@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
@@ -159,7 +160,15 @@ class _MainTabViewState extends State<_MainTabView> {
       body: IndexedStack(index: _index, children: screens),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        onTap: (i) {
+          setState(() => _index = i);
+          // SpellLibraryScreen is kept alive by IndexedStack, so its
+          // initState only fires once; re-request on every visit so a
+          // spell saved from the Create tab shows up without a restart.
+          if (i == 1) {
+            context.read<SpellLibraryBloc>().add(const LibraryRequested());
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.auto_fix_high), label: 'Create'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Library'),
