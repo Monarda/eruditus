@@ -108,3 +108,83 @@ Pre-existing untracked files in the working tree (`.claude/`,
 `docs/superpowers/reports/task-4-report.md`,
 `docs/superpowers/reports/task-5-report.md`) were left alone and not staged, per
 task instructions.
+
+## Fix Round 1: Review Findings
+
+**Finding (Important severity):** The test named `'every loaded spell calculates
+to the level stated in its description'` in
+`test/data/datasources/asset_data_loader_test.dart` was misleadingly named — it
+never invoked `SpellLevelCalculator.calculate` and never parsed the "Level N."
+text out of any spell's `description`. It only checked referential integrity
+(that `baseEffect.id`, `parameterId` values, and `selectedSpecialFactorIds`
+referenced by each spell exist in the respective built-in JSON lists). The
+underlying data was independently re-verified as correct (see "Concerns"
+above), but the test suite had no regression protection against a future
+magnitude/baseLevel typo silently producing a wrong calculated level — only
+id-typo protection existed.
+
+**What was changed:**
+
+- Renamed the misleadingly-named test to `"every spell's referenced ids exist
+  in the built-in catalogs"`, which accurately describes what it checks. Its
+  body and assertions were left completely unchanged — no weakening of the
+  existing referential-integrity checks.
+- Added a new test, reusing the old name (`'every loaded spell calculates to
+  the level stated in its description'`), that performs genuine level
+  verification for all 27 built-in library spells:
+  1. Extracts the integer level from each spell's `description` via
+     `RegExp(r'Level (\d+)\.')`, failing with a clear reason if no match is
+     found (itself a signal of a data-entry problem).
+  2. Builds the spell's magnitudes list from
+     `spell.parameters.map((p) => p.parameter.magnitude)`,
+     `spell.selectedSpecialFactorIds` resolved against the already-loaded
+     `factors` list (`firstWhere` by id, `.magnitude`), and
+     `spell.additionalRequisites.map((r) => r.magnitude)`.
+  3. Calls `SpellLevelCalculator.calculate(spell.baseEffect.baseLevel,
+     magnitudes)` (imported from `package:eruditus/engine/spell_level_calculator.dart`).
+  4. Asserts the computed level equals the level parsed from the description,
+     with a `reason:` naming the spell on failure.
+- No JSON data files, `AssetDataLoader`, or any file other than the test file
+  were touched, per the fix instructions.
+
+Per the process guidance, no red/green TDD cycle was needed here since the
+underlying data was already known-correct — the new test was written to pass
+immediately, then run to confirm it actually does (rather than assumed).
+
+### Test command and full output
+
+```
+export PATH="/c/Users/idf53/Development/SDKs/flutter/flutter/bin:$PATH"
+cd "C:\Users\idf53\Development\personal\arsm\eruditus"
+flutter test test/data/datasources/asset_data_loader_test.dart -v
+```
+
+Relevant output (setup/build logs omitted):
+
+```
+00:00 +0: loadBaseEffects loads all 38 built-in base effects
+00:00 +1: loadParameters loads all 17 built-in parameters
+00:00 +2: loadSpecialFactors loads all 7 built-in special factors
+00:00 +3: loadSpellLibrary loads all 27 built-in spells
+00:00 +4: every spell's referenced ids exist in the built-in catalogs
+00:00 +5: every loaded spell calculates to the level stated in its description
+00:00 +6: All tests passed!
+...
+test package returned with exit code 0
+```
+
+All 6 tests passed on the first run (including the new genuine level-calculation
+test), confirming the prior independent verification of the 27 spells' levels
+was correct and no data errors were uncovered.
+
+`flutter analyze test/data/datasources/asset_data_loader_test.dart` also reported
+`No issues found!`.
+
+### Commit
+
+`ec08401` — "test: add genuine level-calculation regression test for spell
+library (Task 6 review fix)"
+
+Only `test/data/datasources/asset_data_loader_test.dart` was staged and
+committed, per the fix instructions (no JSON data files or `AssetDataLoader`
+touched).
