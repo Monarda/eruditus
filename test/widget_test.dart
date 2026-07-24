@@ -1,30 +1,68 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
+import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
+import 'package:eruditus/bloc/configuration/configuration_event.dart';
+import 'package:eruditus/bloc/configuration/configuration_state.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/main.dart';
 
+class MockSpellCreationBloc extends MockBloc<SpellCreationEvent, SpellCreationState>
+    implements SpellCreationBloc {}
+
+class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
+    implements SpellLibraryBloc {}
+
+class MockConfigurationBloc extends MockBloc<ConfigurationEvent, ConfigurationState>
+    implements ConfigurationBloc {}
+
+class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
+class FakeSpellCreationState extends Fake implements SpellCreationState {}
+class FakeSpellLibraryEvent extends Fake implements SpellLibraryEvent {}
+class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
+class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
+class FakeConfigurationState extends Fake implements ConfigurationState {}
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(() {
+    registerFallbackValue(FakeSpellCreationEvent());
+    registerFallbackValue(FakeSpellCreationState());
+    registerFallbackValue(FakeSpellLibraryEvent());
+    registerFallbackValue(FakeSpellLibraryState());
+    registerFallbackValue(FakeConfigurationEvent());
+    registerFallbackValue(FakeConfigurationState());
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('EruditusApp launches showing the Create tab and bottom navigation', (tester) async {
+    final spellCreationBloc = MockSpellCreationBloc();
+    final spellLibraryBloc = MockSpellLibraryBloc();
+    final configurationBloc = MockConfigurationBloc();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    whenListen(spellCreationBloc, const Stream<SpellCreationState>.empty(),
+        initialState: SpellCreationState.initial());
+    whenListen(spellLibraryBloc, const Stream<SpellLibraryState>.empty(),
+        initialState: SpellLibraryState.initial());
+    whenListen(configurationBloc, const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState.initial());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpWidget(EruditusApp(
+      spellCreationBloc: spellCreationBloc,
+      spellLibraryBloc: spellLibraryBloc,
+      configurationBloc: configurationBloc,
+      allEffects: const [],
+      allParameters: const [],
+      allSpecialFactors: const [],
+    ));
+
+    expect(find.text('Create Spell'), findsOneWidget);
+    expect(find.text('Create'), findsOneWidget);
+    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
   });
 }
