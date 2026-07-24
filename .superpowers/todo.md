@@ -46,7 +46,69 @@
   - `lib/presentation/screens/spell_creation_screen.dart` (UI widget)
   - Configuration for Size magnitudes + Aquam sub-type limits
 
-### 4. Asset Data Loader Test Failures (Pre-existing)
+### 4. Resolve Out-of-Scope Base Effects (~200 effects)
+- [ ] **Variable Base Levels** — Some effects have non-linear level progressions (e.g., Perdo Imaginem levels 2,3,4,5,10; Creo Mentem levels 3,4,5,10,30-55)
+  - [ ] Design model extension for level-dependent base levels
+  - [ ] Update UI to handle effects with multiple valid base levels
+  - [ ] Refactor calculator to pick appropriate base level based on spell context
+
+- [ ] **Magnitude Ladders** — Transport/distance scales (Rego Aquam, Rego Ignem, Rego Terram: 5p→50p→500p→1 league→7 leagues→Arcane Connection)
+  - [ ] Add magnitude ladder field to BaseEffect model
+  - [ ] Calculate multiplier based on distance target selection
+  - [ ] Update spell creation UI with distance picker
+
+- [ ] **Conditional Wards** — Might-level-dependent effects (Rego entries: ward against creatures with Might ≤ spell level)
+  - [ ] Add ward type field to BaseEffect
+  - [ ] Calculate level multiplier: (base + parameters) must exceed target Might
+  - [ ] New UI section for ward configuration
+
+- [ ] **Ritual-Only Constraints** — Some effects require Ritual duration (Creo Corpus healing, Creo Ignem/Auram elemental creation)
+  - [ ] Add ritual-only flag to BaseEffect
+  - [ ] Validate in spell creation: if ritual-only, force Duration = Ritual
+  - [ ] Display warning in UI
+
+- [ ] **Complexity-Stacking Modifiers** — Sensory/movement/intricacy add magnitudes (Creo Imaginem: +1/+2 for complexity, +2 for movement control, +1 for intricacy)
+  - [ ] Design modifier system (separate from special factors)
+  - [ ] Add complexity selector to UI
+  - [ ] Update level calculation with dynamic modifiers
+
+- [ ] **Characteristic Point Scaling** — Creo Mentem levels tied to Characteristic targets (level 30→+0, 35→+1, 40→+2, etc.)
+  - [ ] Generalize as "target-dependent base levels"
+  - [ ] Add target selector to spell creation for affected effects
+  - [ ] Calculate base level from target
+
+- [ ] **Material Difficulty Scaling** — Terram effects: +1 for stone/glass, +2 for metal/gemstone (applied to all Terram techniques)
+  - [ ] Add material selector to base effect configuration
+  - [ ] Calculate level based on material choice
+  - [ ] UI for material selection in spell creation
+
+- [ ] **Intensity/Damage Modifiers** — Muto/Perdo Ignem: add 1 magnitude per 5 points fire damage exceeds +5
+  - [ ] Design intensity modifier as dynamic calculation
+  - [ ] Link to fire damage special factor
+  - [ ] Update level preview in real-time
+
+- [ ] **Level-Dependent Might Reduction** — Muto/Perdo Ignem/Auram: elemental Might reduced by spell level
+  - [ ] Tag effects as "Might-reduction type"
+  - [ ] Note that Might reduction = spell level (not magnitude)
+  - [ ] Document in UI
+
+**Total Flagged Effects by Form:**
+- Creo: 12+ (characteristic scaling, complexity, ritual)
+- Intellego: 8+ (variable levels)
+- Muto: 25+ (complexity, material, intensity, Might reduction)
+- Perdo: 20+ (variable levels, intensity, Might reduction)
+- Rego: 30+ (magnitude ladders, wards, conditional effects)
+- Vim: 54 (all effects: complex meta-magical mechanics)
+
+**Suggested Approach:**
+1. Pick one pattern category (e.g., magnitude ladders)
+2. Extend BaseEffect model with new field
+3. Update SpellEngine.calculateSpellLevel() to handle it
+4. Add UI widget for that pattern
+5. Test with affected effects
+6. Repeat for next category
+
+### 5. Asset Data Loader Test Failures (Pre-existing)
 - [ ] Fix 5 failing tests in `test/data/datasources/asset_data_loader_test.dart`
 - **Rationale:** Tests reference old base effect IDs that changed during extraction
 - **Impact:** Doesn't block app, but test suite noise
@@ -56,18 +118,18 @@
 
 ## Medium Priority
 
-### 5. Real Bloc Hang in Widget Tests
+### 6. Real Bloc Hang in Widget Tests
 - [ ] Document workaround: mock Blocs in widget tests, use integration_test for real E2E
 - [ ] Create widget test helper with mock bloc factories
 - **Context:** Real Bloc hangs forever under flutter_tester; known Bloc limitation
 - **Files:** Test helpers, widget test templates
 
-### 6. Spell Export/Backup Validation
+### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to new constraints (one Range/Duration/Target)
 - [ ] Add migration for legacy spell saves (if any)
 - [ ] Test backup round-trip (export → import)
 
-### 7. UI: Disable Multi-Select for Range/Duration/Target
+### 8. UI: Disable Multi-Select for Range/Duration/Target
 - [ ] Update UI to prevent selecting multiple Range options
 - [ ] Update UI to prevent selecting multiple Duration options
 - [ ] Update UI to prevent selecting multiple Target options
@@ -77,16 +139,16 @@
 
 ## Low Priority / Nice-to-Have
 
-### 8. Documentation
+### 9. Documentation
 - [ ] Update README: mention base effects extraction is complete
 - [ ] Add Size feature guide to docs
 - [ ] Document Aquam sub-type limitations (MVP context)
 
-### 9. Performance
+### 10. Performance
 - [ ] Optimize base effects JSON (currently 604 effects, all loaded at startup)
 - [ ] Consider lazy-loading or caching strategy if app grows
 
-### 10. Out-of-Scope Effects Handling
+### 11. Out-of-Scope Effects Handling
 - [ ] Create filtering/tagging UI for flagged effects (variable base levels, ritual-only, etc.)
 - [ ] User guidance: explain which effects don't fit the calculation model yet
 - **Current State:** ~200 effects flagged with notes documenting out-of-scope patterns
