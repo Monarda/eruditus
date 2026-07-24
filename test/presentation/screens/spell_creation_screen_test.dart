@@ -135,4 +135,55 @@ void main() {
 
     expect(find.textContaining('Calculated Spell Level'), findsNothing);
   });
+
+  testWidgets('shows suggestions when status is calculated', (tester) async {
+    final suggestion = Spell(
+      id: 's1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
+      baseEffect: creoIgnemEffect,
+      parameters: const [], selectedSpecialFactorIds: const [],
+      requiredRequisites: const [], additionalRequisites: const [],
+      source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+      suggestions: [suggestion],
+    );
+    await pumpScreen(tester, state);
+
+    expect(find.text('Pillar of Fire'), findsOneWidget);
+  });
+
+  testWidgets('tapping discard dispatches SpellDiscarded', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
+
+    await tester.tap(find.byKey(const Key('discard-button')));
+    await tester.pump();
+
+    verify(() => bloc.add(const SpellDiscarded())).called(1);
+  });
+
+  testWidgets('saving with a name dispatches SpellSaveRequested', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
+
+    await tester.tap(find.byKey(const Key('save-button')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('spell-name-field')), 'My Fireball');
+    await tester.tap(find.byKey(const Key('confirm-save-button')));
+    await tester.pumpAndSettle();
+
+    verify(() => bloc.add(const SpellSaveRequested('My Fireball'))).called(1);
+  });
 }

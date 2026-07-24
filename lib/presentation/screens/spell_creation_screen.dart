@@ -7,6 +7,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
+import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 class SpellCreationScreen extends StatelessWidget {
   final List<String> techniques;
@@ -140,10 +141,86 @@ class SpellCreationScreen extends StatelessWidget {
                 onPressed: () => bloc.add(const SpellCalculated()),
                 child: const Text('Calculate & View Suggestions'),
               ),
+              if (state.status == SpellCreationStatus.calculated) ...[
+                const SizedBox(height: 16),
+                Text('Similar Spells', style: Theme.of(context).textTheme.titleMedium),
+                if (state.suggestions.isEmpty)
+                  const Text('No similar spells found.')
+                else
+                  ...state.suggestions.map((s) => SpellCard(spell: s)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        key: const Key('discard-button'),
+                        onPressed: () => bloc.add(const SpellDiscarded()),
+                        child: const Text('Discard'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton(
+                        key: const Key('save-button'),
+                        onPressed: () async {
+                          final name = await showDialog<String>(
+                            context: context,
+                            builder: (dialogContext) => const _SaveSpellDialog(),
+                          );
+                          if (name != null && name.isNotEmpty) {
+                            bloc.add(SpellSaveRequested(name));
+                          }
+                        },
+                        child: const Text('Save to Library'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _SaveSpellDialog extends StatefulWidget {
+  const _SaveSpellDialog();
+
+  @override
+  State<_SaveSpellDialog> createState() => _SaveSpellDialogState();
+}
+
+class _SaveSpellDialogState extends State<_SaveSpellDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Name Your Spell'),
+      content: TextField(
+        key: const Key('spell-name-field'),
+        controller: _controller,
+        decoration: const InputDecoration(hintText: 'e.g., Pillar of Flames'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          key: const Key('confirm-save-button'),
+          onPressed: () => Navigator.of(context).pop(_controller.text),
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }
