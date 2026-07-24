@@ -1,0 +1,9 @@
+[
+  {"id": "crim-sensory-complexity", "technique": "Creo", "form": "Imaginem", "name": "Increasing Sensory Complexity", "description": "Moving visual image or clear words instead of noise", "magnitude": 1, "source": "built-in"},
+  {"id": "crim-directed-image", "technique": "Creo", "form": "Imaginem", "name": "Directed Image (Concentration)", "description": "Image moves or makes noise at your direction as you concentrate", "magnitude": 2, "source": "built-in"},
+  {"id": "crim-intricate-design", "technique": "Creo", "form": "Imaginem", "name": "Intricate Design", "description": "Very intricate images, e.g. an intricately ornamented bridge", "magnitude": 1, "source": "built-in"},
+  {"id": "peim-changing-image", "technique": "Perdo", "form": "Imaginem", "name": "Changing Image", "description": "Destroying or dulling an image that changes, rather than a static one", "magnitude": 1, "source": "built-in"},
+  {"id": "reim-changing-image", "technique": "Rego", "form": "Imaginem", "name": "Changing Image", "description": "Moving an image that changes, rather than a static one", "magnitude": 1, "source": "built-in"},
+  {"id": "reim-moved-image-matches", "technique": "Rego", "form": "Imaginem", "name": "Moved Image Matches Changes", "description": "The moved image continues to match changes in the original", "magnitude": 1, "source": "built-in"},
+  {"id": "reim-additional-senses", "technique": "Rego", "form": "Imaginem", "name": "Additional Senses Affected", "description": "Add one magnitude per additional sense beyond the guideline's default", "magnitude": 1, "source": "built-in"}
+]
