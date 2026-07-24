@@ -18,14 +18,14 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     on<TechniqueSelected>((event, emit) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(technique: event.technique),
+        draft: state.draft.copyWith(technique: event.technique, baseEffect: null),
       ));
     });
 
     on<FormSelected>((event, emit) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(form: event.form),
+        draft: state.draft.copyWith(form: event.form, baseEffect: null),
       ));
     });
 

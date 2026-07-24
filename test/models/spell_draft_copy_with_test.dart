@@ -17,4 +17,28 @@ void main() {
     expect(updated.form, 'Corpus');
     expect(updated.baseEffect, effect);
   });
+
+  test('SpellDraft.copyWith(baseEffect: null) explicitly clears baseEffect to null', () {
+    final effect = BaseEffect(
+      id: '1', technique: 'Creo', form: 'Ignem',
+      description: 'Create flame', baseLevel: 10, source: 'built-in',
+    );
+    final draft = SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: effect);
+
+    final updated = draft.copyWith(baseEffect: null);
+
+    expect(updated.baseEffect, isNull);
+  });
+
+  test('SpellDraft.copyWith() with no baseEffect argument preserves the existing baseEffect', () {
+    final effect = BaseEffect(
+      id: '1', technique: 'Creo', form: 'Ignem',
+      description: 'Create flame', baseLevel: 10, source: 'built-in',
+    );
+    final draft = SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: effect);
+
+    final updated = draft.copyWith(form: 'Corpus');
+
+    expect(updated.baseEffect, effect);
+  });
 }

@@ -141,7 +141,7 @@ class SpellDraft {
   SpellDraft copyWith({
     String? technique,
     String? form,
-    BaseEffect? baseEffect,
+    Object? baseEffect = _unset,
     List<SelectedParameter>? parameters,
     List<String>? selectedSpecialFactorIds,
     List<RequiredRequisite>? requiredRequisites,
@@ -152,7 +152,7 @@ class SpellDraft {
       id: id,
       technique: technique ?? this.technique,
       form: form ?? this.form,
-      baseEffect: baseEffect ?? this.baseEffect,
+      baseEffect: identical(baseEffect, _unset) ? this.baseEffect : baseEffect as BaseEffect?,
       parameters: parameters ?? this.parameters,
       selectedSpecialFactorIds: selectedSpecialFactorIds ?? this.selectedSpecialFactorIds,
       requiredRequisites: requiredRequisites ?? this.requiredRequisites,
@@ -161,3 +161,13 @@ class SpellDraft {
     );
   }
 }
+
+/// Sentinel used by [SpellDraft.copyWith] to distinguish "argument omitted"
+/// (keep current value) from "argument explicitly passed as null" (clear the
+/// field). A plain `T? field` parameter with `field ?? this.field` cannot
+/// tell these two cases apart, since both result in `null` being passed in.
+class _Unset {
+  const _Unset();
+}
+
+const _unset = _Unset();

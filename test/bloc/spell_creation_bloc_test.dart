@@ -106,6 +106,40 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'TechniqueSelected clears a previously selected baseEffect',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(const TechniqueSelected('Rego'));
+    },
+    skip: 3,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.technique, 'draft.technique', 'Rego')
+          .having((s) => s.draft.baseEffect, 'draft.baseEffect', isNull),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'FormSelected clears a previously selected baseEffect',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(const FormSelected('Corpus'));
+    },
+    skip: 3,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.form, 'draft.form', 'Corpus')
+          .having((s) => s.draft.baseEffect, 'draft.baseEffect', isNull),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'SpellDiscarded resets to a fresh initial state',
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
     act: (bloc) {
