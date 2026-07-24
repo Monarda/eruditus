@@ -39,7 +39,7 @@ void main() {
 
     final all = await repository.getAllEffects();
 
-    expect(all.length, 146); // 145 built-in (Animal+Aquam) + 1 custom
+    expect(all.length, 187); // 186 built-in (Animal+Aquam+Auram) + 1 custom
     expect(all.any((e) => e.id == 'custom-1'), isTrue);
   });
 
@@ -52,7 +52,7 @@ void main() {
     await repository.deleteCustomEffect('custom-1');
 
     final all = await repository.getAllEffects();
-    expect(all.length, 145);
+    expect(all.length, 186);
   });
 
   test('getAllParameters combines built-in and custom parameters', () async {
