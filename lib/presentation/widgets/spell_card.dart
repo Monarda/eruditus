@@ -15,12 +15,22 @@ class SpellCard extends StatelessWidget {
     final subtitle = level != null
         ? '${spell.technique} ${spell.form} • Level $level'
         : '${spell.technique} ${spell.form}';
+    final description = spell.description;
+    final hasDescription = description != null && description.isNotEmpty;
 
     return Card(
       child: ListTile(
         onTap: onTap,
         title: Text(title),
-        subtitle: Text(subtitle),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(subtitle),
+            if (hasDescription)
+              Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
+          ],
+        ),
         trailing: Chip(label: Text(spell.source == 'built-in' ? 'Built-in' : 'My Spell')),
       ),
     );

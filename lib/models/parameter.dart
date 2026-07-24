@@ -30,6 +30,14 @@ class Parameter {
     magnitude: requireField<int>(map, 'magnitude', 'Parameter'),
     source: requireField<String>(map, 'source', 'Parameter'),
   );
+
+  // Value equality by id — see BaseEffect for why this matters (reloaded
+  // ConfigurationBloc state produces fresh, non-identical instances).
+  @override
+  bool operator ==(Object other) => identical(this, other) || (other is Parameter && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class SelectedParameter {

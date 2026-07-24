@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
+import 'package:eruditus/bloc/configuration/configuration_event.dart';
+import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
@@ -17,12 +20,21 @@ class MockSpellCreationBloc
     extends MockBloc<SpellCreationEvent, SpellCreationState>
     implements SpellCreationBloc {}
 
+class MockConfigurationBloc
+    extends MockBloc<ConfigurationEvent, ConfigurationState>
+    implements ConfigurationBloc {}
+
 class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
 
 class FakeSpellCreationState extends Fake implements SpellCreationState {}
 
+class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
+
+class FakeConfigurationState extends Fake implements ConfigurationState {}
+
 void main() {
   late MockSpellCreationBloc bloc;
+  late MockConfigurationBloc configBloc;
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
@@ -33,23 +45,41 @@ void main() {
   setUpAll(() {
     registerFallbackValue(FakeSpellCreationEvent());
     registerFallbackValue(FakeSpellCreationState());
+    registerFallbackValue(FakeConfigurationEvent());
+    registerFallbackValue(FakeConfigurationState());
   });
 
   setUp(() {
     bloc = MockSpellCreationBloc();
+    configBloc = MockConfigurationBloc();
   });
 
-  Future<void> pumpScreen(WidgetTester tester, SpellCreationState state) async {
+  Future<void> pumpScreen(
+    WidgetTester tester,
+    SpellCreationState state, {
+    ConfigurationState? configState,
+  }) async {
     whenListen(bloc, const Stream<SpellCreationState>.empty(), initialState: state);
+    whenListen(
+      configBloc,
+      const Stream<ConfigurationState>.empty(),
+      initialState: configState ??
+          ConfigurationState(
+            status: ConfigurationStatus.loaded,
+            effects: [creoIgnemEffect],
+            parameters: [voiceParam],
+            factors: const [],
+          ),
+    );
     await tester.pumpWidget(MaterialApp(
-      home: BlocProvider<SpellCreationBloc>.value(
-        value: bloc,
-        child: SpellCreationScreen(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        child: const SpellCreationScreen(
           techniques: ArsArts.all,
           forms: ArsForms.all,
-          availableEffects: [creoIgnemEffect],
-          availableParameters: [voiceParam],
-          availableFactors: const [],
         ),
       ),
     ));
@@ -136,12 +166,14 @@ void main() {
     expect(find.textContaining('Calculated Spell Level'), findsNothing);
   });
 
-  testWidgets('shows suggestions when status is calculated', (tester) async {
+  testWidgets('shows suggestions with their level and description when status is calculated',
+      (tester) async {
     final suggestion = Spell(
       id: 's1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
       baseEffect: creoIgnemEffect,
       parameters: const [], selectedSpecialFactorIds: const [],
       requiredRequisites: const [], additionalRequisites: const [],
+      description: 'A roaring pillar of flame.',
       source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final state = SpellCreationState(
@@ -149,10 +181,13 @@ void main() {
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
       calculatedLevel: 10,
       suggestions: [suggestion],
+      suggestionLevels: const {'s1': 10},
     );
     await pumpScreen(tester, state);
 
     expect(find.text('Pillar of Fire'), findsOneWidget);
+    expect(find.textContaining('Level 10'), findsWidgets);
+    expect(find.text('A roaring pillar of flame.'), findsOneWidget);
   });
 
   testWidgets('tapping discard dispatches SpellDiscarded', (tester) async {
@@ -185,5 +220,142 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => bloc.add(const SpellSaveRequested('My Fireball'))).called(1);
+  });
+
+  testWidgets('shows a success SnackBar when a save completes', (tester) async {
+    final savedSpell = Spell(
+      id: 'saved-1', name: 'My Fireball', technique: 'Creo', form: 'Ignem',
+      baseEffect: creoIgnemEffect,
+      parameters: const [], selectedSpecialFactorIds: const [],
+      requiredRequisites: const [], additionalRequisites: const [],
+      source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final states = Stream.fromIterable([
+      SpellCreationState(status: SpellCreationStatus.saving, draft: SpellDraft()),
+      SpellCreationState(
+        status: SpellCreationStatus.saved,
+        draft: SpellDraft(),
+        savedSpell: savedSpell,
+      ),
+    ]);
+    whenListen(
+      bloc,
+      states,
+      initialState: SpellCreationState(status: SpellCreationStatus.saving, draft: SpellDraft()),
+    );
+    whenListen(
+      configBloc,
+      const Stream<ConfigurationState>.empty(),
+      initialState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect],
+        parameters: [voiceParam],
+        factors: const [],
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      ),
+    ));
+    await tester.pump();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.textContaining('My Fireball'), findsWidgets);
+  });
+
+  testWidgets('shows an error SnackBar and keeps the draft visible when saving fails',
+      (tester) async {
+    final states = Stream.fromIterable([
+      SpellCreationState(
+        status: SpellCreationStatus.error,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+        calculatedLevel: 10,
+        errorMessage: 'disk full',
+      ),
+    ]);
+    whenListen(
+      bloc,
+      states,
+      initialState: SpellCreationState(
+        status: SpellCreationStatus.saving,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+        calculatedLevel: 10,
+      ),
+    );
+    whenListen(
+      configBloc,
+      const Stream<ConfigurationState>.empty(),
+      initialState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect],
+        parameters: [voiceParam],
+        factors: const [],
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      ),
+    ));
+    await tester.pump();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.textContaining('disk full'), findsWidgets);
+    // The Save/Discard controls are still present so the user isn't
+    // stranded and can retry.
+    expect(find.byKey(const Key('save-button')), findsOneWidget);
+    expect(find.byKey(const Key('discard-button')), findsOneWidget);
+  });
+
+  testWidgets('Save and Discard are disabled while a save is in flight', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.saving,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
+
+    final saveButton = tester.widget<ElevatedButton>(find.byKey(const Key('save-button')));
+    final discardButton = tester.widget<OutlinedButton>(find.byKey(const Key('discard-button')));
+
+    expect(saveButton.onPressed, isNull);
+    expect(discardButton.onPressed, isNull);
+  });
+
+  testWidgets('shows the base effect list from ConfigurationBloc, not a static constructor list',
+      (tester) async {
+    final customEffect = BaseEffect(
+      id: 'custom-e1', technique: 'Creo', form: 'Ignem',
+      description: 'My custom fire effect', baseLevel: 3, source: 'user-created',
+    );
+    await pumpScreen(
+      tester,
+      SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem'),
+      ),
+      configState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect, customEffect],
+        parameters: const [],
+        factors: const [],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('base-effect-dropdown')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('My custom fire effect (Base 3)'), findsOneWidget);
   });
 }

@@ -58,7 +58,9 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
               ),
               Expanded(
                 child: ListView(
-                  children: state.visibleSpells.map((s) => SpellCard(spell: s)).toList(),
+                  children: state.visibleSpells
+                      .map((s) => SpellCard(spell: s, level: state.spellLevels[s.id]))
+                      .toList(),
                 ),
               ),
             ],

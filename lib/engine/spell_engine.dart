@@ -7,12 +7,26 @@ import 'package:eruditus/models/special_factor.dart';
 
 class SpellEngine {
   final List<Spell> allSpells;
-  final List<SpecialFactor> allSpecialFactors;
+
+  // Mutable (not final): custom special factors can be added at runtime via
+  // ConfigurationBloc (Settings tab) after this engine is constructed. See
+  // [updateSpecialFactors] and SpellCreationBloc's handling of
+  // AvailableFactorsSynced, which keeps this in sync so a newly added custom
+  // factor's magnitude can be resolved without an app restart.
+  List<SpecialFactor> allSpecialFactors;
 
   SpellEngine({
     required this.allSpells,
     required this.allSpecialFactors,
   });
+
+  /// Replaces the known special factors used for magnitude lookups in
+  /// [calculateSpellLevel]. Called whenever the Settings tab's configured
+  /// special factors change, so a newly added custom factor becomes usable
+  /// in the Create tab immediately.
+  void updateSpecialFactors(List<SpecialFactor> factors) {
+    allSpecialFactors = factors;
+  }
 
   List<String> validateSpellDraft(SpellDraft draft) {
     final errors = <String>[];

@@ -42,12 +42,10 @@ void main() {
 
       final allSpells = await libraryRepository.getAllSpells();
       final allSpecialFactors = await configRepository.getAllSpecialFactors();
-      final allEffects = await configRepository.getAllEffects();
-      final allParameters = await configRepository.getAllParameters();
       final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
 
       final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
-      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
       final configurationBloc = ConfigurationBloc(configRepository: configRepository);
 
       await tester.pumpWidget(EruditusApp(
@@ -55,9 +53,6 @@ void main() {
         spellLibraryBloc: spellLibraryBloc,
         configurationBloc: configurationBloc,
         backupService: backupService,
-        allEffects: allEffects,
-        allParameters: allParameters,
-        allSpecialFactors: allSpecialFactors,
       ));
       await tester.pumpAndSettle();
 

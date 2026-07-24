@@ -18,9 +18,6 @@ import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
 import 'package:eruditus/engine/spell_engine.dart';
-import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
@@ -42,22 +39,20 @@ Future<void> main() async {
 
   final allSpells = await libraryRepository.getAllSpells();
   final allSpecialFactors = await configRepository.getAllSpecialFactors();
-  final allEffects = await configRepository.getAllEffects();
-  final allParameters = await configRepository.getAllParameters();
 
   final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
 
   final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
-  final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository);
+  // Shares the same SpellEngine instance as spellCreationBloc, purely for its
+  // calculateSpellLevel method (so Library cards use the exact same level
+  // math, with no duplicated implementation).
+  final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
   final configurationBloc = ConfigurationBloc(configRepository: configRepository);
 
   runApp(EruditusApp(
     spellCreationBloc: spellCreationBloc,
     spellLibraryBloc: spellLibraryBloc,
     configurationBloc: configurationBloc,
-    allEffects: allEffects,
-    allParameters: allParameters,
-    allSpecialFactors: allSpecialFactors,
     backupService: backupService,
   ));
 }
@@ -66,9 +61,6 @@ class EruditusApp extends StatelessWidget {
   final SpellCreationBloc spellCreationBloc;
   final SpellLibraryBloc spellLibraryBloc;
   final ConfigurationBloc configurationBloc;
-  final List<BaseEffect> allEffects;
-  final List<Parameter> allParameters;
-  final List<SpecialFactor> allSpecialFactors;
   final BackupService backupService;
 
   const EruditusApp({
@@ -76,9 +68,6 @@ class EruditusApp extends StatelessWidget {
     required this.spellCreationBloc,
     required this.spellLibraryBloc,
     required this.configurationBloc,
-    required this.allEffects,
-    required this.allParameters,
-    required this.allSpecialFactors,
     required this.backupService,
   });
 
@@ -92,29 +81,16 @@ class EruditusApp extends StatelessWidget {
           BlocProvider<SpellLibraryBloc>.value(value: spellLibraryBloc),
           BlocProvider<ConfigurationBloc>.value(value: configurationBloc),
         ],
-        child: _MainTabView(
-          allEffects: allEffects,
-          allParameters: allParameters,
-          allSpecialFactors: allSpecialFactors,
-          backupService: backupService,
-        ),
+        child: _MainTabView(backupService: backupService),
       ),
     );
   }
 }
 
 class _MainTabView extends StatefulWidget {
-  final List<BaseEffect> allEffects;
-  final List<Parameter> allParameters;
-  final List<SpecialFactor> allSpecialFactors;
   final BackupService backupService;
 
-  const _MainTabView({
-    required this.allEffects,
-    required this.allParameters,
-    required this.allSpecialFactors,
-    required this.backupService,
-  });
+  const _MainTabView({required this.backupService});
 
   @override
   State<_MainTabView> createState() => _MainTabViewState();
@@ -126,12 +102,9 @@ class _MainTabViewState extends State<_MainTabView> {
   @override
   Widget build(BuildContext context) {
     final screens = [
-      SpellCreationScreen(
+      const SpellCreationScreen(
         techniques: ArsArts.all,
         forms: ArsForms.all,
-        availableEffects: widget.allEffects,
-        availableParameters: widget.allParameters,
-        availableFactors: widget.allSpecialFactors,
       ),
       const SpellLibraryScreen(),
       const ConfigurationScreen(),

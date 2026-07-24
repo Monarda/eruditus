@@ -61,6 +61,20 @@ void main() {
     expect(find.text('Phantasm of the Talking Head'), findsOneWidget);
   });
 
+  testWidgets('shows each card\'s precomputed level from state.spellLevels', (tester) async {
+    await pumpScreen(
+      tester,
+      SpellLibraryState(
+        status: SpellLibraryStatus.loaded,
+        allSpells: [builtInSpell, userSpell],
+        spellLevels: const {'built-1': 5, 'user-1': 15},
+      ),
+    );
+
+    expect(find.textContaining('Level 5'), findsOneWidget);
+    expect(find.textContaining('Level 15'), findsOneWidget);
+  });
+
   testWidgets('shows a loading indicator while status is loading', (tester) async {
     await pumpScreen(tester, SpellLibraryState.initial());
 

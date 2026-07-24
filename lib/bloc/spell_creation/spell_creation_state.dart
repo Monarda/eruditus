@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/spell.dart';
 
-enum SpellCreationStatus { initial, editing, calculated, saving, saved, discarded }
+enum SpellCreationStatus { initial, editing, calculated, saving, saved, error, discarded }
 
 class SpellCreationState extends Equatable {
   final SpellCreationStatus status;
@@ -9,7 +9,12 @@ class SpellCreationState extends Equatable {
   final List<String> validationErrors;
   final int? calculatedLevel;
   final List<Spell> suggestions;
+  // Precomputed per-suggestion spell levels, keyed by spell id, so the UI can
+  // show "name, level, source, description" on each suggestion card without
+  // recomputing (or duplicating) SpellEngine.calculateSpellLevel itself.
+  final Map<String, int> suggestionLevels;
   final Spell? savedSpell;
+  final String? errorMessage;
 
   const SpellCreationState({
     required this.status,
@@ -17,7 +22,9 @@ class SpellCreationState extends Equatable {
     this.validationErrors = const [],
     this.calculatedLevel,
     this.suggestions = const [],
+    this.suggestionLevels = const {},
     this.savedSpell,
+    this.errorMessage,
   });
 
   factory SpellCreationState.initial() => SpellCreationState(
@@ -31,7 +38,9 @@ class SpellCreationState extends Equatable {
     List<String>? validationErrors,
     int? calculatedLevel,
     List<Spell>? suggestions,
+    Map<String, int>? suggestionLevels,
     Spell? savedSpell,
+    String? errorMessage,
   }) {
     return SpellCreationState(
       status: status ?? this.status,
@@ -39,7 +48,13 @@ class SpellCreationState extends Equatable {
       validationErrors: validationErrors ?? this.validationErrors,
       calculatedLevel: calculatedLevel ?? this.calculatedLevel,
       suggestions: suggestions ?? this.suggestions,
+      suggestionLevels: suggestionLevels ?? this.suggestionLevels,
       savedSpell: savedSpell ?? this.savedSpell,
+      // Unlike the other fields, errorMessage is NOT carried forward via a
+      // `?? this.errorMessage` fallback: every emit implicitly clears a
+      // stale error unless the handler explicitly re-passes one, matching
+      // the convention already used by SpellLibraryState/ConfigurationState.
+      errorMessage: errorMessage,
     );
   }
 
@@ -50,6 +65,8 @@ class SpellCreationState extends Equatable {
         validationErrors,
         calculatedLevel,
         suggestions,
+        suggestionLevels,
         savedSpell,
+        errorMessage,
       ];
 }

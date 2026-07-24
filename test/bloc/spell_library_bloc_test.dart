@@ -9,6 +9,7 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
+import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
 
@@ -22,6 +23,12 @@ void main() {
 
   late AppDatabase database;
   late LibraryRepository libraryRepository;
+  // Built from the real, asset-loaded special factors (not an empty list):
+  // several built-in library spells reference special factors by id, and
+  // SpellEngine.calculateSpellLevel throws if a referenced id can't be
+  // resolved, so an empty factors list would crash level computation for
+  // those spells.
+  late SpellEngine spellEngine;
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
@@ -37,6 +44,8 @@ void main() {
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(assetLoader: AssetDataLoader(), spellRepository: spellRepository);
+    final specialFactors = await AssetDataLoader().loadSpecialFactors();
+    spellEngine = SpellEngine(allSpells: const [], allSpecialFactors: specialFactors);
   });
 
   tearDown(() async {
@@ -45,7 +54,10 @@ void main() {
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
     'LibraryRequested loads all spells (27 built-in + 1 user)',
-    build: () => SpellLibraryBloc(libraryRepository: libraryRepository),
+    build: () => SpellLibraryBloc(
+      libraryRepository: libraryRepository,
+      spellEngine: spellEngine,
+    ),
     act: (bloc) => bloc.add(const LibraryRequested()),
     wait: const Duration(milliseconds: 300),
     expect: () => [
@@ -58,8 +70,29 @@ void main() {
   );
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'LibraryRequested precomputes each spell\'s level via the shared SpellEngine, keyed by id',
+    build: () => SpellLibraryBloc(
+      libraryRepository: libraryRepository,
+      spellEngine: spellEngine,
+    ),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    wait: const Duration(milliseconds: 300),
+    expect: () => [
+      isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
+      isA<SpellLibraryState>()
+          .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
+          // 'user-1' has baseLevel 5 with no parameters/factors/requisites, so
+          // its level is exactly the base level.
+          .having((s) => s.spellLevels['user-1'], "spellLevels['user-1']", 5),
+    ],
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
     'FilterChanged to "My Spells" narrows visibleSpells to user-created only',
-    build: () => SpellLibraryBloc(libraryRepository: libraryRepository),
+    build: () => SpellLibraryBloc(
+      libraryRepository: libraryRepository,
+      spellEngine: spellEngine,
+    ),
     act: (bloc) {
       bloc.add(const LibraryRequested());
       bloc.add(const FilterChanged('My Spells'));
@@ -79,7 +112,10 @@ void main() {
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
     'SearchQueryChanged narrows visibleSpells by name, case-insensitively',
-    build: () => SpellLibraryBloc(libraryRepository: libraryRepository),
+    build: () => SpellLibraryBloc(
+      libraryRepository: libraryRepository,
+      spellEngine: spellEngine,
+    ),
     act: (bloc) {
       bloc.add(const LibraryRequested());
       bloc.add(const SearchQueryChanged('fireball'));

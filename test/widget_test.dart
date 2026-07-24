@@ -90,9 +90,6 @@ void main() {
       spellCreationBloc: spellCreationBloc,
       spellLibraryBloc: spellLibraryBloc,
       configurationBloc: configurationBloc,
-      allEffects: const [],
-      allParameters: const [],
-      allSpecialFactors: const [],
       backupService: backupService,
     ));
 

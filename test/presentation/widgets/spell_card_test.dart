@@ -5,7 +5,7 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
-  Spell buildSpell({String? name, String source = 'built-in'}) => Spell(
+  Spell buildSpell({String? name, String source = 'built-in', String? description}) => Spell(
         id: '1',
         name: name,
         technique: 'Creo',
@@ -18,6 +18,7 @@ void main() {
         selectedSpecialFactorIds: const [],
         requiredRequisites: const [],
         additionalRequisites: const [],
+        description: description,
         source: source,
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -50,6 +51,28 @@ void main() {
     ));
 
     expect(find.text('Untitled Creo Ignem'), findsOneWidget);
+  });
+
+  testWidgets('shows the spell description when present', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SpellCard(
+          spell: buildSpell(name: 'Pillar of Fire', description: 'A wall of roaring flame.'),
+          level: 25,
+        ),
+      ),
+    ));
+
+    expect(find.text('A wall of roaring flame.'), findsOneWidget);
+  });
+
+  testWidgets('renders no description text when description is null', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(spell: buildSpell(name: 'Pillar of Fire'), level: 25)),
+    ));
+
+    // Only the title Text should match; no stray empty description widget.
+    expect(find.text(''), findsNothing);
   });
 
   testWidgets('tapping the card invokes onTap', (tester) async {
