@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,10 +15,12 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
+import 'package:eruditus/data/services/backup_service.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
+import 'package:eruditus/presentation/screens/backup_screen.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
@@ -31,6 +37,7 @@ Future<void> main() async {
     assetLoader: assetLoader,
     configDatasource: LocalConfigurationDatasource(database: database),
   );
+  final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
   final allSpells = await libraryRepository.getAllSpells();
   final allSpecialFactors = await configRepository.getAllSpecialFactors();
@@ -50,6 +57,7 @@ Future<void> main() async {
     allEffects: allEffects,
     allParameters: allParameters,
     allSpecialFactors: allSpecialFactors,
+    backupService: backupService,
   ));
 }
 
@@ -60,6 +68,7 @@ class EruditusApp extends StatelessWidget {
   final List<BaseEffect> allEffects;
   final List<Parameter> allParameters;
   final List<SpecialFactor> allSpecialFactors;
+  final BackupService backupService;
 
   const EruditusApp({
     super.key,
@@ -69,6 +78,7 @@ class EruditusApp extends StatelessWidget {
     required this.allEffects,
     required this.allParameters,
     required this.allSpecialFactors,
+    required this.backupService,
   });
 
   @override
@@ -85,6 +95,7 @@ class EruditusApp extends StatelessWidget {
           allEffects: allEffects,
           allParameters: allParameters,
           allSpecialFactors: allSpecialFactors,
+          backupService: backupService,
         ),
       ),
     );
@@ -95,11 +106,13 @@ class _MainTabView extends StatefulWidget {
   final List<BaseEffect> allEffects;
   final List<Parameter> allParameters;
   final List<SpecialFactor> allSpecialFactors;
+  final BackupService backupService;
 
   const _MainTabView({
     required this.allEffects,
     required this.allParameters,
     required this.allSpecialFactors,
+    required this.backupService,
   });
 
   @override
@@ -121,6 +134,25 @@ class _MainTabViewState extends State<_MainTabView> {
       ),
       const SpellLibraryScreen(),
       const ConfigurationScreen(),
+      BackupScreen(
+        backupService: widget.backupService,
+        exportJson: (jsonContent) async {
+          await FilePicker.saveFile(
+            dialogTitle: 'Save Backup',
+            fileName: 'eruditus_backup.json',
+            bytes: utf8.encode(jsonContent),
+          );
+        },
+        importJson: () async {
+          final result = await FilePicker.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['json'],
+          );
+          final path = result?.files.single.path;
+          if (path == null) return null;
+          return File(path).readAsString();
+        },
+      ),
     ];
 
     return Scaffold(
@@ -132,6 +164,7 @@ class _MainTabViewState extends State<_MainTabView> {
           BottomNavigationBarItem(icon: Icon(Icons.auto_fix_high), label: 'Create'),
           BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Library'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+          BottomNavigationBarItem(icon: Icon(Icons.cloud_upload), label: 'Backup'),
         ],
       ),
     );
