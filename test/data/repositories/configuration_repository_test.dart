@@ -39,7 +39,7 @@ void main() {
 
     final all = await repository.getAllEffects();
 
-    expect(all.length, 500); // 499 built-in (7 Forms) + 1 custom
+    expect(all.length, 605); // 604 built-in (10 Forms) + 1 custom
     expect(all.any((e) => e.id == 'custom-1'), isTrue);
   });
 
@@ -52,7 +52,7 @@ void main() {
     await repository.deleteCustomEffect('custom-1');
 
     final all = await repository.getAllEffects();
-    expect(all.length, 499);
+    expect(all.length, 604);
   });
 
   test('getAllParameters combines built-in and custom parameters', () async {
