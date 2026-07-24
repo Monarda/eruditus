@@ -1,3 +1,5 @@
+import 'package:eruditus/utils/map_serialization.dart';
+
 class BaseEffect {
   final String id;
   final String technique;
@@ -25,11 +27,11 @@ class BaseEffect {
   };
 
   factory BaseEffect.fromMap(Map<String, dynamic> map) => BaseEffect(
-    id: map['id'] as String,
-    technique: map['technique'] as String,
-    form: map['form'] as String,
-    description: map['description'] as String,
-    baseLevel: map['baseLevel'] as int,
-    source: map['source'] as String,
+    id: requireField<String>(map, 'id', 'BaseEffect'),
+    technique: requireField<String>(map, 'technique', 'BaseEffect'),
+    form: requireField<String>(map, 'form', 'BaseEffect'),
+    description: requireField<String>(map, 'description', 'BaseEffect'),
+    baseLevel: requireField<int>(map, 'baseLevel', 'BaseEffect'),
+    source: requireField<String>(map, 'source', 'BaseEffect'),
   );
 }

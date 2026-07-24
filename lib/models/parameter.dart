@@ -1,3 +1,5 @@
+import 'package:eruditus/utils/map_serialization.dart';
+
 class Parameter {
   final String id;
   final String name;
@@ -22,11 +24,11 @@ class Parameter {
   };
 
   factory Parameter.fromMap(Map<String, dynamic> map) => Parameter(
-    id: map['id'] as String,
-    name: map['name'] as String,
-    category: map['category'] as String,
-    magnitude: map['magnitude'] as int,
-    source: map['source'] as String,
+    id: requireField<String>(map, 'id', 'Parameter'),
+    name: requireField<String>(map, 'name', 'Parameter'),
+    category: requireField<String>(map, 'category', 'Parameter'),
+    magnitude: requireField<int>(map, 'magnitude', 'Parameter'),
+    source: requireField<String>(map, 'source', 'Parameter'),
   );
 }
 
@@ -45,7 +47,9 @@ class SelectedParameter {
   };
 
   factory SelectedParameter.fromMap(Map<String, dynamic> map) => SelectedParameter(
-    parameterId: map['parameterId'] as String,
-    parameter: Parameter.fromMap(map['parameter'] as Map<String, dynamic>),
+    parameterId: requireField<String>(map, 'parameterId', 'SelectedParameter'),
+    parameter: Parameter.fromMap(
+      requireField<Map<String, dynamic>>(map, 'parameter', 'SelectedParameter'),
+    ),
   );
 }

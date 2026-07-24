@@ -1,3 +1,5 @@
+import 'package:eruditus/utils/map_serialization.dart';
+
 class RequiredRequisite {
   final String art;
 
@@ -6,7 +8,7 @@ class RequiredRequisite {
   Map<String, dynamic> toMap() => {'art': art};
 
   factory RequiredRequisite.fromMap(Map<String, dynamic> map) =>
-      RequiredRequisite(art: map['art'] as String);
+      RequiredRequisite(art: requireField<String>(map, 'art', 'RequiredRequisite'));
 }
 
 class AdditionalRequisite {
@@ -25,7 +27,7 @@ class AdditionalRequisite {
 
   factory AdditionalRequisite.fromMap(Map<String, dynamic> map) =>
       AdditionalRequisite(
-        art: map['art'] as String,
+        art: requireField<String>(map, 'art', 'AdditionalRequisite'),
         magnitude: map['magnitude'] as int? ?? 1,
       );
 }

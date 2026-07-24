@@ -1,6 +1,7 @@
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/utils/map_serialization.dart';
 
 class Spell {
   final String id;
@@ -50,11 +51,13 @@ class Spell {
   };
 
   factory Spell.fromMap(Map<String, dynamic> map) => Spell(
-    id: map['id'] as String,
+    id: requireField<String>(map, 'id', 'Spell'),
     name: map['name'] as String?,
-    technique: map['technique'] as String,
-    form: map['form'] as String,
-    baseEffect: BaseEffect.fromMap(map['baseEffect'] as Map<String, dynamic>),
+    technique: requireField<String>(map, 'technique', 'Spell'),
+    form: requireField<String>(map, 'form', 'Spell'),
+    baseEffect: BaseEffect.fromMap(
+      requireField<Map<String, dynamic>>(map, 'baseEffect', 'Spell'),
+    ),
     parameters: (map['parameters'] as List?)
         ?.map((p) => SelectedParameter.fromMap(p as Map<String, dynamic>))
         .toList() ?? [],
@@ -66,9 +69,9 @@ class Spell {
         ?.map((r) => AdditionalRequisite.fromMap(r as Map<String, dynamic>))
         .toList() ?? [],
     description: map['description'] as String?,
-    source: map['source'] as String,
-    createdAt: DateTime.parse(map['createdAt'] as String),
-    updatedAt: DateTime.parse(map['updatedAt'] as String),
+    source: requireField<String>(map, 'source', 'Spell'),
+    createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
+    updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
   );
 }
 
@@ -101,19 +104,37 @@ class SpellDraft {
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
-  Spell toSpell({required String name, required String source}) => Spell(
-    id: id,
-    name: name,
-    technique: technique!,
-    form: form!,
-    baseEffect: baseEffect!,
-    parameters: parameters,
-    selectedSpecialFactorIds: selectedSpecialFactorIds,
-    requiredRequisites: requiredRequisites,
-    additionalRequisites: additionalRequisites,
-    description: description,
-    source: source,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-  );
+  Spell toSpell({required String name, required String source}) {
+    final missingFields = <String>[
+      if (technique == null) 'technique',
+      if (form == null) 'form',
+      if (baseEffect == null) 'baseEffect',
+    ];
+    if (missingFields.isNotEmpty) {
+      throw StateError(
+        'Cannot convert SpellDraft to Spell: ${missingFields.join(', ')} '
+        '${missingFields.length == 1 ? 'is' : 'are'} not set',
+      );
+    }
+
+    final resolvedTechnique = technique!;
+    final resolvedForm = form!;
+    final resolvedBaseEffect = baseEffect!;
+
+    return Spell(
+      id: id,
+      name: name,
+      technique: resolvedTechnique,
+      form: resolvedForm,
+      baseEffect: resolvedBaseEffect,
+      parameters: parameters,
+      selectedSpecialFactorIds: selectedSpecialFactorIds,
+      requiredRequisites: requiredRequisites,
+      additionalRequisites: additionalRequisites,
+      description: description,
+      source: source,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
 }

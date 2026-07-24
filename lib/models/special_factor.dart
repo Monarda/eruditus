@@ -1,3 +1,5 @@
+import 'package:eruditus/utils/map_serialization.dart';
+
 class SpecialFactor {
   final String id;
   final String technique;
@@ -28,12 +30,12 @@ class SpecialFactor {
   };
 
   factory SpecialFactor.fromMap(Map<String, dynamic> map) => SpecialFactor(
-    id: map['id'] as String,
-    technique: map['technique'] as String,
-    form: map['form'] as String,
-    name: map['name'] as String,
-    description: map['description'] as String,
-    magnitude: map['magnitude'] as int,
-    source: map['source'] as String,
+    id: requireField<String>(map, 'id', 'SpecialFactor'),
+    technique: requireField<String>(map, 'technique', 'SpecialFactor'),
+    form: requireField<String>(map, 'form', 'SpecialFactor'),
+    name: requireField<String>(map, 'name', 'SpecialFactor'),
+    description: requireField<String>(map, 'description', 'SpecialFactor'),
+    magnitude: requireField<int>(map, 'magnitude', 'SpecialFactor'),
+    source: requireField<String>(map, 'source', 'SpecialFactor'),
   );
 }
