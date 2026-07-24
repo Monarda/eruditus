@@ -1652,7 +1652,7 @@ Create `assets/data/base_effects.json` (38 entries — Creo Animal's numbered gu
 
 - [ ] **Step 5: Create the spell library JSON**
 
-Create `assets/data/spell_library.json` (26 named spells drawn from the Imaginem chapter of the Ars Magica 5e core rules, each hand-verified against the Task 2 two-tier algorithm; every `parameters[].parameter` and `baseEffect` entry below matches an id in `parameters.json`/`base_effects.json` above where applicable, but embeds the full object per `Spell.fromMap`'s expected shape):
+Create `assets/data/spell_library.json` (27 named spells drawn from the Imaginem chapter of the Ars Magica 5e core rules, each hand-verified against the Task 2 two-tier algorithm; every `parameters[].parameter` and `baseEffect` entry below matches an id in `parameters.json`/`base_effects.json` above where applicable, but embeds the full object per `Spell.fromMap`'s expected shape):
 
 ```json
 [
@@ -2230,10 +2230,10 @@ void main() {
     expect(factors.every((f) => f.source == 'built-in'), isTrue);
   });
 
-  test('loadSpellLibrary loads all 26 built-in spells', () async {
+  test('loadSpellLibrary loads all 27 built-in spells', () async {
     final spells = await loader.loadSpellLibrary();
 
-    expect(spells.length, 26);
+    expect(spells.length, 27);
     expect(spells.every((s) => s.source == 'built-in'), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
@@ -2274,7 +2274,7 @@ export PATH="/c/Users/idf53/Development/SDKs/flutter/flutter/bin:$PATH"
 flutter test test/data/datasources/asset_data_loader_test.dart -v
 ```
 
-Expected: PASS (all 5 tests pass). If the count assertions fail, recount the actual number of entries in the JSON files you created against what's listed above — the counts must match exactly (38 effects, 17 parameters, 7 factors, 26 spells).
+Expected: PASS (all 5 tests pass). If the count assertions fail, recount the actual number of entries in the JSON files you created against what's listed above — the counts must match exactly (38 effects, 17 parameters, 7 factors, 27 spells).
 
 - [ ] **Step 9: Commit**
 
@@ -2284,7 +2284,7 @@ git commit -m "feat: add built-in spell data (base effects, parameters, special 
 
 Seeds the app with a verified starter set drawn from the Ars Magica 5e
 core rules: 38 base effects (Creo Animal + all 5 Imaginem techniques),
-17 standard Range/Duration/Target parameters, 7 special factors, and 26
+17 standard Range/Duration/Target parameters, 7 special factors, and 27
 named library spells. Every spell's level has been hand-verified against
 the Task 2 two-tier calculation algorithm.
 
@@ -2429,9 +2429,9 @@ void main() {
     await database.close();
   });
 
-  test('getBuiltInSpells returns all 26 built-in library spells', () async {
+  test('getBuiltInSpells returns all 27 built-in library spells', () async {
     final builtIn = await repository.getBuiltInSpells();
-    expect(builtIn.length, 26);
+    expect(builtIn.length, 27);
     expect(builtIn.every((s) => s.source == 'built-in'), isTrue);
   });
 
@@ -2449,7 +2449,7 @@ void main() {
 
     final all = await repository.getAllSpells();
 
-    expect(all.length, 27); // 26 built-in + 1 user
+    expect(all.length, 28); // 27 built-in + 1 user
     expect(all.any((s) => s.id == 'user-1'), isTrue);
   });
 
@@ -3339,15 +3339,15 @@ void main() {
   });
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
-    'LibraryRequested loads all spells (26 built-in + 1 user)',
+    'LibraryRequested loads all spells (27 built-in + 1 user)',
     build: () => SpellLibraryBloc(libraryRepository: libraryRepository),
     act: (bloc) => bloc.add(const LibraryRequested()),
     expect: () => [
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 27)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 27),
+          .having((s) => s.allSpells.length, 'allSpells.length', 28)
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 28),
     ],
   );
 
@@ -3362,7 +3362,7 @@ void main() {
     expect: () => [
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 27),
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 28),
       isA<SpellLibraryState>()
           .having((s) => s.filter, 'filter', 'My Spells')
           .having((s) => s.visibleSpells.length, 'visibleSpells.length', 1)
@@ -6152,7 +6152,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 
 **Known deviations from the original design spec (all called out inline in their task, with rationale):**
 - Task 3: `findSimilarSpells` sorts by closeness to a `referenceLevel`, matching the design spec's intent, rather than the broken draft this plan originally contained.
-- Task 6: seeds a verified 26-spell/38-effect starter set (not the full 50+ spell library) — explicitly scoped as future content work.
+- Task 6: seeds a verified 27-spell/38-effect starter set (not the full 50+ spell library) — explicitly scoped as future content work.
 - Task 8/9/10: each BLoC uses one state class with a status enum, rather than the many discrete state subclasses the design spec sketched — a deliberate YAGNI simplification of the same semantics.
 - Task 14: file-based export/import rather than a real cloud backend, per the design spec's own "Cloud provider TBD" open question.
 
