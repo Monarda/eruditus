@@ -65,5 +65,43 @@ void main() {
 
       expect(level, 15);
     });
+
+    test('Base 5 exactly: capacity is 0, magnitude goes straight to multiplier tier', () {
+      const baseLevel = 5;
+      const magnitudes = [2];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 15);
+    });
+
+    test('Zero-value magnitude is a no-op', () {
+      const baseLevel = 3;
+      const magnitudes = [0];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 3);
+    });
+
+    test('Negative magnitude throws ArgumentError', () {
+      const baseLevel = 3;
+      const magnitudes = [-1];
+
+      expect(
+        () => SpellLevelCalculator.calculate(baseLevel, magnitudes),
+        throwsArgumentError,
+      );
+    });
+
+    test('Negative baseLevel throws ArgumentError', () {
+      const baseLevel = -1;
+      const magnitudes = [1];
+
+      expect(
+        () => SpellLevelCalculator.calculate(baseLevel, magnitudes),
+        throwsArgumentError,
+      );
+    });
   });
 }
