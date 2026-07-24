@@ -54,8 +54,17 @@ class SpellEngine {
   }) {
     final magnitudes = <int>[
       ...parameters.map((p) => p.parameter.magnitude),
-      ...selectedSpecialFactorIds.map((id) =>
-          allSpecialFactors.firstWhere((f) => f.id == id).magnitude),
+      // A selected factor id that no longer resolves against
+      // allSpecialFactors (e.g. a custom factor the user deleted in Settings
+      // after saving a spell that referenced it) contributes 0 magnitude
+      // rather than throwing. A dangling reference shouldn't make an
+      // otherwise-valid spell's level uncomputable -- see
+      // SpellLibraryBloc.LibraryRequested, which computes this for every
+      // saved spell and would otherwise drop the whole Library tab into its
+      // error state over one bad reference.
+      for (final id in selectedSpecialFactorIds)
+        for (final f in allSpecialFactors.where((f) => f.id == id).take(1))
+          f.magnitude,
       ...additionalRequisites.map((r) => r.magnitude),
     ];
 

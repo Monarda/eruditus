@@ -123,6 +123,26 @@ void main() {
       expect(level, 3); // Base 2 + factor(+1) = 3 (within additive tier)
     });
 
+    test('treats a dangling special factor id (deleted after the spell was saved) as 0 magnitude instead of throwing', () {
+      // No special factors known to the engine at all -- simulates the
+      // referenced custom factor having been deleted in Settings after a
+      // spell that selected it was saved.
+      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+      final baseEffect = BaseEffect(
+        id: '1', technique: 'Creo', form: 'Imaginem',
+        description: 'Phantasm', baseLevel: 2, source: 'built-in',
+      );
+
+      final level = engine.calculateSpellLevel(
+        baseEffect: baseEffect,
+        parameters: [],
+        selectedSpecialFactorIds: ['deleted-factor-id'],
+        additionalRequisites: [],
+      );
+
+      expect(level, 2); // Base 2 + unresolved factor(+0) = 2, no StateError
+    });
+
     test('includes additional requisite magnitudes', () {
       final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
       final baseEffect = BaseEffect(

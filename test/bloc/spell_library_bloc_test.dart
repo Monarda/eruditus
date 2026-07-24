@@ -88,6 +88,45 @@ void main() {
   );
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'LibraryRequested loads successfully even when a saved spell references a deleted special factor id',
+    // Simulates: a user selected a custom special factor while creating a
+    // spell, saved the spell (persisting the factor's id in
+    // selectedSpecialFactorIds), then later deleted that custom factor in
+    // the Settings tab. Deletion doesn't cascade to already-saved spells, so
+    // this spell keeps a dangling id. Before the fix,
+    // SpellEngine.calculateSpellLevel threw StateError for this id, and
+    // because LibraryRequested wraps the whole load in one try/catch, that
+    // single bad reference dropped the *entire* Library tab into its error
+    // state, hiding every spell. It must instead load successfully.
+    setUp: () async {
+      final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+      await spellRepository.saveSpell(Spell(
+        id: 'user-dangling', name: 'Spell With Deleted Factor', technique: 'Creo', form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: 'e2', technique: 'Creo', form: 'Ignem',
+          description: 'test', baseLevel: 5, source: 'built-in',
+        ),
+        parameters: const [], selectedSpecialFactorIds: const ['no-longer-exists'],
+        requiredRequisites: const [], additionalRequisites: const [],
+        source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      ));
+    },
+    build: () => SpellLibraryBloc(
+      libraryRepository: libraryRepository,
+      spellEngine: spellEngine,
+    ),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    wait: const Duration(milliseconds: 300),
+    expect: () => [
+      isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
+      isA<SpellLibraryState>()
+          .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
+          .having((s) => s.allSpells.length, 'allSpells.length', 29)
+          .having((s) => s.spellLevels['user-dangling'], "spellLevels['user-dangling']", 5),
+    ],
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
     'FilterChanged to "My Spells" narrows visibleSpells to user-created only',
     build: () => SpellLibraryBloc(
       libraryRepository: libraryRepository,
