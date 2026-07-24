@@ -42,19 +42,21 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                   onChanged: (value) => bloc.add(SearchQueryChanged(value)),
                 ),
               ),
-              Row(
-                children: ['All', 'Built-in', 'My Spells'].map((filter) {
-                  return Expanded(
-                    child: RadioListTile<String>(
-                      title: Text(filter),
-                      value: filter,
-                      groupValue: state.filter,
-                      onChanged: (value) {
-                        if (value != null) bloc.add(FilterChanged(value));
-                      },
-                    ),
-                  );
-                }).toList(),
+              RadioGroup<String>(
+                groupValue: state.filter,
+                onChanged: (value) {
+                  if (value != null) bloc.add(FilterChanged(value));
+                },
+                child: Row(
+                  children: ['All', 'Built-in', 'My Spells'].map((filter) {
+                    return Expanded(
+                      child: RadioListTile<String>(
+                        title: Text(filter),
+                        value: filter,
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
               Expanded(
                 child: ListView(
