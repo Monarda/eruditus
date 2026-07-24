@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
+import 'package:eruditus/engine/spell_level_calculator.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +40,7 @@ void main() {
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
 
-  test('every loaded spell calculates to the level stated in its description', () async {
+  test("every spell's referenced ids exist in the built-in catalogs", () async {
     final spells = await loader.loadSpellLibrary();
     final effects = await loader.loadBaseEffects();
     final parameters = await loader.loadParameters();
@@ -47,7 +48,8 @@ void main() {
 
     // Sanity check: every parameter/effect/factor id referenced by a spell
     // actually exists in its respective built-in list (catches typos in the
-    // hand-authored JSON above).
+    // hand-authored JSON above). Note: this does NOT verify that the spell's
+    // calculated level matches its stated level — see the test below for that.
     final effectIds = effects.map((e) => e.id).toSet();
     final parameterIds = parameters.map((p) => p.id).toSet();
     final factorIds = factors.map((f) => f.id).toSet();
@@ -63,6 +65,37 @@ void main() {
         expect(factorIds.contains(factorId), isTrue,
             reason: '${spell.name}: special factor id $factorId not in special_factors.json');
       }
+    }
+  });
+
+  test('every loaded spell calculates to the level stated in its description', () async {
+    final spells = await loader.loadSpellLibrary();
+    final factors = await loader.loadSpecialFactors();
+
+    int levelStatedInDescription(spell) {
+      final match = RegExp(r'Level (\d+)\.').firstMatch(spell.description ?? '');
+      expect(match, isNotNull,
+          reason: '${spell.name}: description does not contain a "Level N." phrase '
+              '(description was: "${spell.description}")');
+      return int.parse(match!.group(1)!);
+    }
+
+    for (final spell in spells) {
+      final statedLevel = levelStatedInDescription(spell);
+
+      final magnitudes = [
+        ...spell.parameters.map((p) => p.parameter.magnitude),
+        ...spell.selectedSpecialFactorIds
+            .map((id) => factors.firstWhere((f) => f.id == id).magnitude),
+        ...spell.additionalRequisites.map((r) => r.magnitude),
+      ];
+
+      final calculatedLevel =
+          SpellLevelCalculator.calculate(spell.baseEffect.baseLevel, magnitudes);
+
+      expect(calculatedLevel, statedLevel,
+          reason: '${spell.name}: calculated level $calculatedLevel does not match '
+              'level $statedLevel stated in description');
     }
   });
 }
