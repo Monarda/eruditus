@@ -3901,33 +3901,40 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 
 **Design note:** The screen does not fetch its own reference data (effects/parameters/factors) — it receives them as constructor parameters. This keeps the widget a pure function of its inputs plus the injected `SpellCreationBloc`, making it independently testable without also needing a working `ConfigurationBloc`/database in every screen test.
 
+**Design note (environment-specific, important — read before writing any widget test in this project):** Widget tests in this project **must use a mocked bloc**, never a real one wired to a real repository/database. Investigation during Task 11's implementation found that a *real* `Bloc`'s internal event-transformer pipeline hangs indefinitely under this project's `flutter_tester` build (Flutter 3.44.8) — confirmed independent of `bloc`/`flutter_bloc` major version (reproduced identically on both 8.x and 9.x), independent of interaction mechanics (`tap`, `pumpAndSettle`, `pump(duration)`, and `runAsync` all fail to unstick it), and confirmed to require no gesture at all (`bloc.add()` called directly in the test body hangs identically). A raw `StreamController` + `StreamBuilder` works fine in the same environment, and `bloc_test`'s `blocTest` (which doesn't use `testWidgets`/`flutter_tester` at all) works fine — so this is narrowly about a real `Bloc`'s internal pipeline specifically inside the widget-test binding, not streams or bloc logic in general. Use `mocktail`'s `MockBloc` (via `bloc_test`, which depends on `mocktail`) with `whenListen` to control the state stream, and `verify(() => bloc.add(...))` to check dispatched events. This is also the idiomatic flutter_bloc pattern for widget tests regardless of this environment quirk — the real bloc's logic is already covered by Tasks 8-10's `blocTest` suites.
+
+**Dependency addition:** add `mocktail: ^1.0.4` (or latest) to `dev_dependencies` in `pubspec.yaml` and run `flutter pub get` before writing the test below.
+
 - [ ] **Step 1: Write failing widget tests**
 
 Create `test/presentation/screens/spell_creation_screen_test.dart`:
 
 ```dart
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:mocktail/mocktail.dart';
+
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
-import 'package:eruditus/data/database/app_database.dart';
-import 'package:eruditus/data/datasources/local_spell_datasource.dart';
-import 'package:eruditus/data/repositories/spell_repository.dart';
-import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
-void main() {
-  setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  });
+class MockSpellCreationBloc
+    extends MockBloc<SpellCreationEvent, SpellCreationState>
+    implements SpellCreationBloc {}
 
-  late AppDatabase database;
-  late SpellCreationBloc bloc;
+class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
+
+class FakeSpellCreationState extends Fake implements SpellCreationState {}
+
+void main() {
+  late MockSpellCreationBloc bloc;
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
@@ -3935,19 +3942,17 @@ void main() {
   );
   final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
 
-  setUp(() async {
-    database = await AppDatabase.open(path: inMemoryDatabasePath);
-    final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
-    final spellEngine = SpellEngine(allSpells: const [], allSpecialFactors: const []);
-    bloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+  setUpAll(() {
+    registerFallbackValue(FakeSpellCreationEvent());
+    registerFallbackValue(FakeSpellCreationState());
   });
 
-  tearDown(() async {
-    await bloc.close();
-    await database.close();
+  setUp(() {
+    bloc = MockSpellCreationBloc();
   });
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, SpellCreationState state) async {
+    whenListen(bloc, const Stream<SpellCreationState>.empty(), initialState: state);
     await tester.pumpWidget(MaterialApp(
       home: BlocProvider<SpellCreationBloc>.value(
         value: bloc,
@@ -3962,40 +3967,85 @@ void main() {
     ));
   }
 
-  testWidgets('selecting technique, form, effect, and calculating shows the spell level',
-      (tester) async {
-    await pumpScreen(tester);
+  testWidgets('selecting a technique dispatches TechniqueSelected', (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial());
 
     await tester.tap(find.byKey(const Key('technique-dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Creo').last);
     await tester.pumpAndSettle();
 
+    verify(() => bloc.add(const TechniqueSelected('Creo'))).called(1);
+  });
+
+  testWidgets('selecting a form dispatches FormSelected', (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial());
+
     await tester.tap(find.byKey(const Key('form-dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ignem').last);
     await tester.pumpAndSettle();
+
+    verify(() => bloc.add(const FormSelected('Ignem'))).called(1);
+  });
+
+  testWidgets('selecting a base effect dispatches BaseEffectSelected when one is available',
+      (tester) async {
+    final draftState = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem'),
+    );
+    await pumpScreen(tester, draftState);
 
     await tester.tap(find.byKey(const Key('base-effect-dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Create flame (Base 10)').last);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('calculate-button')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Calculated Spell Level: 10'), findsOneWidget);
+    verify(() => bloc.add(BaseEffectSelected(creoIgnemEffect))).called(1);
   });
 
-  testWidgets('calculating with an incomplete draft shows validation errors', (tester) async {
-    await pumpScreen(tester);
+  testWidgets('tapping the calculate button dispatches SpellCalculated', (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial());
 
     await tester.tap(find.byKey(const Key('calculate-button')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+
+    verify(() => bloc.add(const SpellCalculated())).called(1);
+  });
+
+  testWidgets('renders validation errors when present', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(),
+      validationErrors: const [
+        'Technique must be selected',
+        'Form must be selected',
+        'Base effect must be selected',
+      ],
+    );
+    await pumpScreen(tester, state);
 
     expect(find.text('Technique must be selected'), findsOneWidget);
     expect(find.text('Form must be selected'), findsOneWidget);
     expect(find.text('Base effect must be selected'), findsOneWidget);
+  });
+
+  testWidgets('renders the calculated spell level when status is calculated', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 20,
+    );
+    await pumpScreen(tester, state);
+
+    expect(find.text('Calculated Spell Level: 20'), findsOneWidget);
+  });
+
+  testWidgets('does not render the calculated-level card before calculation', (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial());
+
+    expect(find.textContaining('Calculated Spell Level'), findsNothing);
   });
 }
 ```
@@ -4171,18 +4221,20 @@ class SpellCreationScreen extends StatelessWidget {
 flutter test test/presentation/screens/spell_creation_screen_test.dart -v
 ```
 
-Expected: PASS (2 tests). If a dropdown tap doesn't resolve to the expected menu item (Flutter's `DropdownButtonFormField` renders the selected item and the popup menu item as separate widgets matching the same text, hence `.last` above), adjust the finder to target the popup route's item specifically — the intent (select an item, verify the resulting state) must be preserved, not skipped.
+Expected: PASS (7 tests). If a dropdown tap doesn't resolve to the expected menu item (Flutter's `DropdownButtonFormField` renders the selected item and the popup menu item as separate widgets matching the same text, hence `.last` above), adjust the finder to target the popup route's item specifically — the intent (select an item, verify the resulting state) must be preserved, not skipped.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add lib/presentation/screens/spell_creation_screen.dart test/presentation/screens/spell_creation_screen_test.dart
+git add lib/presentation/screens/spell_creation_screen.dart test/presentation/screens/spell_creation_screen_test.dart pubspec.yaml pubspec.lock
 git commit -m "feat: add SpellCreationScreen UI
 
 Technique/Form/BaseEffect dropdowns, parameter chips with add/remove,
 special-factor checkboxes filtered to the current Technique+Form,
-validation error display, and calculated-level card, all driven by
-SpellCreationBloc.
+validation error display, and calculated-level card, driven by
+SpellCreationBloc. Widget test uses a mocked bloc (mocktail + bloc_test's
+MockBloc) per this project's environment-specific finding that a real
+Bloc's event pipeline hangs under flutter_tester.
 
 Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ```
@@ -4204,6 +4256,8 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 - Produces: `SpellCard` widget (reusable spell summary), `SpellLibraryScreen`, extended `SpellCreationScreen`
 
 **Design note on `SpellCard`:** It takes an optional pre-computed `level` (an `int?`) rather than computing the level itself, since `Spell` has no `calculatedSpellLevel` getter (Task 3 put level calculation in `SpellEngine`, not on the model) — whoever renders a `SpellCard` is responsible for computing the level via `SpellEngine.calculateSpellLevel(...)` first, if it wants to display one.
+
+**Design note (carries forward from Task 11):** Both widget tests in this task (`SpellLibraryScreen` and the extended `SpellCreationScreen` save flow) use `mocktail`'s `MockBloc`/`whenListen`, not a real bloc — per Task 11's finding that a real `Bloc`'s event pipeline hangs under this project's `flutter_tester` build. `SpellCard`'s own test needs no bloc at all (it's a pure `StatelessWidget`), so it's unaffected either way.
 
 - [ ] **Step 1: Write failing test for SpellCard**
 
@@ -4335,79 +4389,109 @@ Expected: PASS (4 tests)
 Create `test/presentation/screens/spell_library_screen_test.dart`:
 
 ```dart
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:mocktail/mocktail.dart';
+
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
-import 'package:eruditus/data/database/app_database.dart';
-import 'package:eruditus/data/datasources/asset_data_loader.dart';
-import 'package:eruditus/data/datasources/local_spell_datasource.dart';
-import 'package:eruditus/data/repositories/library_repository.dart';
-import 'package:eruditus/data/repositories/spell_repository.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
+class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
+    implements SpellLibraryBloc {}
+
+class FakeSpellLibraryEvent extends Fake implements SpellLibraryEvent {}
+
+class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
+
 void main() {
+  late MockSpellLibraryBloc bloc;
+
+  Spell buildSpell(String id, String name, {String source = 'built-in'}) => Spell(
+        id: id, name: name, technique: 'Creo', form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: 'e1', technique: 'Creo', form: 'Ignem',
+          description: 'test', baseLevel: 5, source: 'built-in',
+        ),
+        parameters: const [], selectedSpecialFactorIds: const [],
+        requiredRequisites: const [], additionalRequisites: const [],
+        source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+
+  final builtInSpell = buildSpell('built-1', 'Phantasm of the Talking Head');
+  final userSpell = buildSpell('user-1', 'My Custom Fireball', source: 'user-created');
+
   setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    registerFallbackValue(FakeSpellLibraryEvent());
+    registerFallbackValue(FakeSpellLibraryState());
   });
 
-  late AppDatabase database;
-  late SpellLibraryBloc bloc;
-
-  setUp(() async {
-    database = await AppDatabase.open(path: inMemoryDatabasePath);
-    final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
-    await spellRepository.saveSpell(Spell(
-      id: 'user-1', name: 'My Custom Fireball', technique: 'Creo', form: 'Ignem',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 5, source: 'built-in',
-      ),
-      parameters: const [], selectedSpecialFactorIds: const [],
-      requiredRequisites: const [], additionalRequisites: const [],
-      source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
-    ));
-    final libraryRepository = LibraryRepository(assetLoader: AssetDataLoader(), spellRepository: spellRepository);
-    bloc = SpellLibraryBloc(libraryRepository: libraryRepository);
+  setUp(() {
+    bloc = MockSpellLibraryBloc();
   });
 
-  tearDown(() async {
-    await bloc.close();
-    await database.close();
-  });
-
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, SpellLibraryState state) async {
+    whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
     await tester.pumpWidget(MaterialApp(
       home: BlocProvider<SpellLibraryBloc>.value(value: bloc, child: const SpellLibraryScreen()),
     ));
-    await tester.pumpAndSettle();
   }
 
-  testWidgets('shows both built-in and user spells on load', (tester) async {
-    await pumpScreen(tester);
+  testWidgets('shows both built-in and user spells when loaded', (tester) async {
+    await pumpScreen(
+      tester,
+      SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell, userSpell]),
+    );
+
     expect(find.text('My Custom Fireball'), findsOneWidget);
     expect(find.text('Phantasm of the Talking Head'), findsOneWidget);
   });
 
-  testWidgets('filtering to "My Spells" hides built-in spells', (tester) async {
-    await pumpScreen(tester);
+  testWidgets('shows a loading indicator while status is loading', (tester) async {
+    await pumpScreen(tester, SpellLibraryState.initial());
 
-    await tester.tap(find.widgetWithText(RadioListTile<String>, 'My Spells'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('My Custom Fireball'), findsOneWidget);
-    expect(find.text('Phantasm of the Talking Head'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('searching filters the list by name', (tester) async {
-    await pumpScreen(tester);
+  testWidgets('selecting the "My Spells" filter dispatches FilterChanged', (tester) async {
+    await pumpScreen(
+      tester,
+      SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell, userSpell]),
+    );
+
+    await tester.tap(find.widgetWithText(RadioListTile<String>, 'My Spells'));
+    await tester.pump();
+
+    verify(() => bloc.add(const FilterChanged('My Spells'))).called(1);
+  });
+
+  testWidgets('typing in the search field dispatches SearchQueryChanged', (tester) async {
+    await pumpScreen(
+      tester,
+      SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell, userSpell]),
+    );
 
     await tester.enterText(find.byKey(const Key('search-field')), 'fireball');
-    await tester.pumpAndSettle();
+    await tester.pump();
+
+    verify(() => bloc.add(const SearchQueryChanged('fireball'))).called(1);
+  });
+
+  testWidgets('only shows spells present in visibleSpells (filter already applied by state)',
+      (tester) async {
+    await pumpScreen(
+      tester,
+      SpellLibraryState(
+        status: SpellLibraryStatus.loaded,
+        allSpells: [builtInSpell, userSpell],
+        filter: 'My Spells',
+      ),
+    );
 
     expect(find.text('My Custom Fireball'), findsOneWidget);
     expect(find.text('Phantasm of the Talking Head'), findsNothing);
@@ -4506,7 +4590,7 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
 flutter test test/presentation/screens/spell_library_screen_test.dart -v
 ```
 
-Expected: PASS (3 tests)
+Expected: PASS (5 tests)
 
 - [ ] **Step 9: Extend SpellCreationScreen with suggestions and save/discard**
 
@@ -4607,31 +4691,51 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
 }
 ```
 
-- [ ] **Step 10: Extend the SpellCreationScreen test with the save flow**
+- [ ] **Step 10: Extend the SpellCreationScreen test with suggestions display and the save flow**
 
-In `test/presentation/screens/spell_creation_screen_test.dart`, add this test to the existing `main()`'s test list:
+In `test/presentation/screens/spell_creation_screen_test.dart`, add these tests to the existing `main()`'s test list (this file already uses the `MockSpellCreationBloc`/`whenListen` pattern from Task 11 — these new tests follow the same pattern, just with a `calculated`-status state):
 
 ```dart
-  testWidgets('saving after calculation persists the spell via the repository', (tester) async {
-    await pumpScreen(tester);
+  testWidgets('shows suggestions when status is calculated', (tester) async {
+    final suggestion = Spell(
+      id: 's1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
+      baseEffect: creoIgnemEffect,
+      parameters: const [], selectedSpecialFactorIds: const [],
+      requiredRequisites: const [], additionalRequisites: const [],
+      source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+      suggestions: [suggestion],
+    );
+    await pumpScreen(tester, state);
 
-    await tester.tap(find.byKey(const Key('technique-dropdown')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Creo').last);
-    await tester.pumpAndSettle();
+    expect(find.text('Pillar of Fire'), findsOneWidget);
+  });
 
-    await tester.tap(find.byKey(const Key('form-dropdown')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Ignem').last);
-    await tester.pumpAndSettle();
+  testWidgets('tapping discard dispatches SpellDiscarded', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
 
-    await tester.tap(find.byKey(const Key('base-effect-dropdown')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Create flame (Base 10)').last);
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('discard-button')));
+    await tester.pump();
 
-    await tester.tap(find.byKey(const Key('calculate-button')));
-    await tester.pumpAndSettle();
+    verify(() => bloc.add(const SpellDiscarded())).called(1);
+  });
+
+  testWidgets('saving with a name dispatches SpellSaveRequested', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
 
     await tester.tap(find.byKey(const Key('save-button')));
     await tester.pumpAndSettle();
@@ -4640,11 +4744,11 @@ In `test/presentation/screens/spell_creation_screen_test.dart`, add this test to
     await tester.tap(find.byKey(const Key('confirm-save-button')));
     await tester.pumpAndSettle();
 
-    expect(bloc.state.savedSpell?.name, 'My Fireball');
+    verify(() => bloc.add(const SpellSaveRequested('My Fireball'))).called(1);
   });
 ```
 
-This test needs access to `bloc` from the enclosing `setUp` — it must be added inside the same `main()` body as the other tests in that file (which already declares `late SpellCreationBloc bloc;` in scope), not as a new standalone file.
+Since these tests need `creoIgnemEffect`, `pumpScreen`, and `bloc`, they must be added inside the same `main()` body as Task 11's existing tests in this file (which already declare all three in scope), not as a new standalone file.
 
 - [ ] **Step 11: Run all this task's tests to verify they pass**
 
@@ -4652,7 +4756,7 @@ This test needs access to `bloc` from the enclosing `setUp` — it must be added
 flutter test test/presentation/widgets/spell_card_test.dart test/presentation/screens/spell_library_screen_test.dart test/presentation/screens/spell_creation_screen_test.dart -v
 ```
 
-Expected: PASS (4 + 3 + 3 = 10 tests)
+Expected: PASS (4 + 5 + 10 = 19 tests). Note: `spell_creation_screen_test.dart` now has 10 tests total (7 from Task 11 + 3 new ones here).
 
 - [ ] **Step 12: Commit**
 
@@ -4663,7 +4767,8 @@ git commit -m "feat: add SpellCard, SpellLibraryScreen, and suggestions/save flo
 SpellCard is a reusable spell summary tile. SpellLibraryScreen browses
 all spells with search and All/Built-in/My Spells filtering. Extends
 SpellCreationScreen to show similar-spell suggestions after calculation,
-with Save (via a name-entry dialog) and Discard actions.
+with Save (via a name-entry dialog) and Discard actions. Both screens'
+widget tests use mocked blocs per Task 11's environment finding.
 
 Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ```
@@ -4679,65 +4784,82 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 - Test: `test/presentation/screens/configuration_screen_test.dart`
 
 **Interfaces:**
-- Consumes: `ConfigurationBloc` (Task 9... actually Task 10), all Task 1-7 data-layer classes
+- Consumes: `ConfigurationBloc` (Task 10), all Task 1-7 data-layer classes
 - Produces: `ConfigurationScreen` (3 tabs: Effects, Parameters, Special Factors, each listing built-in [read-only] + custom [deletable] entries, with an add-dialog), `EruditusApp` (root widget replacing the default `MyApp`), bottom-nav wiring for Create/Library/Settings (Backup tab is added in Task 14)
+
+**Design note (carries forward from Task 11):** Uses `mocktail`'s `MockBloc`/`whenListen`, not a real bloc — same reason as Tasks 11-12. Because `BaseEffect` (Task 1) has no value equality (plain class, not `Equatable`) and the add-dialog generates a fresh `id` via `DateTime.now().millisecondsSinceEpoch.toString()`, verifying the dispatched event can't use exact object equality — use mocktail's `any(that: matcher)` with an `isA<T>().having(...)` matcher checking the meaningful fields instead (id excluded).
 
 - [ ] **Step 1: Write failing test for ConfigurationScreen**
 
 Create `test/presentation/screens/configuration_screen_test.dart`:
 
 ```dart
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:mocktail/mocktail.dart';
+
 import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
-import 'package:eruditus/data/database/app_database.dart';
-import 'package:eruditus/data/datasources/asset_data_loader.dart';
-import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
-import 'package:eruditus/data/repositories/configuration_repository.dart';
+import 'package:eruditus/bloc/configuration/configuration_event.dart';
+import 'package:eruditus/bloc/configuration/configuration_state.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 
+class MockConfigurationBloc extends MockBloc<ConfigurationEvent, ConfigurationState>
+    implements ConfigurationBloc {}
+
+class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
+
+class FakeConfigurationState extends Fake implements ConfigurationState {}
+
 void main() {
+  late MockConfigurationBloc bloc;
+
   setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    registerFallbackValue(FakeConfigurationEvent());
+    registerFallbackValue(FakeConfigurationState());
   });
 
-  late AppDatabase database;
-  late ConfigurationBloc bloc;
-
-  setUp(() async {
-    database = await AppDatabase.open(path: inMemoryDatabasePath);
-    final configRepository = ConfigurationRepository(
-      assetLoader: AssetDataLoader(),
-      configDatasource: LocalConfigurationDatasource(database: database),
-    );
-    bloc = ConfigurationBloc(configRepository: configRepository);
+  setUp(() {
+    bloc = MockConfigurationBloc();
   });
 
-  tearDown(() async {
-    await bloc.close();
-    await database.close();
-  });
-
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, ConfigurationState state) async {
+    whenListen(bloc, const Stream<ConfigurationState>.empty(), initialState: state);
     await tester.pumpWidget(MaterialApp(
       home: BlocProvider<ConfigurationBloc>.value(value: bloc, child: const ConfigurationScreen()),
     ));
-    await tester.pumpAndSettle();
   }
 
+  ConfigurationState loadedState({List<BaseEffect> effects = const []}) => ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: effects,
+        parameters: const [],
+        factors: const [],
+      );
+
   testWidgets('shows Effects, Parameters, Special Factors tabs', (tester) async {
-    await pumpScreen(tester);
+    await pumpScreen(tester, loadedState());
 
     expect(find.text('Effects'), findsOneWidget);
     expect(find.text('Parameters'), findsOneWidget);
     expect(find.text('Special Factors'), findsOneWidget);
   });
 
-  testWidgets('adding a custom effect shows it in the list', (tester) async {
-    await pumpScreen(tester);
+  testWidgets('renders custom effects present in state', (tester) async {
+    final customEffect = BaseEffect(
+      id: 'custom-1', technique: 'Creo', form: 'Ignem',
+      description: 'My custom effect', baseLevel: 7, source: 'user-created',
+    );
+    await pumpScreen(tester, loadedState(effects: [customEffect]));
+
+    expect(find.text('My custom effect'), findsOneWidget);
+  });
+
+  testWidgets('filling the add-effect dialog dispatches CustomEffectAdded with the entered values',
+      (tester) async {
+    await pumpScreen(tester, loadedState());
 
     await tester.tap(find.byKey(const Key('add-effect-button')));
     await tester.pumpAndSettle();
@@ -4758,7 +4880,14 @@ void main() {
     await tester.tap(find.byKey(const Key('confirm-add-effect')));
     await tester.pumpAndSettle();
 
-    expect(find.text('My custom effect'), findsOneWidget);
+    verify(() => bloc.add(any(
+      that: isA<CustomEffectAdded>()
+          .having((e) => e.effect.technique, 'technique', 'Creo')
+          .having((e) => e.effect.form, 'form', 'Ignem')
+          .having((e) => e.effect.description, 'description', 'My custom effect')
+          .having((e) => e.effect.baseLevel, 'baseLevel', 7)
+          .having((e) => e.effect.source, 'source', 'user-created'),
+    ))).called(1);
   });
 }
 ```
@@ -5191,9 +5320,11 @@ class _AddFactorDialogState extends State<_AddFactorDialog> {
 flutter test test/presentation/screens/configuration_screen_test.dart -v
 ```
 
-Expected: PASS (2 tests)
+Expected: PASS (3 tests)
 
 - [ ] **Step 5: Rewrite main.dart**
+
+**Design note (important):** `EruditusApp` takes already-constructed blocs as constructor parameters (via `BlocProvider.value`), rather than constructing them itself internally via `create:`. `main()` builds the real blocs and passes them in. This is a deliberate dependency-injection choice, not just style: it's what makes `EruditusApp` testable at all — per Tasks 11-13's finding that a real `Bloc`'s event pipeline hangs under this project's `flutter_tester`, any widget test of `EruditusApp` must inject mock blocs instead of letting it build real ones. If `EruditusApp` constructed blocs internally, no test could ever avoid the hang (there'd be no seam to substitute mocks). Do not change this back to `create:` callbacks.
 
 Replace the entire contents of `lib/main.dart` with:
 
@@ -5239,11 +5370,14 @@ Future<void> main() async {
 
   final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
 
+  final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+  final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository);
+  final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
   runApp(EruditusApp(
-    spellEngine: spellEngine,
-    spellRepository: spellRepository,
-    libraryRepository: libraryRepository,
-    configRepository: configRepository,
+    spellCreationBloc: spellCreationBloc,
+    spellLibraryBloc: spellLibraryBloc,
+    configurationBloc: configurationBloc,
     allEffects: allEffects,
     allParameters: allParameters,
     allSpecialFactors: allSpecialFactors,
@@ -5251,20 +5385,18 @@ Future<void> main() async {
 }
 
 class EruditusApp extends StatelessWidget {
-  final SpellEngine spellEngine;
-  final SpellRepository spellRepository;
-  final LibraryRepository libraryRepository;
-  final ConfigurationRepository configRepository;
+  final SpellCreationBloc spellCreationBloc;
+  final SpellLibraryBloc spellLibraryBloc;
+  final ConfigurationBloc configurationBloc;
   final List<BaseEffect> allEffects;
   final List<Parameter> allParameters;
   final List<SpecialFactor> allSpecialFactors;
 
   const EruditusApp({
     super.key,
-    required this.spellEngine,
-    required this.spellRepository,
-    required this.libraryRepository,
-    required this.configRepository,
+    required this.spellCreationBloc,
+    required this.spellLibraryBloc,
+    required this.configurationBloc,
     required this.allEffects,
     required this.allParameters,
     required this.allSpecialFactors,
@@ -5276,11 +5408,9 @@ class EruditusApp extends StatelessWidget {
       title: 'Eruditus',
       home: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (_) => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
-          ),
-          BlocProvider(create: (_) => SpellLibraryBloc(libraryRepository: libraryRepository)),
-          BlocProvider(create: (_) => ConfigurationBloc(configRepository: configRepository)),
+          BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+          BlocProvider<SpellLibraryBloc>.value(value: spellLibraryBloc),
+          BlocProvider<ConfigurationBloc>.value(value: configurationBloc),
         ],
         child: _MainTabView(
           allEffects: allEffects,
@@ -5342,62 +5472,78 @@ class _MainTabViewState extends State<_MainTabView> {
 
 - [ ] **Step 6: Replace the stale default widget_test.dart**
 
-The scaffolded `test/widget_test.dart` tests the default Flutter counter-app template and will fail against the real app. Replace its entire contents with:
+The scaffolded `test/widget_test.dart` tests the default Flutter counter-app template and will fail against the real app. Per this project's real-bloc-hangs-under-`flutter_tester` finding, this smoke test injects **mock** blocs into `EruditusApp` (now possible thanks to Step 5's dependency-injection refactor) rather than constructing real ones — `SpellLibraryScreen`'s `initState` dispatches `LibraryRequested` immediately on mount (and `IndexedStack` builds all three tab screens eagerly, not lazily), so even a "does the app boot" smoke test would hit the hang with real blocs the instant it mounts.
+
+Replace its entire contents with:
 
 ```dart
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:mocktail/mocktail.dart';
 
-import 'package:eruditus/data/database/app_database.dart';
-import 'package:eruditus/data/datasources/asset_data_loader.dart';
-import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
-import 'package:eruditus/data/datasources/local_spell_datasource.dart';
-import 'package:eruditus/data/repositories/configuration_repository.dart';
-import 'package:eruditus/data/repositories/library_repository.dart';
-import 'package:eruditus/data/repositories/spell_repository.dart';
-import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
+import 'package:eruditus/bloc/configuration/configuration_event.dart';
+import 'package:eruditus/bloc/configuration/configuration_state.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/main.dart';
+
+class MockSpellCreationBloc extends MockBloc<SpellCreationEvent, SpellCreationState>
+    implements SpellCreationBloc {}
+
+class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
+    implements SpellLibraryBloc {}
+
+class MockConfigurationBloc extends MockBloc<ConfigurationEvent, ConfigurationState>
+    implements ConfigurationBloc {}
+
+class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
+class FakeSpellCreationState extends Fake implements SpellCreationState {}
+class FakeSpellLibraryEvent extends Fake implements SpellLibraryEvent {}
+class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
+class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
+class FakeConfigurationState extends Fake implements ConfigurationState {}
 
 void main() {
   setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    registerFallbackValue(FakeSpellCreationEvent());
+    registerFallbackValue(FakeSpellCreationState());
+    registerFallbackValue(FakeSpellLibraryEvent());
+    registerFallbackValue(FakeSpellLibraryState());
+    registerFallbackValue(FakeConfigurationEvent());
+    registerFallbackValue(FakeConfigurationState());
   });
 
   testWidgets('EruditusApp launches showing the Create tab and bottom navigation', (tester) async {
-    final database = await AppDatabase.open(path: inMemoryDatabasePath);
-    final assetLoader = AssetDataLoader();
-    final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
-    final libraryRepository = LibraryRepository(assetLoader: assetLoader, spellRepository: spellRepository);
-    final configRepository = ConfigurationRepository(
-      assetLoader: assetLoader,
-      configDatasource: LocalConfigurationDatasource(database: database),
-    );
+    final spellCreationBloc = MockSpellCreationBloc();
+    final spellLibraryBloc = MockSpellLibraryBloc();
+    final configurationBloc = MockConfigurationBloc();
 
-    final allSpells = await libraryRepository.getAllSpells();
-    final allSpecialFactors = await configRepository.getAllSpecialFactors();
-    final allEffects = await configRepository.getAllEffects();
-    final allParameters = await configRepository.getAllParameters();
-    final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
+    whenListen(spellCreationBloc, const Stream<SpellCreationState>.empty(),
+        initialState: SpellCreationState.initial());
+    whenListen(spellLibraryBloc, const Stream<SpellLibraryState>.empty(),
+        initialState: SpellLibraryState.initial());
+    whenListen(configurationBloc, const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState.initial());
 
     await tester.pumpWidget(EruditusApp(
-      spellEngine: spellEngine,
-      spellRepository: spellRepository,
-      libraryRepository: libraryRepository,
-      configRepository: configRepository,
-      allEffects: allEffects,
-      allParameters: allParameters,
-      allSpecialFactors: allSpecialFactors,
+      spellCreationBloc: spellCreationBloc,
+      spellLibraryBloc: spellLibraryBloc,
+      configurationBloc: configurationBloc,
+      allEffects: const [],
+      allParameters: const [],
+      allSpecialFactors: const [],
     ));
-    await tester.pumpAndSettle();
 
     expect(find.text('Create Spell'), findsOneWidget);
     expect(find.text('Create'), findsOneWidget);
     expect(find.text('Library'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
-
-    await database.close();
   });
 }
 ```
@@ -5408,7 +5554,7 @@ void main() {
 flutter test -v
 ```
 
-Expected: PASS (all tests across every task pass; this is the first point where the whole app assembles end-to-end)
+Expected: PASS (all tests across every task pass). This is the first point where `EruditusApp`'s wiring — Create/Library/Settings tabs, all three blocs provided, navigation labels — is verified together, using mocked blocs. Genuine end-to-end verification with real data flowing through the real stack is Task 15's job (via `integration_test`, since that's where a real bloc's pipeline actually works — on a real device/emulator, not this environment's `flutter_tester`).
 
 - [ ] **Step 8: Commit**
 
@@ -5421,6 +5567,9 @@ across 3 tabs, each listing built-in (read-only) + custom (deletable)
 entries with an add-dialog. main.dart now loads all data, constructs
 the real repository/engine/bloc graph, and shows Create/Library/Settings
 via bottom navigation, replacing the default counter-app scaffold.
+EruditusApp takes pre-built blocs via constructor injection (not create:
+callbacks) specifically so tests can substitute mocks, since a real
+bloc's event pipeline hangs under this project's flutter_tester build.
 
 Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ```
@@ -5943,7 +6092,7 @@ In `main()`, after constructing `configRepository`, add:
   final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 ```
 
-Pass `backupService` through to `EruditusApp(...)` (add it as a constructor parameter on `EruditusApp`, stored as a field, same pattern as the other repositories), and thread it down to `_MainTabView` the same way `allEffects`/`allParameters`/`allSpecialFactors` are threaded.
+Pass `backupService` through to `EruditusApp(...)` (add it as a constructor parameter on `EruditusApp`, stored as a field, same pattern as `allEffects`/`allParameters`/`allSpecialFactors` — `BackupScreen` doesn't use a bloc, so this is a plain field, not a `BlocProvider`), and thread it down to `_MainTabView` the same way.
 
 In `_MainTabViewState.build`, add a 4th screen to the `screens` list:
 
@@ -5975,7 +6124,41 @@ And add a 4th `BottomNavigationBarItem`:
           BottomNavigationBarItem(icon: Icon(Icons.cloud_upload), label: 'Backup'),
 ```
 
-Update `test/widget_test.dart`'s `EruditusApp(...)` construction to also pass a `backupService` (built the same way as in the test's existing setup, using the same `spellRepository`/`configRepository` already constructed there), and add:
+Update `test/widget_test.dart`'s `EruditusApp(...)` construction to also pass a `backupService`. Unlike the 3 blocs, `BackupService` isn't a `Bloc` (no stream/event pipeline), so it's not affected by the real-bloc-hangs-under-`flutter_tester` issue — build a real one backed by a real in-memory database, same pattern as Tasks 4-7's datasource/repository tests:
+
+```dart
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import 'package:eruditus/data/database/app_database.dart';
+import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
+import 'package:eruditus/data/datasources/local_spell_datasource.dart';
+import 'package:eruditus/data/repositories/configuration_repository.dart';
+import 'package:eruditus/data/repositories/spell_repository.dart';
+import 'package:eruditus/data/services/backup_service.dart';
+import 'package:eruditus/data/datasources/asset_data_loader.dart';
+```
+
+Add to `setUpAll`:
+
+```dart
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+```
+
+In the test body, before `pumpWidget`:
+
+```dart
+    final database = await AppDatabase.open(path: inMemoryDatabasePath);
+    final backupService = BackupService(
+      spellRepository: SpellRepository(datasource: LocalSpellDatasource(database: database)),
+      configRepository: ConfigurationRepository(
+        assetLoader: AssetDataLoader(),
+        configDatasource: LocalConfigurationDatasource(database: database),
+      ),
+    );
+```
+
+Pass `backupService: backupService` into `EruditusApp(...)`, and add `await database.close();` at the end of the test (after the assertions). Also add:
 
 ```dart
     expect(find.text('Backup'), findsOneWidget);
@@ -6011,23 +6194,55 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 
 ## Task 15: End-to-End Integration Test
 
+**Scope note (important — read before starting):** This task uses the `integration_test` package, **not** plain `flutter_test`. Every prior widget test in this plan (Tasks 11-13) had to mock its bloc(s) because a real `Bloc`'s event pipeline hangs indefinitely under this project's `flutter_tester` build (Flutter 3.44.8) — confirmed independent of bloc/flutter_bloc version, independent of tap/pump/pumpAndSettle/runAsync mechanics, and confirmed to affect `Bloc` specifically (raw `StreamController`+`StreamBuilder` works fine in the same environment). This task's entire purpose is verifying the REAL stack (real blocs, real repositories, real database) end-to-end, so mocking isn't an option here. `integration_test` runs the app on an actual device/emulator/desktop-runtime with a real event loop, sidestepping the `flutter_tester`-specific issue entirely — real blocs work correctly there.
+
 **Files:**
-- Create: `test/integration/spell_creation_flow_test.dart`
+- Modify: `pubspec.yaml` (add `integration_test: sdk: flutter` to `dev_dependencies`)
+- Create: `integration_test/spell_creation_flow_test.dart` (note the top-level `integration_test/` directory, not `test/integration/` — this is Flutter's required convention for this package)
 
 **Interfaces:**
-- Consumes: `EruditusApp` (Task 14's final form, including `backupService`), all repositories/engine
+- Consumes: `EruditusApp` (Task 14's final form, taking pre-built blocs + `backupService` as constructor parameters per Task 13's dependency-injection design), all repositories/engine
 
-**Scope:** This is the first (and only) test that assembles the entire app graph and drives it through the UI exactly as a user would: create a spell, see suggestions from the real seed library, save it, and confirm it shows up in the library with correct filtering. It exercises Tasks 1-14 together in one pass.
+**Running this test requires a target device/runtime** — unlike every other test in this plan, `flutter test integration_test/spell_creation_flow_test.dart` alone is not enough; it needs `-d <device>` naming an actual target:
+- **`-d chrome`** (recommended first choice for this environment): Chrome is already installed on this machine (confirmed present in `PATH` during earlier setup), and running on Chrome via `integration_test`'s web support needs no native build step, no emulator, and no Windows Developer Mode setting — the most friction-free option here.
+- **`-d windows`**: also viable, but performs a real native Windows build, which may require enabling Windows Developer Mode (a system setting) for symlink support (a requirement that surfaced with the `file_picker` 11.x upgrade in Task 14) — do not enable this system setting without asking the user first.
+- An Android emulator or iOS simulator, if available, are also valid but not assumed to be set up on this machine.
 
-- [ ] **Step 1: Write the failing integration test**
+If none of these are available when this task is reached, stop and ask the user which target to use rather than guessing — this is a genuine environment dependency, not something to work around silently.
 
-Create `test/integration/spell_creation_flow_test.dart`:
+- [ ] **Step 1: Add the integration_test dependency**
+
+In `pubspec.yaml`, under `dev_dependencies:`, add:
+
+```yaml
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  # ... existing dev_dependencies unchanged
+```
+
+Run:
+```bash
+export PATH="/c/Users/idf53/Development/SDKs/flutter/flutter/bin:$PATH"
+cd C:\Users\idf53\Development\personal\arsm\eruditus
+flutter pub get
+```
+
+- [ ] **Step 2: Write the integration test**
+
+Create `integration_test/spell_creation_flow_test.dart`:
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
@@ -6040,6 +6255,8 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/main.dart';
 
 void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -6065,11 +6282,14 @@ void main() {
       final allParameters = await configRepository.getAllParameters();
       final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
 
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
       await tester.pumpWidget(EruditusApp(
-        spellEngine: spellEngine,
-        spellRepository: spellRepository,
-        libraryRepository: libraryRepository,
-        configRepository: configRepository,
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
         backupService: backupService,
         allEffects: allEffects,
         allParameters: allParameters,
@@ -6132,34 +6352,44 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run the test to verify it fails or passes**
+- [ ] **Step 3: Run the test on a real target device to verify it fails or passes**
 
 ```bash
 export PATH="/c/Users/idf53/Development/SDKs/flutter/flutter/bin:$PATH"
 cd C:\Users\idf53\Development\personal\arsm\eruditus
-flutter test test/integration/spell_creation_flow_test.dart -v
+flutter test integration_test/spell_creation_flow_test.dart -d chrome
 ```
+
+If Chrome isn't available as a target for some reason, try `-d windows` instead (note: this performs a real native build and may require Windows Developer Mode / symlink support — ask the user before enabling that system setting if it's needed). If neither works, stop and ask the user which device/emulator to use rather than guessing.
 
 Since every piece this test exercises (Tasks 1-14) is already implemented by this point in the plan, this test should **pass immediately** — there is no new production code to write for this task. If it fails, that means an integration gap exists between two already-"complete" tasks (e.g., a widget key mismatch, a text string that doesn't match what a previous task actually rendered, or a wiring bug in `main.dart`). Debug and fix the actual production code (not the test) until it passes, since the test's assertions describe the real, agreed-upon user flow.
 
-- [ ] **Step 3: Run the full test suite one final time**
+- [ ] **Step 4: Run the full non-integration test suite one final time**
 
 ```bash
 flutter test -v
 ```
 
-Expected: PASS — every test from every task, plus this integration test, all green.
+Expected: PASS — every test from every task (Tasks 1-14) is green. This command does not include `integration_test/`, which requires the `-d <device>` invocation from Step 3 to run at all — that's a separate, deliberate check, not part of the regular `flutter test` sweep.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add test/integration/spell_creation_flow_test.dart
+git add pubspec.yaml pubspec.lock integration_test/spell_creation_flow_test.dart
 git commit -m "test: add end-to-end integration test for spell creation flow
 
 Drives the real EruditusApp through the UI: select Technique+Form+Effect,
 calculate, see suggestions from the seed library, save under a name,
 then confirm the saved spell appears in the Library tab and survives
 'My Spells' filtering. Exercises Tasks 1-14 together.
+
+Uses the integration_test package (runs on a real device/emulator/
+browser), not plain flutter_test, since a real Bloc's event pipeline
+hangs under this project's flutter_tester build (Flutter 3.44.8) -
+confirmed independent of bloc/flutter_bloc version and interaction
+mechanics. This is the one test in the suite that needs the real
+async pipeline to actually work, so it can't use the mocked-bloc
+pattern Tasks 11-13 use.
 
 Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 ```
@@ -6170,7 +6400,7 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 
 ✓ **Spec Coverage:** Every design-spec section has a corresponding task — data models (Task 1), spell level algorithm (Task 2), validation/suggestion engine (Task 3), SQLite schema + datasources (Tasks 4-5), built-in seed data (Task 6), repositories (Task 7), all 3 BLoCs (Tasks 8-10), all 4 screens + navigation (Tasks 11-13), backup (Task 14), end-to-end verification (Task 15).
 ✓ **Placeholder Scan:** No TBD/TODO markers remain in any task's steps; the one deliberate scope note (Task 6's "starter set, not full 50+") is explicit and justified, not a hidden gap.
-✓ **Type Consistency:** `SpellEngine(allSpells:, allSpecialFactors:)`, `SpellRepository(datasource:)`, `LibraryRepository(assetLoader:, spellRepository:)`, `ConfigurationRepository(assetLoader:, configDatasource:)`, `BackupService(spellRepository:, configRepository:)` constructor signatures are used identically everywhere they're referenced across Tasks 7-15.
+✓ **Type Consistency:** `SpellEngine(allSpells:, allSpecialFactors:)`, `SpellRepository(datasource:)`, `LibraryRepository(assetLoader:, spellRepository:)`, `ConfigurationRepository(assetLoader:, configDatasource:)`, `BackupService(spellRepository:, configRepository:)`, `EruditusApp(spellCreationBloc:, spellLibraryBloc:, configurationBloc:, backupService:, allEffects:, allParameters:, allSpecialFactors:)` constructor signatures are used identically everywhere they're referenced across Tasks 7-15.
 ✓ **Test-First:** Every task's steps start with a failing test before any production code.
 ✓ **Exact Paths:** All file paths are absolute or repo-relative and unambiguous.
 ✓ **Commit Messages:** Every task ends with a clear, specific commit message and trailer.
@@ -6179,5 +6409,6 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 - Task 3: `findSimilarSpells` sorts by closeness to a `referenceLevel`, matching the design spec's intent, rather than the broken draft this plan originally contained.
 - Task 6: seeds a verified 27-spell/38-effect starter set (not the full 50+ spell library) — explicitly scoped as future content work.
 - Task 8/9/10: each BLoC uses one state class with a status enum, rather than the many discrete state subclasses the design spec sketched — a deliberate YAGNI simplification of the same semantics.
+- Task 11 (found during implementation, not anticipated in the original spec): a real `Bloc`'s event pipeline hangs under this project's `flutter_tester` build, independent of bloc/flutter_bloc version or interaction mechanics. Fixed by: (a) all widget tests (Tasks 11-13) use `mocktail`'s `MockBloc`, (b) `EruditusApp` takes pre-built blocs via constructor injection rather than constructing them internally, specifically so mocks can be substituted in tests, and (c) Task 15's true end-to-end test uses the `integration_test` package (real device/browser runtime) instead of plain `flutter_test`, since that's the one test that actually needs the real pipeline to work.
 - Task 14: file-based export/import rather than a real cloud backend, per the design spec's own "Cloud provider TBD" open question.
 
