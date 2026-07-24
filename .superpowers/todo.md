@@ -19,7 +19,20 @@
   - `lib/bloc/spell_creation/spell_creation_bloc.dart` (enforce in logic)
   - `lib/presentation/screens/spell_creation_screen.dart` (UI restrictions)
 
-### 2. Size Feature (MVP)
+### 2. Requisites UI & Integration
+- [ ] Add requisites section to spell creation screen
+- [ ] Allow selecting multiple Forms as additional requisites
+- [ ] Validate: requisite Forms cannot be the primary Form
+- [ ] Display requisite magnitude contribution in level preview
+- [ ] Differentiate Required vs Additional requisites in UI (if both types needed)
+- **Current State:** Model + engine support requisites (each = +1 magnitude), but **no UI**
+- **Impact:** SpellCreationScreen needs new widget, spell_creation_bloc integration
+- **Files:**
+  - `lib/presentation/screens/spell_creation_screen.dart` (add requisite widget)
+  - `lib/presentation/widgets/` (new requisite_selector widget)
+  - `lib/bloc/spell_creation/spell_creation_bloc.dart` (add requisite events)
+
+### 3. Size Feature (MVP)
 - [ ] Add Size magnitude parameter to spell model
 - [ ] Add Size selection to spell creation UI
 - [ ] Update spell level calculation: base + (Technique modifiers) + (Form modifiers) + (Parameters) + **Size**
@@ -33,7 +46,7 @@
   - `lib/presentation/screens/spell_creation_screen.dart` (UI widget)
   - Configuration for Size magnitudes + Aquam sub-type limits
 
-### 3. Asset Data Loader Test Failures (Pre-existing)
+### 4. Asset Data Loader Test Failures (Pre-existing)
 - [ ] Fix 5 failing tests in `test/data/datasources/asset_data_loader_test.dart`
 - **Rationale:** Tests reference old base effect IDs that changed during extraction
 - **Impact:** Doesn't block app, but test suite noise
@@ -43,18 +56,18 @@
 
 ## Medium Priority
 
-### 4. Real Bloc Hang in Widget Tests
+### 5. Real Bloc Hang in Widget Tests
 - [ ] Document workaround: mock Blocs in widget tests, use integration_test for real E2E
 - [ ] Create widget test helper with mock bloc factories
 - **Context:** Real Bloc hangs forever under flutter_tester; known Bloc limitation
 - **Files:** Test helpers, widget test templates
 
-### 5. Spell Export/Backup Validation
+### 6. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to new constraints (one Range/Duration/Target)
 - [ ] Add migration for legacy spell saves (if any)
 - [ ] Test backup round-trip (export → import)
 
-### 6. UI: Disable Multi-Select for Range/Duration/Target
+### 7. UI: Disable Multi-Select for Range/Duration/Target
 - [ ] Update UI to prevent selecting multiple Range options
 - [ ] Update UI to prevent selecting multiple Duration options
 - [ ] Update UI to prevent selecting multiple Target options
@@ -64,16 +77,16 @@
 
 ## Low Priority / Nice-to-Have
 
-### 7. Documentation
+### 8. Documentation
 - [ ] Update README: mention base effects extraction is complete
 - [ ] Add Size feature guide to docs
 - [ ] Document Aquam sub-type limitations (MVP context)
 
-### 8. Performance
+### 9. Performance
 - [ ] Optimize base effects JSON (currently 604 effects, all loaded at startup)
 - [ ] Consider lazy-loading or caching strategy if app grows
 
-### 9. Out-of-Scope Effects Handling
+### 10. Out-of-Scope Effects Handling
 - [ ] Create filtering/tagging UI for flagged effects (variable base levels, ritual-only, etc.)
 - [ ] User guidance: explain which effects don't fit the calculation model yet
 - **Current State:** ~200 effects flagged with notes documenting out-of-scope patterns
