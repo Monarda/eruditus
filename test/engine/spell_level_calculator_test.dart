@@ -1,0 +1,69 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/spell_level_calculator.dart';
+
+void main() {
+  group('SpellLevelCalculator', () {
+    test('Eyes of the Cat: Base 2 + Touch(+1) + Sun(+2) = 5', () {
+      const baseLevel = 2;
+      const magnitudes = [1, 2];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 5);
+    });
+
+    test('Seal the Earth: Base 1 + Voice(+2) + Sun(+2) + Group(+2) = 15', () {
+      const baseLevel = 1;
+      const magnitudes = [2, 2, 2];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 15);
+    });
+
+    test('Haunt: Base 2 + Arc(+4) + Conc(+1) + Move(+2) + Intricacy(+1) + Intellego(+1) = 35', () {
+      const baseLevel = 2;
+      const magnitudes = [4, 1, 2, 1, 1];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 35);
+    });
+
+    test('Base 10 + Voice(+2) = 20 (base already above 5)', () {
+      const baseLevel = 10;
+      const magnitudes = [2];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 20);
+    });
+
+    test('Base 1 + Touch(+1) = 2 (both within additive tier)', () {
+      const baseLevel = 1;
+      const magnitudes = [1];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 2);
+    });
+
+    test('Empty magnitudes returns base level', () {
+      const baseLevel = 5;
+      const magnitudes = <int>[];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 5);
+    });
+
+    test('Magnitude splitting: Base 4 + Touch(+1) + Sun(+2) = 15', () {
+      const baseLevel = 4;
+      const magnitudes = [1, 2];
+
+      final level = SpellLevelCalculator.calculate(baseLevel, magnitudes);
+
+      expect(level, 15);
+    });
+  });
+}
