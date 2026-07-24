@@ -12,14 +12,12 @@
 - [x] Corpus (commit 5fafdb3, 98 effects)
 - [x] Herbam (commit 26fe212, 49 effects)
 - [x] Ignem (commit b78a1a7, 70 effects)
+- [x] Imaginem (commit 5e96c32, 38 effects)
+- [x] Mentem (commit fa01406, 58 effects)
+- [x] Terram (commit 5b1382f, 51 effects)
+- [x] Vim (commit 5b1382f, 54 effects)
 
-## In Progress / To Do
-
-- [ ] Ignem (~35 effects)
-- [ ] Imaginem (~30 effects)
-- [ ] Mentem (~30 effects)
-- [ ] Terram (~30 effects)
-- [ ] Vim (~25 effects)
+**EXTRACTION COMPLETE** ✅
 
 ---
 
@@ -78,6 +76,41 @@
 - Rego Ignem level 3: magnitude ladder for transport distance
 - Rego Ignem levels 15-40: wards with fixed damage thresholds (+5, +10, +15, +20, +25, +30)
 
+**Imaginem (commit 5e96c32)**
+- Introduction: complexity-stacking modifiers for sensory perception (+1 magnitude per added sense/complexity)
+- Introduction: movement/command modifiers (+2 magnitudes for directed movement/noise at caster's command)
+- Introduction: intricacy modifiers (+1 magnitude for very intricate images)
+- Perdo Imaginem: variable base levels (2, 3, 4, 5, 10) - sensation destruction follows non-linear progression
+- Rego Imaginem general: conditional ward (Might vs level, supernatural realm dependent)
+- Rego Imaginem levels 2-5, 10: distance modifiers with magnitude ladder scaling
+- Rego Imaginem: +1 magnitude for each additional sense beyond the primary sense affected
+
+**Mentem (commit fa01406)**
+- Creo Mentem: variable base levels (3, 4, 5, 10, 30-55) - characteristic point scaling tied to levels
+- Intellego Mentem: variable base levels (4, 5, 10, 15, 20, 25) - information gathering follows non-linear progression
+- Muto Mentem: variable base levels (1, 2, 3, 4, 5, 10, 15, 25) - memory/emotion alteration complexity
+- Perdo Mentem: general entry (spirit Might reduction) + variable base levels (3, 4, 5, 10, 15, 25)
+- Rego Mentem general: conditional ward (Might vs level, supernatural realm dependent)
+- Rego Mentem: variable base levels (3, 4, 5, 10, 15, 20, 25) - mind/emotion control follows non-linear progression
+
+**Terram (commit 5b1382f)**
+- All techniques: variable base levels (non-linear progression)
+- Material difficulty scaling: +1 magnitude for stone/glass, +2 for metal/gemstone
+- Muto Terram: complex material transformation modifiers with multiple bullet-point effects
+- Perdo Terram: material destruction difficulty scaling
+- Rego Terram: magnitude ladder for transport distance (5p to Arcane Connection)
+- Rego Terram general: conditional ward (Might vs level, supernatural realm dependent)
+- Projectile damage scaling in Rego (levels 5/10/15 = +5/+10/+15 damage)
+
+**Vim (commit 5b1382f)**
+- All techniques: variable base levels with complex conditional mechanics
+- Creo Vim general: 4 distinct magical shell sub-effects (different Intellego resistance levels)
+- Perdo Vim general: 13 distinct sub-effects including spell dispelling, Might reduction, casting total penalties
+- Arcane Connection duration reduction across 6 levels (reduce by 1-6 steps)
+- Muto Vim: meta-magical effects (superficial/significant/total change) with power limitations
+- Rego Vim general: 5 complex sub-effects (ward, sustain/suppress, conduit creation, spirit control)
+- Multiple spell modification effects with Penetration requirements
+
 ---
 
 ## Test Results
@@ -87,12 +120,12 @@
 
 ---
 
-## Status Summary (as of 2026-07-24, end of session 1)
+## Status Summary (COMPLETE as of 2026-07-24)
 
-**Progress:** 6 of 8 Forms complete (75%)  
-**Extracted:** 403 base effects (from 50 Technique+Form combinations)  
-**Remaining:** 3 Forms (Imaginem, Mentem, Terram, Vim) estimated ~115 effects → ~518 total on completion  
-**Last commit:** b78a1a7 (Ignem)
+**Progress:** 10 of 10 Forms COMPLETE (100%)  
+**Extracted:** 604 base effects (from all 50 Technique+Form combinations)  
+**All Forms:** Animal (30) + Aquam (115) + Auram (41) + Corpus (98) + Herbam (49) + Ignem (70) + Imaginem (38) + Mentem (58) + Terram (51) + Vim (54) = 604 total  
+**Last commit:** 5b1382f (Terram + Vim)
 
 ## Notes for Resume (Session 2+)
 
