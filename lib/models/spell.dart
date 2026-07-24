@@ -137,4 +137,27 @@ class SpellDraft {
       updatedAt: DateTime.now(),
     );
   }
+
+  SpellDraft copyWith({
+    String? technique,
+    String? form,
+    BaseEffect? baseEffect,
+    List<SelectedParameter>? parameters,
+    List<String>? selectedSpecialFactorIds,
+    List<RequiredRequisite>? requiredRequisites,
+    List<AdditionalRequisite>? additionalRequisites,
+    String? description,
+  }) {
+    return SpellDraft(
+      id: id,
+      technique: technique ?? this.technique,
+      form: form ?? this.form,
+      baseEffect: baseEffect ?? this.baseEffect,
+      parameters: parameters ?? this.parameters,
+      selectedSpecialFactorIds: selectedSpecialFactorIds ?? this.selectedSpecialFactorIds,
+      requiredRequisites: requiredRequisites ?? this.requiredRequisites,
+      additionalRequisites: additionalRequisites ?? this.additionalRequisites,
+      description: description ?? this.description,
+    );
+  }
 }
