@@ -3561,6 +3561,8 @@ Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>"
 
 **Design note:** Add/delete handlers call `configRepository` then re-dispatch `ConfigurationRequested` (via `add(const ConfigurationRequested())`) to reload the combined lists from source, rather than hand-splicing the new/removed item into the cached list — simpler and guarantees the state always reflects what's actually persisted.
 
+**Design note (correcting a concurrency bug found in Task 9's identical pattern):** `SpellLibraryBloc` (Task 9) originally registered each event type via its own separate `on<EventType>(...)` call — the same shape this task's Step 3 draft below uses. Task 9's implementer discovered that flutter_bloc's default behavior processes different event *types* concurrently (each `on<E>()` sets up an independent subscription), so a `CustomEffectAdded` dispatched shortly after `ConfigurationRequested` could interleave with — or race ahead of — the still-in-flight `ConfigurationRequested` handler's async work, producing states in an unpredictable order. This matters especially here because every add/delete handler itself calls `add(const ConfigurationRequested())` internally, creating exactly the same kind of rapid, mixed-type event sequence that exposed the bug in Task 9. **Do not use separate `on<EventType>()` registrations for this bloc.** Instead, funnel every event through one `on<ConfigurationEvent>` handler with a sequential transformer, exactly like `SpellLibraryBloc`'s (already-implemented and reviewed) fix — see Step 3 below, which reflects this corrected structure.
+
 - [ ] **Step 1: Write failing tests**
 
 Create `test/bloc/configuration_bloc_test.dart`:
@@ -3790,8 +3792,24 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
   final ConfigurationRepository configRepository;
 
+  // All events are funneled through a single handler (registered on the base
+  // `ConfigurationEvent` type) with a sequential transformer, for the same
+  // reason as SpellLibraryBloc (Task 9): flutter_bloc's default behavior
+  // processes events of *different* types concurrently (each `on<E>()` call
+  // sets up its own independent subscription). Every add/delete handler here
+  // internally calls `add(const ConfigurationRequested())` to reload, which
+  // creates exactly the rapid, mixed-type event sequence that would race
+  // under concurrent processing. Sequential processing guarantees events are
+  // applied strictly in arrival order.
   ConfigurationBloc({required this.configRepository}) : super(ConfigurationState.initial()) {
-    on<ConfigurationRequested>((event, emit) async {
+    on<ConfigurationEvent>(
+      _onEvent,
+      transformer: (events, mapper) => events.asyncExpand(mapper),
+    );
+  }
+
+  Future<void> _onEvent(ConfigurationEvent event, Emitter<ConfigurationState> emit) async {
+    if (event is ConfigurationRequested) {
       emit(state.copyWith(status: ConfigurationStatus.loading));
       try {
         final effects = await configRepository.getAllEffects();
@@ -3806,40 +3824,47 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
       } catch (e) {
         emit(state.copyWith(status: ConfigurationStatus.error, errorMessage: e.toString()));
       }
-    });
-
-    on<CustomEffectAdded>((event, emit) async {
+    } else if (event is CustomEffectAdded) {
       await configRepository.addCustomEffect(event.effect);
-      add(const ConfigurationRequested());
-    });
-
-    on<CustomEffectDeleted>((event, emit) async {
+      await _reload(emit);
+    } else if (event is CustomEffectDeleted) {
       await configRepository.deleteCustomEffect(event.id);
-      add(const ConfigurationRequested());
-    });
-
-    on<CustomParameterAdded>((event, emit) async {
+      await _reload(emit);
+    } else if (event is CustomParameterAdded) {
       await configRepository.addCustomParameter(event.parameter);
-      add(const ConfigurationRequested());
-    });
-
-    on<CustomParameterDeleted>((event, emit) async {
+      await _reload(emit);
+    } else if (event is CustomParameterDeleted) {
       await configRepository.deleteCustomParameter(event.id);
-      add(const ConfigurationRequested());
-    });
-
-    on<CustomFactorAdded>((event, emit) async {
+      await _reload(emit);
+    } else if (event is CustomFactorAdded) {
       await configRepository.addCustomFactor(event.factor);
-      add(const ConfigurationRequested());
-    });
-
-    on<CustomFactorDeleted>((event, emit) async {
+      await _reload(emit);
+    } else if (event is CustomFactorDeleted) {
       await configRepository.deleteCustomFactor(event.id);
-      add(const ConfigurationRequested());
-    });
+      await _reload(emit);
+    }
+  }
+
+  Future<void> _reload(Emitter<ConfigurationState> emit) async {
+    emit(state.copyWith(status: ConfigurationStatus.loading));
+    try {
+      final effects = await configRepository.getAllEffects();
+      final parameters = await configRepository.getAllParameters();
+      final factors = await configRepository.getAllSpecialFactors();
+      emit(state.copyWith(
+        status: ConfigurationStatus.loaded,
+        effects: effects,
+        parameters: parameters,
+        factors: factors,
+      ));
+    } catch (e) {
+      emit(state.copyWith(status: ConfigurationStatus.error, errorMessage: e.toString()));
+    }
   }
 }
 ```
+
+**Note on this restructuring:** since all events now funnel through one handler within the same bloc instance (not separate `on<E>()` subscriptions), an add/delete handler can no longer rely on `add(const ConfigurationRequested())` re-entering a different handler — that would still work in flutter_bloc generally, but here it's simpler and avoids any re-entrancy subtlety to just call the shared `_reload` helper directly (which contains the same logic `ConfigurationRequested`'s branch runs). This is a direct method call, not an event dispatch, so there's no queuing or ordering concern.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
