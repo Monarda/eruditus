@@ -9,15 +9,16 @@
 ## High Priority Fixes
 
 ### 1. Spell Constraint: One of Each Parameter
-- [ ] Add validation that each spell has exactly ONE Range
-- [ ] Add validation that each spell has exactly ONE Duration  
-- [ ] Add validation that each spell has exactly ONE Target
+- [x] Add validation that each spell has exactly ONE Range
+- [x] Add validation that each spell has exactly ONE Duration  
+- [x] Add validation that each spell has exactly ONE Target
 - **Rationale:** Ars Magica rules: spells have single Range/Duration/Target, modifiers scale level instead
-- **Impact:** Affects spell_creation_bloc, spell model validation, UI constraints
-- **Files:** 
-  - `lib/models/spell.dart` (add validation)
-  - `lib/bloc/spell_creation/spell_creation_bloc.dart` (enforce in logic)
-  - `lib/presentation/screens/spell_creation_screen.dart` (UI restrictions)
+- **Status:** ✅ COMPLETE (commit 2d897db)
+- **Implementation:** 
+  - Redesigned UI with three dedicated dropdowns (Range, Duration, Target)
+  - SpellCreationBloc enforces one-per-category in ParameterAdded handler
+  - SpellEngine.validateSpellDraft() requires all three categories
+  - Dropdown automatically replaces if same category selected again
 
 ### 2. Requisites UI & Integration
 - [ ] Add requisites section to spell creation screen
