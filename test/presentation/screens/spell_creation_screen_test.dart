@@ -184,7 +184,7 @@ void main() {
       duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
       target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
       selectedSpecialFactorIds: const [],
-      requiredRequisites: const [], additionalRequisites: const [],
+      requisites: const [],
       description: 'A roaring pillar of flame.',
       source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
@@ -245,7 +245,7 @@ void main() {
       duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
       target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
       selectedSpecialFactorIds: const [],
-      requiredRequisites: const [], additionalRequisites: const [],
+      requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final states = Stream.fromIterable([

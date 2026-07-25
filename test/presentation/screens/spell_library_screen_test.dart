@@ -36,7 +36,7 @@ void main() {
         duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
         target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
         selectedSpecialFactorIds: const [],
-        requiredRequisites: const [], additionalRequisites: const [],
+        requisites: const [],
         source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
 

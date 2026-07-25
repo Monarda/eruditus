@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -258,7 +257,7 @@ class SpellCreationScreen extends StatelessWidget {
     return DropdownButtonFormField<Parameter>(
       key: key,
       decoration: InputDecoration(labelText: label),
-      value: selectedParameter,
+      initialValue: selectedParameter,
       items: categoryParameters
           .map((p) => DropdownMenuItem(
                 value: p,

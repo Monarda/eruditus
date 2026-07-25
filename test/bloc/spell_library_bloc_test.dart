@@ -48,7 +48,7 @@ void main() {
       duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
       target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
       selectedSpecialFactorIds: const [],
-      requiredRequisites: const [], additionalRequisites: const [],
+      requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(assetLoader: AssetDataLoader(), spellRepository: spellRepository);
@@ -118,7 +118,7 @@ void main() {
         duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
         target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
         selectedSpecialFactorIds: const ['no-longer-exists'],
-        requiredRequisites: const [], additionalRequisites: const [],
+        requisites: const [],
         source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));
     },

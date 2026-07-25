@@ -72,6 +72,70 @@ void main() {
       final errors = engine.validateSpellDraft(draft);
       expect(errors, isEmpty);
     });
+
+    test('fails if a requisite art is the spell\'s own technique or form', () {
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: '1', technique: 'Creo', form: 'Ignem',
+          description: 'Create flame', baseLevel: 10, source: 'built-in',
+        ),
+        range: _range,
+        duration: _duration,
+        target: _target,
+        requisites: [Requisite(art: 'Ignem', kind: RequisiteKind.adding)],
+      );
+
+      final errors = engine.validateSpellDraft(draft);
+      expect(
+        errors,
+        contains("Requisite art cannot be the spell's own technique or form"),
+      );
+    });
+
+    test('fails if the same requisite art is listed twice', () {
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: '1', technique: 'Creo', form: 'Ignem',
+          description: 'Create flame', baseLevel: 10, source: 'built-in',
+        ),
+        range: _range,
+        duration: _duration,
+        target: _target,
+        requisites: [
+          Requisite(art: 'Auram', kind: RequisiteKind.free),
+          Requisite(art: 'Auram', kind: RequisiteKind.adding),
+        ],
+      );
+
+      final errors = engine.validateSpellDraft(draft);
+      expect(errors, contains('Duplicate requisite art: Auram'));
+    });
+
+    test('passes with several distinct requisites of mixed kinds', () {
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: '1', technique: 'Creo', form: 'Ignem',
+          description: 'Create flame', baseLevel: 10, source: 'built-in',
+        ),
+        range: _range,
+        duration: _duration,
+        target: _target,
+        requisites: [
+          Requisite(art: 'Auram', kind: RequisiteKind.free),
+          Requisite(art: 'Terram', kind: RequisiteKind.adding),
+          Requisite(art: 'Rego', kind: RequisiteKind.adding),
+        ],
+      );
+
+      final errors = engine.validateSpellDraft(draft);
+      expect(errors, isEmpty);
+    });
   });
 
   group('SpellEngine.calculateSpellLevel', () {
@@ -84,7 +148,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [], additionalRequisites: [],
+        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [], requisites: [],
       );
 
       expect(level, 10);
@@ -104,7 +168,7 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: touchSp, duration: sunSp, target: _target, selectedSpecialFactorIds: [],
-        additionalRequisites: [],
+        requisites: [],
       );
 
       expect(level, 5); // Eyes of the Cat: Base 2 + Touch(+1) + Sun(+2) = 5
@@ -125,7 +189,7 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: ['sf1'],
-        additionalRequisites: [],
+        requisites: [],
       );
 
       expect(level, 3); // Base 2 + factor(+1) = 3 (within additive tier)
@@ -144,13 +208,13 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: ['deleted-factor-id'],
-        additionalRequisites: [],
+        requisites: [],
       );
 
       expect(level, 2); // Base 2 + unresolved factor(+0) = 2, no StateError
     });
 
-    test('includes additional requisite magnitudes', () {
+    test('an adding requisite contributes +1 magnitude', () {
       final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
@@ -160,10 +224,26 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [],
-        additionalRequisites: [AdditionalRequisite(art: 'Ignem')],
+        requisites: [Requisite(art: 'Auram', kind: RequisiteKind.adding)],
       );
 
-      expect(level, 4); // Base 3 + additional requisite(+1) = 4
+      expect(level, 4); // Base 3 + adding requisite(+1) = 4
+    });
+
+    test('a free requisite contributes no magnitude', () {
+      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+      final baseEffect = BaseEffect(
+        id: '1', technique: 'Creo', form: 'Ignem',
+        description: 'Fire with Ignem light', baseLevel: 3, source: 'built-in',
+      );
+
+      final level = engine.calculateSpellLevel(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [],
+        requisites: [Requisite(art: 'Auram', kind: RequisiteKind.free)],
+      );
+
+      expect(level, 3); // Base 3 + free requisite(+0) = 3
     });
   });
 
@@ -177,7 +257,7 @@ void main() {
         ),
         range: _range, duration: _duration, target: _target,
         selectedSpecialFactorIds: [],
-        requiredRequisites: [], additionalRequisites: [],
+        requisites: [],
         source: 'built-in', createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
     }

@@ -30,7 +30,7 @@ void main() {
       duration: SelectedParameter(parameterId: 'p2', parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in')),
       target: SelectedParameter(parameterId: 'p3', parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in')),
       selectedSpecialFactorIds: const [],
-      requiredRequisites: const [], additionalRequisites: const [],
+      requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
   });
@@ -113,7 +113,7 @@ void main() {
         duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
         target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
         selectedSpecialFactorIds: const [],
-        requiredRequisites: const [], additionalRequisites: const [],
+        requisites: const [],
         source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       return SpellCreationBloc(

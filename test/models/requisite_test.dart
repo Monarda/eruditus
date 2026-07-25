@@ -2,60 +2,67 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/requisite.dart';
 
 void main() {
-  group('RequiredRequisite', () {
-    test('toMap/fromMap round-trip', () {
-      final requisite = RequiredRequisite(art: 'Ignem');
+  group('Requisite', () {
+    test('an adding requisite has magnitude 1', () {
+      expect(Requisite(art: 'Ignem', kind: RequisiteKind.adding).magnitude, 1);
+    });
 
-      final restored = RequiredRequisite.fromMap(requisite.toMap());
+    test('a free requisite has magnitude 0', () {
+      expect(Requisite(art: 'Ignem', kind: RequisiteKind.free).magnitude, 0);
+    });
 
-      expect(restored.art, requisite.art);
+    test('toMap/fromMap round-trip preserves art and kind', () {
+      for (final kind in RequisiteKind.values) {
+        final requisite = Requisite(art: 'Vim', kind: kind);
+
+        final restored = Requisite.fromMap(requisite.toMap());
+
+        expect(restored.art, requisite.art);
+        expect(restored.kind, requisite.kind, reason: 'kind $kind did not survive the round-trip');
+        expect(restored.magnitude, requisite.magnitude);
+      }
     });
 
     test('fromMap throws a clear FormatException when art is missing', () {
-      final map = <String, dynamic>{};
+      final map = {'kind': 'free'};
 
       expect(
-        () => RequiredRequisite.fromMap(map),
+        () => Requisite.fromMap(map),
         throwsA(
           isA<FormatException>().having(
             (e) => e.message,
             'message',
-            allOf(contains('art'), contains('RequiredRequisite')),
+            allOf(contains('art'), contains('Requisite')),
           ),
         ),
       );
     });
-  });
 
-  group('AdditionalRequisite', () {
-    test('toMap/fromMap round-trip', () {
-      final requisite = AdditionalRequisite(art: 'Vim', magnitude: 3);
-
-      final restored = AdditionalRequisite.fromMap(requisite.toMap());
-
-      expect(restored.art, requisite.art);
-      expect(restored.magnitude, requisite.magnitude);
-    });
-
-    test('fromMap defaults magnitude to 1 when not present', () {
+    test('fromMap throws a clear FormatException when kind is missing', () {
       final map = {'art': 'Vim'};
 
-      final restored = AdditionalRequisite.fromMap(map);
-
-      expect(restored.art, 'Vim');
-      expect(restored.magnitude, 1);
-    });
-
-    test('fromMap throws a clear FormatException when art is missing', () {
-      final map = <String, dynamic>{'magnitude': 2};
-
       expect(
-        () => AdditionalRequisite.fromMap(map),
+        () => Requisite.fromMap(map),
         throwsA(
           isA<FormatException>().having(
             (e) => e.message,
             'message',
-            allOf(contains('art'), contains('AdditionalRequisite')),
+            allOf(contains('kind'), contains('Requisite')),
+          ),
+        ),
+      );
+    });
+
+    test('fromMap throws a clear FormatException naming the valid kinds when kind is unknown', () {
+      final map = {'art': 'Vim', 'kind': 'mandatory'};
+
+      expect(
+        () => Requisite.fromMap(map),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains('mandatory'), contains('free'), contains('adding')),
           ),
         ),
       );

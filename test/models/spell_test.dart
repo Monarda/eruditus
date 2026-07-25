@@ -48,13 +48,11 @@ void main() {
         duration: SelectedParameter(parameterId: sunParam.id, parameter: sunParam),
         target: SelectedParameter(parameterId: individualParam.id, parameter: individualParam),
         selectedSpecialFactorIds: ['sf-1', 'sf-2'],
-        requiredRequisites: [
-          RequiredRequisite(art: 'Vim'),
-          RequiredRequisite(art: 'Mentem'),
-        ],
-        additionalRequisites: [
-          AdditionalRequisite(art: 'Auram', magnitude: 1),
-          AdditionalRequisite(art: 'Terram'),
+        requisites: [
+          Requisite(art: 'Vim', kind: RequisiteKind.free),
+          Requisite(art: 'Mentem', kind: RequisiteKind.free),
+          Requisite(art: 'Auram', kind: RequisiteKind.adding),
+          Requisite(art: 'Terram', kind: RequisiteKind.adding),
         ],
         description: 'A test spell',
         source: 'user-created',
@@ -98,15 +96,17 @@ void main() {
 
       expect(restored.selectedSpecialFactorIds, ['sf-1', 'sf-2']);
 
-      expect(restored.requiredRequisites.length, 2);
-      expect(restored.requiredRequisites[0].art, 'Vim');
-      expect(restored.requiredRequisites[1].art, 'Mentem');
-
-      expect(restored.additionalRequisites.length, 2);
-      expect(restored.additionalRequisites[0].art, 'Auram');
-      expect(restored.additionalRequisites[0].magnitude, 1);
-      expect(restored.additionalRequisites[1].art, 'Terram');
-      expect(restored.additionalRequisites[1].magnitude, 1);
+      expect(restored.requisites.length, 4);
+      expect(restored.requisites[0].art, 'Vim');
+      expect(restored.requisites[0].kind, RequisiteKind.free);
+      expect(restored.requisites[0].magnitude, 0);
+      expect(restored.requisites[1].art, 'Mentem');
+      expect(restored.requisites[1].kind, RequisiteKind.free);
+      expect(restored.requisites[2].art, 'Auram');
+      expect(restored.requisites[2].kind, RequisiteKind.adding);
+      expect(restored.requisites[2].magnitude, 1);
+      expect(restored.requisites[3].art, 'Terram');
+      expect(restored.requisites[3].kind, RequisiteKind.adding);
     });
 
     test('fromMap throws a clear FormatException when a required field is missing', () {

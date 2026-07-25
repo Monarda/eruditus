@@ -89,7 +89,7 @@ void main() {
         spell.target.parameter.magnitude,
         ...spell.selectedSpecialFactorIds
             .map((id) => factors.firstWhere((f) => f.id == id).magnitude),
-        ...spell.additionalRequisites.map((r) => r.magnitude),
+        ...spell.requisites.map((r) => r.magnitude),
       ];
 
       final calculatedLevel =
