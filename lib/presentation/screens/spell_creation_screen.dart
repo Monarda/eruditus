@@ -116,6 +116,7 @@ class SpellCreationScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 // Range dropdown
                 _buildParameterDropdown(
+                  key: const Key('range-dropdown'),
                   label: 'Range',
                   category: 'Range',
                   parameters: configState.parameters,
@@ -127,6 +128,7 @@ class SpellCreationScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 // Duration dropdown
                 _buildParameterDropdown(
+                  key: const Key('duration-dropdown'),
                   label: 'Duration',
                   category: 'Duration',
                   parameters: configState.parameters,
@@ -138,6 +140,7 @@ class SpellCreationScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 // Target dropdown
                 _buildParameterDropdown(
+                  key: const Key('target-dropdown'),
                   label: 'Target',
                   category: 'Target',
                   parameters: configState.parameters,
@@ -242,6 +245,7 @@ class SpellCreationScreen extends StatelessWidget {
   }
 
   Widget _buildParameterDropdown({
+    required Key key,
     required String label,
     required String category,
     required List<Parameter> parameters,
@@ -252,6 +256,7 @@ class SpellCreationScreen extends StatelessWidget {
         parameters.where((p) => p.category == category).toList();
 
     return DropdownButtonFormField<Parameter>(
+      key: key,
       decoration: InputDecoration(labelText: label),
       value: selectedParameter,
       items: categoryParameters

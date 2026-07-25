@@ -125,7 +125,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      await tester.tap(find.byKey(const Key('parameter-dropdown')));
+      await tester.tap(find.byKey(const Key('range-dropdown')));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Custom Reach'), findsOneWidget);

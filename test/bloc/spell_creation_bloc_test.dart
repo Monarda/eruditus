@@ -91,11 +91,14 @@ void main() {
       bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellCalculated());
     },
-    skip: 5,
+    skip: 6,
     expect: () => [
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 20) // Base10 + Range(+2) + Duration(+0) + Target(+8)
+          // Base 10 already exceeds the additive-tier cap of 5, so all of
+          // Range(+2) + Duration(+0) + Target(+8) = 10 magnitude falls in the
+          // multiplier tier: 10 + (10 * 5) = 60.
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
           .having((s) => s.validationErrors, 'validationErrors', isEmpty),
     ],
   );
@@ -127,12 +130,13 @@ void main() {
       bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellCalculated());
     },
-    skip: 5,
+    skip: 6,
     expect: () => [
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
-          .having((s) => s.suggestionLevels['suggestion-1'], 'suggestionLevels[suggestion-1]', 20),
+          // Same base effect + parameters as the draft: base 10 + (10 magnitude * 5) = 60.
+          .having((s) => s.suggestionLevels['suggestion-1'], 'suggestionLevels[suggestion-1]', 60),
     ],
   );
 
@@ -148,7 +152,7 @@ void main() {
       bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('My Fireball'));
     },
-    skip: 5,
+    skip: 6,
     wait: const Duration(milliseconds: 300),
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
@@ -175,7 +179,7 @@ void main() {
       bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('My Fireball'));
     },
-    skip: 5,
+    skip: 6,
     wait: const Duration(milliseconds: 300),
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
@@ -244,7 +248,7 @@ void main() {
       bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('Doomed Spell'));
     },
-    skip: 5,
+    skip: 6,
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
       isA<SpellCreationState>()
@@ -323,7 +327,7 @@ void main() {
       bloc.add(const SpellSaveRequested('Raced Spell'));
       bloc.add(const SpellDiscarded());
     },
-    skip: 5,
+    skip: 6,
     wait: const Duration(milliseconds: 300),
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
@@ -362,14 +366,16 @@ void main() {
       bloc.add(const SpecialFactorToggled('custom-1', true));
       bloc.add(const SpellCalculated());
     },
-    skip: 7,
+    skip: 6,
     expect: () => [
       isA<SpellCreationState>()
           .having((s) => s.draft.selectedSpecialFactorIds, 'selectedSpecialFactorIds', ['custom-1']),
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
-          // Base 10 + Range(+2) + Duration(+0) + Target(+8) + Custom(+3) = 23
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 23),
+          // Base 10 already exceeds the additive-tier cap of 5, so all of
+          // Range(+2) + Duration(+0) + Target(+8) + Custom(+3) = 13 magnitude
+          // falls in the multiplier tier: 10 + (13 * 5) = 75.
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 75),
     ],
   );
 }

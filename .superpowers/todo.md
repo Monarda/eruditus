@@ -136,20 +136,36 @@
 - [ ] Update UI to prevent selecting multiple Target options
 - **Impact:** Spell creation screen readability/UX
 
+### 9. Spell Tags / Library Organisation
+- [ ] Add a `tags` field to the Spell model (free-form list of strings)
+- [ ] Allow assigning tags when creating or editing a spell
+- [ ] Filter/browse the library by tag
+- [ ] Support multiple tags per spell, and combining tag filters with existing search + source filters
+- [ ] Decide whether tags are free-text, a curated vocabulary, or free-text with suggestions from existing tags
+- **Rationale:** Thematic grouping that the Technique/Form axes can't express. A spell that raises a castle is both "defensive" and "architecture"; neither is derivable from Creo/Terram.
+- **Current State:** Library supports search by name and filter by source only — no user-defined grouping
+- **Impact:** Model + persistence change (tags need a table or serialised column), plus library filter UI
+- **Files:**
+  - `lib/models/spell.dart` (add tags field, toMap/fromMap)
+  - `lib/data/database/app_database.dart` (schema + migration for existing saves)
+  - `lib/presentation/screens/spell_library_screen.dart` (tag filter UI)
+  - `lib/presentation/screens/spell_creation_screen.dart` (tag entry)
+  - `lib/bloc/spell_library/` (filter-by-tag events/state)
+
 ---
 
 ## Low Priority / Nice-to-Have
 
-### 9. Documentation
+### 10. Documentation
 - [ ] Update README: mention base effects extraction is complete
 - [ ] Add Size feature guide to docs
 - [ ] Document Aquam sub-type limitations (MVP context)
 
-### 10. Performance
+### 11. Performance
 - [ ] Optimize base effects JSON (currently 604 effects, all loaded at startup)
 - [ ] Consider lazy-loading or caching strategy if app grows
 
-### 11. Out-of-Scope Effects Handling
+### 12. Out-of-Scope Effects Handling
 - [ ] Create filtering/tagging UI for flagged effects (variable base levels, ritual-only, etc.)
 - [ ] User guidance: explain which effects don't fit the calculation model yet
 - **Current State:** ~200 effects flagged with notes documenting out-of-scope patterns

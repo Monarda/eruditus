@@ -64,6 +64,9 @@ void main() {
           id: '1', technique: 'Creo', form: 'Ignem',
           description: 'Create flame', baseLevel: 10, source: 'built-in',
         ),
+        range: _range,
+        duration: _duration,
+        target: _target,
       );
 
       final errors = engine.validateSpellDraft(draft);
