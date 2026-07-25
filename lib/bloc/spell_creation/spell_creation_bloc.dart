@@ -47,8 +47,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         draft: state.draft.copyWith(baseEffect: event.effect),
       ));
     } else if (event is ParameterAdded) {
+      // Enforce exactly one parameter per category (Range, Duration, Target, etc.)
+      final withoutCategory = state.draft.parameters
+          .where((p) => p.parameter.category != event.parameter.category)
+          .toList();
       final updated = [
-        ...state.draft.parameters,
+        ...withoutCategory,
         SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter),
       ];
       emit(state.copyWith(

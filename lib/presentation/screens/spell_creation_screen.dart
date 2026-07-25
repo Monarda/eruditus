@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -109,28 +110,40 @@ class SpellCreationScreen extends StatelessWidget {
                     },
                   ),
                 const SizedBox(height: 16),
-                Text('Parameters', style: Theme.of(context).textTheme.titleMedium),
-                Wrap(
-                  spacing: 8,
-                  children: draft.parameters
-                      .map((p) => Chip(
-                            label: Text('${p.parameter.name} (+${p.parameter.magnitude})'),
-                            onDeleted: () => bloc.add(ParameterRemoved(p.parameterId)),
-                          ))
-                      .toList(),
+                Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text('Every spell requires exactly one of each:', style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 12),
+                // Range dropdown
+                _buildParameterDropdown(
+                  label: 'Range',
+                  category: 'Range',
+                  parameters: configState.parameters,
+                  selectedParameter: draft.parameters.firstWhereOrNull((p) => p.parameter.category == 'Range')?.parameter,
+                  onChanged: (param) {
+                    if (param != null) bloc.add(ParameterAdded(param));
+                  },
                 ),
-                DropdownButtonFormField<Parameter>(
-                  key: const Key('parameter-dropdown'),
-                  decoration: const InputDecoration(labelText: 'Add Parameter'),
-                  initialValue: null,
-                  items: configState.parameters
-                      .map((p) => DropdownMenuItem(
-                            value: p,
-                            child: Text('${p.category}: ${p.name} (+${p.magnitude})'),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) bloc.add(ParameterAdded(value));
+                const SizedBox(height: 12),
+                // Duration dropdown
+                _buildParameterDropdown(
+                  label: 'Duration',
+                  category: 'Duration',
+                  parameters: configState.parameters,
+                  selectedParameter: draft.parameters.firstWhereOrNull((p) => p.parameter.category == 'Duration')?.parameter,
+                  onChanged: (param) {
+                    if (param != null) bloc.add(ParameterAdded(param));
+                  },
+                ),
+                const SizedBox(height: 12),
+                // Target dropdown
+                _buildParameterDropdown(
+                  label: 'Target',
+                  category: 'Target',
+                  parameters: configState.parameters,
+                  selectedParameter: draft.parameters.firstWhereOrNull((p) => p.parameter.category == 'Target')?.parameter,
+                  onChanged: (param) {
+                    if (param != null) bloc.add(ParameterAdded(param));
                   },
                 ),
                 if (factorsForSelection.isNotEmpty) ...[
@@ -225,6 +238,29 @@ class SpellCreationScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildParameterDropdown({
+    required String label,
+    required String category,
+    required List<Parameter> parameters,
+    required Parameter? selectedParameter,
+    required Function(Parameter?) onChanged,
+  }) {
+    final categoryParameters =
+        parameters.where((p) => p.category == category).toList();
+
+    return DropdownButtonFormField<Parameter>(
+      decoration: InputDecoration(labelText: label),
+      value: selectedParameter,
+      items: categoryParameters
+          .map((p) => DropdownMenuItem(
+                value: p,
+                child: Text('${p.name} (+${p.magnitude})'),
+              ))
+          .toList(),
+      onChanged: onChanged,
     );
   }
 }

@@ -43,6 +43,16 @@ class SpellEngine {
       errors.add('Base effect must be selected');
     }
 
+    // Validate exactly one of each required parameter category
+    final requiredCategories = {'Range', 'Duration', 'Target'};
+    final selectedCategories = draft.parameters.map((p) => p.parameter.category).toSet();
+
+    for (final category in requiredCategories) {
+      if (!selectedCategories.contains(category)) {
+        errors.add('$category must be selected');
+      }
+    }
+
     return errors;
   }
 
