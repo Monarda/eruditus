@@ -11,7 +11,6 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/selected_parameter.dart';
 import 'package:eruditus/models/spell.dart';
 
 SelectedParameter _sp(String id, String name, String category) => SelectedParameter(
@@ -124,7 +123,8 @@ void main() {
         id: 'e1', technique: 'Muto', form: 'Corpus',
         description: 'test', baseLevel: 5, source: 'built-in',
       ),
-      parameters: const [], selectedSpecialFactorIds: const [],
+      range: _range, duration: _duration, target: _target,
+      selectedSpecialFactorIds: const [],
       requiredRequisites: const [], additionalRequisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );

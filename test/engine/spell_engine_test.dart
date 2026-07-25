@@ -6,6 +6,16 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/requisite.dart';
 
+SelectedParameter _sp(String id, String name, String category) => SelectedParameter(
+  parameterId: id,
+  parameter: Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in'),
+);
+
+final _range = _sp('range-personal', 'Personal', 'Range');
+final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
+final _target = _sp('target-individual', 'Individual', 'Target');
+
+
 void main() {
   group('SpellEngine.validateSpellDraft', () {
     final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
@@ -71,9 +81,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        parameters: [],
-        selectedSpecialFactorIds: [],
-        additionalRequisites: [],
+        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [], additionalRequisites: [],
       );
 
       expect(level, 10);
@@ -87,14 +95,12 @@ void main() {
       );
       final touch = Parameter(id: 'p1', name: 'Touch', category: 'Range', magnitude: 1, source: 'built-in');
       final sun = Parameter(id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2, source: 'built-in');
+      final touchSp = SelectedParameter(parameterId: touch.id, parameter: touch);
+      final sunSp = SelectedParameter(parameterId: sun.id, parameter: sun);
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        parameters: [
-          SelectedParameter(parameterId: touch.id, parameter: touch),
-          SelectedParameter(parameterId: sun.id, parameter: sun),
-        ],
-        selectedSpecialFactorIds: [],
+        range: touchSp, duration: sunSp, target: _target, selectedSpecialFactorIds: [],
         additionalRequisites: [],
       );
 
@@ -115,8 +121,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        parameters: [],
-        selectedSpecialFactorIds: ['sf1'],
+        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: ['sf1'],
         additionalRequisites: [],
       );
 
@@ -135,8 +140,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        parameters: [],
-        selectedSpecialFactorIds: ['deleted-factor-id'],
+        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: ['deleted-factor-id'],
         additionalRequisites: [],
       );
 
@@ -152,8 +156,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        parameters: [],
-        selectedSpecialFactorIds: [],
+        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [],
         additionalRequisites: [AdditionalRequisite(art: 'Ignem')],
       );
 
@@ -169,7 +172,8 @@ void main() {
           id: 'e$id', technique: technique, form: form,
           description: name, baseLevel: baseLevel, source: 'built-in',
         ),
-        parameters: [], selectedSpecialFactorIds: [],
+        range: _range, duration: _duration, target: _target,
+        selectedSpecialFactorIds: [],
         requiredRequisites: [], additionalRequisites: [],
         source: 'built-in', createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
