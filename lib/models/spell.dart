@@ -13,8 +13,7 @@ class Spell {
   final SelectedParameter duration;
   final SelectedParameter target;
   final List<String> selectedSpecialFactorIds;
-  final List<RequiredRequisite> requiredRequisites;
-  final List<AdditionalRequisite> additionalRequisites;
+  final List<Requisite> requisites;
   final String? description;
   final String source; // "built-in" or "user-created"
   final DateTime createdAt;
@@ -30,8 +29,7 @@ class Spell {
     required this.duration,
     required this.target,
     required this.selectedSpecialFactorIds,
-    required this.requiredRequisites,
-    required this.additionalRequisites,
+    required this.requisites,
     this.description,
     required this.source,
     required this.createdAt,
@@ -48,8 +46,7 @@ class Spell {
     'duration': duration.toMap(),
     'target': target.toMap(),
     'selectedSpecialFactorIds': selectedSpecialFactorIds,
-    'requiredRequisites': requiredRequisites.map((r) => r.toMap()).toList(),
-    'additionalRequisites': additionalRequisites.map((r) => r.toMap()).toList(),
+    'requisites': requisites.map((r) => r.toMap()).toList(),
     'description': description,
     'source': source,
     'createdAt': createdAt.toIso8601String(),
@@ -74,11 +71,8 @@ class Spell {
       requireField<Map<String, dynamic>>(map, 'target', 'Spell'),
     ),
     selectedSpecialFactorIds: List<String>.from(map['selectedSpecialFactorIds'] as List? ?? []),
-    requiredRequisites: (map['requiredRequisites'] as List?)
-        ?.map((r) => RequiredRequisite.fromMap(r as Map<String, dynamic>))
-        .toList() ?? [],
-    additionalRequisites: (map['additionalRequisites'] as List?)
-        ?.map((r) => AdditionalRequisite.fromMap(r as Map<String, dynamic>))
+    requisites: (map['requisites'] as List?)
+        ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
         .toList() ?? [],
     description: map['description'] as String?,
     source: requireField<String>(map, 'source', 'Spell'),
@@ -96,8 +90,7 @@ class SpellDraft {
   SelectedParameter? duration;
   SelectedParameter? target;
   List<String> selectedSpecialFactorIds;
-  List<RequiredRequisite> requiredRequisites;
-  List<AdditionalRequisite> additionalRequisites;
+  List<Requisite> requisites;
   String? description;
 
   SpellDraft({
@@ -109,13 +102,11 @@ class SpellDraft {
     this.duration,
     this.target,
     List<String>? selectedSpecialFactorIds,
-    List<RequiredRequisite>? requiredRequisites,
-    List<AdditionalRequisite>? additionalRequisites,
+    List<Requisite>? requisites,
     this.description,
   })  : id = id ?? _generateId(),
         selectedSpecialFactorIds = selectedSpecialFactorIds ?? [],
-        requiredRequisites = requiredRequisites ?? [],
-        additionalRequisites = additionalRequisites ?? [];
+        requisites = requisites ?? [];
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -152,8 +143,7 @@ class SpellDraft {
       duration: resolvedDuration,
       target: resolvedTarget,
       selectedSpecialFactorIds: selectedSpecialFactorIds,
-      requiredRequisites: requiredRequisites,
-      additionalRequisites: additionalRequisites,
+      requisites: requisites,
       description: description,
       source: source,
       createdAt: DateTime.now(),
@@ -169,8 +159,7 @@ class SpellDraft {
     Object? duration = _unset,
     Object? target = _unset,
     List<String>? selectedSpecialFactorIds,
-    List<RequiredRequisite>? requiredRequisites,
-    List<AdditionalRequisite>? additionalRequisites,
+    List<Requisite>? requisites,
     String? description,
   }) {
     return SpellDraft(
@@ -182,8 +171,7 @@ class SpellDraft {
       duration: identical(duration, _unset) ? this.duration : duration as SelectedParameter?,
       target: identical(target, _unset) ? this.target : target as SelectedParameter?,
       selectedSpecialFactorIds: selectedSpecialFactorIds ?? this.selectedSpecialFactorIds,
-      requiredRequisites: requiredRequisites ?? this.requiredRequisites,
-      additionalRequisites: additionalRequisites ?? this.additionalRequisites,
+      requisites: requisites ?? this.requisites,
       description: description ?? this.description,
     );
   }

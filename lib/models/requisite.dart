@@ -1,33 +1,37 @@
 import 'package:eruditus/utils/map_serialization.dart';
 
-class RequiredRequisite {
+/// Whether a requisite contributes to the spell's level.
+///
+/// A `free` requisite is demanded by the spell's nature but is incidental
+/// enough that it costs nothing (the classic example being a Corpus requisite
+/// on a spell that moves a person's clothing along with them). An `adding`
+/// requisite is significant enough to make the effect harder, and costs one
+/// magnitude.
+enum RequisiteKind { free, adding }
+
+class Requisite {
   final String art;
+  final RequisiteKind kind;
 
-  RequiredRequisite({required this.art});
+  Requisite({required this.art, required this.kind});
 
-  Map<String, dynamic> toMap() => {'art': art};
+  int get magnitude => kind == RequisiteKind.adding ? 1 : 0;
 
-  factory RequiredRequisite.fromMap(Map<String, dynamic> map) =>
-      RequiredRequisite(art: requireField<String>(map, 'art', 'RequiredRequisite'));
-}
+  Map<String, dynamic> toMap() => {'art': art, 'kind': kind.name};
 
-class AdditionalRequisite {
-  final String art;
-  final int magnitude; // Always +1
-
-  AdditionalRequisite({
-    required this.art,
-    this.magnitude = 1,
-  });
-
-  Map<String, dynamic> toMap() => {
-    'art': art,
-    'magnitude': magnitude,
-  };
-
-  factory AdditionalRequisite.fromMap(Map<String, dynamic> map) =>
-      AdditionalRequisite(
-        art: requireField<String>(map, 'art', 'AdditionalRequisite'),
-        magnitude: map['magnitude'] as int? ?? 1,
+  factory Requisite.fromMap(Map<String, dynamic> map) {
+    final kindName = requireField<String>(map, 'kind', 'Requisite');
+    final kind = RequisiteKind.values.where((k) => k.name == kindName);
+    if (kind.isEmpty) {
+      throw FormatException(
+        'Requisite has unknown kind "$kindName" '
+        '(expected one of: ${RequisiteKind.values.map((k) => k.name).join(', ')})',
       );
+    }
+
+    return Requisite(
+      art: requireField<String>(map, 'art', 'Requisite'),
+      kind: kind.first,
+    );
+  }
 }

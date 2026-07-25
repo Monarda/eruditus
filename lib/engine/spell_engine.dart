@@ -55,6 +55,18 @@ class SpellEngine {
       errors.add('Target must be selected');
     }
 
+    // Validate requisites: no art can equal the spell's own technique or form.
+    final seenArts = <String>{};
+    for (final req in draft.requisites) {
+      if (req.art == draft.technique || req.art == draft.form) {
+        errors.add('Requisite art cannot be the spell\'s own technique or form');
+      }
+      if (seenArts.contains(req.art)) {
+        errors.add('Duplicate requisite art: ${req.art}');
+      }
+      seenArts.add(req.art);
+    }
+
     return errors;
   }
 
@@ -64,7 +76,7 @@ class SpellEngine {
     required SelectedParameter duration,
     required SelectedParameter target,
     required List<String> selectedSpecialFactorIds,
-    required List<AdditionalRequisite> additionalRequisites,
+    required List<Requisite> requisites,
   }) {
     final magnitudes = <int>[
       range.parameter.magnitude,
@@ -81,7 +93,7 @@ class SpellEngine {
       for (final id in selectedSpecialFactorIds)
         for (final f in allSpecialFactors.where((f) => f.id == id).take(1))
           f.magnitude,
-      ...additionalRequisites.map((r) => r.magnitude),
+      ...requisites.map((r) => r.magnitude),
     ];
 
     return SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes);
@@ -100,7 +112,7 @@ class SpellEngine {
           duration: a.duration,
           target: a.target,
           selectedSpecialFactorIds: a.selectedSpecialFactorIds,
-          additionalRequisites: a.additionalRequisites,
+          requisites: a.requisites,
         );
         final levelB = calculateSpellLevel(
           baseEffect: b.baseEffect,
@@ -108,7 +120,7 @@ class SpellEngine {
           duration: b.duration,
           target: b.target,
           selectedSpecialFactorIds: b.selectedSpecialFactorIds,
-          additionalRequisites: b.additionalRequisites,
+          requisites: b.requisites,
         );
         return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());
       });

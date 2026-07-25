@@ -5,7 +5,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
 
 class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   final SpellEngine spellEngine;
@@ -73,25 +73,29 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(selectedSpecialFactorIds: updated),
       ));
-    } else if (event is RequiredRequisiteChanged) {
-      final updated = event.art == null ? <RequiredRequisite>[] : [RequiredRequisite(art: event.art!)];
+    } else if (event is RequisiteAdded) {
+      final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
+      final updated = [...state.draft.requisites, Requisite(art: event.art, kind: kind)];
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(requiredRequisites: updated),
+        draft: state.draft.copyWith(requisites: updated),
       ));
-    } else if (event is AdditionalRequisiteAdded) {
-      final updated = [...state.draft.additionalRequisites, AdditionalRequisite(art: event.art)];
-      emit(state.copyWith(
-        status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(additionalRequisites: updated),
-      ));
-    } else if (event is AdditionalRequisiteRemoved) {
-      final updated = state.draft.additionalRequisites
+    } else if (event is RequisiteRemoved) {
+      final updated = state.draft.requisites
           .where((r) => r.art != event.art)
           .toList();
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(additionalRequisites: updated),
+        draft: state.draft.copyWith(requisites: updated),
+      ));
+    } else if (event is RequisiteKindChanged) {
+      final kind = event.newKind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
+      final updated = state.draft.requisites.map((r) {
+        return r.art == event.art ? Requisite(art: r.art, kind: kind) : r;
+      }).toList();
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(requisites: updated),
       ));
     } else if (event is SpellCalculated) {
       _handleSpellCalculated(emit);
@@ -117,7 +121,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       duration: state.draft.duration!,
       target: state.draft.target!,
       selectedSpecialFactorIds: state.draft.selectedSpecialFactorIds,
-      additionalRequisites: state.draft.additionalRequisites,
+      requisites: state.draft.requisites,
     );
 
     final suggestions = spellEngine.findSimilarSpells(
@@ -137,7 +141,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           duration: s.duration,
           target: s.target,
           selectedSpecialFactorIds: s.selectedSpecialFactorIds,
-          additionalRequisites: s.additionalRequisites,
+          requisites: s.requisites,
         ),
     };
 

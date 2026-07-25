@@ -59,25 +59,27 @@ class SpecialFactorToggled extends SpellCreationEvent {
   List<Object?> get props => [factorId, selected];
 }
 
-class RequiredRequisiteChanged extends SpellCreationEvent {
-  final String? art;
-  const RequiredRequisiteChanged(this.art);
+class RequisiteAdded extends SpellCreationEvent {
+  final String art;
+  final String kind; // 'free' or 'adding'
+  const RequisiteAdded(this.art, this.kind);
+  @override
+  List<Object?> get props => [art, kind];
+}
+
+class RequisiteRemoved extends SpellCreationEvent {
+  final String art;
+  const RequisiteRemoved(this.art);
   @override
   List<Object?> get props => [art];
 }
 
-class AdditionalRequisiteAdded extends SpellCreationEvent {
+class RequisiteKindChanged extends SpellCreationEvent {
   final String art;
-  const AdditionalRequisiteAdded(this.art);
+  final String newKind; // 'free' or 'adding'
+  const RequisiteKindChanged(this.art, this.newKind);
   @override
-  List<Object?> get props => [art];
-}
-
-class AdditionalRequisiteRemoved extends SpellCreationEvent {
-  final String art;
-  const AdditionalRequisiteRemoved(this.art);
-  @override
-  List<Object?> get props => [art];
+  List<Object?> get props => [art, newKind];
 }
 
 class SpellCalculated extends SpellCreationEvent {
