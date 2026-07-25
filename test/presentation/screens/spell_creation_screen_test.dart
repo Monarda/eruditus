@@ -44,6 +44,10 @@ void main() {
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'built-in');
 
+  late SelectedParameter _range;
+  late SelectedParameter _duration;
+  late SelectedParameter _target;
+
   setUpAll(() {
     registerFallbackValue(FakeSpellCreationEvent());
     registerFallbackValue(FakeSpellCreationState());
@@ -54,6 +58,9 @@ void main() {
   setUp(() {
     bloc = MockSpellCreationBloc();
     configBloc = MockConfigurationBloc();
+    _range = SelectedParameter(parameterId: 'p1', parameter: voiceParam);
+    _duration = SelectedParameter(parameterId: 'p2', parameter: durationParam);
+    _target = SelectedParameter(parameterId: 'p3', parameter: targetParam);
   });
 
   Future<void> pumpScreen(
@@ -154,7 +161,7 @@ void main() {
   testWidgets('renders the calculated spell level when status is calculated', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
-      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
       calculatedLevel: 20,
     );
     await pumpScreen(tester, state);
@@ -183,12 +190,13 @@ void main() {
     );
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
-      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
       calculatedLevel: 10,
       suggestions: [suggestion],
       suggestionLevels: const {'s1': 10},
     );
     await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.text('Pillar of Fire'), 200);
 
     expect(find.text('Pillar of Fire'), findsOneWidget);
     expect(find.textContaining('Level 10'), findsWidgets);
@@ -198,10 +206,11 @@ void main() {
   testWidgets('tapping discard dispatches SpellDiscarded', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
-      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
       calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.byKey(const Key('discard-button')), 200);
 
     await tester.tap(find.byKey(const Key('discard-button')));
     await tester.pump();
@@ -212,10 +221,11 @@ void main() {
   testWidgets('saving with a name dispatches SpellSaveRequested', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
-      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
       calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200);
 
     await tester.tap(find.byKey(const Key('save-button')));
     await tester.pumpAndSettle();
@@ -282,7 +292,7 @@ void main() {
     final states = Stream.fromIterable([
       SpellCreationState(
         status: SpellCreationStatus.error,
-        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
         calculatedLevel: 10,
         errorMessage: 'disk full',
       ),
@@ -292,7 +302,7 @@ void main() {
       states,
       initialState: SpellCreationState(
         status: SpellCreationStatus.saving,
-        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
         calculatedLevel: 10,
       ),
     );
@@ -322,6 +332,7 @@ void main() {
     expect(find.textContaining('disk full'), findsWidgets);
     // The Save/Discard controls are still present so the user isn't
     // stranded and can retry.
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200);
     expect(find.byKey(const Key('save-button')), findsOneWidget);
     expect(find.byKey(const Key('discard-button')), findsOneWidget);
   });
@@ -329,10 +340,11 @@ void main() {
   testWidgets('Save and Discard are disabled while a save is in flight', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.saving,
-      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: _range, duration: _duration, target: _target),
       calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200);
 
     final saveButton = tester.widget<ElevatedButton>(find.byKey(const Key('save-button')));
     final discardButton = tester.widget<OutlinedButton>(find.byKey(const Key('discard-button')));

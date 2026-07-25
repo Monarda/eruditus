@@ -169,11 +169,26 @@ void main() {
         baseLevel: 5,
         source: 'built-in',
       );
+      final range = SelectedParameter(
+        parameterId: 'range-personal',
+        parameter: Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in'),
+      );
+      final duration = SelectedParameter(
+        parameterId: 'duration-momentary',
+        parameter: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+      );
+      final target = SelectedParameter(
+        parameterId: 'target-individual',
+        parameter: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in'),
+      );
 
       final draft = SpellDraft(
         technique: 'Muto',
         form: 'Corpus',
         baseEffect: effect,
+        range: range,
+        duration: duration,
+        target: target,
       );
 
       final spell = draft.toSpell(name: 'My Spell', source: 'user-created');
