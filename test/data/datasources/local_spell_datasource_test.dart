@@ -2,8 +2,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
+import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
+
+SelectedParameter _sp(String id, String name, String category) => SelectedParameter(
+      parameterId: id,
+      parameter: Parameter(
+          id: id, name: name, category: category, magnitude: 0, source: 'built-in'),
+    );
+
+final _range = _sp('range-personal', 'Personal', 'Range');
+final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
+final _target = _sp('target-individual', 'Individual', 'Target');
 
 void main() {
   setUpAll(() {
@@ -36,7 +47,9 @@ void main() {
           baseLevel: 10,
           source: 'built-in',
         ),
-        parameters: const [],
+        range: _range,
+        duration: _duration,
+        target: _target,
         selectedSpecialFactorIds: const [],
         requiredRequisites: const [],
         additionalRequisites: const [],

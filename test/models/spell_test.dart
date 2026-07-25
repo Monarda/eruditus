@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/selected_parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 
 void main() {

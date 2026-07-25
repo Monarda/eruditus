@@ -13,7 +13,6 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/selected_parameter.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
 
