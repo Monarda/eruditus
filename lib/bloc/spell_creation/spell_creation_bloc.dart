@@ -46,26 +46,23 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(baseEffect: event.effect),
       ));
-    } else if (event is ParameterAdded) {
-      // Enforce exactly one parameter per category (Range, Duration, Target, etc.)
-      final withoutCategory = state.draft.parameters
-          .where((p) => p.parameter.category != event.parameter.category)
-          .toList();
-      final updated = [
-        ...withoutCategory,
-        SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter),
-      ];
+    } else if (event is RangeSelected) {
+      final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(parameters: updated),
+        draft: state.draft.copyWith(range: selectedParam),
       ));
-    } else if (event is ParameterRemoved) {
-      final updated = state.draft.parameters
-          .where((p) => p.parameterId != event.parameterId)
-          .toList();
+    } else if (event is DurationSelected) {
+      final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(parameters: updated),
+        draft: state.draft.copyWith(duration: selectedParam),
+      ));
+    } else if (event is TargetSelected) {
+      final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(target: selectedParam),
       ));
     } else if (event is SpecialFactorToggled) {
       final current = state.draft.selectedSpecialFactorIds;
@@ -116,7 +113,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
     final level = spellEngine.calculateSpellLevel(
       baseEffect: state.draft.baseEffect!,
-      parameters: state.draft.parameters,
+      range: state.draft.range!,
+      duration: state.draft.duration!,
+      target: state.draft.target!,
       selectedSpecialFactorIds: state.draft.selectedSpecialFactorIds,
       additionalRequisites: state.draft.additionalRequisites,
     );
@@ -134,7 +133,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       for (final s in suggestions)
         s.id: spellEngine.calculateSpellLevel(
           baseEffect: s.baseEffect,
-          parameters: s.parameters,
+          range: s.range,
+          duration: s.duration,
+          target: s.target,
           selectedSpecialFactorIds: s.selectedSpecialFactorIds,
           additionalRequisites: s.additionalRequisites,
         ),

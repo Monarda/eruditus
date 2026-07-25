@@ -9,7 +9,9 @@ class Spell {
   final String technique;
   final String form;
   final BaseEffect baseEffect;
-  final List<SelectedParameter> parameters;
+  final SelectedParameter range;
+  final SelectedParameter duration;
+  final SelectedParameter target;
   final List<String> selectedSpecialFactorIds;
   final List<RequiredRequisite> requiredRequisites;
   final List<AdditionalRequisite> additionalRequisites;
@@ -24,7 +26,9 @@ class Spell {
     required this.technique,
     required this.form,
     required this.baseEffect,
-    required this.parameters,
+    required this.range,
+    required this.duration,
+    required this.target,
     required this.selectedSpecialFactorIds,
     required this.requiredRequisites,
     required this.additionalRequisites,
@@ -40,7 +44,9 @@ class Spell {
     'technique': technique,
     'form': form,
     'baseEffect': baseEffect.toMap(),
-    'parameters': parameters.map((p) => p.toMap()).toList(),
+    'range': range.toMap(),
+    'duration': duration.toMap(),
+    'target': target.toMap(),
     'selectedSpecialFactorIds': selectedSpecialFactorIds,
     'requiredRequisites': requiredRequisites.map((r) => r.toMap()).toList(),
     'additionalRequisites': additionalRequisites.map((r) => r.toMap()).toList(),
@@ -58,9 +64,15 @@ class Spell {
     baseEffect: BaseEffect.fromMap(
       requireField<Map<String, dynamic>>(map, 'baseEffect', 'Spell'),
     ),
-    parameters: (map['parameters'] as List?)
-        ?.map((p) => SelectedParameter.fromMap(p as Map<String, dynamic>))
-        .toList() ?? [],
+    range: SelectedParameter.fromMap(
+      requireField<Map<String, dynamic>>(map, 'range', 'Spell'),
+    ),
+    duration: SelectedParameter.fromMap(
+      requireField<Map<String, dynamic>>(map, 'duration', 'Spell'),
+    ),
+    target: SelectedParameter.fromMap(
+      requireField<Map<String, dynamic>>(map, 'target', 'Spell'),
+    ),
     selectedSpecialFactorIds: List<String>.from(map['selectedSpecialFactorIds'] as List? ?? []),
     requiredRequisites: (map['requiredRequisites'] as List?)
         ?.map((r) => RequiredRequisite.fromMap(r as Map<String, dynamic>))
@@ -80,7 +92,9 @@ class SpellDraft {
   String? technique;
   String? form;
   BaseEffect? baseEffect;
-  List<SelectedParameter> parameters;
+  SelectedParameter? range;
+  SelectedParameter? duration;
+  SelectedParameter? target;
   List<String> selectedSpecialFactorIds;
   List<RequiredRequisite> requiredRequisites;
   List<AdditionalRequisite> additionalRequisites;
@@ -91,13 +105,14 @@ class SpellDraft {
     this.technique,
     this.form,
     this.baseEffect,
-    List<SelectedParameter>? parameters,
+    this.range,
+    this.duration,
+    this.target,
     List<String>? selectedSpecialFactorIds,
     List<RequiredRequisite>? requiredRequisites,
     List<AdditionalRequisite>? additionalRequisites,
     this.description,
   })  : id = id ?? _generateId(),
-        parameters = parameters ?? [],
         selectedSpecialFactorIds = selectedSpecialFactorIds ?? [],
         requiredRequisites = requiredRequisites ?? [],
         additionalRequisites = additionalRequisites ?? [];
@@ -109,6 +124,9 @@ class SpellDraft {
       if (technique == null) 'technique',
       if (form == null) 'form',
       if (baseEffect == null) 'baseEffect',
+      if (range == null) 'range',
+      if (duration == null) 'duration',
+      if (target == null) 'target',
     ];
     if (missingFields.isNotEmpty) {
       throw StateError(
@@ -120,6 +138,9 @@ class SpellDraft {
     final resolvedTechnique = technique!;
     final resolvedForm = form!;
     final resolvedBaseEffect = baseEffect!;
+    final resolvedRange = range!;
+    final resolvedDuration = duration!;
+    final resolvedTarget = target!;
 
     return Spell(
       id: id,
@@ -127,7 +148,9 @@ class SpellDraft {
       technique: resolvedTechnique,
       form: resolvedForm,
       baseEffect: resolvedBaseEffect,
-      parameters: parameters,
+      range: resolvedRange,
+      duration: resolvedDuration,
+      target: resolvedTarget,
       selectedSpecialFactorIds: selectedSpecialFactorIds,
       requiredRequisites: requiredRequisites,
       additionalRequisites: additionalRequisites,
@@ -142,7 +165,9 @@ class SpellDraft {
     String? technique,
     String? form,
     Object? baseEffect = _unset,
-    List<SelectedParameter>? parameters,
+    Object? range = _unset,
+    Object? duration = _unset,
+    Object? target = _unset,
     List<String>? selectedSpecialFactorIds,
     List<RequiredRequisite>? requiredRequisites,
     List<AdditionalRequisite>? additionalRequisites,
@@ -153,7 +178,9 @@ class SpellDraft {
       technique: technique ?? this.technique,
       form: form ?? this.form,
       baseEffect: identical(baseEffect, _unset) ? this.baseEffect : baseEffect as BaseEffect?,
-      parameters: parameters ?? this.parameters,
+      range: identical(range, _unset) ? this.range : range as SelectedParameter?,
+      duration: identical(duration, _unset) ? this.duration : duration as SelectedParameter?,
+      target: identical(target, _unset) ? this.target : target as SelectedParameter?,
       selectedSpecialFactorIds: selectedSpecialFactorIds ?? this.selectedSpecialFactorIds,
       requiredRequisites: requiredRequisites ?? this.requiredRequisites,
       additionalRequisites: additionalRequisites ?? this.additionalRequisites,

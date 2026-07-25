@@ -13,6 +13,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/selected_parameter.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
 
@@ -26,7 +27,10 @@ void main() {
         id: 'fb', technique: 'Creo', form: 'Ignem',
         description: 'fallback', baseLevel: 1, source: 'built-in',
       ),
-      parameters: const [], selectedSpecialFactorIds: const [],
+      range: SelectedParameter(parameterId: 'p1', parameter: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in')),
+      duration: SelectedParameter(parameterId: 'p2', parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in')),
+      target: SelectedParameter(parameterId: 'p3', parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in')),
+      selectedSpecialFactorIds: const [],
       requiredRequisites: const [], additionalRequisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -40,7 +44,9 @@ void main() {
     id: 'e1', technique: 'Creo', form: 'Ignem',
     description: 'Create flame', baseLevel: 10, source: 'built-in',
   );
-  final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'built-in');
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
@@ -81,17 +87,16 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
-      bloc.add(ParameterAdded(voiceParam));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellCalculated());
     },
-    skip: 3,
+    skip: 5,
     expect: () => [
       isA<SpellCreationState>()
-          .having((s) => s.status, 'status', SpellCreationStatus.editing)
-          .having((s) => s.draft.parameters.length, 'draft.parameters.length', 1),
-      isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 20) // Base10 + Voice(+2)*5
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 20) // Base10 + Range(+2) + Duration(+0) + Target(+8)
           .having((s) => s.validationErrors, 'validationErrors', isEmpty),
     ],
   );
@@ -102,7 +107,10 @@ void main() {
       final suggestion = Spell(
         id: 'suggestion-1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
         baseEffect: creoIgnemEffect,
-        parameters: const [], selectedSpecialFactorIds: const [],
+        range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
+        duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+        target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+        selectedSpecialFactorIds: const [],
         requiredRequisites: const [], additionalRequisites: const [],
         source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
@@ -115,14 +123,17 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellCalculated());
     },
-    skip: 3,
+    skip: 5,
     expect: () => [
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
-          .having((s) => s.suggestionLevels['suggestion-1'], 'suggestionLevels[suggestion-1]', 10),
+          .having((s) => s.suggestionLevels['suggestion-1'], 'suggestionLevels[suggestion-1]', 20),
     ],
   );
 
@@ -133,9 +144,12 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('My Fireball'));
     },
-    skip: 3,
+    skip: 5,
     wait: const Duration(milliseconds: 300),
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
@@ -157,9 +171,12 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('My Fireball'));
     },
-    skip: 3,
+    skip: 5,
     wait: const Duration(milliseconds: 300),
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
@@ -186,6 +203,9 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('First Spell'));
       await Future<void>.delayed(const Duration(milliseconds: 300));
 
@@ -195,6 +215,9 @@ void main() {
         id: 'e2', technique: 'Rego', form: 'Ignem',
         description: 'Redirect flame', baseLevel: 5, source: 'built-in',
       )));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('Second Spell'));
     },
     wait: const Duration(milliseconds: 300),
@@ -217,9 +240,12 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('Doomed Spell'));
     },
-    skip: 3,
+    skip: 5,
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
       isA<SpellCreationState>()
@@ -292,10 +318,13 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(const SpellSaveRequested('Raced Spell'));
       bloc.add(const SpellDiscarded());
     },
-    skip: 3,
+    skip: 5,
     wait: const Duration(milliseconds: 300),
     expect: () => [
       isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
@@ -327,20 +356,21 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
       bloc.add(AvailableFactorsSynced([newFactor]));
       bloc.add(const SpecialFactorToggled('custom-1', true));
       bloc.add(const SpellCalculated());
     },
-    skip: 3,
+    skip: 7,
     expect: () => [
       isA<SpellCreationState>()
           .having((s) => s.draft.selectedSpecialFactorIds, 'selectedSpecialFactorIds', ['custom-1']),
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
-          // Base 10 already exceeds the additive-tier cap of 5, so the
-          // factor's +3 magnitude falls entirely in the multiplier tier:
-          // 10 + (3 * 5) = 25.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 25),
+          // Base 10 + Range(+2) + Duration(+0) + Target(+8) + Custom(+3) = 23
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 23),
     ],
   );
 }

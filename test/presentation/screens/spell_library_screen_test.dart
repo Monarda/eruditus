@@ -8,6 +8,8 @@ import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/selected_parameter.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
@@ -21,13 +23,20 @@ class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
 void main() {
   late MockSpellLibraryBloc bloc;
 
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+
   Spell buildSpell(String id, String name, {String source = 'built-in'}) => Spell(
         id: id, name: name, technique: 'Creo', form: 'Ignem',
         baseEffect: BaseEffect(
           id: 'e1', technique: 'Creo', form: 'Ignem',
           description: 'test', baseLevel: 5, source: 'built-in',
         ),
-        parameters: const [], selectedSpecialFactorIds: const [],
+        range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
+        duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+        target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+        selectedSpecialFactorIds: const [],
         requiredRequisites: const [], additionalRequisites: const [],
         source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );

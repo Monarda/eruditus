@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/selected_parameter.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+
   Spell buildSpell({String? name, String source = 'built-in', String? description}) => Spell(
         id: '1',
         name: name,
@@ -14,7 +20,9 @@ void main() {
           id: 'e1', technique: 'Creo', form: 'Ignem',
           description: 'test', baseLevel: 10, source: 'built-in',
         ),
-        parameters: const [],
+        range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
+        duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+        target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
         selectedSpecialFactorIds: const [],
         requiredRequisites: const [],
         additionalRequisites: const [],

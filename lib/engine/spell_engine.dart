@@ -43,14 +43,16 @@ class SpellEngine {
       errors.add('Base effect must be selected');
     }
 
-    // Validate exactly one of each required parameter category
-    final requiredCategories = {'Range', 'Duration', 'Target'};
-    final selectedCategories = draft.parameters.map((p) => p.parameter.category).toSet();
+    if (draft.range == null) {
+      errors.add('Range must be selected');
+    }
 
-    for (final category in requiredCategories) {
-      if (!selectedCategories.contains(category)) {
-        errors.add('$category must be selected');
-      }
+    if (draft.duration == null) {
+      errors.add('Duration must be selected');
+    }
+
+    if (draft.target == null) {
+      errors.add('Target must be selected');
     }
 
     return errors;
@@ -58,12 +60,16 @@ class SpellEngine {
 
   int calculateSpellLevel({
     required BaseEffect baseEffect,
-    required List<SelectedParameter> parameters,
+    required SelectedParameter range,
+    required SelectedParameter duration,
+    required SelectedParameter target,
     required List<String> selectedSpecialFactorIds,
     required List<AdditionalRequisite> additionalRequisites,
   }) {
     final magnitudes = <int>[
-      ...parameters.map((p) => p.parameter.magnitude),
+      range.parameter.magnitude,
+      duration.parameter.magnitude,
+      target.parameter.magnitude,
       // A selected factor id that no longer resolves against
       // allSpecialFactors (e.g. a custom factor the user deleted in Settings
       // after saving a spell that referenced it) contributes 0 magnitude
@@ -90,13 +96,17 @@ class SpellEngine {
       matches.sort((a, b) {
         final levelA = calculateSpellLevel(
           baseEffect: a.baseEffect,
-          parameters: a.parameters,
+          range: a.range,
+          duration: a.duration,
+          target: a.target,
           selectedSpecialFactorIds: a.selectedSpecialFactorIds,
           additionalRequisites: a.additionalRequisites,
         );
         final levelB = calculateSpellLevel(
           baseEffect: b.baseEffect,
-          parameters: b.parameters,
+          range: b.range,
+          duration: b.duration,
+          target: b.target,
           selectedSpecialFactorIds: b.selectedSpecialFactorIds,
           additionalRequisites: b.additionalRequisites,
         );

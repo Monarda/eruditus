@@ -119,9 +119,9 @@ class SpellCreationScreen extends StatelessWidget {
                   label: 'Range',
                   category: 'Range',
                   parameters: configState.parameters,
-                  selectedParameter: draft.parameters.firstWhereOrNull((p) => p.parameter.category == 'Range')?.parameter,
+                  selectedParameter: draft.range?.parameter,
                   onChanged: (param) {
-                    if (param != null) bloc.add(ParameterAdded(param));
+                    if (param != null) bloc.add(RangeSelected(param));
                   },
                 ),
                 const SizedBox(height: 12),
@@ -130,9 +130,9 @@ class SpellCreationScreen extends StatelessWidget {
                   label: 'Duration',
                   category: 'Duration',
                   parameters: configState.parameters,
-                  selectedParameter: draft.parameters.firstWhereOrNull((p) => p.parameter.category == 'Duration')?.parameter,
+                  selectedParameter: draft.duration?.parameter,
                   onChanged: (param) {
-                    if (param != null) bloc.add(ParameterAdded(param));
+                    if (param != null) bloc.add(DurationSelected(param));
                   },
                 ),
                 const SizedBox(height: 12),
@@ -141,9 +141,9 @@ class SpellCreationScreen extends StatelessWidget {
                   label: 'Target',
                   category: 'Target',
                   parameters: configState.parameters,
-                  selectedParameter: draft.parameters.firstWhereOrNull((p) => p.parameter.category == 'Target')?.parameter,
+                  selectedParameter: draft.target?.parameter,
                   onChanged: (param) {
-                    if (param != null) bloc.add(ParameterAdded(param));
+                    if (param != null) bloc.add(TargetSelected(param));
                   },
                 ),
                 if (factorsForSelection.isNotEmpty) ...[

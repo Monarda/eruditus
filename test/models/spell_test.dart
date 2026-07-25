@@ -2,11 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/selected_parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 
 void main() {
   group('Spell Model', () {
-    test('Spell.toMap and fromMap round-trip preserves every field, including nested lists', () {
+    test('Spell.toMap and fromMap round-trip preserves every field, including nested objects', () {
       final effect = BaseEffect(
         id: '1',
         technique: 'Creo',
@@ -30,6 +31,13 @@ void main() {
         magnitude: 3,
         source: 'built-in',
       );
+      final individualParam = Parameter(
+        id: 'param-individual',
+        name: 'Individual',
+        category: 'Target',
+        magnitude: 10,
+        source: 'built-in',
+      );
 
       final spell = Spell(
         id: 'spell-1',
@@ -37,10 +45,9 @@ void main() {
         technique: 'Creo',
         form: 'Ignem',
         baseEffect: effect,
-        parameters: [
-          SelectedParameter(parameterId: voiceParam.id, parameter: voiceParam),
-          SelectedParameter(parameterId: sunParam.id, parameter: sunParam),
-        ],
+        range: SelectedParameter(parameterId: voiceParam.id, parameter: voiceParam),
+        duration: SelectedParameter(parameterId: sunParam.id, parameter: sunParam),
+        target: SelectedParameter(parameterId: individualParam.id, parameter: individualParam),
         selectedSpecialFactorIds: ['sf-1', 'sf-2'],
         requiredRequisites: [
           RequiredRequisite(art: 'Vim'),
@@ -75,14 +82,20 @@ void main() {
       expect(restored.baseEffect.baseLevel, effect.baseLevel);
       expect(restored.baseEffect.source, effect.source);
 
-      expect(restored.parameters.length, 2);
-      expect(restored.parameters[0].parameterId, voiceParam.id);
-      expect(restored.parameters[0].parameter.name, voiceParam.name);
-      expect(restored.parameters[0].parameter.category, voiceParam.category);
-      expect(restored.parameters[0].parameter.magnitude, voiceParam.magnitude);
-      expect(restored.parameters[0].parameter.source, voiceParam.source);
-      expect(restored.parameters[1].parameterId, sunParam.id);
-      expect(restored.parameters[1].parameter.name, sunParam.name);
+      expect(restored.range.parameterId, voiceParam.id);
+      expect(restored.range.parameter.name, voiceParam.name);
+      expect(restored.range.parameter.category, voiceParam.category);
+      expect(restored.range.parameter.magnitude, voiceParam.magnitude);
+      expect(restored.range.parameter.source, voiceParam.source);
+
+      expect(restored.duration.parameterId, sunParam.id);
+      expect(restored.duration.parameter.name, sunParam.name);
+      expect(restored.duration.parameter.category, sunParam.category);
+      expect(restored.duration.parameter.magnitude, sunParam.magnitude);
+
+      expect(restored.target.parameterId, individualParam.id);
+      expect(restored.target.parameter.name, individualParam.name);
+      expect(restored.target.parameter.category, individualParam.category);
 
       expect(restored.selectedSpecialFactorIds, ['sf-1', 'sf-2']);
 
@@ -100,7 +113,8 @@ void main() {
     test('fromMap throws a clear FormatException when a required field is missing', () {
       final map = {
         'id': 'spell-1',
-        // 'technique' missing
+        // 'range' missing
+        'technique': 'Creo',
         'form': 'Ignem',
         'baseEffect': {
           'id': '1',
@@ -109,6 +123,26 @@ void main() {
           'description': 'Create flame',
           'baseLevel': 10,
           'source': 'built-in',
+        },
+        'duration': {
+          'parameterId': 'p1',
+          'parameter': {
+            'id': 'p1',
+            'name': 'Momentary',
+            'category': 'Duration',
+            'magnitude': 0,
+            'source': 'built-in',
+          },
+        },
+        'target': {
+          'parameterId': 'p2',
+          'parameter': {
+            'id': 'p2',
+            'name': 'Individual',
+            'category': 'Target',
+            'magnitude': 10,
+            'source': 'built-in',
+          },
         },
         'source': 'user-created',
         'createdAt': DateTime(2026, 7, 24).toIso8601String(),
@@ -121,7 +155,7 @@ void main() {
           isA<FormatException>().having(
             (e) => e.message,
             'message',
-            allOf(contains('technique'), contains('Spell')),
+            allOf(contains('range'), contains('Spell')),
           ),
         ),
       );

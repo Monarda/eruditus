@@ -30,18 +30,25 @@ class BaseEffectSelected extends SpellCreationEvent {
   List<Object?> get props => [effect];
 }
 
-class ParameterAdded extends SpellCreationEvent {
+class RangeSelected extends SpellCreationEvent {
   final Parameter parameter;
-  const ParameterAdded(this.parameter);
+  const RangeSelected(this.parameter);
   @override
   List<Object?> get props => [parameter];
 }
 
-class ParameterRemoved extends SpellCreationEvent {
-  final String parameterId;
-  const ParameterRemoved(this.parameterId);
+class DurationSelected extends SpellCreationEvent {
+  final Parameter parameter;
+  const DurationSelected(this.parameter);
   @override
-  List<Object?> get props => [parameterId];
+  List<Object?> get props => [parameter];
+}
+
+class TargetSelected extends SpellCreationEvent {
+  final Parameter parameter;
+  const TargetSelected(this.parameter);
+  @override
+  List<Object?> get props => [parameter];
 }
 
 class SpecialFactorToggled extends SpellCreationEvent {

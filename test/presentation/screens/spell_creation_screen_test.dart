@@ -12,6 +12,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/selected_parameter.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
@@ -41,6 +42,8 @@ void main() {
     description: 'Create flame', baseLevel: 10, source: 'built-in',
   );
   final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'built-in');
 
   setUpAll(() {
     registerFallbackValue(FakeSpellCreationEvent());
@@ -171,7 +174,10 @@ void main() {
     final suggestion = Spell(
       id: 's1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
       baseEffect: creoIgnemEffect,
-      parameters: const [], selectedSpecialFactorIds: const [],
+      range: SelectedParameter(parameterId: 'p1', parameter: voiceParam),
+      duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+      target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+      selectedSpecialFactorIds: const [],
       requiredRequisites: const [], additionalRequisites: const [],
       description: 'A roaring pillar of flame.',
       source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
@@ -226,7 +232,10 @@ void main() {
     final savedSpell = Spell(
       id: 'saved-1', name: 'My Fireball', technique: 'Creo', form: 'Ignem',
       baseEffect: creoIgnemEffect,
-      parameters: const [], selectedSpecialFactorIds: const [],
+      range: SelectedParameter(parameterId: 'p1', parameter: voiceParam),
+      duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+      target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+      selectedSpecialFactorIds: const [],
       requiredRequisites: const [], additionalRequisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );

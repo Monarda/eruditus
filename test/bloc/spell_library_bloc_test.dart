@@ -12,6 +12,8 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/selected_parameter.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +32,10 @@ void main() {
   // those spells.
   late SpellEngine spellEngine;
 
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
     final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
@@ -39,7 +45,10 @@ void main() {
         id: 'e1', technique: 'Creo', form: 'Ignem',
         description: 'test', baseLevel: 5, source: 'built-in',
       ),
-      parameters: const [], selectedSpecialFactorIds: const [],
+      range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
+      duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+      target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+      selectedSpecialFactorIds: const [],
       requiredRequisites: const [], additionalRequisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -106,7 +115,10 @@ void main() {
           id: 'e2', technique: 'Creo', form: 'Ignem',
           description: 'test', baseLevel: 5, source: 'built-in',
         ),
-        parameters: const [], selectedSpecialFactorIds: const ['no-longer-exists'],
+        range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
+        duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
+        target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+        selectedSpecialFactorIds: const ['no-longer-exists'],
         requiredRequisites: const [], additionalRequisites: const [],
         source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));

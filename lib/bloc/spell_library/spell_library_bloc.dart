@@ -37,7 +37,9 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
           for (final s in spells)
             s.id: spellEngine.calculateSpellLevel(
               baseEffect: s.baseEffect,
-              parameters: s.parameters,
+              range: s.range,
+              duration: s.duration,
+              target: s.target,
               selectedSpecialFactorIds: s.selectedSpecialFactorIds,
               additionalRequisites: s.additionalRequisites,
             ),
