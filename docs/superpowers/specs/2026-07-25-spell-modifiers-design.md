@@ -59,7 +59,7 @@ Should the deferred derived-output patterns come into scope later, that judgemen
 
 - **Derived outputs** — Creo Aquam `damage = +[spell level]`, Muto Aquam `Ease Factor +3 per magnitude`, Rego ward `Might ≤ level`, Ignem Might reduction. These stay descriptive text. They are not `option → magnitude` and want a different design.
 - **Ritual** — 11 effects are Ritual-only. There is no Ritual concept anywhere in `lib/` and no Ritual entry in the Duration ladder, so this needs a new spell property before it needs a modifier. Deferred entirely to its own spec.
-- **Aquam sub-types** — Aquam has 5 base-Individual sub-types (water, liquids, poisons, blood, wine) with differing size progressions. One sub-type is supported; the gap stays documented. Revisiting it would add a Form-specific concept the other nine Forms lack.
+- **Size for Mentem and Vim** — the rulebook exempts both for Individual targets. Group sizing for them is determined by the number of minds or effects respectively, which is a different mechanism and out of scope.
 - **User-authored modifiers** — modifiers ship as asset data. The model carries `source` from the outset so user-created modifiers drop in later without a schema change, but no Settings CRUD is built now.
 - **Requisites are unaffected.** A requisite is an Art requirement, not a magnitude-bearing option, and keeps its own `requisites` list and UI section.
 
@@ -73,10 +73,11 @@ This is a prototype with no deployed users. No compatibility shims are written, 
 enum ModifierSelectionMode { single, multi }
 
 class ModifierOption {
-  final String id;               // 'terram-material-metal'
-  final String label;            // 'Metal or gemstone'
+  final String id;               // 'terram-material-gemstone'
+  final String label;            // 'Gemstone'
   final String? description;
   final int magnitude;           // 2
+  final String? baseIndividual;  // 'one cubic inch'
 }
 
 class Modifier {
@@ -90,13 +91,18 @@ class Modifier {
 }
 
 class ModifierScope {
-  final String? technique;       // null = any technique
-  final String? form;            // null = any form
-  final List<String> effectIds;  // empty = any effect within technique/form
+  final String? technique;              // null = any technique
+  final String? form;                   // null = any form
+  final List<String> effectIds;         // empty = any effect within technique/form
+  final List<String> excludeTechniques; // techniques the modifier never applies to
 }
 ```
 
-`scope.appliesTo(draft)` is true when the technique matches or is null, the form matches or is null, and `effectIds` is empty or contains the draft's base-effect id.
+`scope.appliesTo(draft)` is true when the technique matches or is null, the technique is not in `excludeTechniques`, the form matches or is null, and `effectIds` is empty or contains the draft's base-effect id.
+
+`excludeTechniques` exists because the rulebook states "Intellego spells are not affected by Target size". That is a Technique-wide exemption cutting across every Form, and a positive `technique` match cannot express it — the alternative would be one Size definition per Form *and* Technique, 40 in total.
+
+`baseIndividual` on an option records what one Individual is for that choice, which is what the Size ladder multiplies. It carries no magnitude of its own.
 
 ### Selection storage
 
@@ -110,19 +116,43 @@ Chosen over a flat list of option ids for O(1) lookup when rendering each applic
 
 This does not make an invalid state unrepresentable — a `single`-mode modifier can still hold two option ids in its list. Closing that properly needs a sealed `SingleSelection`/`MultiSelection` pair, which can itself contradict the definition's `selectionMode`, so it buys little for the added machinery. The invariant is enforced by validation instead. This is the one place the type is deliberately weaker than the rule.
 
-## Scope binding: the 18 definitions
+## Scope binding: the 16 definitions
 
 | Family | Scope | Mode | Definitions |
 |---|---|---|---|
-| Size | `form:` each of the 10 Forms, technique null | single | 10 |
-| Material difficulty | `technique+form`: Muto/Terram, Perdo/Terram, Rego/Terram | single | 3 |
+| Size | `form:` each of 8 Forms, technique null, `excludeTechniques: ['Intellego']` | single | 8 |
+| Material difficulty *(also sets base Individual)* | `technique+form`: Muto/Terram, Perdo/Terram, Rego/Terram | single | 3 |
+| Aquam base Individual | `form: 'Aquam'` | single | 1 |
 | Unnatural context | `technique: 'Creo', form: 'Auram'` | single | 1 |
 | Distance ladder | `effectIds: ['rrhe-10b', 'rrig-3c', 'rete-4']` | single | 1 |
 | Complexity *(migrated)* | `technique+form` on Creo/Perdo/Rego Imaginem | multi | 3 |
 
-The Form-only wildcard (technique null) is used by the 10 Size ladders. Material difficulty deliberately does **not** use it: Creo Terram models material as the base effect, so a Terram-wide scope would wrongly offer a material modifier on top of `crte-5` "Create base metal".
+The Form-only wildcard (technique null) is used by the Size ladders. Material difficulty deliberately does **not** use it: Creo Terram models material as the base effect, so a Terram-wide scope would wrongly offer a material modifier on top of `crte-5` "Create base metal".
 
 The `effectIds` scope has exactly one user, the distance ladder, whose three effects sit in three different technique+form pairs and cannot be expressed any other way.
+
+### Size follows the rulebook, not per-Form invention
+
+Three rules from the core rules text govern this and correct an earlier assumption that each Form has its own bespoke ladder:
+
+1. **The ladder is universal.** "Adding one magnitude (five levels) to the spell multiplies the maximum size of its target by ten." Every Form's rungs are therefore +0 (base), +1 (×10), +2 (×100) and so on. Only the *base Individual* differs per Form, and that is a label, not a magnitude.
+2. **Mentem and Vim are exempt.** Both state "Size modifiers don't apply to … effects with Individual targets", so neither gets a ladder — 8, not 10.
+3. **Intellego is exempt across all Forms**, handled by `excludeTechniques`.
+
+### Base-Individual sub-types are modelled, not deferred
+
+Aquam and Terram each define five base Individuals rather than one:
+
+| Form | Sub-types |
+|---|---|
+| Aquam | water (pool 5 paces across, 2 deep) · naturally-occurring liquids (2 across, 1 deep) · processed liquids (1 across, ½ deep) · dangerous liquids (½ across, ⅕ deep) · poisons (a single dose) |
+| Terram | sand/dirt/mud/clay (10 cubic paces) · stone (1 cubic pace) · base metals (1 cubic foot) · precious metals (1/10 cubic foot) · gemstones (1 cubic inch) |
+
+**A sub-type carries no magnitude.** It fixes what one Individual is, which is the quantity the Size ladder then multiplies. This is why it lives on `ModifierOption.baseIndividual` rather than becoming a separate concept.
+
+For Terram the material choice and the base-Individual choice are the same axis — picking gemstone both costs +2 difficulty and sets the base to one cubic inch — so the three material modifiers carry both, and grow from 3 options to 5: base metals, precious metals and gemstones all cost +2 but have different base Individuals. Creo Terram needs no such modifier because its five effects (`crte-1` … `crte-25a`) already encode the material.
+
+Aquam gets a standalone modifier whose five options are all magnitude 0, since nothing in Aquam varies difficulty by sub-type.
 
 The Imaginem migration groups today's independent factors into one multi-select `Modifier` per technique+form — three checkboxes under a "Complexity" heading rather than three loose ones. Behaviourally identical, since multi-select over options is equivalent to independent toggles.
 
@@ -192,7 +222,7 @@ This requires `calculateSpellLevel` to return a structured result rather than a 
 
 ### Data and code changes
 
-- `assets/data/special_factors.json` → `modifiers.json`, holding the 18 definitions.
+- `assets/data/special_factors.json` → `modifiers.json`, holding the 16 definitions.
 - `SpecialFactor`, its serialization and its test are deleted. `selectedSpecialFactorIds` is removed outright, not read as a fallback.
 - `ConfigurationBloc`'s factor plumbing is renamed rather than removed — it is the seam authorability will use later.
 - 10 of the 27 built-in spell assets reference factor ids (`lib-crim-talking-head`, `lib-crim-phantasmal-animal`, `lib-crim-human-form`, `lib-crim-haunt`, `lib-peim-veil-of-invisibility`, `lib-peim-smothered-sound`, `lib-reim-wizards-sidestep`, `lib-reim-captive-voice`, `lib-reim-confusion-insane-vibrations`, `lib-reim-wizard-torn`). Their references become `selectedModifiers` maps, **preserving magnitudes exactly** so their stated levels still verify against calculation.
@@ -201,7 +231,7 @@ This requires `calculateSpellLevel` to return a structured result rather than a 
 
 Two deliverables are rulebook extractions, handled the same way the 604 base effects were — a defined task against a named source, not open questions:
 
-1. **Size ladders for 10 Forms.** Rungs and magnitudes from the 5e Size rules. The `Size` parameter category is currently empty; there is no Size data in the repo. One Aquam sub-type only.
+1. **Size ladders for 8 Forms** (all but Mentem and Vim), each `excludeTechniques: ['Intellego']`. The rungs are the universal ×10 progression, so this is authoring labels and base-Individual text rather than deriving magnitudes. The `Size` parameter category is currently empty; there is no Size data in the repo. Base Individuals come from the rulebook's `#### Base Individuals` table.
 2. **3–4 Terram library spells**, with their stated levels, chosen to cover a material selection, a Size selection, and one carrying both.
 
 ## Testing
@@ -211,13 +241,13 @@ The layering here is deliberate, informed by two failures earlier in this projec
 - **Model** — round-trip for `Modifier`, `ModifierOption`, `ModifierScope`; an `appliesTo` matrix covering each wildcard combination (technique-only, form-only, both, `effectIds` hit and miss).
 - **Engine** — magnitude summing for both selection modes; unresolvable option id contributes 0 rather than throwing; a `single`-mode modifier with two selected options produces a validation error; breakdown contents match the contributing sources.
 - **Bloc** — selection and deselection; pruning on `TechniqueSelected`, `FormSelected` and `BaseEffectSelected`.
-- **Asset integrity** — every modifier's `scope.effectIds` resolves to a real effect, mirroring the existing "every spell's referenced ids exist" test. This is what catches typos across 18 hand-authored definitions.
+- **Asset integrity** — every modifier's `scope.effectIds` resolves to a real effect, mirroring the existing "every spell's referenced ids exist" test. This is what catches typos across 16 hand-authored definitions.
 - **Widget** — collapsed summary renders the count and `+N` badge; expanding shows a dropdown for single mode and checkboxes for multi.
 - **Integration, real bloc, mandatory** — select a modifier, change Form, assert the selection is pruned and the badge updates. Pruning is re-render dependent, and mocked widget tests emit no new state, so they are structurally incapable of catching it. Run via `flutter test integration_test/<file> -d windows`; `flutter test` alone does not execute this directory.
 
 ### Why Terram matters to the test set
 
-All 27 built-in spells are Imaginem. Without new library content, the asset-level "calculated level matches stated level" test would exercise only multi-select complexity on Imaginem, leaving no asset-pipeline coverage of single-select modifiers, of Form-only wildcard scoping, or of 9 of the 10 Size ladders.
+All 27 built-in spells are Imaginem. Without new library content, the asset-level "calculated level matches stated level" test would exercise only multi-select complexity on Imaginem, leaving no asset-pipeline coverage of single-select modifiers, of Form-only wildcard scoping, or of 7 of the 8 Size ladders.
 
 ### Pre-existing failures
 
@@ -228,7 +258,7 @@ All 27 built-in spells are Imaginem. Without new library content, the asset-leve
 | Risk | Mitigation |
 |---|---|
 | Pruning silently changes a level | Integration coverage with a real bloc; `+N` badge visible while collapsed |
-| Typos across 18 hand-authored definitions | Asset-integrity test resolving every `effectIds` entry |
+| Typos across 16 hand-authored definitions | Asset-integrity test resolving every `effectIds` entry |
 | Migration breaks the 10 Imaginem spells' verified levels | Magnitudes preserved exactly; existing calculated-vs-stated test guards it |
 | `single`-mode invariant violated in stored data | Validation rule; accepted as a validation concern rather than a type-level one |
 | Size ladder data unavailable or inaccurate | Framed as a rulebook extraction task with a named source, as with base effects |
@@ -240,6 +270,6 @@ All 27 built-in spells are Imaginem. Without new library content, the asset-leve
 - **Requisite hints** — 7 effects carry notes of the form `"Requires Animal requisite"` (also Terram, Herbam, Auram, Mentem). The requisites feature already exists, so these could pre-populate a requisite when such an effect is selected. Surfaced during this spec's data audit; not a modifier and not in scope.
 - **One genuinely variable base level** — a single Muto effect noted `"variable base level (depends on target and transformation complexity)"` has no fixed level in the rules. It is the lone case matching the original out-of-scope document's "variable base" pattern, and the only one of the 130 variable-base notes that is not simply informational.
 - 3 Muto Vim effects carrying constraint notes on what may be changed.
-- Aquam's other 4 base-Individual sub-types.
+- Size interaction with non-Individual Targets. The rulebook sizes Part, Group, Room, Structure and Boundary independently (a base Group is ten Individuals, a base Room holds a hundred). This spec's ladders assume Target Individual; sizing the other Targets is a further piece of work.
 - User-authored modifiers in Settings.
 - Magnitude total and additive-tier/multiplier split in the breakdown panel.
