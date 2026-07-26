@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Superpowers brainstorming visual-companion scratch state
+.superpowers/brainstorm/
