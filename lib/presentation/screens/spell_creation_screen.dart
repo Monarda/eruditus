@@ -7,9 +7,11 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 import 'package:eruditus/utils/constants.dart';
 
@@ -34,9 +36,11 @@ class SpellCreationScreen extends StatelessWidget {
     // a selected factor's magnitude by id lookup and would otherwise not
     // recognize a newly added custom factor.
     return BlocListener<ConfigurationBloc, ConfigurationState>(
-      listenWhen: (previous, current) => previous.factors != current.factors,
+      listenWhen: (previous, current) =>
+          previous.factors != current.factors || previous.modifiers != current.modifiers,
       listener: (context, configState) {
         context.read<SpellCreationBloc>().add(AvailableFactorsSynced(configState.factors));
+        context.read<SpellCreationBloc>().add(AvailableModifiersSynced(configState.modifiers));
       },
       child: BlocConsumer<SpellCreationBloc, SpellCreationState>(
         listener: (context, state) {
@@ -60,6 +64,13 @@ class SpellCreationScreen extends StatelessWidget {
               .toList();
           final factorsForSelection = configState.factors
               .where((f) => f.technique == draft.technique && f.form == draft.form)
+              .toList();
+          final modifiersForSelection = configState.modifiers
+              .where((m) => m.scope.appliesTo(
+                    technique: draft.technique,
+                    form: draft.form,
+                    baseEffectId: draft.baseEffect?.id,
+                  ))
               .toList();
 
           final isSaving = state.status == SpellCreationStatus.saving;
@@ -153,6 +164,15 @@ class SpellCreationScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildRequisitesSection(context, bloc, draft),
+                const SizedBox(height: 16),
+                ModifiersSection(
+                  modifiers: modifiersForSelection,
+                  selected: draft.selectedModifiers,
+                  onSelect: (modifierId, optionId) =>
+                      bloc.add(ModifierOptionSelected(modifierId, optionId)),
+                  onDeselect: (modifierId, optionId) =>
+                      bloc.add(ModifierOptionDeselected(modifierId, optionId)),
+                ),
                 if (factorsForSelection.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text('Special Factors', style: Theme.of(context).textTheme.titleMedium),
