@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/spell.dart';
 
 enum SpellCreationStatus { initial, editing, calculated, saving, saved, error, discarded }
@@ -8,6 +9,7 @@ class SpellCreationState extends Equatable {
   final SpellDraft draft;
   final List<String> validationErrors;
   final int? calculatedLevel;
+  final LevelBreakdown? breakdown;
   final List<Spell> suggestions;
   // Precomputed per-suggestion spell levels, keyed by spell id, so the UI can
   // show "name, level, source, description" on each suggestion card without
@@ -21,6 +23,7 @@ class SpellCreationState extends Equatable {
     required this.draft,
     this.validationErrors = const [],
     this.calculatedLevel,
+    this.breakdown,
     this.suggestions = const [],
     this.suggestionLevels = const {},
     this.savedSpell,
@@ -37,6 +40,7 @@ class SpellCreationState extends Equatable {
     SpellDraft? draft,
     List<String>? validationErrors,
     int? calculatedLevel,
+    LevelBreakdown? breakdown,
     List<Spell>? suggestions,
     Map<String, int>? suggestionLevels,
     Spell? savedSpell,
@@ -47,6 +51,7 @@ class SpellCreationState extends Equatable {
       draft: draft ?? this.draft,
       validationErrors: validationErrors ?? this.validationErrors,
       calculatedLevel: calculatedLevel ?? this.calculatedLevel,
+      breakdown: breakdown ?? this.breakdown,
       suggestions: suggestions ?? this.suggestions,
       suggestionLevels: suggestionLevels ?? this.suggestionLevels,
       savedSpell: savedSpell ?? this.savedSpell,
@@ -64,6 +69,7 @@ class SpellCreationState extends Equatable {
         draft,
         validationErrors,
         calculatedLevel,
+        breakdown,
         suggestions,
         suggestionLevels,
         savedSpell,

@@ -10,6 +10,7 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/spell.dart';
@@ -500,6 +501,152 @@ void main() {
           // Range(+2) + Duration(+0) + Target(+8) + Custom(+3) = 13 magnitude
           // falls in the multiplier tier: 10 + (13 * 5) = 75.
           .having((s) => s.calculatedLevel, 'calculatedLevel', 75),
+    ],
+  );
+
+  final materialModifier = Modifier(
+    id: 'terram-material',
+    name: 'Material difficulty',
+    selectionMode: ModifierSelectionMode.single,
+    scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
+    options: [
+      ModifierOption(id: 'mat-stone', label: 'Stone', magnitude: 1),
+      ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2),
+    ],
+    source: 'built-in',
+  );
+  final reteEffect = BaseEffect(
+    id: 'rete-4', technique: 'Rego', form: 'Terram',
+    description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'ModifierOptionSelected on a single-select modifier replaces the previous option',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Rego'));
+      bloc.add(const FormSelected('Terram'));
+      bloc.add(BaseEffectSelected(reteEffect));
+      bloc.add(const ModifierOptionSelected('terram-material', 'mat-stone'));
+      bloc.add(const ModifierOptionSelected('terram-material', 'mat-metal'));
+    },
+    skip: 4,
+    expect: () => [
+      isA<SpellCreationState>().having(
+        (s) => s.draft.selectedModifiers['terram-material'],
+        'selectedModifiers',
+        ['mat-metal'],
+      ),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'ModifierOptionSelected on a multi-select modifier appends',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+        allSpells: const [],
+        allSpecialFactors: const [],
+        allModifiers: [
+          Modifier(
+            id: 'crim-complexity',
+            name: 'Complexity',
+            selectionMode: ModifierSelectionMode.multi,
+            scope: const ModifierScope(technique: 'Creo', form: 'Imaginem'),
+            options: [
+              ModifierOption(id: 'a', label: 'A', magnitude: 1),
+              ModifierOption(id: 'b', label: 'B', magnitude: 1),
+            ],
+            source: 'built-in',
+          ),
+        ],
+      ),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Imaginem'));
+      bloc.add(const ModifierOptionSelected('crim-complexity', 'a'));
+      bloc.add(const ModifierOptionSelected('crim-complexity', 'b'));
+    },
+    skip: 3,
+    expect: () => [
+      isA<SpellCreationState>().having(
+          (s) => s.draft.selectedModifiers['crim-complexity'], 'selectedModifiers', ['a', 'b']),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'ModifierOptionDeselected removes the option and drops the key when empty',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Rego'));
+      bloc.add(const FormSelected('Terram'));
+      bloc.add(BaseEffectSelected(reteEffect));
+      bloc.add(const ModifierOptionSelected('terram-material', 'mat-metal'));
+      bloc.add(const ModifierOptionDeselected('terram-material', 'mat-metal'));
+    },
+    skip: 4,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.selectedModifiers, 'selectedModifiers', isEmpty),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Form prunes a selection the new Form does not offer',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Rego'));
+      bloc.add(const FormSelected('Terram'));
+      bloc.add(BaseEffectSelected(reteEffect));
+      bloc.add(const ModifierOptionSelected('terram-material', 'mat-metal'));
+      bloc.add(const FormSelected('Ignem'));
+    },
+    skip: 4,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.selectedModifiers, 'selectedModifiers (pruned)', isEmpty),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'SpellCalculated exposes a breakdown listing the selected modifier',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Rego'));
+      bloc.add(const FormSelected('Terram'));
+      bloc.add(BaseEffectSelected(reteEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const ModifierOptionSelected('terram-material', 'mat-metal'));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          .having(
+            (s) => s.breakdown?.contributions.any((c) => c.label.contains('Metal')),
+            'breakdown mentions the modifier',
+            isTrue,
+          ),
     ],
   );
 }

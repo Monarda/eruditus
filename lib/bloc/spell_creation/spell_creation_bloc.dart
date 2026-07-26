@@ -1,11 +1,14 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
+import 'package:eruditus/models/spell.dart' show SpellDraft;
 
 class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   final SpellEngine spellEngine;
@@ -34,17 +37,19 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     if (event is TechniqueSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(technique: event.technique, baseEffect: null),
+        draft: _withPrunedModifiers(
+            state.draft.copyWith(technique: event.technique, baseEffect: null)),
       ));
     } else if (event is FormSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(form: event.form, baseEffect: null),
+        draft:
+            _withPrunedModifiers(state.draft.copyWith(form: event.form, baseEffect: null)),
       ));
     } else if (event is BaseEffectSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(baseEffect: event.effect),
+        draft: _withPrunedModifiers(state.draft.copyWith(baseEffect: event.effect)),
       ));
     } else if (event is RangeSelected) {
       final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
@@ -97,6 +102,36 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
+    } else if (event is ModifierOptionSelected) {
+      final modifier =
+          spellEngine.allModifiers.where((m) => m.id == event.modifierId).firstOrNull;
+      final current = state.draft.selectedModifiers[event.modifierId] ?? const <String>[];
+      final updated = modifier?.selectionMode == ModifierSelectionMode.single
+          ? [event.optionId]
+          : [...current.where((id) => id != event.optionId), event.optionId];
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(selectedModifiers: {
+          ...state.draft.selectedModifiers,
+          event.modifierId: updated,
+        }),
+      ));
+    } else if (event is ModifierOptionDeselected) {
+      final remaining = (state.draft.selectedModifiers[event.modifierId] ?? const <String>[])
+          .where((id) => id != event.optionId)
+          .toList();
+      final updated = {...state.draft.selectedModifiers};
+      if (remaining.isEmpty) {
+        updated.remove(event.modifierId);
+      } else {
+        updated[event.modifierId] = remaining;
+      }
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(selectedModifiers: updated),
+      ));
+    } else if (event is AvailableModifiersSynced) {
+      spellEngine.updateModifiers(event.modifiers);
     } else if (event is SpellCalculated) {
       _handleSpellCalculated(emit);
     } else if (event is SpellSaveRequested) {
@@ -108,6 +143,15 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     }
   }
 
+  SpellDraft _withPrunedModifiers(SpellDraft draft) => draft.copyWith(
+        selectedModifiers: spellEngine.pruneModifierSelections(
+          selectedModifiers: draft.selectedModifiers,
+          technique: draft.technique,
+          form: draft.form,
+          baseEffectId: draft.baseEffect?.id,
+        ),
+      );
+
   void _handleSpellCalculated(Emitter<SpellCreationState> emit) {
     final errors = spellEngine.validateSpellDraft(state.draft);
     if (errors.isNotEmpty) {
@@ -115,7 +159,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       return;
     }
 
-    final level = spellEngine.calculateSpellLevel(
+    final breakdown = spellEngine.calculateBreakdown(
       baseEffect: state.draft.baseEffect!,
       range: state.draft.range!,
       duration: state.draft.duration!,
@@ -124,6 +168,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       selectedModifiers: state.draft.selectedModifiers,
       requisites: state.draft.requisites,
     );
+    final level = breakdown.level;
 
     final suggestions = spellEngine.findSimilarSpells(
       state.draft.technique!,
@@ -151,6 +196,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       status: SpellCreationStatus.calculated,
       validationErrors: const [],
       calculatedLevel: level,
+      breakdown: breakdown,
       suggestions: suggestions,
       suggestionLevels: suggestionLevels,
     ));

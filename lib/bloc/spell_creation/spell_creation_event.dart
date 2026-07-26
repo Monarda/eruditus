@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 
@@ -106,4 +107,29 @@ class AvailableFactorsSynced extends SpellCreationEvent {
   const AvailableFactorsSynced(this.factors);
   @override
   List<Object?> get props => [factors];
+}
+
+class ModifierOptionSelected extends SpellCreationEvent {
+  final String modifierId;
+  final String optionId;
+  const ModifierOptionSelected(this.modifierId, this.optionId);
+  @override
+  List<Object?> get props => [modifierId, optionId];
+}
+
+class ModifierOptionDeselected extends SpellCreationEvent {
+  final String modifierId;
+  final String optionId;
+  const ModifierOptionDeselected(this.modifierId, this.optionId);
+  @override
+  List<Object?> get props => [modifierId, optionId];
+}
+
+/// Dispatched whenever ConfigurationBloc's known modifiers change, so the
+/// SpellEngine's option-magnitude lookup stays in sync without a restart.
+class AvailableModifiersSynced extends SpellCreationEvent {
+  final List<Modifier> modifiers;
+  const AvailableModifiersSynced(this.modifiers);
+  @override
+  List<Object?> get props => [modifiers];
 }
