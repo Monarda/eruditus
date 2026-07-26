@@ -54,7 +54,7 @@ void main() {
   });
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
-    'LibraryRequested loads all spells (27 built-in + 1 user)',
+    'LibraryRequested loads all spells (30 built-in + 1 user)',
     build: () => SpellLibraryBloc(
       libraryRepository: libraryRepository,
       spellEngine: spellEngine,
@@ -65,8 +65,8 @@ void main() {
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 28)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 28),
+          .having((s) => s.allSpells.length, 'allSpells.length', 31)
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 31),
     ],
   );
 
@@ -127,7 +127,7 @@ void main() {
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 29)
+          .having((s) => s.allSpells.length, 'allSpells.length', 32)
           .having((s) => s.spellLevels['user-dangling'], "spellLevels['user-dangling']", 5),
     ],
   );
@@ -147,7 +147,7 @@ void main() {
     expect: () => [
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 28),
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 31),
       isA<SpellLibraryState>()
           .having((s) => s.filter, 'filter', 'My Spells')
           .having((s) => s.visibleSpells.length, 'visibleSpells.length', 1)

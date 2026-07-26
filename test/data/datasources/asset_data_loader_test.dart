@@ -26,10 +26,10 @@ void main() {
     );
   });
 
-  test('loadSpellLibrary loads all 27 built-in spells', () async {
+  test('loadSpellLibrary loads all 30 built-in spells', () async {
     final spells = await loader.loadSpellLibrary();
 
-    expect(spells.length, 27);
+    expect(spells.length, 30);
     expect(spells.every((s) => s.source == 'built-in'), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
@@ -109,5 +109,28 @@ void main() {
 
     expect(ids.length, ids.toSet().length,
         reason: 'duplicate option ids would make selections ambiguous');
+  });
+
+  test('the library covers more than one Form', () async {
+    final spells = await loader.loadSpellLibrary();
+    final forms = spells.map((s) => s.form).toSet();
+
+    expect(forms.length, greaterThan(1),
+        reason: 'a single-Form library cannot exercise Form-scoped modifiers');
+    expect(forms, contains('Terram'));
+  });
+
+  test('at least one library spell selects a single-select modifier', () async {
+    final spells = await loader.loadSpellLibrary();
+    final modifiers = await loader.loadModifiers();
+    final singleIds = modifiers
+        .where((m) => m.selectionMode == ModifierSelectionMode.single)
+        .map((m) => m.id)
+        .toSet();
+
+    expect(
+      spells.any((s) => s.selectedModifiers.keys.any(singleIds.contains)),
+      isTrue,
+    );
   });
 }

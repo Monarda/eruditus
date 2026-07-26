@@ -1407,5 +1407,173 @@
         "reim-changing-image"
       ]
     }
+  },
+  {
+    "id": "lib-pete-stone-to-falling-dust",
+    "name": "Stone to Falling Dust",
+    "technique": "Perdo",
+    "form": "Terram",
+    "baseEffect": {
+      "id": "pete-3",
+      "technique": "Perdo",
+      "form": "Terram",
+      "description": "Destroy dirt",
+      "baseLevel": 3,
+      "source": "built-in"
+    },
+    "range": {
+      "parameterId": "range-sight",
+      "parameter": {
+        "id": "range-sight",
+        "name": "Sight",
+        "category": "Range",
+        "magnitude": 3,
+        "source": "built-in"
+      }
+    },
+    "duration": {
+      "parameterId": "duration-momentary",
+      "parameter": {
+        "id": "duration-momentary",
+        "name": "Momentary",
+        "category": "Duration",
+        "magnitude": 0,
+        "source": "built-in"
+      }
+    },
+    "target": {
+      "parameterId": "target-individual",
+      "parameter": {
+        "id": "target-individual",
+        "name": "Individual",
+        "category": "Target",
+        "magnitude": 0,
+        "source": "built-in"
+      }
+    },
+    "requisites": [],
+    "description": "One solid non-living object turns to a pile of dust. The object must be a base Individual or smaller, so a stone item can be a pace across while a metal item can only be one tenth that size in total. Level 20.",
+    "source": "built-in",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-base-metal"
+      ]
+    }
+  },
+  {
+    "id": "lib-crte-wall-of-protecting-stone",
+    "name": "Wall of Protecting Stone",
+    "technique": "Creo",
+    "form": "Terram",
+    "baseEffect": {
+      "id": "crte-3",
+      "technique": "Creo",
+      "form": "Terram",
+      "description": "Create stone or glass",
+      "baseLevel": 3,
+      "source": "built-in"
+    },
+    "range": {
+      "parameterId": "range-voice",
+      "parameter": {
+        "id": "range-voice",
+        "name": "Voice",
+        "category": "Range",
+        "magnitude": 2,
+        "source": "built-in"
+      }
+    },
+    "duration": {
+      "parameterId": "duration-sun",
+      "parameter": {
+        "id": "duration-sun",
+        "name": "Sun",
+        "category": "Duration",
+        "magnitude": 2,
+        "source": "built-in"
+      }
+    },
+    "target": {
+      "parameterId": "target-individual",
+      "parameter": {
+        "id": "target-individual",
+        "name": "Individual",
+        "category": "Target",
+        "magnitude": 0,
+        "source": "built-in"
+      }
+    },
+    "requisites": [],
+    "description": "Makes a wall of granite up to 25 paces wide, 4 paces high, and 1 pace thick. One needs miner's tools to break through it, though it can be toppled if it is not connected to a support on its side or top. Level 25.",
+    "source": "built-in",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-terram": [
+        "size-terram-2"
+      ]
+    }
+  },
+  {
+    "id": "lib-rete-reaching-hand-of-ten-boulders",
+    "name": "Reaching Hand of Ten Boulders",
+    "technique": "Rego",
+    "form": "Terram",
+    "baseEffect": {
+      "id": "rete-4",
+      "technique": "Rego",
+      "form": "Terram",
+      "description": "Transport a non-living object instantly up to 5 paces (add magnitudes for distance/Arcane Connection)",
+      "baseLevel": 4,
+      "source": "built-in"
+    },
+    "range": {
+      "parameterId": "range-touch",
+      "parameter": {
+        "id": "range-touch",
+        "name": "Touch",
+        "category": "Range",
+        "magnitude": 1,
+        "source": "built-in"
+      }
+    },
+    "duration": {
+      "parameterId": "duration-momentary",
+      "parameter": {
+        "id": "duration-momentary",
+        "name": "Momentary",
+        "category": "Duration",
+        "magnitude": 0,
+        "source": "built-in"
+      }
+    },
+    "target": {
+      "parameterId": "target-individual",
+      "parameter": {
+        "id": "target-individual",
+        "name": "Individual",
+        "category": "Target",
+        "magnitude": 0,
+        "source": "built-in"
+      }
+    },
+    "requisites": [],
+    "description": "You touch a stone weighing up to ten times the base Individual, and it instantly leaps from the ground to a point up to 5 paces away, wherever you direct it. Level 15.",
+    "source": "built-in",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "rego-terram-material": [
+        "rego-terram-material-stone"
+      ],
+      "size-terram": [
+        "size-terram-1"
+      ],
+      "rego-transport-distance": [
+        "rego-distance-5-paces"
+      ]
+    }
   }
 ]
