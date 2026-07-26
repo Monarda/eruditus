@@ -115,12 +115,12 @@
 5. Test with affected effects
 6. Repeat for next category
 
-### 5. Asset Data Loader Test Failures (Pre-existing)
+### 5. Asset Data Loader Test Failures (Pre-existing) — ✅ COMPLETE
 - [x] Fixed the id-mismatch failure: 19 built-in spells' embedded `baseEffect` referenced ids that don't exist in `base_effects.json` (e.g. `crim-2` vs the real `creim-2`, and 14 spells across Intellego/Muto/Perdo/Rego Imaginem whose ids were entirely made up, merging two real catalog entries into one nonexistent id). Corrected all 19 to reference the real matching entry, picked by each spell's own flavor text. No level changes — every corrected pair has an identical `baseLevel`.
-- [ ] Remaining: 4 stale count/parameter expectations in `test/data/datasources/asset_data_loader_test.dart` and `test/bloc/configuration_bloc_test.dart` reference old counts (e.g. "38 built-in base effects") that predate the 604-effect extraction
-- **Rationale:** Tests reference old base effect IDs/counts that changed during extraction
-- **Impact:** Doesn't block app, but test suite noise
-- **Fix Approach:** Update test expectations to match 604 new effect IDs/counts
+- [x] Fixed the stale-count failures: `test/data/datasources/asset_data_loader_test.dart`'s `loadBaseEffects` count and `test/bloc/configuration_bloc_test.dart`'s 3 effect-count assertions hardcoded `38`, stale since the 604-effect extraction. Rather than just updating the number, made both self-healing: the loader test now derives its expected count from `base_effects.json`'s raw entry count directly (an oracle independent of the loader itself); the bloc tests derive their baseline via `AssetDataLoader().loadBaseEffects()` once in `setUpAll`. Deliberately left `loadParameters` (17) and `loadSpellLibrary` (30) as literals — both are small, hand-curated lists changed in deliberate reviewed batches, not bulk-extracted, and haven't gone stale.
+- **Rationale:** `base_effects.json` is bulk-extracted and grows unpredictably across many commits; a hardcoded count is exactly what silently drifted by 566 entries
+- **Impact:** Full suite now at 207 passed, 0 failed
+- **Result:** No further action needed on this item
 
 ---
 
