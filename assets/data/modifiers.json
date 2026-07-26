@@ -1,0 +1,74 @@
+[
+  {
+    "id": "crim-complexity",
+    "name": "Complexity",
+    "description": "Creo Imaginem complexity factors",
+    "selectionMode": "multi",
+    "scope": { "technique": "Creo", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "crim-sensory-complexity",
+        "label": "Increasing Sensory Complexity",
+        "description": "Moving visual image or clear words instead of noise",
+        "magnitude": 1
+      },
+      {
+        "id": "crim-directed-image",
+        "label": "Directed Image (Concentration)",
+        "description": "Image moves or makes noise at your direction as you concentrate",
+        "magnitude": 2
+      },
+      {
+        "id": "crim-intricate-design",
+        "label": "Intricate Design",
+        "description": "Very intricate images, e.g. an intricately ornamented bridge",
+        "magnitude": 1
+      }
+    ]
+  },
+  {
+    "id": "peim-complexity",
+    "name": "Complexity",
+    "description": "Perdo Imaginem complexity factors",
+    "selectionMode": "multi",
+    "scope": { "technique": "Perdo", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "peim-changing-image",
+        "label": "Changing Image",
+        "description": "Destroying or dulling an image that changes, rather than a static one",
+        "magnitude": 1
+      }
+    ]
+  },
+  {
+    "id": "reim-complexity",
+    "name": "Complexity",
+    "description": "Rego Imaginem complexity factors",
+    "selectionMode": "multi",
+    "scope": { "technique": "Rego", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "reim-changing-image",
+        "label": "Changing Image",
+        "description": "Moving an image that changes, rather than a static one",
+        "magnitude": 1
+      },
+      {
+        "id": "reim-moved-image-matches",
+        "label": "Moved Image Matches Changes",
+        "description": "The moved image continues to match changes in the original",
+        "magnitude": 1
+      },
+      {
+        "id": "reim-additional-senses",
+        "label": "Additional Senses Affected",
+        "description": "Add one magnitude per additional sense beyond the guideline's default",
+        "magnitude": 1
+      }
+    ]
+  }
+]

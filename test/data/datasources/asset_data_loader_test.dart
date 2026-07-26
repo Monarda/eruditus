@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
+import 'package:eruditus/models/modifier.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -99,5 +100,26 @@ void main() {
           reason: '${spell.name}: calculated level $calculatedLevel does not match '
               'level $statedLevel stated in description');
     }
+  });
+
+  test('loadModifiers loads the built-in modifier definitions', () async {
+    final modifiers = await loader.loadModifiers();
+
+    expect(modifiers, isNotEmpty);
+    expect(modifiers.every((m) => m.source == 'built-in'), isTrue);
+
+    final creoImaginem = modifiers.firstWhere((m) => m.id == 'crim-complexity');
+    expect(creoImaginem.selectionMode, ModifierSelectionMode.multi);
+    expect(creoImaginem.scope.technique, 'Creo');
+    expect(creoImaginem.scope.form, 'Imaginem');
+    expect(creoImaginem.optionById('crim-directed-image')?.magnitude, 2);
+  });
+
+  test('every modifier option id is unique across all modifiers', () async {
+    final modifiers = await loader.loadModifiers();
+    final ids = [for (final m in modifiers) for (final o in m.options) o.id];
+
+    expect(ids.length, ids.toSet().length,
+        reason: 'duplicate option ids would make selections ambiguous');
   });
 }
