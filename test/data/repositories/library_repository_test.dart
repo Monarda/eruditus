@@ -55,7 +55,6 @@ void main() {
         description: 'test', baseLevel: 5, source: 'built-in',
       ),
       range: _range, duration: _duration, target: _target,
-      selectedSpecialFactorIds: const [],
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -80,7 +79,6 @@ void main() {
         description: 'test', baseLevel: 5, source: 'built-in',
       ),
       range: _range, duration: _duration, target: _target,
-      selectedSpecialFactorIds: const [],
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));

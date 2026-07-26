@@ -40,7 +40,6 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
               range: s.range,
               duration: s.duration,
               target: s.target,
-              selectedSpecialFactorIds: s.selectedSpecialFactorIds,
               selectedModifiers: s.selectedModifiers,
               requisites: s.requisites,
             ),

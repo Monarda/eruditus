@@ -93,7 +93,6 @@ void main() {
             status: ConfigurationStatus.loaded,
             effects: [creoIgnemEffect],
             parameters: [voiceParam],
-            factors: const [],
           ),
     );
     await tester.pumpWidget(MaterialApp(
@@ -211,7 +210,6 @@ void main() {
       range: SelectedParameter(parameterId: 'p1', parameter: voiceParam),
       duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
       target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
-      selectedSpecialFactorIds: const [],
       requisites: const [],
       description: 'A roaring pillar of flame.',
       source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
@@ -272,7 +270,6 @@ void main() {
       range: SelectedParameter(parameterId: 'p1', parameter: voiceParam),
       duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
       target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
-      selectedSpecialFactorIds: const [],
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
@@ -297,7 +294,6 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
         parameters: [voiceParam],
-        factors: const [],
       ),
     );
 
@@ -343,7 +339,6 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
         parameters: [voiceParam],
-        factors: const [],
       ),
     );
 
@@ -399,7 +394,6 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect, customEffect],
         parameters: const [],
-        factors: const [],
       ),
     );
 
@@ -540,7 +534,6 @@ void main() {
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect],
           parameters: [voiceParam],
-          factors: const [],
         ),
       );
 

@@ -7,7 +7,6 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
@@ -28,19 +27,17 @@ class SpellCreationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Effects/parameters/special-factors are read live from ConfigurationBloc
+    // Effects/parameters/modifiers are read live from ConfigurationBloc
     // (rather than taken as static constructor lists) so a custom item added
     // in the Settings tab becomes selectable here immediately, without an app
     // restart and without needing to leave/re-enter this tab. Whenever the
-    // known special factors change, AvailableFactorsSynced keeps
+    // known modifiers change, AvailableModifiersSynced keeps
     // SpellCreationBloc's SpellEngine in sync too, since the engine resolves
-    // a selected factor's magnitude by id lookup and would otherwise not
-    // recognize a newly added custom factor.
+    // a selected modifier option's magnitude by id lookup and would otherwise
+    // not recognize a newly added custom modifier.
     return BlocListener<ConfigurationBloc, ConfigurationState>(
-      listenWhen: (previous, current) =>
-          previous.factors != current.factors || previous.modifiers != current.modifiers,
+      listenWhen: (previous, current) => previous.modifiers != current.modifiers,
       listener: (context, configState) {
-        context.read<SpellCreationBloc>().add(AvailableFactorsSynced(configState.factors));
         context.read<SpellCreationBloc>().add(AvailableModifiersSynced(configState.modifiers));
       },
       child: BlocConsumer<SpellCreationBloc, SpellCreationState>(
@@ -62,9 +59,6 @@ class SpellCreationScreen extends StatelessWidget {
 
           final effectsForSelection = configState.effects
               .where((e) => e.technique == draft.technique && e.form == draft.form)
-              .toList();
-          final factorsForSelection = configState.factors
-              .where((f) => f.technique == draft.technique && f.form == draft.form)
               .toList();
           final modifiersForSelection = configState.modifiers
               .where((m) => m.scope.appliesTo(
@@ -174,18 +168,6 @@ class SpellCreationScreen extends StatelessWidget {
                   onDeselect: (modifierId, optionId) =>
                       bloc.add(ModifierOptionDeselected(modifierId, optionId)),
                 ),
-                if (factorsForSelection.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text('Special Factors', style: Theme.of(context).textTheme.titleMedium),
-                  ...factorsForSelection.map((f) => CheckboxListTile(
-                        title: Text('${f.name} (+${f.magnitude})'),
-                        subtitle: Text(f.description),
-                        value: draft.selectedSpecialFactorIds.contains(f.id),
-                        onChanged: (selected) {
-                          bloc.add(SpecialFactorToggled(f.id, selected ?? false));
-                        },
-                      )),
-                ],
                 const SizedBox(height: 16),
                 if (state.validationErrors.isNotEmpty)
                   ...state.validationErrors.map(

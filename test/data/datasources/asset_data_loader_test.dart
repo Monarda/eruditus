@@ -26,13 +26,6 @@ void main() {
     );
   });
 
-  test('loadSpecialFactors loads all 7 built-in special factors', () async {
-    final factors = await loader.loadSpecialFactors();
-
-    expect(factors.length, 7);
-    expect(factors.every((f) => f.source == 'built-in'), isTrue);
-  });
-
   test('loadSpellLibrary loads all 27 built-in spells', () async {
     final spells = await loader.loadSpellLibrary();
 
@@ -45,15 +38,13 @@ void main() {
     final spells = await loader.loadSpellLibrary();
     final effects = await loader.loadBaseEffects();
     final parameters = await loader.loadParameters();
-    final factors = await loader.loadSpecialFactors();
 
-    // Sanity check: every parameter/effect/factor id referenced by a spell
-    // actually exists in its respective built-in list (catches typos in the
+    // Sanity check: every parameter/effect id referenced by a spell actually
+    // exists in its respective built-in list (catches typos in the
     // hand-authored JSON above). Note: this does NOT verify that the spell's
     // calculated level matches its stated level — see the test below for that.
     final effectIds = effects.map((e) => e.id).toSet();
     final parameterIds = parameters.map((p) => p.id).toSet();
-    final factorIds = factors.map((f) => f.id).toSet();
 
     for (final spell in spells) {
       expect(effectIds.contains(spell.baseEffect.id), isTrue,
@@ -62,16 +53,12 @@ void main() {
         expect(parameterIds.contains(p.parameterId), isTrue,
             reason: '${spell.name}: parameter id ${p.parameterId} not in parameters.json');
       }
-      for (final factorId in spell.selectedSpecialFactorIds) {
-        expect(factorIds.contains(factorId), isTrue,
-            reason: '${spell.name}: special factor id $factorId not in special_factors.json');
-      }
     }
   });
 
   test('every loaded spell calculates to the level stated in its description', () async {
     final spells = await loader.loadSpellLibrary();
-    final factors = await loader.loadSpecialFactors();
+    final modifiers = await loader.loadModifiers();
 
     int levelStatedInDescription(spell) {
       final match = RegExp(r'Level (\d+)\.').firstMatch(spell.description ?? '');
@@ -88,8 +75,9 @@ void main() {
         spell.range.parameter.magnitude,
         spell.duration.parameter.magnitude,
         spell.target.parameter.magnitude,
-        ...spell.selectedSpecialFactorIds
-            .map((id) => factors.firstWhere((f) => f.id == id).magnitude),
+        for (final entry in spell.selectedModifiers.entries)
+          for (final optionId in entry.value)
+            modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,
         ...spell.requisites.map((r) => r.magnitude),
       ];
 

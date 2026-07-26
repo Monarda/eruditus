@@ -4,7 +4,6 @@ import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/modifier.dart';
 
 void main() {
@@ -77,34 +76,6 @@ void main() {
       await datasource.deleteCustomParameter('cp1');
 
       final all = await datasource.getAllCustomParameters();
-      expect(all, isEmpty);
-    });
-  });
-
-  group('custom special factors', () {
-    test('insertCustomFactor then getAllCustomFactors returns it', () async {
-      final factor = SpecialFactor(
-        id: 'cf1', technique: 'Creo', form: 'Ignem',
-        name: 'My Custom Factor', description: 'test factor', magnitude: 1, source: 'user-created',
-      );
-
-      await datasource.insertCustomFactor(factor);
-      final all = await datasource.getAllCustomFactors();
-
-      expect(all.length, 1);
-      expect(all.first.name, 'My Custom Factor');
-    });
-
-    test('deleteCustomFactor removes it', () async {
-      final factor = SpecialFactor(
-        id: 'cf1', technique: 'Creo', form: 'Ignem',
-        name: 'test', description: 'test', magnitude: 1, source: 'user-created',
-      );
-      await datasource.insertCustomFactor(factor);
-
-      await datasource.deleteCustomFactor('cf1');
-
-      final all = await datasource.getAllCustomFactors();
       expect(all, isEmpty);
     });
   });

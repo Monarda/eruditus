@@ -41,8 +41,7 @@ void main() {
       final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
       final allSpells = await libraryRepository.getAllSpells();
-      final allSpecialFactors = await configRepository.getAllSpecialFactors();
-      final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
+      final spellEngine = SpellEngine(allSpells: allSpells);
 
       final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
       final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
@@ -108,7 +107,7 @@ void main() {
       await tester.tap(find.byKey(const Key('calculate-button')));
       await tester.pumpAndSettle();
 
-      // The form is long (dropdowns, parameter/special-factor pickers, the
+      // The form is long (dropdowns, parameter/modifier pickers, the
       // calculated-level card) and the suggestions list renders below the
       // fold, so the ListView's sliver machinery won't have built those
       // widgets yet. Scroll them into view before asserting/tapping.
@@ -200,8 +199,7 @@ void main() {
       final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
       final allSpells = await libraryRepository.getAllSpells();
-      final allSpecialFactors = await configRepository.getAllSpecialFactors();
-      final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
+      final spellEngine = SpellEngine(allSpells: allSpells);
 
       final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
       final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);

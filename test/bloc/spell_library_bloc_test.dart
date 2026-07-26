@@ -24,11 +24,6 @@ void main() {
 
   late AppDatabase database;
   late LibraryRepository libraryRepository;
-  // Built from the real, asset-loaded special factors (not an empty list):
-  // several built-in library spells reference special factors by id, and
-  // SpellEngine.calculateSpellLevel throws if a referenced id can't be
-  // resolved, so an empty factors list would crash level computation for
-  // those spells.
   late SpellEngine spellEngine;
 
   final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
@@ -47,13 +42,11 @@ void main() {
       range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
       duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
       target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
-      selectedSpecialFactorIds: const [],
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(assetLoader: AssetDataLoader(), spellRepository: spellRepository);
-    final specialFactors = await AssetDataLoader().loadSpecialFactors();
-    spellEngine = SpellEngine(allSpells: const [], allSpecialFactors: specialFactors);
+    spellEngine = SpellEngine(allSpells: const []);
   });
 
   tearDown(() async {
@@ -96,20 +89,20 @@ void main() {
   );
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
-    'LibraryRequested loads successfully even when a saved spell references a deleted special factor id',
-    // Simulates: a user selected a custom special factor while creating a
-    // spell, saved the spell (persisting the factor's id in
-    // selectedSpecialFactorIds), then later deleted that custom factor in
-    // the Settings tab. Deletion doesn't cascade to already-saved spells, so
-    // this spell keeps a dangling id. Before the fix,
-    // SpellEngine.calculateSpellLevel threw StateError for this id, and
-    // because LibraryRequested wraps the whole load in one try/catch, that
-    // single bad reference dropped the *entire* Library tab into its error
-    // state, hiding every spell. It must instead load successfully.
+    'LibraryRequested loads successfully even when a saved spell references a deleted modifier id',
+    // Simulates: a user selected a custom modifier option while creating a
+    // spell, saved the spell (persisting the modifier's id in
+    // selectedModifiers), then later deleted that custom modifier in the
+    // Settings tab. Deletion doesn't cascade to already-saved spells, so
+    // this spell keeps a dangling id. SpellEngine.calculateSpellLevel must
+    // not throw for this id, and because LibraryRequested wraps the whole
+    // load in one try/catch, a bad reference that did throw would drop the
+    // *entire* Library tab into its error state, hiding every spell. It
+    // must instead load successfully.
     setUp: () async {
       final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
       await spellRepository.saveSpell(Spell(
-        id: 'user-dangling', name: 'Spell With Deleted Factor', technique: 'Creo', form: 'Ignem',
+        id: 'user-dangling', name: 'Spell With Deleted Modifier', technique: 'Creo', form: 'Ignem',
         baseEffect: BaseEffect(
           id: 'e2', technique: 'Creo', form: 'Ignem',
           description: 'test', baseLevel: 5, source: 'built-in',
@@ -117,7 +110,9 @@ void main() {
         range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
         duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
         target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
-        selectedSpecialFactorIds: const ['no-longer-exists'],
+        selectedModifiers: const {
+          'no-longer-exists': ['no-longer-exists'],
+        },
         requisites: const [],
         source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));

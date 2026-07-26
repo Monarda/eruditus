@@ -12,7 +12,6 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/spell.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
@@ -30,7 +29,6 @@ void main() {
       range: SelectedParameter(parameterId: 'p1', parameter: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in')),
       duration: SelectedParameter(parameterId: 'p2', parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in')),
       target: SelectedParameter(parameterId: 'p3', parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in')),
-      selectedSpecialFactorIds: const [],
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -51,7 +49,7 @@ void main() {
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
     spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
-    spellEngine = SpellEngine(allSpells: const [], allSpecialFactors: const []);
+    spellEngine = SpellEngine(allSpells: const []);
   });
 
   tearDown(() async {
@@ -113,12 +111,11 @@ void main() {
         range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
         duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
         target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
-        selectedSpecialFactorIds: const [],
         requisites: const [],
         source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       return SpellCreationBloc(
-        spellEngine: SpellEngine(allSpells: [suggestion], allSpecialFactors: const []),
+        spellEngine: SpellEngine(allSpells: [suggestion]),
         spellRepository: spellRepository,
       );
     },
@@ -469,17 +466,20 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
-    'AvailableFactorsSynced updates the SpellEngine so a newly available special '
-    'factor resolves during SpellCalculated instead of throwing',
+    'AvailableModifiersSynced updates the SpellEngine so a newly available custom '
+    'modifier resolves during SpellCalculated instead of being ignored',
     build: () => SpellCreationBloc(
-      spellEngine: SpellEngine(allSpells: const [], allSpecialFactors: const []),
+      spellEngine: SpellEngine(allSpells: const []),
       spellRepository: spellRepository,
     ),
     act: (bloc) {
-      final newFactor = SpecialFactor(
-        id: 'custom-1', technique: 'Creo', form: 'Ignem',
-        name: 'Custom Complexity', description: 'A custom factor',
-        magnitude: 3, source: 'user-created',
+      final newModifier = Modifier(
+        id: 'custom-1',
+        name: 'Custom Complexity',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Creo', form: 'Ignem'),
+        options: [ModifierOption(id: 'opt-1', label: 'Custom', magnitude: 3)],
+        source: 'user-created',
       );
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
@@ -487,14 +487,14 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(AvailableFactorsSynced([newFactor]));
-      bloc.add(const SpecialFactorToggled('custom-1', true));
+      bloc.add(AvailableModifiersSynced([newModifier]));
+      bloc.add(const ModifierOptionSelected('custom-1', 'opt-1'));
       bloc.add(const SpellCalculated());
     },
     skip: 6,
     expect: () => [
-      isA<SpellCreationState>()
-          .having((s) => s.draft.selectedSpecialFactorIds, 'selectedSpecialFactorIds', ['custom-1']),
+      isA<SpellCreationState>().having(
+          (s) => s.draft.selectedModifiers['custom-1'], 'selectedModifiers', ['opt-1']),
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           // Base 10 already exceeds the additive-tier cap of 5, so all of
@@ -524,7 +524,7 @@ void main() {
     'ModifierOptionSelected on a single-select modifier replaces the previous option',
     build: () => SpellCreationBloc(
       spellEngine: SpellEngine(
-          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+          allSpells: const [], allModifiers: [materialModifier]),
       spellRepository: spellRepository,
     ),
     act: (bloc) {
@@ -549,7 +549,6 @@ void main() {
     build: () => SpellCreationBloc(
       spellEngine: SpellEngine(
         allSpells: const [],
-        allSpecialFactors: const [],
         allModifiers: [
           Modifier(
             id: 'crim-complexity',
@@ -583,7 +582,7 @@ void main() {
     'ModifierOptionDeselected removes the option and drops the key when empty',
     build: () => SpellCreationBloc(
       spellEngine: SpellEngine(
-          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+          allSpells: const [], allModifiers: [materialModifier]),
       spellRepository: spellRepository,
     ),
     act: (bloc) {
@@ -604,7 +603,7 @@ void main() {
     'changing Form prunes a selection the new Form does not offer',
     build: () => SpellCreationBloc(
       spellEngine: SpellEngine(
-          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+          allSpells: const [], allModifiers: [materialModifier]),
       spellRepository: spellRepository,
     ),
     act: (bloc) {
@@ -625,7 +624,7 @@ void main() {
     'SpellCalculated exposes a breakdown listing the selected modifier',
     build: () => SpellCreationBloc(
       spellEngine: SpellEngine(
-          allSpells: const [], allSpecialFactors: const [], allModifiers: [materialModifier]),
+          allSpells: const [], allModifiers: [materialModifier]),
       spellRepository: spellRepository,
     ),
     act: (bloc) {

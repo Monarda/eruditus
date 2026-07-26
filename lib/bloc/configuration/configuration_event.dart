@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 
 abstract class ConfigurationEvent extends Equatable {
   const ConfigurationEvent();
@@ -38,20 +37,6 @@ class CustomParameterAdded extends ConfigurationEvent {
 class CustomParameterDeleted extends ConfigurationEvent {
   final String id;
   const CustomParameterDeleted(this.id);
-  @override
-  List<Object?> get props => [id];
-}
-
-class CustomFactorAdded extends ConfigurationEvent {
-  final SpecialFactor factor;
-  const CustomFactorAdded(this.factor);
-  @override
-  List<Object?> get props => [factor];
-}
-
-class CustomFactorDeleted extends ConfigurationEvent {
-  final String id;
-  const CustomFactorDeleted(this.id);
   @override
   List<Object?> get props => [id];
 }

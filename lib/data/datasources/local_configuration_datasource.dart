@@ -4,7 +4,6 @@ import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 
 class LocalConfigurationDatasource {
   final AppDatabase database;
@@ -47,26 +46,6 @@ class LocalConfigurationDatasource {
     final rows = await database.db.query('custom_parameters');
     return rows
         .map((row) => Parameter.fromMap(jsonDecode(row['data'] as String) as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> insertCustomFactor(SpecialFactor factor) async {
-    await database.db.insert('custom_factors', {
-      'id': factor.id,
-      'technique': factor.technique,
-      'form': factor.form,
-      'data': jsonEncode(factor.toMap()),
-    });
-  }
-
-  Future<void> deleteCustomFactor(String id) async {
-    await database.db.delete('custom_factors', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<List<SpecialFactor>> getAllCustomFactors() async {
-    final rows = await database.db.query('custom_factors');
-    return rows
-        .map((row) => SpecialFactor.fromMap(jsonDecode(row['data'] as String) as Map<String, dynamic>))
         .toList();
   }
 

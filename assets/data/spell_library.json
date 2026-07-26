@@ -42,9 +42,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "crim-sensory-complexity"
-    ],
     "requisites": [],
     "description": "Creates an illusory face on a wall or other flat object that can speak during the spell's duration. Level 10.",
     "source": "built-in",
@@ -99,9 +96,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "crim-directed-image"
-    ],
     "requisites": [],
     "description": "Creates an image of any animal up to the size of a pony that moves and makes noise under your mental command. Level 20.",
     "source": "built-in",
@@ -156,7 +150,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [
       {
         "art": "Ignem",
@@ -212,10 +205,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "crim-directed-image",
-      "crim-intricate-design"
-    ],
     "requisites": [],
     "description": "Makes an image of a clothed, equipped person who can move, speak, and behave as a human does, under your unspoken command. Level 25.",
     "source": "built-in",
@@ -271,10 +260,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "crim-directed-image",
-      "crim-intricate-design"
-    ],
     "requisites": [
       {
         "art": "Intellego",
@@ -335,7 +320,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "You can see inside a room, as long as you can touch one of its walls. Level 5.",
     "source": "built-in",
@@ -386,7 +370,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Makes your own illusions appear largely transparent to you, but still discernible. Level 15.",
     "source": "built-in",
@@ -437,7 +420,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "You can hear what is happening in a place you have an Arcane Connection to. Level 20.",
     "source": "built-in",
@@ -488,7 +470,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "You see distant things as clearly as if they were a foot away. Level 25.",
     "source": "built-in",
@@ -539,7 +520,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "You can see and hear what is happening in a distant place you have an Arcane Connection to. Level 25.",
     "source": "built-in",
@@ -590,7 +570,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "A setting's worth of food or drink tastes and smells exactly as you designate. Level 5.",
     "source": "built-in",
@@ -641,7 +620,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "The target appears more forceful, authoritative, and believable, gaining +3 on rolls to influence, lead, or convince others. Level 10.",
     "source": "built-in",
@@ -692,7 +670,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Causes all sounds in a room, particularly music, to be especially clear and sonorous. Level 10.",
     "source": "built-in",
@@ -743,7 +720,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Makes someone look, sound, feel, and smell different, though at least passably human. Level 15.",
     "source": "built-in",
@@ -794,7 +770,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Any one thing can be made to appear as something else of approximately the same shape and size. Level 20.",
     "source": "built-in",
@@ -845,7 +820,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Hides the taste of any substance, liquid or solid. Level 5.",
     "source": "built-in",
@@ -896,7 +870,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "A source of heat seems to lose its heat and drop to the surrounding temperature, though it retains its normal harmful effects. Level 10.",
     "source": "built-in",
@@ -947,7 +920,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "The target becomes invisible, but the spell breaks if the target moves. It still casts a shadow. Level 15.",
     "source": "built-in",
@@ -998,9 +970,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "peim-changing-image"
-    ],
     "requisites": [],
     "description": "The target becomes completely undetectable to normal sight regardless of what it does, but still casts a shadow. Level 20.",
     "source": "built-in",
@@ -1055,7 +1024,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Grooves, runes, and similar markings are obscured while the medium's overall shape remains constant. Level 20.",
     "source": "built-in",
@@ -1106,9 +1074,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "peim-changing-image"
-    ],
     "requisites": [],
     "description": "Makes one being or object incapable of producing sound. Level 20.",
     "source": "built-in",
@@ -1163,7 +1128,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Causes a Group of creatures to become invisible; any affected member who moves or is touched makes everyone visible. Level 25.",
     "source": "built-in",
@@ -1214,7 +1178,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [],
     "requisites": [],
     "description": "Makes any person or object appear to be a pace away from its actual position. The spell ends when either moves. Level 10.",
     "source": "built-in",
@@ -1265,10 +1228,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "reim-changing-image",
-      "reim-moved-image-matches"
-    ],
     "requisites": [],
     "description": "Your image appears up to 1 pace from where you actually are; early attacks in combat are aimed at the image. Level 10.",
     "source": "built-in",
@@ -1324,9 +1283,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "reim-changing-image"
-    ],
     "requisites": [],
     "description": "Captures a person's voice and places it in a bag; the victim cannot speak unless the bag is open. Level 30.",
     "source": "built-in",
@@ -1381,9 +1337,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "reim-additional-senses"
-    ],
     "requisites": [],
     "description": "The target sees everything vibrate at high speed and sounds seem to come from the wrong places, suffering -3 to Attack/Defense. Level 30.",
     "source": "built-in",
@@ -1438,10 +1391,6 @@
         "source": "built-in"
       }
     },
-    "selectedSpecialFactorIds": [
-      "reim-additional-senses",
-      "reim-changing-image"
-    ],
     "requisites": [
       {
         "art": "Intellego",

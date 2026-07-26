@@ -38,8 +38,7 @@ class _BackupScreenState extends State<BackupScreen> {
       setState(() {
         _statusMessage = 'Imported ${result.spellsImported} spells, '
             '${result.effectsImported} effects, '
-            '${result.parametersImported} parameters, '
-            '${result.factorsImported} factors.';
+            '${result.parametersImported} parameters.';
       });
     } catch (e) {
       setState(() => _statusMessage = 'Import failed: $e');

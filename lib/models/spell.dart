@@ -12,7 +12,6 @@ class Spell {
   final SelectedParameter range;
   final SelectedParameter duration;
   final SelectedParameter target;
-  final List<String> selectedSpecialFactorIds;
   final Map<String, List<String>> selectedModifiers;
   final List<Requisite> requisites;
   final String? description;
@@ -29,7 +28,6 @@ class Spell {
     required this.range,
     required this.duration,
     required this.target,
-    required this.selectedSpecialFactorIds,
     this.selectedModifiers = const {},
     required this.requisites,
     this.description,
@@ -47,7 +45,6 @@ class Spell {
     'range': range.toMap(),
     'duration': duration.toMap(),
     'target': target.toMap(),
-    'selectedSpecialFactorIds': selectedSpecialFactorIds,
     'selectedModifiers': selectedModifiers.map((k, v) => MapEntry(k, v)),
     'requisites': requisites.map((r) => r.toMap()).toList(),
     'description': description,
@@ -73,7 +70,6 @@ class Spell {
     target: SelectedParameter.fromMap(
       requireField<Map<String, dynamic>>(map, 'target', 'Spell'),
     ),
-    selectedSpecialFactorIds: List<String>.from(map['selectedSpecialFactorIds'] as List? ?? []),
     selectedModifiers: (map['selectedModifiers'] as Map?)?.map(
           (k, v) => MapEntry(k as String, List<String>.from(v as List)),
         ) ??
@@ -96,7 +92,6 @@ class SpellDraft {
   SelectedParameter? range;
   SelectedParameter? duration;
   SelectedParameter? target;
-  List<String> selectedSpecialFactorIds;
   Map<String, List<String>> selectedModifiers;
   List<Requisite> requisites;
   String? description;
@@ -109,12 +104,10 @@ class SpellDraft {
     this.range,
     this.duration,
     this.target,
-    List<String>? selectedSpecialFactorIds,
     Map<String, List<String>>? selectedModifiers,
     List<Requisite>? requisites,
     this.description,
   })  : id = id ?? _generateId(),
-        selectedSpecialFactorIds = selectedSpecialFactorIds ?? [],
         selectedModifiers = selectedModifiers ?? {},
         requisites = requisites ?? [];
 
@@ -152,7 +145,6 @@ class SpellDraft {
       range: resolvedRange,
       duration: resolvedDuration,
       target: resolvedTarget,
-      selectedSpecialFactorIds: selectedSpecialFactorIds,
       selectedModifiers: selectedModifiers,
       requisites: requisites,
       description: description,
@@ -169,7 +161,6 @@ class SpellDraft {
     Object? range = _unset,
     Object? duration = _unset,
     Object? target = _unset,
-    List<String>? selectedSpecialFactorIds,
     Map<String, List<String>>? selectedModifiers,
     List<Requisite>? requisites,
     String? description,
@@ -182,7 +173,6 @@ class SpellDraft {
       range: identical(range, _unset) ? this.range : range as SelectedParameter?,
       duration: identical(duration, _unset) ? this.duration : duration as SelectedParameter?,
       target: identical(target, _unset) ? this.target : target as SelectedParameter?,
-      selectedSpecialFactorIds: selectedSpecialFactorIds ?? this.selectedSpecialFactorIds,
       selectedModifiers: selectedModifiers ?? this.selectedModifiers,
       requisites: requisites ?? this.requisites,
       description: description ?? this.description,

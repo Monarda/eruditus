@@ -66,14 +66,6 @@ class AppDatabase {
       )
     ''');
     await db.execute('''
-      CREATE TABLE custom_factors (
-        id TEXT PRIMARY KEY,
-        technique TEXT NOT NULL,
-        form TEXT NOT NULL,
-        data TEXT NOT NULL
-      )
-    ''');
-    await db.execute('''
       CREATE TABLE custom_modifiers (
         id TEXT PRIMARY KEY,
         data TEXT NOT NULL

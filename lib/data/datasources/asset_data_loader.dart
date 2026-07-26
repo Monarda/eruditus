@@ -6,7 +6,6 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/special_factor.dart';
 
 class AssetDataLoader {
   Future<List<BaseEffect>> loadBaseEffects() async {
@@ -19,12 +18,6 @@ class AssetDataLoader {
     final jsonString = await rootBundle.loadString('assets/data/parameters.json');
     final list = jsonDecode(jsonString) as List<dynamic>;
     return list.map((e) => Parameter.fromMap(e as Map<String, dynamic>)).toList();
-  }
-
-  Future<List<SpecialFactor>> loadSpecialFactors() async {
-    final jsonString = await rootBundle.loadString('assets/data/special_factors.json');
-    final list = jsonDecode(jsonString) as List<dynamic>;
-    return list.map((e) => SpecialFactor.fromMap(e as Map<String, dynamic>)).toList();
   }
 
   Future<List<Modifier>> loadModifiers() async {

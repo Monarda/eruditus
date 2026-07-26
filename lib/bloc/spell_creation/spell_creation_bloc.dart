@@ -69,15 +69,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(target: selectedParam),
       ));
-    } else if (event is SpecialFactorToggled) {
-      final current = state.draft.selectedSpecialFactorIds;
-      final updated = event.selected
-          ? [...current, event.factorId]
-          : current.where((id) => id != event.factorId).toList();
-      emit(state.copyWith(
-        status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(selectedSpecialFactorIds: updated),
-      ));
     } else if (event is RequisiteAdded) {
       final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
       final updated = [...state.draft.requisites, Requisite(art: event.art, kind: kind)];
@@ -138,8 +129,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       await _handleSpellSaveRequested(event, emit);
     } else if (event is SpellDiscarded) {
       emit(SpellCreationState.initial());
-    } else if (event is AvailableFactorsSynced) {
-      spellEngine.updateSpecialFactors(event.factors);
     }
   }
 
@@ -164,7 +153,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       range: state.draft.range!,
       duration: state.draft.duration!,
       target: state.draft.target!,
-      selectedSpecialFactorIds: state.draft.selectedSpecialFactorIds,
       selectedModifiers: state.draft.selectedModifiers,
       requisites: state.draft.requisites,
     );
@@ -186,7 +174,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           range: s.range,
           duration: s.duration,
           target: s.target,
-          selectedSpecialFactorIds: s.selectedSpecialFactorIds,
           selectedModifiers: s.selectedModifiers,
           requisites: s.requisites,
         ),

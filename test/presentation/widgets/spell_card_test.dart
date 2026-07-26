@@ -22,7 +22,6 @@ void main() {
         range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
         duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
         target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
-        selectedSpecialFactorIds: const [],
         requisites: const [],
         description: description,
         source: source,

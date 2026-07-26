@@ -45,9 +45,8 @@ Future<void> main() async {
   final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
   final allSpells = await libraryRepository.getAllSpells();
-  final allSpecialFactors = await configRepository.getAllSpecialFactors();
 
-  final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
+  final spellEngine = SpellEngine(allSpells: allSpells);
 
   final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
   // Shares the same SpellEngine instance as spellCreationBloc, purely for its

@@ -6,7 +6,6 @@ import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/modifier.dart';
 
 void main() {
@@ -64,17 +63,6 @@ void main() {
     final all = await repository.getAllParameters();
 
     expect(all.length, 18); // 17 built-in + 1 custom
-  });
-
-  test('getAllSpecialFactors combines built-in and custom factors', () async {
-    await repository.addCustomFactor(SpecialFactor(
-      id: 'custom-f1', technique: 'Creo', form: 'Ignem',
-      name: 'My Factor', description: 'test', magnitude: 1, source: 'user-created',
-    ));
-
-    final all = await repository.getAllSpecialFactors();
-
-    expect(all.length, 8); // 7 built-in + 1 custom
   });
 
   test('getAllModifiers combines built-in and custom modifiers', () async {

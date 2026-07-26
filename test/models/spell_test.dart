@@ -47,7 +47,6 @@ void main() {
         range: SelectedParameter(parameterId: voiceParam.id, parameter: voiceParam),
         duration: SelectedParameter(parameterId: sunParam.id, parameter: sunParam),
         target: SelectedParameter(parameterId: individualParam.id, parameter: individualParam),
-        selectedSpecialFactorIds: ['sf-1', 'sf-2'],
         requisites: [
           Requisite(art: 'Vim', kind: RequisiteKind.free),
           Requisite(art: 'Mentem', kind: RequisiteKind.free),
@@ -93,8 +92,6 @@ void main() {
       expect(restored.target.parameterId, individualParam.id);
       expect(restored.target.parameter.name, individualParam.name);
       expect(restored.target.parameter.category, individualParam.category);
-
-      expect(restored.selectedSpecialFactorIds, ['sf-1', 'sf-2']);
 
       expect(restored.requisites.length, 4);
       expect(restored.requisites[0].art, 'Vim');
@@ -292,7 +289,6 @@ void main() {
           parameterId: 'p3',
           parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
         ),
-        selectedSpecialFactorIds: const [],
         selectedModifiers: const {
           'terram-material': ['mat-metal'],
           'rego-transport-distance': ['dist-500-paces'],
@@ -328,7 +324,6 @@ void main() {
           parameterId: 'p3',
           parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
         ),
-        selectedSpecialFactorIds: const [],
         requisites: const [],
         source: 'built-in',
         createdAt: DateTime(2026, 1, 1),

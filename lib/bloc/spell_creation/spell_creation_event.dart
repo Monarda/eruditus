@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 
 abstract class SpellCreationEvent extends Equatable {
   const SpellCreationEvent();
@@ -52,14 +51,6 @@ class TargetSelected extends SpellCreationEvent {
   List<Object?> get props => [parameter];
 }
 
-class SpecialFactorToggled extends SpellCreationEvent {
-  final String factorId;
-  final bool selected;
-  const SpecialFactorToggled(this.factorId, this.selected);
-  @override
-  List<Object?> get props => [factorId, selected];
-}
-
 class RequisiteAdded extends SpellCreationEvent {
   final String art;
   final String kind; // 'free' or 'adding'
@@ -96,17 +87,6 @@ class SpellSaveRequested extends SpellCreationEvent {
 
 class SpellDiscarded extends SpellCreationEvent {
   const SpellDiscarded();
-}
-
-/// Dispatched whenever ConfigurationBloc's known special factors change
-/// (initial load, or a custom factor added/deleted in the Settings tab), so
-/// SpellCreationBloc can keep its SpellEngine's magnitude-lookup table in
-/// sync without requiring an app restart.
-class AvailableFactorsSynced extends SpellCreationEvent {
-  final List<SpecialFactor> factors;
-  const AvailableFactorsSynced(this.factors);
-  @override
-  List<Object?> get props => [factors];
 }
 
 class ModifierOptionSelected extends SpellCreationEvent {

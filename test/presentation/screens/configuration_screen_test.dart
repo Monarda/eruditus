@@ -40,15 +40,13 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: effects,
         parameters: const [],
-        factors: const [],
       );
 
-  testWidgets('shows Effects, Parameters, Special Factors tabs', (tester) async {
+  testWidgets('shows Effects, Parameters tabs', (tester) async {
     await pumpScreen(tester, loadedState());
 
     expect(find.text('Effects'), findsOneWidget);
     expect(find.text('Parameters'), findsOneWidget);
-    expect(find.text('Special Factors'), findsOneWidget);
   });
 
   testWidgets('renders custom effects present in state', (tester) async {

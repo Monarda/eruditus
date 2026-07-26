@@ -3,7 +3,6 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
 
@@ -19,7 +18,7 @@ final _target = _sp('target-individual', 'Individual', 'Target');
 
 void main() {
   group('SpellEngine.validateSpellDraft', () {
-    final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+    final engine = SpellEngine(allSpells: []);
 
     test('fails if technique not selected', () {
       final draft = SpellDraft(
@@ -150,7 +149,7 @@ void main() {
         ],
         source: 'built-in',
       );
-      final testEngine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: [material]);
+      final testEngine = SpellEngine(allSpells: [], allModifiers: [material]);
       final draft = SpellDraft(
         technique: 'Rego',
         form: 'Terram',
@@ -178,7 +177,7 @@ void main() {
         ],
         source: 'built-in',
       );
-      final testEngine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: [complexity]);
+      final testEngine = SpellEngine(allSpells: [], allModifiers: [complexity]);
       final draft = SpellDraft(
         technique: 'Creo',
         form: 'Imaginem',
@@ -212,7 +211,7 @@ void main() {
       source: 'built-in',
     );
     final engine = SpellEngine(
-        allSpells: [], allSpecialFactors: [], allModifiers: [material, distance]);
+        allSpells: [], allModifiers: [material, distance]);
 
     test('keeps selections whose modifier still applies', () {
       final pruned = engine.pruneModifierSelections(
@@ -253,7 +252,7 @@ void main() {
 
   group('SpellEngine.calculateSpellLevel', () {
     test('computes level from base effect alone (no parameters/factors/requisites)', () {
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+      final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
         description: 'Create flame', baseLevel: 10, source: 'built-in',
@@ -261,14 +260,14 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [], requisites: [],
+        range: _range, duration: _duration, target: _target, requisites: [],
       );
 
       expect(level, 10);
     });
 
     test('includes parameter magnitudes', () {
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+      final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Muto', form: 'Corpus',
         description: 'Eyes of the Cat base', baseLevel: 2, source: 'built-in',
@@ -280,55 +279,15 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: touchSp, duration: sunSp, target: _target, selectedSpecialFactorIds: [],
+        range: touchSp, duration: sunSp, target: _target,
         requisites: [],
       );
 
       expect(level, 5); // Eyes of the Cat: Base 2 + Touch(+1) + Sun(+2) = 5
     });
 
-    test('includes special factor magnitudes resolved by ID', () {
-      final complexity = SpecialFactor(
-        id: 'sf1', technique: 'Creo', form: 'Imaginem',
-        name: 'Increasing Sensory Complexity',
-        description: 'moving visual or clear words', magnitude: 1, source: 'built-in',
-      );
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: [complexity]);
-      final baseEffect = BaseEffect(
-        id: '1', technique: 'Creo', form: 'Imaginem',
-        description: 'Phantasm', baseLevel: 2, source: 'built-in',
-      );
-
-      final level = engine.calculateSpellLevel(
-        baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: ['sf1'],
-        requisites: [],
-      );
-
-      expect(level, 3); // Base 2 + factor(+1) = 3 (within additive tier)
-    });
-
-    test('treats a dangling special factor id (deleted after the spell was saved) as 0 magnitude instead of throwing', () {
-      // No special factors known to the engine at all -- simulates the
-      // referenced custom factor having been deleted in Settings after a
-      // spell that selected it was saved.
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
-      final baseEffect = BaseEffect(
-        id: '1', technique: 'Creo', form: 'Imaginem',
-        description: 'Phantasm', baseLevel: 2, source: 'built-in',
-      );
-
-      final level = engine.calculateSpellLevel(
-        baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: ['deleted-factor-id'],
-        requisites: [],
-      );
-
-      expect(level, 2); // Base 2 + unresolved factor(+0) = 2, no StateError
-    });
-
     test('an adding requisite contributes +1 magnitude', () {
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+      final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
         description: 'Fire with Ignem light', baseLevel: 3, source: 'built-in',
@@ -336,7 +295,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [],
+        range: _range, duration: _duration, target: _target,
         requisites: [Requisite(art: 'Auram', kind: RequisiteKind.adding)],
       );
 
@@ -344,7 +303,7 @@ void main() {
     });
 
     test('a free requisite contributes no magnitude', () {
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: []);
+      final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
         description: 'Fire with Ignem light', baseLevel: 3, source: 'built-in',
@@ -352,7 +311,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, selectedSpecialFactorIds: [],
+        range: _range, duration: _duration, target: _target,
         requisites: [Requisite(art: 'Auram', kind: RequisiteKind.free)],
       );
 
@@ -371,7 +330,7 @@ void main() {
         ],
         source: 'built-in',
       );
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: [material]);
+      final engine = SpellEngine(allSpells: [], allModifiers: [material]);
       final baseEffect = BaseEffect(
         id: 'rete-4', technique: 'Rego', form: 'Terram',
         description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
@@ -380,7 +339,6 @@ void main() {
       final breakdown = engine.calculateBreakdown(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
-        selectedSpecialFactorIds: const [],
         selectedModifiers: const {'terram-material': ['mat-metal']},
         requisites: const [],
       );
@@ -395,7 +353,7 @@ void main() {
     });
 
     test('an unresolvable modifier option contributes 0 and does not throw', () {
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: const []);
+      final engine = SpellEngine(allSpells: [], allModifiers: const []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
         description: 'Create flame', baseLevel: 3, source: 'built-in',
@@ -404,7 +362,6 @@ void main() {
       final breakdown = engine.calculateBreakdown(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
-        selectedSpecialFactorIds: const [],
         selectedModifiers: const {'deleted-modifier': ['deleted-option']},
         requisites: const [],
       );
@@ -413,7 +370,7 @@ void main() {
     });
 
     test('the breakdown lists base, parameters, requisites and modifiers', () {
-      final engine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: const []);
+      final engine = SpellEngine(allSpells: [], allModifiers: const []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
         description: 'Create flame', baseLevel: 3, source: 'built-in',
@@ -422,7 +379,6 @@ void main() {
       final breakdown = engine.calculateBreakdown(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
-        selectedSpecialFactorIds: const [],
         selectedModifiers: const {},
         requisites: [Requisite(art: 'Auram', kind: RequisiteKind.adding)],
       );
@@ -443,7 +399,6 @@ void main() {
           description: name, baseLevel: baseLevel, source: 'built-in',
         ),
         range: _range, duration: _duration, target: _target,
-        selectedSpecialFactorIds: [],
         requisites: [],
         source: 'built-in', createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
@@ -454,7 +409,7 @@ void main() {
       final spell2 = buildSpell('2', 'Creo', 'Ignem', 'Fireball', 5);
       final spell3 = buildSpell('3', 'Muto', 'Corpus', 'Transform Body', 5);
 
-      final engine = SpellEngine(allSpells: [spell1, spell2, spell3], allSpecialFactors: []);
+      final engine = SpellEngine(allSpells: [spell1, spell2, spell3]);
 
       final similar = engine.findSimilarSpells('Creo', 'Ignem');
 
@@ -469,7 +424,6 @@ void main() {
 
       final engine = SpellEngine(
         allSpells: [spell50, spell10, spell20], // deliberately unsorted input
-        allSpecialFactors: [],
       );
 
       final similar = engine.findSimilarSpells('Creo', 'Ignem', referenceLevel: 22);

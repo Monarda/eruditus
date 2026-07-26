@@ -5,36 +5,19 @@ import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/special_factor.dart';
 
 class SpellEngine {
   final List<Spell> allSpells;
 
-  // Mutable (not final): custom special factors can be added at runtime via
-  // ConfigurationBloc (Settings tab) after this engine is constructed. See
-  // [updateSpecialFactors] and SpellCreationBloc's handling of
-  // AvailableFactorsSynced, which keeps this in sync so a newly added custom
-  // factor's magnitude can be resolved without an app restart.
-  List<SpecialFactor> allSpecialFactors;
-
   // Mutable (not final): custom modifiers can be added at runtime via
-  // ConfigurationBloc (Settings tab) after this engine is constructed, same
-  // as allSpecialFactors above. See [updateModifiers].
+  // ConfigurationBloc (Settings tab) after this engine is constructed. See
+  // [updateModifiers].
   List<Modifier> allModifiers;
 
   SpellEngine({
     required this.allSpells,
-    required this.allSpecialFactors,
     this.allModifiers = const [],
   });
-
-  /// Replaces the known special factors used for magnitude lookups in
-  /// [calculateSpellLevel]. Called whenever the Settings tab's configured
-  /// special factors change, so a newly added custom factor becomes usable
-  /// in the Create tab immediately.
-  void updateSpecialFactors(List<SpecialFactor> factors) {
-    allSpecialFactors = factors;
-  }
 
   /// Replaces the known modifiers used for magnitude lookups in
   /// [calculateBreakdown]. Called whenever the Settings tab's configured
@@ -99,7 +82,6 @@ class SpellEngine {
     required SelectedParameter range,
     required SelectedParameter duration,
     required SelectedParameter target,
-    required List<String> selectedSpecialFactorIds,
     required Map<String, List<String>> selectedModifiers,
     required List<Requisite> requisites,
   }) {
@@ -122,17 +104,10 @@ class SpellEngine {
           magnitude: requisite.magnitude));
     }
 
-    // A selected id that no longer resolves (a factor or modifier deleted
-    // after the spell was saved) contributes 0 rather than throwing. See
+    // A selected id that no longer resolves (a modifier deleted after the
+    // spell was saved) contributes 0 rather than throwing. See
     // SpellLibraryBloc.LibraryRequested, which computes this for every saved
     // spell and would otherwise drop the Library tab into its error state.
-    for (final id in selectedSpecialFactorIds) {
-      for (final factor in allSpecialFactors.where((f) => f.id == id).take(1)) {
-        contributions.add(
-            LevelContribution(label: 'Factor · ${factor.name}', magnitude: factor.magnitude));
-      }
-    }
-
     selectedModifiers.forEach((modifierId, optionIds) {
       for (final modifier in allModifiers.where((m) => m.id == modifierId).take(1)) {
         for (final optionId in optionIds) {
@@ -160,7 +135,6 @@ class SpellEngine {
     required SelectedParameter range,
     required SelectedParameter duration,
     required SelectedParameter target,
-    required List<String> selectedSpecialFactorIds,
     Map<String, List<String>> selectedModifiers = const {},
     required List<Requisite> requisites,
   }) =>
@@ -169,7 +143,6 @@ class SpellEngine {
         range: range,
         duration: duration,
         target: target,
-        selectedSpecialFactorIds: selectedSpecialFactorIds,
         selectedModifiers: selectedModifiers,
         requisites: requisites,
       ).level;
@@ -186,7 +159,6 @@ class SpellEngine {
           range: a.range,
           duration: a.duration,
           target: a.target,
-          selectedSpecialFactorIds: a.selectedSpecialFactorIds,
           requisites: a.requisites,
         );
         final levelB = calculateSpellLevel(
@@ -194,7 +166,6 @@ class SpellEngine {
           range: b.range,
           duration: b.duration,
           target: b.target,
-          selectedSpecialFactorIds: b.selectedSpecialFactorIds,
           requisites: b.requisites,
         );
         return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());

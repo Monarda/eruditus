@@ -50,7 +50,6 @@ void main() {
         range: _range,
         duration: _duration,
         target: _target,
-        selectedSpecialFactorIds: const [],
         requisites: const [],
         source: 'user-created',
         createdAt: DateTime(2026, 1, 1),

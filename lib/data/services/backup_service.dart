@@ -4,20 +4,17 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/spell.dart';
 
 class BackupImportResult {
   final int spellsImported;
   final int effectsImported;
   final int parametersImported;
-  final int factorsImported;
 
   BackupImportResult({
     required this.spellsImported,
     required this.effectsImported,
     required this.parametersImported,
-    required this.factorsImported,
   });
 }
 
@@ -35,8 +32,6 @@ class BackupService {
         (await configRepository.getAllEffects()).where((e) => e.source == 'user-created').toList();
     final customParameters =
         (await configRepository.getAllParameters()).where((p) => p.source == 'user-created').toList();
-    final customFactors =
-        (await configRepository.getAllSpecialFactors()).where((f) => f.source == 'user-created').toList();
 
     final backup = {
       'version': _supportedVersion,
@@ -44,7 +39,6 @@ class BackupService {
       'spells': userSpells.map((s) => s.toMap()).toList(),
       'customEffects': customEffects.map((e) => e.toMap()).toList(),
       'customParameters': customParameters.map((p) => p.toMap()).toList(),
-      'customFactors': customFactors.map((f) => f.toMap()).toList(),
     };
 
     return jsonEncode(backup);
@@ -93,19 +87,10 @@ class BackupService {
       parametersImported++;
     }
 
-    var factorsImported = 0;
-    for (final factorMap in (data['customFactors'] as List? ?? const [])) {
-      final factor = SpecialFactor.fromMap(factorMap as Map<String, dynamic>);
-      await configRepository.deleteCustomFactor(factor.id);
-      await configRepository.addCustomFactor(factor);
-      factorsImported++;
-    }
-
     return BackupImportResult(
       spellsImported: spellsImported,
       effectsImported: effectsImported,
       parametersImported: parametersImported,
-      factorsImported: factorsImported,
     );
   }
 }

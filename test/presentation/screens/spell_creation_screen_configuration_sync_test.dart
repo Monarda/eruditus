@@ -1,5 +1,5 @@
 // Regression coverage for the "custom config doesn't reach Create until
-// restart" bug: SpellCreationScreen must read effects/parameters/factors
+// restart" bug: SpellCreationScreen must read effects/parameters/modifiers
 // live from ConfigurationBloc, so something added via ConfigurationBloc (as
 // happens in the Settings tab) becomes selectable here without rebuilding
 // the widget tree from scratch.
@@ -30,8 +30,8 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
-import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
@@ -86,7 +86,6 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
         parameters: const [],
-        factors: const [],
       );
 
       whenListen(
@@ -128,7 +127,6 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
         parameters: [customParameter],
-        factors: const [],
       ));
       await tester.pump();
       await tester.pump();
@@ -141,7 +139,7 @@ void main() {
   );
 
   testWidgets(
-    'a special factor added via ConfigurationBloc becomes selectable and its magnitude '
+    'a custom modifier added via ConfigurationBloc becomes selectable and its magnitude '
     'resolves in SpellEngine without an app restart',
     (tester) async {
       // The screen is a lazily-built ListView, so a section below the fold is
@@ -161,7 +159,6 @@ void main() {
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
         parameters: const [],
-        factors: const [],
       );
 
       whenListen(
@@ -186,33 +183,37 @@ void main() {
 
       expect(find.textContaining('Custom Complexity'), findsNothing);
 
-      final customFactor = SpecialFactor(
-        id: 'custom-f1', technique: 'Creo', form: 'Ignem',
-        name: 'Custom Complexity', description: 'A homebrewed complexity factor',
-        magnitude: 2, source: 'user-created',
+      final customModifier = Modifier(
+        id: 'custom-m1',
+        name: 'Custom Complexity',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Creo', form: 'Ignem'),
+        options: [ModifierOption(id: 'custom-m1-a', label: 'A homebrewed complexity option', magnitude: 2)],
+        source: 'user-created',
       );
 
-      configBloc.add(CustomFactorAdded(customFactor));
-      verify(() => configBloc.add(CustomFactorAdded(customFactor))).called(1);
+      configBloc.add(CustomModifierAdded(customModifier));
+      verify(() => configBloc.add(CustomModifierAdded(customModifier))).called(1);
 
       configController.add(ConfigurationState(
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
         parameters: const [],
-        factors: [customFactor],
+        modifiers: [customModifier],
       ));
       await tester.pump();
 
-      // The new factor is now shown as a selectable checkbox for the
-      // current Technique+Form.
+      // The new modifier is now shown, once the collapsed Modifiers section
+      // is expanded, as a selectable item for the current Technique+Form.
+      await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+      await tester.pump();
       expect(find.textContaining('Custom Complexity'), findsOneWidget);
 
-      // AvailableFactorsSynced should have been dispatched to
-      // SpellCreationBloc with the updated factors list so its SpellEngine
-      // can resolve the new factor's magnitude by id (rather than throwing
-      // "Bad state: no element" the next time it's selected and
-      // calculated).
-      verify(() => spellCreationBloc.add(AvailableFactorsSynced([customFactor]))).called(1);
+      // AvailableModifiersSynced should have been dispatched to
+      // SpellCreationBloc with the updated modifiers list so its SpellEngine
+      // can resolve the new modifier's magnitude by id (rather than silently
+      // contributing 0 the next time it's selected and calculated).
+      verify(() => spellCreationBloc.add(AvailableModifiersSynced([customModifier]))).called(1);
     },
   );
 }
