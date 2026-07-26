@@ -77,7 +77,34 @@ void main() {
       await tester.tap(find.text('Create an image that affects two senses (Base 2)').last);
       await tester.pumpAndSettle();
 
-      // Calculate.
+      // Range, Duration and Target became mandatory for a valid draft when the
+      // single parameter list was split into one dropdown per category, so they
+      // must be set or validation blocks the calculation below.
+      for (final entry in const {
+        'range-dropdown': 'Personal',
+        'duration-dropdown': 'Momentary',
+        'target-dropdown': 'Individual',
+      }.entries) {
+        await tester.scrollUntilVisible(
+          find.byKey(Key(entry.key)),
+          200.0,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(Key(entry.key)));
+        await tester.pumpAndSettle();
+        await tester.tap(find.textContaining(entry.value).last);
+        await tester.pumpAndSettle();
+      }
+
+      // Calculate. Those three dropdowns (plus the requisites section) pushed
+      // this button below the fold, so it needs scrolling into view first.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('calculate-button')),
+        200.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('calculate-button')));
       await tester.pumpAndSettle();
 
@@ -149,6 +176,128 @@ void main() {
 
       expect(find.text('My New Illusion'), findsOneWidget);
       expect(find.text('Phantasm of the Talking Head'), findsNothing);
+
+      await database.close();
+    },
+  );
+
+  // Requisites had no real-bloc coverage, and a crash slipped through as a
+  // result: the widget tests mock SpellCreationBloc, so no new state is ever
+  // emitted and the rebuild that follows adding a requisite never happens.
+  // This drives the genuine bloc, so add/re-render/change-kind/remove all run
+  // against real state transitions.
+  testWidgets(
+    'end-to-end: add requisites of both kinds, see the level change, then remove one',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+      final libraryRepository = LibraryRepository(assetLoader: assetLoader, spellRepository: spellRepository);
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final allSpecialFactors = await configRepository.getAllSpecialFactors();
+      final spellEngine = SpellEngine(allSpells: allSpells, allSpecialFactors: allSpecialFactors);
+
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      Future<void> scrollTo(Finder finder) async {
+        await tester.scrollUntilVisible(finder, 200.0, scrollable: find.byType(Scrollable).first);
+        await tester.pumpAndSettle();
+      }
+
+      await tester.tap(find.byKey(const Key('technique-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Creo').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('form-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ignem').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('base-effect-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('(Base 4)').last);
+      await tester.pumpAndSettle();
+
+      // Range/Duration/Target are required before a level can be calculated.
+      for (final entry in const {
+        'range-dropdown': 'Personal',
+        'duration-dropdown': 'Momentary',
+        'target-dropdown': 'Individual',
+      }.entries) {
+        await scrollTo(find.byKey(Key(entry.key)));
+        await tester.tap(find.byKey(Key(entry.key)));
+        await tester.pumpAndSettle();
+        await tester.tap(find.textContaining(entry.value).last);
+        await tester.pumpAndSettle();
+      }
+
+      // Add a requisite. This is the step that used to crash: the chosen art
+      // leaves the add dropdown's items on the resulting rebuild.
+      await scrollTo(find.byKey(const Key('requisite-add-dropdown')));
+      await tester.tap(find.byKey(const Key('requisite-add-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Auram').last);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('requisite-row-Auram')), findsOneWidget);
+
+      // Free by default, so the level matches the no-requisite calculation.
+      await scrollTo(find.byKey(const Key('calculate-button')));
+      await tester.tap(find.byKey(const Key('calculate-button')));
+      await tester.pumpAndSettle();
+      await scrollTo(find.textContaining('Calculated Spell Level:'));
+      final levelWithFreeRequisite = tester
+          .widget<Text>(find.textContaining('Calculated Spell Level:'))
+          .data!;
+
+      // Promote it to adding: +1 magnitude, so the level must rise.
+      await scrollTo(find.byKey(const Key('requisite-kind-Auram')));
+      await tester.tap(find.byKey(const Key('requisite-kind-Auram')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Adding (+1)').last);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      await scrollTo(find.byKey(const Key('calculate-button')));
+      await tester.tap(find.byKey(const Key('calculate-button')));
+      await tester.pumpAndSettle();
+      await scrollTo(find.textContaining('Calculated Spell Level:'));
+      final levelWithAddingRequisite = tester
+          .widget<Text>(find.textContaining('Calculated Spell Level:'))
+          .data!;
+
+      expect(
+        levelWithAddingRequisite,
+        isNot(levelWithFreeRequisite),
+        reason: 'promoting a requisite from free to adding should change the level',
+      );
+
+      // Removing it puts the art back in the add dropdown and must not throw.
+      await scrollTo(find.byKey(const Key('requisite-remove-Auram')));
+      await tester.tap(find.byKey(const Key('requisite-remove-Auram')));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('requisite-row-Auram')), findsNothing);
+      expect(find.text('No requisites.'), findsOneWidget);
 
       await database.close();
     },

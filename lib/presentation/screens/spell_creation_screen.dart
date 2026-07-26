@@ -8,7 +8,10 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
+import 'package:eruditus/utils/constants.dart';
 
 class SpellCreationScreen extends StatelessWidget {
   final List<String> techniques;
@@ -148,6 +151,8 @@ class SpellCreationScreen extends StatelessWidget {
                     if (param != null) bloc.add(TargetSelected(param));
                   },
                 ),
+                const SizedBox(height: 16),
+                _buildRequisitesSection(context, bloc, draft),
                 if (factorsForSelection.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   Text('Special Factors', style: Theme.of(context).textTheme.titleMedium),
@@ -240,6 +245,100 @@ class SpellCreationScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  /// The Arts selectable as a requisite: every Technique and Form except the
+  /// spell's own two, which are what the requisite would be a requisite *to*.
+  /// ArsArts and ArsForms overlap on Vim, so the union is de-duplicated.
+  static List<String> _selectableRequisiteArts(SpellDraft draft) {
+    return <String>{...ArsArts.all, ...ArsForms.all}
+        .where((art) => art != draft.technique && art != draft.form)
+        .toList()
+      ..sort();
+  }
+
+  Widget _buildRequisitesSection(
+    BuildContext context,
+    SpellCreationBloc bloc,
+    SpellDraft draft,
+  ) {
+    final taken = draft.requisites.map((r) => r.art).toSet();
+    final available =
+        _selectableRequisiteArts(draft).where((art) => !taken.contains(art)).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Requisites', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text(
+          'Free requisites cost nothing; adding requisites cost +1 magnitude each.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        if (draft.requisites.isEmpty)
+          const Text('No requisites.')
+        else
+          ...draft.requisites.map(
+            (req) => Padding(
+              key: Key('requisite-row-${req.art}'),
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                children: [
+                  Expanded(child: Text(req.art)),
+                  DropdownButton<RequisiteKind>(
+                    key: Key('requisite-kind-${req.art}'),
+                    value: req.kind,
+                    items: RequisiteKind.values
+                        .map((kind) => DropdownMenuItem(
+                              value: kind,
+                              child: Text(
+                                kind == RequisiteKind.adding ? 'Adding (+1)' : 'Free (+0)',
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: (kind) {
+                      if (kind != null) {
+                        bloc.add(RequisiteKindChanged(req.art, kind.name));
+                      }
+                    },
+                  ),
+                  IconButton(
+                    key: Key('requisite-remove-${req.art}'),
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Remove ${req.art} requisite',
+                    onPressed: () => bloc.add(RequisiteRemoved(req.art)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        if (available.isNotEmpty)
+          // A plain DropdownButton, not a DropdownButtonFormField: this is an
+          // action picker, not a field holding a value. Selecting an art moves
+          // it into the requisites list and therefore out of `available`, so a
+          // FormField's retained selection would match no remaining item and
+          // trip Flutter's "exactly one item with value" assertion on the next
+          // rebuild. Pinning value to null keeps the hint showing and leaves
+          // nothing to go stale.
+          DropdownButton<String>(
+            key: const Key('requisite-add-dropdown'),
+            value: null,
+            hint: const Text('Add requisite'),
+            isExpanded: true,
+            items: available
+                .map((art) => DropdownMenuItem(value: art, child: Text(art)))
+                .toList(),
+            // New requisites default to free, the cheaper and more common
+            // case; the user can promote one to adding via its kind dropdown.
+            onChanged: (art) {
+              if (art != null) {
+                bloc.add(RequisiteAdded(art, RequisiteKind.free.name));
+              }
+            },
+          ),
+      ],
     );
   }
 

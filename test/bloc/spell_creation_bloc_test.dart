@@ -344,6 +344,130 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'RequisiteAdded appends a requisite of the given kind',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const RequisiteAdded('Auram', 'free'));
+      bloc.add(const RequisiteAdded('Terram', 'adding'));
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>().having(
+        (s) => s.draft.requisites.map((r) => '${r.art}:${r.kind.name}'),
+        'requisites',
+        ['Auram:free', 'Terram:adding'],
+      ),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'RequisiteKindChanged flips only the named art, leaving the others alone',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const RequisiteAdded('Auram', 'free'));
+      bloc.add(const RequisiteAdded('Terram', 'free'));
+      bloc.add(const RequisiteKindChanged('Terram', 'adding'));
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>().having(
+        (s) => s.draft.requisites.map((r) => '${r.art}:${r.kind.name}'),
+        'requisites',
+        ['Auram:free', 'Terram:adding'],
+      ),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'RequisiteRemoved drops only the named art',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const RequisiteAdded('Auram', 'free'));
+      bloc.add(const RequisiteAdded('Terram', 'adding'));
+      bloc.add(const RequisiteRemoved('Auram'));
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>().having(
+        (s) => s.draft.requisites.map((r) => r.art),
+        'requisites',
+        ['Terram'],
+      ),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'an adding requisite raises the calculated level by one magnitude',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const RequisiteAdded('Auram', 'adding'));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          // Base 10 exceeds the additive cap, so the parameters' 10 magnitude
+          // plus the requisite's 1 all fall in the multiplier tier:
+          // 10 + (11 * 5) = 65, i.e. 5 more than the same draft without it.
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 65),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a free requisite leaves the calculated level unchanged',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const RequisiteAdded('Auram', 'free'));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          // Same 60 as the no-requisite case: a free requisite adds 0.
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 60),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'SpellCalculated reports a requisite that duplicates the spell\'s own form',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const RequisiteAdded('Ignem', 'adding'));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having(
+            (s) => s.validationErrors,
+            'validationErrors',
+            contains("Requisite art cannot be the spell's own technique or form"),
+          ),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'AvailableFactorsSynced updates the SpellEngine so a newly available special '
     'factor resolves during SpellCalculated instead of throwing',
     build: () => SpellCreationBloc(

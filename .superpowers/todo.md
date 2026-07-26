@@ -21,17 +21,23 @@
   - Dropdown automatically replaces if same category selected again
 
 ### 2. Requisites UI & Integration
-- [ ] Add requisites section to spell creation screen
-- [ ] Allow selecting multiple Forms as additional requisites
-- [ ] Validate: requisite Forms cannot be the primary Form
-- [ ] Display requisite magnitude contribution in level preview
-- [ ] Differentiate Required vs Additional requisites in UI (if both types needed)
-- **Current State:** Model + engine support requisites (each = +1 magnitude), but **no UI**
-- **Impact:** SpellCreationScreen needs new widget, spell_creation_bloc integration
-- **Files:**
-  - `lib/presentation/screens/spell_creation_screen.dart` (add requisite widget)
-  - `lib/presentation/widgets/` (new requisite_selector widget)
-  - `lib/bloc/spell_creation/spell_creation_bloc.dart` (add requisite events)
+- [x] Add requisites section to spell creation screen
+- [x] Allow selecting any number of Arts as requisites
+- [x] Validate: requisite art cannot be the spell's own Technique or Form; no duplicate arts
+- [x] Requisite magnitude feeds the calculated level (adding = +1, free = +0)
+- [x] Differentiate free vs adding requisites in UI (per-row kind dropdown)
+- **Status:** ✅ COMPLETE (branch `feature/requisites-ui`)
+- **Implementation:**
+  - Replaced RequiredRequisite/AdditionalRequisite with one `Requisite(art, kind)`
+    and a `RequisiteKind` enum (`free` = 0 magnitude, `adding` = 1)
+  - Spell/SpellDraft carry a single `requisites` list; serialization uses one
+    `requisites` key, and all 27 built-in spells were migrated
+  - Events: `RequisiteAdded(art, kind)` / `RequisiteRemoved(art)` /
+    `RequisiteKindChanged(art, newKind)`
+  - Art pool is the de-duplicated union of ArsArts + ArsForms minus the spell's
+    own Technique and Form; already-chosen arts drop out of the add dropdown
+- **Follow-up not done here:** the level preview shows the total only; it does
+  not itemise which magnitude came from requisites vs parameters vs factors.
 
 ### 3. Size Feature (MVP)
 - [ ] Add Size magnitude parameter to spell model

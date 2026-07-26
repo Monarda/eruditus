@@ -69,6 +69,14 @@ void main() {
     'a parameter added via ConfigurationBloc becomes selectable in SpellCreationScreen '
     'without reconstructing the widget',
     (tester) async {
+      // The screen is a lazily-built ListView, so a section below the fold is
+      // never constructed and finders can't see it. Give the surface enough
+      // height for the whole form.
+      tester.view.physicalSize = const Size(1200, 5000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final spellCreationBloc = MockSpellCreationBloc();
       final configBloc = MockConfigurationBloc();
       final configController = StreamController<ConfigurationState>();
@@ -136,6 +144,14 @@ void main() {
     'a special factor added via ConfigurationBloc becomes selectable and its magnitude '
     'resolves in SpellEngine without an app restart',
     (tester) async {
+      // The screen is a lazily-built ListView, so a section below the fold is
+      // never constructed and finders can't see it. Give the surface enough
+      // height for the whole form.
+      tester.view.physicalSize = const Size(1200, 5000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final spellCreationBloc = MockSpellCreationBloc();
       final configBloc = MockConfigurationBloc();
       final configController = StreamController<ConfigurationState>();
