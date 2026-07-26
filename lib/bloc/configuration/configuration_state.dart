@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 
@@ -10,6 +11,7 @@ class ConfigurationState extends Equatable {
   final List<BaseEffect> effects;
   final List<Parameter> parameters;
   final List<SpecialFactor> factors;
+  final List<Modifier> modifiers;
   final String? errorMessage;
 
   const ConfigurationState({
@@ -17,6 +19,7 @@ class ConfigurationState extends Equatable {
     this.effects = const [],
     this.parameters = const [],
     this.factors = const [],
+    this.modifiers = const [],
     this.errorMessage,
   });
 
@@ -27,6 +30,7 @@ class ConfigurationState extends Equatable {
     List<BaseEffect>? effects,
     List<Parameter>? parameters,
     List<SpecialFactor>? factors,
+    List<Modifier>? modifiers,
     String? errorMessage,
   }) {
     return ConfigurationState(
@@ -34,10 +38,11 @@ class ConfigurationState extends Equatable {
       effects: effects ?? this.effects,
       parameters: parameters ?? this.parameters,
       factors: factors ?? this.factors,
+      modifiers: modifiers ?? this.modifiers,
       errorMessage: errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, effects, parameters, factors, errorMessage];
+  List<Object?> get props => [status, effects, parameters, factors, modifiers, errorMessage];
 }

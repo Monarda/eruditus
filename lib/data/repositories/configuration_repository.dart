@@ -1,6 +1,7 @@
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 
@@ -36,4 +37,15 @@ class ConfigurationRepository {
 
   Future<void> addCustomFactor(SpecialFactor factor) => configDatasource.insertCustomFactor(factor);
   Future<void> deleteCustomFactor(String id) => configDatasource.deleteCustomFactor(id);
+
+  Future<List<Modifier>> getAllModifiers() async {
+    final builtIn = await assetLoader.loadModifiers();
+    final custom = await configDatasource.getAllCustomModifiers();
+    return [...builtIn, ...custom];
+  }
+
+  Future<void> addCustomModifier(Modifier modifier) =>
+      configDatasource.insertCustomModifier(modifier);
+  Future<void> deleteCustomModifier(String id) =>
+      configDatasource.deleteCustomModifier(id);
 }

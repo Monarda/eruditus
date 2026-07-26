@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 
@@ -66,6 +67,24 @@ class LocalConfigurationDatasource {
     final rows = await database.db.query('custom_factors');
     return rows
         .map((row) => SpecialFactor.fromMap(jsonDecode(row['data'] as String) as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> insertCustomModifier(Modifier modifier) async {
+    await database.db.insert('custom_modifiers', {
+      'id': modifier.id,
+      'data': jsonEncode(modifier.toMap()),
+    });
+  }
+
+  Future<void> deleteCustomModifier(String id) async {
+    await database.db.delete('custom_modifiers', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Modifier>> getAllCustomModifiers() async {
+    final rows = await database.db.query('custom_modifiers');
+    return rows
+        .map((row) => Modifier.fromMap(jsonDecode(row['data'] as String) as Map<String, dynamic>))
         .toList();
   }
 }

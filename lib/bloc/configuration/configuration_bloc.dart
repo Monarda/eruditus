@@ -30,11 +30,13 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
         final effects = await configRepository.getAllEffects();
         final parameters = await configRepository.getAllParameters();
         final factors = await configRepository.getAllSpecialFactors();
+        final modifiers = await configRepository.getAllModifiers();
         emit(state.copyWith(
           status: ConfigurationStatus.loaded,
           effects: effects,
           parameters: parameters,
           factors: factors,
+          modifiers: modifiers,
         ));
       } catch (e) {
         emit(state.copyWith(status: ConfigurationStatus.error, errorMessage: e.toString()));
@@ -57,6 +59,12 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
     } else if (event is CustomFactorDeleted) {
       await configRepository.deleteCustomFactor(event.id);
       await _reload(emit);
+    } else if (event is CustomModifierAdded) {
+      await configRepository.addCustomModifier(event.modifier);
+      await _reload(emit);
+    } else if (event is CustomModifierDeleted) {
+      await configRepository.deleteCustomModifier(event.id);
+      await _reload(emit);
     }
   }
 
@@ -66,11 +74,13 @@ class ConfigurationBloc extends Bloc<ConfigurationEvent, ConfigurationState> {
       final effects = await configRepository.getAllEffects();
       final parameters = await configRepository.getAllParameters();
       final factors = await configRepository.getAllSpecialFactors();
+      final modifiers = await configRepository.getAllModifiers();
       emit(state.copyWith(
         status: ConfigurationStatus.loaded,
         effects: effects,
         parameters: parameters,
         factors: factors,
+        modifiers: modifiers,
       ));
     } catch (e) {
       emit(state.copyWith(status: ConfigurationStatus.error, errorMessage: e.toString()));

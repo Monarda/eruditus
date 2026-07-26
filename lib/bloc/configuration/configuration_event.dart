@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 
@@ -51,6 +52,20 @@ class CustomFactorAdded extends ConfigurationEvent {
 class CustomFactorDeleted extends ConfigurationEvent {
   final String id;
   const CustomFactorDeleted(this.id);
+  @override
+  List<Object?> get props => [id];
+}
+
+class CustomModifierAdded extends ConfigurationEvent {
+  final Modifier modifier;
+  const CustomModifierAdded(this.modifier);
+  @override
+  List<Object?> get props => [modifier];
+}
+
+class CustomModifierDeleted extends ConfigurationEvent {
+  final String id;
+  const CustomModifierDeleted(this.id);
   @override
   List<Object?> get props => [id];
 }

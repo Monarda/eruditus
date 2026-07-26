@@ -5,6 +5,7 @@ import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
+import 'package:eruditus/models/modifier.dart';
 
 void main() {
   setUpAll(() {
@@ -106,5 +107,27 @@ void main() {
       final all = await datasource.getAllCustomFactors();
       expect(all, isEmpty);
     });
+  });
+
+  test('custom modifiers round-trip through the database', () async {
+    final modifier = Modifier(
+      id: 'custom-m1',
+      name: 'House size rule',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(form: 'Terram'),
+      options: [ModifierOption(id: 'custom-m1-big', label: 'Big', magnitude: 2)],
+      source: 'user-created',
+    );
+
+    await datasource.insertCustomModifier(modifier);
+    final all = await datasource.getAllCustomModifiers();
+
+    expect(all.length, 1);
+    expect(all.first.id, 'custom-m1');
+    expect(all.first.scope.form, 'Terram');
+    expect(all.first.optionById('custom-m1-big')?.magnitude, 2);
+
+    await datasource.deleteCustomModifier('custom-m1');
+    expect(await datasource.getAllCustomModifiers(), isEmpty);
   });
 }

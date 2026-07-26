@@ -7,6 +7,7 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
+import 'package:eruditus/models/modifier.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -74,5 +75,21 @@ void main() {
     final all = await repository.getAllSpecialFactors();
 
     expect(all.length, 8); // 7 built-in + 1 custom
+  });
+
+  test('getAllModifiers combines built-in and custom modifiers', () async {
+    await repository.addCustomModifier(Modifier(
+      id: 'custom-m1',
+      name: 'House rule',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(form: 'Ignem'),
+      options: [ModifierOption(id: 'custom-m1-a', label: 'A', magnitude: 1)],
+      source: 'user-created',
+    ));
+
+    final all = await repository.getAllModifiers();
+
+    expect(all.any((m) => m.id == 'crim-complexity'), isTrue, reason: 'built-in');
+    expect(all.any((m) => m.id == 'custom-m1'), isTrue, reason: 'custom');
   });
 }
