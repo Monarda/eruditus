@@ -14,26 +14,33 @@ Of 604 built-in base effects, 217 carry a `notes` field. 130 of those are noted 
 
 A further 14 notes describe runtime relationships the app displays as text and does not compute: conditional wards and level-dependent Might reduction, whose effect depends on the target creature's Might versus the spell's level.
 
-The genuine functional gaps are **42 effects across 5 effect-scoped families**, plus Size, which applies broadly rather than to a countable set of effects:
+A second audit pass — checking each flagged effect's description rather than trusting its note — eliminated two more apparent families. **The recurring trap: a note saying "material difficulty" or "Characteristic point scaling" often means the guideline's rungs were extracted as separate base effects, which is already correct modelling.** The test is whether the base level is quoted for *one* case with others adding magnitudes (a modifier), or whether each case has its own effect (no work needed).
 
-| Family | Effects | Shape |
+The genuine functional gaps are **23 effects across 4 families**, plus Size, which applies broadly rather than to a countable set of effects:
+
+| Family | Effects | Why it is a modifier |
 |---|---|---|
-| Material difficulty (Terram: +1 stone/glass, +2 metal/gemstone) | 22 | option → magnitude |
-| Complexity / extra senses (Creo, Perdo, Rego Imaginem) | 8 | option → magnitude |
-| Characteristic point scaling (Creo Mentem) | 6 | option → magnitude |
-| Unnatural-context modifiers (Creo Auram: +1/+2/+4) | 3 | option → magnitude |
-| Distance ladder (Rego transport) | 3 | option → magnitude |
-| Size (all Forms) | applies broadly | option → magnitude |
+| Material difficulty (Muto/Perdo/Rego Terram) | 17 | Base levels are quoted for dirt (`"Weaken dirt"`, `"Control or move dirt"`); harder materials add magnitudes |
+| Unnatural context (Creo Auram: +1/+2/+4) | 3 | Base is the phenomenon; unnatural context adds magnitudes |
+| Distance ladder (Rego Herbam, Ignem, Terram) | 3 | Base is 5 paces; greater distances add magnitudes |
+| Size (all Forms) | applies broadly | Base is one Individual; larger targets add magnitudes |
 
-### Why one mechanism, not six features
+**Not modifier families, despite their notes:**
 
-All six reduce to the same shape: *a choice the caster makes that costs magnitudes.* They differ only in what they are scoped to and whether the choice is exclusive — both of which are field values, not behaviour. Building Size alone would mean building this machinery once and then five more times.
+- **Creo Terram material (5 effects)** — `crte-1` sand, `crte-3` stone/glass, `crte-5` base metal, `crte-15a` precious metal, `crte-25a` gemstone. Material *is* the base effect. This is why material difficulty scopes to three technique+form pairs and not to Terram as a whole.
+- **Characteristic point scaling (6 effects)** — `creem-30` through `creem-55` are six separate effects at levels 30/35/40/45/50/55. Choosing "to no more than +2" *is* choosing `creem-40`.
+- **Rego Imaginem additional senses (4 effects)** — already covered by the existing `reim-additional-senses` special factor, which migrates as part of the complexity group. No new definition.
+- **Creo Vim variable complexity (4 effects)** — `crvi-G1` through `crvi-G4` are General entries whose level is bounded by the spell's own level. That is the deferred derived-output shape, not `option → magnitude`.
+
+### Why one mechanism, not four features
+
+All four reduce to the same shape: *a choice the caster makes that costs magnitudes.* They differ only in what they are scoped to and whether the choice is exclusive — both of which are field values, not behaviour. Building Size alone would mean building this machinery once and then three more times, and would leave the existing special-factor mechanism as a fifth near-duplicate.
 
 `SpecialFactor` already implements the shape for one family. The 7 built-in special factors *are* the Imaginem complexity pattern: technique+form scoped, magnitude-bearing, multi-select, already feeding `calculateSpellLevel`. What it cannot express is (a) mutual exclusivity, (b) any scope other than technique+form, and (c) non-magnitude constraints.
 
 ### Explicitly not a plugin architecture
 
-A strategy or handler interface was considered and rejected for this spec. With derived outputs out of scope (below), all six families are `option → magnitude`; six implementations of an interface whose bodies all read "return the selected option's magnitude" is speculative generality. The mechanism is data plus one interpreter.
+A strategy or handler interface was considered and rejected for this spec. With derived outputs out of scope (below), all four families are `option → magnitude`; four implementations of an interface whose bodies all read "return the selected option's magnitude" is speculative generality. The mechanism is data plus one interpreter.
 
 Should the deferred derived-output patterns come into scope later, that judgement should be revisited — those read the final computed level and produce a different quantity, which is a genuinely different shape and the point at which a code seam earns its place.
 
@@ -42,7 +49,7 @@ Should the deferred derived-output patterns come into scope later, that judgemen
 **In:**
 
 - A unified `Modifier` model replacing `SpecialFactor`, with single and multi selection modes and flexible scoping.
-- Data definitions for all six families.
+- Data definitions for all four modifier families, plus migration of the existing special factors into the complexity group.
 - Level calculation, validation, and pruning of stale selections.
 - An itemised level breakdown in the Create tab.
 - A collapsed-summary Modifiers section in the Create tab.
@@ -103,22 +110,23 @@ Chosen over a flat list of option ids for O(1) lookup when rendering each applic
 
 This does not make an invalid state unrepresentable — a `single`-mode modifier can still hold two option ids in its list. Closing that properly needs a sealed `SingleSelection`/`MultiSelection` pair, which can itself contradict the definition's `selectionMode`, so it buys little for the added machinery. The invariant is enforced by validation instead. This is the one place the type is deliberately weaker than the rule.
 
-## Scope binding: the 17 definitions
+## Scope binding: the 18 definitions
 
 | Family | Scope | Mode | Definitions |
 |---|---|---|---|
-| Size | `form: <each of 10>` | single | 10 |
-| Material difficulty | `form: 'Terram'` | single | 1 |
+| Size | `form:` each of the 10 Forms, technique null | single | 10 |
+| Material difficulty | `technique+form`: Muto/Terram, Perdo/Terram, Rego/Terram | single | 3 |
 | Unnatural context | `technique: 'Creo', form: 'Auram'` | single | 1 |
-| Characteristic scaling | `Creo`/`Mentem` + 6 `effectIds` | single | 1 |
-| Distance ladder | 3 `effectIds` across Rego | single | 1 |
-| Complexity | `technique+form` on Creo/Perdo/Rego Imaginem | multi | 3 |
+| Distance ladder | `effectIds: ['rrhe-10b', 'rrig-3c', 'rete-4']` | single | 1 |
+| Complexity *(migrated)* | `technique+form` on Creo/Perdo/Rego Imaginem | multi | 3 |
 
-Note what wildcards buy: material difficulty is a single definition covering 22 effects because it scopes by Form and ignores technique.
+The Form-only wildcard (technique null) is used by the 10 Size ladders. Material difficulty deliberately does **not** use it: Creo Terram models material as the base effect, so a Terram-wide scope would wrongly offer a material modifier on top of `crte-5` "Create base metal".
+
+The `effectIds` scope has exactly one user, the distance ladder, whose three effects sit in three different technique+form pairs and cannot be expressed any other way.
 
 The Imaginem migration groups today's independent factors into one multi-select `Modifier` per technique+form — three checkboxes under a "Complexity" heading rather than three loose ones. Behaviourally identical, since multi-select over options is equivalent to independent toggles.
 
-The most modifiers any single spell can attract is three: Size, one Form-scoped axis, and a distance ladder on the three specific Rego effects. Typically one or two.
+The most modifiers any single spell can attract is three, and exactly one effect hits that ceiling: `rete-4` (Rego Terram, transport a non-living object) draws Size, material difficulty and the distance ladder at once. It is therefore the natural fixture for multi-modifier tests. Every other affected effect draws one or two.
 
 ## Engine
 
@@ -184,7 +192,7 @@ This requires `calculateSpellLevel` to return a structured result rather than a 
 
 ### Data and code changes
 
-- `assets/data/special_factors.json` → `modifiers.json`, holding the 17 definitions.
+- `assets/data/special_factors.json` → `modifiers.json`, holding the 18 definitions.
 - `SpecialFactor`, its serialization and its test are deleted. `selectedSpecialFactorIds` is removed outright, not read as a fallback.
 - `ConfigurationBloc`'s factor plumbing is renamed rather than removed — it is the seam authorability will use later.
 - 10 of the 27 built-in spell assets reference factor ids (`lib-crim-talking-head`, `lib-crim-phantasmal-animal`, `lib-crim-human-form`, `lib-crim-haunt`, `lib-peim-veil-of-invisibility`, `lib-peim-smothered-sound`, `lib-reim-wizards-sidestep`, `lib-reim-captive-voice`, `lib-reim-confusion-insane-vibrations`, `lib-reim-wizard-torn`). Their references become `selectedModifiers` maps, **preserving magnitudes exactly** so their stated levels still verify against calculation.
@@ -203,7 +211,7 @@ The layering here is deliberate, informed by two failures earlier in this projec
 - **Model** — round-trip for `Modifier`, `ModifierOption`, `ModifierScope`; an `appliesTo` matrix covering each wildcard combination (technique-only, form-only, both, `effectIds` hit and miss).
 - **Engine** — magnitude summing for both selection modes; unresolvable option id contributes 0 rather than throwing; a `single`-mode modifier with two selected options produces a validation error; breakdown contents match the contributing sources.
 - **Bloc** — selection and deselection; pruning on `TechniqueSelected`, `FormSelected` and `BaseEffectSelected`.
-- **Asset integrity** — every modifier's `scope.effectIds` resolves to a real effect, mirroring the existing "every spell's referenced ids exist" test. This is what catches typos across 17 hand-authored definitions.
+- **Asset integrity** — every modifier's `scope.effectIds` resolves to a real effect, mirroring the existing "every spell's referenced ids exist" test. This is what catches typos across 18 hand-authored definitions.
 - **Widget** — collapsed summary renders the count and `+N` badge; expanding shows a dropdown for single mode and checkboxes for multi.
 - **Integration, real bloc, mandatory** — select a modifier, change Form, assert the selection is pruned and the badge updates. Pruning is re-render dependent, and mocked widget tests emit no new state, so they are structurally incapable of catching it. Run via `flutter test integration_test/<file> -d windows`; `flutter test` alone does not execute this directory.
 
@@ -220,7 +228,7 @@ All 27 built-in spells are Imaginem. Without new library content, the asset-leve
 | Risk | Mitigation |
 |---|---|
 | Pruning silently changes a level | Integration coverage with a real bloc; `+N` badge visible while collapsed |
-| Typos across 17 hand-authored definitions | Asset-integrity test resolving every `effectIds` entry |
+| Typos across 18 hand-authored definitions | Asset-integrity test resolving every `effectIds` entry |
 | Migration breaks the 10 Imaginem spells' verified levels | Magnitudes preserved exactly; existing calculated-vs-stated test guards it |
 | `single`-mode invariant violated in stored data | Validation rule; accepted as a validation concern rather than a type-level one |
 | Size ladder data unavailable or inaccurate | Framed as a rulebook extraction task with a named source, as with base effects |
