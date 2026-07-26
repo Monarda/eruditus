@@ -261,9 +261,12 @@ void main() {
       await scrollTo(find.byKey(const Key('calculate-button')));
       await tester.tap(find.byKey(const Key('calculate-button')));
       await tester.pumpAndSettle();
-      await scrollTo(find.textContaining('Calculated Spell Level:'));
+      await scrollTo(find.byKey(const Key('level-breakdown-card')));
       final levelWithFreeRequisite = tester
-          .widget<Text>(find.textContaining('Calculated Spell Level:'))
+          .widget<Text>(find.descendant(
+            of: find.byKey(const Key('breakdown-total')),
+            matching: find.byType(Text),
+          ).last)
           .data!;
 
       // Promote it to adding: +1 magnitude, so the level must rise.
@@ -277,9 +280,12 @@ void main() {
       await scrollTo(find.byKey(const Key('calculate-button')));
       await tester.tap(find.byKey(const Key('calculate-button')));
       await tester.pumpAndSettle();
-      await scrollTo(find.textContaining('Calculated Spell Level:'));
+      await scrollTo(find.byKey(const Key('level-breakdown-card')));
       final levelWithAddingRequisite = tester
-          .widget<Text>(find.textContaining('Calculated Spell Level:'))
+          .widget<Text>(find.descendant(
+            of: find.byKey(const Key('breakdown-total')),
+            matching: find.byType(Text),
+          ).last)
           .data!;
 
       expect(
@@ -296,6 +302,101 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byKey(const Key('requisite-row-Auram')), findsNothing);
       expect(find.text('No requisites.'), findsOneWidget);
+
+      await database.close();
+    },
+  );
+
+  // Pruning only manifests on the rebuild that follows a scope change.
+  // Widget tests mock SpellCreationBloc, so no new state is ever emitted and
+  // that rebuild never happens — the same structural blind spot that let the
+  // requisites crash above slip through. This drives the genuine bloc so a
+  // Form change that strands a modifier selection actually gets exercised.
+  testWidgets(
+    'end-to-end: a modifier selection is pruned when its scope-defining Form changes',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+      final libraryRepository = LibraryRepository(assetLoader: assetLoader, spellRepository: spellRepository);
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final spellEngine = SpellEngine(
+        allSpells: allSpells,
+        allModifiers: await configRepository.getAllModifiers(),
+      );
+
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      Future<void> scrollTo(Finder finder) async {
+        await tester.scrollUntilVisible(finder, 200.0,
+            scrollable: find.byType(Scrollable).first);
+        await tester.pumpAndSettle();
+      }
+
+      await tester.tap(find.byKey(const Key('technique-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rego').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('form-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terram').last);
+      await tester.pumpAndSettle();
+
+      // Expand and choose a material, which only Terram offers.
+      await scrollTo(find.byKey(const Key('modifiers-expand-toggle')));
+      await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+      await tester.pumpAndSettle();
+
+      await scrollTo(find.byKey(const Key('modifier-dropdown-rego-terram-material')));
+      await tester.tap(find.byKey(const Key('modifier-dropdown-rego-terram-material')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Base metal (+2)').last);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      await scrollTo(find.byKey(const Key('modifiers-summary')));
+      expect(find.text('+2'), findsOneWidget);
+
+      // Switching Form strands that selection; it must be pruned, and the
+      // badge must fall back to +0 rather than silently keeping the magnitude.
+      // (The modifiers section is now expanded, so the form dropdown has
+      // scrolled out of view and needs to be brought back before tapping it.)
+      // The form dropdown sits near the very top of the list, well outside
+      // the ListView's build cache extent by this point, so scrolling back
+      // up to it needs a negative delta (the shared `scrollTo` helper above
+      // only ever scrolls forward/down, matching every other use in this file).
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('form-dropdown')),
+        -200.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('form-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ignem').last);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      await scrollTo(find.byKey(const Key('modifiers-summary')));
+      expect(find.text('+2'), findsNothing);
+      expect(find.byKey(const Key('modifier-dropdown-rego-terram-material')), findsNothing);
 
       await database.close();
     },

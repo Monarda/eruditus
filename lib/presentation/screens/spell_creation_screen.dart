@@ -107,10 +107,20 @@ class SpellCreationScreen extends StatelessWidget {
                     key: const Key('base-effect-dropdown'),
                     decoration: const InputDecoration(labelText: 'Base Effect'),
                     initialValue: draft.baseEffect,
+                    // Base effect descriptions can be long, and a Form switch
+                    // swaps in a differently-sized list on the very next
+                    // rebuild. Without isExpanded, the field sizes itself to
+                    // its widest item's intrinsic width, which briefly
+                    // overflows the row during that transition (caught by
+                    // the real-bloc pruning integration test in Task 14).
+                    isExpanded: true,
                     items: effectsForSelection
                         .map((e) => DropdownMenuItem(
                               value: e,
-                              child: Text('${e.description} (Base ${e.baseLevel})'),
+                              child: Text(
+                                '${e.description} (Base ${e.baseLevel})',
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ))
                         .toList(),
                     onChanged: (value) {
