@@ -11,6 +11,7 @@ import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/presentation/widgets/level_breakdown_card.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 import 'package:eruditus/utils/constants.dart';
@@ -190,16 +191,8 @@ class SpellCreationScreen extends StatelessWidget {
                   ...state.validationErrors.map(
                     (e) => Text(e, style: const TextStyle(color: Colors.red)),
                   ),
-                if (showResultsBlock)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        'Calculated Spell Level: ${state.calculatedLevel}',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                  ),
+                if (showResultsBlock && state.breakdown != null)
+                  LevelBreakdownCard(breakdown: state.breakdown!),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   key: const Key('calculate-button'),

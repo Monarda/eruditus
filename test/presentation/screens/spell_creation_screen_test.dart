@@ -12,6 +12,7 @@ import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -173,21 +174,33 @@ void main() {
     expect(find.text('Base effect must be selected'), findsOneWidget);
   });
 
-  testWidgets('renders the calculated spell level when status is calculated', (tester) async {
+  testWidgets('renders the level breakdown when status is calculated', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
-      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
+      draft: SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: range, duration: duration, target: target,
+      ),
       calculatedLevel: 20,
+      breakdown: const LevelBreakdown(
+        level: 20,
+        contributions: [
+          LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+          LevelContribution(label: 'Range · Voice', magnitude: 2),
+        ],
+      ),
     );
     await pumpScreen(tester, state);
 
-    expect(find.text('Calculated Spell Level: 20'), findsOneWidget);
+    expect(find.byKey(const Key('level-breakdown-card')), findsOneWidget);
+    expect(find.text('20'), findsOneWidget);
+    expect(find.text('Range · Voice'), findsOneWidget);
   });
 
   testWidgets('does not render the calculated-level card before calculation', (tester) async {
     await pumpScreen(tester, SpellCreationState.initial());
 
-    expect(find.textContaining('Calculated Spell Level'), findsNothing);
+    expect(find.byKey(const Key('level-breakdown-card')), findsNothing);
   });
 
   testWidgets('shows suggestions with their level and description when status is calculated',
