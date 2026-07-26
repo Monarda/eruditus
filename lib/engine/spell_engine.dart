@@ -79,9 +79,9 @@ class SpellEngine {
 
   LevelBreakdown calculateBreakdown({
     required BaseEffect baseEffect,
-    required SelectedParameter range,
-    required SelectedParameter duration,
-    required SelectedParameter target,
+    required Parameter range,
+    required Parameter duration,
+    required Parameter target,
     required Map<String, List<String>> selectedModifiers,
     required List<Requisite> requisites,
   }) {
@@ -90,12 +90,9 @@ class SpellEngine {
           label: 'Base effect · ${baseEffect.description}',
           magnitude: baseEffect.baseLevel,
           isBase: true),
-      LevelContribution(
-          label: 'Range · ${range.parameter.name}', magnitude: range.parameter.magnitude),
-      LevelContribution(
-          label: 'Duration · ${duration.parameter.name}', magnitude: duration.parameter.magnitude),
-      LevelContribution(
-          label: 'Target · ${target.parameter.name}', magnitude: target.parameter.magnitude),
+      LevelContribution(label: 'Range · ${range.name}', magnitude: range.magnitude),
+      LevelContribution(label: 'Duration · ${duration.name}', magnitude: duration.magnitude),
+      LevelContribution(label: 'Target · ${target.name}', magnitude: target.magnitude),
     ];
 
     for (final requisite in requisites) {
@@ -132,9 +129,9 @@ class SpellEngine {
 
   int calculateSpellLevel({
     required BaseEffect baseEffect,
-    required SelectedParameter range,
-    required SelectedParameter duration,
-    required SelectedParameter target,
+    required Parameter range,
+    required Parameter duration,
+    required Parameter target,
     Map<String, List<String>> selectedModifiers = const {},
     required List<Requisite> requisites,
   }) =>

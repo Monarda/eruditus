@@ -13,34 +13,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-diameter",
-      "parameter": {
-        "id": "duration-diameter",
-        "name": "Diameter",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-diameter",
+      "name": "Diameter",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Creates an illusory face on a wall or other flat object that can speak during the spell's duration. Level 10.",
@@ -67,34 +58,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-diameter",
-      "parameter": {
-        "id": "duration-diameter",
-        "name": "Diameter",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-diameter",
+      "name": "Diameter",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Creates an image of any animal up to the size of a pony that moves and makes noise under your mental command. Level 20.",
@@ -121,34 +103,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [
       {
@@ -176,34 +149,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Makes an image of a clothed, equipped person who can move, speak, and behave as a human does, under your unspoken command. Level 25.",
@@ -231,34 +195,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-arcane-connection",
-      "parameter": {
-        "id": "range-arcane-connection",
-        "name": "Arcane Connection",
-        "category": "Range",
-        "magnitude": 4,
-        "source": "built-in"
-      }
+      "id": "range-arcane-connection",
+      "name": "Arcane Connection",
+      "category": "Range",
+      "magnitude": 4,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-concentration",
-      "parameter": {
-        "id": "duration-concentration",
-        "name": "Concentration",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-concentration",
+      "name": "Concentration",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [
       {
@@ -291,34 +246,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-concentration",
-      "parameter": {
-        "id": "duration-concentration",
-        "name": "Concentration",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-concentration",
+      "name": "Concentration",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-room",
-      "parameter": {
-        "id": "target-room",
-        "name": "Room",
-        "category": "Target",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "target-room",
+      "name": "Room",
+      "category": "Target",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "You can see inside a room, as long as you can touch one of its walls. Level 5.",
@@ -341,34 +287,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-personal",
-      "parameter": {
-        "id": "range-personal",
-        "name": "Personal",
-        "category": "Range",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "range-personal",
+      "name": "Personal",
+      "category": "Range",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-vision",
-      "parameter": {
-        "id": "target-vision",
-        "name": "Vision",
-        "category": "Target",
-        "magnitude": 4,
-        "source": "built-in"
-      }
+      "id": "target-vision",
+      "name": "Vision",
+      "category": "Target",
+      "magnitude": 4,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Makes your own illusions appear largely transparent to you, but still discernible. Level 15.",
@@ -391,34 +328,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-arcane-connection",
-      "parameter": {
-        "id": "range-arcane-connection",
-        "name": "Arcane Connection",
-        "category": "Range",
-        "magnitude": 4,
-        "source": "built-in"
-      }
+      "id": "range-arcane-connection",
+      "name": "Arcane Connection",
+      "category": "Range",
+      "magnitude": 4,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-concentration",
-      "parameter": {
-        "id": "duration-concentration",
-        "name": "Concentration",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-concentration",
+      "name": "Concentration",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-room",
-      "parameter": {
-        "id": "target-room",
-        "name": "Room",
-        "category": "Target",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "target-room",
+      "name": "Room",
+      "category": "Target",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "You can hear what is happening in a place you have an Arcane Connection to. Level 20.",
@@ -441,34 +369,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-personal",
-      "parameter": {
-        "id": "range-personal",
-        "name": "Personal",
-        "category": "Range",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "range-personal",
+      "name": "Personal",
+      "category": "Range",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-vision",
-      "parameter": {
-        "id": "target-vision",
-        "name": "Vision",
-        "category": "Target",
-        "magnitude": 4,
-        "source": "built-in"
-      }
+      "id": "target-vision",
+      "name": "Vision",
+      "category": "Target",
+      "magnitude": 4,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "You see distant things as clearly as if they were a foot away. Level 25.",
@@ -491,34 +410,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-arcane-connection",
-      "parameter": {
-        "id": "range-arcane-connection",
-        "name": "Arcane Connection",
-        "category": "Range",
-        "magnitude": 4,
-        "source": "built-in"
-      }
+      "id": "range-arcane-connection",
+      "name": "Arcane Connection",
+      "category": "Range",
+      "magnitude": 4,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-concentration",
-      "parameter": {
-        "id": "duration-concentration",
-        "name": "Concentration",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-concentration",
+      "name": "Concentration",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-room",
-      "parameter": {
-        "id": "target-room",
-        "name": "Room",
-        "category": "Target",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "target-room",
+      "name": "Room",
+      "category": "Target",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "You can see and hear what is happening in a distant place you have an Arcane Connection to. Level 25.",
@@ -541,34 +451,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "A setting's worth of food or drink tastes and smells exactly as you designate. Level 5.",
@@ -591,34 +492,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "The target appears more forceful, authoritative, and believable, gaining +3 on rolls to influence, lead, or convince others. Level 10.",
@@ -641,34 +533,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-room",
-      "parameter": {
-        "id": "target-room",
-        "name": "Room",
-        "category": "Target",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "target-room",
+      "name": "Room",
+      "category": "Target",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Causes all sounds in a room, particularly music, to be especially clear and sonorous. Level 10.",
@@ -691,34 +574,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Makes someone look, sound, feel, and smell different, though at least passably human. Level 15.",
@@ -741,34 +615,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Any one thing can be made to appear as something else of approximately the same shape and size. Level 20.",
@@ -791,34 +656,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Hides the taste of any substance, liquid or solid. Level 5.",
@@ -841,34 +697,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "A source of heat seems to lose its heat and drop to the surrounding temperature, though it retains its normal harmful effects. Level 10.",
@@ -891,34 +738,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "The target becomes invisible, but the spell breaks if the target moves. It still casts a shadow. Level 15.",
@@ -941,34 +779,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "The target becomes completely undetectable to normal sight regardless of what it does, but still casts a shadow. Level 20.",
@@ -995,34 +824,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-part",
-      "parameter": {
-        "id": "target-part",
-        "name": "Part",
-        "category": "Target",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "target-part",
+      "name": "Part",
+      "category": "Target",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Grooves, runes, and similar markings are obscured while the medium's overall shape remains constant. Level 20.",
@@ -1045,34 +865,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Makes one being or object incapable of producing sound. Level 20.",
@@ -1099,34 +910,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-group",
-      "parameter": {
-        "id": "target-group",
-        "name": "Group",
-        "category": "Target",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "target-group",
+      "name": "Group",
+      "category": "Target",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Causes a Group of creatures to become invisible; any affected member who moves or is touched makes everyone visible. Level 25.",
@@ -1149,34 +951,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Makes any person or object appear to be a pace away from its actual position. The spell ends when either moves. Level 10.",
@@ -1199,34 +992,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-personal",
-      "parameter": {
-        "id": "range-personal",
-        "name": "Personal",
-        "category": "Range",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "range-personal",
+      "name": "Personal",
+      "category": "Range",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Your image appears up to 1 pace from where you actually are; early attacks in combat are aimed at the image. Level 10.",
@@ -1254,34 +1038,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-part",
-      "parameter": {
-        "id": "target-part",
-        "name": "Part",
-        "category": "Target",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "target-part",
+      "name": "Part",
+      "category": "Target",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Captures a person's voice and places it in a bag; the victim cannot speak unless the bag is open. Level 30.",
@@ -1308,34 +1083,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-concentration",
-      "parameter": {
-        "id": "duration-concentration",
-        "name": "Concentration",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-concentration",
+      "name": "Concentration",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-vision",
-      "parameter": {
-        "id": "target-vision",
-        "name": "Vision",
-        "category": "Target",
-        "magnitude": 4,
-        "source": "built-in"
-      }
+      "id": "target-vision",
+      "name": "Vision",
+      "category": "Target",
+      "magnitude": 4,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "The target sees everything vibrate at high speed and sounds seem to come from the wrong places, suffering -3 to Attack/Defense. Level 30.",
@@ -1362,34 +1128,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-personal",
-      "parameter": {
-        "id": "range-personal",
-        "name": "Personal",
-        "category": "Range",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "range-personal",
+      "name": "Personal",
+      "category": "Range",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-concentration",
-      "parameter": {
-        "id": "duration-concentration",
-        "name": "Concentration",
-        "category": "Duration",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "duration-concentration",
+      "name": "Concentration",
+      "category": "Duration",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [
       {
@@ -1422,34 +1179,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-sight",
-      "parameter": {
-        "id": "range-sight",
-        "name": "Sight",
-        "category": "Range",
-        "magnitude": 3,
-        "source": "built-in"
-      }
+      "id": "range-sight",
+      "name": "Sight",
+      "category": "Range",
+      "magnitude": 3,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-momentary",
-      "parameter": {
-        "id": "duration-momentary",
-        "name": "Momentary",
-        "category": "Duration",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "duration-momentary",
+      "name": "Momentary",
+      "category": "Duration",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "One solid non-living object turns to a pile of dust. The object must be a base Individual or smaller, so a stone item can be a pace across while a metal item can only be one tenth that size in total. Level 20.",
@@ -1476,34 +1224,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-voice",
-      "parameter": {
-        "id": "range-voice",
-        "name": "Voice",
-        "category": "Range",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "range-voice",
+      "name": "Voice",
+      "category": "Range",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-sun",
-      "parameter": {
-        "id": "duration-sun",
-        "name": "Sun",
-        "category": "Duration",
-        "magnitude": 2,
-        "source": "built-in"
-      }
+      "id": "duration-sun",
+      "name": "Sun",
+      "category": "Duration",
+      "magnitude": 2,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "Makes a wall of granite up to 25 paces wide, 4 paces high, and 1 pace thick. One needs miner's tools to break through it, though it can be toppled if it is not connected to a support on its side or top. Level 25.",
@@ -1530,34 +1269,25 @@
       "source": "built-in"
     },
     "range": {
-      "parameterId": "range-touch",
-      "parameter": {
-        "id": "range-touch",
-        "name": "Touch",
-        "category": "Range",
-        "magnitude": 1,
-        "source": "built-in"
-      }
+      "id": "range-touch",
+      "name": "Touch",
+      "category": "Range",
+      "magnitude": 1,
+      "source": "built-in"
     },
     "duration": {
-      "parameterId": "duration-momentary",
-      "parameter": {
-        "id": "duration-momentary",
-        "name": "Momentary",
-        "category": "Duration",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "duration-momentary",
+      "name": "Momentary",
+      "category": "Duration",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "target": {
-      "parameterId": "target-individual",
-      "parameter": {
-        "id": "target-individual",
-        "name": "Individual",
-        "category": "Target",
-        "magnitude": 0,
-        "source": "built-in"
-      }
+      "id": "target-individual",
+      "name": "Individual",
+      "category": "Target",
+      "magnitude": 0,
+      "source": "built-in"
     },
     "requisites": [],
     "description": "You touch a stone weighing up to ten times the base Individual, and it instantly leaps from the ground to a point up to 5 paces away, wherever you direct it. Level 15.",

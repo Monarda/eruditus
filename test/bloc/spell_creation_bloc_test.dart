@@ -26,9 +26,9 @@ void main() {
         id: 'fb', technique: 'Creo', form: 'Ignem',
         description: 'fallback', baseLevel: 1, source: 'built-in',
       ),
-      range: SelectedParameter(parameterId: 'p1', parameter: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in')),
-      duration: SelectedParameter(parameterId: 'p2', parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in')),
-      target: SelectedParameter(parameterId: 'p3', parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in')),
+      range: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in'),
+      duration: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+      target: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in'),
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -108,9 +108,9 @@ void main() {
       final suggestion = Spell(
         id: 'suggestion-1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
         baseEffect: creoIgnemEffect,
-        range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
-        duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
-        target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+        range: rangeParam,
+        duration: durationParam,
+        target: targetParam,
         requisites: const [],
         source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );

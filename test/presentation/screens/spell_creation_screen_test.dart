@@ -48,9 +48,9 @@ void main() {
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'built-in');
 
-  late SelectedParameter range;
-  late SelectedParameter duration;
-  late SelectedParameter target;
+  late Parameter range;
+  late Parameter duration;
+  late Parameter target;
 
   setUpAll(() {
     registerFallbackValue(FakeSpellCreationEvent());
@@ -62,9 +62,9 @@ void main() {
   setUp(() {
     bloc = MockSpellCreationBloc();
     configBloc = MockConfigurationBloc();
-    range = SelectedParameter(parameterId: 'p1', parameter: voiceParam);
-    duration = SelectedParameter(parameterId: 'p2', parameter: durationParam);
-    target = SelectedParameter(parameterId: 'p3', parameter: targetParam);
+    range = voiceParam;
+    duration = durationParam;
+    target = targetParam;
   });
 
   /// The screen is a lazily-built ListView, so widgets below the fold are
@@ -207,9 +207,9 @@ void main() {
     final suggestion = Spell(
       id: 's1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
       baseEffect: creoIgnemEffect,
-      range: SelectedParameter(parameterId: 'p1', parameter: voiceParam),
-      duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
-      target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+      range: voiceParam,
+      duration: durationParam,
+      target: targetParam,
       requisites: const [],
       description: 'A roaring pillar of flame.',
       source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
@@ -267,9 +267,9 @@ void main() {
     final savedSpell = Spell(
       id: 'saved-1', name: 'My Fireball', technique: 'Creo', form: 'Ignem',
       baseEffect: creoIgnemEffect,
-      range: SelectedParameter(parameterId: 'p1', parameter: voiceParam),
-      duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
-      target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+      range: voiceParam,
+      duration: durationParam,
+      target: targetParam,
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );

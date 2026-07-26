@@ -63,8 +63,8 @@ void main() {
       expect(effectIds.contains(spell.baseEffect.id), isTrue,
           reason: '${spell.name}: baseEffect id ${spell.baseEffect.id} not in base_effects.json');
       for (final p in [spell.range, spell.duration, spell.target]) {
-        expect(parameterIds.contains(p.parameterId), isTrue,
-            reason: '${spell.name}: parameter id ${p.parameterId} not in parameters.json');
+        expect(parameterIds.contains(p.id), isTrue,
+            reason: '${spell.name}: parameter id ${p.id} not in parameters.json');
       }
     }
   });
@@ -85,9 +85,9 @@ void main() {
       final statedLevel = levelStatedInDescription(spell);
 
       final magnitudes = [
-        spell.range.parameter.magnitude,
-        spell.duration.parameter.magnitude,
-        spell.target.parameter.magnitude,
+        spell.range.magnitude,
+        spell.duration.magnitude,
+        spell.target.magnitude,
         for (final entry in spell.selectedModifiers.entries)
           for (final optionId in entry.value)
             modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,

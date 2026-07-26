@@ -138,7 +138,7 @@ class SpellCreationScreen extends StatelessWidget {
                   label: 'Range',
                   category: 'Range',
                   parameters: configState.parameters,
-                  selectedParameter: draft.range?.parameter,
+                  selectedParameter: draft.range,
                   onChanged: (param) {
                     if (param != null) bloc.add(RangeSelected(param));
                   },
@@ -150,7 +150,7 @@ class SpellCreationScreen extends StatelessWidget {
                   label: 'Duration',
                   category: 'Duration',
                   parameters: configState.parameters,
-                  selectedParameter: draft.duration?.parameter,
+                  selectedParameter: draft.duration,
                   onChanged: (param) {
                     if (param != null) bloc.add(DurationSelected(param));
                   },
@@ -162,7 +162,7 @@ class SpellCreationScreen extends StatelessWidget {
                   label: 'Target',
                   category: 'Target',
                   parameters: configState.parameters,
-                  selectedParameter: draft.target?.parameter,
+                  selectedParameter: draft.target,
                   onChanged: (param) {
                     if (param != null) bloc.add(TargetSelected(param));
                   },

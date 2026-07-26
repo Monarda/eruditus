@@ -6,10 +6,8 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
 
-SelectedParameter _sp(String id, String name, String category) => SelectedParameter(
-  parameterId: id,
-  parameter: Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in'),
-);
+Parameter _sp(String id, String name, String category) =>
+    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
 
 final _range = _sp('range-personal', 'Personal', 'Range');
 final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
@@ -274,12 +272,10 @@ void main() {
       );
       final touch = Parameter(id: 'p1', name: 'Touch', category: 'Range', magnitude: 1, source: 'built-in');
       final sun = Parameter(id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2, source: 'built-in');
-      final touchSp = SelectedParameter(parameterId: touch.id, parameter: touch);
-      final sunSp = SelectedParameter(parameterId: sun.id, parameter: sun);
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: touchSp, duration: sunSp, target: _target,
+        range: touch, duration: sun, target: _target,
         requisites: [],
       );
 

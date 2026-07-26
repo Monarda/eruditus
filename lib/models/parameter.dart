@@ -39,25 +39,3 @@ class Parameter {
   @override
   int get hashCode => id.hashCode;
 }
-
-class SelectedParameter {
-  final String parameterId;
-  final Parameter parameter;
-
-  SelectedParameter({
-    required this.parameterId,
-    required this.parameter,
-  });
-
-  Map<String, dynamic> toMap() => {
-    'parameterId': parameterId,
-    'parameter': parameter.toMap(),
-  };
-
-  factory SelectedParameter.fromMap(Map<String, dynamic> map) => SelectedParameter(
-    parameterId: requireField<String>(map, 'parameterId', 'SelectedParameter'),
-    parameter: Parameter.fromMap(
-      requireField<Map<String, dynamic>>(map, 'parameter', 'SelectedParameter'),
-    ),
-  );
-}

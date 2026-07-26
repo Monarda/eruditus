@@ -6,7 +6,6 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/modifier.dart';
-import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 
@@ -52,22 +51,19 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         draft: _withPrunedModifiers(state.draft.copyWith(baseEffect: event.effect)),
       ));
     } else if (event is RangeSelected) {
-      final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(range: selectedParam),
+        draft: state.draft.copyWith(range: event.parameter),
       ));
     } else if (event is DurationSelected) {
-      final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(duration: selectedParam),
+        draft: state.draft.copyWith(duration: event.parameter),
       ));
     } else if (event is TargetSelected) {
-      final selectedParam = SelectedParameter(parameterId: event.parameter.id, parameter: event.parameter);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(target: selectedParam),
+        draft: state.draft.copyWith(target: event.parameter),
       ));
     } else if (event is RequisiteAdded) {
       final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;

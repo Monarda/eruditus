@@ -32,9 +32,9 @@ void main() {
           id: 'e1', technique: 'Creo', form: 'Ignem',
           description: 'test', baseLevel: 5, source: 'built-in',
         ),
-        range: SelectedParameter(parameterId: 'p1', parameter: rangeParam),
-        duration: SelectedParameter(parameterId: 'p2', parameter: durationParam),
-        target: SelectedParameter(parameterId: 'p3', parameter: targetParam),
+        range: rangeParam,
+        duration: durationParam,
+        target: targetParam,
         requisites: const [],
         source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );

@@ -44,9 +44,9 @@ void main() {
         technique: 'Creo',
         form: 'Ignem',
         baseEffect: effect,
-        range: SelectedParameter(parameterId: voiceParam.id, parameter: voiceParam),
-        duration: SelectedParameter(parameterId: sunParam.id, parameter: sunParam),
-        target: SelectedParameter(parameterId: individualParam.id, parameter: individualParam),
+        range: voiceParam,
+        duration: sunParam,
+        target: individualParam,
         requisites: [
           Requisite(art: 'Vim', kind: RequisiteKind.free),
           Requisite(art: 'Mentem', kind: RequisiteKind.free),
@@ -78,20 +78,20 @@ void main() {
       expect(restored.baseEffect.baseLevel, effect.baseLevel);
       expect(restored.baseEffect.source, effect.source);
 
-      expect(restored.range.parameterId, voiceParam.id);
-      expect(restored.range.parameter.name, voiceParam.name);
-      expect(restored.range.parameter.category, voiceParam.category);
-      expect(restored.range.parameter.magnitude, voiceParam.magnitude);
-      expect(restored.range.parameter.source, voiceParam.source);
+      expect(restored.range.id, voiceParam.id);
+      expect(restored.range.name, voiceParam.name);
+      expect(restored.range.category, voiceParam.category);
+      expect(restored.range.magnitude, voiceParam.magnitude);
+      expect(restored.range.source, voiceParam.source);
 
-      expect(restored.duration.parameterId, sunParam.id);
-      expect(restored.duration.parameter.name, sunParam.name);
-      expect(restored.duration.parameter.category, sunParam.category);
-      expect(restored.duration.parameter.magnitude, sunParam.magnitude);
+      expect(restored.duration.id, sunParam.id);
+      expect(restored.duration.name, sunParam.name);
+      expect(restored.duration.category, sunParam.category);
+      expect(restored.duration.magnitude, sunParam.magnitude);
 
-      expect(restored.target.parameterId, individualParam.id);
-      expect(restored.target.parameter.name, individualParam.name);
-      expect(restored.target.parameter.category, individualParam.category);
+      expect(restored.target.id, individualParam.id);
+      expect(restored.target.name, individualParam.name);
+      expect(restored.target.category, individualParam.category);
 
       expect(restored.requisites.length, 4);
       expect(restored.requisites[0].art, 'Vim');
@@ -121,24 +121,18 @@ void main() {
           'source': 'built-in',
         },
         'duration': {
-          'parameterId': 'p1',
-          'parameter': {
-            'id': 'p1',
-            'name': 'Momentary',
-            'category': 'Duration',
-            'magnitude': 0,
-            'source': 'built-in',
-          },
+          'id': 'p1',
+          'name': 'Momentary',
+          'category': 'Duration',
+          'magnitude': 0,
+          'source': 'built-in',
         },
         'target': {
-          'parameterId': 'p2',
-          'parameter': {
-            'id': 'p2',
-            'name': 'Individual',
-            'category': 'Target',
-            'magnitude': 10,
-            'source': 'built-in',
-          },
+          'id': 'p2',
+          'name': 'Individual',
+          'category': 'Target',
+          'magnitude': 10,
+          'source': 'built-in',
         },
         'source': 'user-created',
         'createdAt': DateTime(2026, 7, 24).toIso8601String(),
@@ -166,18 +160,9 @@ void main() {
         baseLevel: 5,
         source: 'built-in',
       );
-      final range = SelectedParameter(
-        parameterId: 'range-personal',
-        parameter: Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in'),
-      );
-      final duration = SelectedParameter(
-        parameterId: 'duration-momentary',
-        parameter: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-      );
-      final target = SelectedParameter(
-        parameterId: 'target-individual',
-        parameter: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in'),
-      );
+      final range = Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in');
+      final duration = Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+      final target = Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in');
 
       final draft = SpellDraft(
         technique: 'Muto',
@@ -277,18 +262,9 @@ void main() {
           id: 'rete-4', technique: 'Rego', form: 'Terram',
           description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
         ),
-        range: SelectedParameter(
-          parameterId: 'p1',
-          parameter: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in'),
-        ),
-        duration: SelectedParameter(
-          parameterId: 'p2',
-          parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-        ),
-        target: SelectedParameter(
-          parameterId: 'p3',
-          parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
-        ),
+        range: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in'),
+        duration: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+        target: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
         selectedModifiers: const {
           'terram-material': ['mat-metal'],
           'rego-transport-distance': ['dist-500-paces'],
@@ -312,18 +288,9 @@ void main() {
           id: 'e1', technique: 'Creo', form: 'Ignem',
           description: 'Create flame', baseLevel: 10, source: 'built-in',
         ),
-        range: SelectedParameter(
-          parameterId: 'p1',
-          parameter: Parameter(id: 'p1', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in'),
-        ),
-        duration: SelectedParameter(
-          parameterId: 'p2',
-          parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-        ),
-        target: SelectedParameter(
-          parameterId: 'p3',
-          parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
-        ),
+        range: Parameter(id: 'p1', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in'),
+        duration: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+        target: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
         requisites: const [],
         source: 'built-in',
         createdAt: DateTime(2026, 1, 1),
@@ -345,6 +312,39 @@ void main() {
 
       expect(updated.selectedModifiers['terram-material'], ['mat-metal']);
       expect(draft.selectedModifiers['terram-material'], ['mat-stone'], reason: 'original unchanged');
+    });
+
+    test('spell parameter fields are plain Parameters, not wrappers', () {
+      final voice = Parameter(
+        id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
+      final momentary = Parameter(
+        id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+      final individual = Parameter(
+        id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+
+      final spell = Spell(
+        id: 'spell-1',
+        name: 'Test Spell',
+        technique: 'Creo',
+        form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: 'e1', technique: 'Creo', form: 'Ignem',
+          description: 'Create flame', baseLevel: 10, source: 'built-in'),
+        range: voice,
+        duration: momentary,
+        target: individual,
+        requisites: const [],
+        source: 'user-created',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+
+      final restored = Spell.fromMap(spell.toMap());
+
+      expect(restored.range.id, 'range-voice');
+      expect(restored.range.magnitude, 2);
+      expect(restored.duration.id, 'duration-momentary');
+      expect(restored.target.id, 'target-individual');
     });
   });
 }

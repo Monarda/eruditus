@@ -13,11 +13,8 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
 
-SelectedParameter _sp(String id, String name, String category) => SelectedParameter(
-      parameterId: id,
-      parameter: Parameter(
-          id: id, name: name, category: category, magnitude: 0, source: 'built-in'),
-    );
+Parameter _sp(String id, String name, String category) =>
+    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
 
 final _range = _sp('range-personal', 'Personal', 'Range');
 final _duration = _sp('duration-momentary', 'Momentary', 'Duration');

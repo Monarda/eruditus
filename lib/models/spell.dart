@@ -9,9 +9,9 @@ class Spell {
   final String technique;
   final String form;
   final BaseEffect baseEffect;
-  final SelectedParameter range;
-  final SelectedParameter duration;
-  final SelectedParameter target;
+  final Parameter range;
+  final Parameter duration;
+  final Parameter target;
   final Map<String, List<String>> selectedModifiers;
   final List<Requisite> requisites;
   final String? description;
@@ -61,15 +61,9 @@ class Spell {
     baseEffect: BaseEffect.fromMap(
       requireField<Map<String, dynamic>>(map, 'baseEffect', 'Spell'),
     ),
-    range: SelectedParameter.fromMap(
-      requireField<Map<String, dynamic>>(map, 'range', 'Spell'),
-    ),
-    duration: SelectedParameter.fromMap(
-      requireField<Map<String, dynamic>>(map, 'duration', 'Spell'),
-    ),
-    target: SelectedParameter.fromMap(
-      requireField<Map<String, dynamic>>(map, 'target', 'Spell'),
-    ),
+    range: Parameter.fromMap(requireField<Map<String, dynamic>>(map, 'range', 'Spell')),
+    duration: Parameter.fromMap(requireField<Map<String, dynamic>>(map, 'duration', 'Spell')),
+    target: Parameter.fromMap(requireField<Map<String, dynamic>>(map, 'target', 'Spell')),
     selectedModifiers: (map['selectedModifiers'] as Map?)?.map(
           (k, v) => MapEntry(k as String, List<String>.from(v as List)),
         ) ??
@@ -89,9 +83,9 @@ class SpellDraft {
   String? technique;
   String? form;
   BaseEffect? baseEffect;
-  SelectedParameter? range;
-  SelectedParameter? duration;
-  SelectedParameter? target;
+  Parameter? range;
+  Parameter? duration;
+  Parameter? target;
   Map<String, List<String>> selectedModifiers;
   List<Requisite> requisites;
   String? description;
@@ -170,9 +164,9 @@ class SpellDraft {
       technique: technique ?? this.technique,
       form: form ?? this.form,
       baseEffect: identical(baseEffect, _unset) ? this.baseEffect : baseEffect as BaseEffect?,
-      range: identical(range, _unset) ? this.range : range as SelectedParameter?,
-      duration: identical(duration, _unset) ? this.duration : duration as SelectedParameter?,
-      target: identical(target, _unset) ? this.target : target as SelectedParameter?,
+      range: identical(range, _unset) ? this.range : range as Parameter?,
+      duration: identical(duration, _unset) ? this.duration : duration as Parameter?,
+      target: identical(target, _unset) ? this.target : target as Parameter?,
       selectedModifiers: selectedModifiers ?? this.selectedModifiers,
       requisites: requisites ?? this.requisites,
       description: description ?? this.description,
