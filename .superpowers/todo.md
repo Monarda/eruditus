@@ -125,11 +125,28 @@
 
 ## Medium Priority
 
-### 6. Real Bloc Hang in Widget Tests
+### 6. Real Bloc Hang in Widget Tests — and the coverage hole it creates
 - [ ] Document workaround: mock Blocs in widget tests, use integration_test for real E2E
 - [ ] Create widget test helper with mock bloc factories
+- [ ] **Run integration tests as part of verification, not just `flutter test`**
+- [ ] Consider a single script/alias that runs both suites, so "tests pass" means both
 - **Context:** Real Bloc hangs forever under flutter_tester; known Bloc limitation
-- **Files:** Test helpers, widget test templates
+- **Why the extra items matter — two failures already traced to this:**
+  1. `flutter test` does **not** run `integration_test/`; those need a device
+     (`flutter test integration_test/... -d windows`). So the integration suite
+     rots silently. Task 1 broke the end-to-end test — it never selected the
+     newly-mandatory Range/Duration/Target and tapped `calculate-button`
+     without scrolling — and that went unnoticed across several "suite is
+     green" checks, because the file simply never ran.
+  2. Mocked blocs cannot catch re-render bugs. A mock emits no new state, so
+     the rebuild after an interaction never happens. The add-requisite crash
+     (`DropdownButtonFormField` left holding a value no longer in its `items`)
+     was invisible to 6 passing widget tests for exactly this reason. When the
+     failure mode *is* "what happens on re-render", either drive states through
+     a `StreamController` on the mock, or cover it in `integration_test/`.
+- **Verification rule of thumb:** a change to a screen's widget tree is not
+  verified by `flutter test` alone — run the integration suite too.
+- **Files:** Test helpers, widget test templates, `integration_test/`
 
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to new constraints (one Range/Duration/Target)
