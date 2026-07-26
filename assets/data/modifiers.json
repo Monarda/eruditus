@@ -237,7 +237,7 @@
       {
         "id": "size-imaginem-0",
         "label": "Base Individual",
-        "baseIndividual": "an adult human being — an illusion that size, producing that much noise",
+        "baseIndividual": "an adult human being is the standard, an illusion that size, producing that much noise, etc.",
         "magnitude": 0
       },
       { "id": "size-imaginem-1", "label": "Up to 10x base", "magnitude": 1 },
