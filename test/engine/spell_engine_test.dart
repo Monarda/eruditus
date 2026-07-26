@@ -5,6 +5,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/special_factor.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/modifier.dart';
 
 SelectedParameter _sp(String id, String name, String category) => SelectedParameter(
   parameterId: id,
@@ -244,6 +245,80 @@ void main() {
       );
 
       expect(level, 3); // Base 3 + free requisite(+0) = 3
+    });
+
+    test('an adding modifier option raises the level by its magnitude', () {
+      final material = Modifier(
+        id: 'terram-material',
+        name: 'Material difficulty',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
+        options: [
+          ModifierOption(id: 'mat-dirt', label: 'Dirt', magnitude: 0),
+          ModifierOption(id: 'mat-metal', label: 'Metal or gemstone', magnitude: 2),
+        ],
+        source: 'built-in',
+      );
+      final engine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: [material]);
+      final baseEffect = BaseEffect(
+        id: 'rete-4', technique: 'Rego', form: 'Terram',
+        description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedSpecialFactorIds: const [],
+        selectedModifiers: const {'terram-material': ['mat-metal']},
+        requisites: const [],
+      );
+
+      // Base 4 leaves 1 point of additive capacity; the modifier's 2 magnitude
+      // takes 1 additively and 1 at x5: 4 + 1 + 5 = 10.
+      expect(breakdown.level, 10);
+      expect(
+        breakdown.contributions.any((c) => c.label.contains('Metal or gemstone') && c.magnitude == 2),
+        isTrue,
+      );
+    });
+
+    test('an unresolvable modifier option contributes 0 and does not throw', () {
+      final engine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: const []);
+      final baseEffect = BaseEffect(
+        id: '1', technique: 'Creo', form: 'Ignem',
+        description: 'Create flame', baseLevel: 3, source: 'built-in',
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedSpecialFactorIds: const [],
+        selectedModifiers: const {'deleted-modifier': ['deleted-option']},
+        requisites: const [],
+      );
+
+      expect(breakdown.level, 3);
+    });
+
+    test('the breakdown lists base, parameters, requisites and modifiers', () {
+      final engine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: const []);
+      final baseEffect = BaseEffect(
+        id: '1', technique: 'Creo', form: 'Ignem',
+        description: 'Create flame', baseLevel: 3, source: 'built-in',
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedSpecialFactorIds: const [],
+        selectedModifiers: const {},
+        requisites: [Requisite(art: 'Auram', kind: RequisiteKind.adding)],
+      );
+
+      expect(breakdown.contributions.first.isBase, isTrue);
+      expect(breakdown.contributions.first.magnitude, 3);
+      expect(breakdown.contributions.any((c) => c.label.startsWith('Range')), isTrue);
+      expect(breakdown.contributions.any((c) => c.label.startsWith('Requisite')), isTrue);
     });
   });
 

@@ -121,6 +121,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       duration: state.draft.duration!,
       target: state.draft.target!,
       selectedSpecialFactorIds: state.draft.selectedSpecialFactorIds,
+      selectedModifiers: state.draft.selectedModifiers,
       requisites: state.draft.requisites,
     );
 
@@ -141,6 +142,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           duration: s.duration,
           target: s.target,
           selectedSpecialFactorIds: s.selectedSpecialFactorIds,
+          selectedModifiers: s.selectedModifiers,
           requisites: s.requisites,
         ),
     };

@@ -1,5 +1,7 @@
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
@@ -15,9 +17,15 @@ class SpellEngine {
   // factor's magnitude can be resolved without an app restart.
   List<SpecialFactor> allSpecialFactors;
 
+  // Mutable (not final): custom modifiers can be added at runtime via
+  // ConfigurationBloc (Settings tab) after this engine is constructed, same
+  // as allSpecialFactors above. See [updateModifiers].
+  List<Modifier> allModifiers;
+
   SpellEngine({
     required this.allSpells,
     required this.allSpecialFactors,
+    this.allModifiers = const [],
   });
 
   /// Replaces the known special factors used for magnitude lookups in
@@ -26,6 +34,14 @@ class SpellEngine {
   /// in the Create tab immediately.
   void updateSpecialFactors(List<SpecialFactor> factors) {
     allSpecialFactors = factors;
+  }
+
+  /// Replaces the known modifiers used for magnitude lookups in
+  /// [calculateBreakdown]. Called whenever the Settings tab's configured
+  /// modifiers change, so a newly added custom modifier becomes usable in the
+  /// Create tab immediately.
+  void updateModifiers(List<Modifier> modifiers) {
+    allModifiers = modifiers;
   }
 
   List<String> validateSpellDraft(SpellDraft draft) {
@@ -70,34 +86,85 @@ class SpellEngine {
     return errors;
   }
 
+  LevelBreakdown calculateBreakdown({
+    required BaseEffect baseEffect,
+    required SelectedParameter range,
+    required SelectedParameter duration,
+    required SelectedParameter target,
+    required List<String> selectedSpecialFactorIds,
+    required Map<String, List<String>> selectedModifiers,
+    required List<Requisite> requisites,
+  }) {
+    final contributions = <LevelContribution>[
+      LevelContribution(
+          label: 'Base effect · ${baseEffect.description}',
+          magnitude: baseEffect.baseLevel,
+          isBase: true),
+      LevelContribution(
+          label: 'Range · ${range.parameter.name}', magnitude: range.parameter.magnitude),
+      LevelContribution(
+          label: 'Duration · ${duration.parameter.name}', magnitude: duration.parameter.magnitude),
+      LevelContribution(
+          label: 'Target · ${target.parameter.name}', magnitude: target.parameter.magnitude),
+    ];
+
+    for (final requisite in requisites) {
+      contributions.add(LevelContribution(
+          label: 'Requisite · ${requisite.art}, ${requisite.kind.name}',
+          magnitude: requisite.magnitude));
+    }
+
+    // A selected id that no longer resolves (a factor or modifier deleted
+    // after the spell was saved) contributes 0 rather than throwing. See
+    // SpellLibraryBloc.LibraryRequested, which computes this for every saved
+    // spell and would otherwise drop the Library tab into its error state.
+    for (final id in selectedSpecialFactorIds) {
+      for (final factor in allSpecialFactors.where((f) => f.id == id).take(1)) {
+        contributions.add(
+            LevelContribution(label: 'Factor · ${factor.name}', magnitude: factor.magnitude));
+      }
+    }
+
+    selectedModifiers.forEach((modifierId, optionIds) {
+      for (final modifier in allModifiers.where((m) => m.id == modifierId).take(1)) {
+        for (final optionId in optionIds) {
+          final option = modifier.optionById(optionId);
+          if (option == null) continue;
+          contributions.add(LevelContribution(
+              label: '${modifier.name} · ${option.label}', magnitude: option.magnitude));
+        }
+      }
+    });
+
+    final magnitudes = [
+      for (final contribution in contributions)
+        if (!contribution.isBase) contribution.magnitude,
+    ];
+
+    return LevelBreakdown(
+      level: SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes),
+      contributions: contributions,
+    );
+  }
+
   int calculateSpellLevel({
     required BaseEffect baseEffect,
     required SelectedParameter range,
     required SelectedParameter duration,
     required SelectedParameter target,
     required List<String> selectedSpecialFactorIds,
+    Map<String, List<String>> selectedModifiers = const {},
     required List<Requisite> requisites,
-  }) {
-    final magnitudes = <int>[
-      range.parameter.magnitude,
-      duration.parameter.magnitude,
-      target.parameter.magnitude,
-      // A selected factor id that no longer resolves against
-      // allSpecialFactors (e.g. a custom factor the user deleted in Settings
-      // after saving a spell that referenced it) contributes 0 magnitude
-      // rather than throwing. A dangling reference shouldn't make an
-      // otherwise-valid spell's level uncomputable -- see
-      // SpellLibraryBloc.LibraryRequested, which computes this for every
-      // saved spell and would otherwise drop the whole Library tab into its
-      // error state over one bad reference.
-      for (final id in selectedSpecialFactorIds)
-        for (final f in allSpecialFactors.where((f) => f.id == id).take(1))
-          f.magnitude,
-      ...requisites.map((r) => r.magnitude),
-    ];
-
-    return SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes);
-  }
+  }) =>
+      calculateBreakdown(
+        baseEffect: baseEffect,
+        range: range,
+        duration: duration,
+        target: target,
+        selectedSpecialFactorIds: selectedSpecialFactorIds,
+        selectedModifiers: selectedModifiers,
+        requisites: requisites,
+      ).level;
 
   List<Spell> findSimilarSpells(String technique, String form, {int? referenceLevel}) {
     final matches = allSpells
