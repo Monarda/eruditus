@@ -5,7 +5,7 @@
     "technique": "Creo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "crim-2",
+      "id": "creim-2",
       "technique": "Creo",
       "form": "Imaginem",
       "description": "Create an image that affects two senses",
@@ -59,7 +59,7 @@
     "technique": "Creo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "crim-3",
+      "id": "creim-3",
       "technique": "Creo",
       "form": "Imaginem",
       "description": "Create an image that affects three senses",
@@ -113,7 +113,7 @@
     "technique": "Creo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "crim-3",
+      "id": "creim-3",
       "technique": "Creo",
       "form": "Imaginem",
       "description": "Create an image that affects three senses",
@@ -168,7 +168,7 @@
     "technique": "Creo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "crim-2",
+      "id": "creim-2",
       "technique": "Creo",
       "form": "Imaginem",
       "description": "Create an image that affects two senses",
@@ -223,7 +223,7 @@
     "technique": "Creo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "crim-2",
+      "id": "creim-2",
       "technique": "Creo",
       "form": "Imaginem",
       "description": "Create an image that affects two senses",
@@ -283,10 +283,10 @@
     "technique": "Intellego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "inim-1",
+      "id": "ireim-1a",
       "technique": "Intellego",
       "form": "Imaginem",
-      "description": "Use one sense at a distance / memorize an image / discern your own false images",
+      "description": "Use one sense at a distance",
       "baseLevel": 1,
       "source": "built-in"
     },
@@ -333,10 +333,10 @@
     "technique": "Intellego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "inim-1",
+      "id": "ireim-1c",
       "technique": "Intellego",
       "form": "Imaginem",
-      "description": "Use one sense at a distance / memorize an image / discern your own false images",
+      "description": "Be able to discern your own false images",
       "baseLevel": 1,
       "source": "built-in"
     },
@@ -383,10 +383,10 @@
     "technique": "Intellego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "inim-1",
+      "id": "ireim-1a",
       "technique": "Intellego",
       "form": "Imaginem",
-      "description": "Use one sense at a distance / memorize an image / discern your own false images",
+      "description": "Use one sense at a distance",
       "baseLevel": 1,
       "source": "built-in"
     },
@@ -433,10 +433,10 @@
     "technique": "Intellego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "inim-3",
+      "id": "ireim-3b",
       "technique": "Intellego",
       "form": "Imaginem",
-      "description": "Use three senses at a distance / enhance one sense in one way",
+      "description": "Enhance one of your senses in one way (to see clearly at a distance, to see small things, or to see in the dark, for example)",
       "baseLevel": 3,
       "source": "built-in"
     },
@@ -483,7 +483,7 @@
     "technique": "Intellego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "inim-2",
+      "id": "ireim-2",
       "technique": "Intellego",
       "form": "Imaginem",
       "description": "Use two senses at a distance",
@@ -533,10 +533,10 @@
     "technique": "Muto",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "muim-2",
+      "id": "muim-2a",
       "technique": "Muto",
       "form": "Imaginem",
-      "description": "Change two sensations of an object / transform species affecting one sense into another",
+      "description": "Change two sensations of an object",
       "baseLevel": 2,
       "source": "built-in"
     },
@@ -883,10 +883,10 @@
     "technique": "Perdo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "peim-4",
+      "id": "peim-4a",
       "technique": "Perdo",
       "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight (or any three of taste/touch/smell/hearing)",
+      "description": "Destroy an object's ability to affect sight",
       "baseLevel": 4,
       "source": "built-in"
     },
@@ -933,10 +933,10 @@
     "technique": "Perdo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "peim-4",
+      "id": "peim-4a",
       "technique": "Perdo",
       "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight (or any three of taste/touch/smell/hearing)",
+      "description": "Destroy an object's ability to affect sight",
       "baseLevel": 4,
       "source": "built-in"
     },
@@ -987,10 +987,10 @@
     "technique": "Perdo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "peim-4",
+      "id": "peim-4a",
       "technique": "Perdo",
       "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight (or any three of taste/touch/smell/hearing)",
+      "description": "Destroy an object's ability to affect sight",
       "baseLevel": 4,
       "source": "built-in"
     },
@@ -1037,10 +1037,10 @@
     "technique": "Perdo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "peim-3",
+      "id": "peim-3a",
       "technique": "Perdo",
       "form": "Imaginem",
-      "description": "Destroy an object's ability to affect smell or hearing (or both taste and touch)",
+      "description": "Destroy an object's ability to affect smell or hearing",
       "baseLevel": 3,
       "source": "built-in"
     },
@@ -1091,10 +1091,10 @@
     "technique": "Perdo",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "peim-4",
+      "id": "peim-4a",
       "technique": "Perdo",
       "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight (or any three of taste/touch/smell/hearing)",
+      "description": "Destroy an object's ability to affect sight",
       "baseLevel": 4,
       "source": "built-in"
     },
@@ -1246,10 +1246,10 @@
     "technique": "Rego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "reim-4",
+      "id": "reim-4b",
       "technique": "Rego",
       "form": "Imaginem",
-      "description": "Make an object appear up to fifteen paces away, or appear contained in/attached to another object",
+      "description": "Make an object appear (to one sense) to be contained in or attached to another object defined at the time of casting",
       "baseLevel": 4,
       "source": "built-in"
     },
@@ -1300,10 +1300,10 @@
     "technique": "Rego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "reim-3",
+      "id": "reim-3b",
       "technique": "Rego",
       "form": "Imaginem",
-      "description": "Make an object appear up to five paces from its actual position, or move rapidly and disorientingly",
+      "description": "Make objects appear to move rapidly in a disorientating way",
       "baseLevel": 3,
       "source": "built-in"
     },
@@ -1354,10 +1354,10 @@
     "technique": "Rego",
     "form": "Imaginem",
     "baseEffect": {
-      "id": "reim-15",
+      "id": "reim-15b",
       "technique": "Rego",
       "form": "Imaginem",
-      "description": "Make an object appear at a location you have an Arcane Connection to, or summon a disembodied Imaginem spirit",
+      "description": "Summon a disembodied spirit associated with Imaginem",
       "baseLevel": 15,
       "source": "built-in"
     },
