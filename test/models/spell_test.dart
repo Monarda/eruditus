@@ -269,5 +269,87 @@ void main() {
         ),
       );
     });
+
+    test('selectedModifiers survives a toMap/fromMap round-trip', () {
+      final spell = Spell(
+        id: 'spell-1',
+        name: 'Test Spell',
+        technique: 'Rego',
+        form: 'Terram',
+        baseEffect: BaseEffect(
+          id: 'rete-4', technique: 'Rego', form: 'Terram',
+          description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
+        ),
+        range: SelectedParameter(
+          parameterId: 'p1',
+          parameter: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in'),
+        ),
+        duration: SelectedParameter(
+          parameterId: 'p2',
+          parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+        ),
+        target: SelectedParameter(
+          parameterId: 'p3',
+          parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
+        ),
+        selectedSpecialFactorIds: const [],
+        selectedModifiers: const {
+          'terram-material': ['mat-metal'],
+          'rego-transport-distance': ['dist-500-paces'],
+        },
+        requisites: const [],
+        source: 'user-created',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+
+      final restored = Spell.fromMap(spell.toMap());
+
+      expect(restored.selectedModifiers['terram-material'], ['mat-metal']);
+      expect(restored.selectedModifiers['rego-transport-distance'], ['dist-500-paces']);
+    });
+
+    test('fromMap defaults selectedModifiers to an empty map when absent', () {
+      final map = Spell(
+        id: 'spell-2', technique: 'Creo', form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: 'e1', technique: 'Creo', form: 'Ignem',
+          description: 'Create flame', baseLevel: 10, source: 'built-in',
+        ),
+        range: SelectedParameter(
+          parameterId: 'p1',
+          parameter: Parameter(id: 'p1', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in'),
+        ),
+        duration: SelectedParameter(
+          parameterId: 'p2',
+          parameter: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+        ),
+        target: SelectedParameter(
+          parameterId: 'p3',
+          parameter: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
+        ),
+        selectedSpecialFactorIds: const [],
+        requisites: const [],
+        source: 'built-in',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ).toMap();
+      map.remove('selectedModifiers');
+
+      expect(Spell.fromMap(map).selectedModifiers, isEmpty);
+    });
+
+    test('SpellDraft.copyWith replaces selectedModifiers wholesale', () {
+      final draft = SpellDraft(
+        technique: 'Rego',
+        form: 'Terram',
+        selectedModifiers: const {'terram-material': ['mat-stone']},
+      );
+
+      final updated = draft.copyWith(selectedModifiers: const {'terram-material': ['mat-metal']});
+
+      expect(updated.selectedModifiers['terram-material'], ['mat-metal']);
+      expect(draft.selectedModifiers['terram-material'], ['mat-stone'], reason: 'original unchanged');
+    });
   });
 }

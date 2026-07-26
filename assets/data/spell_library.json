@@ -49,7 +49,12 @@
     "description": "Creates an illusory face on a wall or other flat object that can speak during the spell's duration. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-sensory-complexity"
+      ]
+    }
   },
   {
     "id": "lib-crim-phantasmal-animal",
@@ -101,7 +106,12 @@
     "description": "Creates an image of any animal up to the size of a pony that moves and makes noise under your mental command. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-directed-image"
+      ]
+    }
   },
   {
     "id": "lib-crim-phantasmal-fire",
@@ -156,7 +166,8 @@
     "description": "Makes an image of a fire (up to a large campfire) that dances, illuminates, crackles, and apparently warms, but does not spread or burn. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-crim-human-form",
@@ -209,7 +220,13 @@
     "description": "Makes an image of a clothed, equipped person who can move, speak, and behave as a human does, under your unspoken command. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-directed-image",
+        "crim-intricate-design"
+      ]
+    }
   },
   {
     "id": "lib-crim-haunt",
@@ -267,7 +284,13 @@
     "description": "Projects your own image and voice to a spot you have an Arcane Connection to; you can see and hear through the image. Level 35.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-directed-image",
+        "crim-intricate-design"
+      ]
+    }
   },
   {
     "id": "lib-inim-prying-eyes",
@@ -317,7 +340,8 @@
     "description": "You can see inside a room, as long as you can touch one of its walls. Level 5.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-inim-discern-own-illusions",
@@ -367,7 +391,8 @@
     "description": "Makes your own illusions appear largely transparent to you, but still discernible. Level 15.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-inim-ear-for-distant-voices",
@@ -417,7 +442,8 @@
     "description": "You can hear what is happening in a place you have an Arcane Connection to. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-inim-eyes-of-the-eagle",
@@ -467,7 +493,8 @@
     "description": "You see distant things as clearly as if they were a foot away. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-inim-summoning-distant-image",
@@ -517,7 +544,8 @@
     "description": "You can see and hear what is happening in a distant place you have an Arcane Connection to. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-muim-taste-of-spices",
@@ -567,7 +595,8 @@
     "description": "A setting's worth of food or drink tastes and smells exactly as you designate. Level 5.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-muim-ennobled-presence",
@@ -617,7 +646,8 @@
     "description": "The target appears more forceful, authoritative, and believable, gaining +3 on rolls to influence, lead, or convince others. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-muim-notes-of-delightful-sound",
@@ -667,7 +697,8 @@
     "description": "Causes all sounds in a room, particularly music, to be especially clear and sonorous. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-muim-disguise",
@@ -717,7 +748,8 @@
     "description": "Makes someone look, sound, feel, and smell different, though at least passably human. Level 15.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-muim-image-phantom",
@@ -767,7 +799,8 @@
     "description": "Any one thing can be made to appear as something else of approximately the same shape and size. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-peim-taste-dulled-tongue",
@@ -817,7 +850,8 @@
     "description": "Hides the taste of any substance, liquid or solid. Level 5.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-peim-cool-flames",
@@ -867,7 +901,8 @@
     "description": "A source of heat seems to lose its heat and drop to the surrounding temperature, though it retains its normal harmful effects. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-peim-invisibility-standing-wizard",
@@ -917,7 +952,8 @@
     "description": "The target becomes invisible, but the spell breaks if the target moves. It still casts a shadow. Level 15.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-peim-veil-of-invisibility",
@@ -969,7 +1005,12 @@
     "description": "The target becomes completely undetectable to normal sight regardless of what it does, but still casts a shadow. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "peim-complexity": [
+        "peim-changing-image"
+      ]
+    }
   },
   {
     "id": "lib-peim-conspicuous-sigil",
@@ -1019,7 +1060,8 @@
     "description": "Grooves, runes, and similar markings are obscured while the medium's overall shape remains constant. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-peim-smothered-sound",
@@ -1071,7 +1113,12 @@
     "description": "Makes one being or object incapable of producing sound. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "peim-complexity": [
+        "peim-changing-image"
+      ]
+    }
   },
   {
     "id": "lib-peim-chamber-of-invisibility",
@@ -1121,7 +1168,8 @@
     "description": "Causes a Group of creatures to become invisible; any affected member who moves or is touched makes everyone visible. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-reim-shifted-image",
@@ -1171,7 +1219,8 @@
     "description": "Makes any person or object appear to be a pace away from its actual position. The spell ends when either moves. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {}
   },
   {
     "id": "lib-reim-wizards-sidestep",
@@ -1224,7 +1273,13 @@
     "description": "Your image appears up to 1 pace from where you actually are; early attacks in combat are aimed at the image. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-changing-image",
+        "reim-moved-image-matches"
+      ]
+    }
   },
   {
     "id": "lib-reim-captive-voice",
@@ -1276,7 +1331,12 @@
     "description": "Captures a person's voice and places it in a bag; the victim cannot speak unless the bag is open. Level 30.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-changing-image"
+      ]
+    }
   },
   {
     "id": "lib-reim-confusion-insane-vibrations",
@@ -1328,7 +1388,12 @@
     "description": "The target sees everything vibrate at high speed and sounds seem to come from the wrong places, suffering -3 to Attack/Defense. Level 30.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-additional-senses"
+      ]
+    }
   },
   {
     "id": "lib-reim-wizard-torn",
@@ -1386,6 +1451,12 @@
     "description": "Your image separates from your body and can speak in your voice while you see through its eyes; you are invisible and silent at your real location. Level 35.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000"
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-additional-senses",
+        "reim-changing-image"
+      ]
+    }
   }
 ]
