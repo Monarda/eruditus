@@ -310,5 +310,160 @@
         "magnitude": 0
       }
     ]
+  },
+  {
+    "id": "muto-terram-material",
+    "name": "Material",
+    "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
+    "selectionMode": "single",
+    "scope": { "technique": "Muto", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "muto-terram-material-dirt",
+        "label": "Sand, dirt, mud or clay",
+        "baseIndividual": "ten cubic paces",
+        "magnitude": 0
+      },
+      {
+        "id": "muto-terram-material-stone",
+        "label": "Stone or glass",
+        "baseIndividual": "one cubic pace",
+        "magnitude": 1
+      },
+      {
+        "id": "muto-terram-material-base-metal",
+        "label": "Base metal",
+        "baseIndividual": "one cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "muto-terram-material-precious-metal",
+        "label": "Precious metal",
+        "baseIndividual": "one tenth of a cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "muto-terram-material-gemstone",
+        "label": "Gemstone",
+        "baseIndividual": "one cubic inch",
+        "magnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "perdo-terram-material",
+    "name": "Material",
+    "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
+    "selectionMode": "single",
+    "scope": { "technique": "Perdo", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "perdo-terram-material-dirt",
+        "label": "Sand, dirt, mud or clay",
+        "baseIndividual": "ten cubic paces",
+        "magnitude": 0
+      },
+      {
+        "id": "perdo-terram-material-stone",
+        "label": "Stone or glass",
+        "baseIndividual": "one cubic pace",
+        "magnitude": 1
+      },
+      {
+        "id": "perdo-terram-material-base-metal",
+        "label": "Base metal",
+        "baseIndividual": "one cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "perdo-terram-material-precious-metal",
+        "label": "Precious metal",
+        "baseIndividual": "one tenth of a cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "perdo-terram-material-gemstone",
+        "label": "Gemstone",
+        "baseIndividual": "one cubic inch",
+        "magnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "rego-terram-material",
+    "name": "Material",
+    "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
+    "selectionMode": "single",
+    "scope": { "technique": "Rego", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "rego-terram-material-dirt",
+        "label": "Sand, dirt, mud or clay",
+        "baseIndividual": "ten cubic paces",
+        "magnitude": 0
+      },
+      {
+        "id": "rego-terram-material-stone",
+        "label": "Stone or glass",
+        "baseIndividual": "one cubic pace",
+        "magnitude": 1
+      },
+      {
+        "id": "rego-terram-material-base-metal",
+        "label": "Base metal",
+        "baseIndividual": "one cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "rego-terram-material-precious-metal",
+        "label": "Precious metal",
+        "baseIndividual": "one tenth of a cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "rego-terram-material-gemstone",
+        "label": "Gemstone",
+        "baseIndividual": "one cubic inch",
+        "magnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "creo-auram-unnatural",
+    "name": "Unnatural context",
+    "description": "Creating a phenomenon in an unnatural fashion costs magnitudes",
+    "selectionMode": "single",
+    "scope": { "technique": "Creo", "form": "Auram", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      { "id": "creo-auram-unnatural-none", "label": "Natural for the season and place", "magnitude": 0 },
+      { "id": "creo-auram-unnatural-slight", "label": "Slightly unnatural fashion", "magnitude": 1 },
+      { "id": "creo-auram-unnatural-very", "label": "Very unnatural fashion", "magnitude": 2 },
+      {
+        "id": "creo-auram-unnatural-divorced",
+        "label": "Wholly divorced from its normal context",
+        "description": "For example, a lightning bolt springing from the caster's hands",
+        "magnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "rego-transport-distance",
+    "name": "Transport distance",
+    "description": "The base level covers 5 paces; greater distances cost magnitudes",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": null, "effectIds": ["rrhe-10b", "rrig-3c", "rete-4"], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      { "id": "rego-distance-5-paces", "label": "Up to 5 paces", "magnitude": 0 },
+      { "id": "rego-distance-50-paces", "label": "Up to 50 paces", "magnitude": 1 },
+      { "id": "rego-distance-500-paces", "label": "Up to 500 paces", "magnitude": 2 },
+      { "id": "rego-distance-1-league", "label": "Up to 1 league", "magnitude": 3 },
+      { "id": "rego-distance-7-leagues", "label": "Up to 7 leagues", "magnitude": 4 },
+      { "id": "rego-distance-arcane", "label": "Somewhere you have an Arcane Connection", "magnitude": 5 }
+    ]
   }
 ]

@@ -80,4 +80,50 @@ void main() {
 
     expect(ids.length, ids.toSet().length);
   });
+
+  test('material difficulty covers Muto, Perdo and Rego Terram but not Creo', () async {
+    final modifiers = await loader.loadModifiers();
+    final material = modifiers.where((m) => m.id.endsWith('-terram-material')).toList();
+
+    expect(material.length, 3);
+    expect(material.map((m) => m.scope.technique).toSet(), {'Muto', 'Perdo', 'Rego'});
+    expect(material.every((m) => m.scope.form == 'Terram'), isTrue);
+    expect(
+      material.any((m) => m.scope.appliesTo(technique: 'Creo', form: 'Terram', baseEffectId: 'crte-5')),
+      isFalse,
+      reason: 'Creo Terram models material as the base effect',
+    );
+  });
+
+  test('the distance ladder is scoped to its three transport effects', () async {
+    final modifiers = await loader.loadModifiers();
+    final distance = modifiers.firstWhere((m) => m.id == 'rego-transport-distance');
+
+    expect(distance.scope.effectIds..sort(), ['rete-4', 'rrhe-10b', 'rrig-3c']);
+    expect(distance.scope.technique, isNull);
+    expect(distance.scope.form, isNull);
+  });
+
+  test('every scoped effectId refers to a real base effect', () async {
+    final modifiers = await loader.loadModifiers();
+    final effectIds = (await loader.loadBaseEffects()).map((e) => e.id).toSet();
+
+    for (final modifier in modifiers) {
+      for (final id in modifier.scope.effectIds) {
+        expect(effectIds.contains(id), isTrue,
+            reason: '${modifier.id} references unknown base effect $id');
+      }
+    }
+  });
+
+  test('rete-4 draws all three of Size, material and distance', () async {
+    final modifiers = await loader.loadModifiers();
+    final applicable = modifiers
+        .where((m) => m.scope.appliesTo(
+            technique: 'Rego', form: 'Terram', baseEffectId: 'rete-4'))
+        .map((m) => m.id)
+        .toList();
+
+    expect(applicable, containsAll(['size-terram', 'rego-terram-material', 'rego-transport-distance']));
+  });
 }
