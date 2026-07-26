@@ -70,5 +70,245 @@
         "magnitude": 1
       }
     ]
+  },
+  {
+    "id": "size-animal",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Animal",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-animal-0",
+        "label": "Base Individual",
+        "baseIndividual": "a pony-sized animal, Size +1 or lower",
+        "magnitude": 0
+      },
+      { "id": "size-animal-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-animal-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-animal-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-animal-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-aquam",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Aquam",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-aquam-0",
+        "label": "Base Individual",
+        "baseIndividual": "a pool five paces across, two paces deep",
+        "magnitude": 0
+      },
+      { "id": "size-aquam-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-aquam-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-aquam-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-aquam-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-auram",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Auram",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-auram-0",
+        "label": "Base Individual",
+        "baseIndividual": "a weather phenomenon the area inside a standard Boundary",
+        "magnitude": 0
+      },
+      { "id": "size-auram-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-auram-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-auram-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-auram-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-corpus",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Corpus",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-corpus-0",
+        "label": "Base Individual",
+        "baseIndividual": "an adult human being, up to Size +1",
+        "magnitude": 0
+      },
+      { "id": "size-corpus-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-corpus-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-corpus-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-corpus-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-herbam",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Herbam",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-herbam-0",
+        "label": "Base Individual",
+        "baseIndividual": "a plant one pace in each direction",
+        "magnitude": 0
+      },
+      { "id": "size-herbam-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-herbam-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-herbam-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-herbam-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-ignem",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Ignem",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-ignem-0",
+        "label": "Base Individual",
+        "baseIndividual": "a large campfire or the hearthfire of a great hall",
+        "magnitude": 0
+      },
+      { "id": "size-ignem-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-ignem-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-ignem-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-ignem-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-imaginem",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Imaginem",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-imaginem-0",
+        "label": "Base Individual",
+        "baseIndividual": "an adult human being — an illusion that size, producing that much noise",
+        "magnitude": 0
+      },
+      { "id": "size-imaginem-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-imaginem-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-imaginem-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-imaginem-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "size-terram",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Terram",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "size-terram-0",
+        "label": "Base Individual",
+        "baseIndividual": "ten cubic paces",
+        "magnitude": 0
+      },
+      { "id": "size-terram-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-terram-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-terram-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-terram-4", "label": "Up to 10,000x base", "magnitude": 4 }
+    ]
+  },
+  {
+    "id": "aquam-base-individual",
+    "name": "Liquid type",
+    "description": "Which liquid the spell works on, which sets what one Individual is",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": "Aquam", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "aquam-base-water",
+        "label": "Water",
+        "baseIndividual": "a pool five paces across, two paces deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-natural",
+        "label": "Naturally-occurring liquids",
+        "baseIndividual": "a pool two paces across, one pace deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-processed",
+        "label": "Processed liquids",
+        "baseIndividual": "a pool one pace across, half a pace deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-dangerous",
+        "label": "Dangerous liquids",
+        "baseIndividual": "a puddle half a pace across, a fifth of a pace deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-poison",
+        "label": "Poisons",
+        "baseIndividual": "a single dose",
+        "magnitude": 0
+      }
+    ]
   }
 ]
