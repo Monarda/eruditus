@@ -83,6 +83,14 @@ class SpellEngine {
       seenArts.add(req.art);
     }
 
+    draft.selectedModifiers.forEach((modifierId, optionIds) {
+      for (final modifier in allModifiers.where((m) => m.id == modifierId).take(1)) {
+        if (modifier.selectionMode == ModifierSelectionMode.single && optionIds.length > 1) {
+          errors.add('Only one option may be selected for ${modifier.name}');
+        }
+      }
+    });
+
     return errors;
   }
 
@@ -194,5 +202,26 @@ class SpellEngine {
     }
 
     return matches;
+  }
+
+  /// Drops any selection whose modifier no longer applies to the draft. A
+  /// stranded selection would otherwise keep contributing magnitude invisibly
+  /// after the caster changes Technique, Form or base effect.
+  Map<String, List<String>> pruneModifierSelections({
+    required Map<String, List<String>> selectedModifiers,
+    String? technique,
+    String? form,
+    String? baseEffectId,
+  }) {
+    final kept = <String, List<String>>{};
+    selectedModifiers.forEach((modifierId, optionIds) {
+      for (final modifier in allModifiers.where((m) => m.id == modifierId).take(1)) {
+        if (modifier.scope.appliesTo(
+            technique: technique, form: form, baseEffectId: baseEffectId)) {
+          kept[modifierId] = optionIds;
+        }
+      }
+    });
+    return kept;
   }
 }

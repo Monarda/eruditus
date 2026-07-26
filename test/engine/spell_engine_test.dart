@@ -137,6 +137,118 @@ void main() {
       final errors = engine.validateSpellDraft(draft);
       expect(errors, isEmpty);
     });
+
+    test('fails when a single-select modifier has more than one option chosen', () {
+      final material = Modifier(
+        id: 'terram-material',
+        name: 'Material difficulty',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
+        options: [
+          ModifierOption(id: 'mat-stone', label: 'Stone', magnitude: 1),
+          ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2),
+        ],
+        source: 'built-in',
+      );
+      final testEngine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: [material]);
+      final draft = SpellDraft(
+        technique: 'Rego',
+        form: 'Terram',
+        baseEffect: BaseEffect(
+          id: 'rete-4', technique: 'Rego', form: 'Terram',
+          description: 'Transport', baseLevel: 4, source: 'built-in',
+        ),
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'terram-material': ['mat-stone', 'mat-metal']},
+      );
+
+      expect(testEngine.validateSpellDraft(draft),
+          contains('Only one option may be selected for Material difficulty'));
+    });
+
+    test('a multi-select modifier with several options chosen is valid', () {
+      final complexity = Modifier(
+        id: 'crim-complexity',
+        name: 'Complexity',
+        selectionMode: ModifierSelectionMode.multi,
+        scope: const ModifierScope(technique: 'Creo', form: 'Imaginem'),
+        options: [
+          ModifierOption(id: 'a', label: 'A', magnitude: 1),
+          ModifierOption(id: 'b', label: 'B', magnitude: 1),
+        ],
+        source: 'built-in',
+      );
+      final testEngine = SpellEngine(allSpells: [], allSpecialFactors: [], allModifiers: [complexity]);
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Imaginem',
+        baseEffect: BaseEffect(
+          id: 'e1', technique: 'Creo', form: 'Imaginem',
+          description: 'Image', baseLevel: 2, source: 'built-in',
+        ),
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'crim-complexity': ['a', 'b']},
+      );
+
+      expect(testEngine.validateSpellDraft(draft), isEmpty);
+    });
+  });
+
+  group('SpellEngine.pruneModifierSelections', () {
+    final material = Modifier(
+      id: 'terram-material',
+      name: 'Material difficulty',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
+      options: [ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2)],
+      source: 'built-in',
+    );
+    final distance = Modifier(
+      id: 'rego-transport-distance',
+      name: 'Transport distance',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(effectIds: ['rete-4']),
+      options: [ModifierOption(id: 'dist-500', label: '500 paces', magnitude: 2)],
+      source: 'built-in',
+    );
+    final engine = SpellEngine(
+        allSpells: [], allSpecialFactors: [], allModifiers: [material, distance]);
+
+    test('keeps selections whose modifier still applies', () {
+      final pruned = engine.pruneModifierSelections(
+        selectedModifiers: const {'terram-material': ['mat-metal']},
+        technique: 'Rego', form: 'Terram', baseEffectId: 'rete-4',
+      );
+
+      expect(pruned, {'terram-material': ['mat-metal']});
+    });
+
+    test('drops selections stranded by a Form change', () {
+      final pruned = engine.pruneModifierSelections(
+        selectedModifiers: const {'terram-material': ['mat-metal']},
+        technique: 'Rego', form: 'Ignem', baseEffectId: null,
+      );
+
+      expect(pruned, isEmpty);
+    });
+
+    test('drops effect-scoped selections stranded by a base effect change', () {
+      final pruned = engine.pruneModifierSelections(
+        selectedModifiers: const {'rego-transport-distance': ['dist-500']},
+        technique: 'Rego', form: 'Terram', baseEffectId: 'rete-1',
+      );
+
+      expect(pruned, isEmpty);
+    });
+
+    test('drops selections whose modifier no longer exists at all', () {
+      final pruned = engine.pruneModifierSelections(
+        selectedModifiers: const {'deleted-modifier': ['x']},
+        technique: 'Rego', form: 'Terram', baseEffectId: 'rete-4',
+      );
+
+      expect(pruned, isEmpty);
+    });
   });
 
   group('SpellEngine.calculateSpellLevel', () {
