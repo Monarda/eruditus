@@ -32,7 +32,7 @@
 - `lib/engine/level_breakdown.dart` — `LevelContribution`, `LevelBreakdown`
 - `lib/presentation/widgets/modifiers_section.dart` — collapsed/expandable modifier controls
 - `lib/presentation/widgets/level_breakdown_card.dart` — itemised contributions panel
-- `assets/data/modifiers.json` — the 18 definitions
+- `assets/data/modifiers.json` — the 17 definitions
 - `test/models/modifier_test.dart`, `test/engine/level_breakdown_test.dart`, `test/presentation/widgets/modifiers_section_test.dart`, `test/data/asset_modifier_integrity_test.dart`
 
 **Modified:** `lib/models/spell.dart`, `lib/engine/spell_engine.dart`, `lib/bloc/spell_creation/{spell_creation_bloc,spell_creation_event,spell_creation_state}.dart`, `lib/bloc/configuration/{configuration_bloc,configuration_event,configuration_state}.dart`, `lib/bloc/spell_library/spell_library_bloc.dart`, `lib/data/datasources/{asset_data_loader,local_configuration_datasource}.dart`, `lib/data/repositories/configuration_repository.dart`, `lib/data/database/app_database.dart`, `lib/presentation/screens/spell_creation_screen.dart`, `assets/data/spell_library.json`, `integration_test/spell_creation_flow_test.dart`
@@ -49,7 +49,9 @@
 
 **Interfaces:**
 - Consumes: `requireField<T>` from `lib/utils/map_serialization.dart`
-- Produces: `ModifierSelectionMode { single, multi }`; `ModifierOption({required String id, required String label, String? description, required int magnitude})`; `ModifierScope({String? technique, String? form, List<String> effectIds})` with `bool appliesTo({String? technique, String? form, String? baseEffectId})`; `Modifier({required String id, required String name, String? description, required ModifierSelectionMode selectionMode, required ModifierScope scope, required List<ModifierOption> options, required String source})` with `ModifierOption? optionById(String optionId)`. All three have `toMap()`/`fromMap()`.
+- Produces: `ModifierSelectionMode { single, multi }`; `ModifierOption({required String id, required String label, String? description, required int magnitude, String? baseIndividual})`; `ModifierScope({String? technique, String? form, List<String> effectIds, List<String> excludeTechniques})` with `bool appliesTo({String? technique, String? form, String? baseEffectId})`; `Modifier({required String id, required String name, String? description, required ModifierSelectionMode selectionMode, required ModifierScope scope, required List<ModifierOption> options, required String source})` with `ModifierOption? optionById(String optionId)`. All three have `toMap()`/`fromMap()`.
+
+`excludeTechniques` expresses the rulebook's "Intellego spells are not affected by Target size" — a Technique-wide exemption a positive `technique` match cannot represent. `baseIndividual` records what one Individual is for that option, which the Size ladder multiplies; it carries no magnitude.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -136,6 +138,14 @@ void main() {
       const scope = ModifierScope(effectIds: ['rete-4']);
       expect(scope.appliesTo(technique: 'Rego', form: 'Terram', baseEffectId: null), isFalse);
     });
+
+    test('excludeTechniques rejects a listed technique even when form matches', () {
+      // "Intellego spells are not affected by Target size" — core rules.
+      const scope = ModifierScope(form: 'Corpus', excludeTechniques: ['Intellego']);
+
+      expect(scope.appliesTo(technique: 'Creo', form: 'Corpus', baseEffectId: 'e1'), isTrue);
+      expect(scope.appliesTo(technique: 'Intellego', form: 'Corpus', baseEffectId: 'e1'), isFalse);
+    });
   });
 
   group('Modifier', () {
@@ -155,12 +165,39 @@ void main() {
     });
 
     test('toMap/fromMap round-trip preserves scope', () {
-      const scope = ModifierScope(technique: 'Rego', form: 'Terram', effectIds: ['rete-4']);
+      const scope = ModifierScope(
+          technique: 'Rego',
+          form: 'Terram',
+          effectIds: ['rete-4'],
+          excludeTechniques: ['Intellego']);
       final restored = Modifier.fromMap(_mod(scope: scope).toMap());
 
       expect(restored.scope.technique, 'Rego');
       expect(restored.scope.form, 'Terram');
       expect(restored.scope.effectIds, ['rete-4']);
+      expect(restored.scope.excludeTechniques, ['Intellego']);
+    });
+
+    test('toMap/fromMap round-trip preserves an option baseIndividual', () {
+      final modifier = Modifier(
+        id: 'terram-material',
+        name: 'Material difficulty',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
+        options: [
+          ModifierOption(
+              id: 'mat-gemstone', label: 'Gemstone', magnitude: 2, baseIndividual: 'one cubic inch'),
+        ],
+        source: 'built-in',
+      );
+
+      final restored = Modifier.fromMap(modifier.toMap());
+
+      expect(restored.optionById('mat-gemstone')?.baseIndividual, 'one cubic inch');
+    });
+
+    test('baseIndividual is null when an option does not define one', () {
+      expect(_mod().optionById('mat-dirt')?.baseIndividual, isNull);
     });
 
     test('fromMap throws a FormatException naming the valid modes when selectionMode is unknown', () {
@@ -202,17 +239,23 @@ ModifierSelectionMode _selectionModeFromName(String name) {
 }
 
 /// One rung of a modifier: a choice the caster can make, costing [magnitude].
+///
+/// [baseIndividual] records what one Individual is when this option is chosen
+/// — "one cubic inch" for gemstones, "a single dose" for poisons. It is the
+/// quantity a Size ladder multiplies, and carries no magnitude of its own.
 class ModifierOption {
   final String id;
   final String label;
   final String? description;
   final int magnitude;
+  final String? baseIndividual;
 
   ModifierOption({
     required this.id,
     required this.label,
     this.description,
     required this.magnitude,
+    this.baseIndividual,
   });
 
   Map<String, dynamic> toMap() => {
@@ -220,6 +263,7 @@ class ModifierOption {
         'label': label,
         'description': description,
         'magnitude': magnitude,
+        'baseIndividual': baseIndividual,
       };
 
   factory ModifierOption.fromMap(Map<String, dynamic> map) => ModifierOption(
@@ -227,6 +271,7 @@ class ModifierOption {
         label: requireField<String>(map, 'label', 'ModifierOption'),
         description: map['description'] as String?,
         magnitude: requireField<int>(map, 'magnitude', 'ModifierOption'),
+        baseIndividual: map['baseIndividual'] as String?,
       );
 
   @override
@@ -239,14 +284,25 @@ class ModifierOption {
 
 /// Which spells a modifier is offered for. A null [technique] or [form] is a
 /// wildcard; an empty [effectIds] means any effect within that technique/form.
+///
+/// [excludeTechniques] carves out Techniques the modifier never applies to,
+/// which a positive [technique] match cannot express. The Size ladders use it
+/// for Intellego, which the rules exempt from Target size across every Form.
 class ModifierScope {
   final String? technique;
   final String? form;
   final List<String> effectIds;
+  final List<String> excludeTechniques;
 
-  const ModifierScope({this.technique, this.form, this.effectIds = const []});
+  const ModifierScope({
+    this.technique,
+    this.form,
+    this.effectIds = const [],
+    this.excludeTechniques = const [],
+  });
 
   bool appliesTo({String? technique, String? form, String? baseEffectId}) {
+    if (technique != null && excludeTechniques.contains(technique)) return false;
     if (this.technique != null && this.technique != technique) return false;
     if (this.form != null && this.form != form) return false;
     if (effectIds.isNotEmpty &&
@@ -260,12 +316,15 @@ class ModifierScope {
         'technique': technique,
         'form': form,
         'effectIds': effectIds,
+        'excludeTechniques': excludeTechniques,
       };
 
   factory ModifierScope.fromMap(Map<String, dynamic> map) => ModifierScope(
         technique: map['technique'] as String?,
         form: map['form'] as String?,
         effectIds: List<String>.from(map['effectIds'] as List? ?? const []),
+        excludeTechniques:
+            List<String>.from(map['excludeTechniques'] as List? ?? const []),
       );
 }
 
@@ -370,7 +429,7 @@ Create `assets/data/modifiers.json`. The three groups below carry the same ids, 
     "name": "Complexity",
     "description": "Creo Imaginem complexity factors",
     "selectionMode": "multi",
-    "scope": { "technique": "Creo", "form": "Imaginem", "effectIds": [] },
+    "scope": { "technique": "Creo", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
     "source": "built-in",
     "options": [
       {
@@ -398,7 +457,7 @@ Create `assets/data/modifiers.json`. The three groups below carry the same ids, 
     "name": "Complexity",
     "description": "Perdo Imaginem complexity factors",
     "selectionMode": "multi",
-    "scope": { "technique": "Perdo", "form": "Imaginem", "effectIds": [] },
+    "scope": { "technique": "Perdo", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
     "source": "built-in",
     "options": [
       {
@@ -414,7 +473,7 @@ Create `assets/data/modifiers.json`. The three groups below carry the same ids, 
     "name": "Complexity",
     "description": "Rego Imaginem complexity factors",
     "selectionMode": "multi",
-    "scope": { "technique": "Rego", "form": "Imaginem", "effectIds": [] },
+    "scope": { "technique": "Rego", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
     "source": "built-in",
     "options": [
       {
@@ -2402,11 +2461,19 @@ git commit -m "refactor: remove SpecialFactor in favour of the unified Modifier 
 - Test: `test/data/asset_modifier_integrity_test.dart`
 
 **Interfaces:**
-- Produces: 10 modifier definitions with ids `size-<form-lowercase>`, each scoped `{"technique": null, "form": "<Form>", "effectIds": []}`, `selectionMode: "single"`
+- Produces: 8 modifier definitions with ids `size-<form-lowercase>`, each scoped `{"technique": null, "form": "<Form>", "effectIds": [], "excludeTechniques": ["Intellego"]}`, `selectionMode: "single"`; plus `aquam-base-individual`
 
-**Extraction source:** the Ars Magica 5e Size rules, extracted the same way the 604 base effects were. Each Form defines what one Individual is; each rung above it costs magnitudes. Per the spec, Aquam gets one base-Individual sub-type only (water); the other four are documented as deferred.
+**Extraction source:** `C:\Users\idf53\Development\personal\arsm\Ars-Magica-Open-License\reviewed\Ars Magica - Definitive Edition (Core Rules).md`. Read `## Targets and Sizes` (around line 12264) and the `#### Base Individuals` reference table (around line 23277). Locate them with `grep -n` rather than trusting the line numbers, then read the passage with `sed -n 'START,ENDp'` — the file is 25,800 lines and cannot be read whole.
+
+Three rules from that text govern this task, and each contradicts an assumption an earlier draft of this plan made:
+
+1. **The ladder is universal, not per-Form.** "Adding one magnitude (five levels) to the spell multiplies the maximum size of its target by ten." Every ladder therefore runs +0 (base Individual), +1 (×10), +2 (×100), +3 (×1000), +4 (×10,000). Only the *label* of the base rung differs by Form. Do not invent per-Form magnitudes.
+2. **Mentem and Vim get no ladder.** Both read "Size modifiers don't apply to … effects with Individual targets." Hence 8, not 10.
+3. **Intellego is exempt across every Form**, via `excludeTechniques`.
 
 Every ladder's first rung is the base Individual at magnitude 0, so "no size increase" is selectable rather than requiring an empty selection.
+
+Aquam additionally gets `aquam-base-individual`, a single-select modifier whose five options are **all magnitude 0** — the sub-type fixes what one Individual is, it does not change the level. Terram's equivalent is folded into the material modifiers in Task 12, because there the material choice both costs difficulty and sets the base Individual.
 
 - [ ] **Step 1: Write the failing integrity test**
 
@@ -2423,39 +2490,70 @@ void main() {
 
   final loader = AssetDataLoader();
 
-  test('every Form has exactly one Size ladder', () async {
+  // Mentem and Vim: "Size modifiers don't apply to ... effects with
+  // Individual targets" — core rules, Base Individuals table.
+  const sizeExemptForms = ['Mentem', 'Vim'];
+
+  test('every Form except Mentem and Vim has exactly one Size ladder', () async {
     final modifiers = await loader.loadModifiers();
     final sizeLadders = modifiers.where((m) => m.id.startsWith('size-')).toList();
 
-    expect(sizeLadders.length, ArsForms.all.length);
+    expect(sizeLadders.length, ArsForms.all.length - sizeExemptForms.length);
     for (final form in ArsForms.all) {
       final ladder = sizeLadders.where((m) => m.scope.form == form);
+      if (sizeExemptForms.contains(form)) {
+        expect(ladder, isEmpty, reason: '$form is exempt from Size');
+        continue;
+      }
       expect(ladder.length, 1, reason: '$form should have exactly one Size ladder');
       expect(ladder.first.scope.technique, isNull,
-          reason: 'Size applies regardless of Technique');
+          reason: 'Size applies regardless of Technique, bar the exclusion below');
       expect(ladder.first.selectionMode, ModifierSelectionMode.single);
     }
   });
 
-  test('every Size ladder starts at magnitude 0', () async {
+  test('no Size ladder is offered for Intellego', () async {
     final modifiers = await loader.loadModifiers();
 
     for (final ladder in modifiers.where((m) => m.id.startsWith('size-'))) {
-      expect(ladder.options.first.magnitude, 0,
-          reason: '${ladder.id} should offer the base Individual at no cost');
+      expect(ladder.scope.excludeTechniques, contains('Intellego'),
+          reason: '${ladder.id}: Intellego spells are not affected by Target size');
+      expect(
+        ladder.scope.appliesTo(
+            technique: 'Intellego', form: ladder.scope.form, baseEffectId: 'any'),
+        isFalse,
+      );
     }
   });
 
-  test('every Size ladder has strictly increasing magnitudes', () async {
+  test('every Size ladder uses the universal x10 magnitude progression', () async {
     final modifiers = await loader.loadModifiers();
 
     for (final ladder in modifiers.where((m) => m.id.startsWith('size-'))) {
       final magnitudes = ladder.options.map((o) => o.magnitude).toList();
-      for (var i = 1; i < magnitudes.length; i++) {
-        expect(magnitudes[i], greaterThan(magnitudes[i - 1]),
-            reason: '${ladder.id} rungs must increase');
-      }
+      expect(magnitudes, List.generate(magnitudes.length, (i) => i),
+          reason: '${ladder.id}: adding one magnitude multiplies size by ten, so '
+              'rungs must run 0, 1, 2, ... — magnitudes are not per-Form');
     }
+  });
+
+  test('every Size ladder names its base Individual on the first rung', () async {
+    final modifiers = await loader.loadModifiers();
+
+    for (final ladder in modifiers.where((m) => m.id.startsWith('size-'))) {
+      expect(ladder.options.first.baseIndividual, isNotNull,
+          reason: '${ladder.id} must say what one Individual is');
+    }
+  });
+
+  test('Aquam base Individual sub-types carry no magnitude', () async {
+    final modifiers = await loader.loadModifiers();
+    final aquam = modifiers.firstWhere((m) => m.id == 'aquam-base-individual');
+
+    expect(aquam.options.length, 5);
+    expect(aquam.options.every((o) => o.magnitude == 0), isTrue,
+        reason: 'a sub-type fixes what one Individual is; it does not change the level');
+    expect(aquam.options.every((o) => o.baseIndividual != null), isTrue);
   });
 
   test('every modifier option id is unique across all modifiers', () async {
@@ -2472,43 +2570,113 @@ void main() {
 Run: `flutter test test/data/asset_modifier_integrity_test.dart`
 Expected: FAIL — `Expected: <10> Actual: <0>`.
 
-- [ ] **Step 3: Extract and add the ladders**
+- [ ] **Step 3: Add the eight Size ladders**
 
-Add 10 entries to `assets/data/modifiers.json`, one per Form in `ArsForms.all` (Animal, Aquam, Auram, Corpus, Herbam, Ignem, Imaginem, Mentem, Terram, Vim), following this shape. Rung labels and magnitudes come from the 5e Size rules for that Form:
+Add 8 entries to `assets/data/modifiers.json`, one for each Form in `ArsForms.all` except Mentem and Vim — so Animal, Aquam, Auram, Corpus, Herbam, Ignem, Imaginem and Terram. Every ladder is identical in structure and magnitudes; only the base rung's `label` and `baseIndividual` change:
 
 ```json
   {
     "id": "size-corpus",
     "name": "Size",
-    "description": "Targets larger than one Individual cost magnitudes",
+    "description": "Each magnitude multiplies the maximum size of the target by ten",
     "selectionMode": "single",
-    "scope": { "technique": null, "form": "Corpus", "effectIds": [] },
+    "scope": {
+      "technique": null,
+      "form": "Corpus",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
     "source": "built-in",
     "options": [
-      { "id": "size-corpus-0", "label": "One person", "magnitude": 0 },
-      { "id": "size-corpus-1", "label": "Up to a large animal", "magnitude": 1 },
-      { "id": "size-corpus-2", "label": "Up to a very large animal", "magnitude": 2 }
+      {
+        "id": "size-corpus-0",
+        "label": "Base Individual",
+        "baseIndividual": "an adult human being, up to Size +1",
+        "magnitude": 0
+      },
+      { "id": "size-corpus-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-corpus-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-corpus-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-corpus-4", "label": "Up to 10,000x base", "magnitude": 4 }
     ]
   }
 ```
 
-For Aquam, label the base rung to make the supported sub-type explicit, e.g. `"One cubic pace of water"`, and record the other four sub-types in the modifier's `description`.
+Base Individuals, taken verbatim from the rulebook's `#### Base Individuals` table:
 
-- [ ] **Step 4: Run test to verify it passes**
+| Form | `baseIndividual` |
+|---|---|
+| Animal | a pony-sized animal, Size +1 or lower |
+| Aquam | see `aquam-base-individual` below — use "a pool five paces across, two paces deep" for the water default |
+| Auram | a weather phenomenon the area inside a standard Boundary |
+| Corpus | an adult human being, up to Size +1 |
+| Herbam | a plant one pace in each direction |
+| Ignem | a large campfire or the hearthfire of a great hall |
+| Imaginem | an adult human being — an illusion that size, producing that much noise |
+| Terram | see the material modifiers in Task 12 — use "ten cubic paces" for the sand/dirt default |
+
+- [ ] **Step 4: Add the Aquam base-Individual sub-types**
+
+Aquam's five sub-types change what one Individual is without changing the level, so every option is magnitude 0:
+
+```json
+  {
+    "id": "aquam-base-individual",
+    "name": "Liquid type",
+    "description": "Which liquid the spell works on, which sets what one Individual is",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": "Aquam", "effectIds": [], "excludeTechniques": [] },
+    "source": "built-in",
+    "options": [
+      {
+        "id": "aquam-base-water",
+        "label": "Water",
+        "baseIndividual": "a pool five paces across, two paces deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-natural",
+        "label": "Naturally-occurring liquids",
+        "baseIndividual": "a pool two paces across, one pace deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-processed",
+        "label": "Processed liquids",
+        "baseIndividual": "a pool one pace across, half a pace deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-dangerous",
+        "label": "Dangerous liquids",
+        "baseIndividual": "a puddle half a pace across, a fifth of a pace deep",
+        "magnitude": 0
+      },
+      {
+        "id": "aquam-base-poison",
+        "label": "Poisons",
+        "baseIndividual": "a single dose",
+        "magnitude": 0
+      }
+    ]
+  }
+```
+
+- [ ] **Step 5: Run test to verify it passes**
 
 Run: `flutter test test/data/asset_modifier_integrity_test.dart`
 Expected: PASS — `All tests passed!`
 
-- [ ] **Step 5: Run the full suite**
+- [ ] **Step 6: Run the full suite**
 
 Run: `flutter test`
 Expected: the 5 documented pre-existing failures and no others.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add assets/data/modifiers.json test/data/asset_modifier_integrity_test.dart
-git commit -m "feat: add per-Form Size ladders"
+git commit -m "feat: add Size ladders and Aquam base-Individual sub-types"
 ```
 
 ---
@@ -2523,6 +2691,8 @@ git commit -m "feat: add per-Form Size ladders"
 - Produces: `muto-terram-material`, `perdo-terram-material`, `rego-terram-material`, `creo-auram-unnatural`, `rego-transport-distance`
 
 Material difficulty deliberately excludes Creo Terram, whose 5 effects (`crte-1` sand, `crte-3` stone/glass, `crte-5` base metal, `crte-15a` precious metal, `crte-25a` gemstone) model material as the base effect. Scoping to Terram as a whole would wrongly offer a material modifier on top of "Create base metal".
+
+Each material modifier carries **5 options, not 3**: for Terram the material choice is a single axis with two consequences — it costs difficulty magnitude *and* fixes what one Individual is. Base metal, precious metal and gemstone all cost +2 but have base Individuals of one cubic foot, a tenth of that, and one cubic inch respectively, so they cannot be collapsed into a single "metal or gemstone" rung.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2588,15 +2758,42 @@ Append to `assets/data/modifiers.json`. Repeat the material block three times wi
 ```json
   {
     "id": "rego-terram-material",
-    "name": "Material difficulty",
-    "description": "Base levels are quoted for dirt; harder materials cost magnitudes",
+    "name": "Material",
+    "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
     "selectionMode": "single",
-    "scope": { "technique": "Rego", "form": "Terram", "effectIds": [] },
+    "scope": { "technique": "Rego", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
     "source": "built-in",
     "options": [
-      { "id": "rego-terram-material-dirt", "label": "Dirt, sand, mud or clay", "magnitude": 0 },
-      { "id": "rego-terram-material-stone", "label": "Stone or glass", "magnitude": 1 },
-      { "id": "rego-terram-material-metal", "label": "Metal or gemstone", "magnitude": 2 }
+      {
+        "id": "rego-terram-material-dirt",
+        "label": "Sand, dirt, mud or clay",
+        "baseIndividual": "ten cubic paces",
+        "magnitude": 0
+      },
+      {
+        "id": "rego-terram-material-stone",
+        "label": "Stone or glass",
+        "baseIndividual": "one cubic pace",
+        "magnitude": 1
+      },
+      {
+        "id": "rego-terram-material-base-metal",
+        "label": "Base metal",
+        "baseIndividual": "one cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "rego-terram-material-precious-metal",
+        "label": "Precious metal",
+        "baseIndividual": "one tenth of a cubic foot",
+        "magnitude": 2
+      },
+      {
+        "id": "rego-terram-material-gemstone",
+        "label": "Gemstone",
+        "baseIndividual": "one cubic inch",
+        "magnitude": 2
+      }
     ]
   },
   {
@@ -2604,7 +2801,7 @@ Append to `assets/data/modifiers.json`. Repeat the material block three times wi
     "name": "Unnatural context",
     "description": "Creating a phenomenon in an unnatural fashion costs magnitudes",
     "selectionMode": "single",
-    "scope": { "technique": "Creo", "form": "Auram", "effectIds": [] },
+    "scope": { "technique": "Creo", "form": "Auram", "effectIds": [], "excludeTechniques": [] },
     "source": "built-in",
     "options": [
       { "id": "creo-auram-unnatural-none", "label": "Natural for the season and place", "magnitude": 0 },
@@ -2618,7 +2815,7 @@ Append to `assets/data/modifiers.json`. Repeat the material block three times wi
     "name": "Transport distance",
     "description": "The base level covers 5 paces; greater distances cost magnitudes",
     "selectionMode": "single",
-    "scope": { "technique": null, "form": null, "effectIds": ["rrhe-10b", "rrig-3c", "rete-4"] },
+    "scope": { "technique": null, "form": null, "effectIds": ["rrhe-10b", "rrig-3c", "rete-4"], "excludeTechniques": [] },
     "source": "built-in",
     "options": [
       { "id": "rego-distance-5-paces", "label": "Up to 5 paces", "magnitude": 0 },
@@ -2656,7 +2853,7 @@ git commit -m "feat: add material, unnatural-context and transport-distance modi
 - Modify: `assets/data/spell_library.json`
 - Test: `test/data/datasources/asset_data_loader_test.dart`
 
-**Extraction source:** real Ars Magica 5e Terram spells with their published levels. All 27 existing library spells are Imaginem, so without these the asset-level "calculated level matches stated level" test never exercises a single-select modifier, Form-only scoping, or 9 of the 10 Size ladders.
+**Extraction source:** `C:\Users\idf53\Development\personal\arsm\Ars-Magica-Open-License\reviewed\Ars Magica - Definitive Edition (Core Rules).md`. Find the Terram spell list with `grep -n "^##.*Terram Spells"` and read the entries with `sed -n 'START,ENDp'`; take each spell's published level verbatim. All 27 existing library spells are Imaginem, so without these the asset-level "calculated level matches stated level" test never exercises a single-select modifier, Form-only scoping, or 7 of the 8 Size ladders.
 
 Choose 3–4 spells covering: one with a material selection, one with a Size selection, and one carrying both. Each spell's `description` must end with `Level N.` so the existing calculated-vs-stated test can parse it.
 
@@ -2762,7 +2959,7 @@ Then the body:
       await scrollTo(find.byKey(const Key('modifier-dropdown-rego-terram-material')));
       await tester.tap(find.byKey(const Key('modifier-dropdown-rego-terram-material')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Metal or gemstone (+2)').last);
+      await tester.tap(find.text('Base metal (+2)').last);
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);

@@ -116,7 +116,7 @@ Chosen over a flat list of option ids for O(1) lookup when rendering each applic
 
 This does not make an invalid state unrepresentable — a `single`-mode modifier can still hold two option ids in its list. Closing that properly needs a sealed `SingleSelection`/`MultiSelection` pair, which can itself contradict the definition's `selectionMode`, so it buys little for the added machinery. The invariant is enforced by validation instead. This is the one place the type is deliberately weaker than the rule.
 
-## Scope binding: the 16 definitions
+## Scope binding: the 17 definitions
 
 | Family | Scope | Mode | Definitions |
 |---|---|---|---|
@@ -222,7 +222,7 @@ This requires `calculateSpellLevel` to return a structured result rather than a 
 
 ### Data and code changes
 
-- `assets/data/special_factors.json` → `modifiers.json`, holding the 16 definitions.
+- `assets/data/special_factors.json` → `modifiers.json`, holding the 17 definitions.
 - `SpecialFactor`, its serialization and its test are deleted. `selectedSpecialFactorIds` is removed outright, not read as a fallback.
 - `ConfigurationBloc`'s factor plumbing is renamed rather than removed — it is the seam authorability will use later.
 - 10 of the 27 built-in spell assets reference factor ids (`lib-crim-talking-head`, `lib-crim-phantasmal-animal`, `lib-crim-human-form`, `lib-crim-haunt`, `lib-peim-veil-of-invisibility`, `lib-peim-smothered-sound`, `lib-reim-wizards-sidestep`, `lib-reim-captive-voice`, `lib-reim-confusion-insane-vibrations`, `lib-reim-wizard-torn`). Their references become `selectedModifiers` maps, **preserving magnitudes exactly** so their stated levels still verify against calculation.
@@ -241,7 +241,7 @@ The layering here is deliberate, informed by two failures earlier in this projec
 - **Model** — round-trip for `Modifier`, `ModifierOption`, `ModifierScope`; an `appliesTo` matrix covering each wildcard combination (technique-only, form-only, both, `effectIds` hit and miss).
 - **Engine** — magnitude summing for both selection modes; unresolvable option id contributes 0 rather than throwing; a `single`-mode modifier with two selected options produces a validation error; breakdown contents match the contributing sources.
 - **Bloc** — selection and deselection; pruning on `TechniqueSelected`, `FormSelected` and `BaseEffectSelected`.
-- **Asset integrity** — every modifier's `scope.effectIds` resolves to a real effect, mirroring the existing "every spell's referenced ids exist" test. This is what catches typos across 16 hand-authored definitions.
+- **Asset integrity** — every modifier's `scope.effectIds` resolves to a real effect, mirroring the existing "every spell's referenced ids exist" test. This is what catches typos across 17 hand-authored definitions.
 - **Widget** — collapsed summary renders the count and `+N` badge; expanding shows a dropdown for single mode and checkboxes for multi.
 - **Integration, real bloc, mandatory** — select a modifier, change Form, assert the selection is pruned and the badge updates. Pruning is re-render dependent, and mocked widget tests emit no new state, so they are structurally incapable of catching it. Run via `flutter test integration_test/<file> -d windows`; `flutter test` alone does not execute this directory.
 
@@ -258,7 +258,7 @@ All 27 built-in spells are Imaginem. Without new library content, the asset-leve
 | Risk | Mitigation |
 |---|---|
 | Pruning silently changes a level | Integration coverage with a real bloc; `+N` badge visible while collapsed |
-| Typos across 16 hand-authored definitions | Asset-integrity test resolving every `effectIds` entry |
+| Typos across 17 hand-authored definitions | Asset-integrity test resolving every `effectIds` entry |
 | Migration breaks the 10 Imaginem spells' verified levels | Magnitudes preserved exactly; existing calculated-vs-stated test guards it |
 | `single`-mode invariant violated in stored data | Validation rule; accepted as a validation concern rather than a type-level one |
 | Size ladder data unavailable or inaccurate | Framed as a rulebook extraction task with a named source, as with base effects |
