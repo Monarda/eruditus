@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
@@ -8,10 +11,20 @@ void main() {
 
   final loader = AssetDataLoader();
 
-  test('loadBaseEffects loads all 38 built-in base effects', () async {
+  test('loadBaseEffects loads every built-in base effect in the asset file', () async {
     final effects = await loader.loadBaseEffects();
 
-    expect(effects.length, 38);
+    // base_effects.json is bulk-extracted from the rulebook and grows across
+    // many extraction commits, so the expected count is derived from the raw
+    // file itself (an oracle independent of loadBaseEffects) rather than a
+    // literal number -- a hardcoded count here previously drifted from 38 to
+    // 604 without being noticed. This still catches a real loader bug (a
+    // dropped or duplicated entry), it just doesn't need updating by hand
+    // every time the catalog grows.
+    final rawList =
+        jsonDecode(await rootBundle.loadString('assets/data/base_effects.json')) as List;
+    expect(effects.length, rawList.length,
+        reason: 'loadBaseEffects should return exactly the entries present in base_effects.json');
     expect(effects.every((e) => e.source == 'built-in'), isTrue);
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });

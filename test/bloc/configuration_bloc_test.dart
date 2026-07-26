@@ -13,9 +13,19 @@ import 'package:eruditus/models/base_effect.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  setUpAll(() {
+  // The built-in effect count is derived from the actual asset data rather
+  // than hardcoded, since base_effects.json is bulk-extracted and grows
+  // across many commits -- a literal number here previously drifted from 38
+  // to 604 without being noticed. These tests are about ConfigurationBloc's
+  // add/delete/reload behavior, not about re-verifying AssetDataLoader's
+  // parsing (that's asset_data_loader_test.dart's job), so deriving the
+  // baseline from the same production loader is the right oracle here.
+  late int builtInEffectCount;
+
+  setUpAll(() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    builtInEffectCount = (await AssetDataLoader().loadBaseEffects()).length;
   });
 
   late AppDatabase database;
@@ -41,7 +51,7 @@ void main() {
       isA<ConfigurationState>().having((s) => s.status, 'status', ConfigurationStatus.loading),
       isA<ConfigurationState>()
           .having((s) => s.status, 'status', ConfigurationStatus.loaded)
-          .having((s) => s.effects.length, 'effects.length', 38)
+          .having((s) => s.effects.length, 'effects.length', builtInEffectCount)
           .having((s) => s.parameters.length, 'parameters.length', 17),
     ],
   );
@@ -61,7 +71,7 @@ void main() {
       isA<ConfigurationState>().having((s) => s.status, 'status', ConfigurationStatus.loading),
       isA<ConfigurationState>()
           .having((s) => s.status, 'status', ConfigurationStatus.loaded)
-          .having((s) => s.effects.length, 'effects.length', 39)
+          .having((s) => s.effects.length, 'effects.length', builtInEffectCount + 1)
           .having((s) => s.effects.any((e) => e.id == 'custom-1'), 'has custom-1', isTrue),
     ],
   );
@@ -83,7 +93,7 @@ void main() {
       isA<ConfigurationState>().having((s) => s.status, 'status', ConfigurationStatus.loading),
       isA<ConfigurationState>()
           .having((s) => s.status, 'status', ConfigurationStatus.loaded)
-          .having((s) => s.effects.length, 'effects.length', 38),
+          .having((s) => s.effects.length, 'effects.length', builtInEffectCount),
     ],
   );
 }
