@@ -10,7 +10,8 @@ import 'package:eruditus/models/publication_source.dart';
 void main() {
   final effect = BaseEffect(
       id: 'creim-2', technique: 'Creo', form: 'Imaginem',
-      description: 'Create an image that affects two senses', baseLevel: 2, source: 'published');
+      description: 'Create an image that affects two senses', baseLevel: 2,
+      provenance: Provenance(source: PublicationSource.userCreated));
   final voice = Parameter(
       id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
   final momentary = Parameter(

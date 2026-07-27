@@ -41,7 +41,8 @@ void main() {
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'Create flame', baseLevel: 10, source: 'published',
+    description: 'Create flame', baseLevel: 10,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
   final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
@@ -224,7 +225,8 @@ void main() {
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(BaseEffect(
         id: 'e2', technique: 'Rego', form: 'Ignem',
-        description: 'Redirect flame', baseLevel: 5, source: 'published',
+        description: 'Redirect flame', baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
       )));
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
@@ -527,7 +529,8 @@ void main() {
   );
   final reteEffect = BaseEffect(
     id: 'rete-4', technique: 'Rego', form: 'Terram',
-    description: 'Transport a non-living object', baseLevel: 4, source: 'published',
+    description: 'Transport a non-living object', baseLevel: 4,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(

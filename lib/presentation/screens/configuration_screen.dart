@@ -6,6 +6,8 @@ import 'package:eruditus/bloc/configuration/configuration_event.dart';
 import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/utils/constants.dart';
 
 class ConfigurationScreen extends StatefulWidget {
@@ -73,7 +75,7 @@ class _EffectsTab extends StatelessWidget {
     return Scaffold(
       body: ListView(
         children: effects.map((e) {
-          final isCustom = e.source == 'user-created';
+          final isCustom = e.provenance.source == PublicationSource.userCreated;
           return ListTile(
             title: Text(e.description),
             subtitle: Text('${e.technique} ${e.form} • Base ${e.baseLevel}'),
@@ -164,7 +166,7 @@ class _AddEffectDialogState extends State<_AddEffectDialog> {
               form: _form!,
               description: _descriptionController.text,
               baseLevel: level,
-              source: 'user-created',
+              provenance: Provenance(source: PublicationSource.userCreated),
             ));
           },
           child: const Text('Add'),

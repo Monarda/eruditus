@@ -7,6 +7,8 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +36,8 @@ void main() {
   test('getAllEffects combines built-in and custom effects', () async {
     await repository.addCustomEffect(BaseEffect(
       id: 'custom-1', technique: 'Creo', form: 'Ignem',
-      description: 'My custom effect', baseLevel: 7, source: 'user-created',
+      description: 'My custom effect', baseLevel: 7,
+      provenance: Provenance(source: PublicationSource.userCreated),
     ));
 
     final all = await repository.getAllEffects();
@@ -46,7 +49,8 @@ void main() {
   test('deleteCustomEffect removes only the custom one', () async {
     await repository.addCustomEffect(BaseEffect(
       id: 'custom-1', technique: 'Creo', form: 'Ignem',
-      description: 'test', baseLevel: 5, source: 'user-created',
+      description: 'test', baseLevel: 5,
+      provenance: Provenance(source: PublicationSource.userCreated),
     ));
 
     await repository.deleteCustomEffect('custom-1');

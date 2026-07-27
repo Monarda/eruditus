@@ -9,6 +9,8 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -63,7 +65,8 @@ void main() {
       bloc.add(const ConfigurationRequested());
       bloc.add(CustomEffectAdded(BaseEffect(
         id: 'custom-1', technique: 'Creo', form: 'Ignem',
-        description: 'My custom effect', baseLevel: 7, source: 'user-created',
+        description: 'My custom effect', baseLevel: 7,
+        provenance: Provenance(source: PublicationSource.userCreated),
       )));
     },
     skip: 2,
@@ -83,7 +86,8 @@ void main() {
       bloc.add(const ConfigurationRequested());
       bloc.add(CustomEffectAdded(BaseEffect(
         id: 'custom-1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 5, source: 'user-created',
+        description: 'test', baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
       )));
       await Future<void>.delayed(Duration.zero);
       bloc.add(const CustomEffectDeleted('custom-1'));

@@ -32,7 +32,8 @@ void main() {
 
   final effect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 5, source: 'published',
+    description: 'test', baseLevel: 5,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
 
   ResolvedSpell buildSpell(String id, String name,

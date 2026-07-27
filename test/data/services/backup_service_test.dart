@@ -61,7 +61,8 @@ void main() {
     ));
     await configRepository.addCustomEffect(BaseEffect(
       id: 'custom-1', technique: 'Creo', form: 'Ignem',
-      description: 'Custom', baseLevel: 3, source: 'user-created',
+      description: 'Custom', baseLevel: 3,
+      provenance: Provenance(source: PublicationSource.userCreated),
     ));
 
     final jsonString = await backupService.exportToJson();
@@ -93,7 +94,8 @@ void main() {
       'customEffects': [
         BaseEffect(
           id: 'custom-2', technique: 'Muto', form: 'Corpus',
-          description: 'Imported effect', baseLevel: 4, source: 'user-created',
+          description: 'Imported effect', baseLevel: 4,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ).toMap(),
       ],
       'customParameters': [],

@@ -5,6 +5,8 @@ import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 
 void main() {
   setUpAll(() {
@@ -28,7 +30,8 @@ void main() {
     test('insertCustomEffect then getAllCustomEffects returns it', () async {
       final effect = BaseEffect(
         id: 'ce1', technique: 'Creo', form: 'Ignem',
-        description: 'My custom fire effect', baseLevel: 8, source: 'user-created',
+        description: 'My custom fire effect', baseLevel: 8,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       await datasource.insertCustomEffect(effect);
@@ -42,7 +45,8 @@ void main() {
     test('deleteCustomEffect removes it', () async {
       final effect = BaseEffect(
         id: 'ce1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 5, source: 'user-created',
+        description: 'test', baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       await datasource.insertCustomEffect(effect);
 

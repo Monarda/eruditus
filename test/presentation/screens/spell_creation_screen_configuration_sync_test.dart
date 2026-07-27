@@ -32,6 +32,8 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
@@ -62,7 +64,8 @@ void main() {
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'Create flame', baseLevel: 10, source: 'published',
+    description: 'Create flame', baseLevel: 10,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
 
   testWidgets(

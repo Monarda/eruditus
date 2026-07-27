@@ -35,11 +35,13 @@ void main() {
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
   final effect1 = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 5, source: 'published',
+    description: 'test', baseLevel: 5,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
   final effect2 = BaseEffect(
     id: 'e2', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 5, source: 'published',
+    description: 'test', baseLevel: 5,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
 
   setUp(() async {

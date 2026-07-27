@@ -8,6 +8,8 @@ import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
 import 'package:eruditus/bloc/configuration/configuration_event.dart';
 import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 
 class MockConfigurationBloc extends MockBloc<ConfigurationEvent, ConfigurationState>
@@ -52,7 +54,8 @@ void main() {
   testWidgets('renders custom effects present in state', (tester) async {
     final customEffect = BaseEffect(
       id: 'custom-1', technique: 'Creo', form: 'Ignem',
-      description: 'My custom effect', baseLevel: 7, source: 'user-created',
+      description: 'My custom effect', baseLevel: 7,
+      provenance: Provenance(source: PublicationSource.userCreated),
     );
     await pumpScreen(tester, loadedState(effects: [customEffect]));
 
@@ -88,7 +91,7 @@ void main() {
           .having((e) => e.effect.form, 'form', 'Ignem')
           .having((e) => e.effect.description, 'description', 'My custom effect')
           .having((e) => e.effect.baseLevel, 'baseLevel', 7)
-          .having((e) => e.effect.source, 'source', 'user-created'),
+          .having((e) => e.effect.provenance.source, 'source', PublicationSource.userCreated),
     ))).called(1);
   });
 }

@@ -490,7 +490,7 @@ void main() {
         form: 'Ignem',
         description: 'A custom effect for the integration test',
         baseLevel: 5,
-        source: 'user-created',
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       await configRepository.addCustomEffect(customEffect);
 

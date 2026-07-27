@@ -15,7 +15,8 @@ void main() {
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
   final effect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 10, source: 'published',
+    description: 'test', baseLevel: 10,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
   final personalParam =
       Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'published');

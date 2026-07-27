@@ -1,3 +1,4 @@
+import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 class BaseEffect {
@@ -6,7 +7,7 @@ class BaseEffect {
   final String form;
   final String description;
   final int baseLevel;
-  final String source; // "published" or "user-created"
+  final Provenance provenance;
 
   BaseEffect({
     required this.id,
@@ -14,7 +15,7 @@ class BaseEffect {
     required this.form,
     required this.description,
     required this.baseLevel,
-    required this.source,
+    required this.provenance,
   });
 
   Map<String, dynamic> toMap() => {
@@ -23,7 +24,7 @@ class BaseEffect {
     'form': form,
     'description': description,
     'baseLevel': baseLevel,
-    'source': source,
+    ...provenance.toMap(),
   };
 
   factory BaseEffect.fromMap(Map<String, dynamic> map) => BaseEffect(
@@ -32,7 +33,7 @@ class BaseEffect {
     form: requireField<String>(map, 'form', 'BaseEffect'),
     description: requireField<String>(map, 'description', 'BaseEffect'),
     baseLevel: requireField<int>(map, 'baseLevel', 'BaseEffect'),
-    source: requireField<String>(map, 'source', 'BaseEffect'),
+    provenance: Provenance.fromMap(map),
   );
 
   // Value equality by id. Effects are re-parsed from JSON/DB on every

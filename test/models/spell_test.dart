@@ -86,7 +86,7 @@ void main() {
         form: 'Corpus',
         description: 'Transform body',
         baseLevel: 5,
-        source: 'published',
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       final range = Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'published');
       final duration = Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
@@ -121,7 +121,7 @@ void main() {
           form: 'Corpus',
           description: 'Transform body',
           baseLevel: 5,
-          source: 'published',
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         duration: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published'),
         target: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'published'),

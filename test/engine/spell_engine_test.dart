@@ -26,7 +26,8 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 10, source: 'published',
+          description: 'test', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
       );
 
@@ -39,7 +40,8 @@ void main() {
         technique: 'Creo',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 10, source: 'published',
+          description: 'test', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
       );
 
@@ -63,7 +65,8 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'published',
+          description: 'Create flame', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         range: _range,
         duration: _duration,
@@ -80,7 +83,8 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'published',
+          description: 'Create flame', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         range: _range,
         duration: _duration,
@@ -101,7 +105,8 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'published',
+          description: 'Create flame', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         range: _range,
         duration: _duration,
@@ -122,7 +127,8 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'published',
+          description: 'Create flame', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         range: _range,
         duration: _duration,
@@ -156,7 +162,8 @@ void main() {
         form: 'Terram',
         baseEffect: BaseEffect(
           id: 'rete-4', technique: 'Rego', form: 'Terram',
-          description: 'Transport', baseLevel: 4, source: 'published',
+          description: 'Transport', baseLevel: 4,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {'terram-material': ['mat-stone', 'mat-metal']},
@@ -184,7 +191,8 @@ void main() {
         form: 'Imaginem',
         baseEffect: BaseEffect(
           id: 'e1', technique: 'Creo', form: 'Imaginem',
-          description: 'Image', baseLevel: 2, source: 'published',
+          description: 'Image', baseLevel: 2,
+          provenance: Provenance(source: PublicationSource.userCreated),
         ),
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {'crim-complexity': ['a', 'b']},
@@ -256,7 +264,8 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Create flame', baseLevel: 10, source: 'published',
+        description: 'Create flame', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       final level = engine.calculateSpellLevel(
@@ -271,7 +280,8 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Muto', form: 'Corpus',
-        description: 'Eyes of the Cat base', baseLevel: 2, source: 'published',
+        description: 'Eyes of the Cat base', baseLevel: 2,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       final touch = Parameter(id: 'p1', name: 'Touch', category: 'Range', magnitude: 1, source: 'published');
       final sun = Parameter(id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2, source: 'published');
@@ -289,7 +299,8 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Fire with Ignem light', baseLevel: 3, source: 'published',
+        description: 'Fire with Ignem light', baseLevel: 3,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       final level = engine.calculateSpellLevel(
@@ -305,7 +316,8 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Fire with Ignem light', baseLevel: 3, source: 'published',
+        description: 'Fire with Ignem light', baseLevel: 3,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       final level = engine.calculateSpellLevel(
@@ -332,7 +344,8 @@ void main() {
       final engine = SpellEngine(allSpells: [], allModifiers: [material]);
       final baseEffect = BaseEffect(
         id: 'rete-4', technique: 'Rego', form: 'Terram',
-        description: 'Transport a non-living object', baseLevel: 4, source: 'published',
+        description: 'Transport a non-living object', baseLevel: 4,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       final breakdown = engine.calculateBreakdown(
@@ -355,7 +368,8 @@ void main() {
       final engine = SpellEngine(allSpells: [], allModifiers: const []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Create flame', baseLevel: 3, source: 'published',
+        description: 'Create flame', baseLevel: 3,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       final breakdown = engine.calculateBreakdown(
@@ -372,7 +386,8 @@ void main() {
       final engine = SpellEngine(allSpells: [], allModifiers: const []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Create flame', baseLevel: 3, source: 'published',
+        description: 'Create flame', baseLevel: 3,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       final breakdown = engine.calculateBreakdown(
@@ -393,7 +408,8 @@ void main() {
     ResolvedSpell buildSpell(String id, String technique, String form, String name, int baseLevel) {
       final effect = BaseEffect(
         id: 'e$id', technique: technique, form: form,
-        description: name, baseLevel: baseLevel, source: 'published',
+        description: name, baseLevel: baseLevel,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       final record = Spell(
         id: id,
@@ -450,7 +466,8 @@ void main() {
       // operator crash reachable from the Create tab's Calculate button.
       final orphanEffect = BaseEffect(
         id: 'e-orphan', technique: 'Creo', form: 'Ignem',
-        description: 'Orphan', baseLevel: 10, source: 'published',
+        description: 'Orphan', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       final orphan = ResolvedSpell(
         record: Spell(

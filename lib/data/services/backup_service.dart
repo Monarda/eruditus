@@ -4,6 +4,7 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
 
 class BackupImportResult {
@@ -28,8 +29,9 @@ class BackupService {
 
   Future<String> exportToJson() async {
     final userSpells = await spellRepository.getAllUserSpells();
-    final customEffects =
-        (await configRepository.getAllEffects()).where((e) => e.source == 'user-created').toList();
+    final customEffects = (await configRepository.getAllEffects())
+        .where((e) => e.provenance.source == PublicationSource.userCreated)
+        .toList();
     final customParameters =
         (await configRepository.getAllParameters()).where((p) => p.source == 'user-created').toList();
 

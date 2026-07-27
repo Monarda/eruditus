@@ -45,7 +45,8 @@ void main() {
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'Create flame', baseLevel: 10, source: 'published',
+    description: 'Create flame', baseLevel: 10,
+    provenance: Provenance(source: PublicationSource.userCreated),
   );
   final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
@@ -390,7 +391,8 @@ void main() {
       (tester) async {
     final customEffect = BaseEffect(
       id: 'custom-e1', technique: 'Creo', form: 'Ignem',
-      description: 'My custom fire effect', baseLevel: 3, source: 'user-created',
+      description: 'My custom fire effect', baseLevel: 3,
+      provenance: Provenance(source: PublicationSource.userCreated),
     );
     await pumpScreen(
       tester,

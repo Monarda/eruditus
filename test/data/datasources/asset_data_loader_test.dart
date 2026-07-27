@@ -26,7 +26,7 @@ void main() {
         jsonDecode(await rootBundle.loadString('assets/data/base_effects.json')) as List;
     expect(effects.length, rawList.length,
         reason: 'loadBaseEffects should return exactly the entries present in base_effects.json');
-    expect(effects.every((e) => e.source == 'published'), isTrue);
+    expect(effects.every((e) => e.provenance.source == PublicationSource.published), isTrue);
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });
 
@@ -183,6 +183,20 @@ void main() {
       for (final citation in spell.provenance.citations) {
         expect(bookIds.contains(citation.bookId), isTrue,
             reason: '${spell.name}: cited book ${citation.bookId} is not in '
+                'books.json — add the book, do not relax this check');
+      }
+    }
+  });
+
+  test("every base effect's cited book ids exist in the books catalog", () async {
+    final effects = await loader.loadBaseEffects();
+    final books = await loader.loadBooks();
+    final bookIds = books.map((b) => b.id).toSet();
+
+    for (final effect in effects) {
+      for (final citation in effect.provenance.citations) {
+        expect(bookIds.contains(citation.bookId), isTrue,
+            reason: '${effect.id}: cited book ${citation.bookId} is not in '
                 'books.json — add the book, do not relax this check');
       }
     }
