@@ -7,9 +7,10 @@ import 'package:eruditus/engine/spell_engine.dart';
 
 class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
   final LibraryRepository libraryRepository;
-  // Reused (not duplicated) purely for its calculateSpellLevel method, so the
-  // Library screen can show each spell's level using the exact same
-  // magnitude-summing implementation SpellCreationBloc already uses.
+  // Reused (not duplicated) purely for its calculateBreakdown method, so the
+  // Library screen can show each spell's level and Ritual status using the
+  // exact same magnitude-summing/Ritual-deriving implementation
+  // SpellCreationBloc already uses.
   final SpellEngine spellEngine;
 
   // All events are funneled through a single handler (registered on the base
@@ -33,23 +34,27 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
       emit(state.copyWith(status: SpellLibraryStatus.loading));
       try {
         final spells = await libraryRepository.getAllSpells();
-        final levels = <String, int>{
-          for (final s in spells)
-            // An unresolved spell has no base effect to calculate from. It is
-            // omitted rather than defaulted to 0, so the card can tell
-            // "invalid" apart from "genuinely level 0".
-            if (s.isResolved)
-              s.id: spellEngine.calculateSpellLevel(
-                baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
-                target: s.target!, selectedModifiers: s.selectedModifiers,
-                requisites: s.requisites,
-                ritualDeclaration: s.ritualDeclaration,
-              ),
-        };
+        final levels = <String, int>{};
+        final ritualIds = <String>{};
+        for (final s in spells) {
+          // An unresolved spell has no base effect to calculate from. It is
+          // omitted rather than defaulted to 0, so the card can tell
+          // "invalid" apart from "genuinely level 0".
+          if (!s.isResolved) continue;
+          final breakdown = spellEngine.calculateBreakdown(
+            baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
+            target: s.target!, selectedModifiers: s.selectedModifiers,
+            requisites: s.requisites, ritualDeclaration: s.ritualDeclaration,
+          );
+          levels[s.id] = breakdown.level;
+          if (breakdown.ritualStatus.isRitual) ritualIds.add(s.id);
+        }
+
         emit(state.copyWith(
           status: SpellLibraryStatus.loaded,
           allSpells: spells,
           spellLevels: levels,
+          ritualSpellIds: ritualIds,
         ));
       } catch (e) {
         emit(state.copyWith(status: SpellLibraryStatus.error, errorMessage: e.toString()));

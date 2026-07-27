@@ -1,5 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
@@ -15,8 +16,11 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/parameter.dart';
+
+class MockLibraryRepository extends Mock implements LibraryRepository {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -49,6 +53,48 @@ void main() {
     id: 'e2', technique: 'Creo', form: 'Ignem',
     description: 'test', baseLevel: 5,
     provenance: Provenance(source: PublicationSource.userCreated),
+  );
+  final ritualDurationParam = Parameter(
+      id: 'p4', name: 'Year', category: 'Duration', magnitude: 0, requiresRitual: true,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+  final mockLibraryRepository = MockLibraryRepository();
+
+  final ritualSpell = ResolvedSpell(
+    record: Spell(
+      id: 'ritual-1',
+      name: 'Wizard\'s Sidestep',
+      baseEffectId: 'e1',
+      rangeId: 'p1',
+      durationId: 'p4',
+      targetId: 'p3',
+      requisites: const [],
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ),
+    baseEffect: effect1,
+    range: rangeParam,
+    duration: ritualDurationParam,
+    target: targetParam,
+  );
+  final ordinarySpell = ResolvedSpell(
+    record: Spell(
+      id: 'ordinary-1',
+      name: 'Ordinary Spell',
+      baseEffectId: 'e1',
+      rangeId: 'p1',
+      durationId: 'p2',
+      targetId: 'p3',
+      requisites: const [],
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ),
+    baseEffect: effect1,
+    range: rangeParam,
+    duration: durationParam,
+    target: targetParam,
   );
 
   setUp(() async {
@@ -167,6 +213,21 @@ void main() {
           .having((s) => s.allSpells.length, 'allSpells.length', 33)
           .having((s) => s.spellLevels['user-dangling'], "spellLevels['user-dangling']", 5),
     ],
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'LibraryRequested marks Year-duration spells as Rituals',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells())
+          .thenAnswer((_) async => [ritualSpell, ordinarySpell]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    verify: (bloc) {
+      expect(bloc.state.ritualSpellIds, contains(ritualSpell.id));
+      expect(bloc.state.ritualSpellIds, isNot(contains(ordinarySpell.id)));
+    },
   );
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(

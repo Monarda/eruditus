@@ -170,4 +170,20 @@ void main() {
     expect(find.textContaining('deleted-custom-effect'), findsOneWidget);
     expect(find.textContaining('Level'), findsNothing);
   });
+
+  testWidgets('shows a Ritual chip only when the spell is a Ritual',
+      (tester) async {
+    final spell = buildSpell(name: 'Touch of Midas', summary: 'Test summary.');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(spell: spell, level: 20, isRitual: true)),
+    ));
+    expect(find.byKey(const Key('ritual-chip')), findsOneWidget);
+    expect(find.text('Ritual'), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(spell: spell, level: 20)),
+    ));
+    expect(find.byKey(const Key('ritual-chip')), findsNothing);
+  });
 }

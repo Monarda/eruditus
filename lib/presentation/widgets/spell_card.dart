@@ -8,7 +8,12 @@ class SpellCard extends StatelessWidget {
   final int? level;
   final VoidCallback? onTap;
 
-  const SpellCard({super.key, required this.spell, this.level, this.onTap});
+  /// Precomputed by the caller, which owns the SpellEngine. The card never
+  /// derives it — same reason `level` is passed in rather than calculated here.
+  final bool isRitual;
+
+  const SpellCard(
+      {super.key, required this.spell, this.level, this.onTap, this.isRitual = false});
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +47,21 @@ class SpellCard extends StatelessWidget {
       key: isInvalid ? const Key('spell-card-unresolved') : null,
       child: ListTile(
         onTap: onTap,
-        title: Text(title),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: Text(title)),
+            if (isRitual)
+              const Padding(
+                padding: EdgeInsets.only(left: 8),
+                child: Chip(
+                  key: Key('ritual-chip'),
+                  label: Text('Ritual'),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+          ],
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

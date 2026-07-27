@@ -13,6 +13,9 @@ class SpellLibraryState extends Equatable {
   // calculateSpellLevel), so cards can display "name, level, source,
   // description" without recomputing/duplicating the level math.
   final Map<String, int> spellLevels;
+  // Ids of the spells that are Rituals. Precomputed alongside [spellLevels]
+  // for the same reason: the card has no SpellEngine to derive it with.
+  final Set<String> ritualSpellIds;
   final String? errorMessage;
 
   const SpellLibraryState({
@@ -21,6 +24,7 @@ class SpellLibraryState extends Equatable {
     this.query = '',
     this.filter = 'All',
     this.spellLevels = const {},
+    this.ritualSpellIds = const {},
     this.errorMessage,
   });
 
@@ -46,6 +50,7 @@ class SpellLibraryState extends Equatable {
     String? query,
     String? filter,
     Map<String, int>? spellLevels,
+    Set<String>? ritualSpellIds,
     String? errorMessage,
   }) {
     return SpellLibraryState(
@@ -54,10 +59,12 @@ class SpellLibraryState extends Equatable {
       query: query ?? this.query,
       filter: filter ?? this.filter,
       spellLevels: spellLevels ?? this.spellLevels,
+      ritualSpellIds: ritualSpellIds ?? this.ritualSpellIds,
       errorMessage: errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, allSpells, query, filter, spellLevels, errorMessage];
+  List<Object?> get props =>
+      [status, allSpells, query, filter, spellLevels, ritualSpellIds, errorMessage];
 }
