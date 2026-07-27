@@ -35,14 +35,15 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
         final spells = await libraryRepository.getAllSpells();
         final levels = <String, int>{
           for (final s in spells)
-            s.id: spellEngine.calculateSpellLevel(
-              baseEffect: s.baseEffect,
-              range: s.range,
-              duration: s.duration,
-              target: s.target,
-              selectedModifiers: s.selectedModifiers,
-              requisites: s.requisites,
-            ),
+            // An unresolved spell has no base effect to calculate from. It is
+            // omitted rather than defaulted to 0, so the card can tell
+            // "invalid" apart from "genuinely level 0".
+            if (s.isResolved)
+              s.id: spellEngine.calculateSpellLevel(
+                baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
+                target: s.target!, selectedModifiers: s.selectedModifiers,
+                requisites: s.requisites,
+              ),
         };
         emit(state.copyWith(
           status: SpellLibraryStatus.loaded,

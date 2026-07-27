@@ -6,47 +6,14 @@ import 'package:eruditus/models/requisite.dart';
 
 void main() {
   group('Spell Model', () {
-    test('Spell.toMap and fromMap round-trip preserves every field, including nested objects', () {
-      final effect = BaseEffect(
-        id: '1',
-        technique: 'Creo',
-        form: 'Ignem',
-        description: 'Create flame',
-        baseLevel: 10,
-        source: 'built-in',
-      );
-
-      final voiceParam = Parameter(
-        id: 'param-voice',
-        name: 'Voice',
-        category: 'Range',
-        magnitude: 2,
-        source: 'built-in',
-      );
-      final sunParam = Parameter(
-        id: 'param-sun',
-        name: 'Sun',
-        category: 'Duration',
-        magnitude: 3,
-        source: 'built-in',
-      );
-      final individualParam = Parameter(
-        id: 'param-individual',
-        name: 'Individual',
-        category: 'Target',
-        magnitude: 10,
-        source: 'built-in',
-      );
-
+    test('Spell.toMap and fromMap round-trip preserves every field', () {
       final spell = Spell(
         id: 'spell-1',
         name: 'Test Spell',
-        technique: 'Creo',
-        form: 'Ignem',
-        baseEffect: effect,
-        range: voiceParam,
-        duration: sunParam,
-        target: individualParam,
+        baseEffectId: '1',
+        rangeId: 'param-voice',
+        durationId: 'param-sun',
+        targetId: 'param-individual',
         requisites: [
           Requisite(art: 'Vim', kind: RequisiteKind.free),
           Requisite(art: 'Mentem', kind: RequisiteKind.free),
@@ -64,34 +31,14 @@ void main() {
 
       expect(restored.id, spell.id);
       expect(restored.name, spell.name);
-      expect(restored.technique, spell.technique);
-      expect(restored.form, spell.form);
+      expect(restored.baseEffectId, spell.baseEffectId);
+      expect(restored.rangeId, spell.rangeId);
+      expect(restored.durationId, spell.durationId);
+      expect(restored.targetId, spell.targetId);
       expect(restored.description, spell.description);
       expect(restored.source, spell.source);
       expect(restored.createdAt, spell.createdAt);
       expect(restored.updatedAt, spell.updatedAt);
-
-      expect(restored.baseEffect.id, effect.id);
-      expect(restored.baseEffect.technique, effect.technique);
-      expect(restored.baseEffect.form, effect.form);
-      expect(restored.baseEffect.description, effect.description);
-      expect(restored.baseEffect.baseLevel, effect.baseLevel);
-      expect(restored.baseEffect.source, effect.source);
-
-      expect(restored.range.id, voiceParam.id);
-      expect(restored.range.name, voiceParam.name);
-      expect(restored.range.category, voiceParam.category);
-      expect(restored.range.magnitude, voiceParam.magnitude);
-      expect(restored.range.source, voiceParam.source);
-
-      expect(restored.duration.id, sunParam.id);
-      expect(restored.duration.name, sunParam.name);
-      expect(restored.duration.category, sunParam.category);
-      expect(restored.duration.magnitude, sunParam.magnitude);
-
-      expect(restored.target.id, individualParam.id);
-      expect(restored.target.name, individualParam.name);
-      expect(restored.target.category, individualParam.category);
 
       expect(restored.requisites.length, 4);
       expect(restored.requisites[0].art, 'Vim');
@@ -109,31 +56,10 @@ void main() {
     test('fromMap throws a clear FormatException when a required field is missing', () {
       final map = {
         'id': 'spell-1',
-        // 'range' missing
-        'technique': 'Creo',
-        'form': 'Ignem',
-        'baseEffect': {
-          'id': '1',
-          'technique': 'Creo',
-          'form': 'Ignem',
-          'description': 'Create flame',
-          'baseLevel': 10,
-          'source': 'built-in',
-        },
-        'duration': {
-          'id': 'p1',
-          'name': 'Momentary',
-          'category': 'Duration',
-          'magnitude': 0,
-          'source': 'built-in',
-        },
-        'target': {
-          'id': 'p2',
-          'name': 'Individual',
-          'category': 'Target',
-          'magnitude': 10,
-          'source': 'built-in',
-        },
+        // 'rangeId' missing
+        'baseEffectId': '1',
+        'durationId': 'p1',
+        'targetId': 'p2',
         'source': 'user-created',
         'createdAt': DateTime(2026, 7, 24).toIso8601String(),
         'updatedAt': DateTime(2026, 7, 24).toIso8601String(),
@@ -145,7 +71,7 @@ void main() {
           isA<FormatException>().having(
             (e) => e.message,
             'message',
-            allOf(contains('range'), contains('Spell')),
+            allOf(contains('rangeId'), contains('Spell')),
           ),
         ),
       );
@@ -177,12 +103,15 @@ void main() {
 
       expect(spell.name, 'My Spell');
       expect(spell.source, 'user-created');
-      expect(spell.technique, 'Muto');
-      expect(spell.form, 'Corpus');
+      expect(spell.baseEffectId, effect.id);
+      expect(spell.rangeId, range.id);
+      expect(spell.durationId, duration.id);
+      expect(spell.targetId, target.id);
     });
 
-    test('SpellDraft.toSpell throws StateError when technique is not set', () {
+    test('SpellDraft.toSpell throws StateError when range is not set', () {
       final draft = SpellDraft(
+        technique: 'Muto',
         form: 'Corpus',
         baseEffect: BaseEffect(
           id: '1',
@@ -192,33 +121,14 @@ void main() {
           baseLevel: 5,
           source: 'built-in',
         ),
+        duration: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
+        target: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in'),
       );
 
       expect(
         () => draft.toSpell(name: 'My Spell', source: 'user-created'),
         throwsA(
-          isA<StateError>().having((e) => e.message, 'message', contains('technique')),
-        ),
-      );
-    });
-
-    test('SpellDraft.toSpell throws StateError when form is not set', () {
-      final draft = SpellDraft(
-        technique: 'Muto',
-        baseEffect: BaseEffect(
-          id: '1',
-          technique: 'Muto',
-          form: 'Corpus',
-          description: 'Transform body',
-          baseLevel: 5,
-          source: 'built-in',
-        ),
-      );
-
-      expect(
-        () => draft.toSpell(name: 'My Spell', source: 'user-created'),
-        throwsA(
-          isA<StateError>().having((e) => e.message, 'message', contains('form')),
+          isA<StateError>().having((e) => e.message, 'message', contains('range')),
         ),
       );
     });
@@ -246,7 +156,7 @@ void main() {
           isA<StateError>().having(
             (e) => e.message,
             'message',
-            allOf(contains('technique'), contains('form'), contains('baseEffect')),
+            allOf(contains('baseEffect'), contains('range'), contains('duration'), contains('target')),
           ),
         ),
       );
@@ -256,15 +166,10 @@ void main() {
       final spell = Spell(
         id: 'spell-1',
         name: 'Test Spell',
-        technique: 'Rego',
-        form: 'Terram',
-        baseEffect: BaseEffect(
-          id: 'rete-4', technique: 'Rego', form: 'Terram',
-          description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
-        ),
-        range: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in'),
-        duration: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-        target: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
+        baseEffectId: 'rete-4',
+        rangeId: 'p1',
+        durationId: 'p2',
+        targetId: 'p3',
         selectedModifiers: const {
           'terram-material': ['mat-metal'],
           'rego-transport-distance': ['dist-500-paces'],
@@ -283,14 +188,11 @@ void main() {
 
     test('fromMap defaults selectedModifiers to an empty map when absent', () {
       final map = Spell(
-        id: 'spell-2', technique: 'Creo', form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in',
-        ),
-        range: Parameter(id: 'p1', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in'),
-        duration: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-        target: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in'),
+        id: 'spell-2',
+        baseEffectId: 'e1',
+        rangeId: 'p1',
+        durationId: 'p2',
+        targetId: 'p3',
         requisites: const [],
         source: 'built-in',
         createdAt: DateTime(2026, 1, 1),
@@ -312,39 +214,6 @@ void main() {
 
       expect(updated.selectedModifiers['terram-material'], ['mat-metal']);
       expect(draft.selectedModifiers['terram-material'], ['mat-stone'], reason: 'original unchanged');
-    });
-
-    test('spell parameter fields are plain Parameters, not wrappers', () {
-      final voice = Parameter(
-        id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
-      final momentary = Parameter(
-        id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-      final individual = Parameter(
-        id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
-
-      final spell = Spell(
-        id: 'spell-1',
-        name: 'Test Spell',
-        technique: 'Creo',
-        form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in'),
-        range: voice,
-        duration: momentary,
-        target: individual,
-        requisites: const [],
-        source: 'user-created',
-        createdAt: DateTime(2026, 1, 1),
-        updatedAt: DateTime(2026, 1, 1),
-      );
-
-      final restored = Spell.fromMap(spell.toMap());
-
-      expect(restored.range.id, 'range-voice');
-      expect(restored.range.magnitude, 2);
-      expect(restored.duration.id, 'duration-momentary');
-      expect(restored.target.id, 'target-individual');
     });
   });
 }

@@ -9,16 +9,9 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
-
-Parameter _sp(String id, String name, String category) =>
-    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
-
-final _range = _sp('range-personal', 'Personal', 'Range');
-final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
-final _target = _sp('target-individual', 'Individual', 'Target');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -35,9 +28,15 @@ void main() {
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
-    spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+    final assetLoader = AssetDataLoader();
+    final resolver = SpellResolver(
+      effects: await assetLoader.loadBaseEffects(),
+      parameters: await assetLoader.loadParameters(),
+    );
+    spellRepository = SpellRepository(
+        datasource: LocalSpellDatasource(database: database), resolver: resolver);
     configRepository = ConfigurationRepository(
-      assetLoader: AssetDataLoader(),
+      assetLoader: assetLoader,
       configDatasource: LocalConfigurationDatasource(database: database),
     );
     backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
@@ -49,12 +48,12 @@ void main() {
 
   test('exportToJson includes only user-created spells and custom config, with version and date', () async {
     await spellRepository.saveSpell(Spell(
-      id: 'user-1', name: 'My Fireball', technique: 'Creo', form: 'Ignem',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 10, source: 'built-in',
-      ),
-      range: _range, duration: _duration, target: _target,
+      id: 'user-1',
+      name: 'My Fireball',
+      baseEffectId: 'e1',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -76,12 +75,12 @@ void main() {
 
   test('importFromJson restores spells and custom effects', () async {
     final importedSpell = Spell(
-      id: 'imported-1', name: 'Imported Spell', technique: 'Muto', form: 'Corpus',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Muto', form: 'Corpus',
-        description: 'test', baseLevel: 5, source: 'built-in',
-      ),
-      range: _range, duration: _duration, target: _target,
+      id: 'imported-1',
+      name: 'Imported Spell',
+      baseEffectId: 'e1',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
@@ -112,12 +111,12 @@ void main() {
 
   test('importFromJson is idempotent — importing the same backup twice does not throw or duplicate', () async {
     final importedSpell = Spell(
-      id: 'imported-1', name: 'Imported Spell', technique: 'Muto', form: 'Corpus',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Muto', form: 'Corpus',
-        description: 'test', baseLevel: 5, source: 'built-in',
-      ),
-      range: _range, duration: _duration, target: _target,
+      id: 'imported-1',
+      name: 'Imported Spell',
+      baseEffectId: 'e1',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );

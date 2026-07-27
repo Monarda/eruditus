@@ -36,7 +36,7 @@ class BackupService {
     final backup = {
       'version': _supportedVersion,
       'exportDate': DateTime.now().toIso8601String(),
-      'spells': userSpells.map((s) => s.toMap()).toList(),
+      'spells': userSpells.map((s) => s.record.toMap()).toList(),
       'customEffects': customEffects.map((e) => e.toMap()).toList(),
       'customParameters': customParameters.map((p) => p.toMap()).toList(),
     };

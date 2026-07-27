@@ -2,37 +2,6 @@
   {
     "id": "lib-crim-talking-head",
     "name": "Phantasm of the Talking Head",
-    "technique": "Creo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "creim-2",
-      "technique": "Creo",
-      "form": "Imaginem",
-      "description": "Create an image that affects two senses",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-diameter",
-      "name": "Diameter",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Creates an illusory face on a wall or other flat object that can speak during the spell's duration. Level 10.",
     "source": "built-in",
@@ -42,42 +11,15 @@
       "crim-complexity": [
         "crim-sensory-complexity"
       ]
-    }
+    },
+    "baseEffectId": "creim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-diameter",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-crim-phantasmal-animal",
     "name": "Phantasmal Animal",
-    "technique": "Creo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "creim-3",
-      "technique": "Creo",
-      "form": "Imaginem",
-      "description": "Create an image that affects three senses",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-diameter",
-      "name": "Diameter",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Creates an image of any animal up to the size of a pony that moves and makes noise under your mental command. Level 20.",
     "source": "built-in",
@@ -87,42 +29,15 @@
       "crim-complexity": [
         "crim-directed-image"
       ]
-    }
+    },
+    "baseEffectId": "creim-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-diameter",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-crim-phantasmal-fire",
     "name": "Phantasmal Fire",
-    "technique": "Creo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "creim-3",
-      "technique": "Creo",
-      "form": "Imaginem",
-      "description": "Create an image that affects three senses",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [
       {
         "art": "Ignem",
@@ -133,42 +48,15 @@
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "creim-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-crim-human-form",
     "name": "Phantasm of the Human Form",
-    "technique": "Creo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "creim-2",
-      "technique": "Creo",
-      "form": "Imaginem",
-      "description": "Create an image that affects two senses",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Makes an image of a clothed, equipped person who can move, speak, and behave as a human does, under your unspoken command. Level 25.",
     "source": "built-in",
@@ -179,42 +67,15 @@
         "crim-directed-image",
         "crim-intricate-design"
       ]
-    }
+    },
+    "baseEffectId": "creim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-crim-haunt",
     "name": "Haunt of the Living Ghost",
-    "technique": "Creo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "creim-2",
-      "technique": "Creo",
-      "form": "Imaginem",
-      "description": "Create an image that affects two senses",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-arcane-connection",
-      "name": "Arcane Connection",
-      "category": "Range",
-      "magnitude": 4,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-concentration",
-      "name": "Concentration",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [
       {
         "art": "Intellego",
@@ -230,575 +91,197 @@
         "crim-directed-image",
         "crim-intricate-design"
       ]
-    }
+    },
+    "baseEffectId": "creim-2",
+    "rangeId": "range-arcane-connection",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-inim-prying-eyes",
     "name": "Prying Eyes",
-    "technique": "Intellego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "ireim-1a",
-      "technique": "Intellego",
-      "form": "Imaginem",
-      "description": "Use one sense at a distance",
-      "baseLevel": 1,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-concentration",
-      "name": "Concentration",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-room",
-      "name": "Room",
-      "category": "Target",
-      "magnitude": 2,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "You can see inside a room, as long as you can touch one of its walls. Level 5.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "ireim-1a",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-room"
   },
   {
     "id": "lib-inim-discern-own-illusions",
     "name": "Discern Own Illusions",
-    "technique": "Intellego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "ireim-1c",
-      "technique": "Intellego",
-      "form": "Imaginem",
-      "description": "Be able to discern your own false images",
-      "baseLevel": 1,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-personal",
-      "name": "Personal",
-      "category": "Range",
-      "magnitude": 0,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-vision",
-      "name": "Vision",
-      "category": "Target",
-      "magnitude": 4,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Makes your own illusions appear largely transparent to you, but still discernible. Level 15.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "ireim-1c",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-vision"
   },
   {
     "id": "lib-inim-ear-for-distant-voices",
     "name": "The Ear for Distant Voices",
-    "technique": "Intellego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "ireim-1a",
-      "technique": "Intellego",
-      "form": "Imaginem",
-      "description": "Use one sense at a distance",
-      "baseLevel": 1,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-arcane-connection",
-      "name": "Arcane Connection",
-      "category": "Range",
-      "magnitude": 4,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-concentration",
-      "name": "Concentration",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-room",
-      "name": "Room",
-      "category": "Target",
-      "magnitude": 2,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "You can hear what is happening in a place you have an Arcane Connection to. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "ireim-1a",
+    "rangeId": "range-arcane-connection",
+    "durationId": "duration-concentration",
+    "targetId": "target-room"
   },
   {
     "id": "lib-inim-eyes-of-the-eagle",
     "name": "Eyes of the Eagle",
-    "technique": "Intellego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "ireim-3b",
-      "technique": "Intellego",
-      "form": "Imaginem",
-      "description": "Enhance one of your senses in one way (to see clearly at a distance, to see small things, or to see in the dark, for example)",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-personal",
-      "name": "Personal",
-      "category": "Range",
-      "magnitude": 0,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-vision",
-      "name": "Vision",
-      "category": "Target",
-      "magnitude": 4,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "You see distant things as clearly as if they were a foot away. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "ireim-3b",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-vision"
   },
   {
     "id": "lib-inim-summoning-distant-image",
     "name": "Summoning the Distant Image",
-    "technique": "Intellego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "ireim-2",
-      "technique": "Intellego",
-      "form": "Imaginem",
-      "description": "Use two senses at a distance",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-arcane-connection",
-      "name": "Arcane Connection",
-      "category": "Range",
-      "magnitude": 4,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-concentration",
-      "name": "Concentration",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-room",
-      "name": "Room",
-      "category": "Target",
-      "magnitude": 2,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "You can see and hear what is happening in a distant place you have an Arcane Connection to. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "ireim-2",
+    "rangeId": "range-arcane-connection",
+    "durationId": "duration-concentration",
+    "targetId": "target-room"
   },
   {
     "id": "lib-muim-taste-of-spices",
     "name": "Taste of the Spices and Herbs",
-    "technique": "Muto",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "muim-2a",
-      "technique": "Muto",
-      "form": "Imaginem",
-      "description": "Change two sensations of an object",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "A setting's worth of food or drink tastes and smells exactly as you designate. Level 5.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "muim-2a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-muim-ennobled-presence",
     "name": "Aura of Ennobled Presence",
-    "technique": "Muto",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "muim-3",
-      "technique": "Muto",
-      "form": "Imaginem",
-      "description": "Change three sensations of an object",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "The target appears more forceful, authoritative, and believable, gaining +3 on rolls to influence, lead, or convince others. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "muim-3",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-muim-notes-of-delightful-sound",
     "name": "Notes of a Delightful Sound",
-    "technique": "Muto",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "muim-1",
-      "technique": "Muto",
-      "form": "Imaginem",
-      "description": "Change one sensation of an object, but not its type",
-      "baseLevel": 1,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-room",
-      "name": "Room",
-      "category": "Target",
-      "magnitude": 2,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Causes all sounds in a room, particularly music, to be especially clear and sonorous. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "muim-1",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-room"
   },
   {
     "id": "lib-muim-disguise",
     "name": "Disguise of the Transformed Image",
-    "technique": "Muto",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "muim-4",
-      "technique": "Muto",
-      "form": "Imaginem",
-      "description": "Change four sensations of an object",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Makes someone look, sound, feel, and smell different, though at least passably human. Level 15.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "muim-4",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-muim-image-phantom",
     "name": "Image Phantom",
-    "technique": "Muto",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "muim-5",
-      "technique": "Muto",
-      "form": "Imaginem",
-      "description": "Change the appearance of an object completely, except solidity",
-      "baseLevel": 5,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Any one thing can be made to appear as something else of approximately the same shape and size. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "muim-5",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-peim-taste-dulled-tongue",
     "name": "Taste of the Dulled Tongue",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-2",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect taste or touch",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Hides the taste of any substance, liquid or solid. Level 5.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "peim-2",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-peim-cool-flames",
     "name": "Illusion of Cool Flames",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-2",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect taste or touch",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "A source of heat seems to lose its heat and drop to the surrounding temperature, though it retains its normal harmful effects. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "peim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-peim-invisibility-standing-wizard",
     "name": "Invisibility of the Standing Wizard",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-4a",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "The target becomes invisible, but the spell breaks if the target moves. It still casts a shadow. Level 15.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "peim-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-peim-veil-of-invisibility",
     "name": "Veil of Invisibility",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-4a",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "The target becomes completely undetectable to normal sight regardless of what it does, but still casts a shadow. Level 20.",
     "source": "built-in",
@@ -808,83 +291,29 @@
       "peim-complexity": [
         "peim-changing-image"
       ]
-    }
+    },
+    "baseEffectId": "peim-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-peim-conspicuous-sigil",
     "name": "Removal of the Conspicuous Sigil",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-4a",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-part",
-      "name": "Part",
-      "category": "Target",
-      "magnitude": 1,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Grooves, runes, and similar markings are obscured while the medium's overall shape remains constant. Level 20.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "peim-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-part"
   },
   {
     "id": "lib-peim-smothered-sound",
     "name": "Silence of the Smothered Sound",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-3a",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect smell or hearing",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Makes one being or object incapable of producing sound. Level 20.",
     "source": "built-in",
@@ -894,124 +323,43 @@
       "peim-complexity": [
         "peim-changing-image"
       ]
-    }
+    },
+    "baseEffectId": "peim-3a",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-peim-chamber-of-invisibility",
     "name": "Chamber of Invisibility",
-    "technique": "Perdo",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "peim-4a",
-      "technique": "Perdo",
-      "form": "Imaginem",
-      "description": "Destroy an object's ability to affect sight",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-group",
-      "name": "Group",
-      "category": "Target",
-      "magnitude": 2,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Causes a Group of creatures to become invisible; any affected member who moves or is touched makes everyone visible. Level 25.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "peim-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-group"
   },
   {
     "id": "lib-reim-shifted-image",
     "name": "Illusion of the Shifted Image",
-    "technique": "Rego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "reim-2",
-      "technique": "Rego",
-      "form": "Imaginem",
-      "description": "Make an object appear (to one sense) up to one pace from its actual position",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Makes any person or object appear to be a pace away from its actual position. The spell ends when either moves. Level 10.",
     "source": "built-in",
     "createdAt": "2026-01-01T00:00:00.000",
     "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {}
+    "selectedModifiers": {},
+    "baseEffectId": "reim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-reim-wizards-sidestep",
     "name": "Wizard's Sidestep",
-    "technique": "Rego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "reim-2",
-      "technique": "Rego",
-      "form": "Imaginem",
-      "description": "Make an object appear (to one sense) up to one pace from its actual position",
-      "baseLevel": 2,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-personal",
-      "name": "Personal",
-      "category": "Range",
-      "magnitude": 0,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Your image appears up to 1 pace from where you actually are; early attacks in combat are aimed at the image. Level 10.",
     "source": "built-in",
@@ -1022,42 +370,15 @@
         "reim-changing-image",
         "reim-moved-image-matches"
       ]
-    }
+    },
+    "baseEffectId": "reim-2",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-reim-captive-voice",
     "name": "The Captive Voice",
-    "technique": "Rego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "reim-4b",
-      "technique": "Rego",
-      "form": "Imaginem",
-      "description": "Make an object appear (to one sense) to be contained in or attached to another object defined at the time of casting",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-part",
-      "name": "Part",
-      "category": "Target",
-      "magnitude": 1,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Captures a person's voice and places it in a bag; the victim cannot speak unless the bag is open. Level 30.",
     "source": "built-in",
@@ -1067,42 +388,15 @@
       "reim-complexity": [
         "reim-changing-image"
       ]
-    }
+    },
+    "baseEffectId": "reim-4b",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-part"
   },
   {
     "id": "lib-reim-confusion-insane-vibrations",
     "name": "Confusion of the Insane Vibrations",
-    "technique": "Rego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "reim-3b",
-      "technique": "Rego",
-      "form": "Imaginem",
-      "description": "Make objects appear to move rapidly in a disorientating way",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-concentration",
-      "name": "Concentration",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-vision",
-      "name": "Vision",
-      "category": "Target",
-      "magnitude": 4,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "The target sees everything vibrate at high speed and sounds seem to come from the wrong places, suffering -3 to Attack/Defense. Level 30.",
     "source": "built-in",
@@ -1112,42 +406,15 @@
       "reim-complexity": [
         "reim-additional-senses"
       ]
-    }
+    },
+    "baseEffectId": "reim-3b",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-vision"
   },
   {
     "id": "lib-reim-wizard-torn",
     "name": "Image from the Wizard Torn",
-    "technique": "Rego",
-    "form": "Imaginem",
-    "baseEffect": {
-      "id": "reim-15b",
-      "technique": "Rego",
-      "form": "Imaginem",
-      "description": "Summon a disembodied spirit associated with Imaginem",
-      "baseLevel": 15,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-personal",
-      "name": "Personal",
-      "category": "Range",
-      "magnitude": 0,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-concentration",
-      "name": "Concentration",
-      "category": "Duration",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [
       {
         "art": "Intellego",
@@ -1163,42 +430,15 @@
         "reim-additional-senses",
         "reim-changing-image"
       ]
-    }
+    },
+    "baseEffectId": "reim-15b",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-pete-stone-to-falling-dust",
     "name": "Stone to Falling Dust",
-    "technique": "Perdo",
-    "form": "Terram",
-    "baseEffect": {
-      "id": "pete-3",
-      "technique": "Perdo",
-      "form": "Terram",
-      "description": "Destroy dirt",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-sight",
-      "name": "Sight",
-      "category": "Range",
-      "magnitude": 3,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-momentary",
-      "name": "Momentary",
-      "category": "Duration",
-      "magnitude": 0,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "One solid non-living object turns to a pile of dust. The object must be a base Individual or smaller, so a stone item can be a pace across while a metal item can only be one tenth that size in total. Level 20.",
     "source": "built-in",
@@ -1208,42 +448,15 @@
       "perdo-terram-material": [
         "perdo-terram-material-base-metal"
       ]
-    }
+    },
+    "baseEffectId": "pete-3",
+    "rangeId": "range-sight",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-crte-wall-of-protecting-stone",
     "name": "Wall of Protecting Stone",
-    "technique": "Creo",
-    "form": "Terram",
-    "baseEffect": {
-      "id": "crte-3",
-      "technique": "Creo",
-      "form": "Terram",
-      "description": "Create stone or glass",
-      "baseLevel": 3,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-voice",
-      "name": "Voice",
-      "category": "Range",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-sun",
-      "name": "Sun",
-      "category": "Duration",
-      "magnitude": 2,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "Makes a wall of granite up to 25 paces wide, 4 paces high, and 1 pace thick. One needs miner's tools to break through it, though it can be toppled if it is not connected to a support on its side or top. Level 25.",
     "source": "built-in",
@@ -1253,42 +466,15 @@
       "size-terram": [
         "size-terram-2"
       ]
-    }
+    },
+    "baseEffectId": "crte-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual"
   },
   {
     "id": "lib-rete-reaching-hand-of-ten-boulders",
     "name": "Reaching Hand of Ten Boulders",
-    "technique": "Rego",
-    "form": "Terram",
-    "baseEffect": {
-      "id": "rete-4",
-      "technique": "Rego",
-      "form": "Terram",
-      "description": "Transport a non-living object instantly up to 5 paces (add magnitudes for distance/Arcane Connection)",
-      "baseLevel": 4,
-      "source": "built-in"
-    },
-    "range": {
-      "id": "range-touch",
-      "name": "Touch",
-      "category": "Range",
-      "magnitude": 1,
-      "source": "built-in"
-    },
-    "duration": {
-      "id": "duration-momentary",
-      "name": "Momentary",
-      "category": "Duration",
-      "magnitude": 0,
-      "source": "built-in"
-    },
-    "target": {
-      "id": "target-individual",
-      "name": "Individual",
-      "category": "Target",
-      "magnitude": 0,
-      "source": "built-in"
-    },
     "requisites": [],
     "description": "You touch a stone weighing up to ten times the base Individual, and it instantly leaps from the ground to a point up to 5 paces away, wherever you direct it. Level 15.",
     "source": "built-in",
@@ -1304,6 +490,10 @@
       "rego-transport-distance": [
         "rego-distance-5-paces"
       ]
-    }
+    },
+    "baseEffectId": "rete-4",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual"
   }
 ]

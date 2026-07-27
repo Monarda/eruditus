@@ -9,6 +9,7 @@ import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
@@ -26,18 +27,25 @@ void main() {
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
 
-  Spell buildSpell(String id, String name, {String source = 'built-in'}) => Spell(
-        id: id, name: name, technique: 'Creo', form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e1', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 5, source: 'built-in',
-        ),
-        range: rangeParam,
-        duration: durationParam,
-        target: targetParam,
-        requisites: const [],
-        source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
-      );
+  final effect = BaseEffect(
+    id: 'e1', technique: 'Creo', form: 'Ignem',
+    description: 'test', baseLevel: 5, source: 'built-in',
+  );
+
+  ResolvedSpell buildSpell(String id, String name, {String source = 'built-in'}) {
+    final record = Spell(
+      id: id,
+      name: name,
+      baseEffectId: effect.id,
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      requisites: const [],
+      source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    return ResolvedSpell(
+        record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
+  }
 
   final builtInSpell = buildSpell('built-1', 'Phantasm of the Talking Head');
   final userSpell = buildSpell('user-1', 'My Custom Fireball', source: 'user-created');

@@ -60,11 +60,11 @@ void main() {
     final parameterIds = parameters.map((p) => p.id).toSet();
 
     for (final spell in spells) {
-      expect(effectIds.contains(spell.baseEffect.id), isTrue,
-          reason: '${spell.name}: baseEffect id ${spell.baseEffect.id} not in base_effects.json');
-      for (final p in [spell.range, spell.duration, spell.target]) {
-        expect(parameterIds.contains(p.id), isTrue,
-            reason: '${spell.name}: parameter id ${p.id} not in parameters.json');
+      expect(effectIds.contains(spell.baseEffectId), isTrue,
+          reason: '${spell.name}: baseEffect id ${spell.baseEffectId} not in base_effects.json');
+      for (final id in [spell.rangeId, spell.durationId, spell.targetId]) {
+        expect(parameterIds.contains(id), isTrue,
+            reason: '${spell.name}: parameter id $id not in parameters.json');
       }
     }
   });
@@ -81,25 +81,27 @@ void main() {
       return int.parse(match!.group(1)!);
     }
 
+    final effects = await loader.loadBaseEffects();
+    final parameters = await loader.loadParameters();
+    final effectsById = {for (final e in effects) e.id: e};
+    final parametersById = {for (final p in parameters) p.id: p};
+
     for (final spell in spells) {
       final statedLevel = levelStatedInDescription(spell);
+      final baseEffect = effectsById[spell.baseEffectId]!;
 
       final magnitudes = [
-        spell.range.magnitude,
-        spell.duration.magnitude,
-        spell.target.magnitude,
+        parametersById[spell.rangeId]!.magnitude,
+        parametersById[spell.durationId]!.magnitude,
+        parametersById[spell.targetId]!.magnitude,
         for (final entry in spell.selectedModifiers.entries)
           for (final optionId in entry.value)
             modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,
         ...spell.requisites.map((r) => r.magnitude),
       ];
 
-      final calculatedLevel =
-          SpellLevelCalculator.calculate(spell.baseEffect.baseLevel, magnitudes);
-
-      expect(calculatedLevel, statedLevel,
-          reason: '${spell.name}: calculated level $calculatedLevel does not match '
-              'level $statedLevel stated in description');
+      expect(SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes), statedLevel,
+          reason: '${spell.name}: calculated level does not match the stated level');
     }
   });
 
@@ -126,7 +128,9 @@ void main() {
 
   test('the library covers more than one Form', () async {
     final spells = await loader.loadSpellLibrary();
-    final forms = spells.map((s) => s.form).toSet();
+    final effects = await loader.loadBaseEffects();
+    final effectsById = {for (final e in effects) e.id: e};
+    final forms = spells.map((s) => effectsById[s.baseEffectId]!.form).toSet();
 
     expect(forms.length, greaterThan(1),
         reason: 'a single-Form library cannot exercise Form-scoped modifiers');

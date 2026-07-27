@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 2;
+  static const int _databaseVersion = 3;
 
   final Database db;
 
@@ -42,8 +42,6 @@ class AppDatabase {
       CREATE TABLE spells (
         id TEXT PRIMARY KEY,
         name TEXT,
-        technique TEXT NOT NULL,
-        form TEXT NOT NULL,
         source TEXT NOT NULL,
         data TEXT NOT NULL,
         created_at TEXT NOT NULL,

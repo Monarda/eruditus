@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
@@ -9,25 +10,28 @@ void main() {
   final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+  final effect = BaseEffect(
+    id: 'e1', technique: 'Creo', form: 'Ignem',
+    description: 'test', baseLevel: 10, source: 'built-in',
+  );
 
-  Spell buildSpell({String? name, String source = 'built-in', String? description}) => Spell(
-        id: '1',
-        name: name,
-        technique: 'Creo',
-        form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e1', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 10, source: 'built-in',
-        ),
-        range: rangeParam,
-        duration: durationParam,
-        target: targetParam,
-        requisites: const [],
-        description: description,
-        source: source,
-        createdAt: DateTime(2026, 1, 1),
-        updatedAt: DateTime(2026, 1, 1),
-      );
+  ResolvedSpell buildSpell({String? name, String source = 'built-in', String? description}) {
+    final record = Spell(
+      id: '1',
+      name: name,
+      baseEffectId: effect.id,
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      requisites: const [],
+      description: description,
+      source: source,
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    return ResolvedSpell(
+        record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
+  }
 
   testWidgets('shows spell name, technique+form, level, and Built-in badge', (tester) async {
     await tester.pumpWidget(MaterialApp(

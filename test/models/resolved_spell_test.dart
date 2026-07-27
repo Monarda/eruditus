@@ -1,0 +1,70 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/spell.dart';
+
+void main() {
+  final effect = BaseEffect(
+      id: 'creim-2', technique: 'Creo', form: 'Imaginem',
+      description: 'Create an image that affects two senses', baseLevel: 2, source: 'built-in');
+  final voice = Parameter(
+      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
+  final momentary = Parameter(
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final individual = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+
+  Spell record() => Spell(
+        id: 'spell-1',
+        name: 'Phantasm',
+        baseEffectId: 'creim-2',
+        rangeId: 'range-voice',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        requisites: const [],
+        description: 'A face on a wall. Level 10.',
+        source: 'built-in',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+
+  test('a fully resolved spell exposes catalog data through delegating getters', () {
+    final resolved = ResolvedSpell(
+        record: record(), baseEffect: effect, range: voice, duration: momentary, target: individual);
+
+    expect(resolved.isResolved, isTrue);
+    expect(resolved.unresolvedReferences, isEmpty);
+    expect(resolved.id, 'spell-1');
+    expect(resolved.name, 'Phantasm');
+    expect(resolved.source, 'built-in');
+    expect(resolved.description, 'A face on a wall. Level 10.');
+    // Derived from the base effect, never stored separately, so they cannot
+    // disagree with it.
+    expect(resolved.technique, 'Creo');
+    expect(resolved.form, 'Imaginem');
+  });
+
+  test('a missing base effect makes the spell unresolved and names the reference', () {
+    final resolved = ResolvedSpell(
+        record: record(), baseEffect: null, range: voice, duration: momentary, target: individual);
+
+    expect(resolved.isResolved, isFalse);
+    expect(resolved.unresolvedReferences, ['creim-2']);
+    expect(resolved.technique, isNull);
+    expect(resolved.form, isNull);
+    // The record survives intact so the spell can still be listed and re-saved.
+    expect(resolved.id, 'spell-1');
+    expect(resolved.name, 'Phantasm');
+  });
+
+  test('every missing reference is reported, not just the first', () {
+    final resolved = ResolvedSpell(
+        record: record(), baseEffect: null, range: null, duration: momentary, target: null);
+
+    expect(resolved.isResolved, isFalse);
+    expect(resolved.unresolvedReferences,
+        containsAll(['creim-2', 'range-voice', 'target-individual']));
+    expect(resolved.unresolvedReferences, isNot(contains('duration-momentary')));
+  });
+}

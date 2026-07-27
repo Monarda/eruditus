@@ -5,16 +5,8 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
-import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/spell.dart';
-
-Parameter _sp(String id, String name, String category) =>
-    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
-
-final _range = _sp('range-personal', 'Personal', 'Range');
-final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
-final _target = _sp('target-individual', 'Individual', 'Target');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -30,8 +22,15 @@ void main() {
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
-    spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
-    repository = LibraryRepository(assetLoader: AssetDataLoader(), spellRepository: spellRepository);
+    final assetLoader = AssetDataLoader();
+    final resolver = SpellResolver(
+      effects: await assetLoader.loadBaseEffects(),
+      parameters: await assetLoader.loadParameters(),
+    );
+    spellRepository = SpellRepository(
+        datasource: LocalSpellDatasource(database: database), resolver: resolver);
+    repository = LibraryRepository(
+        assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
   });
 
   tearDown(() async {
@@ -46,12 +45,12 @@ void main() {
 
   test('getAllSpells combines built-in and user spells', () async {
     await spellRepository.saveSpell(Spell(
-      id: 'user-1', name: 'My Custom Spell', technique: 'Creo', form: 'Ignem',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 5, source: 'built-in',
-      ),
-      range: _range, duration: _duration, target: _target,
+      id: 'user-1',
+      name: 'My Custom Spell',
+      baseEffectId: 'e1',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -70,12 +69,12 @@ void main() {
 
   test('filterBySource returns only matching-source spells', () async {
     await spellRepository.saveSpell(Spell(
-      id: 'user-1', name: 'Mine', technique: 'Creo', form: 'Ignem',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 5, source: 'built-in',
-      ),
-      range: _range, duration: _duration, target: _target,
+      id: 'user-1',
+      name: 'Mine',
+      baseEffectId: 'e1',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));

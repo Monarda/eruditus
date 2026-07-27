@@ -9,6 +9,7 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
@@ -25,27 +26,40 @@ void main() {
   late AppDatabase database;
   late LibraryRepository libraryRepository;
   late SpellEngine spellEngine;
+  late SpellResolver resolver;
 
   final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
   final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
   final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+  final effect1 = BaseEffect(
+    id: 'e1', technique: 'Creo', form: 'Ignem',
+    description: 'test', baseLevel: 5, source: 'built-in',
+  );
+  final effect2 = BaseEffect(
+    id: 'e2', technique: 'Creo', form: 'Ignem',
+    description: 'test', baseLevel: 5, source: 'built-in',
+  );
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
-    final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+    resolver = SpellResolver(
+      effects: [effect1, effect2],
+      parameters: [rangeParam, durationParam, targetParam],
+    );
+    final spellRepository = SpellRepository(
+        datasource: LocalSpellDatasource(database: database), resolver: resolver);
     await spellRepository.saveSpell(Spell(
-      id: 'user-1', name: 'My Custom Fireball', technique: 'Creo', form: 'Ignem',
-      baseEffect: BaseEffect(
-        id: 'e1', technique: 'Creo', form: 'Ignem',
-        description: 'test', baseLevel: 5, source: 'built-in',
-      ),
-      range: rangeParam,
-      duration: durationParam,
-      target: targetParam,
+      id: 'user-1',
+      name: 'My Custom Fireball',
+      baseEffectId: 'e1',
+      rangeId: 'p1',
+      durationId: 'p2',
+      targetId: 'p3',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
-    libraryRepository = LibraryRepository(assetLoader: AssetDataLoader(), spellRepository: spellRepository);
+    libraryRepository = LibraryRepository(
+        assetLoader: AssetDataLoader(), spellRepository: spellRepository, resolver: resolver);
     spellEngine = SpellEngine(allSpells: const []);
   });
 
@@ -100,16 +114,15 @@ void main() {
     // *entire* Library tab into its error state, hiding every spell. It
     // must instead load successfully.
     setUp: () async {
-      final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+      final spellRepository = SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver);
       await spellRepository.saveSpell(Spell(
-        id: 'user-dangling', name: 'Spell With Deleted Modifier', technique: 'Creo', form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e2', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 5, source: 'built-in',
-        ),
-        range: rangeParam,
-        duration: durationParam,
-        target: targetParam,
+        id: 'user-dangling',
+        name: 'Spell With Deleted Modifier',
+        baseEffectId: 'e2',
+        rangeId: 'p1',
+        durationId: 'p2',
+        targetId: 'p3',
         selectedModifiers: const {
           'no-longer-exists': ['no-longer-exists'],
         },

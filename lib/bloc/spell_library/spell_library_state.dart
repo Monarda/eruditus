@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 
 enum SpellLibraryStatus { loading, loaded, error }
 
 class SpellLibraryState extends Equatable {
   final SpellLibraryStatus status;
-  final List<Spell> allSpells;
+  final List<ResolvedSpell> allSpells;
   final String query;
   final String filter;
   // Precomputed spell levels keyed by spell id (via SpellEngine.
@@ -25,7 +25,7 @@ class SpellLibraryState extends Equatable {
 
   factory SpellLibraryState.initial() => const SpellLibraryState(status: SpellLibraryStatus.loading);
 
-  List<Spell> get visibleSpells {
+  List<ResolvedSpell> get visibleSpells {
     var result = allSpells;
     if (filter == 'Built-in') {
       result = result.where((s) => s.source == 'built-in').toList();
@@ -41,7 +41,7 @@ class SpellLibraryState extends Equatable {
 
   SpellLibraryState copyWith({
     SpellLibraryStatus? status,
-    List<Spell>? allSpells,
+    List<ResolvedSpell>? allSpells,
     String? query,
     String? filter,
     Map<String, int>? spellLevels,

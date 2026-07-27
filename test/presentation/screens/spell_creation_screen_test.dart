@@ -16,6 +16,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
@@ -204,16 +205,20 @@ void main() {
 
   testWidgets('shows suggestions with their level and description when status is calculated',
       (tester) async {
-    final suggestion = Spell(
-      id: 's1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
-      baseEffect: creoIgnemEffect,
-      range: voiceParam,
-      duration: durationParam,
-      target: targetParam,
+    final suggestionRecord = Spell(
+      id: 's1',
+      name: 'Pillar of Fire',
+      baseEffectId: creoIgnemEffect.id,
+      rangeId: voiceParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
       requisites: const [],
       description: 'A roaring pillar of flame.',
       source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
+    final suggestion = ResolvedSpell(
+      record: suggestionRecord, baseEffect: creoIgnemEffect,
+      range: voiceParam, duration: durationParam, target: targetParam);
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
@@ -265,11 +270,12 @@ void main() {
 
   testWidgets('shows a success SnackBar when a save completes', (tester) async {
     final savedSpell = Spell(
-      id: 'saved-1', name: 'My Fireball', technique: 'Creo', form: 'Ignem',
-      baseEffect: creoIgnemEffect,
-      range: voiceParam,
-      duration: durationParam,
-      target: targetParam,
+      id: 'saved-1',
+      name: 'My Fireball',
+      baseEffectId: creoIgnemEffect.id,
+      rangeId: voiceParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );

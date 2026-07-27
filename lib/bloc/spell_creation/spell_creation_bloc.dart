@@ -166,12 +166,8 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     final suggestionLevels = <String, int>{
       for (final s in suggestions)
         s.id: spellEngine.calculateSpellLevel(
-          baseEffect: s.baseEffect,
-          range: s.range,
-          duration: s.duration,
-          target: s.target,
-          selectedModifiers: s.selectedModifiers,
-          requisites: s.requisites,
+          baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+          selectedModifiers: s.selectedModifiers, requisites: s.requisites,
         ),
     };
 

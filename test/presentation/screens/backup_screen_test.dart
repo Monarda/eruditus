@@ -8,6 +8,7 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 
 void main() {
@@ -23,10 +24,16 @@ void main() {
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
+    final assetLoader = AssetDataLoader();
+    final resolver = SpellResolver(
+      effects: await assetLoader.loadBaseEffects(),
+      parameters: await assetLoader.loadParameters(),
+    );
     backupService = BackupService(
-      spellRepository: SpellRepository(datasource: LocalSpellDatasource(database: database)),
+      spellRepository: SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver),
       configRepository: ConfigurationRepository(
-        assetLoader: AssetDataLoader(),
+        assetLoader: assetLoader,
         configDatasource: LocalConfigurationDatasource(database: database),
       ),
     );

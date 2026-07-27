@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -387,17 +388,23 @@ void main() {
   });
 
   group('SpellEngine.findSimilarSpells', () {
-    Spell buildSpell(String id, String technique, String form, String name, int baseLevel) {
-      return Spell(
-        id: id, technique: technique, form: form,
-        name: name, baseEffect: BaseEffect(
-          id: 'e$id', technique: technique, form: form,
-          description: name, baseLevel: baseLevel, source: 'built-in',
-        ),
-        range: _range, duration: _duration, target: _target,
+    ResolvedSpell buildSpell(String id, String technique, String form, String name, int baseLevel) {
+      final effect = BaseEffect(
+        id: 'e$id', technique: technique, form: form,
+        description: name, baseLevel: baseLevel, source: 'built-in',
+      );
+      final record = Spell(
+        id: id,
+        name: name,
+        baseEffectId: effect.id,
+        rangeId: _range.id,
+        durationId: _duration.id,
+        targetId: _target.id,
         requisites: [],
         source: 'built-in', createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
+      return ResolvedSpell(
+        record: record, baseEffect: effect, range: _range, duration: _duration, target: _target);
     }
 
     test('returns only spells with matching Technique+Form', () {

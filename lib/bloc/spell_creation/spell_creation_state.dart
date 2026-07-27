@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 
 enum SpellCreationStatus { initial, editing, calculated, saving, saved, error, discarded }
@@ -10,7 +11,7 @@ class SpellCreationState extends Equatable {
   final List<String> validationErrors;
   final int? calculatedLevel;
   final LevelBreakdown? breakdown;
-  final List<Spell> suggestions;
+  final List<ResolvedSpell> suggestions;
   // Precomputed per-suggestion spell levels, keyed by spell id, so the UI can
   // show "name, level, source, description" on each suggestion card without
   // recomputing (or duplicating) SpellEngine.calculateSpellLevel itself.
@@ -41,7 +42,7 @@ class SpellCreationState extends Equatable {
     List<String>? validationErrors,
     int? calculatedLevel,
     LevelBreakdown? breakdown,
-    List<Spell>? suggestions,
+    List<ResolvedSpell>? suggestions,
     Map<String, int>? suggestionLevels,
     Spell? savedSpell,
     String? errorMessage,

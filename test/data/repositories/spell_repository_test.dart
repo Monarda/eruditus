@@ -1,20 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:eruditus/data/database/app_database.dart';
+import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
-import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/spell.dart';
 
-Parameter _sp(String id, String name, String category) =>
-    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
-
-final _range = _sp('range-personal', 'Personal', 'Range');
-final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
-final _target = _sp('target-individual', 'Individual', 'Target');
-
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -25,7 +20,13 @@ void main() {
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
-    repository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+    final assetLoader = AssetDataLoader();
+    final resolver = SpellResolver(
+      effects: await assetLoader.loadBaseEffects(),
+      parameters: await assetLoader.loadParameters(),
+    );
+    repository = SpellRepository(
+        datasource: LocalSpellDatasource(database: database), resolver: resolver);
   });
 
   tearDown(() async {
@@ -35,15 +36,10 @@ void main() {
   Spell buildSpell(String id, {String? name}) => Spell(
         id: id,
         name: name,
-        technique: 'Creo',
-        form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in',
-        ),
-        range: _range,
-        duration: _duration,
-        target: _target,
+        baseEffectId: 'e1',
+        rangeId: 'range-personal',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
         requisites: const [],
         source: 'user-created',
         createdAt: DateTime(2026, 1, 1),

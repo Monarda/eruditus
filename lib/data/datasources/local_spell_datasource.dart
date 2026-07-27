@@ -39,8 +39,6 @@ class LocalSpellDatasource {
   Map<String, Object?> _toRow(Spell spell) => {
         'id': spell.id,
         'name': spell.name,
-        'technique': spell.technique,
-        'form': spell.form,
         'source': spell.source,
         'data': jsonEncode(spell.toMap()),
         'created_at': spell.createdAt.toIso8601String(),

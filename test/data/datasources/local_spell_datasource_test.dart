@@ -2,16 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
-import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/base_effect.dart';
-
-Parameter _sp(String id, String name, String category) =>
-    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
-
-final _range = _sp('range-personal', 'Personal', 'Range');
-final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
-final _target = _sp('target-individual', 'Individual', 'Target');
 
 void main() {
   setUpAll(() {
@@ -34,19 +25,10 @@ void main() {
   Spell buildSpell(String id, {String? name}) => Spell(
         id: id,
         name: name,
-        technique: 'Creo',
-        form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: 'e1',
-          technique: 'Creo',
-          form: 'Ignem',
-          description: 'Create flame',
-          baseLevel: 10,
-          source: 'built-in',
-        ),
-        range: _range,
-        duration: _duration,
-        target: _target,
+        baseEffectId: 'e1',
+        rangeId: 'range-personal',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
         requisites: const [],
         source: 'user-created',
         createdAt: DateTime(2026, 1, 1),
@@ -60,8 +42,7 @@ void main() {
 
     expect(retrieved, isNotNull);
     expect(retrieved!.name, 'My Fireball');
-    expect(retrieved.technique, 'Creo');
-    expect(retrieved.baseEffect.baseLevel, 10);
+    expect(retrieved.baseEffectId, 'e1');
   });
 
   test('getSpellById returns null for unknown id', () async {

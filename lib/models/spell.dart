@@ -3,15 +3,19 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
+/// A saved spell, stored as references into the effect/parameter catalogs.
+///
+/// This record deliberately holds no copy of any catalog data — no
+/// description, base level, magnitude, technique or form. Those are looked up
+/// through [SpellResolver] on read, so there is exactly one source of truth and
+/// no way for a spell to disagree with the catalog it was built from.
 class Spell {
   final String id;
   final String? name;
-  final String technique;
-  final String form;
-  final BaseEffect baseEffect;
-  final Parameter range;
-  final Parameter duration;
-  final Parameter target;
+  final String baseEffectId;
+  final String rangeId;
+  final String durationId;
+  final String targetId;
   final Map<String, List<String>> selectedModifiers;
   final List<Requisite> requisites;
   final String? description;
@@ -22,12 +26,10 @@ class Spell {
   Spell({
     required this.id,
     this.name,
-    required this.technique,
-    required this.form,
-    required this.baseEffect,
-    required this.range,
-    required this.duration,
-    required this.target,
+    required this.baseEffectId,
+    required this.rangeId,
+    required this.durationId,
+    required this.targetId,
     this.selectedModifiers = const {},
     required this.requisites,
     this.description,
@@ -37,45 +39,40 @@ class Spell {
   });
 
   Map<String, dynamic> toMap() => {
-    'id': id,
-    'name': name,
-    'technique': technique,
-    'form': form,
-    'baseEffect': baseEffect.toMap(),
-    'range': range.toMap(),
-    'duration': duration.toMap(),
-    'target': target.toMap(),
-    'selectedModifiers': selectedModifiers.map((k, v) => MapEntry(k, v)),
-    'requisites': requisites.map((r) => r.toMap()).toList(),
-    'description': description,
-    'source': source,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-  };
+        'id': id,
+        'name': name,
+        'baseEffectId': baseEffectId,
+        'rangeId': rangeId,
+        'durationId': durationId,
+        'targetId': targetId,
+        'selectedModifiers': selectedModifiers,
+        'requisites': requisites.map((r) => r.toMap()).toList(),
+        'description': description,
+        'source': source,
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+      };
 
   factory Spell.fromMap(Map<String, dynamic> map) => Spell(
-    id: requireField<String>(map, 'id', 'Spell'),
-    name: map['name'] as String?,
-    technique: requireField<String>(map, 'technique', 'Spell'),
-    form: requireField<String>(map, 'form', 'Spell'),
-    baseEffect: BaseEffect.fromMap(
-      requireField<Map<String, dynamic>>(map, 'baseEffect', 'Spell'),
-    ),
-    range: Parameter.fromMap(requireField<Map<String, dynamic>>(map, 'range', 'Spell')),
-    duration: Parameter.fromMap(requireField<Map<String, dynamic>>(map, 'duration', 'Spell')),
-    target: Parameter.fromMap(requireField<Map<String, dynamic>>(map, 'target', 'Spell')),
-    selectedModifiers: (map['selectedModifiers'] as Map?)?.map(
-          (k, v) => MapEntry(k as String, List<String>.from(v as List)),
-        ) ??
-        const {},
-    requisites: (map['requisites'] as List?)
-        ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
-        .toList() ?? [],
-    description: map['description'] as String?,
-    source: requireField<String>(map, 'source', 'Spell'),
-    createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
-    updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
-  );
+        id: requireField<String>(map, 'id', 'Spell'),
+        name: map['name'] as String?,
+        baseEffectId: requireField<String>(map, 'baseEffectId', 'Spell'),
+        rangeId: requireField<String>(map, 'rangeId', 'Spell'),
+        durationId: requireField<String>(map, 'durationId', 'Spell'),
+        targetId: requireField<String>(map, 'targetId', 'Spell'),
+        selectedModifiers: (map['selectedModifiers'] as Map?)?.map(
+              (k, v) => MapEntry(k as String, List<String>.from(v as List)),
+            ) ??
+            const {},
+        requisites: (map['requisites'] as List?)
+                ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        description: map['description'] as String?,
+        source: requireField<String>(map, 'source', 'Spell'),
+        createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
+        updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
+      );
 }
 
 class SpellDraft {
@@ -109,8 +106,6 @@ class SpellDraft {
 
   Spell toSpell({required String name, required String source}) {
     final missingFields = <String>[
-      if (technique == null) 'technique',
-      if (form == null) 'form',
       if (baseEffect == null) 'baseEffect',
       if (range == null) 'range',
       if (duration == null) 'duration',
@@ -123,22 +118,13 @@ class SpellDraft {
       );
     }
 
-    final resolvedTechnique = technique!;
-    final resolvedForm = form!;
-    final resolvedBaseEffect = baseEffect!;
-    final resolvedRange = range!;
-    final resolvedDuration = duration!;
-    final resolvedTarget = target!;
-
     return Spell(
       id: id,
       name: name,
-      technique: resolvedTechnique,
-      form: resolvedForm,
-      baseEffect: resolvedBaseEffect,
-      range: resolvedRange,
-      duration: resolvedDuration,
-      target: resolvedTarget,
+      baseEffectId: baseEffect!.id,
+      rangeId: range!.id,
+      durationId: duration!.id,
+      targetId: target!.id,
       selectedModifiers: selectedModifiers,
       requisites: requisites,
       description: description,

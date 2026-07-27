@@ -18,6 +18,7 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
@@ -36,12 +37,18 @@ Future<void> main() async {
 
   final database = await AppDatabase.open();
   final assetLoader = AssetDataLoader();
-  final spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
-  final libraryRepository = LibraryRepository(assetLoader: assetLoader, spellRepository: spellRepository);
   final configRepository = ConfigurationRepository(
     assetLoader: assetLoader,
     configDatasource: LocalConfigurationDatasource(database: database),
   );
+  final resolver = SpellResolver(
+    effects: await configRepository.getAllEffects(),
+    parameters: await configRepository.getAllParameters(),
+  );
+  final spellRepository = SpellRepository(
+      datasource: LocalSpellDatasource(database: database), resolver: resolver);
+  final libraryRepository = LibraryRepository(
+      assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
   final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
   final allSpells = await libraryRepository.getAllSpells();

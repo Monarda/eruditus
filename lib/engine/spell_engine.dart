@@ -4,10 +4,11 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 
 class SpellEngine {
-  final List<Spell> allSpells;
+  final List<ResolvedSpell> allSpells;
 
   // Mutable (not final): custom modifiers can be added at runtime via
   // ConfigurationBloc (Settings tab) after this engine is constructed. See
@@ -144,26 +145,20 @@ class SpellEngine {
         requisites: requisites,
       ).level;
 
-  List<Spell> findSimilarSpells(String technique, String form, {int? referenceLevel}) {
+  List<ResolvedSpell> findSimilarSpells(String technique, String form, {int? referenceLevel}) {
     final matches = allSpells
-        .where((spell) => spell.technique == technique && spell.form == form)
+        .where((s) => s.isResolved && s.technique == technique && s.form == form)
         .toList();
 
     if (referenceLevel != null) {
       matches.sort((a, b) {
         final levelA = calculateSpellLevel(
-          baseEffect: a.baseEffect,
-          range: a.range,
-          duration: a.duration,
-          target: a.target,
-          requisites: a.requisites,
+          baseEffect: a.baseEffect!, range: a.range!, duration: a.duration!, target: a.target!,
+          selectedModifiers: a.selectedModifiers, requisites: a.requisites,
         );
         final levelB = calculateSpellLevel(
-          baseEffect: b.baseEffect,
-          range: b.range,
-          duration: b.duration,
-          target: b.target,
-          requisites: b.requisites,
+          baseEffect: b.baseEffect!, range: b.range!, duration: b.duration!, target: b.target!,
+          selectedModifiers: b.selectedModifiers, requisites: b.requisites,
         );
         return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());
       });

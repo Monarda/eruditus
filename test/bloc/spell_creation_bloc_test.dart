@@ -8,10 +8,12 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
+import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
@@ -21,14 +23,11 @@ void main() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
     registerFallbackValue(Spell(
-      id: 'fallback', technique: 'Creo', form: 'Ignem',
-      baseEffect: BaseEffect(
-        id: 'fb', technique: 'Creo', form: 'Ignem',
-        description: 'fallback', baseLevel: 1, source: 'built-in',
-      ),
-      range: Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in'),
-      duration: Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-      target: Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in'),
+      id: 'fallback',
+      baseEffectId: 'fb',
+      rangeId: 'p1',
+      durationId: 'p2',
+      targetId: 'p3',
       requisites: const [],
       source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
@@ -48,7 +47,12 @@ void main() {
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
-    spellRepository = SpellRepository(datasource: LocalSpellDatasource(database: database));
+    final resolver = SpellResolver(
+      effects: [creoIgnemEffect],
+      parameters: [rangeParam, durationParam, targetParam],
+    );
+    spellRepository = SpellRepository(
+        datasource: LocalSpellDatasource(database: database), resolver: resolver);
     spellEngine = SpellEngine(allSpells: const []);
   });
 
@@ -105,15 +109,19 @@ void main() {
   blocTest<SpellCreationBloc, SpellCreationState>(
     'SpellCalculated precomputes a level for each suggestion, keyed by spell id',
     build: () {
-      final suggestion = Spell(
-        id: 'suggestion-1', name: 'Pillar of Fire', technique: 'Creo', form: 'Ignem',
-        baseEffect: creoIgnemEffect,
-        range: rangeParam,
-        duration: durationParam,
-        target: targetParam,
+      final suggestionRecord = Spell(
+        id: 'suggestion-1',
+        name: 'Pillar of Fire',
+        baseEffectId: creoIgnemEffect.id,
+        rangeId: rangeParam.id,
+        durationId: durationParam.id,
+        targetId: targetParam.id,
         requisites: const [],
         source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
+      final suggestion = ResolvedSpell(
+        record: suggestionRecord, baseEffect: creoIgnemEffect,
+        range: rangeParam, duration: durationParam, target: targetParam);
       return SpellCreationBloc(
         spellEngine: SpellEngine(allSpells: [suggestion]),
         spellRepository: spellRepository,
