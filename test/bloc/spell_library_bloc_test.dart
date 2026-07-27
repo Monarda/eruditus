@@ -42,6 +42,19 @@ void main() {
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
+    // Deliberately a small local fixture catalog (2 effects, 3 parameters)
+    // rather than the real AssetDataLoader catalog. This means when
+    // libraryRepository.getBuiltInSpells() resolves the real 30 built-in
+    // library spells against this resolver below, almost none of them
+    // resolve — only spells built on ids from this narrow set (the fixture
+    // Spells this file saves itself, e.g. `user-1`/`user-dangling`) come back
+    // resolved. `allSpells.length` doesn't care either way: every Spell
+    // (resolved or not) still appears in the list. But `spellLevels` is keyed
+    // only by resolved spells' ids (see SpellLibraryBloc._onEvent), so the
+    // `spellLevels['user-1']`/`spellLevels['user-dangling']` assertions below
+    // work only because those particular fixtures were deliberately built
+    // with ids from this narrow catalog — none of the 30 real built-ins are
+    // expected to contribute a spellLevels entry here.
     resolver = SpellResolver(
       effects: [effect1, effect2],
       parameters: [rangeParam, durationParam, targetParam],

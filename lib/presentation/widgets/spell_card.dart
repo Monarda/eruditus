@@ -12,7 +12,14 @@ class SpellCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isInvalid = !spell.isResolved;
-    final title = spell.name ?? 'Untitled ${spell.technique} ${spell.form}';
+    // An unresolved spell (see below) has a null technique/form too, since
+    // both are derived from the (possibly null) resolved baseEffect. Reachable
+    // via BackupService.importFromJson, which calls Spell.fromMap directly on
+    // user-supplied JSON where `name` is optional: without this branch a
+    // nameless, unresolved spell would render the literal string
+    // "Untitled null null".
+    final title = spell.name ??
+        (isInvalid ? 'Untitled spell' : 'Untitled ${spell.technique} ${spell.form}');
     final String subtitle;
     if (isInvalid) {
       // The catalog entry this spell was built on no longer exists (a custom

@@ -434,5 +434,48 @@ void main() {
       // Closest to 22 is 20 (diff 2), then 10 (diff 12), then 50 (diff 28)
       expect(similar.map((s) => s.id).toList(), ['20', '10', '50']);
     });
+
+    test('excludes unresolved spells rather than dereferencing their null catalog fields', () {
+      final resolved = buildSpell('1', 'Creo', 'Ignem', 'Pillar of Fire', 10);
+      // Unresolved via a null `range` (its rangeId no longer resolves to
+      // anything, e.g. the parameter was deleted after this spell was
+      // saved) while `baseEffect` stays set — so technique/form (derived
+      // from baseEffect) still match the query and this spell would reach
+      // the sort comparator if not for the `isResolved &&` guard. The
+      // `isResolved &&` guard in findSimilarSpells must filter it out
+      // *before* the comparator's `baseEffect!`/`range!`/`duration!`/
+      // `target!` derefs ever run on it — otherwise this is a null-check-
+      // operator crash reachable from the Create tab's Calculate button.
+      final orphanEffect = BaseEffect(
+        id: 'e-orphan', technique: 'Creo', form: 'Ignem',
+        description: 'Orphan', baseLevel: 10, source: 'built-in',
+      );
+      final orphan = ResolvedSpell(
+        record: Spell(
+          id: 'orphan',
+          name: 'Orphan',
+          baseEffectId: orphanEffect.id,
+          rangeId: 'gone',
+          durationId: _duration.id,
+          targetId: _target.id,
+          requisites: const [],
+          source: 'user-created',
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        ),
+        baseEffect: orphanEffect,
+        range: null,
+        duration: _duration,
+        target: _target,
+      );
+
+      final engine = SpellEngine(allSpells: [resolved, orphan]);
+
+      // referenceLevel forces the sort/comparator path to run.
+      final similar = engine.findSimilarSpells('Creo', 'Ignem', referenceLevel: 10);
+
+      expect(similar.any((s) => s.id == 'orphan'), isFalse);
+      expect(similar.map((s) => s.id).toList(), ['1']);
+    });
   });
 }

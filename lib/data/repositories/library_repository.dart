@@ -49,8 +49,13 @@ class LibraryRepository {
   }
 
   Future<List<ResolvedSpell>> getAllSpells() async {
-    final builtIn = await getBuiltInSpells();
+    // Refresh before resolving anything: getBuiltInSpells caches its result
+    // permanently on first call, so whatever catalog snapshot the resolver
+    // holds at that moment fixes the resolution quality of every built-in
+    // spell forever. Refreshing first ensures that first cache-populating
+    // resolve already sees the current catalog rather than a stale one.
     await _refreshResolver();
+    final builtIn = await getBuiltInSpells();
     final user = await spellRepository.getAllUserSpells();
     return [...builtIn, ...user];
   }

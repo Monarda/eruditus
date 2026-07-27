@@ -2,10 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
+import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
+import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
 
 void main() {
@@ -84,4 +87,72 @@ void main() {
     expect(userSpells.length, 1);
     expect(userSpells.first.id, 'user-1');
   });
+
+  // Task 3's headline fix: LibraryRepository refreshes its resolver's catalog
+  // snapshot from ConfigurationRepository on every getAllSpells() call (see
+  // _refreshResolver), so a spell picks up catalog changes made after the
+  // resolver was first built — including a deletion, which must flip a
+  // previously-resolved spell to unresolved on the very next load. This is
+  // only exercised when configRepository is actually supplied (its null
+  // check short-circuits _refreshResolver otherwise), which the other tests
+  // in this file deliberately don't do. The equivalent behaviour is also
+  // covered by integration_test/spell_creation_flow_test.dart's 4th test,
+  // but `flutter test` does not run integration_test/ by default, so this
+  // unit test is what actually exercises the refresh path in CI/local runs.
+  test(
+    'getAllSpells re-resolves against the current catalog: a spell becomes '
+    'unresolved after its custom effect is deleted',
+    () async {
+      final assetLoader = AssetDataLoader();
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final resolver = SpellResolver(
+        effects: await configRepository.getAllEffects(),
+        parameters: await configRepository.getAllParameters(),
+      );
+      final spellRepositoryWithConfig = SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      final repositoryWithConfig = LibraryRepository(
+        assetLoader: assetLoader,
+        spellRepository: spellRepositoryWithConfig,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+
+      final customEffect = BaseEffect(
+        id: 'custom-refresh-effect',
+        technique: 'Creo',
+        form: 'Ignem',
+        description: 'A custom effect for the refresh test',
+        baseLevel: 5,
+        source: 'user-created',
+      );
+      await configRepository.addCustomEffect(customEffect);
+
+      await spellRepositoryWithConfig.saveSpell(Spell(
+        id: 'spell-on-custom-effect',
+        name: 'Spell On Custom Effect',
+        baseEffectId: customEffect.id,
+        rangeId: 'range-personal',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        requisites: const [],
+        source: 'user-created',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ));
+
+      final beforeDeletion = await repositoryWithConfig.getAllSpells();
+      final beforeSpell = beforeDeletion.firstWhere((s) => s.id == 'spell-on-custom-effect');
+      expect(beforeSpell.isResolved, isTrue);
+
+      await configRepository.deleteCustomEffect(customEffect.id);
+
+      final afterDeletion = await repositoryWithConfig.getAllSpells();
+      final afterSpell = afterDeletion.firstWhere((s) => s.id == 'spell-on-custom-effect');
+      expect(afterSpell.isResolved, isFalse);
+    },
+  );
 }
