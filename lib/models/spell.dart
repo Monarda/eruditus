@@ -3,6 +3,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 /// The prose rule every published [Spell] must satisfy, stated once and
@@ -55,6 +56,7 @@ class Spell {
   final String? description;
   final Provenance provenance;
   final List<String> tags;
+  final RitualDeclaration ritualDeclaration;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -71,6 +73,7 @@ class Spell {
     this.description,
     required this.provenance,
     this.tags = const [],
+    this.ritualDeclaration = RitualDeclaration.none,
     required this.createdAt,
     required this.updatedAt,
   }) {
@@ -97,6 +100,7 @@ class Spell {
         'description': description,
         ...provenance.toMap(),
         'tags': tags,
+        'ritualDeclaration': ritualDeclaration.name,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
@@ -120,6 +124,10 @@ class Spell {
         description: map['description'] as String?,
         provenance: Provenance.fromMap(map),
         tags: (map['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
+        ritualDeclaration: map['ritualDeclaration'] == null
+            ? RitualDeclaration.none
+            : ritualDeclarationFromName(
+                requireField<String>(map, 'ritualDeclaration', 'Spell'), 'Spell'),
         createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
         updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
       );
@@ -137,6 +145,7 @@ class SpellDraft {
   List<Requisite> requisites;
   String? summary;
   String? description;
+  RitualDeclaration ritualDeclaration;
 
   SpellDraft({
     String? id,
@@ -150,6 +159,7 @@ class SpellDraft {
     List<Requisite>? requisites,
     this.summary,
     this.description,
+    this.ritualDeclaration = RitualDeclaration.none,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
         requisites = requisites ?? [];
@@ -186,6 +196,7 @@ class SpellDraft {
       requisites: requisites,
       summary: summary,
       description: description,
+      ritualDeclaration: ritualDeclaration,
       provenance: Provenance(source: source),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -203,6 +214,7 @@ class SpellDraft {
     List<Requisite>? requisites,
     String? summary,
     String? description,
+    RitualDeclaration? ritualDeclaration,
   }) {
     return SpellDraft(
       id: id,
@@ -216,6 +228,7 @@ class SpellDraft {
       requisites: requisites ?? this.requisites,
       summary: summary ?? this.summary,
       description: description ?? this.description,
+      ritualDeclaration: ritualDeclaration ?? this.ritualDeclaration,
     );
   }
 }

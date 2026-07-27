@@ -3,6 +3,7 @@ import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 
 /// A [Spell] record joined to the catalog entries its ids refer to.
@@ -54,4 +55,5 @@ class ResolvedSpell {
   DateTime get updatedAt => record.updatedAt;
   Map<String, List<String>> get selectedModifiers => record.selectedModifiers;
   List<Requisite> get requisites => record.requisites;
+  RitualDeclaration get ritualDeclaration => record.ritualDeclaration;
 }

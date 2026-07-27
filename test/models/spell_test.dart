@@ -6,6 +6,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 
 void main() {
   group('Spell Model', () {
@@ -257,6 +258,91 @@ void main() {
 
       expect(updated.selectedModifiers['terram-material'], ['mat-metal']);
       expect(draft.selectedModifiers['terram-material'], ['mat-stone'], reason: 'original unchanged');
+    });
+
+    test('ritualDeclaration defaults to none and round-trips every value', () {
+      for (final value in RitualDeclaration.values) {
+        final spell = Spell(
+          id: 's-1', name: 'Touch of Midas',
+          baseEffectId: 'crte-15a',
+          rangeId: 'range-touch',
+          durationId: 'duration-momentary',
+          targetId: 'target-individual',
+          requisites: const [],
+          ritualDeclaration: value,
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026), updatedAt: DateTime(2026),
+        );
+        expect(Spell.fromMap(spell.toMap()).ritualDeclaration, value);
+      }
+    });
+
+    test('fromMap treats an absent ritualDeclaration key as none', () {
+      final restored = Spell.fromMap({
+        'id': 's-2',
+        'baseEffectId': 'crte-15a',
+        'rangeId': 'range-touch',
+        'durationId': 'duration-momentary',
+        'targetId': 'target-individual',
+        'requisites': <Map<String, dynamic>>[],
+        'source': 'user-created',
+        'createdAt': DateTime(2026).toIso8601String(),
+        'updatedAt': DateTime(2026).toIso8601String(),
+      });
+      expect(restored.ritualDeclaration, RitualDeclaration.none);
+    });
+
+    test('fromMap throws a clear FormatException on an unknown ritualDeclaration', () {
+      expect(
+        () => Spell.fromMap({
+          'id': 's-3',
+          'baseEffectId': 'crte-15a',
+          'rangeId': 'range-touch',
+          'durationId': 'duration-momentary',
+          'targetId': 'target-individual',
+          'requisites': <Map<String, dynamic>>[],
+          'ritualDeclaration': 'because-i-said-so',
+          'source': 'user-created',
+          'createdAt': DateTime(2026).toIso8601String(),
+          'updatedAt': DateTime(2026).toIso8601String(),
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains('because-i-said-so'), contains('storyguideRuling')),
+          ),
+        ),
+      );
+    });
+
+    test('toSpell carries the draft ritualDeclaration through', () {
+      final draft = SpellDraft(
+        technique: 'Creo', form: 'Terram',
+        baseEffect: BaseEffect(
+          id: 'crte-15a', technique: 'Creo', form: 'Terram',
+          description: 'Create precious metal', baseLevel: 15,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        range: Parameter(
+          id: 'range-touch', name: 'Touch', category: 'Range', magnitude: 1,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        duration: Parameter(
+          id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        target: Parameter(
+          id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        ritualDeclaration: RitualDeclaration.lastingCreation,
+      );
+
+      final spell = draft.toSpell(
+          name: 'Touch of Midas', source: PublicationSource.userCreated);
+
+      expect(spell.ritualDeclaration, RitualDeclaration.lastingCreation);
     });
   });
 

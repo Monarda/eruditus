@@ -13,6 +13,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 
 void main() {
@@ -152,5 +153,23 @@ void main() {
       () => backupService.importFromJson(backup),
       throwsFormatException,
     );
+  });
+
+  test('export/import round-trips ritualDeclaration', () async {
+    final spell = Spell(
+      id: 'ritual-1', name: 'Touch of Midas',
+      baseEffectId: 'crte-15a',
+      rangeId: 'range-touch',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
+      requisites: const [],
+      ritualDeclaration: RitualDeclaration.lastingCreation,
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026), updatedAt: DateTime(2026),
+    );
+
+    final restored = Spell.fromMap(spell.toMap());
+
+    expect(restored.ritualDeclaration, RitualDeclaration.lastingCreation);
   });
 }

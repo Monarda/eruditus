@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 
 void main() {
@@ -45,5 +46,16 @@ void main() {
     final updated = draft.copyWith(form: 'Corpus');
 
     expect(updated.baseEffect, effect);
+  });
+
+  test('copyWith replaces ritualDeclaration and preserves it when omitted', () {
+    final draft = SpellDraft(ritualDeclaration: RitualDeclaration.lastingCreation);
+
+    expect(
+      draft.copyWith(ritualDeclaration: RitualDeclaration.none).ritualDeclaration,
+      RitualDeclaration.none,
+    );
+    expect(draft.copyWith(technique: 'Creo').ritualDeclaration,
+        RitualDeclaration.lastingCreation);
   });
 }

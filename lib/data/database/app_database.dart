@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 4;
+  static const int _databaseVersion = 5;
 
   final Database db;
 
@@ -29,6 +29,9 @@ class AppDatabase {
         // it. `custom_factors` is dropped too, but only as dead-table
         // cleanup: `_createSchema` never creates it, so this is a no-op with
         // zero data-loss risk.
+        // The v5 bump is the same shape again: the `spells` DDL is unchanged,
+        // but stored blobs predate `ritualDeclaration`, so the table is
+        // dropped and rebuilt rather than translated.
         onUpgrade: (db, oldVersion, newVersion) async {
           for (final table in const ['spells', 'custom_factors']) {
             await db.execute('DROP TABLE IF EXISTS $table');
