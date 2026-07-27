@@ -244,9 +244,28 @@ void main() {
         await tester.pumpAndSettle();
       }
 
+      // The RitualSection widget added between the Modifiers section and the
+      // Calculate button (Task 7 of the Ritual Spells work) added enough
+      // extra height that, once the viewport has scrolled forward to reach
+      // calculate-button/level-breakdown-card, the requisite row further up
+      // the list is scrolled out of view above the viewport. scrollTo only
+      // ever scrolls forward, so getting back to it needs a negative delta —
+      // same technique already used below for form-dropdown.
+      Future<void> scrollBackTo(Finder finder) async {
+        await tester.scrollUntilVisible(finder, -200.0, scrollable: find.byType(Scrollable).first);
+        await tester.pumpAndSettle();
+      }
+
+      // Rego, not Creo: Creo + Momentary now defaults the Ritual declaration
+      // on (Task 6/7 of the Ritual Spells work), which floors the calculated
+      // level to 20 whenever the raw total is lower. Both the free and the
+      // adding requisite levels below land under 20, so with Creo they'd both
+      // be floored to the same value and the "level must rise" assertion
+      // below would spuriously fail. Rego + Momentary is not a lasting-Creo
+      // case, so no default applies and the raw levels differ as intended.
       await tester.tap(find.byKey(const Key('technique-dropdown')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Creo').last);
+      await tester.tap(find.text('Rego').last);
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('form-dropdown')));
@@ -296,7 +315,7 @@ void main() {
           .data!;
 
       // Promote it to adding: +1 magnitude, so the level must rise.
-      await scrollTo(find.byKey(const Key('requisite-kind-Auram')));
+      await scrollBackTo(find.byKey(const Key('requisite-kind-Auram')));
       await tester.tap(find.byKey(const Key('requisite-kind-Auram')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Adding (+1)').last);
@@ -321,7 +340,7 @@ void main() {
       );
 
       // Removing it puts the art back in the add dropdown and must not throw.
-      await scrollTo(find.byKey(const Key('requisite-remove-Auram')));
+      await scrollBackTo(find.byKey(const Key('requisite-remove-Auram')));
       await tester.tap(find.byKey(const Key('requisite-remove-Auram')));
       await tester.pumpAndSettle();
 
@@ -542,6 +561,123 @@ void main() {
       expect(find.textContaining('Unavailable'), findsOneWidget);
 
       await database.close();
+    },
+  );
+
+  testWidgets(
+    'end-to-end: a Momentary Creo spell is offered the Ritual checkbox, and '
+    'declaring it produces a Ritual spell',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final resolver = SpellResolver(
+        effects: await configRepository.getAllEffects(),
+        parameters: await configRepository.getAllParameters(),
+      );
+      final spellRepository = SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      final libraryRepository = LibraryRepository(
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+      final backupService = BackupService(
+          spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final spellEngine = SpellEngine(allSpells: allSpells);
+
+      final spellCreationBloc = SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(
+          libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Create Spell'), findsOneWidget);
+
+      // Select Creo / Terram / Create precious metal.
+      await tester.tap(find.byKey(const Key('technique-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Creo').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('form-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terram').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('base-effect-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Create precious metal').last);
+      await tester.pumpAndSettle();
+
+      // Touch / Momentary / Individual. Each dropdown must be scrolled into
+      // view first — the form is taller than the viewport, and the existing
+      // test in this file uses exactly this helper for the same reason.
+      for (final entry in const {
+        'range-dropdown': 'Touch',
+        'duration-dropdown': 'Momentary',
+        'target-dropdown': 'Individual',
+      }.entries) {
+        await tester.scrollUntilVisible(
+          find.byKey(Key(entry.key)),
+          200.0,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(Key(entry.key)));
+        await tester.pumpAndSettle();
+        // Dropdown items render as '${name} (+${magnitude})' (e.g. 'Touch
+        // (+1)'), not the bare name, so this needs textContaining rather than
+        // an exact match — the same pattern the existing test above uses for
+        // this same Range/Duration/Target loop.
+        await tester.tap(find.textContaining(entry.value).last);
+        await tester.pumpAndSettle();
+      }
+
+      // The checkbox appears for Creo + Momentary and defaults to ticked.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('ritual-checkbox')),
+        200.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<CheckboxListTile>(find.byKey(const Key('ritual-checkbox'))).value,
+        isTrue,
+      );
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('calculate-button')),
+        200.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('calculate-button')));
+      await tester.pumpAndSettle();
+
+      // Touch of Midas: base 15, +1 Touch = 20.
+      expect(find.text('20'), findsWidgets);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('ritual-banner')),
+        200.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
     },
   );
 }

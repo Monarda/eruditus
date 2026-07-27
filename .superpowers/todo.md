@@ -1,7 +1,7 @@
 # Eruditus Todo List
 
 **Status:** Active development  
-**Last Updated:** 2026-07-27  
+**Last Updated:** 2026-07-28  
 **Base Effects:** ✅ Complete (604 effects extracted)
 
 ---
@@ -11,6 +11,13 @@
 1. **Item 14** — container targets: at-casting vs. subsequently-entering. No
    longer blocked — item 15 (below) added Circle/Ring, closing the catalog gap.
 2. **Item 13** — summary/description entry for user-created spells.
+3. **Item 19** — Size-Ladder Ceiling. Already blocks one real published spell
+   (*Rain of Oil*) from being added to the library.
+4. **Item 18** — Storyguide-Ruling UI for Rituals. Four published core spells
+   are Rituals only by troupe declaration; the Creo+Momentary-only checkbox
+   can't express them.
+5. **Item 22** — Four Creo Animal guidelines missing from the catalog. Pure
+   extraction gap, no design decisions needed — the quickest item here.
 
 ---
 
@@ -39,11 +46,13 @@ gap: spells needing Ring, Circle or Eye could not be expressed at all.
       added specifically to exercise one of the new parameters end to end.
 - **Status:** ✅ COMPLETE (commit `c835d0a`, branch `feature/parameters-and-provenance`)
 - **The two open constraints were each explicitly decided, not left unresolved:**
-  - **Ritual-only gating (Year, Boundary) — deferred, not added.** No ritual
-    flag was added to `Parameter`/`Spell`; the constraint is unenforced for now.
-    Folded into todo item 4's "Ritual-Only Constraints" and into item 17's
-    Merinita/Symbolic-Magic parameters, which need the same flag — closing it
-    once there serves both.
+  - **Ritual-only gating (Year, Boundary) — since resolved, not still deferred.**
+    `Parameter.requiresRitual` landed on branch `feature/ritual-spells` (item
+    4's "Ritual-Only Constraints"), and `Year`/`Boundary` are exactly the two
+    entries flagged `requiresRitual: true`. See
+    `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`. Item 17's
+    Merinita/Symbolic-Magic parameters still need the *Virtue*-gating half —
+    that mechanism, not the ritual flag, is what remains blocking them.
   - **Target `Touch` / Range `Touch` name collision — left as-is.** Harmless in
     the data (ids are category-scoped: `range-touch` vs `target-touch`); the
     creation screen's dropdowns filter by category, so the two never appear in
@@ -132,10 +141,17 @@ gap: spells needing Ring, Circle or Eye could not be expressed at all.
   - [ ] Calculate level multiplier: (base + parameters) must exceed target Might
   - [ ] New UI section for ward configuration
 
-- [ ] **Ritual-Only Constraints** — Some effects require Ritual duration (Creo Corpus healing, Creo Ignem/Auram elemental creation)
-  - [ ] Add ritual-only flag to BaseEffect
-  - [ ] Validate in spell creation: if ritual-only, force Duration = Ritual
-  - [ ] Display warning in UI
+- [x] **Ritual-Only Constraints** — ✅ COMPLETE (branch `feature/ritual-spells`)
+  - [x] Add ritual-only flag to BaseEffect — landed as `RitualRequirement`
+        (`none`/`suggested`/`required`), 7 required and 38 suggested entries
+  - [x] Validate in spell creation — landed as derivation, not validation:
+        nothing is rejected, because a Year-duration spell is not an error,
+        it is a Ritual
+  - [x] Display warning in UI — landed as the `RitualSection` banner
+  - **This item's original wording was wrong.** It said "force Duration =
+        Ritual". Ritual is a spell *type*, orthogonal to all eight Durations —
+        not a Duration itself. See the spec's "Points the rulebook settles that
+        the todo list got wrong".
 
 - [ ] **Complexity-Stacking Modifiers** — Sensory/movement/intricacy add magnitudes (Creo Imaginem: +1/+2 for complexity, +2 for movement control, +1 for intricacy)
   - [ ] Design modifier system (separate from special factors)
@@ -357,15 +373,19 @@ second pass over the same file.
   wherever a constrained widget turns out to be
 
 ### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic
-**Blocked on two model gaps this app doesn't have yet:** a ritual-only flag
-(see item 4's "Ritual-Only Constraints", and the note in item 15 above about
-Year/Boundary), and some way to record that a parameter requires a specific
-Mystery Virtue — which in turn implies a character/Virtue model the app
-doesn't have at all today (it only models spells and catalog data, no
-characters). Do not attempt this until both exist.
+**Blocked on one remaining model gap.** The ritual-only flag half is done:
+`Parameter.requiresRitual` landed on `feature/ritual-spells` (item 4), so
+`Bargain`/`Until (Condition)`/`Year + 1`/the three Symbolic Magic parameters
+below can be flagged ritual today. Still missing: some way to record that a
+parameter requires a specific Mystery Virtue — which in turn implies a
+character/Virtue model the app doesn't have at all (it only models spells and
+catalog data, no characters). Do not attempt this until the Virtue-gating
+mechanism exists.
 
 - [ ] Add a `requiresVirtue`-style field once a Virtue-gating mechanism is designed
-- [ ] Add the ritual-only flag (shared groundwork with item 4)
+- [x] Add the ritual-only flag — landed as `Parameter.requiresRitual`
+      (branch `feature/ritual-spells`, item 4); shared groundwork, not
+      specific to these 9 parameters
 - [ ] Add the 6 Faerie Magic parameters below
 - [ ] Add the 3 Symbolic Magic parameters below
 
@@ -400,6 +420,52 @@ built from at least 3 charms (9 for using all three together):
   `assets/data/parameters.json` (the 9 new entries)
 - **Spec:** `docs/superpowers/specs/2026-07-27-parameters-and-provenance-design.md`
   ("Deferred Work" section)
+
+### 18. Storyguide-Ruling UI for Rituals
+- [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
+      three built-in spells already use, but no control sets
+- [ ] Revisit `SpellCreationBloc._withRitualDeclaration` so the two declaration
+      kinds stay distinguishable once both are user-settable
+- **Rationale:** Core Rules line 12352 lets the troupe declare any spell a
+  Ritual. Four published core spells are Rituals for this reason alone. The
+  Creo+Momentary-only checkbox cannot express them.
+- **Spec:** `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`
+
+### 19. Size-Ladder Ceiling
+- [ ] Every Size ladder in `modifiers.json` stops at +4 (×10,000); some
+      published spells need +5
+- **Blocked example:** *Rain of Oil* (MuAu 50 with an Aquam requisite, core
+  rules line 13310: `Base 4, +3 Sight, +2 Sun, +5 size`) could not be added to
+  the library with the Ritual work for this reason alone.
+- **Belongs with item 4.**
+
+### 20. Creo Creation `suggested` Ritual Sweep
+- [ ] Decide whether every "Create X" guideline should carry
+      `RitualRequirement.suggested`, as the Creo healing guidelines now do
+- **Rationale:** Core Rules line 12176 — "An item made with Creo only lasts for
+  the duration of the spell, unless the spell was a Momentary Ritual" — makes
+  creation exactly as much a lasting-thing case as healing. Skipped deliberately
+  because it is hundreds of entries across all ten Forms, and because the
+  checkbox already defaults on for *every* Creo + Momentary draft, so nothing is
+  incorrect without it. The flag would only add explanatory text.
+
+### 21. Creo Mentem Memory Restoration
+- [ ] Decide whether `creem-4b`, `creem-5b` and `creem-10a` ("Restore a memory
+      … to a fresh state") are Momentary-Creo-lasting-thing cases
+- **Context:** The Ritual sweep's criterion arguably reaches them, but the
+  approved scope was Creo *bodily* healing across Animal, Corpus and Herbam, and
+  the healing-suspension rule at line 13415 does not cover memory. All three are
+  already flagged "Variable base level", so this belongs with item 4.
+
+### 22. Four Creo Animal Guidelines Missing from the Catalog
+- [ ] Level 35 "Increase a Characteristic to one above average"
+- [ ] Level 40 "Cause an animal to reach full maturity in a moment"
+- [ ] Level 45 "Increase a Characteristic to three above average"
+- [ ] Level 55 "Increase a Characteristic to five above average"
+- **Context:** Found while walking the Creo Animal guideline table (core rules
+  line 12468) for the Ritual flagging pass. Nothing to do with Rituals — an
+  extraction gap. The catalog has `cran-35` (Heal all wounds), `cran-40`
+  (Characteristic) and `cran-50` (magical beast) but no siblings for these rows.
 
 ---
 
