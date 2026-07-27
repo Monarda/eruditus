@@ -164,8 +164,8 @@ warning todo item 4 still needs.
 
 ```dart
 enum RitualReason {
-  yearDuration,
-  boundaryTarget,
+  ritualOnlyDuration,
+  ritualOnlyTarget,
   exceedsMaxFormulaicLevel,
   guideline,
   lastingCreation,
@@ -179,8 +179,15 @@ class RitualStatus {
 ```
 
 Reasons **accumulate rather than short-circuit**. Aegis of the Hearth reports
-both `yearDuration` and `boundaryTarget`. Anything less makes the UI text a lie
-and makes the item-enchantment distinction (line 10566) underivable.
+both `ritualOnlyDuration` and `ritualOnlyTarget`. Anything less makes the UI text
+a lie and makes the item-enchantment distinction (line 10566) underivable.
+
+The two parameter-driven reasons are named for the *flag*, not for Year and
+Boundary specifically. `requiresRitual` is a generic property of `Parameter`, and
+todo item 17 adds three more ritual-only Durations (`Until (Condition)`,
+`Bargain`, `Year + 1`). A reason called `yearDuration` would become a lie the
+moment one of those lands. The UI names the actual parameter by reading
+`duration.name` rather than hardcoding it into the reason.
 
 `LevelBreakdown` gains two fields: `ritualStatus`, and `rawLevel` — the level
 before the floor is applied. Because it rides inside the breakdown the bloc
