@@ -211,6 +211,43 @@
   - `lib/models/spell.dart` (tighten the shared validator)
 - **Spec:** `docs/superpowers/specs/2026-07-27-spell-provenance-and-tags-design.md`
 
+### 14. Container Targets: At-Casting vs. Subsequently-Entering
+**Do this directly after the Spell Provenance and Tags work — both change the `Spell` model, and doing them together avoids a second migration.**
+
+- [ ] Model whether a container-target spell affects only what is inside **at the moment of casting**, or also whatever **enters later**
+- [ ] Expose the choice in the spell creation UI, shown only when the selected Target is a container
+- [ ] Validate that the choice is absent for non-container targets, so it cannot be set meaninglessly
+- [ ] Decide whether the choice affects the calculated level, or is purely descriptive
+- **Rationale:** The two readings are different spells. A Room-target spell that
+  cleanses everyone present is not the same as one that cleanses everyone who
+  walks in for the rest of its Duration. Nothing in the model currently records
+  which was meant, so the app cannot tell them apart.
+- **Container targets in the catalog today:** `target-room` (Room, +2),
+  `target-structure` (Structure, +3), `target-bound` (Bound, +4). `target-group`
+  is **not** one — a Group is a fixed set of individuals chosen at casting.
+- **Catalog gap to resolve as part of this:** the **Circle** Target and the
+  **Ring** Duration are absent from `parameters.json` entirely. They are the
+  canonical "affects what crosses the boundary" case, so this work probably
+  needs to add them rather than only annotating the three existing containers.
+- **Open design questions — worth brainstorming before planning:**
+  - A boolean, or an enum (`atCasting` / `ongoing`)? An enum reads better at the
+    call site and leaves room for a third case.
+  - Does it live on `Spell` directly, or as a property of the target selection?
+    The latter is tidier but there is no "target selection" object today — the
+    spell holds a bare `targetId`.
+  - Is the distinction genuinely a property of the *spell*, or is it implied by
+    the Target/Duration pairing (Circle+Ring implying ongoing)? If implied, it
+    may be derivable rather than stored — and storing derivable data is exactly
+    what the id-reference normalization removed.
+  - How should existing spells migrate? Backward compatibility is not a goal, so
+    the three container-target built-ins can simply be re-authored.
+- **Files:**
+  - `lib/models/spell.dart` (the field, plus validation in the shared validator)
+  - `assets/data/parameters.json` (Circle target, Ring duration)
+  - `lib/presentation/screens/spell_creation_screen.dart` (conditional control)
+  - `lib/bloc/spell_creation/` (event + state for the choice)
+  - `lib/data/database/app_database.dart` (schema bump if the field is stored)
+
 ---
 
 ## Low Priority / Nice-to-Have
