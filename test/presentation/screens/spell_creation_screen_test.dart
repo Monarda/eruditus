@@ -194,6 +194,7 @@ void main() {
       calculatedLevel: 20,
       breakdown: const LevelBreakdown(
         level: 20,
+        rawLevel: 20,
         contributions: [
           LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
           LevelContribution(label: 'Range · Voice', magnitude: 2),

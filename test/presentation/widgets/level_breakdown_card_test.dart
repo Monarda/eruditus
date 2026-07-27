@@ -6,6 +6,7 @@ import 'package:eruditus/presentation/widgets/level_breakdown_card.dart';
 void main() {
   const breakdown = LevelBreakdown(
     level: 10,
+    rawLevel: 10,
     contributions: [
       LevelContribution(label: 'Base effect · image, two senses', magnitude: 2, isBase: true),
       LevelContribution(label: 'Range · Voice', magnitude: 2),

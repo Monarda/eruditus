@@ -1,10 +1,12 @@
 import 'package:eruditus/engine/level_breakdown.dart';
+import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 
 class SpellEngine {
@@ -85,6 +87,7 @@ class SpellEngine {
     required Parameter target,
     required Map<String, List<String>> selectedModifiers,
     required List<Requisite> requisites,
+    RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) {
     final contributions = <LevelContribution>[
       LevelContribution(
@@ -122,10 +125,63 @@ class SpellEngine {
         if (!contribution.isBase) contribution.magnitude,
     ];
 
+    final rawLevel = SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes);
+
+    final ritualStatus = _deriveRitualStatus(
+      baseEffect: baseEffect,
+      duration: duration,
+      target: target,
+      ritualDeclaration: ritualDeclaration,
+      rawLevel: rawLevel,
+    );
+
+    // Single pass, no fixed point: the floor only ever raises a level TO 20,
+    // and 20 is below the Formulaic cap of 50, so applying it can never
+    // trigger the exceedsMaxFormulaicLevel reason that was just evaluated.
+    // ritual_status_test.dart asserts that invariant on the constants.
+    final level = ritualStatus.isRitual && rawLevel < RitualStatus.minimumRitualLevel
+        ? RitualStatus.minimumRitualLevel
+        : rawLevel;
+
     return LevelBreakdown(
-      level: SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes),
+      level: level,
+      rawLevel: rawLevel,
+      ritualStatus: ritualStatus,
       contributions: contributions,
     );
+  }
+
+  /// Every reason [rawLevel]'s spell is a Ritual, accumulated in a stable
+  /// order. Declarations are honoured unconditionally — a storyguide ruling is
+  /// legitimate on any spell by definition, and keeping a live draft's
+  /// declaration meaningful is the bloc's job, not the engine's.
+  RitualStatus _deriveRitualStatus({
+    required BaseEffect baseEffect,
+    required Parameter duration,
+    required Parameter target,
+    required RitualDeclaration ritualDeclaration,
+    required int rawLevel,
+  }) {
+    final reasons = <RitualReason>[];
+
+    if (duration.requiresRitual) reasons.add(RitualReason.ritualOnlyDuration);
+    if (target.requiresRitual) reasons.add(RitualReason.ritualOnlyTarget);
+    if (baseEffect.ritualRequirement == RitualRequirement.required) {
+      reasons.add(RitualReason.guideline);
+    }
+    if (rawLevel > RitualStatus.maxFormulaicLevel) {
+      reasons.add(RitualReason.exceedsMaxFormulaicLevel);
+    }
+    switch (ritualDeclaration) {
+      case RitualDeclaration.lastingCreation:
+        reasons.add(RitualReason.lastingCreation);
+      case RitualDeclaration.storyguideRuling:
+        reasons.add(RitualReason.storyguideRuling);
+      case RitualDeclaration.none:
+        break;
+    }
+
+    return RitualStatus(reasons);
   }
 
   int calculateSpellLevel({
@@ -135,6 +191,7 @@ class SpellEngine {
     required Parameter target,
     Map<String, List<String>> selectedModifiers = const {},
     required List<Requisite> requisites,
+    RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) =>
       calculateBreakdown(
         baseEffect: baseEffect,
@@ -143,6 +200,7 @@ class SpellEngine {
         target: target,
         selectedModifiers: selectedModifiers,
         requisites: requisites,
+        ritualDeclaration: ritualDeclaration,
       ).level;
 
   List<ResolvedSpell> findSimilarSpells(String technique, String form, {int? referenceLevel}) {
@@ -155,10 +213,12 @@ class SpellEngine {
         final levelA = calculateSpellLevel(
           baseEffect: a.baseEffect!, range: a.range!, duration: a.duration!, target: a.target!,
           selectedModifiers: a.selectedModifiers, requisites: a.requisites,
+          ritualDeclaration: a.ritualDeclaration,
         );
         final levelB = calculateSpellLevel(
           baseEffect: b.baseEffect!, range: b.range!, duration: b.duration!, target: b.target!,
           selectedModifiers: b.selectedModifiers, requisites: b.requisites,
+          ritualDeclaration: b.ritualDeclaration,
         );
         return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());
       });

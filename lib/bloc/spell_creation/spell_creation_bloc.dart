@@ -152,6 +152,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       target: state.draft.target!,
       selectedModifiers: state.draft.selectedModifiers,
       requisites: state.draft.requisites,
+      ritualDeclaration: state.draft.ritualDeclaration,
     );
     final level = breakdown.level;
 
@@ -169,6 +170,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         s.id: spellEngine.calculateSpellLevel(
           baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
           selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+          ritualDeclaration: s.ritualDeclaration,
         ),
     };
 

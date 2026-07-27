@@ -43,6 +43,7 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
                 baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
                 target: s.target!, selectedModifiers: s.selectedModifiers,
                 requisites: s.requisites,
+                ritualDeclaration: s.ritualDeclaration,
               ),
         };
         emit(state.copyWith(
