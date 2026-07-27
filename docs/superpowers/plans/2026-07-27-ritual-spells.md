@@ -14,7 +14,7 @@
 - **Rulebook:** `C:\Users\idf53\Development\personal\arsm\Ars-Magica-Open-License\reviewed\Ars Magica - Definitive Edition (Core Rules).md`. All line numbers in this plan refer to it.
 - **Flutter is not on the default PATH.** Every shell step must start with:
   `export PATH="$HOME/Development/SDKs/flutter/flutter/bin:$PATH"`
-- **`flutter test` does not run `integration_test/`.** Those need a device: `flutter test integration_test/... -d windows`. "Tests pass" for this branch means **both** suites. See todo item 6.
+- **`flutter test` does not run `integration_test/`.** Those need a device: `flutter test integration_test/... -d windows`. "Tests pass" for this branch means **both** suites. See todo item 6. Windows Developer Mode is enabled on this machine and `-d windows` is verified working, so this is a normal step, not a blocker.
 - **Real Blocs hang forever under `flutter_tester`.** Widget tests must use `MockBloc` from `bloc_test`; anything needing a real Bloc goes in `integration_test/`.
 - **Ritual threshold is `> 50`, not `>= 50`.** Level 50 is a legal Formulaic spell (line 12346).
 - **Ritual minimum level is 20** (line 12354).
@@ -2547,7 +2547,7 @@ Add `import 'package:eruditus/models/ritual_declaration.dart';` if the assertion
 export PATH="$HOME/Development/SDKs/flutter/flutter/bin:$PATH" && flutter test integration_test/spell_creation_flow_test.dart -d windows
 ```
 
-Expected: both tests PASS. This needs Developer Mode enabled on Windows; `-d chrome` is not viable because `sqflite_common_ffi` has no web support.
+Expected: both tests PASS. Developer Mode is enabled and `-d windows` is verified working on this machine, so this runs as-is — do not substitute another device. `-d chrome` is not viable because `sqflite_common_ffi` has no web support.
 
 - [ ] **Step 3: Update the todo list**
 
