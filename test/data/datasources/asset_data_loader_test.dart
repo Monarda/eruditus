@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
+import 'package:eruditus/models/book.dart';
 import 'package:eruditus/models/modifier.dart';
 
 void main() {
@@ -149,5 +150,23 @@ void main() {
       spells.any((s) => s.selectedModifiers.keys.any(singleIds.contains)),
       isTrue,
     );
+  });
+
+  test('loadBooks loads the seeded books catalog', () async {
+    final books = await loader.loadBooks();
+
+    expect(books, isNotEmpty);
+    final core = books.firstWhere((b) => b.id == 'arm5-core');
+    expect(core.title, 'Ars Magica Fifth Edition');
+    expect(core.abbreviation, 'ArM5');
+    expect(core.edition, '5e');
+  });
+
+  test('every book id is unique', () async {
+    final books = await loader.loadBooks();
+    final ids = books.map((b) => b.id).toList();
+
+    expect(ids.length, ids.toSet().length,
+        reason: 'duplicate book ids would make citations ambiguous');
   });
 }
