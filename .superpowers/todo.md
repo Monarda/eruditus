@@ -354,6 +354,51 @@ second pass over the same file.
 - **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`,
   wherever a constrained widget turns out to be
 
+### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic
+**Blocked on two model gaps this app doesn't have yet:** a ritual-only flag
+(see item 4's "Ritual-Only Constraints", and the note in item 15 above about
+Year/Boundary), and some way to record that a parameter requires a specific
+Mystery Virtue — which in turn implies a character/Virtue model the app
+doesn't have at all today (it only models spells and catalog data, no
+characters). Do not attempt this until both exist.
+
+- [ ] Add a `requiresVirtue`-style field once a Virtue-gating mechanism is designed
+- [ ] Add the ritual-only flag (shared groundwork with item 4)
+- [ ] Add the 6 Faerie Magic parameters below
+- [ ] Add the 3 Symbolic Magic parameters below
+
+**Merinita: Faerie Magic** — Core Rules, "Mysteries" chapter (not Houses of
+Hermes: Mystery Cults, where the rest of the House's content lives). Granted to
+initiates of the Faerie Magic Outer Mystery only:
+
+| Name | Type | Level | Note |
+|---|---|---|---|
+| Road | Range | = Voice | affects anyone/anything on the same road or path |
+| Bargain | Duration | = Year + 3 magnitudes | ritual; enforces a bargain, max Year once triggered |
+| Fire | Duration | = Moon | Ignem/Imaginem only; lasts until the targeted fire goes out |
+| Until (Condition) | Duration | = Year | ritual; lasts until a specified condition is met |
+| Year + 1 | Duration | = Year | ritual; a year and a day, by elapsed time not season |
+| Bloodline | Target | = Structure | affects all blood descendants of the immediate target |
+
+**Symbolic Magic** — Houses of Hermes: Mystery Cults, House Merinita chapter.
+Granted to initiates of the Symbolic Magic Major Folk Mystery. All three are
+always ritual and require a physical symbolic charm representing the target,
+built from at least 3 charms (9 for using all three together):
+
+| Name | Type | Level | Note |
+|---|---|---|---|
+| Symbol | Range | = Arcane Connection | affects anything the symbol uniquely identifies |
+| Symbol | Duration | = Year | lasts as long as the physical symbol survives intact |
+| Symbol | Target | = Boundary | affects everything the symbol represents, within range |
+
+- **Rationale:** Found during research for item 15's parameter catalog work.
+  Real, citable content — not filed as "maybe later" but as "genuinely
+  deferred pending groundwork," so the research isn't lost.
+- **Files:** `lib/models/parameter.dart` (the gating field, once designed),
+  `assets/data/parameters.json` (the 9 new entries)
+- **Spec:** `docs/superpowers/specs/2026-07-27-parameters-and-provenance-design.md`
+  ("Deferred Work" section)
+
 ---
 
 ## Low Priority / Nice-to-Have
