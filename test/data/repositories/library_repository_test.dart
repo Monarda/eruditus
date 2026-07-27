@@ -42,9 +42,9 @@ void main() {
     await database.close();
   });
 
-  test('getBuiltInSpells returns all 30 built-in library spells', () async {
+  test('getBuiltInSpells returns all 31 built-in library spells', () async {
     final builtIn = await repository.getBuiltInSpells();
-    expect(builtIn.length, 30);
+    expect(builtIn.length, 31);
     expect(builtIn.every((s) => s.source == PublicationSource.published), isTrue);
   });
 
@@ -62,7 +62,7 @@ void main() {
 
     final all = await repository.getAllSpells();
 
-    expect(all.length, 31); // 30 built-in + 1 user
+    expect(all.length, 32); // 31 built-in + 1 user
     expect(all.any((s) => s.id == 'user-1'), isTrue);
   });
 

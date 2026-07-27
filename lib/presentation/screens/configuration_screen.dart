@@ -188,7 +188,7 @@ class _ParametersTab extends StatelessWidget {
     return Scaffold(
       body: ListView(
         children: parameters.map((p) {
-          final isCustom = p.source == 'user-created';
+          final isCustom = p.provenance.source == PublicationSource.userCreated;
           return ListTile(
             title: Text(p.name),
             subtitle: Text('${p.category} • Magnitude +${p.magnitude}'),
@@ -269,7 +269,7 @@ class _AddParameterDialogState extends State<_AddParameterDialog> {
               name: _nameController.text,
               category: _category!,
               magnitude: magnitude,
-              source: 'user-created',
+              provenance: Provenance(source: PublicationSource.userCreated),
             ));
           },
           child: const Text('Add'),

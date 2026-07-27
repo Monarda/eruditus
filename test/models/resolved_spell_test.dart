@@ -13,11 +13,14 @@ void main() {
       description: 'Create an image that affects two senses', baseLevel: 2,
       provenance: Provenance(source: PublicationSource.userCreated));
   final voice = Parameter(
-      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
+      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
   final momentary = Parameter(
-      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
   final individual = Parameter(
-      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   Spell record() => Spell(
         id: 'spell-1',

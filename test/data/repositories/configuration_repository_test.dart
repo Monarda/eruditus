@@ -61,12 +61,13 @@ void main() {
 
   test('getAllParameters combines built-in and custom parameters', () async {
     await repository.addCustomParameter(Parameter(
-      id: 'custom-p1', name: 'Pair', category: 'Target', magnitude: 2, source: 'user-created',
+      id: 'custom-p1', name: 'Pair', category: 'Target', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.userCreated),
     ));
 
     final all = await repository.getAllParameters();
 
-    expect(all.length, 18); // 17 built-in + 1 custom
+    expect(all.length, 26); // 25 built-in + 1 custom
   });
 
   test('getAllModifiers combines built-in and custom modifiers', () async {

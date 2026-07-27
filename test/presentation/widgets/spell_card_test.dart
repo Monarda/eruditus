@@ -10,20 +10,29 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'published');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
+  final rangeParam = Parameter(
+      id: 'p1', name: 'Voice', category: 'Range', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final durationParam = Parameter(
+      id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final targetParam = Parameter(
+      id: 'p3', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
   final effect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
     description: 'test', baseLevel: 10,
     provenance: Provenance(source: PublicationSource.userCreated),
   );
-  final personalParam =
-      Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'published');
-  final momentaryParam =
-      Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-  final individualParam =
-      Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
+  final personalParam = Parameter(
+      id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final momentaryParam = Parameter(
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final individualParam = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   ResolvedSpell buildSpell({
     String? name,

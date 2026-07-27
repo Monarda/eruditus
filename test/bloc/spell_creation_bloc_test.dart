@@ -11,6 +11,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -44,9 +45,15 @@ void main() {
     description: 'Create flame', baseLevel: 10,
     provenance: Provenance(source: PublicationSource.userCreated),
   );
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'published');
+  final rangeParam = Parameter(
+      id: 'p1', name: 'Voice', category: 'Range', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final durationParam = Parameter(
+      id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final targetParam = Parameter(
+      id: 'p3', name: 'Individual', category: 'Target', magnitude: 8,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);

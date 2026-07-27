@@ -54,7 +54,7 @@ void main() {
       isA<ConfigurationState>()
           .having((s) => s.status, 'status', ConfigurationStatus.loaded)
           .having((s) => s.effects.length, 'effects.length', builtInEffectCount)
-          .having((s) => s.parameters.length, 'parameters.length', 17),
+          .having((s) => s.parameters.length, 'parameters.length', 25),
     ],
   );
 

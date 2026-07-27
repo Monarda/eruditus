@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
@@ -9,8 +10,9 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
 
-Parameter _sp(String id, String name, String category) =>
-    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'published');
+Parameter _sp(String id, String name, String category) => Parameter(
+    id: id, name: name, category: category, magnitude: 0,
+    provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
 final _range = _sp('range-personal', 'Personal', 'Range');
 final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
@@ -283,8 +285,12 @@ void main() {
         description: 'Eyes of the Cat base', baseLevel: 2,
         provenance: Provenance(source: PublicationSource.userCreated),
       );
-      final touch = Parameter(id: 'p1', name: 'Touch', category: 'Range', magnitude: 1, source: 'published');
-      final sun = Parameter(id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2, source: 'published');
+      final touch = Parameter(
+          id: 'p1', name: 'Touch', category: 'Range', magnitude: 1,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+      final sun = Parameter(
+          id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,

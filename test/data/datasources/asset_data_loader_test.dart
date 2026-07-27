@@ -30,20 +30,26 @@ void main() {
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });
 
-  test('loadParameters loads all 17 built-in parameters', () async {
+  test('loadParameters loads all 25 built-in parameters', () async {
     final parameters = await loader.loadParameters();
 
-    expect(parameters.length, 17);
+    expect(parameters.length, 25);
     expect(
-      parameters.any((p) => p.name == 'Touch' && p.category == 'Range' && p.magnitude == 1),
+      parameters.any((p) => p.name == 'Eye' && p.category == 'Range' && p.magnitude == 1),
       isTrue,
     );
+    expect(
+      parameters.any((p) => p.name == 'Boundary' && p.category == 'Target' && p.magnitude == 4),
+      isTrue,
+    );
+    expect(parameters.any((p) => p.name == 'Bound'), isFalse,
+        reason: 'Bound was a data error; the rulebook name is Boundary');
   });
 
-  test('loadSpellLibrary loads all 30 built-in spells', () async {
+  test('loadSpellLibrary loads all 31 built-in spells', () async {
     final spells = await loader.loadSpellLibrary();
 
-    expect(spells.length, 30);
+    expect(spells.length, 31);
     expect(spells.every((s) => s.provenance.source == PublicationSource.published), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
@@ -197,6 +203,20 @@ void main() {
       for (final citation in effect.provenance.citations) {
         expect(bookIds.contains(citation.bookId), isTrue,
             reason: '${effect.id}: cited book ${citation.bookId} is not in '
+                'books.json — add the book, do not relax this check');
+      }
+    }
+  });
+
+  test("every parameter's cited book ids exist in the books catalog", () async {
+    final parameters = await loader.loadParameters();
+    final books = await loader.loadBooks();
+    final bookIds = books.map((b) => b.id).toSet();
+
+    for (final parameter in parameters) {
+      for (final citation in parameter.provenance.citations) {
+        expect(bookIds.contains(citation.bookId), isTrue,
+            reason: '${parameter.id}: cited book ${citation.bookId} is not in '
                 'books.json — add the book, do not relax this check');
       }
     }

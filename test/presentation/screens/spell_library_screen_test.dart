@@ -26,9 +26,15 @@ class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
 void main() {
   late MockSpellLibraryBloc bloc;
 
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'published');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
+  final rangeParam = Parameter(
+      id: 'p1', name: 'Voice', category: 'Range', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final durationParam = Parameter(
+      id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final targetParam = Parameter(
+      id: 'p3', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   final effect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',

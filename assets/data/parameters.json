@@ -1,19 +1,302 @@
 [
-  {"id": "range-personal", "name": "Personal", "category": "Range", "magnitude": 0, "source": "published"},
-  {"id": "range-touch", "name": "Touch", "category": "Range", "magnitude": 1, "source": "published"},
-  {"id": "range-voice", "name": "Voice", "category": "Range", "magnitude": 2, "source": "published"},
-  {"id": "range-sight", "name": "Sight", "category": "Range", "magnitude": 3, "source": "published"},
-  {"id": "range-arcane-connection", "name": "Arcane Connection", "category": "Range", "magnitude": 4, "source": "published"},
-  {"id": "duration-momentary", "name": "Momentary", "category": "Duration", "magnitude": 0, "source": "published"},
-  {"id": "duration-diameter", "name": "Diameter", "category": "Duration", "magnitude": 1, "source": "published"},
-  {"id": "duration-concentration", "name": "Concentration", "category": "Duration", "magnitude": 1, "source": "published"},
-  {"id": "duration-sun", "name": "Sun", "category": "Duration", "magnitude": 2, "source": "published"},
-  {"id": "duration-moon", "name": "Moon", "category": "Duration", "magnitude": 3, "source": "published"},
-  {"id": "target-individual", "name": "Individual", "category": "Target", "magnitude": 0, "source": "published"},
-  {"id": "target-part", "name": "Part", "category": "Target", "magnitude": 1, "source": "published"},
-  {"id": "target-group", "name": "Group", "category": "Target", "magnitude": 2, "source": "published"},
-  {"id": "target-room", "name": "Room", "category": "Target", "magnitude": 2, "source": "published"},
-  {"id": "target-structure", "name": "Structure", "category": "Target", "magnitude": 3, "source": "published"},
-  {"id": "target-vision", "name": "Vision", "category": "Target", "magnitude": 4, "source": "published"},
-  {"id": "target-bound", "name": "Bound", "category": "Target", "magnitude": 4, "source": "published"}
+  {
+    "id": "range-personal",
+    "name": "Personal",
+    "category": "Range",
+    "magnitude": 0,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "range-touch",
+    "name": "Touch",
+    "category": "Range",
+    "magnitude": 1,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "range-eye",
+    "name": "Eye",
+    "category": "Range",
+    "magnitude": 1,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "range-voice",
+    "name": "Voice",
+    "category": "Range",
+    "magnitude": 2,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "range-sight",
+    "name": "Sight",
+    "category": "Range",
+    "magnitude": 3,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "range-arcane-connection",
+    "name": "Arcane Connection",
+    "category": "Range",
+    "magnitude": 4,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-momentary",
+    "name": "Momentary",
+    "category": "Duration",
+    "magnitude": 0,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-diameter",
+    "name": "Diameter",
+    "category": "Duration",
+    "magnitude": 1,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-concentration",
+    "name": "Concentration",
+    "category": "Duration",
+    "magnitude": 1,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-sun",
+    "name": "Sun",
+    "category": "Duration",
+    "magnitude": 2,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-ring",
+    "name": "Ring",
+    "category": "Duration",
+    "magnitude": 2,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-moon",
+    "name": "Moon",
+    "category": "Duration",
+    "magnitude": 3,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-year",
+    "name": "Year",
+    "category": "Duration",
+    "magnitude": 4,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-individual",
+    "name": "Individual",
+    "category": "Target",
+    "magnitude": 0,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-circle",
+    "name": "Circle",
+    "category": "Target",
+    "magnitude": 0,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-taste",
+    "name": "Taste",
+    "category": "Target",
+    "magnitude": 0,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-part",
+    "name": "Part",
+    "category": "Target",
+    "magnitude": 1,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-touch",
+    "name": "Touch",
+    "category": "Target",
+    "magnitude": 1,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-group",
+    "name": "Group",
+    "category": "Target",
+    "magnitude": 2,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-room",
+    "name": "Room",
+    "category": "Target",
+    "magnitude": 2,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-smell",
+    "name": "Smell",
+    "category": "Target",
+    "magnitude": 2,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-structure",
+    "name": "Structure",
+    "category": "Target",
+    "magnitude": 3,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-hearing",
+    "name": "Hearing",
+    "category": "Target",
+    "magnitude": 3,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-vision",
+    "name": "Vision",
+    "category": "Target",
+    "magnitude": 4,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-boundary",
+    "name": "Boundary",
+    "category": "Target",
+    "magnitude": 4,
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  }
 ]

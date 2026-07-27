@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -12,11 +13,14 @@ void main() {
       description: 'Create an image that affects two senses', baseLevel: 2,
       provenance: Provenance(source: PublicationSource.userCreated));
   final voice = Parameter(
-      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
+      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
   final momentary = Parameter(
-      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
   final individual = Parameter(
-      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   final resolver = SpellResolver(
       effects: [effect], parameters: [voice, momentary, individual]);

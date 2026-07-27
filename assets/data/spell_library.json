@@ -645,5 +645,20 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "lib-inme-thoughts-within-babble",
+    "name": "Thoughts Within Babble",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "ireem-5b",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-hearing",
+    "summary": "You can understand the speech of those within range, even those who misuse a language you know — you hear both what they meant and what they actually said. Level 25.",
+    "citations": [{"bookId": "arm5-core"}]
   }
 ]

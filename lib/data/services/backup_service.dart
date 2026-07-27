@@ -32,8 +32,9 @@ class BackupService {
     final customEffects = (await configRepository.getAllEffects())
         .where((e) => e.provenance.source == PublicationSource.userCreated)
         .toList();
-    final customParameters =
-        (await configRepository.getAllParameters()).where((p) => p.source == 'user-created').toList();
+    final customParameters = (await configRepository.getAllParameters())
+        .where((p) => p.provenance.source == PublicationSource.userCreated)
+        .toList();
 
     final backup = {
       'version': _supportedVersion,

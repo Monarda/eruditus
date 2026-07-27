@@ -116,7 +116,7 @@ void main() {
 
       final customParameter = Parameter(
         id: 'custom-p1', name: 'Custom Reach', category: 'Range', magnitude: 4,
-        source: 'user-created',
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       // Dispatch the same event a real "Add Parameter" dialog in the

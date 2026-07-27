@@ -12,6 +12,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
@@ -30,9 +31,15 @@ void main() {
   late SpellEngine spellEngine;
   late SpellResolver resolver;
 
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'published');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
+  final rangeParam = Parameter(
+      id: 'p1', name: 'Voice', category: 'Range', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final durationParam = Parameter(
+      id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final targetParam = Parameter(
+      id: 'p3', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
   final effect1 = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
     description: 'test', baseLevel: 5,
@@ -48,7 +55,7 @@ void main() {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
     // Deliberately a small local fixture catalog (2 effects, 3 parameters)
     // rather than the real AssetDataLoader catalog. This means when
-    // libraryRepository.getBuiltInSpells() resolves the real 30 built-in
+    // libraryRepository.getBuiltInSpells() resolves the real 31 built-in
     // library spells against this resolver below, almost none of them
     // resolve — only spells built on ids from this narrow set (the fixture
     // Spells this file saves itself, e.g. `user-1`/`user-dangling`) come back
@@ -57,7 +64,7 @@ void main() {
     // only by resolved spells' ids (see SpellLibraryBloc._onEvent), so the
     // `spellLevels['user-1']`/`spellLevels['user-dangling']` assertions below
     // work only because those particular fixtures were deliberately built
-    // with ids from this narrow catalog — none of the 30 real built-ins are
+    // with ids from this narrow catalog — none of the 31 real built-ins are
     // expected to contribute a spellLevels entry here.
     resolver = SpellResolver(
       effects: [effect1, effect2],
@@ -85,7 +92,7 @@ void main() {
   });
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
-    'LibraryRequested loads all spells (30 built-in + 1 user)',
+    'LibraryRequested loads all spells (31 built-in + 1 user)',
     build: () => SpellLibraryBloc(
       libraryRepository: libraryRepository,
       spellEngine: spellEngine,
@@ -96,8 +103,8 @@ void main() {
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 31)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 31),
+          .having((s) => s.allSpells.length, 'allSpells.length', 32)
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 32),
     ],
   );
 
@@ -157,7 +164,7 @@ void main() {
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 32)
+          .having((s) => s.allSpells.length, 'allSpells.length', 33)
           .having((s) => s.spellLevels['user-dangling'], "spellLevels['user-dangling']", 5),
     ],
   );
@@ -177,7 +184,7 @@ void main() {
     expect: () => [
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 31),
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 32),
       isA<SpellLibraryState>()
           .having((s) => s.filter, 'filter', 'My Spells')
           .having((s) => s.visibleSpells.length, 'visibleSpells.length', 1)

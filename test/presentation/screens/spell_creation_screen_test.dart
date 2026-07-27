@@ -14,6 +14,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -48,9 +49,15 @@ void main() {
     description: 'Create flame', baseLevel: 10,
     provenance: Provenance(source: PublicationSource.userCreated),
   );
-  final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'published');
+  final voiceParam = Parameter(
+      id: 'p1', name: 'Voice', category: 'Range', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final durationParam = Parameter(
+      id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final targetParam = Parameter(
+      id: 'p3', name: 'Individual', category: 'Target', magnitude: 8,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   late Parameter range;
   late Parameter duration;

@@ -60,7 +60,8 @@ void main() {
   group('custom parameters', () {
     test('insertCustomParameter then getAllCustomParameters returns it', () async {
       final parameter = Parameter(
-        id: 'cp1', name: 'Pair', category: 'Target', magnitude: 2, source: 'user-created',
+        id: 'cp1', name: 'Pair', category: 'Target', magnitude: 2,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       await datasource.insertCustomParameter(parameter);
@@ -73,7 +74,8 @@ void main() {
 
     test('deleteCustomParameter removes it', () async {
       final parameter = Parameter(
-        id: 'cp1', name: 'Pair', category: 'Target', magnitude: 2, source: 'user-created',
+        id: 'cp1', name: 'Pair', category: 'Target', magnitude: 2,
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       await datasource.insertCustomParameter(parameter);
 

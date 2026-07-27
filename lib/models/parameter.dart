@@ -1,3 +1,4 @@
+import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 class Parameter {
@@ -5,14 +6,14 @@ class Parameter {
   final String name;
   final String category; // "Range", "Duration", "Target", or custom
   final int magnitude;
-  final String source; // "published" or "user-created"
+  final Provenance provenance;
 
   Parameter({
     required this.id,
     required this.name,
     required this.category,
     required this.magnitude,
-    required this.source,
+    required this.provenance,
   });
 
   Map<String, dynamic> toMap() => {
@@ -20,7 +21,7 @@ class Parameter {
     'name': name,
     'category': category,
     'magnitude': magnitude,
-    'source': source,
+    ...provenance.toMap(),
   };
 
   factory Parameter.fromMap(Map<String, dynamic> map) => Parameter(
@@ -28,7 +29,7 @@ class Parameter {
     name: requireField<String>(map, 'name', 'Parameter'),
     category: requireField<String>(map, 'category', 'Parameter'),
     magnitude: requireField<int>(map, 'magnitude', 'Parameter'),
-    source: requireField<String>(map, 'source', 'Parameter'),
+    provenance: Provenance.fromMap(map),
   );
 
   // Value equality by id — see BaseEffect for why this matters (reloaded

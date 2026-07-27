@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -88,9 +89,15 @@ void main() {
         baseLevel: 5,
         provenance: Provenance(source: PublicationSource.userCreated),
       );
-      final range = Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'published');
-      final duration = Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
-      final target = Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'published');
+      final range = Parameter(
+          id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+      final duration = Parameter(
+          id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+      final target = Parameter(
+          id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
       final draft = SpellDraft(
         technique: 'Muto',
@@ -123,8 +130,12 @@ void main() {
           baseLevel: 5,
           provenance: Provenance(source: PublicationSource.userCreated),
         ),
-        duration: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published'),
-        target: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'published'),
+        duration: Parameter(
+            id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+            provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')])),
+        target: Parameter(
+            id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10,
+            provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')])),
       );
 
       expect(
