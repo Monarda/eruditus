@@ -660,5 +660,121 @@
     "targetId": "target-hearing",
     "summary": "You can understand the speech of those within range, even those who misuse a language you know — you hear both what they meant and what they actually said. Level 25.",
     "citations": [{"bookId": "arm5-core"}]
+  },
+  {
+    "id": "lib-crco-body-made-whole",
+    "name": "Incantation of the Body Made Whole",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crco-35a",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "ritualDeclaration": "lastingCreation",
+    "summary": "Heals all damage to a human body at the conclusion of the ritual. Cannot restore missing limbs, or damage from disease or poison. Level 40.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crte-touch-of-midas",
+    "name": "Touch of Midas",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crte-15a",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "ritualDeclaration": "lastingCreation",
+    "summary": "Creates a roughly spherical lump of gold about six inches across, weighing some eighty pounds. Level 20.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-cran-ravenous-swarm",
+    "name": "Curse of the Ravenous Swarm",
+    "requisites": [
+      {
+        "art": "Rego",
+        "kind": "adding"
+      }
+    ],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-animal": [
+        "size-animal-2"
+      ]
+    },
+    "baseEffectId": "cran-5b",
+    "rangeId": "range-touch",
+    "durationId": "duration-moon",
+    "targetId": "target-group",
+    "ritualDeclaration": "storyguideRuling",
+    "summary": "Calls a swarm of locusts or other destructive insects upon an area, destroying wild plant life and fields. A Ritual because the effect is a really major one. Level 50.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-breath-open-sky",
+    "name": "Breath of the Open Sky",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-auram": [
+        "size-auram-4"
+      ],
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-slight"
+      ]
+    },
+    "baseEffectId": "crau-5",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "ritualDeclaration": "storyguideRuling",
+    "summary": "Summons a vast and violent storm. A Ritual because of the spectacular scale of the effect. Level 40.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-reem-summoning-the-dead",
+    "name": "Incantation of Summoning the Dead",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "reem-15b",
+    "rangeId": "range-arcane-connection",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "ritualDeclaration": "storyguideRuling",
+    "summary": "Calls up a person's ghost. The caster must stand where the person died, or hold the corpse. Level 40.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
   }
 ]

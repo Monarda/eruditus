@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
+import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -109,12 +111,71 @@ void main() {
     }
   });
 
-  test('loadSpellLibrary loads all 31 built-in spells', () async {
+  test('loadSpellLibrary loads all 36 built-in spells', () async {
     final spells = await loader.loadSpellLibrary();
 
-    expect(spells.length, 31);
+    expect(spells.length, 36);
     expect(spells.every((s) => s.provenance.source == PublicationSource.published), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
+  });
+
+  test('the built-in Ritual spells resolve and calculate to their printed levels',
+      () async {
+    final effects = {for (final e in await loader.loadBaseEffects()) e.id: e};
+    final parameters = {for (final p in await loader.loadParameters()) p.id: p};
+    final modifiers = await loader.loadModifiers();
+    final spells = {for (final s in await loader.loadSpellLibrary()) s.id: s};
+
+    final engine = SpellEngine(allSpells: const [], allModifiers: modifiers);
+
+    const expected = <String, ({int level, bool isRitual, int reasonCount})>{
+      'lib-crco-body-made-whole': (level: 40, isRitual: true, reasonCount: 1),
+      'lib-crte-touch-of-midas': (level: 20, isRitual: true, reasonCount: 1),
+      'lib-cran-ravenous-swarm': (level: 50, isRitual: true, reasonCount: 1),
+      'lib-crau-breath-open-sky': (level: 40, isRitual: true, reasonCount: 1),
+      'lib-reem-summoning-the-dead': (level: 40, isRitual: true, reasonCount: 1),
+    };
+
+    expected.forEach((id, want) {
+      final spell = spells[id]!;
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: effects[spell.baseEffectId]!,
+        range: parameters[spell.rangeId]!,
+        duration: parameters[spell.durationId]!,
+        target: parameters[spell.targetId]!,
+        selectedModifiers: spell.selectedModifiers,
+        requisites: spell.requisites,
+        ritualDeclaration: spell.ritualDeclaration,
+      );
+
+      expect(breakdown.level, want.level, reason: '$id level');
+      expect(breakdown.ritualStatus.isRitual, want.isRitual, reason: '$id isRitual');
+      expect(breakdown.ritualStatus.reasons.length, want.reasonCount,
+          reason: '$id reason count');
+    });
+
+    // Touch of Midas lands exactly on the floor, proving the minimum is a
+    // no-op at 20 rather than something that silently adds.
+    expect(
+      engine
+          .calculateBreakdown(
+            baseEffect: effects['crte-15a']!,
+            range: parameters['range-touch']!,
+            duration: parameters['duration-momentary']!,
+            target: parameters['target-individual']!,
+            selectedModifiers: const {},
+            requisites: const [],
+            ritualDeclaration: RitualDeclaration.lastingCreation,
+          )
+          .ritualMinimumApplied,
+      isFalse,
+    );
+
+    // No pre-existing built-in became a Ritual by accident.
+    final ritualIds = expected.keys.toSet();
+    for (final spell in spells.values.where((s) => !ritualIds.contains(s.id))) {
+      expect(spell.ritualDeclaration, RitualDeclaration.none, reason: spell.id);
+    }
   });
 
   test("every spell's referenced ids exist in the built-in catalogs", () async {
