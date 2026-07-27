@@ -34,6 +34,7 @@ void main() {
     final parameters = await loader.loadParameters();
 
     expect(parameters.length, 25);
+    expect(parameters.every((p) => p.provenance.source == PublicationSource.published), isTrue);
     expect(
       parameters.any((p) => p.name == 'Eye' && p.category == 'Range' && p.magnitude == 1),
       isTrue,

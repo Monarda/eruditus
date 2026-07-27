@@ -8,53 +8,55 @@
 
 ## Next Up (item numbers are IDs, not priority order)
 
-1. **Item 15** — add the missing core-rulebook parameters. Blocks 14, and the
-   catalog is wrong today, not merely incomplete.
-2. **Item 14** — container targets: at-casting vs. subsequently-entering.
-3. **Item 13** — summary/description entry for user-created spells.
+1. **Item 14** — container targets: at-casting vs. subsequently-entering. No
+   longer blocked — item 15 (below) added Circle/Ring, closing the catalog gap.
+2. **Item 13** — summary/description entry for user-created spells.
 
 ---
 
 ## High Priority Fixes
 
-### 15. Add All Core-Rulebook Parameters — ⚠️ DO THIS FIRST
-The catalog holds **17** parameters. The ArM5 core rulebook defines **25**, and
-one existing entry is misnamed. This is a correctness problem, not just a gap:
-spells that need Ring, Circle or Eye cannot currently be expressed at all.
+### 15. Add All Core-Rulebook Parameters — ✅ COMPLETE
+The catalog held **17** parameters; the ArM5 core rulebook defines **25**, and
+one existing entry was misnamed. This was a correctness problem, not just a
+gap: spells needing Ring, Circle or Eye could not be expressed at all.
 
-- [ ] **Range — add Eye (+1).** The rulebook pairs it with Touch: "Touch and Eye
+- [x] **Range — add Eye (+1).** The rulebook pairs it with Touch: "Touch and Eye
       are the same 'level' of range", listed as `Touch/Eye`. Not interchangeable
       with Touch, just equal in magnitude.
-- [ ] **Duration — add Ring (+2)** (paired with Sun) **and Year (+4)**.
-- [ ] **Target — add Circle (+0)** (paired with Individual) **and the four
+- [x] **Duration — add Ring (+2)** (paired with Sun) **and Year (+4)**.
+- [x] **Target — add Circle (+0)** (paired with Individual) **and the four
       missing magical senses: Taste (+0), Touch (+1), Smell (+2), Hearing (+3).**
       The senses are Intellego targets, each equivalent to a standard target:
       Taste=Individual, Touch=Part, Smell=Group, Hearing=Structure,
-      Vision=Boundary. Vision is already present and correct.
-- [ ] **Rename `Bound` → `Boundary`.** The rulebook name is Boundary. The id
-      (`target-bound`) may keep its spelling or change — backward compatibility
-      is not a goal, and no built-in spell currently uses it.
-- [ ] Verify the 30 built-in spells still calculate correctly after the rename
-- **Two constraints the model cannot express yet — decide how to handle:**
-  - **Year duration and Boundary target are ritual-only.** The rulebook is
-    explicit: "A spell with this duration must be ritual" (Year) and "A spell
-    with this target must be a ritual" (Boundary). There is no ritual flag on
-    `Parameter` or `Spell` today. This overlaps todo item 4's "Ritual-Only
-    Constraints" — either add the flag here, or add these two parameters
-    knowingly unconstrained and let item 4 close it. **Vision is deliberately
-    NOT ritual** ("unlike Boundary, it does not require Ritual magic"), so the
-    flag must sit on the parameter, not be inferred from magnitude.
-  - **Target `Touch` collides by name with Range `Touch`.** Harmless in the data
-    (ids are category-scoped: `range-touch` vs `target-touch`) but the creation
-    screen's dropdowns show bare names, so both will read "Touch" in different
-    pickers. Confirm that is acceptable or disambiguate the label.
+      Vision=Boundary. Vision was already present and correct.
+- [x] **Rename `Bound` → `Boundary`.** The rulebook name is Boundary. Id changed
+      to `target-boundary` (backward compatibility was not a goal, and no
+      built-in spell used the old id).
+- [x] Verify the built-in spells still calculate correctly after the rename —
+      confirmed via the full asset test suite, plus a new demonstration spell
+      ("Thoughts Within Babble," Intellego Mentem, Target: Hearing, Level 25)
+      added specifically to exercise one of the new parameters end to end.
+- **Status:** ✅ COMPLETE (commit `c835d0a`, branch `feature/parameters-and-provenance`)
+- **The two open constraints were each explicitly decided, not left unresolved:**
+  - **Ritual-only gating (Year, Boundary) — deferred, not added.** No ritual
+    flag was added to `Parameter`/`Spell`; the constraint is unenforced for now.
+    Folded into todo item 4's "Ritual-Only Constraints" and into item 17's
+    Merinita/Symbolic-Magic parameters, which need the same flag — closing it
+    once there serves both.
+  - **Target `Touch` / Range `Touch` name collision — left as-is.** Harmless in
+    the data (ids are category-scoped: `range-touch` vs `target-touch`); the
+    creation screen's dropdowns filter by category, so the two never appear in
+    the same picker. Not disambiguated.
 - **Source:** `Ars-Magica-Open-License/raw-md/Ars Magica 5e - Core Rules.md`,
-  section "Ranges, Durations, Targets" (~line 7840) and "Magical Senses".
-- **Files:**
-  - `assets/data/parameters.json` (8 new entries, 1 rename)
-  - `test/data/datasources/asset_data_loader_test.dart` (the parameter count is
-    a hardcoded `17` — update it, and consider whether it should stay a literal;
-    it is a small hand-curated list, so a literal is defensible)
+  section "Ranges, Durations, Targets" (~line 7840) and "Magical Senses". Every
+  new magnitude and the demonstration spell's full stat block were independently
+  re-verified against this source during the final branch review, not just
+  checked for internal consistency.
+- **Spec/Plan:** `docs/superpowers/specs/2026-07-27-parameters-and-provenance-design.md`,
+  `docs/superpowers/plans/2026-07-27-parameters-and-provenance.md`
+- **Files touched:** `assets/data/parameters.json` (25 entries), `assets/data/spell_library.json`
+  (1 new spell), `lib/models/parameter.dart`, `test/data/datasources/asset_data_loader_test.dart`
 
 ### 1. Spell Constraint: One of Each Parameter
 - [x] Add validation that each spell has exactly ONE Range
