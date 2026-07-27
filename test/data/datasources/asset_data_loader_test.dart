@@ -47,6 +47,24 @@ void main() {
         reason: 'Bound was a data error; the rulebook name is Boundary');
   });
 
+  test('exactly Year and Boundary are flagged ritual-only', () async {
+    final parameters = await loader.loadParameters();
+
+    final flagged = parameters.where((p) => p.requiresRitual).map((p) => p.id).toSet();
+
+    // Hardcoded, unlike the base-effect counts: parameters.json is the small
+    // hand-curated list todo item 5 deliberately left as literals.
+    expect(flagged, {'duration-year', 'target-boundary'});
+
+    // Vision shares Boundary's +4 magnitude but is explicitly not ritual-only
+    // (Core Rules line 12345: Formulaic spells "may have Vision target, if
+    // they are magical sense spells").
+    expect(
+      parameters.firstWhere((p) => p.id == 'target-vision').requiresRitual,
+      isFalse,
+    );
+  });
+
   test('loadSpellLibrary loads all 31 built-in spells', () async {
     final spells = await loader.loadSpellLibrary();
 

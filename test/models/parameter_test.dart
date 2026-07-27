@@ -74,5 +74,41 @@ void main() {
       expect(restored.provenance.source, PublicationSource.published);
       expect(restored.provenance.citations, [const Citation(bookId: 'arm5-core')]);
     });
+
+    test('requiresRitual defaults to false and round-trips when true', () {
+      final plain = Parameter(
+        id: 'p-1', name: 'Sun', category: 'Duration', magnitude: 2,
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(plain.requiresRitual, isFalse);
+
+      final ritual = Parameter(
+        id: 'p-2', name: 'Year', category: 'Duration', magnitude: 4,
+        requiresRitual: true,
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(Parameter.fromMap(ritual.toMap()).requiresRitual, isTrue);
+      expect(Parameter.fromMap(plain.toMap()).requiresRitual, isFalse);
+    });
+
+    test('fromMap treats an absent requiresRitual key as false', () {
+      final restored = Parameter.fromMap({
+        'id': 'p-3',
+        'name': 'Touch',
+        'category': 'Range',
+        'magnitude': 1,
+        'source': 'published',
+        'citations': [
+          {'bookId': 'arm5-core'},
+        ],
+      });
+      expect(restored.requiresRitual, isFalse);
+    });
   });
 }

@@ -148,6 +148,7 @@
     "name": "Year",
     "category": "Duration",
     "magnitude": 4,
+    "requiresRitual": true,
     "source": "published",
     "citations": [
       {
@@ -292,6 +293,7 @@
     "name": "Boundary",
     "category": "Target",
     "magnitude": 4,
+    "requiresRitual": true,
     "source": "published",
     "citations": [
       {
