@@ -7,6 +7,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 import 'package:eruditus/models/publication_source.dart';
 
@@ -37,19 +38,28 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     if (event is TechniqueSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: _withPrunedModifiers(
-            state.draft.copyWith(technique: event.technique, baseEffect: null)),
+        draft: _withRitualDeclaration(
+          _withPrunedModifiers(
+              state.draft.copyWith(technique: event.technique, baseEffect: null)),
+          reapplyDefault: false,
+        ),
       ));
     } else if (event is FormSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft:
-            _withPrunedModifiers(state.draft.copyWith(form: event.form, baseEffect: null)),
+        draft: _withRitualDeclaration(
+          _withPrunedModifiers(
+              state.draft.copyWith(form: event.form, baseEffect: null)),
+          reapplyDefault: false,
+        ),
       ));
     } else if (event is BaseEffectSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: _withPrunedModifiers(state.draft.copyWith(baseEffect: event.effect)),
+        draft: _withRitualDeclaration(
+          _withPrunedModifiers(state.draft.copyWith(baseEffect: event.effect)),
+          reapplyDefault: true,
+        ),
       ));
     } else if (event is RangeSelected) {
       emit(state.copyWith(
@@ -59,7 +69,10 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     } else if (event is DurationSelected) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(duration: event.parameter),
+        draft: _withRitualDeclaration(
+          state.draft.copyWith(duration: event.parameter),
+          reapplyDefault: true,
+        ),
       ));
     } else if (event is TargetSelected) {
       emit(state.copyWith(
@@ -120,6 +133,11 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       ));
     } else if (event is AvailableModifiersSynced) {
       spellEngine.updateModifiers(event.modifiers);
+    } else if (event is RitualDeclarationChanged) {
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(ritualDeclaration: event.declaration),
+      ));
     } else if (event is SpellCalculated) {
       _handleSpellCalculated(emit);
     } else if (event is SpellSaveRequested) {
@@ -137,6 +155,38 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           baseEffectId: draft.baseEffect?.id,
         ),
       );
+
+  static const String _creo = 'Creo';
+  static const String _momentaryDurationId = 'duration-momentary';
+
+  /// A Momentary Creo spell is the one case the rulebook leaves to the caster
+  /// (Core Rules line 12351), so it is the only case the checkbox is offered
+  /// for and the only case the bloc sets automatically.
+  bool _declaresLastingCreation(SpellDraft draft) =>
+      draft.technique == _creo && draft.duration?.id == _momentaryDurationId;
+
+  /// Re-derives [SpellDraft.ritualDeclaration] after a change to Technique,
+  /// Form, base effect or Duration.
+  ///
+  /// A `lastingCreation` declaration is a statement about *this* effect at
+  /// *this* Duration; when either moves out of eligibility the statement has
+  /// become false and must go, exactly as pruneModifierSelections drops a
+  /// stranded modifier rather than let it keep affecting the level invisibly.
+  ///
+  /// A `storyguideRuling` is never touched. It is not invalidated by changing
+  /// Duration, and no UI sets it yet — silently wiping one would make the
+  /// deferred storyguide-ruling UI a second migration.
+  SpellDraft _withRitualDeclaration(SpellDraft draft, {required bool reapplyDefault}) {
+    if (draft.ritualDeclaration == RitualDeclaration.storyguideRuling) return draft;
+
+    if (!_declaresLastingCreation(draft)) {
+      return draft.copyWith(ritualDeclaration: RitualDeclaration.none);
+    }
+    if (reapplyDefault) {
+      return draft.copyWith(ritualDeclaration: RitualDeclaration.lastingCreation);
+    }
+    return draft;
+  }
 
   void _handleSpellCalculated(Emitter<SpellCreationState> emit) {
     final errors = spellEngine.validateSpellDraft(state.draft);

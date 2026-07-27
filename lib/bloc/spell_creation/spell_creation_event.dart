@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 
 abstract class SpellCreationEvent extends Equatable {
   const SpellCreationEvent();
@@ -112,4 +113,13 @@ class AvailableModifiersSynced extends SpellCreationEvent {
   const AvailableModifiersSynced(this.modifiers);
   @override
   List<Object?> get props => [modifiers];
+}
+
+/// The caster's own statement about a spell's Ritual status — the part the
+/// rulebook leaves to judgement rather than to the spell's configuration.
+class RitualDeclarationChanged extends SpellCreationEvent {
+  final RitualDeclaration declaration;
+  const RitualDeclarationChanged(this.declaration);
+  @override
+  List<Object?> get props => [declaration];
 }

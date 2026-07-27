@@ -17,6 +17,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
@@ -674,4 +675,121 @@ void main() {
           ),
     ],
   );
+
+  group('ritual declaration', () {
+    final momentary = Parameter(
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration',
+      magnitude: 0, provenance: Provenance(source: PublicationSource.userCreated),
+    );
+    final sun = Parameter(
+      id: 'duration-sun', name: 'Sun', category: 'Duration',
+      magnitude: 2, provenance: Provenance(source: PublicationSource.userCreated),
+    );
+    final suggestedHealing = BaseEffect(
+      id: 'crco-35a', technique: 'Creo', form: 'Corpus',
+      description: 'Heal all wounds', baseLevel: 35,
+      ritualRequirement: RitualRequirement.suggested,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+    final plainCreo = BaseEffect(
+      id: 'crte-15a', technique: 'Creo', form: 'Terram',
+      description: 'Create precious metal', baseLevel: 15,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'defaults to lastingCreation for any Creo + Momentary draft',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(BaseEffectSelected(plainCreo)),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.lastingCreation),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'defaults to lastingCreation for a suggested healing effect too',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(BaseEffectSelected(suggestedHealing)),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.lastingCreation),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'does not default for a non-Creo technique',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Perdo'))
+        ..add(DurationSelected(momentary)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.none),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'does not default for a non-Momentary duration',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(sun)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.none),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'respects an explicit clear and does not re-tick on an unrelated event',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(const RitualDeclarationChanged(RitualDeclaration.none))
+        ..add(const FormSelected('Terram')),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.none),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'prunes lastingCreation when the draft leaves Creo + Momentary',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(DurationSelected(sun)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.none),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'prunes lastingCreation when the technique leaves Creo',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(const TechniqueSelected('Muto')),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.none),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'never prunes a storyguideRuling',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Perdo'))
+        ..add(const RitualDeclarationChanged(RitualDeclaration.storyguideRuling))
+        ..add(DurationSelected(sun)),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
+    );
+  });
 }
