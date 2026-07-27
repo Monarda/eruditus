@@ -6,12 +6,14 @@ import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
+import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/level_breakdown_card.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
+import 'package:eruditus/presentation/widgets/ritual_section.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 import 'package:eruditus/utils/constants.dart';
 
@@ -177,6 +179,20 @@ class SpellCreationScreen extends StatelessWidget {
                       bloc.add(ModifierOptionSelected(modifierId, optionId)),
                   onDeselect: (modifierId, optionId) =>
                       bloc.add(ModifierOptionDeselected(modifierId, optionId)),
+                ),
+                const SizedBox(height: 16),
+                RitualSection(
+                  ritualStatus:
+                      state.breakdown?.ritualStatus ?? const RitualStatus.notRitual(),
+                  declaration: draft.ritualDeclaration,
+                  showDeclarationCheckbox: draft.technique == 'Creo' &&
+                      draft.duration?.id == 'duration-momentary',
+                  durationName: draft.duration?.name ?? '',
+                  targetName: draft.target?.name ?? '',
+                  guidelineIsSuggested: draft.baseEffect?.ritualRequirement ==
+                      RitualRequirement.suggested,
+                  onDeclarationChanged: (declaration) =>
+                      bloc.add(RitualDeclarationChanged(declaration)),
                 ),
                 const SizedBox(height: 16),
                 if (state.validationErrors.isNotEmpty)
