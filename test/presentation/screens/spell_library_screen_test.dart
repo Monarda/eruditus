@@ -9,8 +9,10 @@ import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
 class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
@@ -32,7 +34,7 @@ void main() {
     description: 'test', baseLevel: 5, source: 'published',
   );
 
-  ResolvedSpell buildSpell(String id, String name, {String source = 'published'}) {
+  ResolvedSpell buildSpell(String id, String name, {SpellSource source = SpellSource.published}) {
     final record = Spell(
       id: id,
       name: name,
@@ -41,6 +43,10 @@ void main() {
       durationId: durationParam.id,
       targetId: targetParam.id,
       requisites: const [],
+      description: source == SpellSource.published ? 'A test spell.' : null,
+      citations: source == SpellSource.published
+          ? const [Citation(bookId: 'arm5-core')]
+          : const [],
       source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     return ResolvedSpell(
@@ -48,7 +54,7 @@ void main() {
   }
 
   final builtInSpell = buildSpell('built-1', 'Phantasm of the Talking Head');
-  final userSpell = buildSpell('user-1', 'My Custom Fireball', source: 'user-created');
+  final userSpell = buildSpell('user-1', 'My Custom Fireball', source: SpellSource.userCreated);
 
   setUpAll(() {
     registerFallbackValue(FakeSpellLibraryEvent());

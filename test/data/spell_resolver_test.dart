@@ -3,6 +3,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   final effect = BaseEffect(
@@ -26,7 +27,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const [],
-        source: 'published',
+        source: SpellSource.userCreated,
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       );

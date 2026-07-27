@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 enum SpellLibraryStatus { loading, loaded, error }
 
@@ -28,9 +29,9 @@ class SpellLibraryState extends Equatable {
   List<ResolvedSpell> get visibleSpells {
     var result = allSpells;
     if (filter == 'Published') {
-      result = result.where((s) => s.source == 'published').toList();
+      result = result.where((s) => s.source == SpellSource.published).toList();
     } else if (filter == 'My Spells') {
-      result = result.where((s) => s.source == 'user-created').toList();
+      result = result.where((s) => s.source == SpellSource.userCreated).toList();
     }
     if (query.isNotEmpty) {
       final lowerQuery = query.toLowerCase();

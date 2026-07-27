@@ -6,6 +6,7 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/book.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,7 @@ void main() {
     final spells = await loader.loadSpellLibrary();
 
     expect(spells.length, 30);
-    expect(spells.every((s) => s.source == 'published'), isTrue);
+    expect(spells.every((s) => s.source == SpellSource.published), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
 
@@ -75,10 +76,10 @@ void main() {
     final modifiers = await loader.loadModifiers();
 
     int levelStatedInDescription(spell) {
-      final match = RegExp(r'Level (\d+)\.').firstMatch(spell.description ?? '');
+      final match = RegExp(r'Level (\d+)\.').firstMatch(spell.summary ?? '');
       expect(match, isNotNull,
-          reason: '${spell.name}: description does not contain a "Level N." phrase '
-              '(description was: "${spell.description}")');
+          reason: '${spell.name}: summary does not contain a "Level N." phrase '
+              '(summary was: "${spell.summary}")');
       return int.parse(match!.group(1)!);
     }
 
@@ -168,5 +169,23 @@ void main() {
 
     expect(ids.length, ids.toSet().length,
         reason: 'duplicate book ids would make citations ambiguous');
+  });
+
+  test("every spell's cited book ids exist in the books catalog", () async {
+    final spells = await loader.loadSpellLibrary();
+    final books = await loader.loadBooks();
+    final bookIds = books.map((b) => b.id).toSet();
+
+    for (final spell in spells) {
+      expect(spell.source, SpellSource.published,
+          reason: '${spell.name}: every library spell should be published');
+      expect(spell.citations, isNotEmpty,
+          reason: '${spell.name}: a published spell needs at least one citation');
+      for (final citation in spell.citations) {
+        expect(bookIds.contains(citation.bookId), isTrue,
+            reason: '${spell.name}: cited book ${citation.bookId} is not in '
+                'books.json — add the book, do not relax this check');
+      }
+    }
   });
 }

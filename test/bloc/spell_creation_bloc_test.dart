@@ -15,6 +15,7 @@ import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
 
@@ -29,7 +30,7 @@ void main() {
       durationId: 'p2',
       targetId: 'p3',
       requisites: const [],
-      source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
   });
 
@@ -117,7 +118,7 @@ void main() {
         durationId: durationParam.id,
         targetId: targetParam.id,
         requisites: const [],
-        source: 'published', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+        source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final suggestion = ResolvedSpell(
         record: suggestionRecord, baseEffect: creoIgnemEffect,

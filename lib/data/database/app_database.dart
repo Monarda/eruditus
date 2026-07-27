@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 3;
+  static const int _databaseVersion = 4;
 
   final Database db;
 

@@ -3,6 +3,7 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 class LibraryRepository {
   final AssetDataLoader assetLoader;
@@ -67,7 +68,7 @@ class LibraryRepository {
     return all.where((s) => (s.name ?? '').toLowerCase().contains(lowerQuery)).toList();
   }
 
-  Future<List<ResolvedSpell>> filterBySource(String source) async {
+  Future<List<ResolvedSpell>> filterBySource(SpellSource source) async {
     final all = await getAllSpells();
     return all.where((s) => s.source == source).toList();
   }

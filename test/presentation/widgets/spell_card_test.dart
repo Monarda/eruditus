@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
@@ -21,7 +23,12 @@ void main() {
   final individualParam =
       Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
 
-  ResolvedSpell buildSpell({String? name, String source = 'published', String? description}) {
+  ResolvedSpell buildSpell({
+    String? name,
+    SpellSource source = SpellSource.published,
+    String? summary,
+    String? description,
+  }) {
     final record = Spell(
       id: '1',
       name: name,
@@ -30,8 +37,10 @@ void main() {
       durationId: durationParam.id,
       targetId: targetParam.id,
       requisites: const [],
+      summary: summary,
       description: description,
       source: source,
+      citations: source == SpellSource.published ? const [Citation(bookId: 'arm5-core')] : const [],
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );
@@ -41,7 +50,12 @@ void main() {
 
   testWidgets('shows spell name, technique+form, level, and Published badge', (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: buildSpell(name: 'Pillar of Fire'), level: 25)),
+      home: Scaffold(
+        body: SpellCard(
+          spell: buildSpell(name: 'Pillar of Fire', summary: 'Test summary.'),
+          level: 25,
+        ),
+      ),
     ));
 
     expect(find.text('Pillar of Fire'), findsOneWidget);
@@ -53,7 +67,7 @@ void main() {
   testWidgets('shows "My Spell" badge for user-created spells', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: SpellCard(spell: buildSpell(name: 'My Fireball', source: 'user-created')),
+        body: SpellCard(spell: buildSpell(name: 'My Fireball', source: SpellSource.userCreated)),
       ),
     ));
 
@@ -62,7 +76,7 @@ void main() {
 
   testWidgets('falls back to "Untitled Technique Form" when name is null', (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: buildSpell(name: null))),
+      home: Scaffold(body: SpellCard(spell: buildSpell(name: null, summary: 'Test summary.'))),
     ));
 
     expect(find.text('Untitled Creo Ignem'), findsOneWidget);
@@ -83,7 +97,12 @@ void main() {
 
   testWidgets('renders no description text when description is null', (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: buildSpell(name: 'Pillar of Fire'), level: 25)),
+      home: Scaffold(
+        body: SpellCard(
+          spell: buildSpell(name: 'Pillar of Fire', source: SpellSource.userCreated),
+          level: 25,
+        ),
+      ),
     ));
 
     // Only the title Text should match; no stray empty description widget.
@@ -94,7 +113,10 @@ void main() {
     var tapped = false;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: SpellCard(spell: buildSpell(name: 'Test'), onTap: () => tapped = true),
+        body: SpellCard(
+          spell: buildSpell(name: 'Test', source: SpellSource.userCreated),
+          onTap: () => tapped = true,
+        ),
       ),
     ));
 
@@ -111,7 +133,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const [],
-      source: 'user-created',
+      source: SpellSource.userCreated,
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );

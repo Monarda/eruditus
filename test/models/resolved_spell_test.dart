@@ -3,6 +3,8 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   final effect = BaseEffect(
@@ -24,7 +26,8 @@ void main() {
         targetId: 'target-individual',
         requisites: const [],
         description: 'A face on a wall. Level 10.',
-        source: 'published',
+        source: SpellSource.published,
+        citations: const [Citation(bookId: 'arm5-core')],
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       );
@@ -37,7 +40,7 @@ void main() {
     expect(resolved.unresolvedReferences, isEmpty);
     expect(resolved.id, 'spell-1');
     expect(resolved.name, 'Phantasm');
-    expect(resolved.source, 'published');
+    expect(resolved.source, SpellSource.published);
     expect(resolved.description, 'A face on a wall. Level 10.');
     // Derived from the base effect, never stored separately, so they cannot
     // disagree with it.

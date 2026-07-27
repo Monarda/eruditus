@@ -6,6 +6,7 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +42,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const [],
-        source: 'user-created',
+        source: SpellSource.userCreated,
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 class SpellCard extends StatelessWidget {
   final ResolvedSpell spell;
@@ -31,8 +32,11 @@ class SpellCard extends StatelessWidget {
           ? '${spell.technique} ${spell.form} • Level $level'
           : '${spell.technique} ${spell.form}';
     }
-    final description = spell.description;
-    final hasDescription = description != null && description.isNotEmpty;
+    // Prefer the paraphrase; fall back to the verbatim rulebook text. A
+    // published spell always has at least one of them; a user-created spell may
+    // have neither, in which case the blurb is simply omitted.
+    final blurb = spell.summary ?? spell.description;
+    final hasBlurb = blurb != null && blurb.isNotEmpty;
 
     return Card(
       key: isInvalid ? const Key('spell-card-unresolved') : null,
@@ -47,11 +51,13 @@ class SpellCard extends StatelessWidget {
                 style: isInvalid
                     ? TextStyle(color: Theme.of(context).colorScheme.error)
                     : null),
-            if (hasDescription)
-              Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
+            if (hasBlurb)
+              Text(blurb, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),
-        trailing: Chip(label: Text(spell.source == 'published' ? 'Published' : 'My Spell')),
+        trailing: Chip(
+            label: Text(
+                spell.source == SpellSource.published ? 'Published' : 'My Spell')),
       ),
     );
   }

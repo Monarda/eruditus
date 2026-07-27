@@ -10,6 +10,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,7 @@ void main() {
   test('getBuiltInSpells returns all 30 built-in library spells', () async {
     final builtIn = await repository.getBuiltInSpells();
     expect(builtIn.length, 30);
-    expect(builtIn.every((s) => s.source == 'published'), isTrue);
+    expect(builtIn.every((s) => s.source == SpellSource.published), isTrue);
   });
 
   test('getAllSpells combines built-in and user spells', () async {
@@ -55,7 +56,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const [],
-      source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
 
     final all = await repository.getAllSpells();
@@ -79,10 +80,10 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const [],
-      source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
 
-    final userSpells = await repository.filterBySource('user-created');
+    final userSpells = await repository.filterBySource(SpellSource.userCreated);
 
     expect(userSpells.length, 1);
     expect(userSpells.first.id, 'user-1');
@@ -139,7 +140,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const [],
-        source: 'user-created',
+        source: SpellSource.userCreated,
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));

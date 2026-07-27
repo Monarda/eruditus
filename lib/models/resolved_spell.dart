@@ -1,7 +1,9 @@
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 
 /// A [Spell] record joined to the catalog entries its ids refer to.
 ///
@@ -43,8 +45,11 @@ class ResolvedSpell {
 
   String get id => record.id;
   String? get name => record.name;
+  String? get summary => record.summary;
   String? get description => record.description;
-  String get source => record.source;
+  SpellSource get source => record.source;
+  List<Citation> get citations => record.citations;
+  List<String> get tags => record.tags;
   DateTime get createdAt => record.createdAt;
   DateTime get updatedAt => record.updatedAt;
   Map<String, List<String>> get selectedModifiers => record.selectedModifiers;

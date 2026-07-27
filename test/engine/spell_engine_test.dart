@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -401,7 +402,7 @@ void main() {
         durationId: _duration.id,
         targetId: _target.id,
         requisites: [],
-        source: 'published', createdAt: DateTime.now(), updatedAt: DateTime.now(),
+        source: SpellSource.userCreated, createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
       return ResolvedSpell(
         record: record, baseEffect: effect, range: _range, duration: _duration, target: _target);
@@ -459,7 +460,7 @@ void main() {
           durationId: _duration.id,
           targetId: _target.id,
           requisites: const [],
-          source: 'user-created',
+          source: SpellSource.userCreated,
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),
         ),

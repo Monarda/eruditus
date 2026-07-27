@@ -13,6 +13,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/models/parameter.dart';
 
 void main() {
@@ -69,7 +70,7 @@ void main() {
       durationId: 'p2',
       targetId: 'p3',
       requisites: const [],
-      source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(
         assetLoader: AssetDataLoader(), spellRepository: spellRepository, resolver: resolver);
@@ -140,7 +141,7 @@ void main() {
           'no-longer-exists': ['no-longer-exists'],
         },
         requisites: const [],
-        source: 'user-created', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+        source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));
     },
     build: () => SpellLibraryBloc(
