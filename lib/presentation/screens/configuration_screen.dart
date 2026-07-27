@@ -83,7 +83,7 @@ class _EffectsTab extends StatelessWidget {
                     icon: const Icon(Icons.delete),
                     onPressed: () => onDelete(e.id),
                   )
-                : const Text('Built-in'),
+                : const Text('Published'),
           );
         }).toList(),
       ),
@@ -196,7 +196,7 @@ class _ParametersTab extends StatelessWidget {
                     icon: const Icon(Icons.delete),
                     onPressed: () => onDelete(p.id),
                   )
-                : const Text('Built-in'),
+                : const Text('Published'),
           );
         }).toList(),
       ),

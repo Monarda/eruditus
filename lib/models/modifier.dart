@@ -111,7 +111,7 @@ class Modifier {
   final ModifierSelectionMode selectionMode;
   final ModifierScope scope;
   final List<ModifierOption> options;
-  final String source; // 'built-in' or 'user-created'
+  final String source; // 'published' or 'user-created'
 
   Modifier({
     required this.id,

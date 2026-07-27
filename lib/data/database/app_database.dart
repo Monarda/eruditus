@@ -16,13 +16,15 @@ class AppDatabase {
       options: OpenDatabaseOptions(
         version: _databaseVersion,
         onCreate: (db, version) => _createSchema(db),
-        // Backward compatibility is not a goal for this prototype, but only the
-        // `spells` table's shape actually changed in this branch (it dropped
-        // the `technique`/`form` columns). Rather than translate stored
-        // spells whose shape has changed, drop just that table and rebuild
-        // it: destructive, but self-healing and explicit, where a silent
-        // schema mismatch would fail confusingly at read time. The rest of
-        // the custom catalog (`custom_effects`, `custom_parameters`,
+        // Backward compatibility is not a goal for this prototype, and in this
+        // branch's v4 bump the `spells` table's DDL is unchanged — what
+        // changed is the shape of the JSON stored in its `data` blob (the new
+        // `SpellSource`/citations/tags/summary split), which old rows don't
+        // have and `Spell.fromMap` cannot parse. Rather than translate stored
+        // spells whose blob shape has changed, drop just that table and
+        // rebuild it: destructive, but self-healing and explicit, where a
+        // silent schema mismatch would fail confusingly at read time. The
+        // rest of the custom catalog (`custom_effects`, `custom_parameters`,
         // `custom_modifiers`) is untouched by this upgrade and must survive
         // it. `custom_factors` is dropped too, but only as dead-table
         // cleanup: `_createSchema` never creates it, so this is a no-op with

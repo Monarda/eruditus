@@ -66,7 +66,7 @@ void main() {
     final jsonString = await backupService.exportToJson();
     final data = jsonDecode(jsonString) as Map<String, dynamic>;
 
-    expect(data['version'], '1.0');
+    expect(data['version'], '2.0');
     expect(data['exportDate'], isNotNull);
     expect((data['spells'] as List).length, 1);
     expect((data['spells'] as List).first['name'], 'My Fireball');
@@ -86,7 +86,7 @@ void main() {
       source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final backup = {
-      'version': '1.0',
+      'version': '2.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [importedSpell.toMap()],
       'customEffects': [
@@ -122,7 +122,7 @@ void main() {
       source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final jsonString = jsonEncode({
-      'version': '1.0',
+      'version': '2.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [importedSpell.toMap()],
       'customEffects': [],

@@ -5,7 +5,7 @@ class Parameter {
   final String name;
   final String category; // "Range", "Duration", "Target", or custom
   final int magnitude;
-  final String source; // "built-in" or "user-created"
+  final String source; // "published" or "user-created"
 
   Parameter({
     required this.id,

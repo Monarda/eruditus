@@ -4,7 +4,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
-import 'package:eruditus/models/book.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/spell_source.dart';
 

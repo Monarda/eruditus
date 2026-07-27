@@ -18,7 +18,7 @@ class SearchQueryChanged extends SpellLibraryEvent {
 }
 
 class FilterChanged extends SpellLibraryEvent {
-  final String filter; // 'All' | 'Built-in' | 'My Spells'
+  final String filter; // 'All' | 'Published' | 'My Spells'
   const FilterChanged(this.filter);
   @override
   List<Object?> get props => [filter];

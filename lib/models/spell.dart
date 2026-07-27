@@ -80,7 +80,17 @@ class Spell {
     this.tags = const [],
     required this.createdAt,
     required this.updatedAt,
-  });
+  }) {
+    final problems = validateSpellFields(
+      source: source,
+      summary: summary,
+      description: description,
+      citations: citations,
+    );
+    if (problems.isNotEmpty) {
+      throw FormatException('Spell: ${problems.join('; ')}');
+    }
+  }
 
   Map<String, dynamic> toMap() => {
         'id': id,
@@ -108,16 +118,6 @@ class Spell {
             ?.map((c) => Citation.fromMap(c as Map<String, dynamic>))
             .toList() ??
         const <Citation>[];
-
-    final problems = validateSpellFields(
-      source: source,
-      summary: summary,
-      description: description,
-      citations: citations,
-    );
-    if (problems.isNotEmpty) {
-      throw FormatException('Spell.fromMap: ${problems.join('; ')}');
-    }
 
     return Spell(
       id: requireField<String>(map, 'id', 'Spell'),

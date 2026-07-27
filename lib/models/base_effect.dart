@@ -6,7 +6,7 @@ class BaseEffect {
   final String form;
   final String description;
   final int baseLevel;
-  final String source; // "built-in" or "user-created"
+  final String source; // "published" or "user-created"
 
   BaseEffect({
     required this.id,
