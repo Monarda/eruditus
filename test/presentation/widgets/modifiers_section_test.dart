@@ -13,7 +13,7 @@ void main() {
       ModifierOption(id: 'mat-stone', label: 'Stone or glass', magnitude: 1),
       ModifierOption(id: 'mat-metal', label: 'Metal or gemstone', magnitude: 2),
     ],
-    source: 'built-in',
+    source: 'published',
   );
   final complexity = Modifier(
     id: 'crim-complexity',
@@ -21,7 +21,7 @@ void main() {
     selectionMode: ModifierSelectionMode.multi,
     scope: const ModifierScope(technique: 'Creo', form: 'Imaginem'),
     options: [ModifierOption(id: 'crim-intricate-design', label: 'Intricate Design', magnitude: 1)],
-    source: 'built-in',
+    source: 'published',
   );
 
   Future<void> pump(

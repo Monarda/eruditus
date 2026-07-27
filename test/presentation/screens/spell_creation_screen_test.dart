@@ -43,11 +43,11 @@ void main() {
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'Create flame', baseLevel: 10, source: 'built-in',
+    description: 'Create flame', baseLevel: 10, source: 'published',
   );
-  final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'built-in');
+  final voiceParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'published');
 
   late Parameter range;
   late Parameter duration;
@@ -214,7 +214,7 @@ void main() {
       targetId: targetParam.id,
       requisites: const [],
       description: 'A roaring pillar of flame.',
-      source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      source: 'published', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final suggestion = ResolvedSpell(
       record: suggestionRecord, baseEffect: creoIgnemEffect,

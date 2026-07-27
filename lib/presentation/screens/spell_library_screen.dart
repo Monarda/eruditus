@@ -48,7 +48,7 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                   if (value != null) bloc.add(FilterChanged(value));
                 },
                 child: Row(
-                  children: ['All', 'Built-in', 'My Spells'].map((filter) {
+                  children: ['All', 'Published', 'My Spells'].map((filter) {
                     return Expanded(
                       child: RadioListTile<String>(
                         title: Text(filter),

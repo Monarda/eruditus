@@ -8,7 +8,7 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
 
 Parameter _sp(String id, String name, String category) =>
-    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'built-in');
+    Parameter(id: id, name: name, category: category, magnitude: 0, source: 'published');
 
 final _range = _sp('range-personal', 'Personal', 'Range');
 final _duration = _sp('duration-momentary', 'Momentary', 'Duration');
@@ -24,7 +24,7 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 10, source: 'built-in',
+          description: 'test', baseLevel: 10, source: 'published',
         ),
       );
 
@@ -37,7 +37,7 @@ void main() {
         technique: 'Creo',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'test', baseLevel: 10, source: 'built-in',
+          description: 'test', baseLevel: 10, source: 'published',
         ),
       );
 
@@ -61,7 +61,7 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in',
+          description: 'Create flame', baseLevel: 10, source: 'published',
         ),
         range: _range,
         duration: _duration,
@@ -78,7 +78,7 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in',
+          description: 'Create flame', baseLevel: 10, source: 'published',
         ),
         range: _range,
         duration: _duration,
@@ -99,7 +99,7 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in',
+          description: 'Create flame', baseLevel: 10, source: 'published',
         ),
         range: _range,
         duration: _duration,
@@ -120,7 +120,7 @@ void main() {
         form: 'Ignem',
         baseEffect: BaseEffect(
           id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10, source: 'built-in',
+          description: 'Create flame', baseLevel: 10, source: 'published',
         ),
         range: _range,
         duration: _duration,
@@ -146,7 +146,7 @@ void main() {
           ModifierOption(id: 'mat-stone', label: 'Stone', magnitude: 1),
           ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2),
         ],
-        source: 'built-in',
+        source: 'published',
       );
       final testEngine = SpellEngine(allSpells: [], allModifiers: [material]);
       final draft = SpellDraft(
@@ -154,7 +154,7 @@ void main() {
         form: 'Terram',
         baseEffect: BaseEffect(
           id: 'rete-4', technique: 'Rego', form: 'Terram',
-          description: 'Transport', baseLevel: 4, source: 'built-in',
+          description: 'Transport', baseLevel: 4, source: 'published',
         ),
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {'terram-material': ['mat-stone', 'mat-metal']},
@@ -174,7 +174,7 @@ void main() {
           ModifierOption(id: 'a', label: 'A', magnitude: 1),
           ModifierOption(id: 'b', label: 'B', magnitude: 1),
         ],
-        source: 'built-in',
+        source: 'published',
       );
       final testEngine = SpellEngine(allSpells: [], allModifiers: [complexity]);
       final draft = SpellDraft(
@@ -182,7 +182,7 @@ void main() {
         form: 'Imaginem',
         baseEffect: BaseEffect(
           id: 'e1', technique: 'Creo', form: 'Imaginem',
-          description: 'Image', baseLevel: 2, source: 'built-in',
+          description: 'Image', baseLevel: 2, source: 'published',
         ),
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {'crim-complexity': ['a', 'b']},
@@ -199,7 +199,7 @@ void main() {
       selectionMode: ModifierSelectionMode.single,
       scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
       options: [ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2)],
-      source: 'built-in',
+      source: 'published',
     );
     final distance = Modifier(
       id: 'rego-transport-distance',
@@ -207,7 +207,7 @@ void main() {
       selectionMode: ModifierSelectionMode.single,
       scope: const ModifierScope(effectIds: ['rete-4']),
       options: [ModifierOption(id: 'dist-500', label: '500 paces', magnitude: 2)],
-      source: 'built-in',
+      source: 'published',
     );
     final engine = SpellEngine(
         allSpells: [], allModifiers: [material, distance]);
@@ -254,7 +254,7 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Create flame', baseLevel: 10, source: 'built-in',
+        description: 'Create flame', baseLevel: 10, source: 'published',
       );
 
       final level = engine.calculateSpellLevel(
@@ -269,10 +269,10 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Muto', form: 'Corpus',
-        description: 'Eyes of the Cat base', baseLevel: 2, source: 'built-in',
+        description: 'Eyes of the Cat base', baseLevel: 2, source: 'published',
       );
-      final touch = Parameter(id: 'p1', name: 'Touch', category: 'Range', magnitude: 1, source: 'built-in');
-      final sun = Parameter(id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2, source: 'built-in');
+      final touch = Parameter(id: 'p1', name: 'Touch', category: 'Range', magnitude: 1, source: 'published');
+      final sun = Parameter(id: 'p2', name: 'Sun', category: 'Duration', magnitude: 2, source: 'published');
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
@@ -287,7 +287,7 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Fire with Ignem light', baseLevel: 3, source: 'built-in',
+        description: 'Fire with Ignem light', baseLevel: 3, source: 'published',
       );
 
       final level = engine.calculateSpellLevel(
@@ -303,7 +303,7 @@ void main() {
       final engine = SpellEngine(allSpells: []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Fire with Ignem light', baseLevel: 3, source: 'built-in',
+        description: 'Fire with Ignem light', baseLevel: 3, source: 'published',
       );
 
       final level = engine.calculateSpellLevel(
@@ -325,12 +325,12 @@ void main() {
           ModifierOption(id: 'mat-dirt', label: 'Dirt', magnitude: 0),
           ModifierOption(id: 'mat-metal', label: 'Metal or gemstone', magnitude: 2),
         ],
-        source: 'built-in',
+        source: 'published',
       );
       final engine = SpellEngine(allSpells: [], allModifiers: [material]);
       final baseEffect = BaseEffect(
         id: 'rete-4', technique: 'Rego', form: 'Terram',
-        description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
+        description: 'Transport a non-living object', baseLevel: 4, source: 'published',
       );
 
       final breakdown = engine.calculateBreakdown(
@@ -353,7 +353,7 @@ void main() {
       final engine = SpellEngine(allSpells: [], allModifiers: const []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Create flame', baseLevel: 3, source: 'built-in',
+        description: 'Create flame', baseLevel: 3, source: 'published',
       );
 
       final breakdown = engine.calculateBreakdown(
@@ -370,7 +370,7 @@ void main() {
       final engine = SpellEngine(allSpells: [], allModifiers: const []);
       final baseEffect = BaseEffect(
         id: '1', technique: 'Creo', form: 'Ignem',
-        description: 'Create flame', baseLevel: 3, source: 'built-in',
+        description: 'Create flame', baseLevel: 3, source: 'published',
       );
 
       final breakdown = engine.calculateBreakdown(
@@ -391,7 +391,7 @@ void main() {
     ResolvedSpell buildSpell(String id, String technique, String form, String name, int baseLevel) {
       final effect = BaseEffect(
         id: 'e$id', technique: technique, form: form,
-        description: name, baseLevel: baseLevel, source: 'built-in',
+        description: name, baseLevel: baseLevel, source: 'published',
       );
       final record = Spell(
         id: id,
@@ -401,7 +401,7 @@ void main() {
         durationId: _duration.id,
         targetId: _target.id,
         requisites: [],
-        source: 'built-in', createdAt: DateTime.now(), updatedAt: DateTime.now(),
+        source: 'published', createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
       return ResolvedSpell(
         record: record, baseEffect: effect, range: _range, duration: _duration, target: _target);
@@ -448,7 +448,7 @@ void main() {
       // operator crash reachable from the Create tab's Calculate button.
       final orphanEffect = BaseEffect(
         id: 'e-orphan', technique: 'Creo', form: 'Ignem',
-        description: 'Orphan', baseLevel: 10, source: 'built-in',
+        description: 'Orphan', baseLevel: 10, source: 'published',
       );
       final orphan = ResolvedSpell(
         record: Spell(

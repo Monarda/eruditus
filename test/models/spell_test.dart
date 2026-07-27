@@ -84,11 +84,11 @@ void main() {
         form: 'Corpus',
         description: 'Transform body',
         baseLevel: 5,
-        source: 'built-in',
+        source: 'published',
       );
-      final range = Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in');
-      final duration = Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-      final target = Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in');
+      final range = Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'published');
+      final duration = Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+      final target = Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'published');
 
       final draft = SpellDraft(
         technique: 'Muto',
@@ -119,10 +119,10 @@ void main() {
           form: 'Corpus',
           description: 'Transform body',
           baseLevel: 5,
-          source: 'built-in',
+          source: 'published',
         ),
-        duration: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in'),
-        target: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'built-in'),
+        duration: Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published'),
+        target: Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 10, source: 'published'),
       );
 
       expect(
@@ -194,7 +194,7 @@ void main() {
         durationId: 'p2',
         targetId: 'p3',
         requisites: const [],
-        source: 'built-in',
+        source: 'published',
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ).toMap();

@@ -6,7 +6,7 @@ void main() {
   test('SpellDraft.copyWith preserves id and unspecified fields, overrides given ones', () {
     final effect = BaseEffect(
       id: '1', technique: 'Creo', form: 'Ignem',
-      description: 'Create flame', baseLevel: 10, source: 'built-in',
+      description: 'Create flame', baseLevel: 10, source: 'published',
     );
     final draft = SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: effect);
 
@@ -21,7 +21,7 @@ void main() {
   test('SpellDraft.copyWith(baseEffect: null) explicitly clears baseEffect to null', () {
     final effect = BaseEffect(
       id: '1', technique: 'Creo', form: 'Ignem',
-      description: 'Create flame', baseLevel: 10, source: 'built-in',
+      description: 'Create flame', baseLevel: 10, source: 'published',
     );
     final draft = SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: effect);
 
@@ -33,7 +33,7 @@ void main() {
   test('SpellDraft.copyWith() with no baseEffect argument preserves the existing baseEffect', () {
     final effect = BaseEffect(
       id: '1', technique: 'Creo', form: 'Ignem',
-      description: 'Create flame', baseLevel: 10, source: 'built-in',
+      description: 'Create flame', baseLevel: 10, source: 'published',
     );
     final draft = SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: effect);
 

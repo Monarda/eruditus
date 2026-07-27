@@ -26,7 +26,7 @@ void main() {
         jsonDecode(await rootBundle.loadString('assets/data/base_effects.json')) as List;
     expect(effects.length, rawList.length,
         reason: 'loadBaseEffects should return exactly the entries present in base_effects.json');
-    expect(effects.every((e) => e.source == 'built-in'), isTrue);
+    expect(effects.every((e) => e.source == 'published'), isTrue);
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });
 
@@ -44,7 +44,7 @@ void main() {
     final spells = await loader.loadSpellLibrary();
 
     expect(spells.length, 30);
-    expect(spells.every((s) => s.source == 'built-in'), isTrue);
+    expect(spells.every((s) => s.source == 'published'), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
 
@@ -110,7 +110,7 @@ void main() {
     final modifiers = await loader.loadModifiers();
 
     expect(modifiers, isNotEmpty);
-    expect(modifiers.every((m) => m.source == 'built-in'), isTrue);
+    expect(modifiers.every((m) => m.source == 'published'), isTrue);
 
     final creoImaginem = modifiers.firstWhere((m) => m.id == 'crim-complexity');
     expect(creoImaginem.selectionMode, ModifierSelectionMode.multi);

@@ -23,16 +23,16 @@ class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
 void main() {
   late MockSpellLibraryBloc bloc;
 
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'published');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
 
   final effect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 5, source: 'built-in',
+    description: 'test', baseLevel: 5, source: 'published',
   );
 
-  ResolvedSpell buildSpell(String id, String name, {String source = 'built-in'}) {
+  ResolvedSpell buildSpell(String id, String name, {String source = 'published'}) {
     final record = Spell(
       id: id,
       name: name,

@@ -27,8 +27,8 @@ class SpellLibraryState extends Equatable {
 
   List<ResolvedSpell> get visibleSpells {
     var result = allSpells;
-    if (filter == 'Built-in') {
-      result = result.where((s) => s.source == 'built-in').toList();
+    if (filter == 'Published') {
+      result = result.where((s) => s.source == 'published').toList();
     } else if (filter == 'My Spells') {
       result = result.where((s) => s.source == 'user-created').toList();
     }

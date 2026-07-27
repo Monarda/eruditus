@@ -51,7 +51,7 @@ class SpellCard extends StatelessWidget {
               Text(description, maxLines: 2, overflow: TextOverflow.ellipsis),
           ],
         ),
-        trailing: Chip(label: Text(spell.source == 'built-in' ? 'Built-in' : 'My Spell')),
+        trailing: Chip(label: Text(spell.source == 'published' ? 'Published' : 'My Spell')),
       ),
     );
   }

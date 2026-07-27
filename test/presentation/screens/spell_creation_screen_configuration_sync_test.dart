@@ -62,7 +62,7 @@ void main() {
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'Create flame', baseLevel: 10, source: 'built-in',
+    description: 'Create flame', baseLevel: 10, source: 'published',
   );
 
   testWidgets(

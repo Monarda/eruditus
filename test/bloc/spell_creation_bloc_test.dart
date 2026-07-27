@@ -39,11 +39,11 @@ void main() {
 
   final creoIgnemEffect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'Create flame', baseLevel: 10, source: 'built-in',
+    description: 'Create flame', baseLevel: 10, source: 'published',
   );
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'built-in');
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 8, source: 'published');
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
@@ -117,7 +117,7 @@ void main() {
         durationId: durationParam.id,
         targetId: targetParam.id,
         requisites: const [],
-        source: 'built-in', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+        source: 'published', createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final suggestion = ResolvedSpell(
         record: suggestionRecord, baseEffect: creoIgnemEffect,
@@ -222,7 +222,7 @@ void main() {
       bloc.add(const FormSelected('Ignem'));
       bloc.add(BaseEffectSelected(BaseEffect(
         id: 'e2', technique: 'Rego', form: 'Ignem',
-        description: 'Redirect flame', baseLevel: 5, source: 'built-in',
+        description: 'Redirect flame', baseLevel: 5, source: 'published',
       )));
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
@@ -521,11 +521,11 @@ void main() {
       ModifierOption(id: 'mat-stone', label: 'Stone', magnitude: 1),
       ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2),
     ],
-    source: 'built-in',
+    source: 'published',
   );
   final reteEffect = BaseEffect(
     id: 'rete-4', technique: 'Rego', form: 'Terram',
-    description: 'Transport a non-living object', baseLevel: 4, source: 'built-in',
+    description: 'Transport a non-living object', baseLevel: 4, source: 'published',
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
@@ -567,7 +567,7 @@ void main() {
               ModifierOption(id: 'a', label: 'A', magnitude: 1),
               ModifierOption(id: 'b', label: 'B', magnitude: 1),
             ],
-            source: 'built-in',
+            source: 'published',
           ),
         ],
       ),

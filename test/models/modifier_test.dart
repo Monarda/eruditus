@@ -16,7 +16,7 @@ Modifier _mod({
         ModifierOption(id: 'mat-stone', label: 'Stone or glass', magnitude: 1),
         ModifierOption(id: 'mat-metal', label: 'Metal or gemstone', magnitude: 2),
       ],
-      source: 'built-in',
+      source: 'published',
     );
 
 void main() {
@@ -128,7 +128,7 @@ void main() {
           ModifierOption(
               id: 'mat-gemstone', label: 'Gemstone', magnitude: 2, baseIndividual: 'one cubic inch'),
         ],
-        source: 'built-in',
+        source: 'published',
       );
 
       final restored = Modifier.fromMap(modifier.toMap());

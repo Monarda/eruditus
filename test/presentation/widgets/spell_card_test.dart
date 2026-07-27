@@ -7,21 +7,21 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'published');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
   final effect = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 10, source: 'built-in',
+    description: 'test', baseLevel: 10, source: 'published',
   );
   final personalParam =
-      Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in');
+      Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'published');
   final momentaryParam =
-      Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+      Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
   final individualParam =
-      Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+      Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
 
-  ResolvedSpell buildSpell({String? name, String source = 'built-in', String? description}) {
+  ResolvedSpell buildSpell({String? name, String source = 'published', String? description}) {
     final record = Spell(
       id: '1',
       name: name,
@@ -39,7 +39,7 @@ void main() {
         record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
   }
 
-  testWidgets('shows spell name, technique+form, level, and Built-in badge', (tester) async {
+  testWidgets('shows spell name, technique+form, level, and Published badge', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(body: SpellCard(spell: buildSpell(name: 'Pillar of Fire'), level: 25)),
     ));
@@ -47,7 +47,7 @@ void main() {
     expect(find.text('Pillar of Fire'), findsOneWidget);
     expect(find.textContaining('Creo Ignem'), findsOneWidget);
     expect(find.textContaining('Level 25'), findsOneWidget);
-    expect(find.text('Built-in'), findsOneWidget);
+    expect(find.text('Published'), findsOneWidget);
   });
 
   testWidgets('shows "My Spell" badge for user-created spells', (tester) async {

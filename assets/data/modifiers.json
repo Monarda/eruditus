@@ -5,7 +5,7 @@
     "description": "Creo Imaginem complexity factors",
     "selectionMode": "multi",
     "scope": { "technique": "Creo", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "crim-sensory-complexity",
@@ -33,7 +33,7 @@
     "description": "Perdo Imaginem complexity factors",
     "selectionMode": "multi",
     "scope": { "technique": "Perdo", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "peim-changing-image",
@@ -49,7 +49,7 @@
     "description": "Rego Imaginem complexity factors",
     "selectionMode": "multi",
     "scope": { "technique": "Rego", "form": "Imaginem", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "reim-changing-image",
@@ -82,7 +82,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-animal-0",
@@ -107,7 +107,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-aquam-0",
@@ -132,7 +132,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-auram-0",
@@ -157,7 +157,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-corpus-0",
@@ -182,7 +182,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-herbam-0",
@@ -207,7 +207,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-ignem-0",
@@ -232,7 +232,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-imaginem-0",
@@ -257,7 +257,7 @@
       "effectIds": [],
       "excludeTechniques": ["Intellego"]
     },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "size-terram-0",
@@ -277,7 +277,7 @@
     "description": "Which liquid the spell works on, which sets what one Individual is",
     "selectionMode": "single",
     "scope": { "technique": null, "form": "Aquam", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "aquam-base-water",
@@ -317,7 +317,7 @@
     "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
     "selectionMode": "single",
     "scope": { "technique": "Muto", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "muto-terram-material-dirt",
@@ -357,7 +357,7 @@
     "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
     "selectionMode": "single",
     "scope": { "technique": "Perdo", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "perdo-terram-material-dirt",
@@ -397,7 +397,7 @@
     "description": "Base levels are quoted for dirt; harder materials cost magnitudes. The material also sets what one Individual is.",
     "selectionMode": "single",
     "scope": { "technique": "Rego", "form": "Terram", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       {
         "id": "rego-terram-material-dirt",
@@ -437,7 +437,7 @@
     "description": "Creating a phenomenon in an unnatural fashion costs magnitudes",
     "selectionMode": "single",
     "scope": { "technique": "Creo", "form": "Auram", "effectIds": [], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       { "id": "creo-auram-unnatural-none", "label": "Natural for the season and place", "magnitude": 0 },
       { "id": "creo-auram-unnatural-slight", "label": "Slightly unnatural fashion", "magnitude": 1 },
@@ -456,7 +456,7 @@
     "description": "The base level covers 5 paces; greater distances cost magnitudes",
     "selectionMode": "single",
     "scope": { "technique": null, "form": null, "effectIds": ["rrhe-10b", "rrig-3c", "rete-4"], "excludeTechniques": [] },
-    "source": "built-in",
+    "source": "published",
     "options": [
       { "id": "rego-distance-5-paces", "label": "Up to 5 paces", "magnitude": 0 },
       { "id": "rego-distance-50-paces", "label": "Up to 50 paces", "magnitude": 1 },

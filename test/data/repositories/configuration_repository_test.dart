@@ -77,7 +77,7 @@ void main() {
 
     final all = await repository.getAllModifiers();
 
-    expect(all.any((m) => m.id == 'crim-complexity'), isTrue, reason: 'built-in');
+    expect(all.any((m) => m.id == 'crim-complexity'), isTrue, reason: 'published');
     expect(all.any((m) => m.id == 'custom-m1'), isTrue, reason: 'custom');
   });
 }

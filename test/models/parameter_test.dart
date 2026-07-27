@@ -9,7 +9,7 @@ void main() {
         name: 'Voice',
         category: 'Range',
         magnitude: 2,
-        source: 'built-in',
+        source: 'published',
       );
 
       final restored = Parameter.fromMap(parameter.toMap());
@@ -27,7 +27,7 @@ void main() {
         'name': 'Voice',
         'category': 'Range',
         // 'magnitude' missing
-        'source': 'built-in',
+        'source': 'published',
       };
 
       expect(

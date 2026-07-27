@@ -7,13 +7,13 @@ import 'package:eruditus/models/spell.dart';
 void main() {
   final effect = BaseEffect(
       id: 'creim-2', technique: 'Creo', form: 'Imaginem',
-      description: 'Create an image that affects two senses', baseLevel: 2, source: 'built-in');
+      description: 'Create an image that affects two senses', baseLevel: 2, source: 'published');
   final voice = Parameter(
-      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'built-in');
+      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2, source: 'published');
   final momentary = Parameter(
-      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
   final individual = Parameter(
-      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
 
   final resolver = SpellResolver(
       effects: [effect], parameters: [voice, momentary, individual]);
@@ -26,7 +26,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const [],
-        source: 'built-in',
+        source: 'published',
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       );

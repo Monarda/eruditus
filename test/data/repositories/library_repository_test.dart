@@ -43,7 +43,7 @@ void main() {
   test('getBuiltInSpells returns all 30 built-in library spells', () async {
     final builtIn = await repository.getBuiltInSpells();
     expect(builtIn.length, 30);
-    expect(builtIn.every((s) => s.source == 'built-in'), isTrue);
+    expect(builtIn.every((s) => s.source == 'published'), isTrue);
   });
 
   test('getAllSpells combines built-in and user spells', () async {

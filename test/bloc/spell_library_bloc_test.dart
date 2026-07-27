@@ -28,16 +28,16 @@ void main() {
   late SpellEngine spellEngine;
   late SpellResolver resolver;
 
-  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'built-in');
-  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
-  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
+  final rangeParam = Parameter(id: 'p1', name: 'Voice', category: 'Range', magnitude: 0, source: 'published');
+  final durationParam = Parameter(id: 'p2', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'published');
+  final targetParam = Parameter(id: 'p3', name: 'Individual', category: 'Target', magnitude: 0, source: 'published');
   final effect1 = BaseEffect(
     id: 'e1', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 5, source: 'built-in',
+    description: 'test', baseLevel: 5, source: 'published',
   );
   final effect2 = BaseEffect(
     id: 'e2', technique: 'Creo', form: 'Ignem',
-    description: 'test', baseLevel: 5, source: 'built-in',
+    description: 'test', baseLevel: 5, source: 'published',
   );
 
   setUp(() async {

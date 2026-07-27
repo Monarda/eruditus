@@ -10,7 +10,7 @@ void main() {
         form: 'Ignem',
         description: 'Create flame',
         baseLevel: 10,
-        source: 'built-in',
+        source: 'published',
       );
 
       final restored = BaseEffect.fromMap(effect.toMap());
@@ -30,7 +30,7 @@ void main() {
         // 'form' missing
         'description': 'Create flame',
         'baseLevel': 10,
-        'source': 'built-in',
+        'source': 'published',
       };
 
       expect(
@@ -52,7 +52,7 @@ void main() {
         'form': 'Ignem',
         'description': 'Create flame',
         'baseLevel': 'not-an-int',
-        'source': 'built-in',
+        'source': 'published',
       };
 
       expect(
