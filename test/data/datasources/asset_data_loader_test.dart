@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
 
@@ -63,6 +64,49 @@ void main() {
       parameters.firstWhere((p) => p.id == 'target-vision').requiresRitual,
       isFalse,
     );
+  });
+
+  test('the ritual-flagged base effects are exactly the reviewed sets', () async {
+    final effects = await loader.loadBaseEffects();
+
+    Set<String> idsWith(RitualRequirement requirement) => effects
+        .where((e) => e.ritualRequirement == requirement)
+        .map((e) => e.id)
+        .toSet();
+
+    // Asserted as exact SETS, not counts. Todo item 5's reasoning for deriving
+    // counts from the file applies to properties that drift as the extraction
+    // grows; this is a hand-reviewed membership decision, and a count would
+    // pass while an entry silently moved between the two flags.
+    expect(idsWith(RitualRequirement.required), {
+      'craq-25b', 'crau-25', 'crco-5b', 'crig-25b', 'crte-25b',
+      'pevi-G9', 'pevi-G10',
+    });
+
+    expect(idsWith(RitualRequirement.suggested), {
+      // Creo Animal (11)
+      'cran-15a', 'cran-20a', 'cran-25b', 'cran-25c', 'cran-25d', 'cran-25e',
+      'cran-30a', 'cran-30b', 'cran-35', 'cran-40', 'cran-75',
+      // Creo Corpus (20)
+      'crco-15a', 'crco-15c', 'crco-20a', 'crco-20b', 'crco-20c', 'crco-25a',
+      'crco-25b', 'crco-25c', 'crco-25d', 'crco-30a', 'crco-30b', 'crco-30d',
+      'crco-35a', 'crco-35b', 'crco-35c', 'crco-40', 'crco-45', 'crco-50',
+      'crco-55', 'crco-70',
+      // Creo Herbam (7)
+      'crhe-1e', 'crhe-2c', 'crhe-3b', 'crhe-4', 'crhe-5', 'crhe-10',
+      'crhe-15b',
+    });
+
+    // Recovery bonuses and suppression effects are sustained by the spell and
+    // are deliberately excluded; "Stop the progress of a disease" is contrasted
+    // directly with the ritual "Cure a disease" at Core Rules line 12478.
+    for (final id in ['cran-1', 'crco-1a', 'cran-25a', 'crco-3b', 'crhe-1a']) {
+      expect(
+        effects.firstWhere((e) => e.id == id).ritualRequirement,
+        RitualRequirement.none,
+        reason: '$id is sustained by the spell, not lasting after it',
+      );
+    }
   });
 
   test('loadSpellLibrary loads all 31 built-in spells', () async {
