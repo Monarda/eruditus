@@ -6,7 +6,55 @@
 
 ---
 
+## Next Up (item numbers are IDs, not priority order)
+
+1. **Item 15** — add the missing core-rulebook parameters. Blocks 14, and the
+   catalog is wrong today, not merely incomplete.
+2. **Item 14** — container targets: at-casting vs. subsequently-entering.
+3. **Item 13** — summary/description entry for user-created spells.
+
+---
+
 ## High Priority Fixes
+
+### 15. Add All Core-Rulebook Parameters — ⚠️ DO THIS FIRST
+The catalog holds **17** parameters. The ArM5 core rulebook defines **25**, and
+one existing entry is misnamed. This is a correctness problem, not just a gap:
+spells that need Ring, Circle or Eye cannot currently be expressed at all.
+
+- [ ] **Range — add Eye (+1).** The rulebook pairs it with Touch: "Touch and Eye
+      are the same 'level' of range", listed as `Touch/Eye`. Not interchangeable
+      with Touch, just equal in magnitude.
+- [ ] **Duration — add Ring (+2)** (paired with Sun) **and Year (+4)**.
+- [ ] **Target — add Circle (+0)** (paired with Individual) **and the four
+      missing magical senses: Taste (+0), Touch (+1), Smell (+2), Hearing (+3).**
+      The senses are Intellego targets, each equivalent to a standard target:
+      Taste=Individual, Touch=Part, Smell=Group, Hearing=Structure,
+      Vision=Boundary. Vision is already present and correct.
+- [ ] **Rename `Bound` → `Boundary`.** The rulebook name is Boundary. The id
+      (`target-bound`) may keep its spelling or change — backward compatibility
+      is not a goal, and no built-in spell currently uses it.
+- [ ] Verify the 30 built-in spells still calculate correctly after the rename
+- **Two constraints the model cannot express yet — decide how to handle:**
+  - **Year duration and Boundary target are ritual-only.** The rulebook is
+    explicit: "A spell with this duration must be ritual" (Year) and "A spell
+    with this target must be a ritual" (Boundary). There is no ritual flag on
+    `Parameter` or `Spell` today. This overlaps todo item 4's "Ritual-Only
+    Constraints" — either add the flag here, or add these two parameters
+    knowingly unconstrained and let item 4 close it. **Vision is deliberately
+    NOT ritual** ("unlike Boundary, it does not require Ritual magic"), so the
+    flag must sit on the parameter, not be inferred from magnitude.
+  - **Target `Touch` collides by name with Range `Touch`.** Harmless in the data
+    (ids are category-scoped: `range-touch` vs `target-touch`) but the creation
+    screen's dropdowns show bare names, so both will read "Touch" in different
+    pickers. Confirm that is acceptable or disambiguate the label.
+- **Source:** `Ars-Magica-Open-License/raw-md/Ars Magica 5e - Core Rules.md`,
+  section "Ranges, Durations, Targets" (~line 7840) and "Magical Senses".
+- **Files:**
+  - `assets/data/parameters.json` (8 new entries, 1 rename)
+  - `test/data/datasources/asset_data_loader_test.dart` (the parameter count is
+    a hardcoded `17` — update it, and consider whether it should stay a literal;
+    it is a small hand-curated list, so a literal is defensible)
 
 ### 1. Spell Constraint: One of Each Parameter
 - [x] Add validation that each spell has exactly ONE Range
@@ -223,12 +271,31 @@
   walks in for the rest of its Duration. Nothing in the model currently records
   which was meant, so the app cannot tell them apart.
 - **Container targets in the catalog today:** `target-room` (Room, +2),
-  `target-structure` (Structure, +3), `target-bound` (Bound, +4). `target-group`
-  is **not** one — a Group is a fixed set of individuals chosen at casting.
-- **Catalog gap to resolve as part of this:** the **Circle** Target and the
-  **Ring** Duration are absent from `parameters.json` entirely. They are the
-  canonical "affects what crosses the boundary" case, so this work probably
-  needs to add them rather than only annotating the three existing containers.
+  `target-structure` (Structure, +3), `target-bound` (Bound, +4).
+- **Blocked by item 15.** The **Circle** Target and **Ring** Duration are absent
+  from `parameters.json` entirely and are the canonical "affects what crosses
+  the boundary" case. Item 15 adds them; do that first rather than adding them
+  piecemeal here.
+- **⚠️ The rulebook may already answer this, which could collapse the whole
+  item.** ArM5 core defines the behaviour *per target*, rather than leaving it
+  to the caster:
+  - **Group:** "The things in the Group when the spell is cast are affected for
+    the entire duration, even if they split up. Things that join the Group
+    during the spell duration are **not** affected." — fixed at casting, stated
+    outright.
+  - **Circle:** a ward "prevent[s] things warded against that are within the
+    circle from leaving, and prevent[s] things warded against that are outside
+    from **entering**." — explicitly ongoing.
+  - Room, Structure and Boundary are defined spatially ("everything within…")
+    without settling the question either way.
+
+  So the distinction may be a **property of the Target parameter**, derivable
+  rather than stored — which would make this a data annotation on
+  `parameters.json` plus a display concern, with no `Spell` field, no schema
+  bump and no UI control at all. Read the rulebook's "Ranges, Durations,
+  Targets" and "Magical Wards" sections before assuming a user-facing choice is
+  needed. If it turns out only Room/Structure/Boundary are genuinely ambiguous,
+  the scope shrinks to those three.
 - **Open design questions — worth brainstorming before planning:**
   - A boolean, or an enum (`atCasting` / `ongoing`)? An enum reads better at the
     call site and leaves room for a third case.
