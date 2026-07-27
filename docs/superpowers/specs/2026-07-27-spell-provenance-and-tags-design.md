@@ -60,13 +60,21 @@ class Spell {
 2. `source == userCreated` ⟺ `citations.isEmpty`.
 3. `source == published` ⟹ at least one citation.
 
-**Why invariant 1 is conditional.** The spell creation screen collects only a
-name — `SpellSaveRequested(name)` carries nothing else. An unconditional rule
-would make every user-created spell invalid on save. The alternatives are worse:
-adding a prose field to the creation UI is scope creep and poor UX, and
-auto-deriving a summary would store derivable data, which is precisely what the
-id-reference normalization removed. The requirement belongs to the published
-corpus, which is where it originated.
+**Invariant 1 is conditional only as an interim measure.** User-created spells
+should eventually carry a summary or description too. They cannot yet: the
+creation screen collects only a name — `SpellSaveRequested(name)` carries
+nothing else — so an unconditional rule would reject every user-created spell on
+save. Collecting the text needs an input field and a new event, which is UI work
+and out of scope here.
+
+So this plan prepares the model and defers the UI. `SpellDraft` gains a `summary`
+field (see below) so the later work is purely presentational, with no further
+model change. When that UI lands, invariant 1 should be tightened to apply to
+both sources. Tracked as todo item 13.
+
+The two alternatives were both worse: forcing a prose field into the creation
+screen now is scope creep, and auto-deriving a summary would store derivable
+data, which is precisely what the id-reference normalization removed.
 
 ### Serialization
 
@@ -88,8 +96,14 @@ Both delegate to one shared validator so the rules are stated once.
 
 ### `SpellDraft`
 
-Unchanged apart from `toSpell`. It holds catalog objects for the creation
-screen's dropdowns, and none of the new fields are surfaced there: tags are
+Gains a `String? summary` field alongside the `String? description` it already
+has, and `toSpell` passes both through. Nothing sets either today — no code in
+`lib/bloc/spell_creation/` writes `description`, so it is always null in
+practice — but carrying them means the deferred UI work adds only an input
+widget and an event, never another model change.
+
+Otherwise unchanged. It holds catalog objects for the creation screen's
+dropdowns, and the remaining new fields are not surfaced there: tags are
 deliberately not exposed, and a user-created spell has no citations by
 definition. `toSpell` emits `source: SpellSource.userCreated`, an empty citation
 list, and empty tags.

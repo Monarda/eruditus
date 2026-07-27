@@ -1,7 +1,7 @@
 # Eruditus Todo List
 
 **Status:** Active development  
-**Last Updated:** 2026-07-24  
+**Last Updated:** 2026-07-27  
 **Base Effects:** ✅ Complete (604 effects extracted)
 
 ---
@@ -39,19 +39,32 @@
 - **Follow-up not done here:** the level preview shows the total only; it does
   not itemise which magnitude came from requisites vs parameters vs factors.
 
-### 3. Size Feature (MVP)
-- [ ] Add Size magnitude parameter to spell model
-- [ ] Add Size selection to spell creation UI
-- [ ] Update spell level calculation: base + (Technique modifiers) + (Form modifiers) + (Parameters) + **Size**
-- [ ] Document Aquam gap: only 1 of 5 sub-Individual types per Form in MVP
+### 3. Size Feature (MVP) — ✅ COMPLETE
+- [x] Add Size magnitude parameter to spell model
+- [x] Add Size selection to spell creation UI
+- [x] Update spell level calculation: base + (Technique modifiers) + (Form modifiers) + (Parameters) + **Size**
+- [x] Document Aquam gap: only 1 of 5 sub-Individual types per Form in MVP
 - **Rationale:** Ars Magica 5e core mechanic; Size affects target count/scope
-- **Impact:** Modifies SpellEngine.calculateSpellLevel(), UI, spell save/load
-- **Aquam Context:** Form has 5 base-Individual types (water/liquids/poisons/blood/wine) but MVP only handles one per spell
-- **Files:**
-  - `lib/models/spell.dart` (add size field)
-  - `lib/engine/spell_engine.dart` (level calculation)
-  - `lib/presentation/screens/spell_creation_screen.dart` (UI widget)
-  - Configuration for Size magnitudes + Aquam sub-type limits
+- **Status:** ✅ COMPLETE (delivered by the Spell Modifiers plan, Task 11)
+- **Implementation — note it did NOT land the way this item originally anticipated.**
+  There is no bespoke `size` field on `Spell`. Size is modelled as ordinary
+  scoped Modifiers, so it needed no model change at all beyond the
+  `selectedModifiers` map that was already there:
+  - 8 Size ladders in `assets/data/modifiers.json` (`size-animal`, `size-aquam`,
+    `size-auram`, `size-corpus`, `size-herbam`, `size-ignem`, `size-imaginem`,
+    `size-terram`), each 5 options: Base Individual (+0) then ×10/×100/×1,000/
+    ×10,000 at +1…+4
+  - Each is Form-scoped and excludes Intellego, so the ladder only appears on
+    spells where Size is meaningful. Mentem and Vim deliberately have none.
+  - Selection is stored in `Spell.selectedModifiers` as id references, rendered
+    by the shared modifiers section, and its magnitude feeds the level through
+    the normal modifier path in `SpellEngine.calculateBreakdown` — no special
+    case in the calculator.
+- **Aquam gap — closed as documented, not as fixed.** The Form has 5
+  base-Individual sub-types (water/liquids/poisons/blood/wine); `size-aquam`
+  carries exactly one, recorded in its base option's `baseIndividual` field as
+  "a pool five paces across, two paces deep". The other four remain out of
+  scope, as the MVP intended. See the standing note at the foot of this file.
 
 ### 4. Resolve Out-of-Scope Base Effects (~200 effects)
 - [ ] **Variable Base Levels** — Some effects have non-linear level progressions (e.g., Perdo Imaginem levels 2,3,4,5,10; Creo Mentem levels 3,4,5,10,30-55)
@@ -175,6 +188,28 @@
   - `lib/presentation/screens/spell_library_screen.dart` (tag filter UI)
   - `lib/presentation/screens/spell_creation_screen.dart` (tag entry)
   - `lib/bloc/spell_library/` (filter-by-tag events/state)
+
+### 13. Summary/Description Entry for User-Created Spells
+- [ ] Add a summary input (and optionally a description input) to the spell creation screen
+- [ ] Carry the text on the save event so it reaches `SpellDraft` → `Spell`
+- [ ] Tighten the summary-or-description invariant to apply to **both** sources,
+      not just published spells, once the UI can collect it
+- [ ] Update the invariant tests and the spec's "interim" note when it lands
+- **Rationale:** The Spell Provenance and Tags change split `description` into
+  `summary` (paraphrase) and `description` (verbatim rulebook text), and requires
+  at least one of them on published spells. User-created spells were exempted
+  **only because the creation screen collects nothing but a name** —
+  `SpellSaveRequested(name)` carries no prose, so an unconditional rule would have
+  rejected every user-created spell on save.
+- **The model is already ready.** `SpellDraft` carries `summary` and
+  `description` and `toSpell` passes both through, so this is purely
+  presentational: an input widget plus an event. No model or persistence change.
+- **Files:**
+  - `lib/presentation/screens/spell_creation_screen.dart` (input field)
+  - `lib/bloc/spell_creation/spell_creation_event.dart` (carry the text on save)
+  - `lib/bloc/spell_creation/spell_creation_bloc.dart` (set it on the draft)
+  - `lib/models/spell.dart` (tighten the shared validator)
+- **Spec:** `docs/superpowers/specs/2026-07-27-spell-provenance-and-tags-design.md`
 
 ---
 
