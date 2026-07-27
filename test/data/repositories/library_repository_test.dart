@@ -9,8 +9,9 @@ import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,7 @@ void main() {
   test('getBuiltInSpells returns all 30 built-in library spells', () async {
     final builtIn = await repository.getBuiltInSpells();
     expect(builtIn.length, 30);
-    expect(builtIn.every((s) => s.source == SpellSource.published), isTrue);
+    expect(builtIn.every((s) => s.source == PublicationSource.published), isTrue);
   });
 
   test('getAllSpells combines built-in and user spells', () async {
@@ -56,7 +57,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const [],
-      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
 
     final all = await repository.getAllSpells();
@@ -80,10 +81,10 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const [],
-      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
 
-    final userSpells = await repository.filterBySource(SpellSource.userCreated);
+    final userSpells = await repository.filterBySource(PublicationSource.userCreated);
 
     expect(userSpells.length, 1);
     expect(userSpells.first.id, 'user-1');
@@ -140,7 +141,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const [],
-        source: SpellSource.userCreated,
+        provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ));

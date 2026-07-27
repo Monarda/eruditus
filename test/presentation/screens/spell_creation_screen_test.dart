@@ -16,9 +16,10 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
@@ -215,7 +216,7 @@ void main() {
       targetId: targetParam.id,
       requisites: const [],
       description: 'A roaring pillar of flame.',
-      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final suggestion = ResolvedSpell(
       record: suggestionRecord, baseEffect: creoIgnemEffect,
@@ -278,7 +279,7 @@ void main() {
       durationId: durationParam.id,
       targetId: targetParam.id,
       requisites: const [],
-      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     useTallSurface(tester);
     final states = Stream.fromIterable([

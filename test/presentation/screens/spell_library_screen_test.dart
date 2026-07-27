@@ -10,9 +10,10 @@ import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
 class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
@@ -34,7 +35,8 @@ void main() {
     description: 'test', baseLevel: 5, source: 'published',
   );
 
-  ResolvedSpell buildSpell(String id, String name, {SpellSource source = SpellSource.published}) {
+  ResolvedSpell buildSpell(String id, String name,
+      {PublicationSource source = PublicationSource.published}) {
     final record = Spell(
       id: id,
       name: name,
@@ -43,18 +45,21 @@ void main() {
       durationId: durationParam.id,
       targetId: targetParam.id,
       requisites: const [],
-      description: source == SpellSource.published ? 'A test spell.' : null,
-      citations: source == SpellSource.published
-          ? const [Citation(bookId: 'arm5-core')]
-          : const [],
-      source: source, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      description: source == PublicationSource.published ? 'A test spell.' : null,
+      provenance: Provenance(
+        source: source,
+        citations: source == PublicationSource.published
+            ? const [Citation(bookId: 'arm5-core')]
+            : const [],
+      ),
+      createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     return ResolvedSpell(
         record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
   }
 
   final builtInSpell = buildSpell('built-1', 'Phantasm of the Talking Head');
-  final userSpell = buildSpell('user-1', 'My Custom Fireball', source: SpellSource.userCreated);
+  final userSpell = buildSpell('user-1', 'My Custom Fireball', source: PublicationSource.userCreated);
 
   setUpAll(() {
     registerFallbackValue(FakeSpellLibraryEvent());

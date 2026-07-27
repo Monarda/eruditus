@@ -3,9 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
@@ -25,7 +26,7 @@ void main() {
 
   ResolvedSpell buildSpell({
     String? name,
-    SpellSource source = SpellSource.published,
+    PublicationSource source = PublicationSource.published,
     String? summary,
     String? description,
   }) {
@@ -39,8 +40,10 @@ void main() {
       requisites: const [],
       summary: summary,
       description: description,
-      source: source,
-      citations: source == SpellSource.published ? const [Citation(bookId: 'arm5-core')] : const [],
+      provenance: Provenance(
+        source: source,
+        citations: source == PublicationSource.published ? const [Citation(bookId: 'arm5-core')] : const [],
+      ),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );
@@ -67,7 +70,7 @@ void main() {
   testWidgets('shows "My Spell" badge for user-created spells', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: SpellCard(spell: buildSpell(name: 'My Fireball', source: SpellSource.userCreated)),
+        body: SpellCard(spell: buildSpell(name: 'My Fireball', source: PublicationSource.userCreated)),
       ),
     ));
 
@@ -99,7 +102,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          spell: buildSpell(name: 'Pillar of Fire', source: SpellSource.userCreated),
+          spell: buildSpell(name: 'Pillar of Fire', source: PublicationSource.userCreated),
           level: 25,
         ),
       ),
@@ -114,7 +117,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          spell: buildSpell(name: 'Test', source: SpellSource.userCreated),
+          spell: buildSpell(name: 'Test', source: PublicationSource.userCreated),
           onTap: () => tapped = true,
         ),
       ),
@@ -133,7 +136,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const [],
-      source: SpellSource.userCreated,
+      provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
     );

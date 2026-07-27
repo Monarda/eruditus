@@ -8,7 +8,7 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
 import 'package:eruditus/models/spell.dart' show SpellDraft;
-import 'package:eruditus/models/spell_source.dart';
+import 'package:eruditus/models/publication_source.dart';
 
 class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   final SpellEngine spellEngine;
@@ -189,7 +189,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     emit(state.copyWith(status: SpellCreationStatus.saving));
 
     try {
-      final spell = state.draft.toSpell(name: event.name, source: SpellSource.userCreated);
+      final spell = state.draft.toSpell(name: event.name, source: PublicationSource.userCreated);
       await spellRepository.saveSpell(spell);
 
       // Reset to a fresh, empty draft (with a newly generated id) rather than

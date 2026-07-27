@@ -1,41 +1,36 @@
 import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
-import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
-/// The rules every spell record must satisfy, stated once and shared by
-/// [Spell.fromMap] and [SpellDraft.toSpell] so the two paths cannot drift.
+/// The prose rule every published [Spell] must satisfy, stated once and
+/// shared by [Spell.fromMap] and [SpellDraft.toSpell] so the two paths
+/// cannot drift.
 ///
 /// Returns a list of human-readable problems; empty means valid.
 ///
-/// The summary-or-description rule applies to published spells only. This is
-/// interim: user-created spells should carry prose too, but the creation screen
-/// collects nothing but a name, so an unconditional rule would reject every
-/// user-created spell on save. Tighten this when that UI lands — todo item 13.
-List<String> validateSpellFields({
-  required SpellSource source,
+/// This rule applies to published spells only. This is interim: user-created
+/// spells should carry prose too, but the creation screen collects nothing
+/// but a name, so an unconditional rule would reject every user-created
+/// spell on save. Tighten this when that UI lands — todo item 13.
+///
+/// The citation invariant (published needs ≥1 citation, user-created needs
+/// 0) is no longer checked here — it now lives on [Provenance] itself, and
+/// is enforced when the [Provenance] passed to this [Spell] was constructed.
+List<String> validateSpellProse({
+  required PublicationSource source,
   required String? summary,
   required String? description,
-  required List<Citation> citations,
 }) {
-  final problems = <String>[];
   final hasProse = (summary != null && summary.isNotEmpty) ||
       (description != null && description.isNotEmpty);
 
-  if (source == SpellSource.published) {
-    if (!hasProse) {
-      problems.add('a published spell needs a summary or a description');
-    }
-    if (citations.isEmpty) {
-      problems.add('a published spell needs at least one citation');
-    }
-  } else if (citations.isNotEmpty) {
-    problems.add('a user-created spell cannot have citations');
+  if (source == PublicationSource.published && !hasProse) {
+    return ['a published spell needs a summary or a description'];
   }
-
-  return problems;
+  return const [];
 }
 
 /// A saved spell, stored as references into the effect/parameter catalogs.
@@ -58,8 +53,7 @@ class Spell {
   final List<Requisite> requisites;
   final String? summary;
   final String? description;
-  final SpellSource source;
-  final List<Citation> citations;
+  final Provenance provenance;
   final List<String> tags;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -75,17 +69,15 @@ class Spell {
     required this.requisites,
     this.summary,
     this.description,
-    required this.source,
-    this.citations = const [],
+    required this.provenance,
     this.tags = const [],
     required this.createdAt,
     required this.updatedAt,
   }) {
-    final problems = validateSpellFields(
-      source: source,
+    final problems = validateSpellProse(
+      source: provenance.source,
       summary: summary,
       description: description,
-      citations: citations,
     );
     if (problems.isNotEmpty) {
       throw FormatException('Spell: ${problems.join('; ')}');
@@ -103,46 +95,34 @@ class Spell {
         'requisites': requisites.map((r) => r.toMap()).toList(),
         'summary': summary,
         'description': description,
-        'source': source.wireValue,
-        'citations': citations.map((c) => c.toMap()).toList(),
+        ...provenance.toMap(),
         'tags': tags,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
 
-  factory Spell.fromMap(Map<String, dynamic> map) {
-    final source = SpellSource.fromWire(requireField<String>(map, 'source', 'Spell'));
-    final summary = map['summary'] as String?;
-    final description = map['description'] as String?;
-    final citations = (map['citations'] as List?)
-            ?.map((c) => Citation.fromMap(c as Map<String, dynamic>))
-            .toList() ??
-        const <Citation>[];
-
-    return Spell(
-      id: requireField<String>(map, 'id', 'Spell'),
-      name: map['name'] as String?,
-      baseEffectId: requireField<String>(map, 'baseEffectId', 'Spell'),
-      rangeId: requireField<String>(map, 'rangeId', 'Spell'),
-      durationId: requireField<String>(map, 'durationId', 'Spell'),
-      targetId: requireField<String>(map, 'targetId', 'Spell'),
-      selectedModifiers: (map['selectedModifiers'] as Map?)?.map(
-            (k, v) => MapEntry(k as String, List<String>.from(v as List)),
-          ) ??
-          const {},
-      requisites: (map['requisites'] as List?)
-              ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
-              .toList() ??
-          [],
-      summary: summary,
-      description: description,
-      source: source,
-      citations: citations,
-      tags: (map['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
-      createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
-      updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
-    );
-  }
+  factory Spell.fromMap(Map<String, dynamic> map) => Spell(
+        id: requireField<String>(map, 'id', 'Spell'),
+        name: map['name'] as String?,
+        baseEffectId: requireField<String>(map, 'baseEffectId', 'Spell'),
+        rangeId: requireField<String>(map, 'rangeId', 'Spell'),
+        durationId: requireField<String>(map, 'durationId', 'Spell'),
+        targetId: requireField<String>(map, 'targetId', 'Spell'),
+        selectedModifiers: (map['selectedModifiers'] as Map?)?.map(
+              (k, v) => MapEntry(k as String, List<String>.from(v as List)),
+            ) ??
+            const {},
+        requisites: (map['requisites'] as List?)
+                ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        summary: map['summary'] as String?,
+        description: map['description'] as String?,
+        provenance: Provenance.fromMap(map),
+        tags: (map['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
+        createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
+        updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
+      );
 }
 
 class SpellDraft {
@@ -176,7 +156,7 @@ class SpellDraft {
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
-  Spell toSpell({required String name, required SpellSource source}) {
+  Spell toSpell({required String name, required PublicationSource source}) {
     final missingFields = <String>[
       if (baseEffect == null) 'baseEffect',
       if (range == null) 'range',
@@ -190,12 +170,7 @@ class SpellDraft {
       );
     }
 
-    final problems = validateSpellFields(
-      source: source,
-      summary: summary,
-      description: description,
-      citations: const [],
-    );
+    final problems = validateSpellProse(source: source, summary: summary, description: description);
     if (problems.isNotEmpty) {
       throw StateError('Cannot convert SpellDraft to Spell: ${problems.join('; ')}');
     }
@@ -211,7 +186,7 @@ class SpellDraft {
       requisites: requisites,
       summary: summary,
       description: description,
-      source: source,
+      provenance: Provenance(source: source),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );

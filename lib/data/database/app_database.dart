@@ -19,7 +19,7 @@ class AppDatabase {
         // Backward compatibility is not a goal for this prototype, and in this
         // branch's v4 bump the `spells` table's DDL is unchanged — what
         // changed is the shape of the JSON stored in its `data` blob (the new
-        // `SpellSource`/citations/tags/summary split), which old rows don't
+        // `PublicationSource`/citations/tags/summary split), which old rows don't
         // have and `Spell.fromMap` cannot parse. Rather than translate stored
         // spells whose blob shape has changed, drop just that table and
         // rebuild it: destructive, but self-healing and explicit, where a

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/modifier.dart';
-import 'package:eruditus/models/spell_source.dart';
+import 'package:eruditus/models/publication_source.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +44,7 @@ void main() {
     final spells = await loader.loadSpellLibrary();
 
     expect(spells.length, 30);
-    expect(spells.every((s) => s.source == SpellSource.published), isTrue);
+    expect(spells.every((s) => s.provenance.source == PublicationSource.published), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
 
@@ -176,11 +176,11 @@ void main() {
     final bookIds = books.map((b) => b.id).toSet();
 
     for (final spell in spells) {
-      expect(spell.source, SpellSource.published,
+      expect(spell.provenance.source, PublicationSource.published,
           reason: '${spell.name}: every library spell should be published');
-      expect(spell.citations, isNotEmpty,
+      expect(spell.provenance.citations, isNotEmpty,
           reason: '${spell.name}: a published spell needs at least one citation');
-      for (final citation in spell.citations) {
+      for (final citation in spell.provenance.citations) {
         expect(bookIds.contains(citation.bookId), isTrue,
             reason: '${spell.name}: cited book ${citation.bookId} is not in '
                 'books.json — add the book, do not relax this check');

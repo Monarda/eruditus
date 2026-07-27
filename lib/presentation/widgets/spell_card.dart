@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eruditus/models/resolved_spell.dart';
-import 'package:eruditus/models/spell_source.dart';
+import 'package:eruditus/models/publication_source.dart';
 
 class SpellCard extends StatelessWidget {
   final ResolvedSpell spell;
@@ -57,7 +57,7 @@ class SpellCard extends StatelessWidget {
         ),
         trailing: Chip(
             label: Text(
-                spell.source == SpellSource.published ? 'Published' : 'My Spell')),
+                spell.source == PublicationSource.published ? 'Published' : 'My Spell')),
       ),
     );
   }

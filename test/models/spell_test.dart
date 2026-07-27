@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
-import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
-import 'package:eruditus/models/spell_source.dart';
 
 void main() {
   group('Spell Model', () {
@@ -23,7 +23,7 @@ void main() {
           Requisite(art: 'Terram', kind: RequisiteKind.adding),
         ],
         description: 'A test spell',
-        source: SpellSource.userCreated,
+        provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 7, 24, 12, 30),
         updatedAt: DateTime(2026, 7, 25, 8, 15),
       );
@@ -38,7 +38,7 @@ void main() {
       expect(restored.durationId, spell.durationId);
       expect(restored.targetId, spell.targetId);
       expect(restored.description, spell.description);
-      expect(restored.source, spell.source);
+      expect(restored.provenance.source, spell.provenance.source);
       expect(restored.createdAt, spell.createdAt);
       expect(restored.updatedAt, spell.updatedAt);
 
@@ -101,10 +101,10 @@ void main() {
         target: target,
       );
 
-      final spell = draft.toSpell(name: 'My Spell', source: SpellSource.userCreated);
+      final spell = draft.toSpell(name: 'My Spell', source: PublicationSource.userCreated);
 
       expect(spell.name, 'My Spell');
-      expect(spell.source, SpellSource.userCreated);
+      expect(spell.provenance.source, PublicationSource.userCreated);
       expect(spell.baseEffectId, effect.id);
       expect(spell.rangeId, range.id);
       expect(spell.durationId, duration.id);
@@ -128,7 +128,7 @@ void main() {
       );
 
       expect(
-        () => draft.toSpell(name: 'My Spell', source: SpellSource.userCreated),
+        () => draft.toSpell(name: 'My Spell', source: PublicationSource.userCreated),
         throwsA(
           isA<StateError>().having((e) => e.message, 'message', contains('range')),
         ),
@@ -142,7 +142,7 @@ void main() {
       );
 
       expect(
-        () => draft.toSpell(name: 'My Spell', source: SpellSource.userCreated),
+        () => draft.toSpell(name: 'My Spell', source: PublicationSource.userCreated),
         throwsA(
           isA<StateError>().having((e) => e.message, 'message', contains('baseEffect')),
         ),
@@ -153,7 +153,7 @@ void main() {
       final draft = SpellDraft();
 
       expect(
-        () => draft.toSpell(name: 'My Spell', source: SpellSource.userCreated),
+        () => draft.toSpell(name: 'My Spell', source: PublicationSource.userCreated),
         throwsA(
           isA<StateError>().having(
             (e) => e.message,
@@ -177,7 +177,7 @@ void main() {
           'rego-transport-distance': ['dist-500-paces'],
         },
         requisites: const [],
-        source: SpellSource.userCreated,
+        provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       );
@@ -196,7 +196,7 @@ void main() {
         durationId: 'p2',
         targetId: 'p3',
         requisites: const [],
-        source: SpellSource.userCreated,
+        provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
       ).toMap();
@@ -220,6 +220,12 @@ void main() {
   });
 
   group('spell field invariants', () {
+    // The citation invariant (published needs >=1 citation, user-created
+    // needs 0) and the "unknown source value throws" invariant now live on
+    // Provenance/PublicationSource themselves — see
+    // test/models/provenance_test.dart and test/models/publication_source_test.dart.
+    // This group covers only the summary-or-description rule that Spell
+    // itself still owns via validateSpellProse.
     Map<String, dynamic> baseMap() => {
           'id': 'x',
           'name': 'X',
@@ -241,20 +247,8 @@ void main() {
       expect(Spell.fromMap(baseMap()).summary, 'A summary.');
     });
 
-    test('a published spell with only a description is valid', () {
-      final map = baseMap()
-        ..remove('summary')
-        ..['description'] = 'Verbatim rulebook text.';
-      expect(Spell.fromMap(map).description, 'Verbatim rulebook text.');
-    });
-
     test('a published spell with neither summary nor description is rejected', () {
       final map = baseMap()..remove('summary');
-      expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
-    });
-
-    test('a published spell with no citations is rejected', () {
-      final map = baseMap()..['citations'] = <dynamic>[];
       expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
     });
 
@@ -264,38 +258,7 @@ void main() {
         ..remove('summary')
         ..['source'] = 'user-created'
         ..['citations'] = <dynamic>[];
-      expect(Spell.fromMap(map).source, SpellSource.userCreated);
-    });
-
-    test('a user-created spell carrying citations is rejected', () {
-      final map = baseMap()..['source'] = 'user-created';
-      expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
-    });
-
-    test('an unknown source value is rejected rather than defaulted', () {
-      final map = baseMap()..['source'] = 'built-in';
-      expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
-    });
-
-    test('a spell published twice round-trips with both citations', () {
-      final map = baseMap()
-        ..['citations'] = [
-          {'bookId': 'arm5-core', 'page': 142},
-          {'bookId': 'arm5-core'},
-        ];
-      final restored = Spell.fromMap(Spell.fromMap(map).toMap());
-
-      expect(restored.citations, [
-        const Citation(bookId: 'arm5-core', page: 142),
-        const Citation(bookId: 'arm5-core'),
-      ]);
-    });
-
-    test('tags round-trip and default to empty', () {
-      expect(Spell.fromMap(baseMap()).tags, isEmpty);
-
-      final tagged = baseMap()..['tags'] = ['architecture', 'defensive'];
-      expect(Spell.fromMap(tagged).tags, ['architecture', 'defensive']);
+      expect(Spell.fromMap(map).provenance.source, PublicationSource.userCreated);
     });
   });
 }

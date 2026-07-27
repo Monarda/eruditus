@@ -12,8 +12,9 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
-import 'package:eruditus/models/spell_source.dart';
 import 'package:eruditus/models/parameter.dart';
 
 void main() {
@@ -70,7 +71,7 @@ void main() {
       durationId: 'p2',
       targetId: 'p3',
       requisites: const [],
-      source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(
         assetLoader: AssetDataLoader(), spellRepository: spellRepository, resolver: resolver);
@@ -141,7 +142,7 @@ void main() {
           'no-longer-exists': ['no-longer-exists'],
         },
         requisites: const [],
-        source: SpellSource.userCreated, createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+        provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));
     },
     build: () => SpellLibraryBloc(
