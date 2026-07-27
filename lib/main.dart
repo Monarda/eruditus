@@ -48,7 +48,11 @@ Future<void> main() async {
   final spellRepository = SpellRepository(
       datasource: LocalSpellDatasource(database: database), resolver: resolver);
   final libraryRepository = LibraryRepository(
-      assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
+    assetLoader: assetLoader,
+    spellRepository: spellRepository,
+    resolver: resolver,
+    configRepository: configRepository,
+  );
   final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
   final allSpells = await libraryRepository.getAllSpells();

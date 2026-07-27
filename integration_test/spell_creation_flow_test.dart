@@ -6,6 +6,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
+import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
@@ -17,6 +18,8 @@ import 'package:eruditus/data/services/backup_service.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/main.dart';
+import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
 void main() {
@@ -44,7 +47,11 @@ void main() {
       final spellRepository = SpellRepository(
           datasource: LocalSpellDatasource(database: database), resolver: resolver);
       final libraryRepository = LibraryRepository(
-          assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
       final allSpells = await libraryRepository.getAllSpells();
@@ -208,7 +215,11 @@ void main() {
       final spellRepository = SpellRepository(
           datasource: LocalSpellDatasource(database: database), resolver: resolver);
       final libraryRepository = LibraryRepository(
-          assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
       final allSpells = await libraryRepository.getAllSpells();
@@ -341,7 +352,11 @@ void main() {
       final spellRepository = SpellRepository(
           datasource: LocalSpellDatasource(database: database), resolver: resolver);
       final libraryRepository = LibraryRepository(
-          assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
 
       final allSpells = await libraryRepository.getAllSpells();
@@ -416,6 +431,113 @@ void main() {
       await scrollTo(find.byKey(const Key('modifiers-summary')));
       expect(find.text('+2'), findsNothing);
       expect(find.byKey(const Key('modifier-dropdown-rego-terram-material')), findsNothing);
+
+      await database.close();
+    },
+  );
+
+  // The deletion-invalidates-spells policy is the one genuinely new behaviour
+  // in this plan, and it only manifests once a deletion propagates through a
+  // reload. Mocked widget tests can't observe that, so this drives the real
+  // blocs/repositories end to end.
+  testWidgets(
+    'end-to-end: a spell built on a custom effect stays listed and marked '
+    'unavailable after that effect is deleted',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final resolver = SpellResolver(
+        effects: await configRepository.getAllEffects(),
+        parameters: await configRepository.getAllParameters(),
+      );
+      final spellRepository = SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      final libraryRepository = LibraryRepository(
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+      final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final spellEngine = SpellEngine(allSpells: allSpells);
+
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      // Author a custom base effect, build a spell on it, then delete the
+      // effect. The user has accepted that this invalidates the spell — it must
+      // stay listed and clearly marked, not vanish and not crash the tab.
+      final customEffect = BaseEffect(
+        id: 'custom-integration-effect',
+        technique: 'Creo',
+        form: 'Ignem',
+        description: 'A custom effect for the integration test',
+        baseLevel: 5,
+        source: 'user-created',
+      );
+      await configRepository.addCustomEffect(customEffect);
+
+      await spellRepository.saveSpell(Spell(
+        id: 'spell-on-custom-effect',
+        name: 'Spell On Custom Effect',
+        baseEffectId: customEffect.id,
+        rangeId: 'range-personal',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        requisites: const [],
+        source: 'user-created',
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ));
+
+      await tester.tap(find.text('Library'));
+      await tester.pumpAndSettle();
+
+      final libraryListView = find.descendant(
+          of: find.byType(SpellLibraryScreen), matching: find.byType(ListView));
+      final libraryScrollable = find.descendant(
+          of: libraryListView, matching: find.byType(Scrollable));
+
+      await tester.scrollUntilVisible(
+          find.text('Spell On Custom Effect'), 200.0, scrollable: libraryScrollable);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Spell On Custom Effect'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      // Confirms the spell is genuinely resolved at this point (not just
+      // listed) — the custom effect was added after the resolver was built
+      // at test setup, so this also exercises the resolver picking up a
+      // newly-added catalog entry, not just tolerating a deleted one.
+      expect(find.textContaining('Unavailable'), findsNothing);
+
+      // Delete the effect out from under it and reload the library.
+      await configRepository.deleteCustomEffect(customEffect.id);
+      spellLibraryBloc.add(const LibraryRequested());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+          find.text('Spell On Custom Effect'), 200.0, scrollable: libraryScrollable);
+      await tester.pumpAndSettle();
+
+      // Still listed, now visibly unavailable, and the tab is intact.
+      expect(tester.takeException(), isNull);
+      expect(find.text('Spell On Custom Effect'), findsOneWidget);
+      expect(find.textContaining('Unavailable'), findsOneWidget);
 
       await database.close();
     },

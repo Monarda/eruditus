@@ -12,14 +12,34 @@ import 'package:eruditus/models/spell.dart';
 /// on a since-deleted custom effect must still list (marked unresolved) instead
 /// of taking down the whole Library tab.
 class SpellResolver {
-  final Map<String, BaseEffect> _effectsById;
-  final Map<String, Parameter> _parametersById;
+  // Mutable (not final): the catalog snapshot taken at construction goes
+  // stale the moment a custom effect or parameter is added or deleted
+  // elsewhere (e.g. the Settings tab). See [updateCatalogs].
+  Map<String, BaseEffect> _effectsById;
+  Map<String, Parameter> _parametersById;
 
   SpellResolver({
     required List<BaseEffect> effects,
     required List<Parameter> parameters,
   })  : _effectsById = {for (final e in effects) e.id: e},
         _parametersById = {for (final p in parameters) p.id: p};
+
+  /// Replaces the known effect/parameter catalog used for id lookups.
+  ///
+  /// Without this, a resolver built once at app startup would keep resolving
+  /// spells against that original snapshot forever: a spell built on a custom
+  /// effect added after startup would never resolve, and a spell whose custom
+  /// effect was later deleted would keep appearing to resolve. Callers that
+  /// hold a long-lived resolver (see `LibraryRepository`) call this whenever
+  /// they have a fresher view of the catalog, mirroring how `SpellEngine`
+  /// keeps its `allModifiers` current via `updateModifiers`.
+  void updateCatalogs({
+    required List<BaseEffect> effects,
+    required List<Parameter> parameters,
+  }) {
+    _effectsById = {for (final e in effects) e.id: e};
+    _parametersById = {for (final p in parameters) p.id: p};
+  }
 
   ResolvedSpell resolve(Spell record) => ResolvedSpell(
         record: record,

@@ -14,6 +14,12 @@ void main() {
     id: 'e1', technique: 'Creo', form: 'Ignem',
     description: 'test', baseLevel: 10, source: 'built-in',
   );
+  final personalParam =
+      Parameter(id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0, source: 'built-in');
+  final momentaryParam =
+      Parameter(id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0, source: 'built-in');
+  final individualParam =
+      Parameter(id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0, source: 'built-in');
 
   ResolvedSpell buildSpell({String? name, String source = 'built-in', String? description}) {
     final record = Spell(
@@ -94,5 +100,39 @@ void main() {
 
     await tester.tap(find.byType(SpellCard));
     expect(tapped, isTrue);
+  });
+
+  testWidgets('an unresolved spell is shown as unavailable with no level', (tester) async {
+    final record = Spell(
+      id: 'orphan',
+      name: 'Orphaned Spell',
+      baseEffectId: 'deleted-custom-effect',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
+      requisites: const [],
+      source: 'user-created',
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    // Base effect missing, parameters present — exactly what a deleted custom
+    // effect leaves behind.
+    final unresolved = ResolvedSpell(
+      record: record,
+      baseEffect: null,
+      range: personalParam,
+      duration: momentaryParam,
+      target: individualParam,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(spell: unresolved)),
+    ));
+
+    expect(find.byKey(const Key('spell-card-unresolved')), findsOneWidget);
+    expect(find.text('Orphaned Spell'), findsOneWidget);
+    expect(find.textContaining('Unavailable'), findsOneWidget);
+    expect(find.textContaining('deleted-custom-effect'), findsOneWidget);
+    expect(find.textContaining('Level'), findsNothing);
   });
 }
