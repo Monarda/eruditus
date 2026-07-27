@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 
 void main() {
@@ -13,7 +16,10 @@ void main() {
       ModifierOption(id: 'mat-stone', label: 'Stone or glass', magnitude: 1),
       ModifierOption(id: 'mat-metal', label: 'Metal or gemstone', magnitude: 2),
     ],
-    source: 'published',
+    provenance: Provenance(
+      source: PublicationSource.published,
+      citations: const [Citation(bookId: 'arm5-core')],
+    ),
   );
   final complexity = Modifier(
     id: 'crim-complexity',
@@ -21,7 +27,10 @@ void main() {
     selectionMode: ModifierSelectionMode.multi,
     scope: const ModifierScope(technique: 'Creo', form: 'Imaginem'),
     options: [ModifierOption(id: 'crim-intricate-design', label: 'Intricate Design', magnitude: 1)],
-    source: 'published',
+    provenance: Provenance(
+      source: PublicationSource.published,
+      citations: const [Citation(bookId: 'arm5-core')],
+    ),
   );
 
   Future<void> pump(

@@ -1,3 +1,4 @@
+import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 enum ModifierSelectionMode { single, multi }
@@ -111,7 +112,7 @@ class Modifier {
   final ModifierSelectionMode selectionMode;
   final ModifierScope scope;
   final List<ModifierOption> options;
-  final String source; // 'published' or 'user-created'
+  final Provenance provenance;
 
   Modifier({
     required this.id,
@@ -120,7 +121,7 @@ class Modifier {
     required this.selectionMode,
     required this.scope,
     required this.options,
-    required this.source,
+    required this.provenance,
   });
 
   ModifierOption? optionById(String optionId) {
@@ -137,7 +138,7 @@ class Modifier {
         'selectionMode': selectionMode.name,
         'scope': scope.toMap(),
         'options': options.map((o) => o.toMap()).toList(),
-        'source': source,
+        ...provenance.toMap(),
       };
 
   factory Modifier.fromMap(Map<String, dynamic> map) => Modifier(
@@ -151,7 +152,7 @@ class Modifier {
         options: requireField<List>(map, 'options', 'Modifier')
             .map((o) => ModifierOption.fromMap(o as Map<String, dynamic>))
             .toList(),
-        source: requireField<String>(map, 'source', 'Modifier'),
+        provenance: Provenance.fromMap(map),
       );
 
   // Value equality by id — see BaseEffect for why this matters (reloaded

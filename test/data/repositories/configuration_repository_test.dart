@@ -77,7 +77,7 @@ void main() {
       selectionMode: ModifierSelectionMode.single,
       scope: const ModifierScope(form: 'Ignem'),
       options: [ModifierOption(id: 'custom-m1-a', label: 'A', magnitude: 1)],
-      source: 'user-created',
+      provenance: Provenance(source: PublicationSource.userCreated),
     ));
 
     final all = await repository.getAllModifiers();

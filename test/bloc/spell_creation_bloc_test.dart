@@ -498,7 +498,7 @@ void main() {
         selectionMode: ModifierSelectionMode.single,
         scope: const ModifierScope(technique: 'Creo', form: 'Ignem'),
         options: [ModifierOption(id: 'opt-1', label: 'Custom', magnitude: 3)],
-        source: 'user-created',
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
       bloc.add(const TechniqueSelected('Creo'));
       bloc.add(const FormSelected('Ignem'));
@@ -532,7 +532,10 @@ void main() {
       ModifierOption(id: 'mat-stone', label: 'Stone', magnitude: 1),
       ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2),
     ],
-    source: 'published',
+    provenance: Provenance(
+      source: PublicationSource.published,
+      citations: const [Citation(bookId: 'arm5-core')],
+    ),
   );
   final reteEffect = BaseEffect(
     id: 'rete-4', technique: 'Rego', form: 'Terram',
@@ -579,7 +582,10 @@ void main() {
               ModifierOption(id: 'a', label: 'A', magnitude: 1),
               ModifierOption(id: 'b', label: 'B', magnitude: 1),
             ],
-            source: 'published',
+            provenance: Provenance(
+              source: PublicationSource.published,
+              citations: const [Citation(bookId: 'arm5-core')],
+            ),
           ),
         ],
       ),

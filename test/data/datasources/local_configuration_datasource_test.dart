@@ -93,7 +93,7 @@ void main() {
       selectionMode: ModifierSelectionMode.single,
       scope: const ModifierScope(form: 'Terram'),
       options: [ModifierOption(id: 'custom-m1-big', label: 'Big', magnitude: 2)],
-      source: 'user-created',
+      provenance: Provenance(source: PublicationSource.userCreated),
     );
 
     await datasource.insertCustomModifier(modifier);

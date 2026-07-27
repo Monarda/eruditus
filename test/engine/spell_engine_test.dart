@@ -156,7 +156,10 @@ void main() {
           ModifierOption(id: 'mat-stone', label: 'Stone', magnitude: 1),
           ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2),
         ],
-        source: 'published',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
       );
       final testEngine = SpellEngine(allSpells: [], allModifiers: [material]);
       final draft = SpellDraft(
@@ -185,7 +188,10 @@ void main() {
           ModifierOption(id: 'a', label: 'A', magnitude: 1),
           ModifierOption(id: 'b', label: 'B', magnitude: 1),
         ],
-        source: 'published',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
       );
       final testEngine = SpellEngine(allSpells: [], allModifiers: [complexity]);
       final draft = SpellDraft(
@@ -211,7 +217,10 @@ void main() {
       selectionMode: ModifierSelectionMode.single,
       scope: const ModifierScope(technique: 'Rego', form: 'Terram'),
       options: [ModifierOption(id: 'mat-metal', label: 'Metal', magnitude: 2)],
-      source: 'published',
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-core')],
+      ),
     );
     final distance = Modifier(
       id: 'rego-transport-distance',
@@ -219,7 +228,10 @@ void main() {
       selectionMode: ModifierSelectionMode.single,
       scope: const ModifierScope(effectIds: ['rete-4']),
       options: [ModifierOption(id: 'dist-500', label: '500 paces', magnitude: 2)],
-      source: 'published',
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-core')],
+      ),
     );
     final engine = SpellEngine(
         allSpells: [], allModifiers: [material, distance]);
@@ -345,7 +357,10 @@ void main() {
           ModifierOption(id: 'mat-dirt', label: 'Dirt', magnitude: 0),
           ModifierOption(id: 'mat-metal', label: 'Metal or gemstone', magnitude: 2),
         ],
-        source: 'published',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
       );
       final engine = SpellEngine(allSpells: [], allModifiers: [material]);
       final baseEffect = BaseEffect(

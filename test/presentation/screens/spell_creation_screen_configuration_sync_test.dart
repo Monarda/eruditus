@@ -192,7 +192,7 @@ void main() {
         selectionMode: ModifierSelectionMode.single,
         scope: const ModifierScope(technique: 'Creo', form: 'Ignem'),
         options: [ModifierOption(id: 'custom-m1-a', label: 'A homebrewed complexity option', magnitude: 2)],
-        source: 'user-created',
+        provenance: Provenance(source: PublicationSource.userCreated),
       );
 
       configBloc.add(CustomModifierAdded(customModifier));

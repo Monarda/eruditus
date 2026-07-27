@@ -25,7 +25,8 @@
         "description": "Very intricate images, e.g. an intricately ornamented bridge",
         "magnitude": 1
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "peim-complexity",
@@ -41,7 +42,8 @@
         "description": "Destroying or dulling an image that changes, rather than a static one",
         "magnitude": 1
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "reim-complexity",
@@ -69,7 +71,8 @@
         "description": "Add one magnitude per additional sense beyond the guideline's default",
         "magnitude": 1
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-animal",
@@ -94,7 +97,8 @@
       { "id": "size-animal-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-animal-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-animal-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-aquam",
@@ -119,7 +123,8 @@
       { "id": "size-aquam-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-aquam-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-aquam-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-auram",
@@ -144,7 +149,8 @@
       { "id": "size-auram-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-auram-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-auram-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-corpus",
@@ -169,7 +175,8 @@
       { "id": "size-corpus-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-corpus-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-corpus-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-herbam",
@@ -194,7 +201,8 @@
       { "id": "size-herbam-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-herbam-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-herbam-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-ignem",
@@ -219,7 +227,8 @@
       { "id": "size-ignem-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-ignem-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-ignem-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-imaginem",
@@ -244,7 +253,8 @@
       { "id": "size-imaginem-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-imaginem-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-imaginem-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "size-terram",
@@ -269,7 +279,8 @@
       { "id": "size-terram-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-terram-3", "label": "Up to 1,000x base", "magnitude": 3 },
       { "id": "size-terram-4", "label": "Up to 10,000x base", "magnitude": 4 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "aquam-base-individual",
@@ -309,7 +320,8 @@
         "baseIndividual": "a single dose",
         "magnitude": 0
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "muto-terram-material",
@@ -349,7 +361,8 @@
         "baseIndividual": "one cubic inch",
         "magnitude": 2
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "perdo-terram-material",
@@ -389,7 +402,8 @@
         "baseIndividual": "one cubic inch",
         "magnitude": 2
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "rego-terram-material",
@@ -429,7 +443,8 @@
         "baseIndividual": "one cubic inch",
         "magnitude": 2
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "creo-auram-unnatural",
@@ -448,7 +463,8 @@
         "description": "For example, a lightning bolt springing from the caster's hands",
         "magnitude": 4
       }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   },
   {
     "id": "rego-transport-distance",
@@ -464,6 +480,7 @@
       { "id": "rego-distance-1-league", "label": "Up to 1 league", "magnitude": 3 },
       { "id": "rego-distance-7-leagues", "label": "Up to 7 leagues", "magnitude": 4 },
       { "id": "rego-distance-arcane", "label": "Somewhere you have an Arcane Connection", "magnitude": 5 }
-    ]
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   }
 ]

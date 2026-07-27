@@ -116,7 +116,7 @@ void main() {
     final modifiers = await loader.loadModifiers();
 
     expect(modifiers, isNotEmpty);
-    expect(modifiers.every((m) => m.source == 'published'), isTrue);
+    expect(modifiers.every((m) => m.provenance.source == PublicationSource.published), isTrue);
 
     final creoImaginem = modifiers.firstWhere((m) => m.id == 'crim-complexity');
     expect(creoImaginem.selectionMode, ModifierSelectionMode.multi);
@@ -217,6 +217,20 @@ void main() {
       for (final citation in parameter.provenance.citations) {
         expect(bookIds.contains(citation.bookId), isTrue,
             reason: '${parameter.id}: cited book ${citation.bookId} is not in '
+                'books.json — add the book, do not relax this check');
+      }
+    }
+  });
+
+  test("every modifier's cited book ids exist in the books catalog", () async {
+    final modifiers = await loader.loadModifiers();
+    final books = await loader.loadBooks();
+    final bookIds = books.map((b) => b.id).toSet();
+
+    for (final modifier in modifiers) {
+      for (final citation in modifier.provenance.citations) {
+        expect(bookIds.contains(citation.bookId), isTrue,
+            reason: '${modifier.id}: cited book ${citation.bookId} is not in '
                 'books.json — add the book, do not relax this check');
       }
     }
