@@ -205,6 +205,36 @@ void main() {
       expect(Spell.fromMap(map).selectedModifiers, isEmpty);
     });
 
+    test('tags default to empty and round-trip through toMap/fromMap', () {
+      final spell = Spell(
+        id: 'x',
+        baseEffectId: 'e1',
+        rangeId: 'p1',
+        durationId: 'p2',
+        targetId: 'p3',
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+      expect(spell.tags, isEmpty);
+
+      final tagged = Spell(
+        id: 'y',
+        baseEffectId: 'e1',
+        rangeId: 'p1',
+        durationId: 'p2',
+        targetId: 'p3',
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated),
+        tags: const ['architecture', 'defensive'],
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+      final restored = Spell.fromMap(tagged.toMap());
+      expect(restored.tags, ['architecture', 'defensive']);
+    });
+
     test('SpellDraft.copyWith replaces selectedModifiers wholesale', () {
       final draft = SpellDraft(
         technique: 'Rego',
@@ -245,6 +275,13 @@ void main() {
 
     test('a published spell with only a summary is valid', () {
       expect(Spell.fromMap(baseMap()).summary, 'A summary.');
+    });
+
+    test('a published spell with only a description is valid', () {
+      final map = baseMap()
+        ..remove('summary')
+        ..['description'] = 'Verbatim rulebook text.';
+      expect(Spell.fromMap(map).description, 'Verbatim rulebook text.');
     });
 
     test('a published spell with neither summary nor description is rejected', () {
