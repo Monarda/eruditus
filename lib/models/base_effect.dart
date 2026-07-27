@@ -1,12 +1,32 @@
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
+/// Whether a guideline demands a Ritual spell.
+///
+/// [required] is a hard constraint from the rulebook — the spell cannot be
+/// Formulaic. [suggested] is guidance only: it forces nothing, and exists so
+/// the UI can explain what casting the effect non-ritually actually does. See
+/// Core Rules line 13415 on healing spells, which suspend rather than cure
+/// when cast as anything other than a Momentary Ritual.
+enum RitualRequirement { none, suggested, required }
+
+RitualRequirement _ritualRequirementFromName(String name) {
+  for (final value in RitualRequirement.values) {
+    if (value.name == name) return value;
+  }
+  throw FormatException(
+    "BaseEffect.fromMap: unknown ritualRequirement '$name' (expected one of: "
+    "${RitualRequirement.values.map((r) => r.name).join(', ')})",
+  );
+}
+
 class BaseEffect {
   final String id;
   final String technique;
   final String form;
   final String description;
   final int baseLevel;
+  final RitualRequirement ritualRequirement;
   final Provenance provenance;
 
   BaseEffect({
@@ -15,6 +35,7 @@ class BaseEffect {
     required this.form,
     required this.description,
     required this.baseLevel,
+    this.ritualRequirement = RitualRequirement.none,
     required this.provenance,
   });
 
@@ -24,6 +45,7 @@ class BaseEffect {
     'form': form,
     'description': description,
     'baseLevel': baseLevel,
+    'ritualRequirement': ritualRequirement.name,
     ...provenance.toMap(),
   };
 
@@ -33,6 +55,10 @@ class BaseEffect {
     form: requireField<String>(map, 'form', 'BaseEffect'),
     description: requireField<String>(map, 'description', 'BaseEffect'),
     baseLevel: requireField<int>(map, 'baseLevel', 'BaseEffect'),
+    ritualRequirement: map['ritualRequirement'] == null
+        ? RitualRequirement.none
+        : _ritualRequirementFromName(
+            requireField<String>(map, 'ritualRequirement', 'BaseEffect')),
     provenance: Provenance.fromMap(map),
   );
 

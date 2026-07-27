@@ -104,5 +104,61 @@ void main() {
       );
       expect(effect.provenance.citations, isEmpty);
     });
+
+    test('ritualRequirement defaults to none and round-trips every value', () {
+      for (final value in RitualRequirement.values) {
+        final effect = BaseEffect(
+          id: 'e-1', technique: 'Creo', form: 'Corpus',
+          description: 'Heal a Light Wound', baseLevel: 15,
+          ritualRequirement: value,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        );
+        expect(BaseEffect.fromMap(effect.toMap()).ritualRequirement, value);
+      }
+
+      final plain = BaseEffect(
+        id: 'e-2', technique: 'Creo', form: 'Ignem',
+        description: 'Create flame', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      expect(plain.ritualRequirement, RitualRequirement.none);
+    });
+
+    test('fromMap treats an absent ritualRequirement key as none', () {
+      final restored = BaseEffect.fromMap({
+        'id': 'e-3',
+        'technique': 'Creo',
+        'form': 'Ignem',
+        'description': 'Create flame',
+        'baseLevel': 10,
+        'source': 'user-created',
+      });
+      expect(restored.ritualRequirement, RitualRequirement.none);
+    });
+
+    test('fromMap throws a clear FormatException on an unknown ritualRequirement', () {
+      expect(
+        () => BaseEffect.fromMap({
+          'id': 'e-4',
+          'technique': 'Creo',
+          'form': 'Ignem',
+          'description': 'Create flame',
+          'baseLevel': 10,
+          'ritualRequirement': 'mandatory',
+          'source': 'user-created',
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('mandatory'),
+              contains('BaseEffect'),
+              contains('suggested'),
+            ),
+          ),
+        ),
+      );
+    });
   });
 }
