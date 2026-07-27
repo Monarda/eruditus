@@ -315,6 +315,45 @@ spells that need Ring, Circle or Eye cannot currently be expressed at all.
   - `lib/bloc/spell_creation/` (event + state for the choice)
   - `lib/data/database/app_database.dart` (schema bump if the field is stored)
 
+### 16. Short Forms for Parameter Names
+**Decide alongside item 15** — that item already edits all 25 parameter entries,
+so populating a short form there is nearly free, whereas doing it later means a
+second pass over the same file.
+
+- [ ] Decide whether parameters need a short display form at all — confirm a real
+      layout is actually constrained before building anything
+- [ ] If so, add an optional `shortName` to `Parameter`, falling back to `name`
+- [ ] Add a small widget that picks the longest form fitting the available width
+
+- **Do NOT encode alternatives as inline markup** (e.g. `"B/ound/ary"`):
+  - It puts presentation inside domain data — search, comparison, backup export
+    and tests would all need to strip markup first, and one missed call site
+    shows a user `B/ound/ary` in an exported file.
+  - It can only express prefix truncation. "Arcane Connection" → "Arc" works;
+    → "AC" does not.
+  - **`/` already means something else here.** The rulebook uses it for
+    equal-difficulty pairings — `Touch/Eye`, `Sun/Ring`, `Group/Room`,
+    `Individual/Circle`. Reusing it for abbreviation in the same catalog is a
+    trap.
+- **Precedent already in the codebase:** `Book` carries `title` *and*
+  `abbreviation` as separate fields (added by the Spell Provenance work). Doing
+  the same on `Parameter` follows house style rather than inventing a scheme.
+  The wider precedent is CLDR, which models wide / abbreviated / narrow as named
+  forms, never as markup.
+- **Flutter has no built-in string-alternatives system.** `FittedBox` scales
+  glyphs rather than substituting words; `TextOverflow.ellipsis` truncates
+  crudely ("Bound…"); `auto_size_text` is third-party, not a dependency here, and
+  shrinks the font rather than swapping text. The real mechanism is
+  `LayoutBuilder` + `TextPainter` measurement with your own selection logic.
+- **Note:** `Bound` → `Boundary` is a *data error* fixed by item 15, not a short
+  form anyone chose. Do not treat it as evidence that abbreviations are needed.
+- **Check the need first.** These names appear mostly in dropdowns, where width
+  is rarely tight and substituting text makes selection confusing. If anything
+  is genuinely constrained it is more likely the spell card or the level
+  breakdown chips — measure before building.
+- **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`,
+  wherever a constrained widget turns out to be
+
 ---
 
 ## Low Priority / Nice-to-Have
