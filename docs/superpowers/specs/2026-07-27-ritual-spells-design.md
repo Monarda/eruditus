@@ -304,28 +304,111 @@ structured flag:
 | `pevi-G9` | Perdo Vim | "General entry; must be Ritual" |
 | `pevi-G10` | Perdo Vim | "General entry; must be Ritual" |
 
-**`"suggested"` on the Creo healing sweep.** Today's flagging is inconsistent:
-five Creo Corpus healing entries carry a note, while Creo Animal and Creo Herbam
-healing — which the rulebook treats identically — carry none, and Creo Corpus's
-own `crco-25c` "Restore a lost limb" and its five aging-crisis entries carry
-none either. Roughly 31 entries qualify by grep; the exact membership is settled
-during implementation by checking each candidate against its own guideline table
-in the Creo Animal, Creo Corpus and Creo Herbam sections. A grep count is not a
-reviewed list.
+**`"suggested"` on 38 entries.** Today's flagging is inconsistent: five Creo
+Corpus healing entries carry a note, while Creo Animal and Creo Herbam healing —
+which the rulebook treats identically — carry none, and Creo Corpus's own
+`crco-25c` "Restore a lost limb" and its five aging-crisis entries carry none
+either.
 
-The inclusion rule:
+The rule applied, stated first as the rationale for the list that follows:
 
 > Include a Creo guideline when what it produces **persists after the magic
 > ends** — healing a wound, restoring a lost limb or sense, curing a disease,
 > resolving an aging crisis, raising the dead, permanently raising a
 > Characteristic.
 >
-> Exclude it when the effect is sustained *by* the spell: Recovery-roll bonuses,
-> "Preserve a corpse from decay", "Stop the progress of a disease" (line 12478
-> contrasts this directly with "Cure a disease… unless Momentary Ritual"), and
-> the maturation entries whose own text demands a Duration.
+> Exclude it when the effect is sustained *by* the spell.
 
-`crco-70` "Raise the dead" and `cran-75` "Raise an animal from the dead" receive
+Every row of the Creo Animal (line 12468), Creo Corpus (line 13413) and Creo
+Herbam (line 13919) guideline tables was walked against the catalog. The
+resulting membership is exact, and every id below was verified to exist with the
+stated Technique and Form. None overlaps the seven `required` entries.
+
+**Creo Animal — 11**
+
+| Id | Level | Guideline |
+|---|---|---|
+| `cran-15a` | 15 | Heal a Light Wound |
+| `cran-20a` | 20 | Heal a Medium Wound |
+| `cran-25b` | 25 | Heal a Heavy Wound |
+| `cran-25c` | 25 | Restore a lost sense |
+| `cran-25d` | 25 | Restore a lost limb |
+| `cran-25e` | 25 | Cure a disease, counteracting its effects |
+| `cran-30a` | 30 | Heal an Incapacitating Wound |
+| `cran-30b` | 30 | Increase a Characteristic, to no more than average |
+| `cran-35` | 35 | Heal all wounds |
+| `cran-40` | 40 | Increase a Characteristic, to two above average |
+| `cran-75` | 75 | Raise an animal from the dead |
+
+**Creo Corpus — 20**
+
+| Id | Level | Guideline |
+|---|---|---|
+| `crco-15a` | 15 | Heal a Light Wound |
+| `crco-15c` | 15 | Resolve a minor aging crisis |
+| `crco-20a` | 20 | Heal a Medium Wound |
+| `crco-20b` | 20 | Heal the debilitating after-effects of a disease, poison, or injury |
+| `crco-20c` | 20 | Resolve a serious aging crisis |
+| `crco-25a` | 25 | Heal a Heavy Wound |
+| `crco-25b` | 25 | Improve all wounds by one level of severity |
+| `crco-25c` | 25 | Restore a lost limb |
+| `crco-25d` | 25 | Resolve a major aging crisis |
+| `crco-30a` | 30 | Heal an Incapacitating Wound |
+| `crco-30b` | 30 | Increase a physical Characteristic, to no more than 0 |
+| `crco-30d` | 30 | Resolve a critical aging crisis |
+| `crco-35a` | 35 | Heal all wounds |
+| `crco-35b` | 35 | Resolve a terminal aging crisis |
+| `crco-35c` | 35 | Increase a physical Characteristic, to no more than +1 |
+| `crco-40` | 40 | Increase a physical Characteristic, to no more than +2 |
+| `crco-45` | 45 | Increase a physical Characteristic, to no more than +3 |
+| `crco-50` | 50 | Increase a physical Characteristic, to no more than +4 |
+| `crco-55` | 55 | Increase a physical Characteristic, to no more than +5 |
+| `crco-70` | 70 | Raise the dead |
+
+**Creo Herbam — 7**
+
+| Id | Level | Guideline |
+|---|---|---|
+| `crhe-1e` | 1 | Heal a Light Wound to a plant |
+| `crhe-2c` | 2 | Heal a Medium Wound to a plant |
+| `crhe-3b` | 3 | Heal a Heavy Wound to a plant |
+| `crhe-4` | 4 | Heal an Incapacitating Wound to a plant |
+| `crhe-5` | 5 | Heal all Wounds to a plant |
+| `crhe-10` | 10 | Heal all damage to a plant, including wounds, disease, and poison |
+| `crhe-15b` | 15 | Restore a damaged manufactured wooden item |
+
+### Exclusions, and why
+
+Recorded so each is a decision on file rather than an omission.
+
+- **Recovery-roll bonuses** (`cran-1`, `crco-1a`, and their ladders). The bonus
+  applies while the spell runs; nothing persists. The Creo Corpus preamble
+  (line 13416) treats these as a separate category from healing outright.
+- **"Preserve a corpse from decay"** (`cran-2b`, `crco-2b`, `crhe-2b`) and
+  **"Prevent a plant from becoming sick"** (`crhe-1d`). Ongoing preservation,
+  sustained by the spell.
+- **`crco-1b`** (wounds treated as less serious for activity) and **`crco-3b`**
+  (prevent wounds worsening). Suppression, not repair.
+- **`cran-25a` "Stop the progress of a disease."** Line 12478 contrasts this
+  directly with "Cure a disease, counteracting its effects (unless Momentary
+  Ritual, same as stopping progress)" — the *cure* is the ritual case, the
+  *stopping* is not.
+- **All maturation entries** (`cran-15d`, `cran-20c`, `cran-25f`, `cran-30c`,
+  `crco-30c`, `crhe-15a`, `crhe-20`, `crhe-25`, `crhe-30`, `crhe-40`) and
+  **`crhe-1a`** ("grows well for the duration of the spell"). Their own text
+  demands a Duration; accelerated growth applies only while the spell runs.
+- **All Creo creation guidelines** (`cran-5a/5b/10a/10b/15c/50`, `crhe-1b/1c/2a/3a`,
+  and their equivalents in every other Form). Line 12176 makes these condition-5
+  cases too, but the creation sweep is deliberately out of scope — see "Out of
+  Scope". The default-on behaviour covers them for correctness regardless.
+- **Creo Mentem memory restoration** (`creem-4b`, `creem-5b`, `creem-10a`,
+  "Restore a memory… to a fresh state"). The criterion arguably reaches them, but
+  the approved sweep is Creo *bodily* healing across Animal, Corpus and Herbam;
+  memory restoration is not covered by the healing-suspension rule at line 13415,
+  and all three are already flagged "Variable base level" — todo item 4's
+  territory. Left out, recorded below as an open question.
+
+`crco-70` "Raise the dead" and `cran-75` "Raise an animal from the dead" carry
 the flag redundantly — a base level of 70 or 75 already trips condition 1 — for
 uniformity, at no cost.
 
@@ -392,11 +475,17 @@ unknown name; absent JSON keys defaulting to `none` and `false`.
 
 **Assets.** Assert exactly two parameters carry `requiresRitual` — hardcoded,
 because `parameters.json` is the hand-curated list todo item 5 deliberately left
-as literals. Derive the `ritualRequirement` counts from `base_effects.json`
-itself rather than hardcoding them, because that file is bulk-extracted and is
-precisely the one that silently drifted by 566 entries. Assert every
-`ritualRequirement` value parses. Assert all five new library spells resolve and
-calculate to their printed levels.
+as literals.
+
+For `base_effects.json`, assert the flagged ids **as exact sets** against the
+seven `required` and thirty-eight `suggested` ids listed above, not as counts.
+Todo item 5's reasoning for deriving counts applies to properties of the file as
+a whole, which drift as the extraction grows; this is a hand-reviewed membership
+decision, and the set is the thing worth pinning. A count would pass while an
+entry silently moved from one flag to the other. Also assert every
+`ritualRequirement` value parses.
+
+Assert all five new library spells resolve and calculate to their printed levels.
 
 **Widgets.** Mocked blocs covering the visibility rule (shown for Creo +
 Momentary, hidden otherwise), the default-ticked state, and the banner's reason
@@ -417,3 +506,13 @@ needs `-d windows`, and "tests pass" for this branch means **both** suites, not
    `Base 4, +3 Sight, +2 Sun, +5 size`). Belongs with todo item 4.
 3. **Creo creation `suggested` sweep.** Skipped deliberately, per "Out of Scope".
    Recorded so the asymmetry with the healing sweep is a decision on file.
+4. **Creo Mentem memory restoration.** Decide whether `creem-4b`, `creem-5b` and
+   `creem-10a` are condition-5 cases. Entangled with their existing "Variable
+   base level" flag, so it belongs with todo item 4.
+5. **Four Creo Animal guidelines missing from the catalog**, found while walking
+   the table for this pass and unrelated to Rituals: level 35 "Increase a
+   Characteristic to one above average", level 40 "Cause an animal to reach full
+   maturity in a moment", level 45 "Increase a Characteristic to three above
+   average", and level 55 "Increase a Characteristic to five above average". The
+   catalog has `cran-35` (Heal all wounds), `cran-40` (Characteristic) and
+   `cran-50` (magical beast) but no siblings for these four rows.
