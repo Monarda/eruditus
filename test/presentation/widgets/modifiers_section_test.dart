@@ -50,8 +50,8 @@ void main() {
         body: ModifiersSection(
           modifiers: modifiers,
           selected: selected,
-          onSelect: onSelect ?? (_, __) {},
-          onDeselect: onDeselect ?? (_, __) {},
+          onSelect: onSelect ?? (_, _) {},
+          onDeselect: onDeselect ?? (_, _) {},
         ),
       ),
     ));
