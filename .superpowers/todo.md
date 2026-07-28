@@ -543,7 +543,9 @@ built from at least 3 charms (9 for using all three together):
   derive correctly without it.
 
 ### 21. Creo Mentem Memory Restoration
-- [ ] Decide whether `creem-4b`, `creem-5b` and `creem-10a` ("Restore a memory
+- [ ] Decide whether `crme-4b`, `crme-5b` and `crme-10a` (renamed from
+      `creem-4b`/`creem-5b`/`creem-10a` when the base-effect id scheme was
+      corrected — see the published-spell-import branch) ("Restore a memory
       … to a fresh state") are Momentary-Creo-lasting-thing cases
 - **Context:** The Ritual sweep's criterion arguably reaches them, but the
   approved scope was Creo *bodily* healing across Animal, Corpus and Herbam, and
@@ -733,10 +735,12 @@ gaps, three remain open and have moved to their own sections above.**
       there.
 - [x] **Magnitude Ladders** — ✅ COMPLETE. Landed as `rego-transport-distance`
       (6 rungs, 5 paces → Arcane Connection), scoped by `effectIds` to
-      `rrhe-10b`, `rrig-3c`, `rete-4`.
+      `rehe-10b`, `reig-3c`, `rete-4` (first two renamed from `rrhe-10b`/
+      `rrig-3c` when the base-effect id scheme was corrected).
 - [x] **Characteristic Point Scaling** — ⚪ NOT A GAP. Each rung is already its
-      own base effect (`creem-30` … `creem-55`); choosing "to no more than +2"
-      *is* choosing `creem-40`. What looked like a modelling gap was an
+      own base effect (`crme-30` … `crme-55`, renamed from `creem-30`…`creem-55`);
+      choosing "to no more than +2" *is* choosing `crme-40`. What looked like
+      a modelling gap was an
       extraction gap in Creo Animal only — now item 22.
 - [ ] **Variable Base Levels** — → **moved to item 25**, and the sub-item badly
       understated it. Most `"Variable base level"` notes are informational rung
