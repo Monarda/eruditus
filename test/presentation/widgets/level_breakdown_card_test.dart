@@ -52,4 +52,35 @@ void main() {
     // total alone would invite "why isn't 2 + 4 = 6?".
     expect(find.textContaining('Total magnitude'), findsNothing);
   });
+
+  testWidgets('does not show a Ritual minimum note when the floor did not apply',
+      (tester) async {
+    await pump(tester);
+
+    expect(find.byKey(const Key('ritual-minimum-note')), findsNothing);
+  });
+
+  testWidgets('shows a Ritual minimum note with the raw and floored levels when the floor applied',
+      (tester) async {
+    const flooredBreakdown = LevelBreakdown(
+      level: 20,
+      rawLevel: 2,
+      contributions: [
+        LevelContribution(label: 'Base effect · Heal a Light Wound to a plant', magnitude: 1, isBase: true),
+        LevelContribution(label: 'Range · Touch', magnitude: 1),
+      ],
+    );
+
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(body: LevelBreakdownCard(breakdown: flooredBreakdown)),
+    ));
+
+    expect(find.byKey(const Key('ritual-minimum-note')), findsOneWidget);
+    expect(find.text('Ritual minimum: raised from 2 to 20'), findsOneWidget);
+  });
 }

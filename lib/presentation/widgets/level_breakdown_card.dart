@@ -43,6 +43,19 @@ class LevelBreakdownCard extends StatelessWidget {
                     ],
                   ),
                 )),
+            // The floor is deliberately not a LevelContribution (see the class
+            // doc on ritualMinimumApplied), so a raw-level-2 calculation that
+            // displays as 20 needs its own line explaining the gap -- otherwise
+            // the contributions above visibly fail to sum to the total shown.
+            if (breakdown.ritualMinimumApplied)
+              Padding(
+                key: const Key('ritual-minimum-note'),
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  'Ritual minimum: raised from ${breakdown.rawLevel} to ${breakdown.level}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
           ],
         ),
       ),

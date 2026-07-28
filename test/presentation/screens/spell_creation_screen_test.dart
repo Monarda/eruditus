@@ -13,6 +13,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
+import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -212,6 +213,84 @@ void main() {
     await pumpScreen(tester, SpellCreationState.initial());
 
     expect(find.byKey(const Key('level-breakdown-card')), findsNothing);
+  });
+
+  testWidgets(
+      'editing the draft after Calculate hides the stale Ritual banner rather than '
+      'leaving its old reason on screen', (tester) async {
+    // Regression test: state.breakdown is carried forward by copyWith across
+    // edits (breakdown ?? this.breakdown), so a mock bloc whose state never
+    // changes cannot catch this -- the bug only appears on the rebuild that
+    // follows an edit. Drive two real states through a controller instead,
+    // exactly as the "requisite survives the rebuild" test above does for the
+    // analogous add-dropdown bug.
+    useTallSurface(tester);
+    final stateController = StreamController<SpellCreationState>();
+    addTearDown(stateController.close);
+
+    final yearParam = Parameter(
+        id: 'p-year', name: 'Year', category: 'Duration', magnitude: 4,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+    final calculatedState = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: range, duration: yearParam, target: target,
+      ),
+      calculatedLevel: 20,
+      breakdown: const LevelBreakdown(
+        level: 20,
+        rawLevel: 20,
+        ritualStatus: RitualStatus([RitualReason.ritualOnlyDuration]),
+        contributions: [
+          LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+        ],
+      ),
+    );
+
+    whenListen(bloc, stateController.stream, initialState: calculatedState);
+    whenListen(
+      configBloc,
+      const Stream<ConfigurationState>.empty(),
+      initialState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect],
+        parameters: [voiceParam, yearParam, durationParam, targetParam],
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      ),
+    ));
+
+    expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
+    expect(find.textContaining('Year duration'), findsOneWidget);
+
+    // The user changes Duration after Calculate. The bloc reverts status to
+    // editing (as it does for any editing event) but, per
+    // SpellCreationState.copyWith, the stale breakdown from the Year
+    // calculation still rides along on the new state.
+    stateController.add(SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: range, duration: durationParam, target: target,
+      ),
+      breakdown: calculatedState.breakdown,
+    ));
+    await tester.pump();
+
+    // The level card is correctly gated already; the banner must now be too,
+    // rather than falsely reading "Ritual: Year duration" for a Momentary draft.
+    expect(find.byKey(const Key('level-breakdown-card')), findsNothing);
+    expect(find.byKey(const Key('ritual-banner')), findsNothing);
   });
 
   testWidgets('shows suggestions with their level and description when status is calculated',

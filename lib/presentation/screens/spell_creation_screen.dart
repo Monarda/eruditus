@@ -182,8 +182,15 @@ class SpellCreationScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 RitualSection(
-                  ritualStatus:
-                      state.breakdown?.ritualStatus ?? const RitualStatus.notRitual(),
+                  // Gated the same as LevelBreakdownCard below: state.breakdown
+                  // is carried forward by copyWith across edits made after
+                  // Calculate, so without this gate the banner would keep
+                  // showing a reason computed for a draft the user has since
+                  // changed (e.g. still reading "Year duration" after Duration
+                  // was switched to Sun).
+                  ritualStatus: showResultsBlock
+                      ? (state.breakdown?.ritualStatus ?? const RitualStatus.notRitual())
+                      : const RitualStatus.notRitual(),
                   declaration: draft.ritualDeclaration,
                   showDeclarationCheckbox: draft.technique == 'Creo' &&
                       draft.duration?.id == 'duration-momentary',

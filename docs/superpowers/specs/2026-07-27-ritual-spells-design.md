@@ -298,20 +298,27 @@ breakdown per saved spell, so `RitualStatus` is available there at no cost.
 
 ### `base_effects.json` — `ritualRequirement`
 
-**`"required"` on 7 entries**, promoting today's free-text `notes` to a
+**`"required"` on 6 entries**, promoting today's free-text `notes` to a
 structured flag:
 
 | Id | Technique/Form | Existing note or marker |
 |---|---|---|
 | `craq-25b` | Creo Aquam | "(Ritual)" in the description |
 | `crau-25` | Creo Auram | "Ritual only" |
-| `crco-5b` | Creo Corpus | "Ritual only" |
 | `crig-25b` | Creo Ignem | "Ritual only" |
 | `crte-25b` | Creo Terram | "Variable base level; ritual-only" |
 | `pevi-G9` | Perdo Vim | "General entry; must be Ritual" |
 | `pevi-G10` | Perdo Vim | "General entry; must be Ritual" |
 
-**`"suggested"` on 38 entries.** Today's flagging is inconsistent: five Creo
+> `crco-5b` ("Create an entire human corpse," base level 5) was reclassified
+> from `required` to `suggested` during whole-branch review: unlike the six
+> entries above, the Creo Corpus guideline table itself (line 13431) carries no
+> "(Ritual)" marker for this entry, and the catalog's own "Ritual only" note is
+> insufficient basis to force it. It now appears in the Creo Corpus `suggested`
+> list below instead; the Momentary-Creo `lastingCreation` declaration still
+> covers the real case.
+
+**`"suggested"` on 39 entries.** Today's flagging is inconsistent: five Creo
 Corpus healing entries carry a note, while Creo Animal and Creo Herbam healing —
 which the rulebook treats identically — carry none, and Creo Corpus's own
 `crco-25c` "Restore a lost limb" and its five aging-crisis entries carry none
@@ -329,7 +336,7 @@ The rule applied, stated first as the rationale for the list that follows:
 Every row of the Creo Animal (line 12468), Creo Corpus (line 13413) and Creo
 Herbam (line 13919) guideline tables was walked against the catalog. The
 resulting membership is exact, and every id below was verified to exist with the
-stated Technique and Form. None overlaps the seven `required` entries.
+stated Technique and Form. None overlaps the six `required` entries.
 
 **Creo Animal — 11**
 
@@ -347,10 +354,11 @@ stated Technique and Form. None overlaps the seven `required` entries.
 | `cran-40` | 40 | Increase a Characteristic, to two above average |
 | `cran-75` | 75 | Raise an animal from the dead |
 
-**Creo Corpus — 20**
+**Creo Corpus — 21**
 
 | Id | Level | Guideline |
 |---|---|---|
+| `crco-5b` | 5 | Create an entire human corpse (reclassified from `required`; see note above) |
 | `crco-15a` | 15 | Heal a Light Wound |
 | `crco-15c` | 15 | Resolve a minor aging crisis |
 | `crco-20a` | 20 | Heal a Medium Wound |
@@ -485,7 +493,7 @@ because `parameters.json` is the hand-curated list todo item 5 deliberately left
 as literals.
 
 For `base_effects.json`, assert the flagged ids **as exact sets** against the
-seven `required` and thirty-eight `suggested` ids listed above, not as counts.
+six `required` and thirty-nine `suggested` ids listed above, not as counts.
 Todo item 5's reasoning for deriving counts applies to properties of the file as
 a whole, which drift as the extraction grows; this is a hand-reviewed membership
 decision, and the set is the thing worth pinning. A count would pass while an

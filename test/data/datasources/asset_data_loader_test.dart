@@ -81,7 +81,7 @@ void main() {
     // grows; this is a hand-reviewed membership decision, and a count would
     // pass while an entry silently moved between the two flags.
     expect(idsWith(RitualRequirement.required), {
-      'craq-25b', 'crau-25', 'crco-5b', 'crig-25b', 'crte-25b',
+      'craq-25b', 'crau-25', 'crig-25b', 'crte-25b',
       'pevi-G9', 'pevi-G10',
     });
 
@@ -89,7 +89,10 @@ void main() {
       // Creo Animal (11)
       'cran-15a', 'cran-20a', 'cran-25b', 'cran-25c', 'cran-25d', 'cran-25e',
       'cran-30a', 'cran-30b', 'cran-35', 'cran-40', 'cran-75',
-      // Creo Corpus (20)
+      // Creo Corpus (21) -- crco-5b reclassified from required during
+      // whole-branch review: the rulebook guideline table carries no Ritual
+      // marker for it, unlike the other six required entries.
+      'crco-5b',
       'crco-15a', 'crco-15c', 'crco-20a', 'crco-20b', 'crco-20c', 'crco-25a',
       'crco-25b', 'crco-25c', 'crco-25d', 'crco-30a', 'crco-30b', 'crco-30d',
       'crco-35a', 'crco-35b', 'crco-35c', 'crco-40', 'crco-45', 'crco-50',
