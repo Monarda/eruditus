@@ -471,7 +471,7 @@
     "name": "Transport distance",
     "description": "The base level covers 5 paces; greater distances cost magnitudes",
     "selectionMode": "single",
-    "scope": { "technique": null, "form": null, "effectIds": ["rrhe-10b", "rrig-3c", "rete-4"], "excludeTechniques": [] },
+    "scope": { "technique": null, "form": null, "effectIds": ["rehe-10b", "reig-3c", "rete-4"], "excludeTechniques": [] },
     "source": "published",
     "options": [
       { "id": "rego-distance-5-paces", "label": "Up to 5 paces", "magnitude": 0 },

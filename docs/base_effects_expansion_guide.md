@@ -52,7 +52,7 @@ Template for each effect:
 **ID scheme:**
 - Creo Auram, level 1, first effect → `crau-1` (no letter)
 - Creo Auram, level 1, second effect → `crau-1b` (add letter suffix)
-- Intellego Auram, level 15 → `irau-15`
+- Intellego Auram, level 15 → `inau-15`
 - etc.
 
 ### Step 3: Flag Out-of-Scope Effects

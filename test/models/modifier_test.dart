@@ -75,7 +75,7 @@ void main() {
     });
 
     test('effectIds narrows to listed effects only', () {
-      const scope = ModifierScope(effectIds: ['rrhe-10b', 'rrig-3c', 'rete-4']);
+      const scope = ModifierScope(effectIds: ['rehe-10b', 'reig-3c', 'rete-4']);
       expect(scope.appliesTo(technique: 'Rego', form: 'Terram', baseEffectId: 'rete-4'), isTrue);
       expect(scope.appliesTo(technique: 'Rego', form: 'Terram', baseEffectId: 'rete-1'), isFalse);
     });

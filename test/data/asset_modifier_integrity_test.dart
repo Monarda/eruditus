@@ -99,7 +99,7 @@ void main() {
     final modifiers = await loader.loadModifiers();
     final distance = modifiers.firstWhere((m) => m.id == 'rego-transport-distance');
 
-    expect(distance.scope.effectIds..sort(), ['rete-4', 'rrhe-10b', 'rrig-3c']);
+    expect(distance.scope.effectIds..sort(), ['rehe-10b', 'reig-3c', 'rete-4']);
     expect(distance.scope.technique, isNull);
     expect(distance.scope.form, isNull);
   });

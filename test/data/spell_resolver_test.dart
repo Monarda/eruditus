@@ -9,7 +9,7 @@ import 'package:eruditus/models/spell.dart';
 
 void main() {
   final effect = BaseEffect(
-      id: 'creim-2', technique: 'Creo', form: 'Imaginem',
+      id: 'crim-2', technique: 'Creo', form: 'Imaginem',
       description: 'Create an image that affects two senses', baseLevel: 2,
       provenance: Provenance(source: PublicationSource.userCreated));
   final voice = Parameter(
@@ -25,7 +25,7 @@ void main() {
   final resolver = SpellResolver(
       effects: [effect], parameters: [voice, momentary, individual]);
 
-  Spell record({String baseEffectId = 'creim-2', String rangeId = 'range-voice'}) => Spell(
+  Spell record({String baseEffectId = 'crim-2', String rangeId = 'range-voice'}) => Spell(
         id: 'spell-1',
         name: 'Phantasm',
         baseEffectId: baseEffectId,
@@ -62,7 +62,7 @@ void main() {
 
     expect(resolved.isResolved, isFalse);
     expect(resolved.range, isNull);
-    expect(resolved.baseEffect?.id, 'creim-2');
+    expect(resolved.baseEffect?.id, 'crim-2');
   });
 
   test('resolveAll resolves each record independently', () {

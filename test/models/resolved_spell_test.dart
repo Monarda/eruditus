@@ -9,7 +9,7 @@ import 'package:eruditus/models/publication_source.dart';
 
 void main() {
   final effect = BaseEffect(
-      id: 'creim-2', technique: 'Creo', form: 'Imaginem',
+      id: 'crim-2', technique: 'Creo', form: 'Imaginem',
       description: 'Create an image that affects two senses', baseLevel: 2,
       provenance: Provenance(source: PublicationSource.userCreated));
   final voice = Parameter(
@@ -25,7 +25,7 @@ void main() {
   Spell record() => Spell(
         id: 'spell-1',
         name: 'Phantasm',
-        baseEffectId: 'creim-2',
+        baseEffectId: 'crim-2',
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
@@ -60,7 +60,7 @@ void main() {
         record: record(), baseEffect: null, range: voice, duration: momentary, target: individual);
 
     expect(resolved.isResolved, isFalse);
-    expect(resolved.unresolvedReferences, ['creim-2']);
+    expect(resolved.unresolvedReferences, ['crim-2']);
     expect(resolved.technique, isNull);
     expect(resolved.form, isNull);
     // The record survives intact so the spell can still be listed and re-saved.
@@ -74,7 +74,7 @@ void main() {
 
     expect(resolved.isResolved, isFalse);
     expect(resolved.unresolvedReferences,
-        containsAll(['creim-2', 'range-voice', 'target-individual']));
+        containsAll(['crim-2', 'range-voice', 'target-individual']));
     expect(resolved.unresolvedReferences, isNot(contains('duration-momentary')));
   });
 }
