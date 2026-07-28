@@ -28,6 +28,13 @@ class ResolveTest(unittest.TestCase):
         with self.assertRaises(ledger.MissingEntry):
             build({}).resolve("lib-cran-x", ["cran-5a", "cran-5b"])
 
+    def test_no_candidates_fails(self):
+        # A spell whose Technique/Form/level combination matches zero
+        # base-effect guideline entries at all — a real scenario once real
+        # spells are imported (Task 10).
+        with self.assertRaises(ledger.MissingEntry):
+            build({}).resolve("lib-cran-x", [])
+
     def test_stale_candidate_set_fails(self):
         # Todo item 22 adds guideline rows. A decision made against three
         # candidates deserves re-examination when there are four.
@@ -47,6 +54,23 @@ class ResolveTest(unittest.TestCase):
                 "baseEffectId": "cran-5a",
                 "candidates": ["cran-5a"],
                 "rationale": "unnecessary",
+            }
+        })
+        with self.assertRaises(ledger.UnnecessaryEntry):
+            book.resolve("lib-cran-x", ["cran-5a"])
+
+    def test_stale_multi_candidate_entry_becomes_unnecessary_at_one(self):
+        # A ledger entry was written when there were two candidates, and the
+        # catalog has since narrowed to one (a guideline row was corrected or
+        # removed). This pins the current behavior: no ambiguity now means no
+        # entry is needed, regardless of whether the entry's own recorded
+        # candidates list has since gone stale — UnnecessaryEntry wins over
+        # StaleEntry here, and removing the entry as instructed resolves both.
+        book = build({
+            "lib-cran-x": {
+                "baseEffectId": "cran-5a",
+                "candidates": ["cran-5a", "cran-5b"],
+                "rationale": "chosen when there were two",
             }
         })
         with self.assertRaises(ledger.UnnecessaryEntry):
