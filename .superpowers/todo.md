@@ -232,6 +232,13 @@ gap: spells needing Ring, Circle or Eye could not be expressed at all.
 - [ ] Validate imported spells conform to new constraints (one Range/Duration/Target)
 - [ ] Add migration for legacy spell saves (if any)
 - [ ] Test backup round-trip (export → import)
+- [ ] **Known gap (found in the Ritual Spells whole-branch review):**
+      `test/data/services/backup_service_test.dart`'s "backup round-trip" test
+      duplicates `spell_test.dart`'s serialization round-trip rather than
+      calling through the real `BackupService` — the service itself is not
+      actually exercised by that test. Not a regression from that branch (the
+      service wasn't touched), but a pre-existing coverage hole this item
+      should close along with the checkbox above.
 
 ### 8. UI: Disable Multi-Select for Range/Duration/Target
 - [ ] Update UI to prevent selecting multiple Range options
@@ -466,6 +473,33 @@ built from at least 3 charms (9 for using all three together):
   line 12468) for the Ritual flagging pass. Nothing to do with Rituals — an
   extraction gap. The catalog has `cran-35` (Heal all wounds), `cran-40`
   (Characteristic) and `cran-50` (magical beast) but no siblings for these rows.
+
+### 23. Ritual Spells Review — Remaining Cosmetic/Test-Hygiene Findings
+Three Minor findings from the Ritual Spells whole-branch review, left unfixed
+as genuinely low-priority (5 of the review's 8 Minor findings were fixed
+directly — see commit `ca3c28a`). None affect correctness.
+
+- [ ] **JSON formatting inconsistency in `assets/data/spell_library.json`** —
+      the 5 Ritual spells added by that branch use multi-line citation
+      formatting; the other 31 built-in spells use compact single-line. Purely
+      cosmetic; reformat the 5 to match if a pass over this file happens for
+      any other reason.
+- [ ] **A widget test title promises more than it asserts** — one test in
+      the Ritual Spells work (`test/presentation/widgets/*` or
+      `test/presentation/screens/spell_creation_screen_test.dart`; not pinned
+      down further by the review) has a name broader than what it actually
+      checks. Needs a pass to find and either narrow the title or extend the
+      assertions.
+- [ ] **The "no accidental Ritual" regression-guard loop only checks
+      `ritualDeclaration`**, not a full breakdown recompute — it could in
+      theory miss a case where `ritualDeclaration == none` but
+      `RitualStatus`-derived reasons (e.g. a guideline flag or the >50
+      threshold) still fire. Tighten it to assert on a recomputed
+      `LevelBreakdown.ritualStatus.isRitual` instead of just the declaration
+      field.
+- **Rationale:** Recorded here rather than fixed immediately because none is a
+  correctness bug — see `.superpowers/sdd/progress.md` in the (now-merged)
+  `feature/ritual-spells` history for the full review context.
 
 ---
 
