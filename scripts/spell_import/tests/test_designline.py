@@ -55,6 +55,116 @@ class ParseDesignTest(unittest.TestCase):
             designline.parse_design("(Base 10, +1 Touch, +1 fancy effect)")
 
 
+class VocabularyAdditionsTest(unittest.TestCase):
+    """Direct pins for the vocabulary added beyond the original brief
+    (commit a95bcd7): each entry was hand-verified against a real DE spell,
+    but VocabularyCoverageTest below only asserts parsing doesn't raise, so
+    none of them had a test asserting the actual kind/label/magnitude. These
+    are synthetic minimal design lines, not corpus lookups, so a future typo
+    in the mapping (e.g. "Str" resolving to the wrong parameter, or
+    _REQUISITE_EFFECT producing kind="modifier") fails fast and locally.
+    """
+
+    def test_str_is_the_structure_parameter(self):
+        design = designline.parse_design("(Base 5, +1 Touch, +3 Str)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "parameter")
+        self.assertEqual(token.label, "Structure")
+        self.assertEqual(token.magnitude, 3)
+
+    def test_eve_is_the_eye_parameter(self):
+        design = designline.parse_design("(Base 5, +1 Eve)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "parameter")
+        self.assertEqual(token.label, "Eye")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_dia_is_the_diameter_parameter(self):
+        design = designline.parse_design("(Base 5, +1 Dia)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "parameter")
+        self.assertEqual(token.label, "Diameter")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_technique_effect_phrasing_is_a_requisite_not_a_modifier(self):
+        # "<Technique> effect" (_REQUISITE_EFFECT) is an alternate spelling of
+        # "<Technique> requisite" used alongside a "Req: <Technique>" stat
+        # line (e.g. Circling Winds of Protection). Must come out as
+        # kind="requisite" with the technique as the label, not "modifier".
+        design = designline.parse_design("(Base 5, +1 Touch, +1 Rego effect)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "requisite")
+        self.assertEqual(token.label, "Rego")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_free_requisite_no_increase_phrasing(self):
+        design = designline.parse_design("(Base 5, +1 Touch, no increase for requisite)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "requisite")
+        self.assertEqual(token.magnitude, 0)
+
+    def test_free_requisite_is_free_phrasing(self):
+        design = designline.parse_design("(Base 5, +1 Touch, requisite is free)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "requisite")
+        self.assertEqual(token.magnitude, 0)
+
+    def test_free_requisite_no_cost_for_technique_effect_phrasing(self):
+        design = designline.parse_design("(Base 5, +1 Touch, no cost for Rego effect)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "requisite")
+        self.assertEqual(token.magnitude, 0)
+
+    def test_crim_directed_image_move_at_your_command(self):
+        design = designline.parse_design("(Base 5, +2 move at your command)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "move at your command")
+        self.assertEqual(token.magnitude, 2)
+
+    def test_crim_directed_image_move_under_your_command(self):
+        design = designline.parse_design("(Base 5, +2 move under your command)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "move under your command")
+        self.assertEqual(token.magnitude, 2)
+
+    def test_crim_sensory_complexity_intelligible_speech(self):
+        design = designline.parse_design("(Base 5, +1 intelligible speech)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "intelligible speech")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_reim_moved_image_matches_changes(self):
+        design = designline.parse_design("(Base 5, +1 moved image matches changes)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "moved image matches changes")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_reim_additional_senses_plural(self):
+        design = designline.parse_design("(Base 5, +1 additional senses)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "additional senses")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_reim_additional_sense_singular(self):
+        design = designline.parse_design("(Base 5, +1 additional sense)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "additional sense")
+        self.assertEqual(token.magnitude, 1)
+
+    def test_reim_moving_image(self):
+        design = designline.parse_design("(Base 5, +1 moving image)")
+        token = design.tokens[-1]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "moving image")
+        self.assertEqual(token.magnitude, 1)
+
+
 class VocabularyCoverageTest(unittest.TestCase):
     def test_every_de_design_line_either_parses_or_names_its_blocker(self):
         from scripts.spell_import import blocks, sources
