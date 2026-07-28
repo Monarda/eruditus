@@ -29,3 +29,20 @@ class ResolveBookTest(unittest.TestCase):
         self.assertGreater(len(lines), 10000)
         self.assertFalse(any(line.endswith("\n") for line in lines))
         self.assertTrue(any(line.startswith(">") for line in lines))
+
+    def test_sanctuary_of_ice_raw_md_collapses_into_reviewed_entry(self):
+        title = "Ars Magica 4e - Sanctuary of Ice - The Greater Alps Tribunal"
+        books = sources.all_books()
+        self.assertIn(title, books)
+        self.assertNotIn("Ars Magica 4e - Sanctuary of Ice", books)
+        self.assertEqual(books[title].parent.name, "reviewed")
+
+    def test_against_the_dark_raw_md_collapses_into_reviewed_entry(self):
+        title = "Ars Magica 5e - Against the Dark - The Transylvanian Tribunal"
+        books = sources.all_books()
+        self.assertIn(title, books)
+        self.assertNotIn(
+            "Ars Magica 5e - Tribunal - Against the Dark - The Transylvanian Tribunal",
+            books,
+        )
+        self.assertEqual(books[title].parent.name, "reviewed")

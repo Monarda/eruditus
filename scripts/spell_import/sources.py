@@ -22,11 +22,26 @@ DE_TITLE = "Ars Magica - Definitive Edition (Core Rules)"
 _SUFFIX = re.compile(r"\s*-\s*(ForceOCRfixed|RedoOCR)$")
 _EDITION_TAG = re.compile(r"\s*\[digital edition\].*$")
 
+# A handful of raw-md filenames diverge from their reviewed counterpart by
+# more than an OCR-run suffix or edition tag (a missing subtitle, an extra
+# word inserted before the title). These are known, specific mismatches, not
+# a pattern worth solving with fuzzy matching, so they are listed explicitly:
+# raw-md-derived title -> canonical (reviewed) title.
+_TITLE_ALIASES = {
+    "Ars Magica 4e - Sanctuary of Ice": (
+        "Ars Magica 4e - Sanctuary of Ice - The Greater Alps Tribunal"
+    ),
+    "Ars Magica 5e - Tribunal - Against the Dark - The Transylvanian Tribunal": (
+        "Ars Magica 5e - Against the Dark - The Transylvanian Tribunal"
+    ),
+}
+
 
 def title_of(path: pathlib.Path) -> str:
     stem = path.name[: -len(".md")] if path.name.endswith(".md") else path.name
     stem = _EDITION_TAG.sub("", stem)
-    return _SUFFIX.sub("", stem).strip()
+    stem = _SUFFIX.sub("", stem).strip()
+    return _TITLE_ALIASES.get(stem, stem)
 
 
 def all_books(root: pathlib.Path = RULEBOOK_ROOT) -> dict[str, pathlib.Path]:
