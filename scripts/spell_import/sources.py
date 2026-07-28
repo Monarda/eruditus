@@ -34,6 +34,8 @@ _TITLE_ALIASES = {
     "Ars Magica 5e - Tribunal - Against the Dark - The Transylvanian Tribunal": (
         "Ars Magica 5e - Against the Dark - The Transylvanian Tribunal"
     ),
+    "Ars Magica Definitive Digital _alt version": DE_TITLE,
+    "Ars Magica Definitive High Contrast": DE_TITLE,
 }
 
 
