@@ -46,3 +46,8 @@ app.*.map.json
 
 # Superpowers brainstorming visual-companion scratch state
 .superpowers/brainstorm/
+
+# Written by scripts/spell_import/extract_spells.py when the ledger is
+# incomplete. It is a worksheet, not a record — copy decisions into
+# resolutions.json by hand.
+scripts/spell_import/resolutions.proposed.json
