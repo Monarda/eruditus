@@ -156,15 +156,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         ),
       );
 
-  static const String _creo = 'Creo';
-  static const String _momentaryDurationId = 'duration-momentary';
-
-  /// A Momentary Creo spell is the one case the rulebook leaves to the caster
-  /// (Core Rules line 12351), so it is the only case the checkbox is offered
-  /// for and the only case the bloc sets automatically.
-  bool _declaresLastingCreation(SpellDraft draft) =>
-      draft.technique == _creo && draft.duration?.id == _momentaryDurationId;
-
   /// Re-derives [SpellDraft.ritualDeclaration] after a change to Technique,
   /// Form, base effect or Duration.
   ///
@@ -179,7 +170,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   SpellDraft _withRitualDeclaration(SpellDraft draft, {required bool reapplyDefault}) {
     if (draft.ritualDeclaration == RitualDeclaration.storyguideRuling) return draft;
 
-    if (!_declaresLastingCreation(draft)) {
+    if (!draft.isEligibleForLastingCreationDeclaration) {
       return draft.copyWith(ritualDeclaration: RitualDeclaration.none);
     }
     if (reapplyDefault) {
@@ -212,17 +203,21 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       referenceLevel: level,
     );
 
-    // Precompute each suggestion's own level (reusing SpellEngine's single
-    // calculateSpellLevel implementation rather than duplicating the
-    // magnitude-summing logic) so cards can display it.
-    final suggestionLevels = <String, int>{
-      for (final s in suggestions)
-        s.id: spellEngine.calculateSpellLevel(
-          baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
-          selectedModifiers: s.selectedModifiers, requisites: s.requisites,
-          ritualDeclaration: s.ritualDeclaration,
-        ),
-    };
+    // Precompute each suggestion's own level and Ritual status (reusing
+    // SpellEngine's single calculateBreakdown implementation rather than
+    // duplicating the magnitude-summing/Ritual-deriving logic) so cards can
+    // display both, matching the library screen's chip.
+    final suggestionLevels = <String, int>{};
+    final ritualSuggestionIds = <String>{};
+    for (final s in suggestions) {
+      final suggestionBreakdown = spellEngine.calculateBreakdown(
+        baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+        selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+        ritualDeclaration: s.ritualDeclaration,
+      );
+      suggestionLevels[s.id] = suggestionBreakdown.level;
+      if (suggestionBreakdown.ritualStatus.isRitual) ritualSuggestionIds.add(s.id);
+    }
 
     emit(state.copyWith(
       status: SpellCreationStatus.calculated,
@@ -231,6 +226,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       breakdown: breakdown,
       suggestions: suggestions,
       suggestionLevels: suggestionLevels,
+      ritualSuggestionIds: ritualSuggestionIds,
     ));
   }
 

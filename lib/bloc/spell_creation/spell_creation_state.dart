@@ -16,6 +16,9 @@ class SpellCreationState extends Equatable {
   // show "name, level, source, description" on each suggestion card without
   // recomputing (or duplicating) SpellEngine.calculateSpellLevel itself.
   final Map<String, int> suggestionLevels;
+  // Ids of suggestions that are themselves Ritual spells, so cards can show
+  // the same Ritual chip the library screen shows.
+  final Set<String> ritualSuggestionIds;
   final Spell? savedSpell;
   final String? errorMessage;
 
@@ -27,6 +30,7 @@ class SpellCreationState extends Equatable {
     this.breakdown,
     this.suggestions = const [],
     this.suggestionLevels = const {},
+    this.ritualSuggestionIds = const {},
     this.savedSpell,
     this.errorMessage,
   });
@@ -44,6 +48,7 @@ class SpellCreationState extends Equatable {
     LevelBreakdown? breakdown,
     List<ResolvedSpell>? suggestions,
     Map<String, int>? suggestionLevels,
+    Set<String>? ritualSuggestionIds,
     Spell? savedSpell,
     String? errorMessage,
   }) {
@@ -55,6 +60,7 @@ class SpellCreationState extends Equatable {
       breakdown: breakdown ?? this.breakdown,
       suggestions: suggestions ?? this.suggestions,
       suggestionLevels: suggestionLevels ?? this.suggestionLevels,
+      ritualSuggestionIds: ritualSuggestionIds ?? this.ritualSuggestionIds,
       savedSpell: savedSpell ?? this.savedSpell,
       // Unlike the other fields, errorMessage is NOT carried forward via a
       // `?? this.errorMessage` fallback: every emit implicitly clears a
@@ -73,6 +79,7 @@ class SpellCreationState extends Equatable {
         breakdown,
         suggestions,
         suggestionLevels,
+        ritualSuggestionIds,
         savedSpell,
         errorMessage,
       ];

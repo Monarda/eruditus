@@ -158,6 +158,74 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'SpellCalculated flags a Ritual suggestion in ritualSuggestionIds, leaving a non-Ritual one out',
+    build: () {
+      final yearDuration = Parameter(
+        id: 'p2-year', name: 'Year', category: 'Duration', magnitude: 5,
+        requiresRitual: true,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+      );
+      // A separate, low-level effect/target so this suggestion's raw level
+      // stays well under the Ritual >50 threshold — it must be non-Ritual by
+      // construction, not just by not carrying a `requiresRitual` parameter.
+      final lowEffect = BaseEffect(
+        id: 'e-low', technique: 'Creo', form: 'Ignem',
+        description: 'Warm a small object', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final zeroTarget = Parameter(
+        id: 'p3-zero', name: 'Personal-ish', category: 'Target', magnitude: 0,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+      );
+      final ritualRecord = Spell(
+        id: 'ritual-suggestion',
+        name: 'Endless Flame',
+        baseEffectId: creoIgnemEffect.id,
+        rangeId: rangeParam.id,
+        durationId: yearDuration.id,
+        targetId: targetParam.id,
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+      final ordinaryRecord = Spell(
+        id: 'ordinary-suggestion',
+        name: 'Warmth of the Hearth',
+        baseEffectId: lowEffect.id,
+        rangeId: rangeParam.id,
+        durationId: durationParam.id,
+        targetId: zeroTarget.id,
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+      final ritualSuggestion = ResolvedSpell(
+        record: ritualRecord, baseEffect: creoIgnemEffect,
+        range: rangeParam, duration: yearDuration, target: targetParam);
+      final ordinarySuggestion = ResolvedSpell(
+        record: ordinaryRecord, baseEffect: lowEffect,
+        range: rangeParam, duration: durationParam, target: zeroTarget);
+      return SpellCreationBloc(
+        spellEngine: SpellEngine(allSpells: [ritualSuggestion, ordinarySuggestion]),
+        spellRepository: spellRepository,
+      );
+    },
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', {'ritual-suggestion'}),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'SpellSaveRequested saves the spell and emits saving then saved',
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
     act: (bloc) {

@@ -1,3 +1,8 @@
+# One-shot script, already applied (Ritual Spells Task 3, commit f16c94e).
+# Kept for reference only, not part of any build or test step — do not
+# re-run without checking `base_effects.json` first: `crco-5b` was
+# reclassified `required` -> `suggested` after this script ran (see the
+# design spec), so REQUIRED/SUGGESTED below no longer match the current file.
 import pathlib
 import re
 

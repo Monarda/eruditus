@@ -29,9 +29,13 @@ class AppDatabase {
         // it. `custom_factors` is dropped too, but only as dead-table
         // cleanup: `_createSchema` never creates it, so this is a no-op with
         // zero data-loss risk.
-        // The v5 bump is the same shape again: the `spells` DDL is unchanged,
-        // but stored blobs predate `ritualDeclaration`, so the table is
-        // dropped and rebuilt rather than translated.
+        // The v5 bump touches the `spells` blob shape again (the new
+        // `ritualDeclaration` field), but unlike v4 this one is additive: a
+        // translation-free upgrade was possible by defaulting missing
+        // `ritualDeclaration` to `none` on read. Dropped anyway, for
+        // consistency with the v4 policy above — backward compatibility is
+        // not a goal for this prototype, and a silent per-field default is
+        // one more implicit behavior to maintain forever.
         onUpgrade: (db, oldVersion, newVersion) async {
           for (final table in const ['spells', 'custom_factors']) {
             await db.execute('DROP TABLE IF EXISTS $table');

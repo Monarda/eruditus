@@ -166,6 +166,15 @@ class SpellDraft {
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
+  static const String _creo = 'Creo';
+  static const String _momentaryDurationId = 'duration-momentary';
+
+  /// A Momentary Creo spell is the one case the rulebook leaves to the caster
+  /// (Core Rules line 12351) — the only case the `lastingCreation` checkbox
+  /// is offered for and the only case it is set automatically.
+  bool get isEligibleForLastingCreationDeclaration =>
+      technique == _creo && duration?.id == _momentaryDurationId;
+
   Spell toSpell({required String name, required PublicationSource source}) {
     final missingFields = <String>[
       if (baseEffect == null) 'baseEffect',

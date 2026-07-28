@@ -678,6 +678,8 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
+
+      await database.close();
     },
   );
 }

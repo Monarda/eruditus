@@ -192,8 +192,7 @@ class SpellCreationScreen extends StatelessWidget {
                       ? (state.breakdown?.ritualStatus ?? const RitualStatus.notRitual())
                       : const RitualStatus.notRitual(),
                   declaration: draft.ritualDeclaration,
-                  showDeclarationCheckbox: draft.technique == 'Creo' &&
-                      draft.duration?.id == 'duration-momentary',
+                  showDeclarationCheckbox: draft.isEligibleForLastingCreationDeclaration,
                   durationName: draft.duration?.name ?? '',
                   targetName: draft.target?.name ?? '',
                   guidelineIsSuggested: draft.baseEffect?.ritualRequirement ==
@@ -221,7 +220,11 @@ class SpellCreationScreen extends StatelessWidget {
                     const Text('No similar spells found.')
                   else
                     ...state.suggestions.map(
-                      (s) => SpellCard(spell: s, level: state.suggestionLevels[s.id]),
+                      (s) => SpellCard(
+                        spell: s,
+                        level: state.suggestionLevels[s.id],
+                        isRitual: state.ritualSuggestionIds.contains(s.id),
+                      ),
                     ),
                   if (state.status == SpellCreationStatus.error)
                     Padding(
