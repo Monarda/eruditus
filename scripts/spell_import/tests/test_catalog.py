@@ -1,3 +1,4 @@
+import re
 import unittest
 
 from scripts.spell_import import catalog
@@ -65,3 +66,51 @@ class ExistingIdsTest(unittest.TestCase):
                 mismatches.append((spell["name"], spell["id"], generated))
 
         self.assertEqual(mismatches, [], msg="the slugger must reproduce existing ids exactly")
+
+
+class BaseEffectIdSchemeTest(unittest.TestCase):
+    """Every base-effect id must encode its own technique/form/level.
+
+    259 of 604 ids failed this once (e.g. `reem-15b` for Rego Mentem, which
+    should be `reme-15b`) because they predated `TECHNIQUE_ABBREVIATION`/
+    `FORM_ABBREVIATION` and were never reconciled against them. This is the
+    regression guard: it holds `base_effects.json` to the same scheme
+    `slug_id` uses, so a future hand-edit can't silently drift again.
+    """
+
+    _GENERAL_SUFFIX = re.compile(r"^(gen(-\d+)?|G\d*)$", re.IGNORECASE)
+    _LEVEL_SUFFIX = re.compile(r"^(\d+)[a-z]?$")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.effects = catalog.Catalog.load().base_effects
+
+    def test_every_id_prefix_matches_its_own_technique_and_form(self):
+        mismatches = []
+        for effect in self.effects:
+            prefix = effect["id"].split("-", 1)[0]
+            expected = (
+                catalog.TECHNIQUE_ABBREVIATION[effect["technique"]]
+                + catalog.FORM_ABBREVIATION[effect["form"]]
+            )
+            if prefix != expected:
+                mismatches.append((effect["id"], effect["technique"], effect["form"], expected))
+        self.assertEqual(mismatches, [], msg="id prefix must be technique+form abbreviation")
+
+    def test_every_id_suffix_matches_its_own_base_level(self):
+        mismatches = []
+        unparsed = []
+        for effect in self.effects:
+            suffix = effect["id"].split("-", 1)[1]
+            if self._GENERAL_SUFFIX.match(suffix):
+                if effect["baseLevel"] != 0:
+                    mismatches.append((effect["id"], "General", effect["baseLevel"]))
+                continue
+            level_match = self._LEVEL_SUFFIX.match(suffix)
+            if not level_match:
+                unparsed.append((effect["id"], suffix))
+                continue
+            if effect["baseLevel"] != int(level_match.group(1)):
+                mismatches.append((effect["id"], level_match.group(1), effect["baseLevel"]))
+        self.assertEqual(unparsed, [], msg="id suffix shape not recognised")
+        self.assertEqual(mismatches, [], msg="id suffix level must match baseLevel")
