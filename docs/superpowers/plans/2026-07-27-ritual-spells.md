@@ -403,6 +403,13 @@ git add lib/models/base_effect.dart test/models/base_effect_test.dart && git com
 
 ### Task 3: Flag the 45 ritual base effects in the catalog
 
+> **Addendum (post-merge whole-branch review):** `crco-5b` was reclassified
+> from `required` to `suggested` after this task landed — the rulebook's
+> Creo Corpus guideline table carries no Ritual marker for it, unlike the
+> other six `required` entries. The split below (7/38) reflects what this
+> task actually implemented and verified at the time; the corrected 6/39
+> split is recorded in the spec. See `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`.
+
 **Files:**
 - Modify: `assets/data/base_effects.json`
 - Test: `test/data/datasources/asset_data_loader_test.dart`
