@@ -25,51 +25,8 @@ FORM_ABBREVIATION = {
 # Leading articles and stock phrases the existing 36 ids drop.
 _STOPWORDS = {"the", "of", "a", "an", "phantasm"}
 
-# 19 of the 36 committed library spells were hand-edited before this slugger
-# existed and treat "of" (and which leading noun to drop) inconsistently —
-# e.g. "Veil of Invisibility" keeps "of" (-> veil-of-invisibility) while
-# "Illusion of Cool Flames" drops both "Illusion" and "of" (-> cool-flames).
-# No general word-dropping rule reproduces all of them (see
-# .superpowers/sdd/task-5-report.md for the full analysis), and inventing one
-# would just curve-fit this noise into the rule that also generates ids for
-# the ~250 spells being imported later, silently degrading those. So these
-# 19 historical ids are pinned verbatim by spell name; the general rule
-# below is authoritative only for names that aren't in this dict, i.e.
-# spells not yet given an id.
-#
-# Note: "Incantation of Summoning the Dead" -> "lib-reem-summoning-the-dead"
-# preserves the historical id as-is, including its "reem" prefix, which
-# itself echoes a pre-existing typo in assets/data/base_effects.json's
-# "reem-15b" entry (Rego Mentem should abbreviate to "reme", per
-# FORM_ABBREVIATION, not "reem"). That typo is a base-effects data-quality
-# issue, out of scope here, and relevant to the already-tracked todo about
-# rebuilding the base-effect catalog from the correct source.
-ID_OVERRIDES = {
-    "Haunt of the Living Ghost": "lib-crim-haunt",
-    "Eyes of the Eagle": "lib-inim-eyes-of-the-eagle",
-    "Taste of the Spices and Herbs": "lib-muim-taste-of-spices",
-    "Aura of Ennobled Presence": "lib-muim-ennobled-presence",
-    "Notes of a Delightful Sound": "lib-muim-notes-of-delightful-sound",
-    "Disguise of the Transformed Image": "lib-muim-disguise",
-    "Illusion of Cool Flames": "lib-peim-cool-flames",
-    "Veil of Invisibility": "lib-peim-veil-of-invisibility",
-    "Removal of the Conspicuous Sigil": "lib-peim-conspicuous-sigil",
-    "Silence of the Smothered Sound": "lib-peim-smothered-sound",
-    "Chamber of Invisibility": "lib-peim-chamber-of-invisibility",
-    "Illusion of the Shifted Image": "lib-reim-shifted-image",
-    "Image from the Wizard Torn": "lib-reim-wizard-torn",
-    "Wall of Protecting Stone": "lib-crte-wall-of-protecting-stone",
-    "Reaching Hand of Ten Boulders": "lib-rete-reaching-hand-of-ten-boulders",
-    "Incantation of the Body Made Whole": "lib-crco-body-made-whole",
-    "Touch of Midas": "lib-crte-touch-of-midas",
-    "Curse of the Ravenous Swarm": "lib-cran-ravenous-swarm",
-    "Incantation of Summoning the Dead": "lib-reem-summoning-the-dead",
-}
-
 
 def slug_id(technique: str, form: str, name: str) -> str:
-    if name in ID_OVERRIDES:
-        return ID_OVERRIDES[name]
     prefix = TECHNIQUE_ABBREVIATION[technique] + FORM_ABBREVIATION[form]
     words = re.sub(r"[^a-z0-9\s-]", "", name.lower()).split()
     kept = [w for w in words if w not in _STOPWORDS] or words

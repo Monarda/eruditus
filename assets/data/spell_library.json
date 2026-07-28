@@ -94,7 +94,7 @@
     ]
   },
   {
-    "id": "lib-crim-haunt",
+    "id": "lib-crim-haunt-living-ghost",
     "name": "Haunt of the Living Ghost",
     "requisites": [
       {
@@ -180,7 +180,7 @@
     ]
   },
   {
-    "id": "lib-inim-eyes-of-the-eagle",
+    "id": "lib-inim-eyes-eagle",
     "name": "Eyes of the Eagle",
     "requisites": [],
     "source": "published",
@@ -218,7 +218,7 @@
     ]
   },
   {
-    "id": "lib-muim-taste-of-spices",
+    "id": "lib-muim-taste-spices-and-herbs",
     "name": "Taste of the Spices and Herbs",
     "requisites": [],
     "source": "published",
@@ -237,7 +237,7 @@
     ]
   },
   {
-    "id": "lib-muim-ennobled-presence",
+    "id": "lib-muim-aura-ennobled-presence",
     "name": "Aura of Ennobled Presence",
     "requisites": [],
     "source": "published",
@@ -256,7 +256,7 @@
     ]
   },
   {
-    "id": "lib-muim-notes-of-delightful-sound",
+    "id": "lib-muim-notes-delightful-sound",
     "name": "Notes of a Delightful Sound",
     "requisites": [],
     "source": "published",
@@ -275,7 +275,7 @@
     ]
   },
   {
-    "id": "lib-muim-disguise",
+    "id": "lib-muim-disguise-transformed-image",
     "name": "Disguise of the Transformed Image",
     "requisites": [],
     "source": "published",
@@ -332,7 +332,7 @@
     ]
   },
   {
-    "id": "lib-peim-cool-flames",
+    "id": "lib-peim-illusion-cool-flames",
     "name": "Illusion of Cool Flames",
     "requisites": [],
     "source": "published",
@@ -370,7 +370,7 @@
     ]
   },
   {
-    "id": "lib-peim-veil-of-invisibility",
+    "id": "lib-peim-veil-invisibility",
     "name": "Veil of Invisibility",
     "requisites": [],
     "source": "published",
@@ -393,7 +393,7 @@
     ]
   },
   {
-    "id": "lib-peim-conspicuous-sigil",
+    "id": "lib-peim-removal-conspicuous-sigil",
     "name": "Removal of the Conspicuous Sigil",
     "requisites": [],
     "source": "published",
@@ -412,7 +412,7 @@
     ]
   },
   {
-    "id": "lib-peim-smothered-sound",
+    "id": "lib-peim-silence-smothered-sound",
     "name": "Silence of the Smothered Sound",
     "requisites": [],
     "source": "published",
@@ -435,7 +435,7 @@
     ]
   },
   {
-    "id": "lib-peim-chamber-of-invisibility",
+    "id": "lib-peim-chamber-invisibility",
     "name": "Chamber of Invisibility",
     "requisites": [],
     "source": "published",
@@ -454,7 +454,7 @@
     ]
   },
   {
-    "id": "lib-reim-shifted-image",
+    "id": "lib-reim-illusion-shifted-image",
     "name": "Illusion of the Shifted Image",
     "requisites": [],
     "source": "published",
@@ -543,7 +543,7 @@
     ]
   },
   {
-    "id": "lib-reim-wizard-torn",
+    "id": "lib-reim-image-from-wizard-torn",
     "name": "Image from the Wizard Torn",
     "requisites": [
       {
@@ -595,7 +595,7 @@
     ]
   },
   {
-    "id": "lib-crte-wall-of-protecting-stone",
+    "id": "lib-crte-wall-protecting-stone",
     "name": "Wall of Protecting Stone",
     "requisites": [],
     "source": "published",
@@ -618,7 +618,7 @@
     ]
   },
   {
-    "id": "lib-rete-reaching-hand-of-ten-boulders",
+    "id": "lib-rete-reaching-hand-ten-boulders",
     "name": "Reaching Hand of Ten Boulders",
     "requisites": [],
     "source": "published",
@@ -662,7 +662,7 @@
     "citations": [{"bookId": "arm5-core"}]
   },
   {
-    "id": "lib-crco-body-made-whole",
+    "id": "lib-crco-incantation-body-made-whole",
     "name": "Incantation of the Body Made Whole",
     "requisites": [],
     "source": "published",
@@ -682,7 +682,7 @@
     ]
   },
   {
-    "id": "lib-crte-touch-of-midas",
+    "id": "lib-crte-touch-midas",
     "name": "Touch of Midas",
     "requisites": [],
     "source": "published",
@@ -702,7 +702,7 @@
     ]
   },
   {
-    "id": "lib-cran-ravenous-swarm",
+    "id": "lib-cran-curse-ravenous-swarm",
     "name": "Curse of the Ravenous Swarm",
     "requisites": [
       {
@@ -758,7 +758,7 @@
     ]
   },
   {
-    "id": "lib-reem-summoning-the-dead",
+    "id": "lib-reme-incantation-summoning-dead",
     "name": "Incantation of Summoning the Dead",
     "requisites": [],
     "source": "published",

@@ -132,11 +132,11 @@ void main() {
     final engine = SpellEngine(allSpells: const [], allModifiers: modifiers);
 
     const expected = <String, ({int level, bool isRitual, int reasonCount})>{
-      'lib-crco-body-made-whole': (level: 40, isRitual: true, reasonCount: 1),
-      'lib-crte-touch-of-midas': (level: 20, isRitual: true, reasonCount: 1),
-      'lib-cran-ravenous-swarm': (level: 50, isRitual: true, reasonCount: 1),
+      'lib-crco-incantation-body-made-whole': (level: 40, isRitual: true, reasonCount: 1),
+      'lib-crte-touch-midas': (level: 20, isRitual: true, reasonCount: 1),
+      'lib-cran-curse-ravenous-swarm': (level: 50, isRitual: true, reasonCount: 1),
       'lib-crau-breath-open-sky': (level: 40, isRitual: true, reasonCount: 1),
-      'lib-reem-summoning-the-dead': (level: 40, isRitual: true, reasonCount: 1),
+      'lib-reme-incantation-summoning-dead': (level: 40, isRitual: true, reasonCount: 1),
     };
 
     expected.forEach((id, want) {
