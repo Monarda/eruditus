@@ -114,10 +114,18 @@ void main() {
     }
   });
 
-  test('loadSpellLibrary loads all 36 built-in spells', () async {
+  test('loadSpellLibrary loads every spell in the asset file', () async {
     final spells = await loader.loadSpellLibrary();
 
-    expect(spells.length, 36);
+    // Derived from the raw file, not a literal. Item 5 left this as a
+    // hardcoded 36 on the reasoning that the library was "small,
+    // hand-curated, changed in deliberate reviewed batches, not
+    // bulk-extracted". Every clause of that stopped being true when the
+    // library became generator output.
+    final rawList =
+        jsonDecode(await rootBundle.loadString('assets/data/spell_library.json')) as List;
+    expect(spells.length, rawList.length,
+        reason: 'loadSpellLibrary should return exactly the entries in spell_library.json');
     expect(spells.every((s) => s.provenance.source == PublicationSource.published), isTrue);
     expect(spells.every((s) => s.name != null && s.name!.isNotEmpty), isTrue);
   });
