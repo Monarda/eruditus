@@ -1,1 +1,92 @@
-{}
+{
+  "lib-inim-prying-eyes": {
+    "baseEffectId": "inim-1a",
+    "candidates": ["inim-1a", "inim-1b", "inim-1c"],
+    "rationale": "Lets you see inside a room from touching its wall; inim-1a is 'use one sense at a distance', not memorizing an image already seen (inim-1b) or discerning your own illusions (inim-1c)."
+  },
+  "lib-inim-discern-own-illusions": {
+    "baseEffectId": "inim-1c",
+    "candidates": ["inim-1a", "inim-1b", "inim-1c"],
+    "rationale": "Makes your own illusions transparent but still discernible to you, which is inim-1c's guideline verbatim ('be able to discern your own false images'), not sensing at a distance (inim-1a) or remembering an image (inim-1b)."
+  },
+  "lib-inim-ear-for-distant-voices": {
+    "baseEffectId": "inim-1a",
+    "candidates": ["inim-1a", "inim-1b", "inim-1c"],
+    "rationale": "Hears what is happening at a place reached via Arcane Connection: one sense (hearing) projected at a distance, i.e. inim-1a, not memory of an image (inim-1b) or self-illusion detection (inim-1c)."
+  },
+  "lib-inim-eyes-eagle": {
+    "baseEffectId": "inim-3b",
+    "candidates": ["inim-3a", "inim-3b"],
+    "rationale": "Sees distant things as if a foot away — inim-3b's guideline gives 'to see clearly at a distance' as its own example, whereas inim-3a is using three separate senses at once, which this spell does not do."
+  },
+  "lib-muim-taste-spices-and-herbs": {
+    "baseEffectId": "muim-2a",
+    "candidates": ["muim-2a", "muim-2b"],
+    "rationale": "Makes food or drink taste AND smell as designated — two sensations of the same object changed, matching muim-2a, not muim-2b which converts species from one sense into another (e.g. sound made visible)."
+  },
+  "lib-peim-invisibility-standing-wizard": {
+    "baseEffectId": "peim-4a",
+    "candidates": ["peim-4a", "peim-4b"],
+    "rationale": "Makes the target invisible, i.e. destroys its ability to affect sight — peim-4a — rather than peim-4b, which destroys any three of taste/touch/smell/hearing but leaves sight untouched."
+  },
+  "lib-peim-veil-invisibility": {
+    "baseEffectId": "peim-4a",
+    "candidates": ["peim-4a", "peim-4b"],
+    "rationale": "Makes the target completely undetectable to normal sight regardless of movement — destroying the ability to affect sight is peim-4a; peim-4b covers the non-sight senses instead."
+  },
+  "lib-peim-removal-conspicuous-sigil": {
+    "baseEffectId": "peim-4a",
+    "candidates": ["peim-4a", "peim-4b"],
+    "rationale": "Obscures grooves, runes, and markings from sight while shape remains — a sight-only suppression, matching peim-4a ('destroy an object's ability to affect sight') rather than peim-4b's non-sight senses."
+  },
+  "lib-peim-silence-smothered-sound": {
+    "baseEffectId": "peim-3a",
+    "candidates": ["peim-3a", "peim-3b"],
+    "rationale": "Makes a being or object incapable of producing sound — hearing is one of the two senses peim-3a covers ('smell or hearing'), whereas peim-3b covers taste and touch, neither of which is sound."
+  },
+  "lib-peim-chamber-invisibility": {
+    "baseEffectId": "peim-4a",
+    "candidates": ["peim-4a", "peim-4b"],
+    "rationale": "Causes a Group to become invisible — destroying the ability to affect sight, peim-4a, not peim-4b which destroys three of the other four senses and leaves sight alone."
+  },
+  "lib-reim-captive-voice": {
+    "baseEffectId": "reim-4b",
+    "candidates": ["reim-4a", "reim-4b"],
+    "rationale": "Captures a voice and places it inside a bag — the image (of sound) is made to appear contained in another object defined at casting, which is reim-4b verbatim, not reim-4a's simple fifteen-pace relocation."
+  },
+  "lib-reim-confusion-insane-vibrations": {
+    "baseEffectId": "reim-3b",
+    "candidates": ["reim-3a", "reim-3b"],
+    "rationale": "Makes everything the target perceives vibrate at high speed and sounds seem to come from the wrong place — objects appearing to move rapidly in a disorientating way is reim-3b's guideline exactly, not reim-3a's flat five-pace repositioning."
+  },
+  "lib-reim-image-from-wizard-torn": {
+    "baseEffectId": "reim-15b",
+    "candidates": ["reim-15a", "reim-15b"],
+    "rationale": "The caster's own image detaches and acts with independent senses and speech at Personal range (no Arcane Connection involved), matching reim-15b 'summon a disembodied spirit associated with Imaginem' rather than reim-15a, which relocates an image to a place reached via Arcane Connection."
+  },
+  "lib-inme-thoughts-within-babble": {
+    "baseEffectId": "inme-5b",
+    "candidates": ["inme-5a", "inme-5b"],
+    "rationale": "Lets you understand what speakers meant even when they misuse a language — inme-5b's guideline is 'understand the meaning behind spoken sounds' verbatim, not inme-5a's sensing of a single emotion."
+  },
+  "lib-crco-incantation-body-made-whole": {
+    "baseEffectId": "crco-35a",
+    "candidates": ["crco-35a", "crco-35b", "crco-35c"],
+    "rationale": "Heals all damage to a human body; crco-35a is 'heal all wounds' verbatim, distinct from resolving a terminal aging crisis (crco-35b) or raising a physical Characteristic (crco-35c)."
+  },
+  "lib-crte-touch-midas": {
+    "baseEffectId": "crte-15a",
+    "candidates": ["crte-15a", "crte-15b"],
+    "rationale": "Creates a lump of gold, a precious metal — crte-15a's guideline, not crte-15b which repairs an existing crafted item to 'as new' rather than creating raw material."
+  },
+  "lib-cran-curse-ravenous-swarm": {
+    "baseEffectId": "cran-5b",
+    "candidates": ["cran-5a", "cran-5b", "cran-5c"],
+    "rationale": "Calls a swarm of locusts or destructive insects, matching cran-5b 'create an insect or similar bug' — not cran-5a, which creates an animal product like spidersilk or wool, nor cran-5c, a Recovery-roll bonus."
+  },
+  "lib-reme-incantation-summoning-dead": {
+    "baseEffectId": "reme-15b",
+    "candidates": ["reme-15a", "reme-15b"],
+    "rationale": "Calls up a person's ghost, a disembodied spirit associated with Mentem — reme-15b verbatim, not reme-15a which controls a person the caster can currently see (a ghost being summoned is neither present nor visible beforehand)."
+  }
+}
