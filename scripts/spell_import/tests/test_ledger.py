@@ -95,3 +95,21 @@ class ResolveTest(unittest.TestCase):
 class CommittedLedgerTest(unittest.TestCase):
     def test_the_committed_ledger_parses(self):
         self.assertIsInstance(ledger.Ledger.load().entries, dict)
+
+    def test_every_committed_key_is_a_real_spell(self):
+        # A ledger entry is never consulted unless a spell reaches
+        # Ledger.resolve() with a matching id — a spell that is currently
+        # blocked (an unrecognised design-line token, no design line, etc.)
+        # never looks its id up at all. A typo'd key, or one for a spell
+        # that no longer exists under that name, would sit silently unused
+        # rather than raising anything. This catches that directly, instead
+        # of waiting for the spell's blocker to clear.
+        from scripts.spell_import import blocks, catalog as catalog_module, sources
+
+        lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
+        parsed, _ = blocks.parse_de(lines)
+        real_ids = {catalog_module.slug_id(b.technique, b.form, b.name) for b in parsed}
+
+        book = ledger.Ledger.load()
+        unknown = sorted(set(book.entries) - real_ids)
+        self.assertEqual(unknown, [], msg=f"ledger keys with no matching spell: {unknown}")

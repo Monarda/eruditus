@@ -70,10 +70,14 @@ class Ledger:
 
         if len(candidates) == 1:
             if entry is not None and entry.base_effect_id == candidates[0]:
-                raise UnnecessaryEntry(
-                    f"{spell_id}: only one candidate ({candidates[0]}); "
-                    "remove the ledger entry, or change it to a deliberate override"
-                )
+                # NOTE: an entry disagreeing with the sole candidate does NOT
+                # reach here — it falls through to the `not in candidates`
+                # check below, which always raises StaleEntry. There is
+                # currently no way to record a deliberate override of an
+                # unambiguous spell (see .superpowers/todo.md item 27); the
+                # message below only covers the "remove it" half of that.
+                raise UnnecessaryEntry(f"{spell_id}: only one candidate ({candidates[0]}); "
+                                        "remove the ledger entry")
             if entry is None:
                 return candidates[0]
 

@@ -106,9 +106,13 @@ Listed in dependency order. Item 27 is the next branch.
 - [ ] **9 spells the ledger cannot resolve — needs a rules decision, not a
       ledger entry.** Found while filling `resolutions.json` (Task 10 of the
       harness's implementation plan). Two distinct shapes of blocker:
-      - **Zero base-effect candidates at the computed level** (a catalog gap,
-        not a spell problem — likely relevant to item 22's rebuild-from-`reviewed`
-        work): `lib-muau-infernal-smoke-death`, `lib-muau-fog-confusion`,
+      - **Zero base-effect candidates at the computed level** — these are
+        exactly **item 28's 5 spells** (cross-referenced there in detail:
+        the level is genuinely derived from a prose rule above the
+        guideline table, not missing from extraction, and item 28's own
+        "add the derived rows as ordinary catalog entries" option is
+        probably the fix that also unblocks these for import):
+        `lib-muau-infernal-smoke-death`, `lib-muau-fog-confusion`,
         `lib-peig-wizards-icy-grip`, `lib-crvi-enigmas-gift`,
         `lib-invi-sense-lingering-magic`.
       - **Genuinely ambiguous between 2-3 candidates**, no textual
@@ -252,6 +256,65 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   the nearest printed rung.
 - **Found by the 2026-07-28 audit** as the 5 spells whose `Base N` matched no
   catalog entry at all.
+- **Confirmed again** when item 27's import harness ran for real: these are
+  exactly the 5 "zero base-effect candidates" spells in item 27's blocked
+  list. Fixing this item (adding the derived rows) is what would let them
+  import.
+
+### 29. Follow-ups from item 27's Final Whole-Branch Review — **NEW**
+Everything below is a genuine finding from the merge-readiness review of the
+published-spell-import branch (item 27) — none block that merge (the
+committed data and code are correct today), all concern *future* safety or
+clarity. The two cheapest, highest-value ones were fixed immediately as part
+of closing item 27 out (`KnownUnresolvableStalenessTest` in
+`test_extract.py`, `test_every_committed_key_is_a_real_spell` in
+`test_ledger.py`, and a corrected docstring in `emit.py`'s
+`_selected_modifiers`); what's left needs either more design judgement or
+more time than closing out item 27 warranted.
+
+- [ ] **No CI runs either test suite.** The harness's whole correctness
+      argument (`assets/data/spell_library.json` is verified-correct
+      generator output) depends on both `python -m unittest discover` and
+      `flutter test` actually running on every change — today neither does
+      automatically (`.github/workflows` doesn't exist). A regression that
+      silently reintroduces the `selectedModifiers: {}` bug (item 27's
+      Wizard's Mount defect) would pass every Python test (the golden-file
+      `RegenerationTest` just says "stale, re-run --write", which launders
+      the bug into the asset) — only the Dart-side assertion 1 catches it.
+      Highest-value single follow-up on this list.
+- [ ] **Decide on the ledger's "explicit override" promise.** The spec says
+      an entry disagreeing with an unambiguous spell's sole candidate is
+      valid "as an explicit override, which needs a rationale like any
+      other decision" — but `ledger.py`'s `resolve()` has no code path
+      where that succeeds; it always raises `StaleEntry`. The
+      `UnnecessaryEntry` message was corrected to stop promising the
+      impossible ("change it to a deliberate override"), but the actual
+      decision — implement the override, or drop the promise from the spec
+      — is still open.
+- [ ] **Wire the Imaginem complexity-factor mapping that already exists as
+      prose.** `designline.MODIFIER_LABELS`'s comment already documents a
+      verified `label -> (modifier_id, option_id)` mapping for ~10 Creo/Rego
+      Imaginem spells (all four Phantasm-* spells among them — currently
+      blocked, which is also why `library_repository_test.dart`'s search
+      test had to move off the query `'phantasm'`). Turning that comment
+      into real data `emit.py` consumes would unblock those spells directly.
+- [ ] **`rego-transport-distance` extension for Hermes' Portal** (already
+      named in item 27's hand-derivation note) — implementing it would also
+      make `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
+      start failing on purpose; whoever does this should expect and update
+      that test, not be surprised by it.
+- [ ] Minor: no `test_emit.py` — `emit.py` is the only pipeline module
+      without a direct unit test, and it's the module that carried the
+      `selectedModifiers` bug.
+- [ ] Minor: `main()` in `extract_spells.py` never prints *why* spells are
+      blocked (only the count) — a `--show-blocked` flag or always-print
+      would make the CLI more useful for items 24/25/26/28's ongoing work.
+- [ ] Minor: `catalog._STOPWORDS` still contains `"phantasm"`, a content
+      word, not a real stopword — currently a no-op (nothing named
+      "Phantasm" imports today) but will start silently shaping ids the
+      moment the Imaginem modifier mapping above is wired up.
+- [ ] Minor: `README.md` is still the stock Flutter template and never
+      mentions `scripts/spell_import/`.
 
 ### 19. Size-Ladder Ceiling
 - [ ] Every Size ladder in `modifiers.json` stops at +4 (×10,000); 4 published

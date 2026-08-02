@@ -87,3 +87,42 @@ class HandDerivedTest(unittest.TestCase):
         blocked_names = {name for name, _ in report.blocked}
         for name in ["Whispering Winds", "Hermes' Portal"]:
             self.assertIn(name, blocked_names)
+
+
+class KnownUnresolvableStalenessTest(unittest.TestCase):
+    """Guards extract_spells.KNOWN_UNRESOLVABLE against silent staleness.
+
+    Each entry there records a human judgement that a spell's candidate set
+    is genuinely, irreducibly ambiguous. KNOWN_UNRESOLVABLE routes straight
+    to `blocked`, bypassing Ledger.resolve() entirely -- which means it also
+    bypasses resolve()'s own StaleEntry check. If a future catalog change
+    (e.g. todo item 22's rebuild of base_effects.json, which the spec
+    specifically calls out as touching Muto Terram -- mute-3a/3b/3c is one
+    of these four) narrows or changes the candidate set, this entry's
+    reason silently stops applying and nothing else would notice.
+    """
+
+    def test_every_known_unresolvable_spell_is_still_genuinely_ambiguous(self):
+        from scripts.spell_import import blocks, catalog as catalog_module, designline, sources
+
+        lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
+        parsed, _ = blocks.parse_de(lines)
+        cat = catalog_module.Catalog.load()
+        by_id = {catalog_module.slug_id(b.technique, b.form, b.name): b for b in parsed}
+
+        stale = []
+        for spell_id in extract_spells.KNOWN_UNRESOLVABLE:
+            block = by_id.get(spell_id)
+            if block is None:
+                stale.append((spell_id, "no longer a parsed spell at all"))
+                continue
+            design = designline.parse_design(block.design_line)
+            candidates = cat.candidates(block.technique, block.form, design.base_level)
+            if len(candidates) < 2:
+                stale.append((spell_id, f"only {len(candidates)} candidate(s) now: {candidates}"))
+
+        self.assertEqual(stale, [], msg=(
+            "KNOWN_UNRESOLVABLE entries no longer genuinely ambiguous -- "
+            "remove them from extract_spells.py and let the ledger (or a "
+            "fresh resolutions.json entry) take over: "
+        ) + str(stale))

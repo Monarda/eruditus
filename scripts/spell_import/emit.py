@@ -56,16 +56,34 @@ def _selected_modifiers(
 ) -> dict[str, list[str]]:
     """Map design-line modifier tokens onto modifiers.json option ids.
 
-    Only "size" is mapped — it is the one modifier-kind token whose value
-    translates mechanically (magnitude N -> the Form's `size-<form>-N`
-    option, verified to exist for every case actually in the corpus except
-    Mentem, which has no size modifier at all, and three spells whose
-    printed magnitude (5) exceeds every size modifier's top option (4)).
-    Everything else (unnatural, stone/metal material, Imaginem complexity
-    factors) is a smaller, less mechanical set with no verified mapping yet
-    — raising here, not guessing, is what routes those spells to `blocked`
-    in extract_spells.py rather than importing them with a silently wrong
-    level. See .superpowers/todo.md item 27.
+    Only "size" is wired up here — it is the one modifier-kind token whose
+    value translates mechanically (magnitude N -> the Form's
+    `size-<form>-N` option, verified to exist for every case actually in
+    the corpus except Mentem, which has no size modifier at all, and three
+    spells whose printed magnitude (5) exceeds every size modifier's top
+    option (4)).
+
+    Everything else raises here rather than guessing, which is what routes
+    those spells to `blocked` in extract_spells.py instead of importing
+    them with a silently wrong level. But "no verified mapping" is not
+    equally true of every one of them:
+
+    - The Imaginem complexity-factor labels ("move at/under your command",
+      "intelligible speech", "moved image matches changes", "additional
+      sense(s)", "moving image") DO already have a verified, per-spell
+      mapping — it lives as prose in designline.MODIFIER_LABELS's comment,
+      confirmed against every spell that uses each label. It just isn't
+      wired into this function as data yet. Turning that comment into a
+      real `label -> (modifier_id, option_id)` table here would unblock
+      those ~10 spells; the mapping itself is not the missing piece.
+    - "unnatural" genuinely has no mapping for most of its spells:
+      `creo-auram-unnatural` only covers Creo Auram, and most "unnatural"
+      tokens are on Muto/Rego Auram spells it doesn't scope to.
+    - "metal" is genuinely ambiguous: the design line's "+2 metal" doesn't
+      say whether that means `muto-terram-material`'s base-metal or
+      precious-metal option (different ids, and here the same magnitude).
+
+    See .superpowers/todo.md item 27 for the tracked follow-up.
     """
     selected: dict[str, list[str]] = {}
     for token in design.tokens:
