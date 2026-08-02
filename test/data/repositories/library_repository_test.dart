@@ -72,6 +72,10 @@ void main() {
   });
 
   test('searchSpells filters by name, case-insensitively', () async {
+    // Was 'phantasm': every built-in Phantasm-* spell is now blocked (an
+    // unmapped Imaginem modifier token — see extract_spells.py), so that
+    // query no longer matches anything in the regenerated library. 'beast'
+    // is a common, stable substring across many surviving spell names.
     final results = await repository.searchSpells('BeAsT');
     expect(results, isNotEmpty);
     expect(results.every((s) => s.name!.toLowerCase().contains('beast')), isTrue);

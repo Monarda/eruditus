@@ -89,12 +89,15 @@ Listed in dependency order. Item 27 is the next branch.
         rationale was picking "the most general-sounding" candidate rather
         than a textually forced one: `lib-inte-tracks-faerie-glow` (`inte-4a`
         vs `inte-4b`), `lib-inte-sense-feet-that-thread-earth` (same pair,
-        same shape of ambiguity), `lib-mute-crystal-dart` (`mute-3a` vs
-        `mute-3c`, stone-vs-crystal boundary), `lib-peig-conjuration-indubitable-cold`
+        same shape of ambiguity), `lib-mute-crystal-dart` (`mute-3a`/`3b`/`3c`,
+        stone-vs-crystal boundary), `lib-peig-conjuration-indubitable-cold`
         (`peig-4a`/`4b`/`4c`, three co-equally-supported readings).
-      All 9 are excluded from the 279 spells the extractor currently
-      imports; they stay blocked/unresolved until a human with the rules
-      text and (for the first group) the corrected base-effect catalog can
+      All 9 are excluded from the 249 spells the extractor currently
+      imports (Task 10's `KNOWN_UNRESOLVABLE`/zero-candidate routing in
+      `scripts/spell_import/extract_spells.py` blocks them explicitly rather
+      than leaving them stuck as `unresolved`); they stay blocked until a
+      human with the rules text and (for the first group) the corrected
+      base-effect catalog can
       make the call.
       (Five further spells lack a design line but are General-level, so they
       belong to item 25, not here: *Ward against the Beasts of Legend*,
