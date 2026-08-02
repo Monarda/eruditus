@@ -1,92 +1,1474 @@
 {
   "lib-inim-prying-eyes": {
     "baseEffectId": "inim-1a",
-    "candidates": ["inim-1a", "inim-1b", "inim-1c"],
+    "candidates": [
+      "inim-1a",
+      "inim-1b",
+      "inim-1c"
+    ],
     "rationale": "Lets you see inside a room from touching its wall; inim-1a is 'use one sense at a distance', not memorizing an image already seen (inim-1b) or discerning your own illusions (inim-1c)."
   },
   "lib-inim-discern-own-illusions": {
     "baseEffectId": "inim-1c",
-    "candidates": ["inim-1a", "inim-1b", "inim-1c"],
+    "candidates": [
+      "inim-1a",
+      "inim-1b",
+      "inim-1c"
+    ],
     "rationale": "Makes your own illusions transparent but still discernible to you, which is inim-1c's guideline verbatim ('be able to discern your own false images'), not sensing at a distance (inim-1a) or remembering an image (inim-1b)."
   },
   "lib-inim-ear-for-distant-voices": {
     "baseEffectId": "inim-1a",
-    "candidates": ["inim-1a", "inim-1b", "inim-1c"],
+    "candidates": [
+      "inim-1a",
+      "inim-1b",
+      "inim-1c"
+    ],
     "rationale": "Hears what is happening at a place reached via Arcane Connection: one sense (hearing) projected at a distance, i.e. inim-1a, not memory of an image (inim-1b) or self-illusion detection (inim-1c)."
   },
   "lib-inim-eyes-eagle": {
     "baseEffectId": "inim-3b",
-    "candidates": ["inim-3a", "inim-3b"],
+    "candidates": [
+      "inim-3a",
+      "inim-3b"
+    ],
     "rationale": "Sees distant things as if a foot away — inim-3b's guideline gives 'to see clearly at a distance' as its own example, whereas inim-3a is using three separate senses at once, which this spell does not do."
   },
   "lib-muim-taste-spices-and-herbs": {
     "baseEffectId": "muim-2a",
-    "candidates": ["muim-2a", "muim-2b"],
+    "candidates": [
+      "muim-2a",
+      "muim-2b"
+    ],
     "rationale": "Makes food or drink taste AND smell as designated — two sensations of the same object changed, matching muim-2a, not muim-2b which converts species from one sense into another (e.g. sound made visible)."
   },
   "lib-peim-invisibility-standing-wizard": {
     "baseEffectId": "peim-4a",
-    "candidates": ["peim-4a", "peim-4b"],
+    "candidates": [
+      "peim-4a",
+      "peim-4b"
+    ],
     "rationale": "Makes the target invisible, i.e. destroys its ability to affect sight — peim-4a — rather than peim-4b, which destroys any three of taste/touch/smell/hearing but leaves sight untouched."
   },
   "lib-peim-veil-invisibility": {
     "baseEffectId": "peim-4a",
-    "candidates": ["peim-4a", "peim-4b"],
+    "candidates": [
+      "peim-4a",
+      "peim-4b"
+    ],
     "rationale": "Makes the target completely undetectable to normal sight regardless of movement — destroying the ability to affect sight is peim-4a; peim-4b covers the non-sight senses instead."
   },
   "lib-peim-removal-conspicuous-sigil": {
     "baseEffectId": "peim-4a",
-    "candidates": ["peim-4a", "peim-4b"],
+    "candidates": [
+      "peim-4a",
+      "peim-4b"
+    ],
     "rationale": "Obscures grooves, runes, and markings from sight while shape remains — a sight-only suppression, matching peim-4a ('destroy an object's ability to affect sight') rather than peim-4b's non-sight senses."
   },
   "lib-peim-silence-smothered-sound": {
     "baseEffectId": "peim-3a",
-    "candidates": ["peim-3a", "peim-3b"],
+    "candidates": [
+      "peim-3a",
+      "peim-3b"
+    ],
     "rationale": "Makes a being or object incapable of producing sound — hearing is one of the two senses peim-3a covers ('smell or hearing'), whereas peim-3b covers taste and touch, neither of which is sound."
   },
   "lib-peim-chamber-invisibility": {
     "baseEffectId": "peim-4a",
-    "candidates": ["peim-4a", "peim-4b"],
+    "candidates": [
+      "peim-4a",
+      "peim-4b"
+    ],
     "rationale": "Causes a Group to become invisible — destroying the ability to affect sight, peim-4a, not peim-4b which destroys three of the other four senses and leaves sight alone."
   },
   "lib-reim-captive-voice": {
     "baseEffectId": "reim-4b",
-    "candidates": ["reim-4a", "reim-4b"],
+    "candidates": [
+      "reim-4a",
+      "reim-4b"
+    ],
     "rationale": "Captures a voice and places it inside a bag — the image (of sound) is made to appear contained in another object defined at casting, which is reim-4b verbatim, not reim-4a's simple fifteen-pace relocation."
   },
   "lib-reim-confusion-insane-vibrations": {
     "baseEffectId": "reim-3b",
-    "candidates": ["reim-3a", "reim-3b"],
+    "candidates": [
+      "reim-3a",
+      "reim-3b"
+    ],
     "rationale": "Makes everything the target perceives vibrate at high speed and sounds seem to come from the wrong place — objects appearing to move rapidly in a disorientating way is reim-3b's guideline exactly, not reim-3a's flat five-pace repositioning."
   },
   "lib-reim-image-from-wizard-torn": {
     "baseEffectId": "reim-15b",
-    "candidates": ["reim-15a", "reim-15b"],
+    "candidates": [
+      "reim-15a",
+      "reim-15b"
+    ],
     "rationale": "The caster's own image detaches and acts with independent senses and speech at Personal range (no Arcane Connection involved), matching reim-15b 'summon a disembodied spirit associated with Imaginem' rather than reim-15a, which relocates an image to a place reached via Arcane Connection."
   },
   "lib-inme-thoughts-within-babble": {
     "baseEffectId": "inme-5b",
-    "candidates": ["inme-5a", "inme-5b"],
+    "candidates": [
+      "inme-5a",
+      "inme-5b"
+    ],
     "rationale": "Lets you understand what speakers meant even when they misuse a language — inme-5b's guideline is 'understand the meaning behind spoken sounds' verbatim, not inme-5a's sensing of a single emotion."
   },
   "lib-crco-incantation-body-made-whole": {
     "baseEffectId": "crco-35a",
-    "candidates": ["crco-35a", "crco-35b", "crco-35c"],
+    "candidates": [
+      "crco-35a",
+      "crco-35b",
+      "crco-35c"
+    ],
     "rationale": "Heals all damage to a human body; crco-35a is 'heal all wounds' verbatim, distinct from resolving a terminal aging crisis (crco-35b) or raising a physical Characteristic (crco-35c)."
   },
   "lib-crte-touch-midas": {
     "baseEffectId": "crte-15a",
-    "candidates": ["crte-15a", "crte-15b"],
+    "candidates": [
+      "crte-15a",
+      "crte-15b"
+    ],
     "rationale": "Creates a lump of gold, a precious metal — crte-15a's guideline, not crte-15b which repairs an existing crafted item to 'as new' rather than creating raw material."
   },
   "lib-cran-curse-ravenous-swarm": {
     "baseEffectId": "cran-5b",
-    "candidates": ["cran-5a", "cran-5b", "cran-5c"],
+    "candidates": [
+      "cran-5a",
+      "cran-5b",
+      "cran-5c"
+    ],
     "rationale": "Calls a swarm of locusts or destructive insects, matching cran-5b 'create an insect or similar bug' — not cran-5a, which creates an animal product like spidersilk or wool, nor cran-5c, a Recovery-roll bonus."
   },
   "lib-reme-incantation-summoning-dead": {
     "baseEffectId": "reme-15b",
-    "candidates": ["reme-15a", "reme-15b"],
+    "candidates": [
+      "reme-15a",
+      "reme-15b"
+    ],
     "rationale": "Calls up a person's ghost, a disembodied spirit associated with Mentem — reme-15b verbatim, not reme-15a which controls a person the caster can currently see (a ghost being summoned is neither present nor visible beforehand)."
+  },
+  "lib-cran-soothe-pains-beast": {
+    "baseEffectId": "cran-15a",
+    "candidates": [
+      "cran-15a",
+      "cran-15b",
+      "cran-15c",
+      "cran-15d"
+    ],
+    "rationale": "The spell cures one Light Wound suffered by the animal, matching cran-15a's guideline \"Heal a Light Wound\", not a Recovery bonus (cran-15b), creating a mammal (cran-15c), or forcing maturity (cran-15d)."
+  },
+  "lib-cran-weavers-trap-webs": {
+    "baseEffectId": "cran-5a",
+    "candidates": [
+      "cran-5a",
+      "cran-5b",
+      "cran-5c"
+    ],
+    "rationale": "Grows a net of actual spider webs \"as thick as string and as strong as iron\" — creating the animal product spidersilk, cran-5a's own example, not creating a live insect (cran-5b) or a Recovery bonus (cran-5c)."
+  },
+  "lib-cran-wizards-mount": {
+    "baseEffectId": "cran-15c",
+    "candidates": [
+      "cran-15a",
+      "cran-15b",
+      "cran-15c",
+      "cran-15d"
+    ],
+    "rationale": "\"Creates a horse\" — a mammal — matching cran-15c, not healing a Light Wound (cran-15a), a Recovery bonus (cran-15b), or forcing maturity (cran-15d)."
+  },
+  "lib-inan-shiver-lycanthrope": {
+    "baseEffectId": "inan-4b",
+    "candidates": [
+      "inan-4a",
+      "inan-4b"
+    ],
+    "rationale": "Detects whether a person or beast is actually a lycanthrope — learning a specific bodily fact (inan-4b), not sensing the target's dominant emotional drive (inan-4a)."
+  },
+  "lib-muan-beast-outlandish-size": {
+    "baseEffectId": "muan-4a",
+    "candidates": [
+      "muan-4a",
+      "muan-4b"
+    ],
+    "rationale": "Changes an animal's Size by +1 while it remains \"of huge size\" but still recognizably itself, matching muan-4a's 'major change in a beast while leaving it recognizably the same sort of animal' — this changes a live beast, not an animal product (muan-4b)."
+  },
+  "lib-muan-doublet-impenetrable-silk": {
+    "baseEffectId": "muan-4b",
+    "candidates": [
+      "muan-4a",
+      "muan-4b"
+    ],
+    "rationale": "Changes \"an item made of animal material — silk, wool, or leather\" so it resists cutting, matching muan-4b's 'change something made of animal products in a minor unnatural way' — this affects an animal product, not a live beast (muan-4a)."
+  },
+  "lib-muan-growth-creeping-things": {
+    "baseEffectId": "muan-4a",
+    "candidates": [
+      "muan-4a",
+      "muan-4b"
+    ],
+    "rationale": "Causes a live small creature to grow to four times its size while remaining the same sort of animal — muan-4a's 'major change in a beast while leaving it recognizably the same sort of animal', not muan-4b which only affects animal products."
+  },
+  "lib-muan-beast-minuscule-proportions": {
+    "baseEffectId": "muan-4a",
+    "candidates": [
+      "muan-4a",
+      "muan-4b"
+    ],
+    "rationale": "Reduces a live animal's Size by 2 while it remains the same beast, just runt-sized — muan-4a's major-but-recognizable change to a beast, not muan-4b's minor change to an animal product."
+  },
+  "lib-muan-beast-remade": {
+    "baseEffectId": "muan-10a",
+    "candidates": [
+      "muan-10a",
+      "muan-10b"
+    ],
+    "rationale": "\"Gives one land beast a human form\" with a Corpus requisite exactly as muan-10a specifies ('change an animal into a human... requires a Corpus requisite'), not muan-10b which turns an animal into a plant with a Herbam requisite."
+  },
+  "lib-muan-transformation-ravenous-beast-to-torpid-toad": {
+    "baseEffectId": "muan-5a",
+    "candidates": [
+      "muan-5a",
+      "muan-5b",
+      "muan-5c"
+    ],
+    "rationale": "\"Turns any animal into a toad\" — changing one animal into a different animal, muan-5a verbatim — not a minor unnatural change to the same animal (muan-5b) or a change to an animal product (muan-5c)."
+  },
+  "lib-muan-steed-vengeance": {
+    "baseEffectId": "muan-15a",
+    "candidates": [
+      "muan-15a",
+      "muan-15b"
+    ],
+    "rationale": "Gives a horse fangs, razor-sharp hooves, and steam breath while it remains a horse — muan-15a's own example is 'give a horse claws and fangs', not muan-15b which turns the animal into a non-living item."
+  },
+  "lib-pean-decay-fur-and-hide": {
+    "baseEffectId": "pean-4a",
+    "candidates": [
+      "pean-4a",
+      "pean-4b",
+      "pean-4c"
+    ],
+    "rationale": "Destroys an object made of animal fur or hide, including wool and leather, matching pean-4a's guideline \"Destroy something made of animal products\", not causing a beast pain (pean-4b) or Fatigue loss (pean-4c)."
+  },
+  "lib-pean-agony-beast": {
+    "baseEffectId": "pean-4b",
+    "candidates": [
+      "pean-4a",
+      "pean-4b",
+      "pean-4c"
+    ],
+    "rationale": "The beast \"lashes wildly about... and howls in great pain\" but only needs a Stamina roll to act, with no wound inflicted — pean-4b's 'cause a beast pain, but do no real damage', not destroying an animal product (pean-4a) or a Fatigue loss (pean-4c)."
+  },
+  "lib-pean-blunt-vipers-fangs": {
+    "baseEffectId": "pean-5a",
+    "candidates": [
+      "pean-5a",
+      "pean-5b",
+      "pean-5c"
+    ],
+    "rationale": "Blunts a beast's natural weapons, halving their damage while the beast recovers as from a Light Wound — pean-5a's 'injure an animal so it is hampered, but not damaged (roughly halves effectiveness)', not destroying a corpse (pean-5b) or inflicting an actual Light Wound (pean-5c)."
+  },
+  "lib-pean-falcons-hood": {
+    "baseEffectId": "pean-20c",
+    "candidates": [
+      "pean-20a",
+      "pean-20b",
+      "pean-20c"
+    ],
+    "rationale": "\"Destroys an animal's vision\" — one of a beast's major senses — matching pean-20c, not inflicting an Incapacitating Wound (pean-20a) or severing a limb (pean-20b)."
+  },
+  "lib-pean-cripple-howling-wolf": {
+    "baseEffectId": "pean-15c",
+    "candidates": [
+      "pean-15a",
+      "pean-15b",
+      "pean-15c",
+      "pean-15d"
+    ],
+    "rationale": "\"One of the target's legs breaks cleanly. The animal cannot walk on that leg, but the damage heals as a Medium Wound\" matches pean-15c's 'cripple a beast's limb, so that it is unusable but could heal', not destroying a minor sense (pean-15a), inflicting a Heavy Wound outright (pean-15b), or aging (pean-15d)."
+  },
+  "lib-rean-disguise-putrid-aroma": {
+    "baseEffectId": "rean-2b",
+    "candidates": [
+      "rean-2a",
+      "rean-2b",
+      "rean-2c"
+    ],
+    "rationale": "Makes a carnivore \"take no interest in you\" and not attack — rean-2b's 'protect the target from animal attacks (only affects animals without supernatural abilities)', not planting a suggestion (rean-2a) or treating animal-product items (rean-2c)."
+  },
+  "lib-rean-circle-beast-warding": {
+    "baseEffectId": "rean-2b",
+    "candidates": [
+      "rean-2a",
+      "rean-2b",
+      "rean-2c"
+    ],
+    "rationale": "Inscribes a circle \"that no normal beast will cross\" — protecting against attacks by ordinary (non-supernatural) animals, rean-2b, not planting a suggestion in one animal's mind (rean-2a) or treating animal-product items (rean-2c)."
+  },
+  "lib-rean-panic-elephants-mouse": {
+    "baseEffectId": "rean-5a",
+    "candidates": [
+      "rean-5a",
+      "rean-5b",
+      "rean-5c",
+      "rean-5d",
+      "rean-5e"
+    ],
+    "rationale": "\"Makes an animal afraid... by preying upon its instinctive fears\" — manipulating its emotions, rean-5a — not paralysis (rean-5b), warding (rean-5c), spirit control (rean-5d), or vermin generation (rean-5e)."
+  },
+  "lib-rean-vipers-gaze": {
+    "baseEffectId": "rean-5b",
+    "candidates": [
+      "rean-5a",
+      "rean-5b",
+      "rean-5c",
+      "rean-5d",
+      "rean-5e"
+    ],
+    "rationale": "\"Holds an animal rigid as long as you maintain eye contact\" is a literal paralysis effect, rean-5b, not emotional manipulation (rean-5a), warding (rean-5c), spirit control (rean-5d), or vermin generation (rean-5e)."
+  },
+  "lib-rean-gentle-beast": {
+    "baseEffectId": "rean-10a",
+    "candidates": [
+      "rean-10a",
+      "rean-10b"
+    ],
+    "rationale": "\"Calms an animal, making it nearly fearless... does not resist being ridden, shaved\" — making it completely passive, rean-10a — not instantly transporting it (rean-10b)."
+  },
+  "lib-rean-mastering-unruly-beast": {
+    "baseEffectId": "rean-15a",
+    "candidates": [
+      "rean-15a",
+      "rean-15b"
+    ],
+    "rationale": "\"You can make an animal perform any act it is capable of\" is complete control over the animal, rean-15a, not summoning a disembodied spirit (rean-15b)."
+  },
+  "lib-rean-commanding-harnessed-beast": {
+    "baseEffectId": "rean-15a",
+    "candidates": [
+      "rean-15a",
+      "rean-15b"
+    ],
+    "rationale": "\"You implant a complicated command into an animal, which it carries out\" is complete control of the beast, rean-15a, not summoning a disembodied spirit (rean-15b)."
+  },
+  "lib-craq-footsteps-slippery-oil": {
+    "baseEffectId": "craq-3a",
+    "candidates": [
+      "craq-3a",
+      "craq-3b"
+    ],
+    "rationale": "Spreads \"nonflammable grease\" over an uncontained slick area — craq-3a's 'create water (or some other natural liquid) that is not contained', not creating ice (craq-3b)."
+  },
+  "lib-craq-creeping-oil": {
+    "baseEffectId": "craq-3a",
+    "candidates": [
+      "craq-3a",
+      "craq-3b"
+    ],
+    "rationale": "Saturates cloth with a spot of flammable oil that spreads over the target — creating an uncontained natural liquid, craq-3a, not creating ice (craq-3b)."
+  },
+  "lib-craq-mighty-torrent-water": {
+    "baseEffectId": "craq-10a",
+    "candidates": [
+      "craq-10a",
+      "craq-10b"
+    ],
+    "rationale": "A \"jet of water\" that knocks the target back with force is a high-flow-rate geyser, craq-10a, not a created poison (craq-10b) — the damage comes from impact, not toxicity."
+  },
+  "lib-muaq-incantation-putrid-wine": {
+    "baseEffectId": "muaq-2a",
+    "candidates": [
+      "muaq-2a",
+      "muaq-2b"
+    ],
+    "rationale": "Makes liquids in the room \"vile, and malodorous\" with no wound or damage effect described — changing one natural liquid into another (muaq-2a), not turning it into a poison that causes a Light Wound (muaq-2b)."
+  },
+  "lib-muaq-lungs-fish": {
+    "baseEffectId": "muaq-4a",
+    "candidates": [
+      "muaq-4a",
+      "muaq-4b",
+      "muaq-4c",
+      "muaq-4d"
+    ],
+    "rationale": "\"Turns water into air\" with an explicit Auram requisite — muaq-4a's 'change a liquid into an unrelated solid or gas (with requisites)' verbatim — not splitting a liquid into two liquids (muaq-4b), poisoning (muaq-4c), or an unnatural liquid (muaq-4d)."
+  },
+  "lib-muaq-vile-water-sterility": {
+    "baseEffectId": "muaq-4d",
+    "candidates": [
+      "muaq-4a",
+      "muaq-4b",
+      "muaq-4c",
+      "muaq-4d"
+    ],
+    "rationale": "The spell's own design line calls its base effect \"a very unnatural liquid\", matching muaq-4d verbatim, not a solid/gas change (muaq-4a), splitting into two liquids (muaq-4b), or poisoning (muaq-4c)."
+  },
+  "lib-reaq-push-gentle-wave": {
+    "baseEffectId": "reaq-4a",
+    "candidates": [
+      "reaq-4a",
+      "reaq-4b"
+    ],
+    "rationale": "Forms a wave to \"propel a small boat slowly through the water\" via ongoing pushing, matching reaq-4a's 'control a liquid in a forceful but calm way, such as a fast but constant current', not reaq-4b's instantaneous transport."
+  },
+  "lib-reaq-chaos-angry-waves": {
+    "baseEffectId": "reaq-5b",
+    "candidates": [
+      "reaq-5a",
+      "reaq-5b",
+      "reaq-5c",
+      "reaq-5d"
+    ],
+    "rationale": "\"Causes water to churn wildly, overturning small water craft\" is violent control of ordinary water, reaq-5b, not warding against water (reaq-5a), spirit control (reaq-5c), or controlling a water elemental (reaq-5d)."
+  },
+  "lib-crau-jupiters-resounding-blow": {
+    "baseEffectId": "crau-3a",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "Creates a thunderclap loud enough to deafen bystanders, matching crau-3a's example of 'deafening thunder' as a severe weather phenomenon, not crau-3b's debilitating air (stench, poison)."
+  },
+  "lib-crau-stench-twenty-corpses": {
+    "baseEffectId": "crau-3b",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "Creates a horrible stench that forces Stamina rolls or a penalty and vomiting, i.e. a debilitating kind of air (crau-3b's 'noxious stench'), not a weather phenomenon like thunder or wind (crau-3a)."
+  },
+  "lib-crau-wreaths-foul-smoke": {
+    "baseEffectId": "crau-3b",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "Thick sulfurous smoke that causes Fatigue loss and Light Wounds on repeated exposure is a debilitating kind of air (crau-3b), not a severe weather phenomenon like thunder, rain, or wind (crau-3a)."
+  },
+  "lib-crau-broom-winds": {
+    "baseEffectId": "crau-3a",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "Whips up violent, gale-strength winds strong enough to knock a target down, matching crau-3a's 'gale force wind' as a severe weather phenomenon, not crau-3b's debilitating air."
+  },
+  "lib-crau-charge-angry-winds": {
+    "baseEffectId": "crau-3a",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "A roaring wall of wind that knocks people down and defeats missile fire is crau-3a's 'gale force wind' severe weather phenomenon, not crau-3b's debilitating air."
+  },
+  "lib-crau-circling-winds-protection": {
+    "baseEffectId": "crau-3a",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "Surrounds the caster with winds circling at great speed, a localized gale-force wind (crau-3a's severe weather phenomenon), with a separate Rego requisite layered on for the defensive control; not crau-3b's debilitating air."
+  },
+  "lib-crau-clouds-rain-and-thunder": {
+    "baseEffectId": "crau-3a",
+    "candidates": [
+      "crau-3a",
+      "crau-3b"
+    ],
+    "rationale": "Creates a small but severe rainstorm with lightning and winds, matching crau-3a's 'monsoon rain'/'deafening thunder' severe weather phenomenon, not crau-3b's debilitating air."
+  },
+  "lib-inau-sailors-foretaste-morrow": {
+    "baseEffectId": "inau-4b",
+    "candidates": [
+      "inau-4a",
+      "inau-4b"
+    ],
+    "rationale": "Gives the caster an extrapolated, occasionally-wrong prediction of tomorrow's weather — an intuition about the air's future state (inau-4b), not direct sensing of the air's current mundane properties (inau-4a)."
+  },
+  "lib-inau-eyes-bat": {
+    "baseEffectId": "inau-4a",
+    "candidates": [
+      "inau-4a",
+      "inau-4b"
+    ],
+    "rationale": "Lets the caster sense the boundaries of the air itself (where solid objects are) to navigate in darkness — a direct mundane property of the air (inau-4a), not an intuited fact (inau-4b)."
+  },
+  "lib-muau-rain-stones": {
+    "baseEffectId": "muau-4a",
+    "candidates": [
+      "muau-4a",
+      "muau-4b"
+    ],
+    "rationale": "Turns rain into stones as it falls, with a Terram requisite for the specific solid — muau-4a's 'transform an amount of air into another element (fire, earth, or water)', not muau-4b's harmful-gas Light Wound effect."
+  },
+  "lib-muau-talons-winds": {
+    "baseEffectId": "muau-4b",
+    "candidates": [
+      "muau-4a",
+      "muau-4b"
+    ],
+    "rationale": "Transforms a wind into an abrasive medium that cuts for +4 damage, i.e. turning a gas into a harmful form that inflicts a Light Wound (muau-4b), not an elemental transformation into fire/earth/water (muau-4a)."
+  },
+  "lib-muau-rain-oil": {
+    "baseEffectId": "muau-4a",
+    "candidates": [
+      "muau-4a",
+      "muau-4b"
+    ],
+    "rationale": "Turns rain into droplets of oil, with an Aquam requisite for the specific liquid — muau-4a's 'transform an amount of air into another element ... water', not muau-4b's harmful-gas wound effect."
+  },
+  "lib-peau-cloudless-sky-returned": {
+    "baseEffectId": "peau-10a",
+    "candidates": [
+      "peau-10a",
+      "peau-10b"
+    ],
+    "rationale": "Clears the sky of clouds and other meteorological activity, matching peau-10a's destruction of a severe weather phenomenon, not peau-10b's debilitating kind of air (stench, poison)."
+  },
+  "lib-reau-ward-against-rain": {
+    "baseEffectId": "reau-4b",
+    "candidates": [
+      "reau-4a",
+      "reau-4b"
+    ],
+    "rationale": "Wards the caster so no rain falls on them no matter the weather — reau-4b's 'ward someone against a type of normal weather phenomenon', not reau-4a's active control of a severe phenomenon."
+  },
+  "lib-reau-clouds-thunderous-might": {
+    "baseEffectId": "reau-4a",
+    "candidates": [
+      "reau-4a",
+      "reau-4b"
+    ],
+    "rationale": "Gathers pre-existing clouds and winds into a storm under the caster's ongoing control, matching reau-4a's 'control a severe weather phenomenon', not reau-4b's defensive ward."
+  },
+  "lib-reau-gathering-stormy-might": {
+    "baseEffectId": "reau-4a",
+    "candidates": [
+      "reau-4a",
+      "reau-4b"
+    ],
+    "rationale": "As Clouds of Thunderous Might but covering the whole visible sky, still under the caster's control — reau-4a's 'control a severe weather phenomenon', not reau-4b's ward."
+  },
+  "lib-invi-sense-magical-power": {
+    "baseEffectId": "invi-1b",
+    "candidates": [
+      "invi-1a",
+      "invi-1b",
+      "invi-1c"
+    ],
+    "rationale": "Tells the caster only whether he is currently standing in a Magic aura, matching invi-1b's 'detect presence of supernatural aura', not detecting high-magnitude magic (invi-1a) or vis (invi-1c)."
+  },
+  "lib-invi-scales-magical-weight": {
+    "baseEffectId": "invi-4b",
+    "candidates": [
+      "invi-4a",
+      "invi-4b",
+      "invi-4c"
+    ],
+    "rationale": "Compares an unknown quantity of vis against a known amount to determine how many pawns are present, matching invi-4b's 'judge amount of vis present', not detecting magic strength (invi-4a) or discerning vis's Art (invi-4c)."
+  },
+  "lib-invi-sense-nature-vis": {
+    "baseEffectId": "invi-4c",
+    "candidates": [
+      "invi-4a",
+      "invi-4b",
+      "invi-4c"
+    ],
+    "rationale": "Reveals which Art (Technique or Form) a supply of raw vis is associated with via its glowing color, matching invi-4c's 'discern the Art of vis', not judging quantity (invi-4b) or detecting magic strength (invi-4a)."
+  },
+  "lib-invi-piercing-faerie-veil": {
+    "baseEffectId": "invi-3b",
+    "candidates": [
+      "invi-3a",
+      "invi-3b"
+    ],
+    "rationale": "Lets the caster see through the boundary of a Faerie regio to find the path to the next level, matching invi-3b's 'detect regio boundaries', not invi-3a's detection of magic strength."
+  },
+  "lib-crco-bind-wound": {
+    "baseEffectId": "crco-3b",
+    "candidates": [
+      "crco-3a",
+      "crco-3b"
+    ],
+    "rationale": "Seals the target's wounds so they cannot worsen but does not speed recovery, matching crco-3b 'prevent all of a target's wounds from getting any worse' rather than crco-3a's Recovery-roll bonus."
+  },
+  "lib-crco-charm-against-putrefaction": {
+    "baseEffectId": "crco-2b",
+    "candidates": [
+      "crco-2a",
+      "crco-2b"
+    ],
+    "rationale": "Prevents decay of a human corpse or severed body part, matching crco-2b 'preserve a corpse from decay' rather than crco-2a's Recovery-roll bonus, which applies to the living."
+  },
+  "lib-crco-chirurgeons-healing-touch": {
+    "baseEffectId": "crco-15a",
+    "candidates": [
+      "crco-15a",
+      "crco-15b",
+      "crco-15c"
+    ],
+    "rationale": "Heals a single Light Wound from injury and explicitly does not heal poison or disease, matching crco-15a 'heal a Light Wound' rather than the Recovery bonus (crco-15b) or aging-crisis (crco-15c) guidelines."
+  },
+  "lib-crco-gentle-touch-purified-body": {
+    "baseEffectId": "crco-15a",
+    "candidates": [
+      "crco-15a",
+      "crco-15b",
+      "crco-15c"
+    ],
+    "rationale": "Cures a Light-Wound-equivalent affliction caused by poison or disease (not injury), the disease/poison counterpart to Chirurgeon's Healing Touch built on the same 'heal a Light Wound' severity guideline (crco-15a), not the Recovery bonus (crco-15b) or aging crisis (crco-15c)."
+  },
+  "lib-crco-restoration-defiled-body": {
+    "baseEffectId": "crco-20b",
+    "candidates": [
+      "crco-20a",
+      "crco-20b",
+      "crco-20c"
+    ],
+    "rationale": "Explicitly 'does not heal wounds, only extra effects,' removing crippling after-effects of injury, poison, or disease, matching crco-20b rather than crco-20a (Medium Wound); the passing mention of premature aging never uses the book's 'aging crisis' terminology (crco-20c)."
+  },
+  "lib-crco-cheating-reaper": {
+    "baseEffectId": "crco-25d",
+    "candidates": [
+      "crco-25a",
+      "crco-25b",
+      "crco-25c",
+      "crco-25d"
+    ],
+    "rationale": "Resolves 'a major (or less severe) crisis caused by aging,' matching crco-25d 'resolve a major aging crisis' verbatim, not the wound-healing (crco-25a), wound-severity-improvement (crco-25b), or limb-restoration (crco-25c) guidelines."
+  },
+  "lib-inco-revealed-flaws-mortal-flesh": {
+    "baseEffectId": "inco-5a",
+    "candidates": [
+      "inco-5a",
+      "inco-5b"
+    ],
+    "rationale": "Finds medical defects in a touched, living person, matching inco-5a 'sense a specific piece of information about a body' rather than inco-5b's speaking with a corpse."
+  },
+  "lib-inco-whispers-through-black-gate": {
+    "baseEffectId": "inco-5b",
+    "candidates": [
+      "inco-5a",
+      "inco-5b"
+    ],
+    "rationale": "Lets the caster converse with an undecayed corpse's spirit through the barrier between the dead and living, matching inco-5b 'speak with a dead body' rather than inco-5a's sensing information about a body."
+  },
+  "lib-muco-disguise-new-visage": {
+    "baseEffectId": "muco-3a",
+    "candidates": [
+      "muco-3a",
+      "muco-3b"
+    ],
+    "rationale": "Transforms the target's facial features to another human configuration, matching muco-3a's changing a person's appearance while remaining human in form, not muco-3b's transformation of non-living human bone."
+  },
+  "lib-muco-arm-infant": {
+    "baseEffectId": "muco-3a",
+    "candidates": [
+      "muco-3a",
+      "muco-3b"
+    ],
+    "rationale": "Shrinks a person's arm and changes its proportions while it remains a living human arm, matching muco-3a's change to a person's appearance/size, not muco-3b's change to non-living bone."
+  },
+  "lib-muco-shape-woodland-prowler": {
+    "baseEffectId": "muco-10a",
+    "candidates": [
+      "muco-10a",
+      "muco-10b"
+    ],
+    "rationale": "Changes the target into a wolf, matching muco-10a 'turn a human into a land animal' rather than muco-10b's Soak bonus."
+  },
+  "lib-muco-cloak-black-feathers": {
+    "baseEffectId": "muco-20a",
+    "candidates": [
+      "muco-20a",
+      "muco-20b"
+    ],
+    "rationale": "Transforms the caster into a raven, matching muco-20a 'turn a human into a bird or a fish' rather than muco-20b's Soak bonus."
+  },
+  "lib-muco-curse-circe": {
+    "baseEffectId": "muco-10a",
+    "candidates": [
+      "muco-10a",
+      "muco-10b"
+    ],
+    "rationale": "Turns a person into a pig, matching muco-10a 'turn a human into a land animal' rather than muco-10b's Soak bonus."
+  },
+  "lib-muco-stance-patient-tree": {
+    "baseEffectId": "muco-25c",
+    "candidates": [
+      "muco-25a",
+      "muco-25b",
+      "muco-25c"
+    ],
+    "rationale": "Turns the caster into a living tree that senses day/night and wind, matching muco-25c 'turn a human into a plant' rather than a transformation into a solid inanimate object (muco-25a) or a Soak bonus (muco-25b)."
+  },
+  "lib-peco-dust-to-dust": {
+    "baseEffectId": "peco-5b",
+    "candidates": [
+      "peco-5a",
+      "peco-5b",
+      "peco-5c"
+    ],
+    "rationale": "Turns a dead body to dust, matching peco-5b 'destroy a corpse' rather than inflicting a Light Wound (peco-5a) or hampering a living target (peco-5c)."
+  },
+  "lib-peco-wound-that-weeps": {
+    "baseEffectId": "peco-5a",
+    "candidates": [
+      "peco-5a",
+      "peco-5b",
+      "peco-5c"
+    ],
+    "rationale": "Opens a bleeding wound on a living target described as 'only a Light Wound,' matching peco-5a 'inflict a Light Wound' rather than destroying a corpse (peco-5b) or a non-injuring hampering effect (peco-5c)."
+  },
+  "lib-peco-invocation-weariness": {
+    "baseEffectId": "peco-10b",
+    "candidates": [
+      "peco-10a",
+      "peco-10b"
+    ],
+    "rationale": "Causes the target to lose a Fatigue level rather than inflicting an actual wound, matching peco-10b rather than peco-10a's Medium Wound."
+  },
+  "lib-peco-bane-decrepit-body": {
+    "baseEffectId": "peco-15a",
+    "candidates": [
+      "peco-15a",
+      "peco-15b",
+      "peco-15c",
+      "peco-15d"
+    ],
+    "rationale": "Ages the target 5 years, matching peco-15a 'age someone by up to five years' verbatim, not the limb-crippling (peco-15b), minor-sense-destruction (peco-15c), or Heavy Wound (peco-15d) guidelines."
+  },
+  "lib-peco-curse-leprous-flesh": {
+    "baseEffectId": "peco-20b",
+    "candidates": [
+      "peco-20a",
+      "peco-20b",
+      "peco-20c",
+      "peco-20d"
+    ],
+    "rationale": "Inflicts leprosy, a disease that rots the target's flesh over weeks, matching peco-20b 'inflict a major disease' rather than destroying a sense (peco-20a), severing a limb (peco-20c), or a direct Incapacitating Wound (peco-20d) — its wound-equivalent severity is just the disease's mechanical effect, not a separate guideline."
+  },
+  "lib-peco-grip-choking-hand": {
+    "baseEffectId": "peco-10b",
+    "candidates": [
+      "peco-10a",
+      "peco-10b"
+    ],
+    "rationale": "Constricts the target's throat, draining a Fatigue level each round rather than wounding them, matching peco-10b rather than peco-10a's Medium Wound."
+  },
+  "lib-peco-incantation-milky-eyes": {
+    "baseEffectId": "peco-20a",
+    "candidates": [
+      "peco-20a",
+      "peco-20b",
+      "peco-20c",
+      "peco-20d"
+    ],
+    "rationale": "Blinds the target with cataracts and explicitly 'heals as a Heavy Wound,' matching peco-20a 'destroy one of a person's major senses (heals as a Heavy Wound)' verbatim, not disease (peco-20b), limb-severing (peco-20c), or a direct Incapacitating Wound (peco-20d)."
+  },
+  "lib-peco-twist-tongue": {
+    "baseEffectId": "peco-15c",
+    "candidates": [
+      "peco-15a",
+      "peco-15b",
+      "peco-15c",
+      "peco-15d"
+    ],
+    "rationale": "Destroys the target's ability to speak and explicitly 'heals as a Medium Wound,' matching peco-15c's minor-sense-destruction guideline (heals as a Medium Wound) rather than aging (peco-15a), a crippled limb (peco-15b, the tongue is not a limb), or a direct Heavy Wound (peco-15d)."
+  },
+  "lib-peco-curse-unportended-plague": {
+    "baseEffectId": "peco-20b",
+    "candidates": [
+      "peco-20a",
+      "peco-20b",
+      "peco-20c",
+      "peco-20d"
+    ],
+    "rationale": "Starts a plague afflicting everyone in the boundary with 'the disease' described under Curse of the Leprous Flesh, matching peco-20b 'inflict a major disease' for the same reason as that spell."
+  },
+  "lib-reco-rise-feathery-body": {
+    "baseEffectId": "reco-4c",
+    "candidates": [
+      "reco-4a",
+      "reco-4b",
+      "reco-4c"
+    ],
+    "rationale": "Lets the target float straight up to any height but explicitly cannot move horizontally, matching reco-4c 'move a target slowly straight up' rather than movement in any direction (reco-4b) or general large-scale movement control (reco-4a)."
+  },
+  "lib-reco-despair-quivering-manacles": {
+    "baseEffectId": "reco-4a",
+    "candidates": [
+      "reco-4a",
+      "reco-4b",
+      "reco-4c"
+    ],
+    "rationale": "Makes the target shake vigorously in place, imposing penalties on their actions rather than relocating them, matching reco-4a 'control the large-scale physical movements of a target' rather than the directional-movement guidelines (reco-4b, reco-4c)."
+  },
+  "lib-reco-endurance-berserkers": {
+    "baseEffectId": "reco-10b",
+    "candidates": [
+      "reco-10a",
+      "reco-10b",
+      "reco-10c",
+      "reco-10d",
+      "reco-10e"
+    ],
+    "rationale": "Makes the caster's body act as though unwounded and unfatigued, matching reco-10b 'eliminate the penalties of Fatigue and wounds' verbatim, not the motion-control, corpse-animation, transport, or surgery guidelines."
+  },
+  "lib-reco-gift-frogs-legs": {
+    "baseEffectId": "reco-10a",
+    "candidates": [
+      "reco-10a",
+      "reco-10b",
+      "reco-10c",
+      "reco-10d",
+      "reco-10e"
+    ],
+    "rationale": "Grants the target an enhanced leap requiring their own landing roll rather than instantly relocating them, matching reco-10a 'control a target's motions' rather than the instant 5-pace transport (reco-10d), which does not fit a jump covering up to 25 feet that takes real time to land."
+  },
+  "lib-reco-lifting-dangling-puppet": {
+    "baseEffectId": "reco-4c",
+    "candidates": [
+      "reco-4a",
+      "reco-4b",
+      "reco-4c"
+    ],
+    "rationale": "Lifts a person straight up (or lets them descend) through the air, matching reco-4c 'move a target slowly straight up, or in one direction over surfaces that cannot support it' rather than movement in any direction (reco-4b) or general movement control (reco-4a)."
+  },
+  "lib-reco-gift-vigor": {
+    "baseEffectId": "reco-15a",
+    "candidates": [
+      "reco-15a",
+      "reco-15b",
+      "reco-15c",
+      "reco-15d",
+      "reco-15e",
+      "reco-15f"
+    ],
+    "rationale": "Transfers bodily Fatigue energy from the caster to the target, matching reco-15a 'direct the flow of bodily energy' verbatim, not the directional-movement, spirit-summoning, transport, warding, or surgery guidelines."
+  },
+  "lib-reco-awaken-slumbering-corpse": {
+    "baseEffectId": "reco-10c",
+    "candidates": [
+      "reco-10a",
+      "reco-10b",
+      "reco-10c",
+      "reco-10d",
+      "reco-10e"
+    ],
+    "rationale": "Causes a corpse to function and obey simple verbal commands, matching reco-10c 'animate a corpse' verbatim, not the motion-control, fatigue/wound-elimination, transport, or surgery guidelines."
+  },
+  "lib-reco-strings-unwilling-marionette": {
+    "baseEffectId": "reco-10a",
+    "candidates": [
+      "reco-10a",
+      "reco-10b",
+      "reco-10c",
+      "reco-10d",
+      "reco-10e"
+    ],
+    "rationale": "Lets the caster control a living person's physical movements such as walking and turning, matching reco-10a 'control a target's motions' rather than animating a corpse (reco-10c) or the other level-10 guidelines."
+  },
+  "lib-reco-walking-corpse": {
+    "baseEffectId": "reco-10c",
+    "candidates": [
+      "reco-10a",
+      "reco-10b",
+      "reco-10c",
+      "reco-10d",
+      "reco-10e"
+    ],
+    "rationale": "Turns a corpse into a servant that follows simple verbal commands, matching reco-10c 'animate a corpse' verbatim, not the motion-control, fatigue/wound-elimination, transport, or surgery guidelines."
+  },
+  "lib-crhe-conjure-sturdy-vine": {
+    "baseEffectId": "crhe-1c",
+    "candidates": [
+      "crhe-1a",
+      "crhe-1b",
+      "crhe-1c",
+      "crhe-1d",
+      "crhe-1e"
+    ],
+    "rationale": "Grows an entirely new 10-pace vine from a quantity of wood or fertile soil, matching crhe-1c 'create a plant' — not crhe-1a, whose guideline is for sustaining an already-existing plant's growth, not conjuring new plant matter."
+  },
+  "lib-crhe-trap-entwining-vines": {
+    "baseEffectId": "crhe-1c",
+    "candidates": [
+      "crhe-1a",
+      "crhe-1b",
+      "crhe-1c",
+      "crhe-1d",
+      "crhe-1e"
+    ],
+    "rationale": "Causes new woody vines to grow rapidly from fertile earth to ensnare a target, matching crhe-1c 'create a plant' rather than crhe-1a's guideline for nursing an existing plant's growth over the spell's duration."
+  },
+  "lib-crhe-bridge-wood": {
+    "baseEffectId": "crhe-3a",
+    "candidates": [
+      "crhe-3a",
+      "crhe-3b"
+    ],
+    "rationale": "Creates a bridge of living leaves, vines, and wood, matching crhe-3a's guideline example verbatim ('such as a living wall or bridge'), not crhe-3b's plant-healing effect."
+  },
+  "lib-crhe-wall-thorns": {
+    "baseEffectId": "crhe-1c",
+    "candidates": [
+      "crhe-1a",
+      "crhe-1b",
+      "crhe-1c",
+      "crhe-1d",
+      "crhe-1e"
+    ],
+    "rationale": "Instantly grows a wall of thorny bushes out of existing bushes or fertile soil — new plant matter, not accelerated growth of a designated existing plant — matching crhe-1c 'create a plant', not crhe-1a."
+  },
+  "lib-crhe-wall-living-wood": {
+    "baseEffectId": "crhe-3a",
+    "candidates": [
+      "crhe-3a",
+      "crhe-3b"
+    ],
+    "rationale": "Grows a straight wall of living oak from nearby trees or fertile earth, matching crhe-3a's guideline example verbatim ('such as a living wall or bridge'), not crhe-3b's plant-healing effect."
+  },
+  "lib-muhe-rope-bronze": {
+    "baseEffectId": "muhe-4a",
+    "candidates": [
+      "muhe-4a",
+      "muhe-4b"
+    ],
+    "rationale": "Printed with Req: Terram, and turns plant-material rope into bronze, matching muhe-4a 'change a plant or item made from plant products into metal or stone (Terram requisite)', not muhe-4b's Mentem-requisite consciousness effect."
+  },
+  "lib-muhe-thaumaturgical-transformation-plants-to-iron": {
+    "baseEffectId": "muhe-4a",
+    "candidates": [
+      "muhe-4a",
+      "muhe-4b"
+    ],
+    "rationale": "Printed with Req: Terram, and makes plant material as hard as iron, matching muhe-4a's metal/stone transformation with Terram requisite, not muhe-4b's awaken-consciousness effect."
+  },
+  "lib-muhe-stir-slumbering-tree": {
+    "baseEffectId": "muhe-4b",
+    "candidates": [
+      "muhe-4a",
+      "muhe-4b"
+    ],
+    "rationale": "Printed with Req: Mentem, and raises a tree to a human-like consciousness that can see and hear, matching muhe-4b 'awaken the consciousness of a plant (Mentem requisite)', not muhe-4a's metal/stone transformation."
+  },
+  "lib-muhe-curse-haunted-forest": {
+    "baseEffectId": "muhe-4b",
+    "candidates": [
+      "muhe-4a",
+      "muhe-4b"
+    ],
+    "rationale": "Turns a forest's trees conscious and cruel, capable of sight, hearing, and limited movement, matching muhe-4b 'awaken the consciousness of a plant' — not muhe-4a's metal/stone transformation, which does not occur here (the printed Req: Perdo covers the trees' gnarled, hideous appearance, a separate effect bundled at no extra cost)."
+  },
+  "lib-rehe-dance-staves": {
+    "baseEffectId": "rehe-3b",
+    "candidates": [
+      "rehe-3a",
+      "rehe-3b"
+    ],
+    "rationale": "Animates a pole, staff, or haft — explicitly 'any other long, thin, non-living wooden object', i.e. a crafted implement — matching rehe-3b 'manipulate items made of plant products', not rehe-3a's guideline for controlling raw, unworked wood."
+  },
+  "lib-rehe-repel-wooden-shafts": {
+    "baseEffectId": "rehe-4a",
+    "candidates": [
+      "rehe-4a",
+      "rehe-4b",
+      "rehe-4c"
+    ],
+    "rationale": "Deflects a single blow from any weapon made of wood, matching rehe-4a 'deflect a single attack by a wooden weapon' verbatim, not rehe-4b (moving a rooted plant) or rehe-4c (treating plant-product items)."
+  },
+  "lib-rehe-strike-angered-branch": {
+    "baseEffectId": "rehe-3a",
+    "candidates": [
+      "rehe-3a",
+      "rehe-3b"
+    ],
+    "rationale": "Animates a natural tree branch to swing and strike a target, matching rehe-3a 'control an amount of wood' (raw wood), not rehe-3b's guideline for manipulating crafted plant-product items."
+  },
+  "lib-rehe-tangle-wood-and-thorns": {
+    "baseEffectId": "rehe-3a",
+    "candidates": [
+      "rehe-3a",
+      "rehe-3b"
+    ],
+    "rationale": "Hurls and animates a designated length of raw wood (possibly thorny) to ensnare a target, matching rehe-3a 'control an amount of wood', not rehe-3b's crafted-item guideline."
+  },
+  "lib-rehe-coils-entangling-plants": {
+    "baseEffectId": "rehe-3a",
+    "candidates": [
+      "rehe-3a",
+      "rehe-3b"
+    ],
+    "rationale": "Animates living grass and small plants in a field to grab and entangle targets, matching rehe-3a 'control an amount of wood' (the guideline header notes living and dead wood are equally easy to control), not rehe-3b's crafted-item guideline."
+  },
+  "lib-rehe-lord-trees": {
+    "baseEffectId": "rehe-4b",
+    "candidates": [
+      "rehe-4a",
+      "rehe-4b",
+      "rehe-4c"
+    ],
+    "rationale": "Moves a tree's branches and bends its trunk while the tree stays rooted in place, matching rehe-4b 'control an entire plant... although it remains rooted' — confirmed by the level-30 'Freeing the Striding Tree' being explicitly 'Like Lord of the Trees, above, but the tree can walk', which needs the higher-level 'need not remain rooted' guideline instead."
+  },
+  "lib-rehe-treacherous-spear": {
+    "baseEffectId": "rehe-10a",
+    "candidates": [
+      "rehe-10a",
+      "rehe-10b"
+    ],
+    "rationale": "Animates a wooden weapon to attack its wielder on its own, without requiring the caster's continued control, matching rehe-10a 'move with purpose and intelligence, without requiring your constant control', not rehe-10b's plant-transport guideline (nothing is transported)."
+  },
+  "lib-rehe-twist-living-tree": {
+    "baseEffectId": "rehe-4b",
+    "candidates": [
+      "rehe-4a",
+      "rehe-4b",
+      "rehe-4c"
+    ],
+    "rationale": "Bends a living tree into a cage, shelter, or wall while it stays rooted, matching rehe-4b 'control an entire plant... although it remains rooted', not rehe-4a (deflecting a weapon) or rehe-4c (treating plant-product items)."
+  },
+  "lib-rehe-ward-against-wood": {
+    "baseEffectId": "rehe-15a",
+    "candidates": [
+      "rehe-15a",
+      "rehe-15b",
+      "rehe-15c",
+      "rehe-15d"
+    ],
+    "rationale": "Protects the caster so that nonenchanted wood cannot touch his body, matching rehe-15a 'ward someone against mundane plant products' verbatim, not the other level-15 guidelines (blossoming trees, weaving, spirit-summoning)."
+  },
+  "lib-rehe-freeing-striding-tree": {
+    "baseEffectId": "rehe-5a",
+    "candidates": [
+      "rehe-5a",
+      "rehe-5b",
+      "rehe-5c",
+      "rehe-5d",
+      "rehe-5e"
+    ],
+    "rationale": "Explicitly described as 'Like Lord of the Trees, above, but the tree can walk', matching rehe-5a 'moving it around as you direct, and it need not remain rooted' — the walking is exactly what distinguishes it from the level-4 rooted version."
+  },
+  "lib-rehe-calling-council-trees": {
+    "baseEffectId": "rehe-5c",
+    "candidates": [
+      "rehe-5a",
+      "rehe-5b",
+      "rehe-5c",
+      "rehe-5d",
+      "rehe-5e"
+    ],
+    "rationale": "Calls all magical, potentially mobile trees within the woodland to come to the ritual site, matching rehe-5c 'summon a mobile plant', not rehe-5b's disembodied-spirit guideline — these are living trees, not spirits."
+  },
+  "lib-inte-eyes-eons": {
+    "baseEffectId": "inte-4a",
+    "candidates": [
+      "inte-4a",
+      "inte-4b"
+    ],
+    "rationale": "Determines the age of a nonliving target to within 10% of its actual age — a single mundane fact about an object — matching inte-4a 'learn one mundane property of an object', not inte-4b's sight-based guideline (no seeing is involved)."
+  },
+  "lib-inte-stone-tell-mind-that-sits": {
+    "baseEffectId": "inte-20c",
+    "candidates": [
+      "inte-20a",
+      "inte-20b",
+      "inte-20c"
+    ],
+    "rationale": "Lets the caster talk with natural stone, matching inte-20c 'speak with a natural rock (e.g., a boulder)' verbatim, not inte-20a (learning magical properties) or inte-20b (seeing through earth)."
+  },
+  "lib-inte-dream-mind-that-sits": {
+    "baseEffectId": "inte-30a",
+    "candidates": [
+      "inte-30a",
+      "inte-30b"
+    ],
+    "rationale": "Probes and communes with a spirit inside a natural stone object over many hours, matching inte-30a 'commune with a natural rock', not inte-30b's metal-object guideline (no metal is involved)."
+  },
+  "lib-mute-supple-iron-and-rigid-rope": {
+    "baseEffectId": "mute-3a",
+    "candidates": [
+      "mute-3a",
+      "mute-3b",
+      "mute-3c"
+    ],
+    "rationale": "Makes a stiff object flexible or a flexible object stiff, using casting requisites appropriate to the material, matching mute-3a 'change dirt to be slightly unnatural (may require requisites)' verbatim — no material-category change (liquid/gas or stone) occurs."
+  },
+  "lib-mute-edge-razor": {
+    "baseEffectId": "mute-3a",
+    "candidates": [
+      "mute-3a",
+      "mute-3b",
+      "mute-3c"
+    ],
+    "rationale": "Sharpens a metal edge to a degree unequaled by manual methods, matching mute-3a 'change dirt to be slightly unnatural' — the metal stays metal, only its sharpness property changes unnaturally, unlike mute-3b/c's material-category changes."
+  },
+  "lib-mute-object-increased-size": {
+    "baseEffectId": "mute-4d",
+    "candidates": [
+      "mute-4a",
+      "mute-4b",
+      "mute-4c",
+      "mute-4d"
+    ],
+    "rationale": "Doubles an inanimate object's dimensions (and hence roughly its order of magnitude in volume), matching mute-4d 'make something grow to ten times its previous volume' verbatim, not the material-composition guidelines (mute-4a/b/c), since no material change occurs."
+  },
+  "lib-rete-unseen-arm": {
+    "baseEffectId": "rete-2a",
+    "candidates": [
+      "rete-2a",
+      "rete-2b",
+      "rete-2c"
+    ],
+    "rationale": "Slowly moves a nonliving thing like a mug, instrument, or pouch of coins at a distance, matching rete-2a 'control or move dirt in a slightly unnatural fashion', not rete-2b (keeping dirt away) or rete-2c (shaping/forming dirt)."
+  },
+  "lib-rete-invisible-sling-vilano": {
+    "baseEffectId": "rete-5d",
+    "candidates": [
+      "rete-5a",
+      "rete-5b",
+      "rete-5c",
+      "rete-5d"
+    ],
+    "rationale": "Hurls a stone that inflicts +5 damage with a 20-pace range increment, matching rete-5d 'hurl a hard projectile with enough force to do +5 damage (range increment of 20 paces)' verbatim, not the other level-5 guidelines (warding, spirits, elementals)."
+  },
+  "lib-rete-forgiving-earth": {
+    "baseEffectId": "rete-2c",
+    "candidates": [
+      "rete-2a",
+      "rete-2b",
+      "rete-2c"
+    ],
+    "rationale": "Loosens packed dirt into ground as loose as plowed earth, matching rete-2c 'shape and form dirt, as if a craftsman had worked it', not rete-2a (moving dirt elsewhere) or rete-2b (warding dirt away)."
+  },
+  "lib-rete-unyielding-earth": {
+    "baseEffectId": "rete-2c",
+    "candidates": [
+      "rete-2a",
+      "rete-2b",
+      "rete-2c"
+    ],
+    "rationale": "Compacts loose ground into solid packed dirt, matching rete-2c 'shape and form dirt, as if a craftsman had worked it', not rete-2a (moving dirt elsewhere) or rete-2b (warding dirt away)."
+  },
+  "lib-crig-palm-flame": {
+    "baseEffectId": "crig-3c",
+    "candidates": [
+      "crig-3a",
+      "crig-3b",
+      "crig-3c"
+    ],
+    "rationale": "A flame conjured in the palm that 'can ignite very flammable items' matches crig-3c; the spell's total level (Base 3 + Touch + Conc, no extra magnitude) pays for only one base-3 effect, and the torch-like light is the unavoidable physical byproduct of a real flame, not a separately-paid crig-3a light effect — contrast Lamp without Flame, which explicitly buys light with 'no apparent source' (i.e. light without real fire, the case crig-3a actually covers). Nothing chills/heats the caster's own hand (ruling out crig-3b)."
+  },
+  "lib-crig-heat-searing-forge": {
+    "baseEffectId": "crig-4a",
+    "candidates": [
+      "crig-4a",
+      "crig-4b",
+      "crig-4c",
+      "crig-4d"
+    ],
+    "rationale": "Heated metal does exactly '+5 damage' on contact, the literal figure from crig-4a ('Create a fire doing +5 damage') reflavored as scalding metal rather than open flame, not a pure temperature-utility effect like boiling water (crig-4d, no damage stated)."
+  },
+  "lib-crig-lamp-without-flame": {
+    "baseEffectId": "crig-4b",
+    "candidates": [
+      "crig-4a",
+      "crig-4b",
+      "crig-4c",
+      "crig-4d"
+    ],
+    "rationale": "Creates 'a steady light as bright as daylight on a cloudy day' with 'no apparent source' (no real fire at all), matching crig-4b's 'Create light as bright as a cloudy day' precisely."
+  },
+  "lib-crig-blade-virulent-flame": {
+    "baseEffectId": "crig-5b",
+    "candidates": [
+      "crig-5a",
+      "crig-5b",
+      "crig-5c",
+      "crig-5d",
+      "crig-5e"
+    ],
+    "rationale": "Forms a fire along a blade doing '+5' (or double, whichever is greater), matching crig-5b's 'fire doing +5 damage in an unnatural shape... covering an item' (the blade being the covered item), not the +10-damage crig-5a."
+  },
+  "lib-crig-flash-scarlet-flames": {
+    "baseEffectId": "crig-5c",
+    "candidates": [
+      "crig-5a",
+      "crig-5b",
+      "crig-5c",
+      "crig-5d",
+      "crig-5e"
+    ],
+    "rationale": "The flash is explicitly 'equivalent to looking straight at the sun,' matching crig-5c's 'Create light as bright as direct sunlight on a clear day' exactly."
+  },
+  "lib-crig-pilum-fire": {
+    "baseEffectId": "crig-10a",
+    "candidates": [
+      "crig-10a",
+      "crig-10b",
+      "crig-10c",
+      "crig-10d"
+    ],
+    "rationale": "The jet of fire does exactly '+15 damage' to its target, the figure from crig-10a ('Create a fire doing +15 damage'), not the +10-in-unnatural-shape crig-10b."
+  },
+  "lib-crig-arc-fiery-ribbons": {
+    "baseEffectId": "crig-5a",
+    "candidates": [
+      "crig-5a",
+      "crig-5b",
+      "crig-5c",
+      "crig-5d",
+      "crig-5e"
+    ],
+    "rationale": "The ribbons of flame do '+10 damage' to everyone in the arc, matching crig-5a's 'Create a fire doing +10 damage' by its damage figure, not the +5-damage unnatural-shape guideline crig-5b."
+  },
+  "lib-crig-coat-flame": {
+    "baseEffectId": "crig-5b",
+    "candidates": [
+      "crig-5a",
+      "crig-5b",
+      "crig-5c",
+      "crig-5d",
+      "crig-5e"
+    ],
+    "rationale": "The target is 'swathed in fire' taking '+5 damage every round,' matching crig-5b's 'fire doing +5 damage in an unnatural shape, such as in a ring or sheet' (a fire-sheet coating the wearer), not the +10-damage crig-5a."
+  },
+  "lib-crig-circle-encompassing-flames": {
+    "baseEffectId": "crig-20b",
+    "candidates": [
+      "crig-20a",
+      "crig-20b"
+    ],
+    "rationale": "The ring of flames deals exactly '+20 damage' to anyone passing through it, matching crig-20b's 'fire doing +20 damage in an unnatural shape' (a ring), not the +25-damage crig-20a."
+  },
+  "lib-inig-tales-ashes": {
+    "baseEffectId": "inig-3a",
+    "candidates": [
+      "inig-3a",
+      "inig-3b"
+    ],
+    "rationale": "Reveals what specific touched ashes originally were and how they burned, i.e. the mundane properties of that ash (inig-3a), not a general area-wide search for past fire traces (inig-3b)."
+  },
+  "lib-inig-shadows-fires-past": {
+    "baseEffectId": "inig-3b",
+    "candidates": [
+      "inig-3a",
+      "inig-3b"
+    ],
+    "rationale": "Lets you 'see where fires have been in the past lunar month' and explicitly 'detects the traces of fire,' matching inig-3b's guideline wording ('Detect the traces of fires which burned within the last lunar month') verbatim, rather than reading properties of a specific pile of ash (inig-3a)."
+  },
+  "lib-inig-vision-heats-light": {
+    "baseEffectId": "inig-2d",
+    "candidates": [
+      "inig-2a",
+      "inig-2b",
+      "inig-2c",
+      "inig-2d"
+    ],
+    "rationale": "Lets you see the heat of any object at body temperature or hotter (not specifically 'a fire'), matching inig-2d's 'Sense levels of heat,' unlike inig-2a/2b/2c which are all scoped to detecting fires specifically."
+  },
+  "lib-peig-winters-icy-touch": {
+    "baseEffectId": "peig-4c",
+    "candidates": [
+      "peig-4a",
+      "peig-4b",
+      "peig-4c"
+    ],
+    "rationale": "'The target loses a Fatigue level' is peig-4c's guideline verbatim ('Chill a person so that they lose a Fatigue level'), not extinguishing a fire (peig-4a) or chilling an inanimate object (peig-4b)."
+  },
+  "lib-peig-soothe-raging-flames": {
+    "baseEffectId": "peig-10a",
+    "candidates": [
+      "peig-10a",
+      "peig-10b"
+    ],
+    "rationale": "'Eradicates the heat of a bonfire' while it keeps burning matches peig-10a's example verbatim ('Destroy one aspect of a fire, for example, heat or light'), not the person-damaging peig-10b."
+  },
+  "lib-peig-well-without-light": {
+    "baseEffectId": "peig-3a",
+    "candidates": [
+      "peig-3a",
+      "peig-3b"
+    ],
+    "rationale": "'Removes light from the target structure' until the entire area is dark, matching peig-3a's 'Completely extinguish all light in an area,' not the partial fire-reduction of peig-3b."
+  },
+  "lib-reig-tremulous-vault-torchs-flame": {
+    "baseEffectId": "reig-3c",
+    "candidates": [
+      "reig-3a",
+      "reig-3b",
+      "reig-3c"
+    ],
+    "rationale": "The fire 'make[s] a leap of up to 10 feet' via a Targeting roll, a discrete instantaneous relocation matching reig-3c's 'Transport a fire instantly up to 5 paces,' not the gradual/continuous movement of reig-3b."
+  },
+  "lib-reig-leap-fire": {
+    "baseEffectId": "reig-3c",
+    "candidates": [
+      "reig-3a",
+      "reig-3b",
+      "reig-3c"
+    ],
+    "rationale": "Shares the same discrete leap-and-Targeting-roll mechanic as Tremulous Vault of the Torch's Flame, matching reig-3c's instantaneous transport, not the continuous 'move a fire quickly' of reig-3b."
+  },
+  "lib-reig-light-shaft-night": {
+    "baseEffectId": "reig-3a",
+    "candidates": [
+      "reig-3a",
+      "reig-3b",
+      "reig-3c"
+    ],
+    "rationale": "Gathers ambient moonbeams/starlight into a shaft that 'moves under your control,' matching reig-3a's 'Control a fire [or, per the Rego Ignem intro, light] in a natural fashion (for example, control its direction of spread),' not an instantaneous transport (reig-3c) or fire left burning naturally elsewhere (reig-3b)."
+  },
+  "lib-crme-panic-trembling-heart": {
+    "baseEffectId": "crme-4a",
+    "candidates": [
+      "crme-4a",
+      "crme-4b"
+    ],
+    "rationale": "Creates an overpowering fear of a specific object/person/place in the target's mind, matching crme-4a 'Put a thought or emotion into another's mind' - not crme-4b, which restores an existing memory from a fragment."
+  },
+  "lib-crme-rising-ire": {
+    "baseEffectId": "crme-4a",
+    "candidates": [
+      "crme-4a",
+      "crme-4b"
+    ],
+    "rationale": "Makes the target furious at someone or something of the caster's choice - implanting an emotion, matching crme-4a 'Put a thought or emotion into another's mind', not crme-4b's memory restoration."
+  },
+  "lib-crme-memory-distant-dream": {
+    "baseEffectId": "crme-5a",
+    "candidates": [
+      "crme-5a",
+      "crme-5b"
+    ],
+    "rationale": "Inserts a full and complete memory into a person's mind from nothing, matching crme-5a 'Create a memory in another's mind' - not crme-5b, which requires a fragment of an existing memory to restore."
+  },
+  "lib-crme-pains-perpetual-worry": {
+    "baseEffectId": "crme-4a",
+    "candidates": [
+      "crme-4a",
+      "crme-4b"
+    ],
+    "rationale": "Gives the target a nagging, painful anxious emotion out of nowhere, matching crme-4a 'Put a thought or emotion into another's mind', not crme-4b's memory restoration."
+  },
+  "lib-inme-sight-transparent-motive": {
+    "baseEffectId": "inme-5a",
+    "candidates": [
+      "inme-5a",
+      "inme-5b"
+    ],
+    "rationale": "Detects the single general motive (fear, anger, greed) most powerfully influencing the target, matching inme-5a 'Sense a single emotion in a being' - not inme-5b, which is about understanding spoken sounds/language."
+  },
+  "lib-inme-perception-conflicting-motives": {
+    "baseEffectId": "inme-10a",
+    "candidates": [
+      "inme-10a",
+      "inme-10b"
+    ],
+    "rationale": "Detects the conflicting motives (e.g. fear vs. duty) behind a target's actions - sensing the target's emotions, matching inme-10a 'Sense all of the emotions in a being', not inme-10b's truth-of-a-statement guideline."
+  },
+  "lib-inme-posing-silent-question": {
+    "baseEffectId": "inme-15c",
+    "candidates": [
+      "inme-15a",
+      "inme-15b",
+      "inme-15c"
+    ],
+    "rationale": "Asks one silent mental question and detects the answer the target believes - matching inme-15c 'Pick a single answer from the mind of a target' precisely, not inme-15a's general two-way speech or inme-15b's broader surface-thought reading."
+  },
+  "lib-mume-mind-beast": {
+    "baseEffectId": "mume-15b",
+    "candidates": [
+      "mume-15a",
+      "mume-15b"
+    ],
+    "rationale": "Turns the target's mind into that of an animal (Req: Animal) - a total transformation of the mind, matching mume-15b 'Utterly change a person's mind', not mume-15a, which requires an Imaginem requisite this spell doesn't carry."
+  },
+  "lib-mume-vision-haunting-spirits": {
+    "baseEffectId": "mume-15a",
+    "candidates": [
+      "mume-15a",
+      "mume-15b"
+    ],
+    "rationale": "Makes all spirits in the area visible, with an explicit Req: Imaginem matching mume-15a's own 'Imaginem requisite' notation exactly - not mume-15b, which changes a mind rather than revealing one."
+  },
+  "lib-peme-trust-childlike-faith": {
+    "baseEffectId": "peme-4b",
+    "candidates": [
+      "peme-4a",
+      "peme-4b",
+      "peme-4c"
+    ],
+    "rationale": "The target loses judgment and believes almost any lie - diminishing the single mental capability of judgment, matching peme-4b 'Diminish a single mental capability in a person', not peme-4a (memory removal) or peme-4c (blunting emotions)."
+  },
+  "lib-peme-enchantment-detachment": {
+    "baseEffectId": "peme-4c",
+    "candidates": [
+      "peme-4a",
+      "peme-4b",
+      "peme-4c"
+    ],
+    "rationale": "Calms and greatly lowers the intensity of the target's current emotions, matching peme-4c 'Reduce the intensity of all of a person's emotions' verbatim, not peme-4a (memory) or peme-4b (a single mental capability)."
+  },
+  "lib-peme-loss-but-moments-memory": {
+    "baseEffectId": "peme-10a",
+    "candidates": [
+      "peme-10a",
+      "peme-10b"
+    ],
+    "rationale": "Removes up to five continuous minutes from a target's memory - a short/minor memory, matching peme-10a 'Remove a minor or short memory from a person's mind', not peme-10b's reduction of all mental capabilities."
+  },
+  "lib-peme-blessing-childlike-bliss": {
+    "baseEffectId": "peme-10b",
+    "candidates": [
+      "peme-10a",
+      "peme-10b"
+    ],
+    "rationale": "Reduces an adult mind to a child's level across the board (solving problems, reasoning, expressing emotion), matching peme-10b 'Reduce all of a person's mental capabilities', not peme-10a's single-memory removal."
+  },
+  "lib-peme-passions-lost-feeling": {
+    "baseEffectId": "peme-15b",
+    "candidates": [
+      "peme-15a",
+      "peme-15b",
+      "peme-15c"
+    ],
+    "rationale": "The target is unable to feel any sort of emotion, matching peme-15b 'Remove all emotions from a person' verbatim, not peme-15a (a major memory) or peme-15c (driving someone insane)."
+  },
+  "lib-peme-poisoning-will": {
+    "baseEffectId": "peme-4c",
+    "candidates": [
+      "peme-4a",
+      "peme-4b",
+      "peme-4c"
+    ],
+    "rationale": "Gradually saps will and vitality, dulling caring and passion broadly across everyone in the cursed area, matching peme-4c 'Reduce the intensity of all of a person's emotions' - not a single capability (peme-4b) or a removed memory (peme-4a)."
+  },
+  "lib-reme-aura-rightful-authority": {
+    "baseEffectId": "reme-5c",
+    "candidates": [
+      "reme-5a",
+      "reme-5b",
+      "reme-5c"
+    ],
+    "rationale": "The target is strongly inclined to obey the caster as a natural superior, matching reme-5c 'Incline a person to a particular sort of response' - not reme-5a (controlling an emotion the target must already feel) or reme-5b (controlling a disembodied spirit; the target here is a living person)."
+  },
+  "lib-reme-coerce-spirits-night": {
+    "baseEffectId": "reme-5b",
+    "candidates": [
+      "reme-5a",
+      "reme-5b",
+      "reme-5c"
+    ],
+    "rationale": "Makes a ghost obey the caster's threats - the target is explicitly a disembodied spirit, matching reme-5b 'Control a disembodied spirit associated with Mentem', not reme-5a (a natural emotion) or reme-5c (inclining a person's response)."
+  },
+  "lib-reme-visions-infernal-terrors": {
+    "baseEffectId": "reme-10b",
+    "candidates": [
+      "reme-10a",
+      "reme-10b"
+    ],
+    "rationale": "Causes everything the target sees and hears to be colored with terror, affecting the target's reactions across the board (per the Stamina-roll effect table), matching reme-10b 'Imbue all of a person's responses with a particular emotion' - not reme-10a's active control of one cultivated emotion."
   }
 }

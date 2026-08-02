@@ -42,13 +42,18 @@ void main() {
     await database.close();
   });
 
-  test('getBuiltInSpells returns all 36 built-in library spells', () async {
+  test('getBuiltInSpells returns every built-in library spell', () async {
     final builtIn = await repository.getBuiltInSpells();
-    expect(builtIn.length, 36);
+    // Derived, not a literal — the built-in count is generator output now,
+    // and changes every time the published-spell-import pipeline is re-run.
+    final rawCount = (await AssetDataLoader().loadSpellLibrary()).length;
+    expect(builtIn.length, rawCount);
     expect(builtIn.every((s) => s.source == PublicationSource.published), isTrue);
   });
 
   test('getAllSpells combines built-in and user spells', () async {
+    final builtInCount = (await AssetDataLoader().loadSpellLibrary()).length;
+
     await spellRepository.saveSpell(Spell(
       id: 'user-1',
       name: 'My Custom Spell',
@@ -62,14 +67,14 @@ void main() {
 
     final all = await repository.getAllSpells();
 
-    expect(all.length, 37); // 36 built-in + 1 user
+    expect(all.length, builtInCount + 1);
     expect(all.any((s) => s.id == 'user-1'), isTrue);
   });
 
   test('searchSpells filters by name, case-insensitively', () async {
-    final results = await repository.searchSpells('phantasm');
+    final results = await repository.searchSpells('BeAsT');
     expect(results, isNotEmpty);
-    expect(results.every((s) => s.name!.toLowerCase().contains('phantasm')), isTrue);
+    expect(results.every((s) => s.name!.toLowerCase().contains('beast')), isTrue);
   });
 
   test('filterBySource returns only matching-source spells', () async {

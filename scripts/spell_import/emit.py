@@ -36,7 +36,7 @@ def build_spell(
         "source": "published",
         "createdAt": FIXED_TIMESTAMP,
         "updatedAt": FIXED_TIMESTAMP,
-        "selectedModifiers": {},
+        "selectedModifiers": _selected_modifiers(design, block, catalog),
         "baseEffectId": base_effect_id,
         "rangeId": range_id,
         "durationId": duration_id,
@@ -49,6 +49,45 @@ def build_spell(
         spell["ritualDeclaration"] = "lastingCreation"
 
     return spell
+
+
+def _selected_modifiers(
+    design: designline.Design, block, catalog: catalog_module.Catalog
+) -> dict[str, list[str]]:
+    """Map design-line modifier tokens onto modifiers.json option ids.
+
+    Only "size" is mapped — it is the one modifier-kind token whose value
+    translates mechanically (magnitude N -> the Form's `size-<form>-N`
+    option, verified to exist for every case actually in the corpus except
+    Mentem, which has no size modifier at all, and three spells whose
+    printed magnitude (5) exceeds every size modifier's top option (4)).
+    Everything else (unnatural, stone/metal material, Imaginem complexity
+    factors) is a smaller, less mechanical set with no verified mapping yet
+    — raising here, not guessing, is what routes those spells to `blocked`
+    in extract_spells.py rather than importing them with a silently wrong
+    level. See .superpowers/todo.md item 27.
+    """
+    selected: dict[str, list[str]] = {}
+    for token in design.tokens:
+        if token.kind != "modifier":
+            continue
+        if token.label.lower() != "size":
+            raise designline.UnknownToken(
+                f"{block.name}: no modifiers.json mapping for modifier token {token.label!r}"
+            )
+        modifier_id = f"size-{block.form.lower()}"
+        modifier = next((m for m in catalog.modifiers if m["id"] == modifier_id), None)
+        if modifier is None:
+            raise designline.UnknownToken(f"{block.name}: no {modifier_id!r} modifier exists")
+        option = next(
+            (o for o in modifier["options"] if o["magnitude"] == token.magnitude), None
+        )
+        if option is None:
+            raise designline.UnknownToken(
+                f"{block.name}: {modifier_id!r} has no option at magnitude {token.magnitude}"
+            )
+        selected.setdefault(modifier_id, []).append(option["id"])
+    return selected
 
 
 def _parameter_name(design: designline.Design, slot: str, block) -> str:

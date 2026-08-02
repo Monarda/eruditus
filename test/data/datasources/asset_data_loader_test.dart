@@ -142,8 +142,8 @@ void main() {
     const expected = <String, ({int level, bool isRitual, int reasonCount})>{
       'lib-crco-incantation-body-made-whole': (level: 40, isRitual: true, reasonCount: 1),
       'lib-crte-touch-midas': (level: 20, isRitual: true, reasonCount: 1),
-      'lib-cran-curse-ravenous-swarm': (level: 50, isRitual: true, reasonCount: 1),
-      'lib-crau-breath-open-sky': (level: 40, isRitual: true, reasonCount: 1),
+      'lib-crco-cheating-reaper': (level: 30, isRitual: true, reasonCount: 1),
+      'lib-mume-past-another': (level: 35, isRitual: true, reasonCount: 2),
       'lib-reme-incantation-summoning-dead': (level: 40, isRitual: true, reasonCount: 1),
     };
 
@@ -182,11 +182,14 @@ void main() {
       isFalse,
     );
 
-    // No pre-existing built-in became a Ritual by accident.
-    final ritualIds = expected.keys.toSet();
-    for (final spell in spells.values.where((s) => !ritualIds.contains(s.id))) {
-      expect(spell.ritualDeclaration, RitualDeclaration.none, reason: spell.id);
-    }
+    // This spot-checks a handful of named spells; it does not assert that no
+    // OTHER spell is a Ritual. That was true when the library was a small,
+    // hand-curated 36 entries — it stopped being true once the library
+    // became bulk-extracted from the whole rulebook (Ritual is a real,
+    // common property, not something added one spell at a time). Full-corpus
+    // Ritual-status correctness is assertion 2 in
+    // test/data/published_spell_import_test.dart, which checks every spell,
+    // not just a named few.
   });
 
   test("every spell's referenced ids exist in the built-in catalogs", () async {

@@ -34,6 +34,7 @@ void main() {
   late LibraryRepository libraryRepository;
   late SpellEngine spellEngine;
   late SpellResolver resolver;
+  late int builtInCount;
 
   final rangeParam = Parameter(
       id: 'p1', name: 'Voice', category: 'Range', magnitude: 0,
@@ -101,7 +102,7 @@ void main() {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
     // Deliberately a small local fixture catalog (2 effects, 3 parameters)
     // rather than the real AssetDataLoader catalog. This means when
-    // libraryRepository.getBuiltInSpells() resolves the real 36 built-in
+    // libraryRepository.getBuiltInSpells() resolves the real built-in
     // library spells against this resolver below, almost none of them
     // resolve — only spells built on ids from this narrow set (the fixture
     // Spells this file saves itself, e.g. `user-1`/`user-dangling`) come back
@@ -110,12 +111,16 @@ void main() {
     // only by resolved spells' ids (see SpellLibraryBloc._onEvent), so the
     // `spellLevels['user-1']`/`spellLevels['user-dangling']` assertions below
     // work only because those particular fixtures were deliberately built
-    // with ids from this narrow catalog — none of the 36 real built-ins are
+    // with ids from this narrow catalog — none of the real built-ins are
     // expected to contribute a spellLevels entry here.
     resolver = SpellResolver(
       effects: [effect1, effect2],
       parameters: [rangeParam, durationParam, targetParam],
     );
+    // Derived, not a literal — the built-in count is generator output now
+    // (see AssetDataLoaderTest's identically-motivated fix) and changes
+    // every time the published-spell-import pipeline is re-run.
+    builtInCount = (await AssetDataLoader().loadSpellLibrary()).length;
     final spellRepository = SpellRepository(
         datasource: LocalSpellDatasource(database: database), resolver: resolver);
     await spellRepository.saveSpell(Spell(
@@ -138,7 +143,7 @@ void main() {
   });
 
   blocTest<SpellLibraryBloc, SpellLibraryState>(
-    'LibraryRequested loads all spells (36 built-in + 1 user)',
+    'LibraryRequested loads all spells (built-in + 1 user)',
     build: () => SpellLibraryBloc(
       libraryRepository: libraryRepository,
       spellEngine: spellEngine,
@@ -149,8 +154,8 @@ void main() {
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 37)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 37),
+          .having((s) => s.allSpells.length, 'allSpells.length', builtInCount + 1)
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', builtInCount + 1),
     ],
   );
 
@@ -210,7 +215,7 @@ void main() {
       isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.allSpells.length, 'allSpells.length', 38)
+          .having((s) => s.allSpells.length, 'allSpells.length', builtInCount + 2)
           .having((s) => s.spellLevels['user-dangling'], "spellLevels['user-dangling']", 5),
     ],
   );
@@ -245,7 +250,7 @@ void main() {
     expect: () => [
       isA<SpellLibraryState>()
           .having((s) => s.status, 'status', SpellLibraryStatus.loaded)
-          .having((s) => s.visibleSpells.length, 'visibleSpells.length', 37),
+          .having((s) => s.visibleSpells.length, 'visibleSpells.length', builtInCount + 1),
       isA<SpellLibraryState>()
           .having((s) => s.filter, 'filter', 'My Spells')
           .having((s) => s.visibleSpells.length, 'visibleSpells.length', 1)

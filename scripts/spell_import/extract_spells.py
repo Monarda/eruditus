@@ -17,6 +17,21 @@ from . import blocks, catalog as catalog_module, designline, ledger as ledger_mo
 LIBRARY_PATH = catalog_module.DATA_DIR / "spell_library.json"
 PROPOSALS_PATH = ledger_module.LEDGER_PATH.with_name("resolutions.proposed.json")
 
+# Spells that genuinely cannot be resolved by a ledger entry: the rulebook's
+# own text supports two or more candidates about equally, with no textual
+# signal for which is primary (checked twice — a first pass resolved these,
+# a review pass found the rationale was picking the most general-sounding
+# candidate rather than a textually forced one, and pulled them). Recorded
+# here rather than left as `unresolved` because "unresolved" means "add a
+# ledger entry" — these don't have one to add. See .superpowers/todo.md
+# item 27. Remove an entry once a rules decision actually resolves it.
+KNOWN_UNRESOLVABLE = {
+    "lib-inte-tracks-faerie-glow": "ambiguous between inte-4a/4b, no textual discriminator",
+    "lib-inte-sense-feet-that-thread-earth": "ambiguous between inte-4a/4b, no textual discriminator",
+    "lib-mute-crystal-dart": "ambiguous between mute-3a/3b/3c, stone-vs-crystal boundary",
+    "lib-peig-conjuration-indubitable-cold": "ambiguous between peig-4a/4b/4c, three co-equal readings",
+}
+
 
 @dataclasses.dataclass
 class Report:
@@ -61,21 +76,28 @@ def run(write: bool = False) -> Report:
         spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
         candidates = catalog.candidates(block.technique, block.form, design.base_level)
 
+        if not candidates:
+            blocked.append((block.name, "no base effect at that Technique/Form/level"))
+            continue
+
+        if spell_id in KNOWN_UNRESOLVABLE:
+            blocked.append((block.name, f"unresolvable: {KNOWN_UNRESOLVABLE[spell_id]}"))
+            continue
+
         try:
             base_effect_id = book.resolve(spell_id, candidates)
         except ledger_module.MissingEntry as error:
             unresolved.append(str(error))
-            if candidates:
-                proposals[spell_id] = {
-                    "baseEffectId": "",
-                    "candidates": candidates,
-                    "rationale": "",
-                    "_name": block.name,
-                    "_line": block.line_no,
-                    "_descriptions": [
-                        e["description"] for e in catalog.base_effects if e["id"] in candidates
-                    ],
-                }
+            proposals[spell_id] = {
+                "baseEffectId": "",
+                "candidates": candidates,
+                "rationale": "",
+                "_name": block.name,
+                "_line": block.line_no,
+                "_descriptions": [
+                    e["description"] for e in catalog.base_effects if e["id"] in candidates
+                ],
+            }
             continue
         except ledger_module.LedgerError as error:
             unresolved.append(str(error))
