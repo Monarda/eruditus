@@ -129,8 +129,11 @@ Listed in dependency order. Item 27 is the next branch.
 
 **Final tally:** 250 imported, 110 blocked, 0 unresolved — 360 published
 spells in the Definitive Edition core rules, all accounted for. Of the 110
-blocked: 9 need a rules decision (listed above, includes *Whispering Winds*
-and *Hermes' Portal* from the hand-derivation item), the rest are mechanical
+blocked: 9 need a rules decision (the literal list above — 5 catalog gaps,
+4 real ambiguity); *Whispering Winds* and *Hermes' Portal* are 2 more
+blocked separately, under "no design line printed" (see the hand-derivation
+item above — 7 spells share that reason: these 2 plus 5 General-level ones
+belonging to item 25); the rest are mechanical
 (General level → item 25; an unrecognised or unmapped design-line token —
 mostly Imaginem complexity factors and Auram "unnatural" tokens, neither
 modelled yet; a handful of genuinely malformed rulebook stat/design lines).

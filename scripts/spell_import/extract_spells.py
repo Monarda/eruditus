@@ -88,8 +88,8 @@ KNOWN_UNRESOLVABLE = {
 #   rete-4/rehe-10b/reig-3c) but not yet wired up. Extending that mapping is
 #   a real fix, just a different and larger one than "correct this string" —
 #   left blocked rather than forced through an unimplemented modifier or an
-#   unrelated candidate whose math happens to work (rete-10/15 reach 75 too,
-#   but describe hurling projectiles, not a travel portal).
+#   unrelated candidate whose math happens to work: rete-15b (+4 size) lands
+#   on exactly 75, but describes hurling a projectile, not a travel portal.
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
 }
