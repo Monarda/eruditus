@@ -75,6 +75,27 @@ Listed in dependency order. Item 27 is the next branch.
       *Enchantment of the Scrying Pool* (InAq 30, line 12900),
       *Whispering Winds* (InAu 15, line 13251),
       *Hermes' Portal* (ReTe 75, line 15638).
+- [ ] **9 spells the ledger cannot resolve — needs a rules decision, not a
+      ledger entry.** Found while filling `resolutions.json` (Task 10 of the
+      harness's implementation plan). Two distinct shapes of blocker:
+      - **Zero base-effect candidates at the computed level** (a catalog gap,
+        not a spell problem — likely relevant to item 22's rebuild-from-`reviewed`
+        work): `lib-muau-infernal-smoke-death`, `lib-muau-fog-confusion`,
+        `lib-peig-wizards-icy-grip`, `lib-crvi-enigmas-gift`,
+        `lib-invi-sense-lingering-magic`.
+      - **Genuinely ambiguous between 2-3 candidates**, no textual
+        discriminator strong enough to write a non-guessed rationale — each
+        was actually resolved once, then pulled after a reviewer found the
+        rationale was picking "the most general-sounding" candidate rather
+        than a textually forced one: `lib-inte-tracks-faerie-glow` (`inte-4a`
+        vs `inte-4b`), `lib-inte-sense-feet-that-thread-earth` (same pair,
+        same shape of ambiguity), `lib-mute-crystal-dart` (`mute-3a` vs
+        `mute-3c`, stone-vs-crystal boundary), `lib-peig-conjuration-indubitable-cold`
+        (`peig-4a`/`4b`/`4c`, three co-equally-supported readings).
+      All 9 are excluded from the 279 spells the extractor currently
+      imports; they stay blocked/unresolved until a human with the rules
+      text and (for the first group) the corrected base-effect catalog can
+      make the call.
       (Five further spells lack a design line but are General-level, so they
       belong to item 25, not here: *Ward against the Beasts of Legend*,
       *Sight of the True Form*, *Ward against Faeries of the Mountain*,
