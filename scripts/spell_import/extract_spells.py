@@ -33,6 +33,68 @@ KNOWN_UNRESOLVABLE = {
 }
 
 
+# The rulebook prints no design line for these three. Each derivation below is
+# done by hand from the spell's stat line and a chosen guideline, and each is
+# then checked by assertion 1 — if a derivation is wrong the computed level
+# will not equal the printed one. Hand-derivation under a test is a different
+# thing from hand-derivation on trust.
+#
+# Five further spells also lack a design line but are General-level and so
+# belong to todo item 25, not here.
+#
+# Only one of the three actually resolves this way. All three spells' own
+# prose explicitly disclaims normal Hermetic guideline arithmetic
+# ("does not conform to the normal InAq guidelines" / "old Mercurian ritual",
+# "fits poorly into the normal framework of Hermetic magic", "Mercurian
+# Ritual"), so each was checked, not assumed, against the real InAq/InAu/ReTe
+# guideline tables:
+#
+# - Enchantment of the Scrying Pool (R: Touch, D: Year, T: Ind, level 30):
+#   Base 5 (inaq-5, "Learn the magical properties of a liquid" — the sole
+#   candidate at level 5, so no ledger entry is needed) + Touch(1) + Year(4)
+#   computes to exactly 30 via SpellLevelCalculator, and is the *only*
+#   InAq base level (1, 2, 3a/3b, 4, 5, 10, 15, 20) that does. The "does not
+#   conform" text turns out to describe the *range* mechanism (the pool
+#   reaches another body of water via what "appears to be" an Arcane
+#   Connection, without the usual +4 Range: Arcane Connection surcharge) —
+#   not the base-effect arithmetic itself, which lines up exactly once the
+#   stat line's actual Range (Touch, to the pool touched when cast) is used.
+#
+# - Whispering Winds (R: Sight, D: Conc, T: Ind, level 15) has no working
+#   derivation. InAu's only base levels are 1, 2, 4, 15 (checked against
+#   the printed Intellego Auram Guidelines table); with Sight(3) + Conc(1) +
+#   Ind(0) fixed by the stat line, base 2 computes to 10 and base 4 to 20 —
+#   15 sits exactly one magnitude short/over either way, with no legitimate
+#   token to bridge it: the stat line carries no Req: art, the prose
+#   names none, and size-auram's scope explicitly excludes Intellego. The
+#   only numeric fits (base 2 + a fabricated +1 requisite, or base 1 + a
+#   fabricated +2) require inventing a requisite the text does not support —
+#   exactly the "picking a candidate because the math works, not because the
+#   text forces it" mistake this file's KNOWN_UNRESOLVABLE comment already
+#   warns against. Left blocked; its own prose ("fits poorly into the normal
+#   framework of Hermetic magic") is the rulebook's own explanation for why.
+#
+# - Hermes' Portal (R: Arc, D: Year, T: Ind, level 75) has no working
+#   derivation within this importer's current modelling. The only
+#   thematically-grounded guideline is rete-4 ("Transport a non-living
+#   object instantly up to 5 paces... add magnitudes for distance/Arcane
+#   Connection"); with Arc(4) + Year(4) + Ind(0) fixed by the stat line,
+#   Base 4 computes to 40, leaving a 35-level (7-magnitude) gap that only
+#   closes with rete-4's own distance ladder at its top rung (Arcane
+#   Connection, magnitude 5, modifiers.json id "rego-transport-distance")
+#   plus 2 magnitudes of size. `emit.build_spell` only maps "size" tokens to
+#   a modifiers.json option today (see `_selected_modifiers`'s docstring);
+#   "rego-transport-distance" is modelled in the catalog (scoped to exactly
+#   rete-4/rehe-10b/reig-3c) but not yet wired up. Extending that mapping is
+#   a real fix, just a different and larger one than "correct this string" —
+#   left blocked rather than forced through an unimplemented modifier or an
+#   unrelated candidate whose math happens to work (rete-10/15 reach 75 too,
+#   but describe hurling projectiles, not a travel portal).
+HAND_DERIVED: dict[str, str] = {
+    "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
+}
+
+
 @dataclasses.dataclass
 class Report:
     spells: list[dict]
@@ -59,12 +121,13 @@ def run(write: bool = False) -> Report:
     proposals: dict[str, dict] = {}
 
     for block in parsed:
-        if block.design_line is None:
+        design_text = block.design_line or HAND_DERIVED.get(block.name)
+        if design_text is None:
             blocked.append((block.name, "no design line printed"))
             continue
 
         try:
-            design = designline.parse_design(block.design_line)
+            design = designline.parse_design(design_text)
         except designline.UnknownToken as error:
             blocked.append((block.name, str(error)))
             continue

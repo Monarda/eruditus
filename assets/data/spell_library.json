@@ -988,6 +988,26 @@
     ]
   },
   {
+    "id": "lib-inaq-enchantment-scrying-pool",
+    "name": "Enchantment of the Scrying Pool",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "inaq-5",
+    "rangeId": "range-touch",
+    "durationId": "duration-year",
+    "targetId": "target-individual",
+    "summary": "Req: Imaginem Turns a body of water into a scrying pool. Innately magical people (including most companions with mystical powers) who look into the pool can see any spot they know of that is within sight of some natural body of water. The view you get is the same view that someone would have from a low boat on the water either close to shore or far from shore, as desired. Maximum range for scry... Level 30.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-inaq-subtle-taste-poison-and-purity",
     "name": "Subtle Taste of Poison and Purity",
     "requisites": [],

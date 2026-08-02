@@ -63,3 +63,27 @@ class RegenerationTest(unittest.TestCase):
         first = extract_spells.serialize(extract_spells.run(write=False).spells)
         second = extract_spells.serialize(extract_spells.run(write=False).spells)
         self.assertEqual(first, second)
+
+
+class HandDerivedTest(unittest.TestCase):
+    """Of the 3 spells with no printed design line, only 1 has a legitimate
+    hand-derivation. The other 2 were investigated, not skipped: their own
+    prose explicitly disclaims normal Hermetic guideline arithmetic
+    ("does not conform to the normal InAq guidelines", "fits poorly into
+    the normal framework of Hermetic magic", Mercurian Ritual), and no
+    combination of real base level + real magnitude tokens reproduces their
+    printed level without inventing a requisite or an unimplemented
+    modifier the text doesn't support. See HAND_DERIVED's module docstring
+    in extract_spells.py for the full per-spell reasoning.
+    """
+
+    def test_the_derivable_spell_is_imported(self):
+        report = extract_spells.run(write=False)
+        names = {s["name"] for s in report.spells}
+        self.assertIn("Enchantment of the Scrying Pool", names)
+
+    def test_the_two_non_derivable_spells_stay_correctly_blocked(self):
+        report = extract_spells.run(write=False)
+        blocked_names = {name for name, _ in report.blocked}
+        for name in ["Whispering Winds", "Hermes' Portal"]:
+            self.assertIn(name, blocked_names)

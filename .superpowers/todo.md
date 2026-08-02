@@ -54,27 +54,55 @@ matching does not close the 186 — see item 27's spec.
 
 Listed in dependency order. Item 27 is the next branch.
 
-### 27. Published Spell Import Harness — **NEXT (design agreed)**
+### 27. Published Spell Import Harness — ✅ COMPLETE (11/11 tasks)
 **Spec:** `docs/superpowers/specs/2026-07-28-published-spell-import-design.md`
+**Plan:** `docs/superpowers/plans/2026-07-28-published-spell-import.md`
 
-- [ ] Maintained, idempotent extractor at `scripts/import/extract_spells.py`
-- [ ] Hand-edited resolution ledger at `scripts/import/resolutions.json`,
+- [x] Maintained, idempotent extractor at `scripts/spell_import/extract_spells.py`
+      (`scripts/import/` in the original spec — `import` is a Python keyword,
+      so the directory was renamed; the one deliberate spec deviation)
+- [x] Hand-edited resolution ledger at `scripts/spell_import/resolutions.json`,
       recording each base-effect decision **and the candidate set it was made
       against** — so item 22's new guideline rows flag affected decisions as
-      stale rather than letting them stand unexamined
-- [ ] Five asset assertions: level equality, **Ritual agreement** (the oracle
+      stale rather than letting them stand unexamined. 167 entries.
+- [x] Five asset assertions: level equality, **Ritual agreement** (the oracle
       that does not depend on the base effect), resolution completeness,
       reference integrity, clean regeneration
-- [ ] Import the 286 already-expressible spells (the library holds 36 today)
-- [ ] Retire `loadSpellLibrary`'s hardcoded count — see item 5's note
-- [ ] Correct `Citation.page`'s doc comment: it promises page numbers arriving
+- [x] Import the already-expressible spells (the library held 36 before this
+      item; **250 after**, not the audit's estimated 286 — reconciled, not
+      forced: 110 spells stay blocked with a documented reason each — 360
+      total published spells accounted for exactly). See the "9 spells"
+      and "2 of 3 design-line-less spells" notes below for the two blocker
+      classes that account for the gap from 286.
+- [x] Retire `loadSpellLibrary`'s hardcoded count — see item 5's note
+- [x] Correct `Citation.page`'s doc comment: it promised page numbers arriving
       with "the spell-parsing work", but the reviewed markdown has no page
-      markers, only prose cross-references. The promise cannot be kept.
-- [ ] Hand-derive the breakdown for the **3 spells the rulebook prints no design
-      line for**, all fixed-level so the derivation is checkable:
-      *Enchantment of the Scrying Pool* (InAq 30, line 12900),
-      *Whispering Winds* (InAu 15, line 13251),
-      *Hermes' Portal* (ReTe 75, line 15638).
+      markers, only prose cross-references. The promise could not be kept;
+      doc comment corrected instead.
+- [x] Hand-derive the breakdown for the **3 spells the rulebook prints no design
+      line for**. Only 1 of 3 has a legitimate derivation:
+      - *Enchantment of the Scrying Pool* (InAq 30, line 12900) — ✅ derived:
+        `(Base 5, +1 Touch, +4 Year)`, base effect `inaq-5` (sole candidate,
+        no ledger entry needed). Imported.
+      - *Whispering Winds* (InAu 15, line 13251) — ❌ no legitimate
+        derivation exists. InAu's only base levels are 1/2/4/15; with
+        Sight(3)/Conc(1)/Ind(0) fixed by the stat line, no real base level +
+        real magnitude token reproduces 15 without inventing a requisite the
+        text doesn't support. The spell's own prose says why: "fits poorly
+        into the normal framework of Hermetic magic." Stays blocked.
+      - *Hermes' Portal* (ReTe 75, line 15638) — ❌ no derivation within the
+        importer's current modelling. The thematically-right guideline
+        (`rete-4`, "Transport a non-living object... add magnitudes for
+        distance/Arcane Connection") needs the `rego-transport-distance`
+        modifier at its top rung plus 2 magnitudes of size to reach 75 —
+        `emit.build_spell` maps only `size`-kind modifier tokens to
+        `modifiers.json` today (see `_selected_modifiers` in `emit.py`).
+        Extending that mapping to `rego-transport-distance` (already scoped
+        in `modifiers.json` to exactly `rete-4`/`rehe-10b`/`reig-3c`) is a
+        real, scoped follow-up that would resolve this spell — not done
+        here, since it's infrastructure work beyond "derive one string."
+        Its own printed `(Mercurian Ritual)` marker corroborates it's
+        non-standard. Stays blocked.
 - [ ] **9 spells the ledger cannot resolve — needs a rules decision, not a
       ledger entry.** Found while filling `resolutions.json` (Task 10 of the
       harness's implementation plan). Two distinct shapes of blocker:
@@ -92,13 +120,20 @@ Listed in dependency order. Item 27 is the next branch.
         same shape of ambiguity), `lib-mute-crystal-dart` (`mute-3a`/`3b`/`3c`,
         stone-vs-crystal boundary), `lib-peig-conjuration-indubitable-cold`
         (`peig-4a`/`4b`/`4c`, three co-equally-supported readings).
-      All 9 are excluded from the 249 spells the extractor currently
+      All 9 are excluded from the 250 spells the extractor currently
       imports (Task 10's `KNOWN_UNRESOLVABLE`/zero-candidate routing in
       `scripts/spell_import/extract_spells.py` blocks them explicitly rather
       than leaving them stuck as `unresolved`); they stay blocked until a
       human with the rules text and (for the first group) the corrected
-      base-effect catalog can
-      make the call.
+      base-effect catalog can make the call.
+
+**Final tally:** 250 imported, 110 blocked, 0 unresolved — 360 published
+spells in the Definitive Edition core rules, all accounted for. Of the 110
+blocked: 9 need a rules decision (listed above, includes *Whispering Winds*
+and *Hermes' Portal* from the hand-derivation item), the rest are mechanical
+(General level → item 25; an unrecognised or unmapped design-line token —
+mostly Imaginem complexity factors and Auram "unnatural" tokens, neither
+modelled yet; a handful of genuinely malformed rulebook stat/design lines).
       (Five further spells lack a design line but are General-level, so they
       belong to item 25, not here: *Ward against the Beasts of Legend*,
       *Sight of the True Form*, *Ward against Faeries of the Mountain*,
