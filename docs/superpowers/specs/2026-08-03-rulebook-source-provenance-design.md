@@ -250,6 +250,57 @@ path. `actions/checkout` will not clone outside the workspace, so the current
 hardcoded sibling path cannot be satisfied on a runner. It also helps any
 contributor whose local layout differs.
 
+### 6. Source-shape changes: folders and filenames
+
+The rulebook's *shape* changes too, not just its text, and the current
+`sources.py` is calibrated to a shape that no longer exists.
+
+**`raw-md` has been deleted upstream** (rulebook commit `8b6c4d6` "Delete raw-md
+directory"). The README now documents a two-tier hierarchy — `/reviewed`
+("**USE THESE!**"), `/wip` ("use until reviewed is populated") — plus
+`/3rd-party`, and does not mention `raw-md` at all.
+
+Verified against rulebook `f36ac84`: no file in `reviewed/` or `wip/` carries an
+OCR-run suffix, a `[digital edition]` tag, or a `DO NOT USE` marker, and none of
+the four `_TITLE_ALIASES` source titles is present. **Every raw-md accommodation
+in `sources.py` is therefore dead code**, not merely unused:
+
+- `FOLDERS` drops to `("reviewed", "wip")`
+- `_SUFFIX`, `_EDITION_TAG`, `_TITLE_ALIASES` and the `"DO NOT USE"` filter are
+  removed; `title_of` collapses to stem extraction
+- the exclusion of `3rd-party` gains a comment saying why (it is third-party
+  material, not the licensed corpus)
+
+Six of the ten tests in `test_sources.py` are raw-md-specific, and two of them —
+`test_uses_raw_only_as_last_resort` and the 50-line corpus audit
+`test_every_raw_md_title_is_triaged_against_reviewed_and_wip` — **currently pass
+vacuously**, because globbing a directory that does not exist yields nothing.
+They are removed rather than repointed, for the reason below.
+
+**Books migrate `wip` → `reviewed`, and are occasionally renamed.** Today
+`reviewed` (28) and `wip` (25) partition the 53-book corpus with zero title
+overlap, so precedence is never exercised; it is insurance for the moment a book
+moves. Two failure shapes follow, and each is already covered:
+
+- **Migration.** A book moving folders changes both the file's `sha256` and the
+  lock's `path`, so it surfaces as an ordinary source change through §1–§3. If
+  the filename *also* changes during the move, `all_books()` briefly yields two
+  entries for one book and the old title resolves to the stale `wip` copy — the
+  lock's `path` field is what makes that visible rather than silent. This is the
+  concrete justification for recording `path`.
+- **Rename.** A renamed book makes `resolve_book(DE_TITLE)` raise
+  `FileNotFoundError` — loud and immediate, which is correct. Only the message
+  improves: it gains the closest available titles ("did you mean…"), so a rename
+  is diagnosable without manually listing the corpus.
+
+The corpus-wide audit test is **deleted, not repointed.** Its value was guarding
+a bug class specific to a third folder holding duplicate OCR renders of books the
+other folders already had. With a partitioned two-folder corpus, the equivalent
+risk applies to exactly one book — the one we read — and the lock's `path` field
+covers it precisely, with no fuzzy title matching. A near-duplicate detector over
+the whole corpus would be flaky in ways the earlier check demonstrated: string
+similarity flags *Tribunals of Hermes — Iberia* against *— Rome* at 0.91.
+
 ## Testing
 
 - **`test_provenance.py`** — the lock round-trips; sha computation is stable;
@@ -260,6 +311,11 @@ contributor whose local layout differs.
   supplied and its clean omission when it is not.
 - **`RegenerationTest`** — message updated, plus a test that it distinguishes
   "source moved" from "hand-edited".
+- **`test_sources.py`** — the six raw-md tests removed; `resolve_book`'s
+  "did you mean…" suggestion covered; a test that `DE_TITLE` resolves to the
+  folder the lock records. `test_falls_back_to_wip_when_not_reviewed` stays: it
+  is unexercised by today's partitioned corpus, but is exactly what a `wip` →
+  `reviewed` migration will exercise.
 
 Both new modules run **against fixtures with no rulebook present**. This is
 deliberate: it begins the source-independent test split item 29 calls for,
@@ -296,3 +352,15 @@ read the live book and there are no fixtures today.
 - The in-repo catalogs (`base_effects.json`, `parameters.json`,
   `modifiers.json`) are already versioned with the code and stay out of scope.
 - Ledger staleness is already handled and is not re-implemented here.
+
+## Consequence for item 22, recorded not actioned
+
+Item 22 plans to rebuild `base_effects.json`, noting the 604 entries came from
+`raw-md/Ars Magica 5e - Core Rules.md` while a reviewed Definitive Edition
+exists. **That input no longer exists** — upstream deleted `raw-md` — so the
+current catalog can no longer be diffed against its own origin to see what a
+rebuild would change. The old file remains retrievable from rulebook history:
+
+    git -C <rulebook> show 8b6c4d6^:"raw-md/Ars Magica 5e - Core Rules.md"
+
+This strengthens item 22 and should be recorded there. It is out of scope here.
