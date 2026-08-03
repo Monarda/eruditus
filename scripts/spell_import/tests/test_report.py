@@ -1,4 +1,7 @@
+import pathlib
+import tempfile
 import unittest
+from unittest import mock
 
 from scripts.spell_import import provenance, report
 
@@ -86,10 +89,6 @@ class RenderTest(unittest.TestCase):
         self.assertIn("initial import", text.lower())
 
 
-import pathlib
-import tempfile
-
-
 class DesignLinesTest(unittest.TestCase):
     MARKDOWN = "\n".join([
         "### Creo Animal Spells",
@@ -111,4 +110,14 @@ class DesignLinesTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIsNone(
                 report.old_design_lines(pathlib.Path(tmp), "deadbee", "reviewed/Book.md")
+            )
+
+    def test_old_design_lines_returns_none_on_decode_error(self):
+        """Verify UnicodeDecodeError from corrupted blob is caught."""
+        with mock.patch("subprocess.run") as mock_run:
+            mock_run.side_effect = UnicodeDecodeError(
+                "utf-8", b"\xff", 0, 1, "invalid start byte"
+            )
+            self.assertIsNone(
+                report.old_design_lines(pathlib.Path("."), "abc123", "Book.md")
             )

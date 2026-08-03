@@ -143,9 +143,10 @@ def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
     try:
         finished = subprocess.run(
             ["git", "-C", str(root), "show", f"{commit}:{relative}"],
-            capture_output=True, text=True, timeout=30, encoding="utf-8",
+            capture_output=True, text=True, timeout=30,
+            encoding="utf-8", errors="replace",
         )
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError, UnicodeDecodeError):
         return None
     if finished.returncode != 0:
         return None
