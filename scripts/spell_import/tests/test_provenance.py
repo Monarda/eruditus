@@ -1,7 +1,9 @@
 import json
 import pathlib
+import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 from scripts.spell_import import provenance
 
@@ -43,6 +45,46 @@ class DescribeTest(unittest.TestCase):
             book = root / "reviewed" / "Some Book.md"
             book.write_text("hello", encoding="utf-8")
             self.assertIsNone(provenance.describe("Some Book", book, root).rulebook)
+
+
+class GitRevisionDegradationTest(unittest.TestCase):
+    """Test that git_revision gracefully handles all failure modes."""
+
+    def test_git_absent_from_path_yields_none(self):
+        """FileNotFoundError (git not found) is caught and returns None."""
+        with mock.patch("subprocess.run") as mock_run:
+            mock_run.side_effect = FileNotFoundError("git not found")
+            result = provenance.git_revision(pathlib.Path("/tmp"), "some/file.md")
+            self.assertIsNone(result)
+
+    def test_non_zero_exit_code_yields_none(self):
+        """Non-zero exit code (e.g., file not tracked) returns None."""
+        with mock.patch("subprocess.run") as mock_run:
+            mock_run.return_value = mock.Mock(returncode=128, stdout="")
+            result = provenance.git_revision(pathlib.Path("/tmp"), "some/file.md")
+            self.assertIsNone(result)
+
+    def test_malformed_stdout_yields_none(self):
+        """Stdout not matching exactly 3 null-separated parts returns None."""
+        with mock.patch("subprocess.run") as mock_run:
+            # Only 2 parts instead of 3
+            mock_run.return_value = mock.Mock(returncode=0, stdout="abc\x00def")
+            result = provenance.git_revision(pathlib.Path("/tmp"), "some/file.md")
+            self.assertIsNone(result)
+
+    def test_empty_stdout_yields_none(self):
+        """Empty stdout returns None."""
+        with mock.patch("subprocess.run") as mock_run:
+            mock_run.return_value = mock.Mock(returncode=0, stdout="")
+            result = provenance.git_revision(pathlib.Path("/tmp"), "some/file.md")
+            self.assertIsNone(result)
+
+    def test_subprocess_timeout_yields_none(self):
+        """subprocess.TimeoutExpired is caught and returns None."""
+        with mock.patch("subprocess.run") as mock_run:
+            mock_run.side_effect = subprocess.TimeoutExpired("git", 10)
+            result = provenance.git_revision(pathlib.Path("/tmp"), "some/file.md")
+            self.assertIsNone(result)
 
 
 class LockFileTest(unittest.TestCase):

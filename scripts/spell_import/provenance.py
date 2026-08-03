@@ -3,7 +3,8 @@
 The rulebook lives outside this repository and is not versioned with it, so
 nothing else can attribute a change in the generated asset to a change in its
 input. This module answers exactly one question — "which source produced
-this?" — and knows nothing about spells.
+this?" — performing no parsing, catalog access, or spell logic. It records
+the spell counts it is handed for the drift message.
 
 The lock it maintains is a *record*, not a pin: it never constrains which
 rulebook is read. Its meaning is "the last source revision known to produce
@@ -83,8 +84,9 @@ def git_revision(root: pathlib.Path, relative: str) -> RulebookRevision | None:
             ["git", "-C", str(root), "log", "-1",
              "--format=%h%x00%ad%x00%s", "--date=short", "--", relative],
             capture_output=True, text=True, timeout=10,
+            encoding="utf-8", errors="replace",
         )
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError, UnicodeDecodeError):
         return None
     if finished.returncode != 0 or not finished.stdout.strip():
         return None
