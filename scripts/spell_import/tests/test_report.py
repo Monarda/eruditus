@@ -84,3 +84,31 @@ class RenderTest(unittest.TestCase):
     def test_no_lock_renders_as_an_initial_import(self):
         text = report.render(self.diff, None, CURRENT, imported=250, blocked=110, unresolved=0)
         self.assertIn("initial import", text.lower())
+
+
+import pathlib
+import tempfile
+
+
+class DesignLinesTest(unittest.TestCase):
+    MARKDOWN = "\n".join([
+        "### Creo Animal Spells",
+        "#### LEVEL 20",
+        "##### Soothe Pains of the Beast",
+        "R: Touch, D: Mom, T: Ind, Ritual",
+        "Prose about the spell.",
+        "(Base level 15, +1 Touch)",
+    ])
+
+    def test_maps_spell_id_to_its_design_line(self):
+        found = report.design_lines_of(self.MARKDOWN)
+        self.assertEqual(found, {"lib-cran-soothe-pains-beast": "(Base level 15, +1 Touch)"})
+
+    def test_text_with_no_spells_yields_an_empty_mapping(self):
+        self.assertEqual(report.design_lines_of("# Just a heading\n\nSome prose."), {})
+
+    def test_old_design_lines_returns_none_outside_a_git_checkout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(
+                report.old_design_lines(pathlib.Path(tmp), "deadbee", "reviewed/Book.md")
+            )

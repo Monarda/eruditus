@@ -117,3 +117,36 @@ def render(
         lines.append("")
 
     return "\n".join(lines)
+
+
+def design_lines_of(text: str) -> dict[str, str]:
+    """Spell id to printed design line, for any revision of the rulebook."""
+    from . import blocks, catalog as catalog_module
+
+    parsed, _ = blocks.parse_de(text.split("\n"))
+    return {
+        catalog_module.slug_id(block.technique, block.form, block.name): block.design_line
+        for block in parsed
+        if block.design_line
+    }
+
+
+def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
+    """The design lines as of a past rulebook revision. Best effort.
+
+    Returns None when the rulebook is not a git checkout, the revision is
+    not fetched, or git is unavailable. The report degrades to omitting the
+    design-line column; it never fails because of this.
+    """
+    import subprocess
+
+    try:
+        finished = subprocess.run(
+            ["git", "-C", str(root), "show", f"{commit}:{relative}"],
+            capture_output=True, text=True, timeout=30, encoding="utf-8",
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if finished.returncode != 0:
+        return None
+    return design_lines_of(finished.stdout)
