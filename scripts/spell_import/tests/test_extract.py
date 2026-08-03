@@ -126,3 +126,32 @@ class KnownUnresolvableStalenessTest(unittest.TestCase):
             "remove them from extract_spells.py and let the ledger (or a "
             "fresh resolutions.json entry) take over: "
         ) + str(stale))
+
+
+class WriteGateTest(unittest.TestCase):
+    """The gate is exercised through run()'s return value, not by writing.
+
+    These must never call run(write=True) against the real asset — a test
+    that rewrites committed data is a test that can destroy it.
+    """
+
+    def test_report_carries_the_source_identity(self):
+        report = extract_spells.run(write=False)
+        self.assertIsNotNone(report.identity.sha256)
+        self.assertEqual(len(report.identity.sha256), 64)
+        self.assertEqual(report.identity.spells_parsed, 360)
+
+    def test_report_carries_a_design_line_per_imported_spell(self):
+        report = extract_spells.run(write=False)
+        for spell in report.spells:
+            self.assertIn(spell["id"], report.design_lines, msg=spell["id"])
+
+    def test_the_committed_lock_matches_the_current_source(self):
+        from scripts.spell_import import provenance
+        lock = provenance.load()
+        self.assertIsNotNone(lock, "source.lock is missing — run --write --accept-source")
+        report = extract_spells.run(write=False)
+        self.assertTrue(
+            provenance.matches(lock, report.identity),
+            msg="\n\n" + provenance.describe_change(lock, report.identity),
+        )

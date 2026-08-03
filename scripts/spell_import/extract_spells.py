@@ -12,10 +12,17 @@ import dataclasses
 import json
 import sys
 
-from . import blocks, catalog as catalog_module, designline, ledger as ledger_module, emit, sources
+from . import blocks, catalog as catalog_module, designline, ledger as ledger_module
+from . import emit, provenance, report as report_module, sources
 
 LIBRARY_PATH = catalog_module.DATA_DIR / "spell_library.json"
 PROPOSALS_PATH = ledger_module.LEDGER_PATH.with_name("resolutions.proposed.json")
+REPORT_PATH = ledger_module.LEDGER_PATH.with_name("import_report.md")
+
+
+class SourceMoved(Exception):
+    """The rulebook changed since the committed asset was generated."""
+
 
 # Spells that genuinely cannot be resolved by a ledger entry: the rulebook's
 # own text supports two or more candidates about equally, with no textual
@@ -101,6 +108,8 @@ class Report:
     blocked: list[tuple[str, str]]
     unresolved: list[str]
     problems: list[str]
+    identity: provenance.SourceIdentity
+    design_lines: dict[str, str]
 
 
 def serialize(spells: list[dict]) -> str:
@@ -109,11 +118,15 @@ def serialize(spells: list[dict]) -> str:
     return json.dumps(ordered, indent=2, ensure_ascii=False) + "\n"
 
 
-def run(write: bool = False) -> Report:
-    lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
+def run(write: bool = False, accept_source: bool = False) -> Report:
+    root = sources.default_root()
+    path = sources.resolve_book(sources.DE_TITLE, root)
+    lines = sources.read_lines(path)
     parsed, problems = blocks.parse_de(lines)
     catalog = catalog_module.Catalog.load()
     book = ledger_module.Ledger.load()
+
+    design_lines: dict[str, str] = {}
 
     spells: list[dict] = []
     blocked: list[tuple[str, str]] = []
@@ -137,6 +150,7 @@ def run(write: bool = False) -> Report:
             continue
 
         spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
+        design_lines[spell_id] = design_text
         candidates = catalog.candidates(block.technique, block.form, design.base_level)
 
         if not candidates:
@@ -176,18 +190,69 @@ def run(write: bool = False) -> Report:
             json.dumps(proposals, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
 
-    if write and not unresolved and not problems:
-        LIBRARY_PATH.write_text(serialize(spells), encoding="utf-8")
+    identity = provenance.describe(
+        sources.DE_TITLE, path, root, parsed=len(parsed), imported=len(spells)
+    )
 
-    return Report(spells=spells, blocked=blocked, unresolved=unresolved, problems=problems)
+    if write and not unresolved and not problems:
+        lock = provenance.load()
+        fresh = serialize(spells)
+        committed = LIBRARY_PATH.read_text(encoding="utf-8") if LIBRARY_PATH.is_file() else ""
+        would_change = fresh != committed
+
+        # An absent lock refuses unconditionally: nothing can be attested, so
+        # "the asset happens to match" is not a reason to proceed quietly. A
+        # merely-moved source refuses only when it would actually rewrite the
+        # asset, since otherwise --write is a no-op anyway.
+        if not provenance.matches(lock, identity) and not accept_source:
+            if would_change or lock is None:
+                raise SourceMoved(provenance.describe_change(lock, identity))
+
+        if would_change:
+            LIBRARY_PATH.write_text(fresh, encoding="utf-8")
+
+        if accept_source:
+            if would_change:
+                old = json.loads(committed) if committed else []
+                previous = None
+                if lock is not None and lock.rulebook is not None:
+                    previous = report_module.old_design_lines(
+                        root, lock.rulebook.commit, lock.path
+                    )
+                REPORT_PATH.write_text(
+                    report_module.render(
+                        report_module.diff_assets(old, spells),
+                        lock, identity,
+                        imported=len(spells), blocked=len(blocked), unresolved=len(unresolved),
+                        old_design_lines=previous, new_design_lines=design_lines,
+                    ),
+                    encoding="utf-8",
+                )
+            provenance.write(identity)
+
+    return Report(
+        spells=spells, blocked=blocked, unresolved=unresolved, problems=problems,
+        identity=identity, design_lines=design_lines,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true", help="rewrite spell_library.json")
+    parser.add_argument(
+        "--accept-source", action="store_true",
+        help="adopt a changed rulebook: rewrite source.lock and the change report",
+    )
     args = parser.parse_args(argv)
 
-    report = run(write=args.write)
+    if args.accept_source and not args.write:
+        parser.error("--accept-source is only meaningful with --write")
+
+    try:
+        report = run(write=args.write, accept_source=args.accept_source)
+    except SourceMoved as error:
+        print(error, file=sys.stderr)
+        return 1
 
     print(f"imported : {len(report.spells)}")
     print(f"blocked  : {len(report.blocked)}")

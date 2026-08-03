@@ -1,0 +1,12 @@
+{
+  "book": "Ars Magica - Definitive Edition (Core Rules)",
+  "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
+  "sha256": "716ae3658ae47526a5f4e7a2b5f9606355db5ae31bc874e113e5a63ba4bede85",
+  "rulebook": {
+    "commit": "97cc62d",
+    "date": "2026-07-18",
+    "subject": "Review Definitive Edition chapter 16"
+  },
+  "spellsParsed": 360,
+  "spellsImported": 250
+}
