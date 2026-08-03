@@ -2,6 +2,7 @@ import os
 import pathlib
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from scripts.spell_import import sources
 
@@ -44,15 +45,38 @@ class RootOverrideTest(unittest.TestCase):
 
     def test_env_var_overrides_the_default_root(self):
         with tempfile.TemporaryDirectory() as tmp:
-            os.environ["ARS_RULEBOOK_ROOT"] = tmp
-            try:
+            with patch.dict(os.environ, {"ARS_RULEBOOK_ROOT": tmp}):
                 self.assertEqual(sources.default_root(), pathlib.Path(tmp))
-            finally:
-                del os.environ["ARS_RULEBOOK_ROOT"]
 
     def test_default_root_without_the_env_var_is_the_sibling_directory(self):
-        os.environ.pop("ARS_RULEBOOK_ROOT", None)
-        self.assertEqual(sources.default_root().name, "Ars-Magica-Open-License")
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("ARS_RULEBOOK_ROOT", None)
+            self.assertEqual(sources.default_root().name, "Ars-Magica-Open-License")
+
+    def test_env_isolation_is_restored_after_tests(self):
+        """Verify that mutating os.environ in tests does not affect subsequent tests.
+
+        This test demonstrates that the isolation around ARS_RULEBOOK_ROOT works:
+        - Set a sentinel value before running isolated tests
+        - Run the env-var tests (which use patch.dict)
+        - Verify the sentinel value survives intact
+        """
+        sentinel = "test-isolation-sentinel"
+        os.environ["ARS_RULEBOOK_ROOT"] = sentinel
+        try:
+            # Simulate what happens when the other tests run and temporarily change the env
+            with tempfile.TemporaryDirectory() as tmp:
+                with patch.dict(os.environ, {"ARS_RULEBOOK_ROOT": tmp}):
+                    self.assertEqual(sources.default_root(), pathlib.Path(tmp))
+
+            with patch.dict(os.environ, {}, clear=False):
+                os.environ.pop("ARS_RULEBOOK_ROOT", None)
+                self.assertEqual(sources.default_root().name, "Ars-Magica-Open-License")
+
+            # After both isolated sections, the original value must be restored
+            self.assertEqual(os.environ.get("ARS_RULEBOOK_ROOT"), sentinel)
+        finally:
+            del os.environ["ARS_RULEBOOK_ROOT"]
 
 
 class SuggestionTest(unittest.TestCase):
