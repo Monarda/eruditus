@@ -9,6 +9,17 @@ FIXED_TIMESTAMP = "2026-01-01T00:00:00.000"
 
 CORE_BOOK_ID = "arm5-core"
 
+# designline's `elaborate` tokens carry the printed magnitude; this maps it to
+# the modifiers.json option that already encodes that magnitude. A magnitude
+# outside this map raises rather than defaulting, so an unexpected value
+# blocks its spell instead of importing one with the wrong option selected.
+_ELABORATE_OPTIONS = {
+    0: "elaborate-effect-none",
+    1: "elaborate-effect-minor",
+    2: "elaborate-effect-considerable",
+    3: "elaborate-effect-extensive",
+}
+
 
 def build_spell(
     block,
@@ -44,6 +55,14 @@ def build_spell(
         "summary": _summary(block),
         "citations": [{"bookId": CORE_BOOK_ID}],
     }
+
+    adjustments = [
+        {"magnitude": token.magnitude, "note": token.note}
+        for token in design.tokens
+        if token.kind == "adjustment"
+    ]
+    if adjustments:
+        spell["adjustments"] = adjustments
 
     if block.stat.is_ritual:
         spell["ritualDeclaration"] = "lastingCreation"
@@ -87,6 +106,20 @@ def _selected_modifiers(
     """
     selected: dict[str, list[str]] = {}
     for token in design.tokens:
+        if token.kind == "elaborate":
+            option_id = _ELABORATE_OPTIONS.get(token.magnitude)
+            if option_id is None:
+                raise designline.UnknownToken(
+                    f"{block.name}: no elaborate-effect option at magnitude "
+                    f"{token.magnitude}"
+                )
+            if not _option_exists(catalog, "elaborate-effect", option_id, token.magnitude):
+                raise designline.UnknownToken(
+                    f"{block.name}: modifiers.json has no 'elaborate-effect' option "
+                    f"{option_id!r} at magnitude {token.magnitude}"
+                )
+            selected.setdefault("elaborate-effect", []).append(option_id)
+            continue
         if token.kind != "modifier":
             continue
         if token.label.lower() != "size":
@@ -106,6 +139,25 @@ def _selected_modifiers(
             )
         selected.setdefault(modifier_id, []).append(option["id"])
     return selected
+
+
+def _option_exists(
+    catalog: catalog_module.Catalog, modifier_id: str, option_id: str, magnitude: int
+) -> bool:
+    """Is `option_id` really a `modifier_id` option carrying `magnitude`?
+
+    _ELABORATE_OPTIONS is a hand-written id table, so a typo in it — or a
+    renamed option in modifiers.json — would otherwise put a dangling id
+    into the asset with no Python test to catch it. Checking the magnitude
+    too means the table cannot drift out of step with the catalog silently.
+    """
+    modifier = next((m for m in catalog.modifiers if m["id"] == modifier_id), None)
+    if modifier is None:
+        return False
+    return any(
+        o["id"] == option_id and o["magnitude"] == magnitude
+        for o in modifier["options"]
+    )
 
 
 def _parameter_name(design: designline.Design, slot: str, block) -> str:

@@ -48,11 +48,12 @@ class ParseDesignTest(unittest.TestCase):
         self.assertEqual(design.tokens[-1].label, "size")
 
     def test_unknown_token_raises(self):
-        # "+1 fancy effect" is an ad-hoc per-spell magnitude (todo item 24).
-        # It must fail loudly so the spell is reported blocked, not imported
-        # with a silently dropped magnitude.
+        # "+2 metal/gems" is a real, unmodelled mechanism (Stone to Falling
+        # Dust). It must fail loudly so the spell is reported blocked, not
+        # imported with a silently dropped magnitude. This example used to be
+        # "+1 fancy effect", which ElaborateEffectTest below now recognises.
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 10, +1 Touch, +1 fancy effect)")
+            designline.parse_design("(Base 10, +1 Touch, +2 metal/gems)")
 
 
 class VocabularyAdditionsTest(unittest.TestCase):
@@ -163,6 +164,61 @@ class VocabularyAdditionsTest(unittest.TestCase):
         self.assertEqual(token.kind, "modifier")
         self.assertEqual(token.label, "moving image")
         self.assertEqual(token.magnitude, 1)
+
+
+class SplittingTest(unittest.TestCase):
+    def test_a_comma_inside_parentheses_does_not_split_a_token(self):
+        design = designline.parse_design(
+            "(Base 1, +1 Touch, +4 Year, +1 Size (for a total of +4 Size, including "
+            "the +3 from the guideline))"
+        )
+        labels = [t.label for t in design.tokens]
+        self.assertIn("Size", labels)
+        self.assertNotIn("including the +3 from the guideline", labels)
+
+
+class ElaborateEffectTest(unittest.TestCase):
+    def test_each_known_wording_becomes_an_elaborate_token(self):
+        for text, magnitude in [
+            ("(Base 3, +1 Touch, +1 fancy effect)", 1),
+            ("(Base 3, +1 Touch, +2 fancy effect)", 2),
+            ("(Base 4, +1 Eye, +1 complex effect)", 1),
+            ("(Base 25, +3 Moon, +1 for special effect)", 1),
+            ("(Base 5, +1 Touch, +1 additional effect)", 1),
+            ("(Base 10, +1 Touch, +3 elaborate design)", 3),
+        ]:
+            with self.subTest(text=text):
+                tokens = [t for t in designline.parse_design(text).tokens
+                          if t.kind == "elaborate"]
+                self.assertEqual(len(tokens), 1)
+                self.assertEqual(tokens[0].magnitude, magnitude)
+
+
+class AdjustmentTest(unittest.TestCase):
+    def test_an_allow_listed_token_becomes_an_adjustment(self):
+        design = designline.parse_design(
+            "(Base 25, +1 Touch, -1 because the old limb is needed)"
+        )
+        adj = [t for t in design.tokens if t.kind == "adjustment"]
+        self.assertEqual(len(adj), 1)
+        self.assertEqual(adj[0].magnitude, -1)
+        self.assertEqual(adj[0].note, "because the old limb is needed")
+
+    def test_the_note_keeps_text_that_parenthetical_stripping_would_remove(self):
+        design = designline.parse_design(
+            "(Base 2, +1 Touch, +2 Special (based on Concentration))"
+        )
+        adj = [t for t in design.tokens if t.kind == "adjustment"]
+        self.assertEqual(adj[0].note, "Special (based on Concentration)")
+
+    def test_an_unlisted_token_still_raises(self):
+        # The allow-list is closed on purpose: absorbing unknown tokens would
+        # import real mechanisms as free text, with a correct level and wrong
+        # modelling. See the spec's "an allow-list, never a catch-all".
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 4, +2 for up to +15 damage)")
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 5, +2 metal/gems)")
 
 
 class VocabularyCoverageTest(unittest.TestCase):
