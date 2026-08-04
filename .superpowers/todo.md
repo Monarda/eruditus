@@ -261,19 +261,35 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   list. Fixing this item (adding the derived rows) is what would let them
   import.
 
-### 30. Weekly Rulebook Freshness Check — ✅ COMPLETE
-**Spec:** `docs/superpowers/specs/2026-08-03-rulebook-source-provenance.md`
+### 30. Rulebook Source Provenance — ✅ COMPLETE (7/7 tasks)
+**Spec:** `docs/superpowers/specs/2026-08-03-rulebook-source-provenance-design.md`
+**Plan:** `docs/superpowers/plans/2026-08-03-rulebook-source-provenance.md`
 
-The freshness job needs no new comparison logic: running the existing Python
-suite with the rulebook at `origin/main` fails precisely when an upstream
-change reaches the library, via `RegenerationTest`, and stays quiet for chapter
-reviews that touch no spells.
+Record which rulebook revision produced `assets/data/spell_library.json`, so
+a source change is diagnosable as a source change and cannot be adopted without
+a human reading a readable summary of what it did. The implementation uses
+deterministic sha256-based provenance tracking in a committed sidecar (`source.lock`),
+never in the asset itself.
 
-- [x] `.github/workflows/rulebook-freshness.yml`: a weekly scheduled job that
-      clones the rulebook at origin/main, sets `ARS_RULEBOOK_ROOT` to the clone,
-      and runs the import harness suite. Deliberately unpinned so a failure means
-      "upstream improved, go adopt it" rather than "something broke".
-- **Status:** ✅ COMPLETE (commit `77c8b01`)
+- [x] **Retire raw-md handling in `sources.py`** — `raw-md` folder deleted upstream;
+      add `ARS_RULEBOOK_ROOT` environment override for CI; remove six dead tests.
+- [x] **`provenance.py`** — Compute and store source identity (sha256 + advisory
+      git metadata); load/compare; zero rulebook dependency for testing.
+- [x] **`report.py`** — Diff two asset lists into readable markdown with spell
+      summaries and old design lines (best-effort from git history); pure data
+      in, string out, testable without a rulebook.
+- [x] **`import_report.md`** — Committed human-readable record of the last
+      adoption that changed the asset.
+- [x] **Drift-aware `RegenerationTest` failure message** — distinguishes "source
+      moved" from "asset was hand-edited" by checking `source.lock`.
+- [x] **`--accept-source` gate on `--write`** — enforces explicit adoption of
+      upstream changes; ordered behind unresolved/problems guards.
+- [x] **Weekly `.github/workflows/rulebook-freshness.yml`** — scheduled job that
+      clones the rulebook at origin/main, sets `ARS_RULEBOOK_ROOT`, and runs the
+      Python import harness suite. Deliberately unpinned so a failure means
+      "upstream improved, go adopt it" rather than "something broke"; quiet when
+      chapter reviews touch no spells, via `RegenerationTest`'s asset comparison.
+- **Status:** ✅ COMPLETE (commits across tasks 1–7; workflow commit `77c8b01`)
 
 ### 29. Follow-ups from item 27's Final Whole-Branch Review — **UPDATED**
 Everything below is a genuine finding from the merge-readiness review of the
@@ -287,14 +303,20 @@ of closing item 27 out (`KnownUnresolvableStalenessTest` in
 more time than closing out item 27 warranted.
 
 - [ ] **No CI runs either test suite (partially addressed by item 30).**
-      Item 30 delivers a weekly freshness job that runs both test suites against
-      the upstream rulebook. The remaining gap: a push/PR `tests` job that runs
-      on every commit to this repo. When that job lands (separate tracked work),
-      it should read the rulebook SHA from `source.lock` to ensure reproducible
-      testing against a known rulebook revision, rather than pulling `origin/main`.
-      The freshness job's unpinned behaviour ("upstream improved") is correct for
-      weekly drift detection; the push/PR job's pinned behaviour (known-good
-      baseline) is correct for regression testing.
+      Item 30 delivers a weekly freshness job that runs the Python import harness
+      suite against the upstream rulebook at `origin/main`. The Dart-side test
+      suite (`flutter test`) still never runs automatically — and a regression that
+      silently reintroduces the `selectedModifiers: {}` bug (item 27's Wizard's
+      Mount defect) would pass every Python test (the golden-file `RegenerationTest`
+      just says "stale, re-run --write", which launders the bug into the asset) —
+      only the Dart-side assertion 1 catches it. The remaining gap: a push/PR
+      `tests` job that runs both suites on every commit to this repo. When that job
+      lands (separate tracked work), it should read the rulebook SHA from
+      `source.lock` to ensure reproducible testing against a known rulebook
+      revision, rather than pulling `origin/main`. The freshness job's unpinned
+      behaviour ("upstream improved") is correct for weekly drift detection; the
+      push/PR job's pinned behaviour (known-good baseline) is correct for
+      regression testing.
 - [ ] **Decide on the ledger's "explicit override" promise.** The spec says
       an entry disagreeing with an unambiguous spell's sole candidate is
       valid "as an explicit override, which needs a rationale like any
