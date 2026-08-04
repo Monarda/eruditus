@@ -17,6 +17,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Manual trigger, so this job can be exercised from any branch without
+  # opening a pull request first. Debugging a workflow that only runs on
+  # push-to-main or on a PR otherwise costs a commit cycle per attempt.
+  workflow_dispatch:
 
 # A new push to a PR supersedes the previous run.
 concurrency:
