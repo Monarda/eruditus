@@ -136,8 +136,18 @@ warns against.
 negative magnitude. This feature collides with that invariant head-on.
 
 Adjustments become magnitudes like any other, passed into the same `calculate()`
-list. The guard changes from "no magnitude may be negative" to **"the resulting
-level must be at least 1"**. Negatives inside the additive tier take the
+list. The guard changes from "no magnitude may be negative" to **"magnitudes may
+not push the level below where it started"** — `level < 1 && level < baseLevel`.
+
+> **Amended after review.** This section originally specified the flat "the
+> resulting level must be at least 1", and that is what shipped first. It is
+> wrong: `base_effects.json` holds 47 base-level-0 guidelines (the General and
+> ward lines), and one at Personal/Momentary/Individual is `calculate(0, [0, 0,
+> 0])` — a level-0 spell the calculator had always returned, which the flat
+> guard turned into a crash. The comparison against `baseLevel` restores it
+> while still rejecting, say, base 5 with five `-1`s.
+
+Negatives inside the additive tier take the
 symmetric rule: subtract 1 while below level 5. No published spell exercises that
 case — the only negative has base 25, where additive capacity is already
 exhausted — but leaving it undefined would be a hole.

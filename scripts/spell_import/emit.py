@@ -219,11 +219,13 @@ def _parameter_name(design: designline.Design, slot: str, block) -> str:
 def _summary(block) -> str:
     """Prose plus the printed level, kept as a trailing "Level N." phrase.
 
-    asset_data_loader_test.dart no longer parses this -- it reads the
-    `printedLevel` field build_spell emits instead. The suffix stays here
-    verbatim anyway: churning existing summaries is out of scope for this
-    change (see .superpowers/todo.md's ledger-authored-summaries item), and a
-    real per-spell summary will drop this suffix when that lands.
+    The suffix is NOT vestigial. `test/data/published_spell_import_test.dart`
+    parses it back out with `RegExp(r'Level (\\d+)\\.$')` and uses it as the
+    oracle for assertion 1, "every spell computes to its printed level" --
+    the harness's primary assertion. Only asset_data_loader_test.dart was
+    moved onto the `printedLevel` field build_spell also emits. Dropping the
+    suffix (see .superpowers/todo.md item 31) reds that assertion unless the
+    oracle moves onto `printedLevel` first.
     """
     prose = " ".join(block.prose.split())
     if len(prose) > 400:
