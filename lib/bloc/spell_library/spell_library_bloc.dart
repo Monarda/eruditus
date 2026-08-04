@@ -41,14 +41,26 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
           // omitted rather than defaulted to 0, so the card can tell
           // "invalid" apart from "genuinely level 0".
           if (!s.isResolved) continue;
-          final breakdown = spellEngine.calculateBreakdown(
-            baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
-            target: s.target!, selectedModifiers: s.selectedModifiers,
-            requisites: s.requisites, adjustments: s.adjustments,
-            ritualDeclaration: s.ritualDeclaration,
-          );
-          levels[s.id] = breakdown.level;
-          if (breakdown.ritualStatus.isRitual) ritualIds.add(s.id);
+          // Per spell, not per load. A saved spell whose adjustments drive it
+          // below level 1 makes calculateBreakdown throw; with one try around
+          // the whole loop that single row dropped the entire Library tab into
+          // its error state on every launch, leaving no in-app way to reach
+          // and delete the offending spell. Degrade to one level-less row
+          // instead — the same treatment an unresolved spell gets above, and
+          // SpellCard already renders a missing level as plain
+          // "Technique Form" with no level suffix.
+          try {
+            final breakdown = spellEngine.calculateBreakdown(
+              baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
+              target: s.target!, selectedModifiers: s.selectedModifiers,
+              requisites: s.requisites, adjustments: s.adjustments,
+              ritualDeclaration: s.ritualDeclaration,
+            );
+            levels[s.id] = breakdown.level;
+            if (breakdown.ritualStatus.isRitual) ritualIds.add(s.id);
+          } catch (_) {
+            continue;
+          }
         }
 
         emit(state.copyWith(

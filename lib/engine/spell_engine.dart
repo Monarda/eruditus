@@ -78,6 +78,32 @@ class SpellEngine {
       }
     });
 
+    // Last, and only once the draft is complete enough to compute: a draft
+    // whose negative magnitudes drive the level below 1 has no level at all.
+    // SpellLevelCalculator signals that by throwing, and nothing downstream
+    // catches it — SpellCreationBloc._handleSpellCalculated would take the
+    // ArgumentError straight out of the handler, and _handleSpellSaveRequested
+    // never calls the calculator at all, so an uncomputable draft would save.
+    // Reported here instead, as one more validation message the creation
+    // screen already renders, which also keeps the Save button unreachable
+    // (it only renders once a draft has calculated).
+    if (errors.isEmpty) {
+      try {
+        calculateBreakdown(
+          baseEffect: draft.baseEffect!,
+          range: draft.range!,
+          duration: draft.duration!,
+          target: draft.target!,
+          selectedModifiers: draft.selectedModifiers,
+          requisites: draft.requisites,
+          adjustments: draft.adjustments,
+          ritualDeclaration: draft.ritualDeclaration,
+        );
+      } on ArgumentError {
+        errors.add('Negative magnitudes reduce this spell below level 1');
+      }
+    }
+
     return errors;
   }
 

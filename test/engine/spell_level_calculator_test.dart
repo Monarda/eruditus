@@ -118,8 +118,29 @@ void main() {
       expect(SpellLevelCalculator.calculate(3, [1, -1, 2]), 5);
     });
 
-    test('throws when the result would fall below 1', () {
+    test('throws when subtraction drives the result below 1', () {
       expect(() => SpellLevelCalculator.calculate(5, [-1, -1, -1, -1, -1]),
+          throwsArgumentError);
+    });
+
+    test('a base-0 guideline with no magnitudes is level 0, not an error', () {
+      // Regression: base_effects.json holds 47 base-level-0 guidelines (the
+      // General and ward lines — crvi-G1, rean-gen, inco-gen…), all selectable
+      // in the creation screen. One at Personal/Momentary/Individual is
+      // exactly this call, and it returned 0 until the "level >= 1" guard
+      // this branch added started rejecting it.
+      expect(SpellLevelCalculator.calculate(0, const []), 0);
+      expect(SpellLevelCalculator.calculate(0, const [0, 0, 0]), 0);
+    });
+
+    test('a base-0 guideline that adds then removes a magnitude is still 0', () {
+      expect(SpellLevelCalculator.calculate(0, const [1, -1]), 0);
+    });
+
+    test('a base-0 guideline pushed below 0 by a magnitude still throws', () {
+      // The guard fires on magnitudes driving the level below where it
+      // started, so base 0 is not a blanket exemption.
+      expect(() => SpellLevelCalculator.calculate(0, const [-1]),
           throwsArgumentError);
     });
 

@@ -679,6 +679,41 @@ void main() {
   });
 
   group('adjustments section', () {
+    SpellCreationState stateWithMagnitude(int magnitude) => SpellCreationState(
+          status: SpellCreationStatus.editing,
+          draft: SpellDraft(
+            id: 'draft-1',
+            adjustments: [LevelAdjustment(magnitude: magnitude, note: 'a note')],
+          ),
+        );
+
+    IconButton stepper(WidgetTester tester, String key) =>
+        tester.widget<IconButton>(find.byKey(Key(key)));
+
+    testWidgets('the magnitude stepper is enabled inside its band', (tester) async {
+      await pumpScreen(tester, stateWithMagnitude(0));
+
+      expect(stepper(tester, 'adjustment-decrement-0').onPressed, isNotNull);
+      expect(stepper(tester, 'adjustment-increment-0').onPressed, isNotNull);
+    });
+
+    testWidgets('the decrement button is disabled at the floor', (tester) async {
+      // Unbounded before this: six taps on a fresh row reached -6, and the
+      // spell it produced had no computable level. Disabled at the bound, not
+      // silently ignoring the tap.
+      await pumpScreen(tester, stateWithMagnitude(-5));
+
+      expect(stepper(tester, 'adjustment-decrement-0').onPressed, isNull);
+      expect(stepper(tester, 'adjustment-increment-0').onPressed, isNotNull);
+    });
+
+    testWidgets('the increment button is disabled at the ceiling', (tester) async {
+      await pumpScreen(tester, stateWithMagnitude(10));
+
+      expect(stepper(tester, 'adjustment-increment-0').onPressed, isNull);
+      expect(stepper(tester, 'adjustment-decrement-0').onPressed, isNotNull);
+    });
+
     testWidgets('removing a row leaves the surviving notes on the right rows',
         (tester) async {
       // A mocked bloc emits no new state, so an interaction never triggers the

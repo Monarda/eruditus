@@ -376,6 +376,17 @@ class SpellCreationScreen extends StatelessWidget {
     );
   }
 
+  /// The band the adjustment stepper may reach.
+  ///
+  /// The published corpus spans -1 (*The Severed Limb Made Whole*) to +4, so
+  /// this is deliberately much wider — a house rule should not be blocked by
+  /// an arbitrary bound. What it does stop is an unbounded stepper: before
+  /// this, six taps on a fresh row reached -6, and any spell that far under
+  /// its base level has no computable level at all. The buttons disable at
+  /// the bound rather than swallowing taps, so the limit is visible.
+  static const int _minAdjustmentMagnitude = -5;
+  static const int _maxAdjustmentMagnitude = 10;
+
   Widget _buildAdjustmentsSection(
     BuildContext context,
     SpellCreationBloc bloc,
@@ -405,11 +416,14 @@ class SpellCreationScreen extends StatelessWidget {
                     key: Key('adjustment-decrement-$index'),
                     icon: const Icon(Icons.remove),
                     tooltip: 'Decrease magnitude',
-                    onPressed: () => bloc.add(AdjustmentUpdated(
-                      index,
-                      draft.adjustments[index].magnitude - 1,
-                      draft.adjustments[index].note,
-                    )),
+                    onPressed:
+                        draft.adjustments[index].magnitude <= _minAdjustmentMagnitude
+                            ? null
+                            : () => bloc.add(AdjustmentUpdated(
+                                  index,
+                                  draft.adjustments[index].magnitude - 1,
+                                  draft.adjustments[index].note,
+                                )),
                   ),
                   SizedBox(
                     width: 32,
@@ -423,11 +437,14 @@ class SpellCreationScreen extends StatelessWidget {
                     key: Key('adjustment-increment-$index'),
                     icon: const Icon(Icons.add),
                     tooltip: 'Increase magnitude',
-                    onPressed: () => bloc.add(AdjustmentUpdated(
-                      index,
-                      draft.adjustments[index].magnitude + 1,
-                      draft.adjustments[index].note,
-                    )),
+                    onPressed:
+                        draft.adjustments[index].magnitude >= _maxAdjustmentMagnitude
+                            ? null
+                            : () => bloc.add(AdjustmentUpdated(
+                                  index,
+                                  draft.adjustments[index].magnitude + 1,
+                                  draft.adjustments[index].note,
+                                )),
                   ),
                   const SizedBox(width: 8),
                   Expanded(

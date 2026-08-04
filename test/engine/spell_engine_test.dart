@@ -210,6 +210,53 @@ void main() {
 
       expect(testEngine.validateSpellDraft(draft), isEmpty);
     });
+
+    test('reports a draft whose adjustments drive it below level 1', () {
+      // Nothing downstream catches SpellLevelCalculator's ArgumentError: the
+      // creation bloc's Calculate handler would take it straight out, and its
+      // Save handler never calls the calculator at all, so the spell would
+      // save and then break the Library tab on the next launch. It has to
+      // surface as a validation message instead.
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: 'e1', technique: 'Creo', form: 'Ignem',
+          description: 'test', baseLevel: 5,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        range: _range, duration: _duration, target: _target,
+        adjustments: [
+          LevelAdjustment(magnitude: -5, note: 'far too generous a discount'),
+        ],
+      );
+
+      expect(engine.validateSpellDraft(draft),
+          contains('Negative magnitudes reduce this spell below level 1'));
+    });
+
+    test('a base-0 guideline draft is valid, because level 0 is a real level', () {
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Vim',
+        baseEffect: BaseEffect(
+          id: 'crvi-G1', technique: 'Creo', form: 'Vim',
+          description: 'Ward against a General guideline', baseLevel: 0,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        range: _range, duration: _duration, target: _target,
+      );
+
+      expect(engine.validateSpellDraft(draft), isEmpty);
+      expect(
+        engine.calculateSpellLevel(
+          baseEffect: draft.baseEffect!,
+          range: _range, duration: _duration, target: _target,
+          requisites: const [],
+        ),
+        0,
+      );
+    });
   });
 
   group('SpellEngine.pruneModifierSelections', () {
@@ -568,5 +615,6 @@ void main() {
       expect(breakdown.contributions.map((c) => c.label),
           contains('Adjustment · cosmetic, free'));
     });
+
   });
 }
