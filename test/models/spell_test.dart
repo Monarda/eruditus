@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -343,6 +344,47 @@ void main() {
           name: 'Touch of Midas', source: PublicationSource.userCreated);
 
       expect(spell.ritualDeclaration, RitualDeclaration.lastingCreation);
+    });
+
+    test('Spell round-trips its adjustments', () {
+      final spell = Spell(
+        id: 'spell-adj',
+        name: 'Test Spell',
+        baseEffectId: '1',
+        rangeId: 'param-voice',
+        durationId: 'param-sun',
+        targetId: 'param-individual',
+        requisites: const [],
+        adjustments: [
+          LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
+          LevelAdjustment(magnitude: 0, note: 'purely cosmetic and thus free'),
+        ],
+        description: 'A test spell',
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+
+      expect(Spell.fromMap(spell.toMap()).adjustments, spell.adjustments);
+    });
+
+    test('a Spell whose map has no adjustments key parses as an empty list', () {
+      final spell = Spell(
+        id: 'spell-none',
+        name: 'Test Spell',
+        baseEffectId: '1',
+        rangeId: 'param-voice',
+        durationId: 'param-sun',
+        targetId: 'param-individual',
+        requisites: const [],
+        description: 'A test spell',
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+      final map = spell.toMap()..remove('adjustments');
+
+      expect(Spell.fromMap(map).adjustments, isEmpty);
     });
   });
 

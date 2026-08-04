@@ -1,4 +1,5 @@
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -52,6 +53,7 @@ class Spell {
   final String targetId;
   final Map<String, List<String>> selectedModifiers;
   final List<Requisite> requisites;
+  final List<LevelAdjustment> adjustments;
   final String? summary;
   final String? description;
   final Provenance provenance;
@@ -69,6 +71,7 @@ class Spell {
     required this.targetId,
     this.selectedModifiers = const {},
     required this.requisites,
+    this.adjustments = const [],
     this.summary,
     this.description,
     required this.provenance,
@@ -96,6 +99,7 @@ class Spell {
         'targetId': targetId,
         'selectedModifiers': selectedModifiers,
         'requisites': requisites.map((r) => r.toMap()).toList(),
+        'adjustments': adjustments.map((a) => a.toMap()).toList(),
         'summary': summary,
         'description': description,
         ...provenance.toMap(),
@@ -118,6 +122,10 @@ class Spell {
             const {},
         requisites: (map['requisites'] as List?)
                 ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        adjustments: (map['adjustments'] as List?)
+                ?.map((a) => LevelAdjustment.fromMap(a as Map<String, dynamic>))
                 .toList() ??
             [],
         summary: map['summary'] as String?,
@@ -143,6 +151,7 @@ class SpellDraft {
   Parameter? target;
   Map<String, List<String>> selectedModifiers;
   List<Requisite> requisites;
+  List<LevelAdjustment> adjustments;
   String? summary;
   String? description;
   RitualDeclaration ritualDeclaration;
@@ -157,12 +166,14 @@ class SpellDraft {
     this.target,
     Map<String, List<String>>? selectedModifiers,
     List<Requisite>? requisites,
+    List<LevelAdjustment>? adjustments,
     this.summary,
     this.description,
     this.ritualDeclaration = RitualDeclaration.none,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
-        requisites = requisites ?? [];
+        requisites = requisites ?? [],
+        adjustments = adjustments ?? [];
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -203,6 +214,7 @@ class SpellDraft {
       targetId: target!.id,
       selectedModifiers: selectedModifiers,
       requisites: requisites,
+      adjustments: adjustments,
       summary: summary,
       description: description,
       ritualDeclaration: ritualDeclaration,
@@ -221,6 +233,7 @@ class SpellDraft {
     Object? target = _unset,
     Map<String, List<String>>? selectedModifiers,
     List<Requisite>? requisites,
+    List<LevelAdjustment>? adjustments,
     String? summary,
     String? description,
     RitualDeclaration? ritualDeclaration,
@@ -235,6 +248,7 @@ class SpellDraft {
       target: identical(target, _unset) ? this.target : target as Parameter?,
       selectedModifiers: selectedModifiers ?? this.selectedModifiers,
       requisites: requisites ?? this.requisites,
+      adjustments: adjustments ?? this.adjustments,
       summary: summary ?? this.summary,
       description: description ?? this.description,
       ritualDeclaration: ritualDeclaration ?? this.ritualDeclaration,
