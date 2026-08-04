@@ -185,3 +185,15 @@ class RegenerationMessageTest(unittest.TestCase):
         message = extract_spells.regeneration_failure_message(lock, lock)
         self.assertIn("hand-edited", message)
         self.assertNotIn("rulebook source moved", message)
+
+    def test_names_the_absent_lock_when_lock_is_missing(self):
+        from scripts.spell_import import provenance
+        current = provenance.SourceIdentity(
+            book="B", path="reviewed/B.md", sha256="1" * 64, rulebook=None,
+            spells_parsed=1, spells_imported=1,
+        )
+        message = extract_spells.regeneration_failure_message(None, current)
+        self.assertIn("no source.lock exists", message)
+        self.assertIn("--accept-source", message)
+        self.assertNotIn("hand-edited", message)
+        self.assertNotIn("rulebook source moved", message)
