@@ -374,4 +374,15 @@ void main() {
       }
     }
   });
+
+  test('the elaborate-effect modifier is globally scoped with a 0-3 ladder', () async {
+    final modifiers = await loader.loadModifiers();
+    final elaborate = modifiers.firstWhere((m) => m.id == 'elaborate-effect');
+
+    expect(elaborate.scope.technique, isNull,
+        reason: 'the rule applies to any Technique');
+    expect(elaborate.scope.form, isNull, reason: 'the rule applies to any Form');
+    expect(elaborate.selectionMode, ModifierSelectionMode.single);
+    expect(elaborate.options.map((o) => o.magnitude).toList(), [0, 1, 2, 3]);
+  });
 }

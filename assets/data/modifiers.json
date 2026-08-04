@@ -482,5 +482,20 @@
       { "id": "rego-distance-arcane", "label": "Somewhere you have an Arcane Connection", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
+  },
+  {
+    "id": "elaborate-effect",
+    "name": "Elaborate effect",
+    "description": "The storyguide charges magnitudes when an effect is more elaborate than its guideline describes",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": null, "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "elaborate-effect-none", "label": "As the guideline describes", "magnitude": 0 },
+      { "id": "elaborate-effect-minor", "label": "Slightly more elaborate", "magnitude": 1 },
+      { "id": "elaborate-effect-considerable", "label": "Considerably more elaborate", "magnitude": 2 },
+      { "id": "elaborate-effect-extensive", "label": "Extensively more elaborate", "magnitude": 3 }
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
   }
 ]
