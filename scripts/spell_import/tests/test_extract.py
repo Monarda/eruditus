@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import unittest
 
@@ -50,13 +51,16 @@ class RegenerationTest(unittest.TestCase):
     """
 
     def test_committed_library_matches_a_fresh_run(self):
+        from scripts.spell_import import provenance
+
         report = extract_spells.run(write=False)
         committed = json.loads(LIBRARY.read_text(encoding="utf-8"))
         self.assertEqual(
             extract_spells.serialize(report.spells),
             extract_spells.serialize(committed),
-            msg="assets/data/spell_library.json is stale or was hand-edited — "
-                "re-run `python -m scripts.spell_import.extract_spells --write`",
+            msg="\n\n" + extract_spells.regeneration_failure_message(
+                provenance.load(), report.identity
+            ),
         )
 
     def test_two_runs_are_byte_identical(self):
@@ -155,3 +159,29 @@ class WriteGateTest(unittest.TestCase):
             provenance.matches(lock, report.identity),
             msg="\n\n" + provenance.describe_change(lock, report.identity),
         )
+
+
+class RegenerationMessageTest(unittest.TestCase):
+    """The message must name the real cause, not the likeliest-looking one."""
+
+    def test_names_the_source_when_the_lock_disagrees(self):
+        from scripts.spell_import import provenance
+        lock = provenance.SourceIdentity(
+            book="B", path="reviewed/B.md", sha256="0" * 64,
+            rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
+            spells_parsed=1, spells_imported=1,
+        )
+        current = dataclasses.replace(lock, sha256="1" * 64)
+        message = extract_spells.regeneration_failure_message(lock, current)
+        self.assertIn("rulebook source moved", message)
+        self.assertNotIn("hand-edited", message)
+
+    def test_blames_the_asset_when_the_lock_agrees(self):
+        from scripts.spell_import import provenance
+        lock = provenance.SourceIdentity(
+            book="B", path="reviewed/B.md", sha256="0" * 64, rulebook=None,
+            spells_parsed=1, spells_imported=1,
+        )
+        message = extract_spells.regeneration_failure_message(lock, lock)
+        self.assertIn("hand-edited", message)
+        self.assertNotIn("rulebook source moved", message)

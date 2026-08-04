@@ -118,6 +118,23 @@ def serialize(spells: list[dict]) -> str:
     return json.dumps(ordered, indent=2, ensure_ascii=False) + "\n"
 
 
+def regeneration_failure_message(
+    lock: provenance.SourceIdentity | None, current: provenance.SourceIdentity
+) -> str:
+    """Why does a fresh run disagree with the committed asset?
+
+    Two very different causes, and the wrong guess costs real time: either
+    the rulebook moved under a correct asset, or the asset was edited by
+    hand. The lock is what tells them apart.
+    """
+    if not provenance.matches(lock, current):
+        return provenance.describe_change(lock, current)
+    return (
+        "assets/data/spell_library.json is stale or was hand-edited — "
+        "re-run `python -m scripts.spell_import.extract_spells --write`"
+    )
+
+
 def run(write: bool = False, accept_source: bool = False) -> Report:
     root = sources.default_root()
     path = sources.resolve_book(sources.DE_TITLE, root)
