@@ -302,21 +302,32 @@ of closing item 27 out (`KnownUnresolvableStalenessTest` in
 `_selected_modifiers`); what's left needs either more design judgement or
 more time than closing out item 27 warranted.
 
-- [ ] **No CI runs either test suite (partially addressed by item 30).**
-      Item 30 delivers a weekly freshness job that runs the Python import harness
-      suite against the upstream rulebook at `origin/main`. The Dart-side test
-      suite (`flutter test`) still never runs automatically — and a regression that
-      silently reintroduces the `selectedModifiers: {}` bug (item 27's Wizard's
-      Mount defect) would pass every Python test (the golden-file `RegenerationTest`
-      just says "stale, re-run --write", which launders the bug into the asset) —
-      only the Dart-side assertion 1 catches it. The remaining gap: a push/PR
-      `tests` job that runs both suites on every commit to this repo. When that job
-      lands (separate tracked work), it should read the rulebook SHA from
-      `source.lock` to ensure reproducible testing against a known rulebook
-      revision, rather than pulling `origin/main`. The freshness job's unpinned
-      behaviour ("upstream improved") is correct for weekly drift detection; the
-      push/PR job's pinned behaviour (known-good baseline) is correct for
-      regression testing.
+- [x] **CI now runs both test suites — ✅ CLOSED.** Two workflows, deliberately
+      answering different questions:
+      - `.github/workflows/tests.yml` — on push to `main` and on every pull
+        request. **Pinned:** reads the rulebook revision from `source.lock` and
+        clones the rulebook at exactly that commit, so upstream churn can never
+        redden a PR. Runs `python -m unittest discover` **and `flutter test`** —
+        the Dart half is the point, since a regression reintroducing the
+        `selectedModifiers: {}` bug (item 27's Wizard's Mount defect) passes
+        every Python test and only the Dart-side assertion 1 catches it.
+      - `.github/workflows/rulebook-freshness.yml` — weekly, **unpinned** (item
+        30). A failure means "upstream improved, go adopt it".
+- **Implementation note the next person will need.** `source.lock` records an
+  **abbreviated** 7-char SHA, and the git wire protocol cannot fetch one —
+  `git fetch --depth 1 origin 97cc62d` fails with `couldn't find remote ref`
+  (verified). The pinned job therefore does a blobless clone
+  (`--filter=blob:none`, ~14s) and resolves the short SHA locally at checkout.
+  Do not "simplify" it to a shallow fetch-by-SHA; it cannot work without either
+  widening the lock to a full SHA or re-deriving it. A cache keyed on the
+  recorded SHA skips the clone entirely until the lock is bumped, and a
+  post-restore `rev-parse` check guards against a cache entry holding the wrong
+  tree.
+- **Supply-chain note.** `tests.yml` uses the third-party
+  `subosito/flutter-action@v2`, pinned by major-version tag rather than commit
+  SHA. It is the de-facto standard for installing Flutter in Actions, but it is
+  the only non-first-party action in this repo. Pin it to a commit SHA if that
+  trade is not acceptable.
 - [ ] **Decide on the ledger's "explicit override" promise.** The spec says
       an entry disagreeing with an unambiguous spell's sole candidate is
       valid "as an explicit override, which needs a rationale like any

@@ -1,0 +1,101 @@
+# Does this repo's code still pass its own tests?
+#
+# Deliberately PINNED, and that is the whole difference from rulebook-freshness.
+# This job clones the rulebook at the revision `source.lock` records, so it
+# tests *this repo's code* against a fixed input. Upstream churn can never
+# redden a pull request here. The unpinned counterpart -- "has upstream moved
+# in a way that reaches the library?" -- is rulebook-freshness.yml's job, and
+# keeping those two questions in separate workflows is the point.
+#
+# It runs BOTH suites. `flutter test` matters as much as the Python one: the
+# generated asset is verified on the Dart side, and a regression that emptied
+# `selectedModifiers` would pass every Python test while only the Dart
+# assertion caught it.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A new push to a PR supersedes the previous run.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read the pinned rulebook revision from source.lock
+        id: lock
+        run: |
+          sha=$(python3 -c "
+          import json
+          lock = json.load(open('scripts/spell_import/source.lock'))
+          print((lock.get('rulebook') or {}).get('commit', ''))
+          ")
+          if [ -z "$sha" ]; then
+            echo "::error::source.lock records no rulebook revision, so this job cannot pin its input. The lock was probably written where the rulebook was not a git checkout; re-run --write --accept-source somewhere it is."
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Pinning rulebook to $sha"
+
+      - name: Restore the pinned rulebook from cache
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/rulebook
+          key: rulebook-${{ steps.lock.outputs.sha }}
+
+      # A blobless clone, because the lock records an ABBREVIATED sha and the
+      # git wire protocol cannot fetch one: `git fetch origin 97cc62d` fails
+      # with "couldn't find remote ref". Cloning the commit graph first and
+      # resolving the short sha locally is what makes the pin work at all.
+      # blob:none keeps that cheap -- the history's blobs are never fetched,
+      # only the ones the pinned tree actually needs.
+      - name: Clone the rulebook at the pinned revision
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          git clone --filter=blob:none --quiet \
+            https://github.com/OriginalMadman/Ars-Magica-Open-License.git \
+            "${{ runner.temp }}/rulebook"
+          git -C "${{ runner.temp }}/rulebook" checkout --quiet "${{ steps.lock.outputs.sha }}"
+
+      # Guards the cache as much as the clone: a cache entry restored under the
+      # right key but holding the wrong tree would silently unpin this job.
+      - name: Confirm the rulebook is at the pinned revision
+        run: |
+          actual=$(git -C "${{ runner.temp }}/rulebook" rev-parse --short HEAD)
+          expected="${{ steps.lock.outputs.sha }}"
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::rulebook is at $actual but source.lock pins $expected"
+            exit 1
+          fi
+          echo "Rulebook at $actual, as pinned."
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Import harness suite
+        env:
+          ARS_RULEBOOK_ROOT: ${{ runner.temp }}/rulebook
+        run: python -m unittest discover -s scripts/spell_import/tests -t .
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # No ARS_RULEBOOK_ROOT here on purpose: the Dart tests read the committed
+      # assets, never the rulebook. Setting it would imply a dependency that
+      # does not exist.
+      - name: Flutter suite
+        run: flutter test
