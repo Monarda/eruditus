@@ -1,0 +1,50 @@
+# Is the committed spell library still what the current rulebook produces?
+#
+# Deliberately unpinned: it clones the rulebook at origin/main, so a failure
+# means "upstream improved, go adopt it" rather than "something broke". It is
+# quiet when a rulebook change touches no spell, because RegenerationTest
+# compares the generated asset rather than the source bytes.
+name: rulebook-freshness
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Clone the rulebook at origin/main
+        run: |
+          git clone --depth 1 \
+            https://github.com/OriginalMadman/Ars-Magica-Open-License.git \
+            "${{ runner.temp }}/rulebook"
+
+      - name: Report the recorded versus current source
+        env:
+          ARS_RULEBOOK_ROOT: ${{ runner.temp }}/rulebook
+        run: |
+          python - <<'PY'
+          from scripts.spell_import import provenance, sources
+          root = sources.default_root()
+          path = sources.resolve_book(sources.DE_TITLE, root)
+          current = provenance.describe(sources.DE_TITLE, path, root)
+          lock = provenance.load()
+          if provenance.matches(lock, current):
+              print("Rulebook unchanged since the asset was generated.")
+          else:
+              print("NOTE: the rulebook has moved. Harmless unless the suite fails below.")
+              print(provenance.describe_change(lock, current))
+          PY
+
+      - name: Run the import harness suite against upstream
+        env:
+          ARS_RULEBOOK_ROOT: ${{ runner.temp }}/rulebook
+        run: python -m unittest discover -s scripts/spell_import/tests -t .
