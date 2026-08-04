@@ -542,6 +542,25 @@ a different quantity from it. That is a genuinely different shape from
 the point where a code seam earns its place. See that spec's "Deferred work,
 recorded".
 
+### 31. Real Per-Spell Summaries — Ledger-Authored
+- [ ] Author real per-spell summaries into a committed ledger keyed by spell
+      id — the same pattern as `resolutions.json` — because the extractor is
+      deterministic stdlib Python and cannot summarise prose at extraction
+      time
+- **Why this is needed:** spell summaries are currently the description
+  truncated to 400 characters, which duplicates the description rather than
+  summarising it.
+- **Deferred by the human partner** until all core-rulebook spells are
+  imported (263 of 360 today, 97 still blocked), so the work is done once
+  against the full set rather than being redone as more spells clear their
+  blockers.
+- **When it happens:** drop the now-vestigial `" Level N."` suffix from the
+  summary, which this task made redundant — `printedLevel` is now its own
+  field on `Spell`, so nothing reads the suffix out of the prose anymore.
+- **Files:** `scripts/spell_import/emit.py` (`_summary`), a new per-spell
+  summary ledger alongside `scripts/spell_import/resolutions.json`,
+  `assets/data/spell_library.json`
+
 ---
 
 ## C. Not on the Critical Path
