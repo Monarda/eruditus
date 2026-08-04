@@ -56,6 +56,7 @@ class Spell {
   final List<LevelAdjustment> adjustments;
   final String? summary;
   final String? description;
+  final int? printedLevel;
   final Provenance provenance;
   final List<String> tags;
   final RitualDeclaration ritualDeclaration;
@@ -74,6 +75,7 @@ class Spell {
     this.adjustments = const [],
     this.summary,
     this.description,
+    this.printedLevel,
     required this.provenance,
     this.tags = const [],
     this.ritualDeclaration = RitualDeclaration.none,
@@ -102,6 +104,7 @@ class Spell {
         'adjustments': adjustments.map((a) => a.toMap()).toList(),
         'summary': summary,
         'description': description,
+        'printedLevel': printedLevel,
         ...provenance.toMap(),
         'tags': tags,
         'ritualDeclaration': ritualDeclaration.name,
@@ -130,6 +133,7 @@ class Spell {
             [],
         summary: map['summary'] as String?,
         description: map['description'] as String?,
+        printedLevel: map['printedLevel'] as int?,
         provenance: Provenance.fromMap(map),
         tags: (map['tags'] as List?)?.map((t) => t as String).toList() ?? const [],
         ritualDeclaration: map['ritualDeclaration'] == null
@@ -154,6 +158,7 @@ class SpellDraft {
   List<LevelAdjustment> adjustments;
   String? summary;
   String? description;
+  int? printedLevel;
   RitualDeclaration ritualDeclaration;
 
   SpellDraft({
@@ -169,6 +174,7 @@ class SpellDraft {
     List<LevelAdjustment>? adjustments,
     this.summary,
     this.description,
+    this.printedLevel,
     this.ritualDeclaration = RitualDeclaration.none,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
@@ -217,6 +223,7 @@ class SpellDraft {
       adjustments: adjustments,
       summary: summary,
       description: description,
+      printedLevel: printedLevel,
       ritualDeclaration: ritualDeclaration,
       provenance: Provenance(source: source),
       createdAt: DateTime.now(),
@@ -236,6 +243,7 @@ class SpellDraft {
     List<LevelAdjustment>? adjustments,
     String? summary,
     String? description,
+    int? printedLevel,
     RitualDeclaration? ritualDeclaration,
   }) {
     return SpellDraft(
@@ -251,6 +259,7 @@ class SpellDraft {
       adjustments: adjustments ?? this.adjustments,
       summary: summary ?? this.summary,
       description: description ?? this.description,
+      printedLevel: printedLevel ?? this.printedLevel,
       ritualDeclaration: ritualDeclaration ?? this.ritualDeclaration,
     );
   }

@@ -159,9 +159,10 @@ class DescriptionEmissionTest(unittest.TestCase):
     """`description` is the full verbatim prose; `summary` stays untouched.
 
     emit._summary truncates block.prose to 400 characters and appends
-    "Level N." — that shape is load-bearing for
-    asset_data_loader_test.dart and must not change. description exists so
-    the untruncated rulebook text is available too.
+    "Level N." — asset_data_loader_test.dart no longer parses that suffix
+    (it reads the `printedLevel` field, see PrintedLevelEmissionTest below),
+    but the suffix itself is unchanged: churning it is out of scope here.
+    description exists so the untruncated rulebook text is available too.
     """
 
     @classmethod
@@ -193,3 +194,37 @@ class DescriptionEmissionTest(unittest.TestCase):
     def test_empty_prose_omits_the_description_key(self):
         spell = self._build("")
         self.assertNotIn("description", spell)
+
+
+class PrintedLevelEmissionTest(unittest.TestCase):
+    """`printedLevel` is the rulebook's printed level, emitted as its own field.
+
+    asset_data_loader_test.dart reads this directly rather than
+    regex-scraping the "Level N." phrase out of `summary` -- see
+    scripts/spell_import/emit.py's build_spell. block.printed_level is
+    int | None; every spell that actually reaches build_spell has one (a
+    spell without one is routed to `blocked` before emission), so None here
+    is a bug, not a valid input, and build_spell raises rather than emitting
+    a null or omitting the key.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def _build(self, level: int | None, design_text: str = "(Base 1, +1 Touch, +2 Sun)") -> dict:
+        design = designline.parse_design(design_text)
+        block = _block("Test Spell", "Rego", "Aquam", level)
+        return emit.build_spell(block, "reaq-3", self.catalog, design)
+
+    def test_printed_level_is_emitted_and_matches_the_block(self):
+        spell = self._build(10)
+        self.assertEqual(spell["printedLevel"], 10)
+
+    def test_a_different_level_is_emitted_faithfully(self):
+        spell = self._build(35)
+        self.assertEqual(spell["printedLevel"], 35)
+
+    def test_a_missing_printed_level_raises_rather_than_emitting_null(self):
+        with self.assertRaises(ValueError):
+            self._build(None)

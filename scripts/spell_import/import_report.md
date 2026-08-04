@@ -11,528 +11,528 @@ Parsed 360 → 360 · imported 263 → 263 · blocked 97 → 97 · unresolved 0 
 
 ## Changed (263)
 - Soothe Pains of the Beast (`lib-cran-soothe-pains-beast`)
-  - description: None → 'This spell looks much like a ritualistic "laying on of hands" seen in many churches. You kneel and press your hands to the wound while reciting a quiet incantation. The spell cures one Light Wound suffered by the animal. Asaron of Flambeau believes his mission in life is to repopulate the world so there will be more to kill, and thus spends seasons healing animals and people throughout Europe. In his version of this spell, a black patch in the shape of a tongue of fire is left where the wound was. A symbolic flame is seen in almost all of Asaron\'s spells, making it his wizard\'s sigil.'
+  - printedLevel: None → 20
 - True Rest of the Injured Brute (`lib-cran-true-rest-injured-brute`)
-  - description: None → 'The injured target gets a +9 bonus to all Recovery rolls made while the spell is in effect.'
+  - printedLevel: None → 20
 - Weaver's Trap of Webs (`lib-cran-weavers-trap-webs`)
-  - description: None → "In casting this spell, you point and from the indicated initial location, a huge net of spider webs grows, filling an area 5 paces by 5 paces by 6 feet high. With supports, the webs can hang vertically, forming a wall, otherwise they act like a net. When the webs are through growing after a few seconds, they are as thick as string and as strong as iron. Everyone caught in the area of the webs is immobilized. Getting free requires a Strength stress roll of 12+, or someone who is not trapped may use an edged weapon to free a victim, which takes three rounds. Contrary to widespread rumor, fire is ineffective against these webs. Webs may continue to trap victims in the future, as long as the spell lasts and they aren't completely hacked apart."
+  - printedLevel: None → 35
 - The Wizard's Mount (`lib-cran-wizards-mount`)
-  - description: None → 'Creates a horse, which is normal in every way except that it is not disturbed by The Gift.'
+  - printedLevel: None → 35
 - Creeping Oil (`lib-craq-creeping-oil`)
-  - description: None → "Saturates a porous material with flammable oil. When casting this spell, you make a flicking motion with your index finger and thumb, as if propelling something at the target. A dot of oil appears on the target after the spell is finished, and slowly spreads over the target, saturating enough cloth to cover a person. If used on a person's clothes and ignited, the oil does +12 damage the first round, +6 the second, and +0 the third."
+  - printedLevel: None → 15
 - Footsteps of Slippery Oil (`lib-craq-footsteps-slippery-oil`)
-  - description: None → 'From each of the next ten footsteps the caster of this spell takes, nonflammable grease spreads out, leaving a slick area 10 paces wide. Dexterity stress rolls are required to remain upright whenever a character on the oil does something more challenging than walking. A roll against an Ease Factor of 6 is needed for the average maneuver, with Ease Factors of up to 15 needed to (for example) make a right turn at full speed on a smooth, greased surface. The duration is the length of time that the oil lasts. This spell was invented by a rather good-natured magus, and the gestures associated with the most common variations of the spell are as comical as the effects themselves. You stand first on one leg, and then the other, vigorously rubbing the bottom of each upturned foot, as if spreading on a salve.'
+  - printedLevel: None → 5
 - Mighty Torrent of Water (`lib-craq-mighty-torrent-water`)
-  - description: None → "A 3-foot-diameter jet of water sprays from your outstretched arms towards your target. The target of this gusher of water takes +10 damage and must make a Strength + Size stress roll against an Ease Factor of 9 or be sent flying back. Marbaid of Flambeau's wizard's sigil is connected to his obsession with blood. In his version of the spell the target is hit by a gush of blood, and the stains do not go away until sunrise/sunset. This does not require a requisite, as it is a purely cosmetic effect."
+  - printedLevel: None → 20
 - Clouds of Rain and Thunder (`lib-crau-clouds-rain-and-thunder`)
-  - description: None → 'Creates a small but severe rainstorm, including lightning and winds. The storm gathers and breaks in a few seconds as the caster concentrates, and dissipates with similar speed when he stops doing so. Note that reducing the Range for this spell makes the storm increasingly unnatural, so versions of this spell with lower Range still have the same level.'
+  - printedLevel: None → 25
 - Clouds of Summer Snow (`lib-crau-clouds-summer-snow`)
-  - description: None → 'Creates clouds that drop snow over an area about half a mile across. The clouds gather over a few seconds at the beginning of the spell, and dissipate over the same sort of time when the caster stops concentrating. The spell does not affect temperature.'
+  - printedLevel: None → 25
 - Stench of the Twenty Corpses (`lib-crau-stench-twenty-corpses`)
-  - description: None → 'Creates a horrible stench of rotting corpses. All those within fifty paces of the target point must make Stamina stress rolls against an Ease Factor of 6 or act with a -3 penalty on all rolls. Anyone who botches the roll vomits and is incapacitated for (10 - Stamina) rounds.'
+  - printedLevel: None → 10
 - Wreaths of Foul Smoke (`lib-crau-wreaths-foul-smoke`)
-  - description: None → 'Thick, yellow, sulfurous smoke rises up from the spot you designate, spreading and thinning naturally, but thick enough to block sight in a radius of about five paces around the point of origin. For each round anyone breathes the smoke, a Stamina stress roll against an Ease Factor of 3 must be made or a Fatigue level is lost. Once a character is Unconscious, further failed rolls result in the character taking a Light Wound each time. The area where the spell is cast will be damaged: small plants wilt and die, and tree growth is stunted. A faint stench of sulfur clings for days to anything exposed to the smoke.'
+  - printedLevel: None → 10
 - Bind Wound (`lib-crco-bind-wound`)
-  - description: None → "This spell binds the target's wounds, so that he can undertake any activity without the risk of worsening the wounds. He still suffers from the wound penalties, however, and cannot heal naturally while under the influence of this spell. Typically, you place your hands on the target and pass them over his wounds, which magically seal themselves and stop bleeding."
+  - printedLevel: None → 10
 - Charm against Putrefaction (`lib-crco-charm-against-putrefaction`)
-  - description: None → 'Prevents decay of a human corpse, or of a severed body part. Necromancers use it to preserve their revived corpses.'
+  - printedLevel: None → 10
 - Cheating the Reaper (`lib-crco-cheating-reaper`)
-  - description: None → 'Resolves a major (or less severe) crisis caused by aging. The target still requires rest for the remainder of the season to recover fully. Note that each application of this spell causes Warping. See page 392 for details on crises.'
+  - printedLevel: None → 30
 - The Chirurgeon's Healing Touch (`lib-crco-chirurgeons-healing-touch`)
-  - description: None → 'This spell heals a single Light Wound suffered by the person touched. This spell does not heal damage from poison or disease.'
+  - printedLevel: None → 20
 - Gentle Touch of the Purified Body (`lib-crco-gentle-touch-purified-body`)
-  - description: None → 'The target is cured of a Light Wound caused by poison or disease. This spell does not heal damage caused by injury.'
+  - printedLevel: None → 20
 - Incantation of the Body Made Whole (`lib-crco-incantation-body-made-whole`)
-  - description: None → 'Heals all damage to a human body at the conclusion of the ritual. The spell can only heal wounds, not such damage as missing limbs, or diseases and damage from poisons.'
+  - printedLevel: None → 40
 - Purification of the Festering Wounds (`lib-crco-purification-festering-wounds`)
-  - description: None → 'The target gains a +9 bonus to Recovery rolls, as long as he has been under the influence of this spell for the whole of the recovery interval. The recovery interval is counted from the time that the spell is cast, any previous time is ignored.'
+  - printedLevel: None → 20
 - Restoration of the Defiled Body (`lib-crco-restoration-defiled-body`)
-  - description: None → 'Removes the crippling or malignant after-effects of any injury, poison, or disease, or of premature aging. The effects of natural aging cannot be undone by this or any spell. This spell does not heal wounds, only extra effects.'
+  - printedLevel: None → 25
 - The Severed Limb Made Whole (`lib-crco-severed-limb-made-whole`)
-  - description: None → "A limb that has been detached from the body can be reattached, but any decay that has occurred on the severed limb remains after the limb is reattached. After a day of decomposition, a limb is weak. After seven days, it is nearly useless and infects the character on whom it is replaced (Stamina stress roll against an Ease Factor of 6 or take a Medium Wound). If it's been severed for more than two weeks, the limb is completely useless."
+  - printedLevel: None → 25
 - The Shadow of Life Renewed (`lib-crco-shadow-life-renewed`)
-  - description: None → "Req: Mentem Brings the semblance of life to a corpse. During the ritual, healing spells work on the corpse, which is important because the body must be physically whole or else it simply dies again once it is brought back to life. For each day that the person has been dead, roll for aging. When the ritual is complete, roll a simple die to determine the success of the attempt: | Roll | Result | | ---- | ------ | | 1 | Body dissolves | | 2 | Body possessed by a demon, faerie, or other supernatural entity | | 3 | Mindless, useless living corpse | | 4–5 | Automaton with no Abilities over 3 | | 6–7 | Automaton, but Abilities as a normal person's | | 8 | Person with self direction but no personality, and somehow dangerously demented | | 9–10 | Person with will, but no personality. The revived person is not truly alive and cannot gain experience points. Must make an aging roll at the beginning of each year of existence, regardless of age. This is the closest the Order has gotten to raising the dead. |"
+  - printedLevel: None → 75
 - Bridge of Wood (`lib-crhe-bridge-wood`)
-  - description: None → 'Creates a bridge made from living leaves, vines, and wood. The bridge can reach up to 20 paces, and is five paces wide. It is sturdy enough to support creatures of up to Size +4.'
+  - printedLevel: None → 20
 - Conjure the Sturdy Vine (`lib-crhe-conjure-sturdy-vine`)
-  - description: None → 'Grows 10 paces of vine from a moderate quantity of wood, or from fertile soil. The vine is extremely strong and pliable, suitable for use as rope.'
+  - printedLevel: None → 5
 - Trap of the Entwining Vines (`lib-crhe-trap-entwining-vines`)
-  - description: None → 'Causes strong, woody vines to grow rapidly from fertile earth. The vines cover a circle 2 paces across and reach 6 feet high. Anything caught within them is immobilized. To avoid the vines, the target must make a Quickness — Encumbrance stress roll against an Ease Factor of 9. To break out requires a Strength stress roll against an Ease Factor of 12 (allowed once a round). Someone not trapped can cut a trapped person free in two rounds, assuming proper tools. The vines weaken and wither to dust at sunrise or sunset.'
+  - printedLevel: None → 15
 - Wall of Living Wood (`lib-crhe-wall-living-wood`)
-  - description: None → 'A straight wall of living oak is created, growing quickly from nearby trees, other plant growth, or fertile earth. The wall is 20 paces long, 1 pace thick, and 5 paces high. It can be scaled with a Dexterity + Athletics stress roll against an Ease Factor of 9.'
+  - printedLevel: None → 25
 - Wall of Thorns (`lib-crhe-wall-thorns`)
-  - description: None → "Within seconds, this spell creates a straight wall of woody, thorny bushes up to 20 paces long, 1 pace thick, and 4 paces high. The thorns, which are unnaturally resilient, have a +15 Soak, are cut by edged weapons only, and cutting through requires inflicting a Heavy Wound. Bodily forcing one's way through the wall requires a Strength stress roll against an Ease Factor of 9 and does +15 damage whether the attempt succeeds or fails. If the roll botches, an additional 5 points of damage are suffered. The wall grows out of existing bushes or fertile soil. A Dexterity + Athletics stress roll against an Ease Factor of 9 allows a character to scale the wall, but the character takes +10 damage in the process."
+  - printedLevel: None → 20
 - Arc of Fiery Ribbons (`lib-crig-arc-fiery-ribbons`)
-  - description: None → 'A dozen multi-hued ribbons of flame leap from your hands and fly out as far as your voice carries, covering a 60-degree arc. All those in the arc take +10 damage.'
+  - printedLevel: None → 25
 - Blade of the Virulent Flame (`lib-crig-blade-virulent-flame`)
-  - description: None → 'Forms a fire along the length of a metal blade. This flame doubles the weapon damage score for the blade (or adds +5, whichever is greater), and can start fires as well. If the spell is cast repeatedly on the same blade, the blade gets hot enough to melt after half an hour, which ends the spell. Letting the blade cool for half an hour between castings avoids this.'
+  - printedLevel: None → 15
 - Circle of Encompassing Flames (`lib-crig-circle-encompassing-flames`)
-  - description: None → 'Creates a circle of flames 6 feet high. The circle begins at a 1-pace radius, but you can make it shrink to a pillar or grow to a 3-pace radius as you concentrate if you cast with a Rego requisite. Anyone moving through the flames takes +20 damage. You cannot move the center of the circle.'
+  - printedLevel: None → 35
 - Coat of Flame (`lib-crig-coat-flame`)
-  - description: None → 'Req: Rego The target is swathed in fire, and takes +5 damage every round while the spell is in effect. That is, the damage must be rolled against Soak twenty times during the spell. The Rego requisite ensures that the fire does not spread.'
+  - printedLevel: None → 25
 - Flash of the Scarlet Flames (`lib-crig-flash-scarlet-flames`)
-  - description: None → "A brilliant red flash explodes in the air where you designate. If you target a person's face the target needs a Stamina stress roll against an Ease Factor of 9 to avoid temporary blindness. If the target botches the roll, he is permanently blinded. If temporarily blinded, he can try to make a simple Stamina roll against an Ease Factor of 9 each minute to recover. The flash is equivalent to looking straight at the sun. In Rose of Jerbiton's version of this spell, there is a faint odor of roses in the area where the flash explodes."
+  - printedLevel: None → 15
 - Heat of the Searing Forge (`lib-crig-heat-searing-forge`)
-  - description: None → 'Heats a piece of metal so that it is too hot to touch. Something the size of a breastplate or helmet does +5 damage if in direct contact with the skin for one round. For each additional round, more damage is done, the amount dropping by two points each round (+3 damage on round two, then +1). Smaller objects do less damage. Most metal armor has leather or cloth underneath that gives the victim a +3 Soak bonus against the heat.'
+  - printedLevel: None → 10
 - Lamp without Flame (`lib-crig-lamp-without-flame`)
-  - description: None → 'This spell creates a steady light as bright as daylight on a cloudy day. The light has no apparent source, but illuminates an area about ten paces across, centered on a point indicated by the caster. This point may be a mobile item.'
+  - printedLevel: None → 10
 - Moonbeam (`lib-crig-moonbeam`)
-  - description: None → 'Causes a gentle light, bright enough to read by, to shine down from above and illuminate the area described by your encircled arms. Lasts as long as you hold your arms in a circle.'
+  - printedLevel: None → 3
 - Palm of Flame (`lib-crig-palm-flame`)
-  - description: None → "A flame leaps up in your palm, which must be upturned for the spell's duration. The flame casts light like a torch, and can ignite very flammable items. It does no damage, and does not burn the caster."
+  - printedLevel: None → 5
 - Pilum of Fire (`lib-crig-pilum-fire`)
-  - description: None → 'A 2-foot, thick, spear-shaped jet of fire flies from your palms, doing +15 damage to the individual it hits.'
+  - printedLevel: None → 20
 - The Shadow of Human Life (`lib-crim-shadow-human-life`)
-  - description: None → 'Req: Mentem The human image created (as in Phantasm of the Human Form) has limited freedom and simulated intellect. It functions as an independent human, albeit a stupid one, capable of interpreting general orders in new situations.'
+  - printedLevel: None → 40
 - Gift of Reason (`lib-crme-gift-reason`)
-  - description: None → "Permanently increases the target's Intelligence by 1 point, to no higher than 0."
+  - printedLevel: None → 35
 - Memory of the Distant Dream (`lib-crme-memory-distant-dream`)
-  - description: None → "Inserts a full and complete memory into a person's mind. If the target gives the memory some thought and concentration, and makes an Intelligence roll against an Ease Factor of 9, the memory is revealed as false. When the duration expires, the memory vanishes, although the subject may remember remembering it."
+  - printedLevel: None → 20
 - Pains of the Perpetual Worry (`lib-crme-pains-perpetual-worry`)
-  - description: None → 'Gives someone a nagging, taunting, painful emotion — a recurrent sense of anxiety, a fear of something he or she does not know, a fear of everything, and a fear of nothing. To have this spell cast on you is truly a curse.'
+  - printedLevel: None → 20
 - Panic of the Trembling Heart (`lib-crme-panic-trembling-heart`)
-  - description: None → 'Creates an overpowering fear in one person of a specific object, person, or place.'
+  - printedLevel: None → 15
 - Rising Ire (`lib-crme-rising-ire`)
-  - description: None → 'Makes the target furious at someone or something of your choice. A stress roll against an Ease Factor of 9 using an appropriate Personality Trait (like Calm) can hold the anger in check, but it is felt strongly regardless of the roll.'
+  - printedLevel: None → 15
 - Weight of a Thousand Hells (`lib-crme-weight-thousand-hells`)
-  - description: None → 'Causes the victim to feel the despair, anguish, pain, and sorrow of a thousand sinners in Hell. This is a horrible spell, for the victim loses almost all motivation and earthly cares. All he can feel is his own pain – endless, inexorable, and searing. Appropriate Personality Trait rolls suffer a harmful adjustment of –5, and the target suffers –2 on any rolls that require thought or concentration. The target has a strong tendency to do nothing but brood.'
+  - printedLevel: None → 25
 - Words of the Unbroken Silence (`lib-crme-words-unbroken-silence`)
-  - description: None → 'Lets you say two words directly to the mind of a target. The target can recognize your voice and knows that the message is of supernatural origin.'
+  - printedLevel: None → 10
 - Conjuring the Mystic Tower (`lib-crte-conjuring-mystic-tower`)
-  - description: None → 'An elaborately carved tower, formed from a single block of stone, rises out of the ground. The tower stands 80 feet high and is 30 feet wide, with a foundation set 20 feet into the ground. You determine the design of the chambers within.'
+  - printedLevel: None → 35
 - Seal the Earth (`lib-crte-seal-earth`)
-  - description: None → 'Creates enough dirt to fill in a pit of up to 6 paces across and 3 paces deep.'
+  - printedLevel: None → 15
 - Touch of Midas (`lib-crte-touch-midas`)
-  - description: None → 'This spell creates a roughly spherical lump of gold about six inches across. This weighs about eighty pounds, and is enough money to keep a peasant family in comfort for about three hundred years.'
+  - printedLevel: None → 20
 - Wall of Protecting Stone (`lib-crte-wall-protecting-stone`)
-  - description: None → "Makes a wall of granite up to 25 paces wide, 4 paces high, and 1 pace thick. One needs miner's tools to break through it, though it can be toppled if it is not connected to a support on its side or top."
+  - printedLevel: None → 25
 - The Phantom Gift (`lib-crvi-phantom-gift`)
-  - description: None → 'The target of the spell becomes tainted with magic as most magi are. Beasts and people react to the target as though he were a magus. Those who normally associate with the victim do not become hostile, but do give him or her a wider berth. The spell has no effect on those who already have The Gift, including those blessed with the Gentle Gift.'
+  - printedLevel: None → 15
 - Hunter's Sense (`lib-inan-hunters-sense`)
-  - description: None → 'You sense the shapes and primary motivations of all animals above a certain size that you can hear, or could hear if they were making a noise. You decide the size threshold when you cast the spell, such as "all animals larger than a fox." The \'noise\' of an animal\'s shape is louder the larger it is, while the \'noise\' of its motivations increases depending on how intense the motivation is. A rabbit fleeing from a fox would sound fearful, very loudly. The fox\'s motivation might be fairly quiet, especially if recent hunting had been good.'
+  - printedLevel: None → 30
 - Image of the Beast (`lib-inan-image-beast`)
-  - description: None → 'Gives you a hazy mental image of an animal you have an Arcane Connection to. Wounds caused by an animal are an Arcane Connection to that animal with a lifetime of a few hours. This spell can thus be used to find out what was responsible for an attack. All spells cast by Chavin of Tytalus can be recognized because they promote or advocate war or violence. In his version of this spell, the claws and teeth of the beast appear more dangerous.'
+  - printedLevel: None → 5
 - Opening the Tome of the Animal's Mind (`lib-inan-opening-tome-animals-mind`)
-  - description: None → "You touch the head of the animal in question and read its memories of the past day. The further the animal is from human, the harder it is to read its memories accurately. If you simply scan the beast's memories, not looking for anything special, you get the memories the beast thinks are most important. If you are trying to get a specific fact, you need a Perception + Finesse stress roll against an Ease Factor of 6, or 12 if the fact is obscure. Since normal animals are sensitive to magic, they resist your touch and try to shy away from you both when the spell is cast and while the spell continues to function. This can be quite a problem with larger animals."
+  - printedLevel: None → 25
 - Shiver of the Lycanthrope (`lib-inan-shiver-lycanthrope`)
-  - description: None → 'You feel a sudden shiver if you are touching a person or beast that is actually a lycanthrope. Variants of this spell detect other types of shapechanger, but not Bjornaer with Heartbeasts.'
+  - printedLevel: None → 10
 - Call of the Rushing Waters (`lib-inaq-call-rushing-waters`)
-  - description: None → 'Allows you to find any natural body of water for which you have an Arcane Connection (for example, a vial of water from it). Once you cast the spell, you can hear the water while you concentrate. Following the sound eventually brings you to the water, but you must make simple Perception rolls against an Ease Factor of 6 to follow the sound accurately (roll once per day for long journeys). If you break concentration, you must cast the spell again. A body of water that does not move or that makes little noise requires a roll against an Ease Factor of 9 to be traced.'
+  - printedLevel: None → 15
 - Clear Sight of the Naiad (`lib-inaq-clear-sight-naiad`)
-  - description: None → 'You can see as clearly through water as through air, for a single moment.'
+  - printedLevel: None → 5
 - Enchantment of the Scrying Pool (`lib-inaq-enchantment-scrying-pool`)
-  - description: None → 'Req: Imaginem Turns a body of water into a scrying pool. Innately magical people (including most companions with mystical powers) who look into the pool can see any spot they know of that is within sight of some natural body of water. The view you get is the same view that someone would have from a low boat on the water either close to shore or far from shore, as desired. Maximum range for scrying is 500 miles; the range of the spell is the range to the pool when the spell is cast. This ritual is not entirely of Hermetic magic, and does not conform to the normal InAq guidelines. It is an old Mercurian ritual that has become known throughout the Order, and which appears to use one body of water as an Arcane Connection to any other body of water. A number of theoreticians would like to make that work more generally, but so far this has not proved possible. (Special spell)'
+  - printedLevel: None → 30
 - Subtle Taste of Poison and Purity (`lib-inaq-subtle-taste-poison-and-purity`)
-  - description: None → 'You can taste all of the properties of any liquid or mixture of liquids. Unlike *Touch of the Pearls*, you can use this sense on any number of liquids during the duration of the spell, but you must taste the liquids in question.'
+  - printedLevel: None → 5
 - Touch of the Pearls (`lib-inaq-touch-pearls`)
-  - description: None → "Tells you whether a liquid you hold or touch is poisonous, just as a pearl sometimes does. Safer than Subtle Taste of Poison and Purity, as you don't have to taste the possibly poisonous liquid. In Verdan of Ex Miscellanea's version of the spell, poisonous liquids turn a faint green. According to his sigil, all his spells involve the color green."
+  - printedLevel: None → 5
 - Voice of the Lake (`lib-inaq-voice-lake`)
-  - description: None → 'You can hold a conversation with a body of water. A body of water usually knows about things directly in contact with it, such as boats and fish. Genuine lakes are too complex for this spell to affect; they are not Individuals of Aquam.'
+  - printedLevel: None → 25
 - Eyes of the Bat (`lib-inau-eyes-bat`)
-  - description: None → "You can move about confidently in complete darkness by sensing air and its boundaries (for example, where solid objects are). You 'hear' the boundaries of the air, so it does not permit fine discriminations. On the other hand, you can 'hear' boundaries behind you."
+  - printedLevel: None → 25
 - Sailor's Foretaste of the Morrow (`lib-inau-sailors-foretaste-morrow`)
-  - description: None → "You know precisely what tomorrow's weather will be, and you gain a general impression about the weather for the week ahead. This intuition only applies to the place where you cast the spell, and is based on extrapolating current conditions, so it is occasionally wrong (precise, but inaccurate). Still, it would take something like an interfering magical being, or a volcanic eruption, to throw the prediction off."
+  - printedLevel: None → 15
 - True Sight of the Air (`lib-inau-true-sight-air`)
-  - description: None → 'Lets you see clearly through all manner of obfuscation in the air nearby, including smoke, fog, and dust, even if the obfuscation is magical.'
+  - printedLevel: None → 15
 - The Inexorable Search (`lib-inco-inexorable-search`)
-  - description: None → "Determines the location of a specific person. To cast the spell you need a map and an Arcane Connection. After casting the spell, you can move your finger over the map at the rate of one hour per square foot of map. When your finger passes over the person's location as represented on the map, you sense the person's presence. (If the person is not in the area covered by the map, no sensations result.) You can locate the person to within a thumb's width on the map. A similar spell allows you to search for a dead body (Tracing the Trail of Death's Stench)."
+  - printedLevel: None → 20
 - Physician's Eye (`lib-inco-physicians-eye`)
-  - description: None → "Determines the general health of a single person. Specific afflictions appear to you as areas of yellow coloration on the person's body. A Perception + Medicine stress roll is required to identify unusual diseases. The Ease Factor is determined by the rarity of the disease."
+  - printedLevel: None → 5
 - Revealed Flaws of Mortal Flesh (`lib-inco-revealed-flaws-mortal-flesh`)
-  - description: None → "You are able to find any medical defects in a person or being that you are touching. This provides more, and more specific, information than Physician's Eye."
+  - printedLevel: None → 10
 - Whispers through the Black Gate (`lib-inco-whispers-through-black-gate`)
-  - description: None → 'Req: Mentem You can speak through the barrier — the figurative "gate" — that stands between the dead and the living, to one corpse that has not yet decayed into a skeleton. The corpse cannot have been buried in Church burial, nor have belonged to a spirit that went straight to Heaven (for example, a saint or a crusader). The spirit that you speak with is not compelled to tell the truth; you can, of course, find ways to coerce or trick it into doing so. All those around you can hear the voice of the corpse.'
+  - printedLevel: None → 15
 - Converse with Plant and Tree (`lib-inhe-converse-with-plant-and-tree`)
-  - description: None → 'You can speak with a plant for one conversation. The level of conversation depends on the type of plants; longer-lived and more noble plants have more to say. A single question and response takes ten to thirty minutes, with slower-growing plants speaking more slowly. Typically, plants can talk about the soil and about other plants around them, but have limited awareness of more momentary events, such as the passing of animals or people, unless that passing has a direct bearing on the plant (for example, a person cut its trunk). News can spread quickly through a forest when it has to, called from tree to tree on the wind. Bystanders cannot understand your conversation.'
+  - printedLevel: None → 25
 - Hunt for the Wild Herb (`lib-inhe-hunt-for-wild-herb`)
-  - description: None → 'When you cast this spell, you can smell one sort of plant, and follow the scent, as long as you continue to concentrate. You must have a sample of the type of plant you are looking for. A Perception stress roll against an Ease Factor of 6 is needed to follow the scent. If there is no plant of the relevant type fairly close by (close enough to smell), you smell nothing, although the spell still works.'
+  - printedLevel: None → 5
 - Intuition of the Forest (`lib-inhe-intuition-forest`)
-  - description: None → 'You engage in a type of communion with the woods that you are in, giving you an intuitive sense of how to get along in the forest, and how to get the most out of the forest without causing it harm. You get a +3 to all nature-oriented rolls (not including spells) when in a forest or similar area. Causing significant harm to the forest cancels this spell.'
+  - printedLevel: None → 10
 - Probe Nature's Hidden Lore (`lib-inhe-probe-natures-hidden-lore`)
-  - description: None → 'Tells you what kind of plant you are touching. You also get an image of it in its natural habitat. Works with plant products as well as with plants themselves.'
+  - printedLevel: None → 4
 - Shriek of the Impending Shafts (`lib-inhe-shriek-impending-shafts`)
-  - description: None → "Lets you know where anything wooden will be in the immediate future by a shriek that sounds in the air in advance of the wood's coming. A piece of wood that is controlled may change course, so the spell is sometimes wrong. You get a +9 bonus on Defense scores against wooden weapons (provided that you have the freedom to dodge), and you can automatically dodge wooden missiles fired from more than ten paces away. The shriek is only audible to you, and it cannot be simulated by people making noises."
+  - printedLevel: None → 15
 - Eyes of the Flame (`lib-inig-eyes-flame`)
-  - description: None → 'Lets you see a fire to which you have an Arcane Connection. You can also see all those things which the fire illuminates.'
+  - printedLevel: None → 35
 - Shadows of the Fires Past (`lib-inig-shadows-fires-past`)
-  - description: None → 'Allows you to see where fires have been in the past lunar month. A light red flickering haze appears where the fire was, and you gain an intuitive sense of when the fire was there. This spell does not look into the past, but detects the traces of fire.'
+  - printedLevel: None → 15
 - Tales of the Ashes (`lib-inig-tales-ashes`)
-  - description: None → 'Lets you see what the ashes you touch originally were, and how and when the object was burned. The latter two are divined from markings and signs in the ashes.'
+  - printedLevel: None → 5
 - Vision of Heat's Light (`lib-inig-vision-heats-light`)
-  - description: None → "Allows you to see the heat of objects that are of human body temperature or hotter. Excellent for use in the dark, but it doesn't give true vision. You can see well enough to use a weapon, even a missile weapon, without penalty, but recognizing people is very difficult."
+  - printedLevel: None → 20
 - Words of the Flickering Flame (`lib-inig-words-flickering-flame`)
-  - description: None → "Allows you to converse with a fire, commonly very chaotic and distractible. Promising a fire more fuel might keep its interest. Fires are mostly aware of what they've burned, but they have a limited awareness of what goes on around them as well."
+  - printedLevel: None → 35
 - Discern Own Illusions (`lib-inim-discern-own-illusions`)
-  - description: None → 'This spell makes your own illusions appear largely transparent to you, but still discernible.'
+  - printedLevel: None → 15
 - The Ear for Distant Voices (`lib-inim-ear-for-distant-voices`)
-  - description: None → 'You can hear what is happening in the place you designate. You must have an Arcane Connection with the place or with a person there.'
+  - printedLevel: None → 20
 - Eyes of the Eagle (`lib-inim-eyes-eagle`)
-  - description: None → 'You see distant things clearly. No matter how far away something is, you can make out details as if it were only a foot or so from you. Things do not all appear to be a foot away; you can simply make out details as well as if they were. You can still judge distance accurately; in fact, more accurately than normal, to within an inch or so at a distance of several miles, since you can see as clearly as if you were judging distance a foot away.'
+  - printedLevel: None → 25
 - Prying Eyes (`lib-inim-prying-eyes`)
-  - description: None → 'You can see inside a room, as long as you can touch one of its walls. If the room is unlit or poorly lit, you can only see as much as you could if you were inside, but magical enhancements of your senses do apply. You may change your viewpoint within the room throughout the duration of the spell.'
+  - printedLevel: None → 5
 - Summoning the Distant Image (`lib-inim-summoning-distant-image`)
-  - description: None → 'You can see and hear what is happening in a distant place if you have some sort of Arcane Connection to either the location or a person there.'
+  - printedLevel: None → 25
 - Peering into the Mortal Mind (`lib-inme-peering-into-mortal-mind`)
-  - description: None → 'You can thoroughly probe and understand the contents of the mind of the target, including his or her immediate and long-term motives, personal strengths and weaknesses, and other pertinent information.'
+  - printedLevel: None → 30
 - Perception of the Conflicting Motives (`lib-inme-perception-conflicting-motives`)
-  - description: None → "You can detect the conflicting motives behind one target's actions. Thus you might learn that a guard feels conflict between fear and duty. This spell is often used before application of a Muto or Rego spell, since it is usually easier to change a target's emotions after you've sensed them than it is to create emotions."
+  - printedLevel: None → 15
 - Posing the Silent Question (`lib-inme-posing-silent-question`)
-  - description: None → 'You can ask one silent mental question of the target, then detect the answer. The truth of the answer is limited by the knowledge of the target. Questions to the effect of "What would you do if ...?" often receive inaccurate replies. You are likely to get what the target thinks he would do, not necessarily what he would really do. The target of this spell does not notice the questioning unless he or she resists the spell, in which case they notice the attempt.'
+  - printedLevel: None → 20
 - Sight of the Transparent Motive (`lib-inme-sight-transparent-motive`)
-  - description: None → "Detects the general motive most powerfully influencing the target at the moment. General motives are such things as fear, anger, and greed, not specific things like the desire to look good before one's superiors."
+  - printedLevel: None → 10
 - Thoughts within Babble (`lib-inme-thoughts-within-babble`)
-  - description: None → 'You can understand the speech of those within the target area. Perception or Communication stress rolls are needed for difficult exchanges. You also understand people who misuse a language that you do speak; you know what they meant to say, as well as hearing what they actually said.'
+  - printedLevel: None → 25
 - Dream of the Mind That Sits (`lib-inte-dream-mind-that-sits`)
-  - description: None → "Req: Creo Allows you to probe the memories of a spirit within a natural stone object. The spell also perfects those memories. Probing the memories of such a spirit is extremely slow. A typical session lasts between six and twelve hours, during which the caster is oblivious to the outside world. The spell allows the caster to perceive the memories of the spirit. The spirit's senses are limited and slow, but its memory of them is very long. Using this spell the caster can relive events witnessed by the spirit, as it recalls them. Larger stone objects have more powerful spirits and so have better perceptions. Precisely what level of detail an individual spirit can perceive is up to the storyguide."
+  - printedLevel: None → 50
 - Eyes of the Eons (`lib-inte-eyes-eons`)
-  - description: None → 'Determines the age of any nonliving target to within 10% of its actual age.'
+  - printedLevel: None → 10
 - Eyes of the Treacherous Terrain (`lib-inte-eyes-treacherous-terrain`)
-  - description: None → 'You can tell intuitively if any natural terrain you see is treacherous, such as if a rock field is prone to sliding.'
+  - printedLevel: None → 15
 - The Miner's Keen Eye (`lib-inte-miners-keen-eye`)
-  - description: None → 'You can see any one type of mineral (gold, diamond, sand), specified at the time of casting, through up to 3 paces of intervening material. You have a good idea of how much is there and how pure it is, if appropriate.'
+  - printedLevel: None → 20
 - Probe for Pure Silver (`lib-inte-probe-for-pure-silver`)
-  - description: None → 'You can smell silver, and follow the scent.'
+  - printedLevel: None → 4
 - Stone Tell of the Mind That Sits (`lib-inte-stone-tell-mind-that-sits`)
-  - description: None → "Allows you to talk with natural stone. A stone's answers feel slow and ponderous, but do not actually take any longer than a normal conversation. Though a stone is usually willing to talk, its direction sense and awareness of quickly moving things (such as people) are limited."
+  - printedLevel: None → 30
 - Piercing the Faerie Veil (`lib-invi-piercing-faerie-veil`)
-  - description: None → 'This spell allows the caster to see through the boundaries of Faerie regiones, and therefore divine the path to the next level (more details about regiones are given on page 420). There are separate but related spells for Divine, Magical and Infernal regiones.'
+  - printedLevel: None → 20
 - Scales of the Magical Weight (`lib-invi-scales-magical-weight`)
-  - description: None → 'When casting this spell, you typically hold your hands straight out from your body, place a known amount of Vim vis in your left hand (usually one pawn), and then place an unknown amount of vis in your right hand. After casting the spell, you may sense how heavy the unknown vis is in relation to the known, determining the number of pawns present. If you cast the spell without anything to measure the unknown vis against, you only have a very general idea of how valuable it is. The spell cannot be used to determine the amount of raw vis invested in an enchanted item.'
+  - printedLevel: None → 5
 - Sense of Magical Power (`lib-invi-sense-magical-power`)
-  - description: None → 'This spell tells the caster whether he is currently in a Magic aura. It does not give any further information. Other spells do the same for other kinds of aura.'
+  - printedLevel: None → 2
 - Sense the Nature of Vis (`lib-invi-sense-nature-vis`)
-  - description: None → 'You can tell what Art a supply of raw vis is connected to. To you, the vis appears to glow with an aura that is appropriate to the Technique or Form that the vis is associated with. Creo is white, Intellego gold, Muto constantly fluctuating, Perdo black, Rego purple, Animal brown, Aquam blue, Auram violet, Corpus dark red, Herbam green, Imaginem pearly blue, Ignem bright red, Mentem orange, Terram dark brown, and Vim silver. Some of the colors are very similar, but are easy to distinguish if the item is held steadily and studied for a few seconds.'
+  - printedLevel: None → 5
 - Beast of Minuscule Proportions (`lib-muan-beast-minuscule-proportions`)
-  - description: None → 'Reduces the size of an animal by 2. This modifies Strength by -4, reduces the range for each wound type by two points, and increases Quickness by +2. The beast appears to be the runt of its litter.'
+  - printedLevel: None → 20
 - Beast of Outlandish Size (`lib-muan-beast-outlandish-size`)
-  - description: None → 'Changes the Size of an animal by +1. This change modifies Strength by +2, the range for each wound level increases by one, and Quickness falls by one. The new beast is of huge size, and looks much more impressive than its former self. Townspeople may run in fear of it, and there is little doubt among them that it is a creature of magic.'
+  - printedLevel: None → 15
 - The Beast Remade (`lib-muan-beast-remade`)
-  - description: None → 'Req: Corpus Gives one land beast a human form, though its intellect remains the same. Some feature of the animal is retained in the human form. A former dog might have an exceptionally hairy human body, and a former cat might let loose an occasional "meow." Once transformed, the beast is disoriented for a while before it becomes used to its new body.'
+  - printedLevel: None → 25
 - Doublet of Impenetrable Silk (`lib-muan-doublet-impenetrable-silk`)
-  - description: None → "Change an item made of animal material — silk, wool, or leather — so it cannot be cut or penetrated by weapons. A simple cloth doublet becomes the equivalent of armor with no Load and a +3 Soak bonus. Armor made of guilted material or any kind of leather improves its Protection by an additional +3. The magic does not make the armor better at absorbing shock, so this +3 bonus is the limit that can be bestowed without changing the material into something completely different. At the storyguide's option, the bonus given by this spell may not apply against strictly blunt weapons like clubs and staves."
+  - printedLevel: None → 15
 - Growth of the Creeping Things (`lib-muan-growth-creeping-things`)
-  - description: None → 'Causes an insect, mouse, toad, or other small (Size -8 or smaller) creature to grow to four times its normal size. If it was venomous before, it is even more venomous now. Semi-venomous creatures, like most spiders, have poison with an Ease Factor of 6 that does a Light Wound.'
+  - printedLevel: None → 15
 - Steed of Vengeance (`lib-muan-steed-vengeance`)
-  - description: None → 'Turns a horse into a ferocious magical mount. Its coat becomes a deep black and its eyes a fiery red, its teeth transform into fangs, its hooves become razor-sharp, and it occasionally breathes steam from its mouth — the horse seems a creature from Hell itself. All its Attack rolls get a +5 bonus. The horse tolerates a magus rider. When the spell wears off, the horse must make a Stamina stress roll against an Ease Factor of 9 or die from shock.'
+  - printedLevel: None → 35
 - Transformation of the Ravenous Beast to the Torpid Toad (`lib-muan-transformation-ravenous-beast-to-torpid-toad`)
-  - description: None → 'Turns any animal into a toad. A newly created toad will hold a certain terror for peasants and serfs, because many believe toads exude a poisonous substance from their skin.'
+  - printedLevel: None → 25
 - Incantation of Putrid Wine (`lib-muaq-incantation-putrid-wine`)
-  - description: None → 'Makes all liquids within the target room vile, and malodorous. The room where this spell is cast may not lose the stench for weeks or months. Note that this spell only affects liquids that are in the room when it is cast, and they remain malodorous even if removed from the room.'
+  - printedLevel: None → 15
 - Lungs of the Fish (`lib-muaq-lungs-fish`)
-  - description: None → 'Req: Auram Turns water into air as it enters your lungs, allowing you to breathe water as you do air. This spell puzzles Hermetic theoreticians, as it behaves like a dynamic container target despite not being a container target. All known attempts to create analogous effects have failed, even though analysis of this spell has not revealed any sign of non-Hermetic influence, or integrated experimentation. Most magi just point to it as an example of how Hermetic magic is not fully understood, and get on with their lives.'
+  - printedLevel: None → 20
 - Vile Water of Sterility (`lib-muaq-vile-water-sterility`)
-  - description: None → 'Ruins a body of water up to the size of a small lake, making it unfit for natural habitation and consumption. The water becomes dark and murky, and noxious fumes emanate from it. Vegetation on the banks either dies or becomes corrupt. Nearby trees become gnarled and blackened, and land animals flee the area.'
+  - printedLevel: None → 45
 - Rain of Stones (`lib-muau-rain-stones`)
-  - description: None → "Reg: Terram Turns rain into stones as it falls, causing +0 damage every two rounds (they're small stones), and maybe less if the rain is very light. People under cover are not affected. The stones revert to water when the spell expires. If it stops raining before the spell ends, no more rain is transformed, even if a different rain storm starts."
+  - printedLevel: None → 20
 - Talons of the Winds (`lib-muau-talons-winds`)
-  - description: None → "Req: Rego Transforms a wind into an abrasive medium that tears and claws at everything in its path. Soft materials like leaves and cloth are shredded, and people take +4 damage from innumerable bloody cuts and abrasions. This spell cannot be cast if there is not a breeze of some sort blowing, thus making it difficult to use effectively indoors. The caster is not affected by the spell, even if the wind is blowing directly at him. In Ossium of Bjornaer's version of this spell a strange keening can be heard in the air as it cuts through targets. Ossium's wizard's sigil manifests by making many of his spells eerie or frightening."
+  - printedLevel: None → 20
 - Arm of the Infant (`lib-muco-arm-infant`)
-  - description: None → "Shrinks a person's arm to half its original length and makes it pudgy, like an infant's."
+  - printedLevel: None → 20
 - Cloak of Black Feathers (`lib-muco-cloak-black-feathers`)
-  - description: None → 'Req: Animal You hang a small cape of raven feathers on your back and transform into a raven. You can resume human form at will, but doing so ends the spell.'
+  - printedLevel: None → 30
 - Cloak of Mist (`lib-muco-cloak-mist`)
-  - description: None → "Req: Auram You turn yourself into a thick, cohesive mist of approximately human size. You can float through the air at walking speed and can see and hear what is going on around you. You can also seep through cracks, but cannot move through solid objects. You may return to human form at any time, but doing so ends the spell. As mist, you are subject to the forces of the wind. In order to cast this spell, you inhale some mist, and you keep the mist in your 'mouth' until you want to end the spell."
+  - printedLevel: None → 40
 - Curse of Circe (`lib-muco-curse-circe`)
-  - description: None → 'Req: Animal Turns a person into a pig.'
+  - printedLevel: None → 30
 - Disguise of the New Visage (`lib-muco-disguise-new-visage`)
-  - description: None → "The target's facial features are transformed to any approximately human configuration you choose. In Cralian of Tremere's version of this spell, the new visage is always as unassuming as possible."
+  - printedLevel: None → 15
 - Eyes of the Cat (`lib-muco-eyes-cat`)
-  - description: None → 'Req: Animal The target gains the eyes of a cat, which allow him or her to see in near darkness (but not in absolute darkness, such as a lightless subterranean cavern).'
+  - printedLevel: None → 5
 - Gift of the Bear's Fortitude (`lib-muco-gift-bears-fortitude`)
-  - description: None → 'Your flesh becomes resistant to physical damage. You get +3 to your Soak. Your flesh is tough and insensitive; any rolls that involve a sensitive touch (such as for picking a lock) are at -1.'
+  - printedLevel: None → 25
 - Preternatural Growth and Shrinking (`lib-muco-preternatural-growth-and-shrinking`)
-  - description: None → "Adds +1 to the target's normal Size or decreases it by up to 2 points."
+  - printedLevel: None → 15
 - Shape of the Woodland Prowler (`lib-muco-shape-woodland-prowler`)
-  - description: None → 'Req: Animal You place a wolf skin over yourself or another, and the target changes into a wolf. The target may change back at will, ending the spell. Before casting this spell, you must first, of course, acquire the skin of a wolf, if you want to be able to end the spell early.'
+  - printedLevel: None → 25
 - The Silent Vigil (`lib-muco-silent-vigil`)
-  - description: None → 'Req: Terram You can move into and become part of a rock formation that is at least twice your size. While in the stone, you can hear what is going on around you, but you cannot use other senses. The spell lasts until you come out, and you must come out where you went in. You have no need for food or drink, though you do age. Rolls to recover from Fatigue or wounds take twice as long to make while you are in the stone. Casting requisites are required for items you take with you into the stone.'
+  - printedLevel: None → 45
 - Stance of the Patient Tree (`lib-muco-stance-patient-tree`)
-  - description: None → 'Req: Herbam You turn yourself into a tree about 12 feet high, with a trunk about a foot thick. You can sense only the most basic things, such as night and day, strong winds, and things that can affect a tree. You can resume human form at will, but doing so ends the spell. While in tree form, you do not heal any wounds or restore any Fatigue levels. The tree branch you use to let yourself change back determines the kind of tree you become, and you cannot cast the spell without the branch.'
+  - printedLevel: None → 35
 - Transform to Water (`lib-muco-transform-to-water`)
-  - description: None → 'Req: Aquam You turn yourself into water, one pint for every pound of the your weight. As water, you can hold yourself together unless someone makes an effort to separate part of you from the rest. You can roll slowly across the ground, but cannot move uphill. You can hear sounds, feel things that touch you, and can sense temperature. You can resume human form at will, but doing so ends the spell. You cannot resume human form if a significant part of your body/water is separated from the rest. You pour a small amount of water into your hands when you cast the spell.'
+  - printedLevel: None → 40
 - Pass the Unyielding Portal (`lib-muhe-pass-unyielding-portal`)
-  - description: None → 'Makes the wood of a door pliable, allowing the magus to bend it open regardless of most locks or bars.'
+  - printedLevel: None → 5
 - Piercing Shaft of Wood (`lib-muhe-piercing-shaft-wood`)
-  - description: None → 'Req: Rego Turns a piece of wood into a sleek, barbed, strong shaft that flies through the air at a target. Damage depends on the size of the item from which the shaft is formed: staff (upper size limit) +10, 2-foot branch +8, wand +5. This spell cannot miss, but it is resisted.'
+  - printedLevel: None → 10
 - Rope of Bronze (`lib-muhe-rope-bronze`)
-  - description: None → 'Req: Terram Turns a piece of rope (made from plant material) into refined, superior bronze, which does not break under normal circumstances.'
+  - printedLevel: None → 15
 - Stir the Slumbering Tree (`lib-muhe-stir-slumbering-tree`)
-  - description: None → 'Req: Mentem Raises any tree into a state of consciousness resembling that of a human. Such a tree can see and hear what is going on around it, and at a normal human level of perception. Such a tree may share some mental attributes or personality traits with the caster. The tree can rearrange its branches over the course of several hours, though too slowly for people to observe the movement from second to second. Most trees in magical areas are already awake.'
+  - printedLevel: None → 25
 - Transformation of the Thorny Staff (`lib-muhe-transformation-thorny-staff`)
-  - description: None → 'Causes a length of wood (up to 6 feet in length) to grow thick, sharp thorns at whatever spots you touch. If the spell is cast on a staff, the thorns add +4 to the damage done by the staff.'
+  - printedLevel: None → 10
 - Flames of Sculpted Ice (`lib-muig-flames-sculpted-ice`)
-  - description: None → "Req: Aquam Turns a fire up to the size of a small house into ice. The ice forms beautiful sculptures of leaping flame, until it begins to melt. When the ice has melted halfway, the flames start again, but probably won't spread, because of wet surroundings."
+  - printedLevel: None → 35
 - Hornet Fire (`lib-muig-hornet-fire`)
-  - description: None → 'Req: Rego Turns a fire into a swarm of fireballs, each the size of a large insect, that fly and harass at your command. Their burning touch gives one person within range both a –3 penalty on all rolls and two extra botch dice, but they do not cause actual damage.'
+  - printedLevel: None → 10
 - The Many-hued Conflagration (`lib-muig-many-hued-conflagration`)
-  - description: None → 'Makes a fire burn brightly in shifting colors for an instant. Each being looking at the fire must make a Stamina stress roll against an Ease Factor of 6 or be blinded for one round by the multicolored lights.'
+  - printedLevel: None → 5
 - Prison of Flames (`lib-muig-prison-flames`)
-  - description: None → 'Turns a bonfire into a prison shaped like a miniature castle. A person thrown into the middle is not burned, but takes +15 damage if he or she tries to escape.'
+  - printedLevel: None → 20
 - Show of the Flames and Smoke (`lib-muig-show-flames-and-smoke`)
-  - description: None → 'Causes smoke of different colors, streams of flame, and strange popping and sizzling noises to come from a fire. The effect is so spectacular that onlookers are either entranced or horrified, depending on the circumstances. The pyrotechnics might ignite nearby flammable objects and cause minor burns to those within 2 paces of the fire.'
+  - printedLevel: None → 10
 - Trapping the Fire (`lib-muig-trapping-fire`)
-  - description: None → 'Req: Terram This spell turns the heat and flames of a large campfire into a small, very hard object, such as a gem or a piece of metal. If the object is broken, the flame returns, but dies if there is nothing to burn.'
+  - printedLevel: None → 25
 - Aura of Ennobled Presence (`lib-muim-aura-ennobled-presence`)
-  - description: None → 'The target appears more forceful, authoritative, and believable. Numerous subtle changes in appearance bring about this change, including a slight supernatural illumination of the face, a more erect posture, and a louder and smoother voice. The character gets a +3 on rolls to influence, lead, or convince others.'
+  - printedLevel: None → 10
 - Disguise of the Transformed Image (`lib-muim-disguise-transformed-image`)
-  - description: None → 'Makes someone look, sound, feel, and smell different, though at least passably human.'
+  - printedLevel: None → 15
 - Image Phantom (`lib-muim-image-phantom`)
-  - description: None → 'Any one thing, including a living thing, can be made to appear as if it were something else of approximately the same shape and size. The illusion cannot be cast on things that have a shape or size improper to the final appearance. If the target moves or is moved in such a way that the illusion is inappropriate, it looks very strange indeed.'
+  - printedLevel: None → 20
 - Notes of a Delightful Sound (`lib-muim-notes-delightful-sound`)
-  - description: None → 'Causes all sounds in a room, particularly music, to be especially clear and sonorous. The notes are clearer, sharper, and more distinct'
+  - printedLevel: None → 10
 - Taste of the Spices and Herbs (`lib-muim-taste-spices-and-herbs`)
-  - description: None → "A setting's worth of food or drink tastes and smells exactly as you designate."
+  - printedLevel: None → 5
 - Inmost Companion (`lib-mume-inmost-companion`)
-  - description: None → "Req: Animal The target's mind is made physical as a bird. This bird normally stays close to the target's body, but need not. If the target has Magic Resistance, it protects both his body and mind, as normal. No matter how far it travels, the target's mind controls his body, as well as the bird's, as normal. In particular, it can see through both sets of sense organs. If the bird is killed, the target also dies, as his mind has been killed."
+  - printedLevel: None → 40
 - Mind of the Beast (`lib-mume-mind-beast`)
-  - description: None → 'Req: Animal You turn the mind of the target into that of an animal of your choice. The victim acts and thinks like that animal as much as possible; a person who thinks he is a bird will try to fly, but will not be able to. This can be dangerous for the target.'
+  - printedLevel: None → 30
 - Past of Another (`lib-mume-past-another`)
-  - description: None → "The target's memories are completely rewritten, and he is unable to remember his actual life until the effect is dispelled or expires."
+  - printedLevel: None → 35
 - Recollection of Memories Never Quite Lived (`lib-mume-recollection-memories-never-quite-lived`)
-  - description: None → "Changes the target's memory of a detail into a similar, though different, memory. The target is no more sure of this manufactured memory than of the authentic one, so he may discover strange fabrications to be false."
+  - printedLevel: None → 4
 - Vision of the Haunting Spirits (`lib-mume-vision-haunting-spirits`)
-  - description: None → 'Req: Imaginem All spirits within the target area become visible, although they might remain unseen if hiding behind something. This includes the spirits of living people, which appear as the person normally does. If the person is invisible or otherwise changed from his normal shape, his normal appearance is superimposed on his current appearance.'
+  - printedLevel: None → 40
 - Supple Iron and Rigid Rope (`lib-mute-supple-iron-and-rigid-rope`)
-  - description: None → 'Makes a flexible object stiff or a stiff object flexible. Casting requisites of Forms appropriate to the materials affected are required. Note that, despite the name, this spell is not high enough level to affect iron.'
+  - printedLevel: None → 10
 - Teeth of the Earth Mother (`lib-mute-teeth-earth-mother`)
-  - description: None → 'You cause twenty pointed pillars of white marble to spring up from the ground to a height of 12 feet, forming a circle 3 paces in diameter. At their tops, the pillars are thin and as sharp as spears. At the base, where they touch, they are 18 inches thick. When the pillars spring up, they can be used to cage people, to form a wall, or simply to skewer enemies. Climbing to the top of the pillars requires three Dexterity + Athletics stress rolls against an Ease Factor of 12, and the tops break away when the target reaches them, causing the victim to fall. Skewering a target does +25 damage, possibly more on following rounds if the victim struggles or is exceptionally heavy. When the spell ends, the pillars crumble to dust.'
+  - printedLevel: None → 35
 - Agony of the Beast (`lib-pean-agony-beast`)
-  - description: None → 'After you point at the beast and cast this spell, it begins lashing wildly about, upsetting any nearby objects, and howling in great pain. In order to do anything else, the beast must make a Stamina + Size stress roll against an Ease Factor of 9 each round.'
+  - printedLevel: None → 15
 - Blunt the Viper's Fangs (`lib-pean-blunt-vipers-fangs`)
-  - description: None → "Blunt the claws, teeth, talons, or other natural weapons of a beast. Only sharp weapons may be affected: this spell does not affect a weapon such as a horse's hoof or a giant snake's coils. The blunted weapon has its total damage (including Attack Advantage) reduced to half (round up). The beast may recover from the effect as if it were a Light Wound. The spell may affect animals of size up to +4."
+  - printedLevel: None → 20
 - Cripple the Howling Wolf (`lib-pean-cripple-howling-wolf`)
-  - description: None → "When casting this spell, you commonly make an abrupt snapping motion with your hands. One of the target's legs breaks cleanly. The animal cannot walk on that leg, but the damage heals as a Medium Wound. Note that the target need not be a wolf, and that you cannot choose which leg."
+  - printedLevel: None → 25
 - Decay Fur and Hide (`lib-pean-decay-fur-and-hide`)
-  - description: None → "Destroys an object made of animal fur or hide, including wool and leather. Marius of Tremere's version of this spell has the target disappear in an impressive puff of smoke."
+  - printedLevel: None → 10
 - The Falcon's Hood (`lib-pean-falcons-hood`)
-  - description: None → "Destroys an animal's vision. The blindness heals as if it is a Medium Wound. The title refers to the hood used to cover a falcon's eyes when it is not hunting. When cast by Asaron of Flambeau, this spell causes the animals it targets to bear a faint silhouette of a flame in their eyes."
+  - printedLevel: None → 25
 - Calling the Odious Drought (`lib-peaq-calling-odious-drought`)
-  - description: None → 'Req: Auram Causes a drought over the surrounding area. Only one-tenth the normal rain falls, streams dry up, and rivers dwindle.'
+  - printedLevel: None → 50
 - Closing the Earth's Gate (`lib-peaq-closing-earths-gate`)
-  - description: None → 'Dries a single spring, so that it never flows again. This spell targets the spring, not the water in it at a particular time, so the spring does not start to flow again later.'
+  - printedLevel: None → 25
 - Comfort of the Drenched Traveler (`lib-peaq-comfort-drenched-traveler`)
-  - description: None → 'Dries a person and his or her clothes.'
+  - printedLevel: None → 5
 - Curse of the Desert (`lib-peaq-curse-desert`)
-  - description: None → "Removes virtually all the fluid from the target's body, doing +15 damage, which armor does not protect against. The target must drink within a few minutes of being struck with this spell, or it dies. Casting requisites are Animal for beasts, and Corpus for humans."
+  - printedLevel: None → 25
 - Parching Wind (`lib-peaq-parching-wind`)
-  - description: None → 'Removes most of the water from any object, including plants (with a Herbam requisite), possibly making the object brittle and fragile. With a Corpus or Animal requisite, the spell can affect humans or animals. This causes +10 damage, against which armor is no defense, and makes the target extremely thirsty.'
+  - printedLevel: None → 20
 - The Cloudless Sky Returned (`lib-peau-cloudless-sky-returned`)
-  - description: None → "This spell clears the sky within your vision of any clouds or other meteorological activity short of a hurricane or tornado, either naturally occurring or caused by magic. The clouds take a few seconds to clear, during which time you must concentrate on them. This spell only affects meteorological activity in progress at the moment of casting, and is not powerful enough to dispel a weather condition caused by Ritual magic. In Ferramentum's version of this spell, the clouds clear from the sky in an orderly manner, as if they were soldiers marching on parade."
+  - printedLevel: None → 45
 - Quiet the Raging Winds (`lib-peau-quiet-raging-winds`)
-  - description: None → 'Stops all wind from blowing, leaving only calm air. This spell is not powerful enough to affect winds caused by Ritual magic, and only affects winds blowing on the caster when it is cast. Under normal circumstances, the winds will not pick up again for at least an hour or so.'
+  - printedLevel: None → 20
 - Room of Stale Air (`lib-peau-room-stale-air`)
-  - description: None → 'Makes the air in a room stuffy and uncomfortable. Any creatures that breathe air suffer a –3 penalty on all rolls involving physical exertion. In addition, for each round of exertion a character must make a simple Stamina roll against an Ease Factor of 6 or lose a Fatigue level. This may cause panic in some creatures or people. The speed at which the air refreshes itself depends on how well ventilated the room is.'
+  - printedLevel: None → 15
 - Bane of the Decrepit Body (`lib-peco-bane-decrepit-body`)
-  - description: None → 'The target ages 5 years. Determine effects normally. This spell does not work on children younger than age 16.'
+  - printedLevel: None → 25
 - Clenching Grasp of the Crushed Heart (`lib-peco-clenching-grasp-crushed-heart`)
-  - description: None → 'When casting this spell, you make a clenching motion with your hand. The victim doubles over and dies at once.'
+  - printedLevel: None → 40
 - Curse of the Leprous Flesh (`lib-peco-curse-leprous-flesh`)
-  - description: None → "This spell inflicts leprosy on the target, which causes a person's flesh to rot off in a matter of weeks a truly hideous sight. Much of the target's flesh literally hangs from his or her frame, and there is a pungent rotting smell about him at all times. The target takes an Incapacitating Wound from the disease, and must roll as normal to recover. The target also loses a point of Stamina by the time the disease ends. If the victim somehow survives this curse, he is shunned by mundane communities. If the victim succeeds in a Stamina roll against an Ease Factor of 6 when the spell is cast, he shakes off the disease, although he still feels unwell for a few days, and may have problems if an astute doctor realizes he is leprous."
+  - printedLevel: None → 25
 - Curse of the Unportended Plague (`lib-peco-curse-unportended-plague`)
-  - description: None → 'Starts a plague in a city or other Boundary. Everyone within the boundary is afflicted with the disease when the ritual is complete, and suffers as described under Curse of the Leprous Flesh, on the previous page. The conditions causing the disease last but a moment, so people entering the area after the spell is cast are safe. Using, or even transcribing, this spell is rigorously discouraged by most of the Order of Hermes. (Note: the disease caused by this spell is not the later Bubonic Plague, which is unknown in Europe in 1220.)'
+  - printedLevel: None → 55
 - Dust to Dust (`lib-peco-dust-to-dust`)
-  - description: None → "Turns a dead body or mindless undead body to dust in two rounds. The spell doesn't affect those undead possessed by spirits. To do this to an animal corpse requires a Perdo Animal spell."
+  - printedLevel: None → 15
 - Grip of the Choking Hand (`lib-peco-grip-choking-hand`)
-  - description: None → "The target feels an invisible, strangling hand on the throat. Each round, the target loses a Fatigue level. Once the target falls unconscious, the spell has no further effect. The spell works by seriously constricting the target's windpipe, hence the feeling. This constriction is not quite enough to kill, however."
+  - printedLevel: None → 25
 - Incantation of the Milky Eyes (`lib-peco-incantation-milky-eyes`)
-  - description: None → 'Blinds a target, leaving the eyes milky with cataracts. This heals as a Heavy Wound.'
+  - printedLevel: None → 30
 - Invocation of Weariness (`lib-peco-invocation-weariness`)
-  - description: None → 'The target loses a Fatigue level. The phrases used with this spell are usually singsong melodies, which lull the victim into drowsiness.'
+  - printedLevel: None → 20
 - Touch of the Goose Feather (`lib-peco-touch-goose-feather`)
-  - description: None → 'The target lets out a loud sneeze. Spellcasters who sneeze must make Intelligence + Concentration stress rolls against an Ease Factor of 12 to maintain concentration, and others get –1 on most activities at the moment of the sneeze.'
+  - printedLevel: None → 5
 - Twist of the Tongue (`lib-peco-twist-tongue`)
-  - description: None → "Twists the target's tongue into a spiral, completely destroying the ability to speak. A grave offense to a magus. The damage heals as a Medium Wound."
+  - printedLevel: None → 30
 - The Wound That Weeps (`lib-peco-wound-that-weeps`)
-  - description: None → 'When casting this spell, you point at the victim and a large wound opens on his or her body. The wound is not a deep one, but it bleeds profusely. This is only a Light Wound, but it looks bad.'
+  - printedLevel: None → 15
 - Curse of the Rotted Wood (`lib-pehe-curse-rotted-wood`)
-  - description: None → "Causes a non-living wooden object to rot and fall apart. Objects up to the size of a single door can be affected, but things that size take up to two rounds to decay. Usually, large chunks of wood start falling off the target, and slowly crumble to smaller and smaller pieces, until only dust is left. Ferramentum of Verditius's version of this spell is very orderly as per his wizard's sigil. The decay of the object starts from the top and continues to the bottom, leaving only dust as it goes."
+  - printedLevel: None → 5
 - The Great Rot (`lib-pehe-great-rot`)
-  - description: None → 'Rots and destroys a large amount of dead wood, up to the amount found in a wooden house or small inn. Wooden structures creak and groan mightily for about a minute before collapsing.'
+  - printedLevel: None → 25
 - Plant's Withering Bane (`lib-pehe-plants-withering-bane`)
-  - description: None → 'Withers and destroys one living plant, up to and including a plant the size of a small tree.'
+  - printedLevel: None → 20
 - Treading the Ashen Path (`lib-pehe-treading-ashen-path`)
-  - description: None → 'As you walk through a forest after casting this spell, all the plant material 10 paces in front of you and 5 paces to either side withers and dies. Trees are reduced to bare trunks, while their leaves and all smaller plants turn to ash. You can walk for 7 miles with each casting of this spell. Use of this spell in faerie woods is not recommended. This spell was originally invented by a magus of House Flambeau, and he was awarded a prize for it by his primus.'
+  - printedLevel: None → 30
 - Wizard's Autumn (`lib-pehe-wizards-autumn`)
-  - description: None → 'All the deciduous leaves (that is, those that normally fall in autumn) on the target plants turn brown and then fall to the ground. The full process takes a minute. This spell can affect a small grove of trees. The trees do not bud again until the next spring.'
+  - printedLevel: None → 15
 - Gloom of Evening (`lib-peig-gloom-evening`)
-  - description: None → 'The level of light in the target room drops substantially, making the room gloomy, with deep shadows everywhere.'
+  - printedLevel: None → 10
 - Soothe the Raging Flames (`lib-peig-soothe-raging-flames`)
-  - description: None → 'Eradicates the heat of a bonfire, which, however, continues to burn until the fuel already covered in flame is consumed. The flames do not spread, or harm anything beyond what they were already burning. If the fire is extinguished and relit, it will burn hot again, as it is now a different fire.'
+  - printedLevel: None → 20
 - Well without Light (`lib-peig-well-without-light`)
-  - description: None → 'Removes light from the target structure. Only spells greater than level 25 can create light within this area. When casting this spell, magi typically clench a hand into a fist, and the light flows into the fist like a living entity, until the entire area is dark.'
+  - printedLevel: None → 25
 - Winter's Icy Touch (`lib-peig-winters-icy-touch`)
-  - description: None → 'Causes the target to feel a chill and lose body heat. The target loses a Fatigue level.'
+  - printedLevel: None → 10
 - Wizard's Eclipse (`lib-peig-wizards-eclipse`)
-  - description: None → 'The sun is eclipsed within the target area, making it as dark as night. The darkness begins very suddenly — the superstitious are likely to panic, especially if they see that there is normal daylight just beyond the boundary of the spell.'
+  - printedLevel: None → 35
 - Chamber of Invisibility (`lib-peim-chamber-invisibility`)
-  - description: None → 'Causes a Group of creatures to become invisible. Any affected character who moves or is touched makes everyone visible. All members of the Group still cast shadows.'
+  - printedLevel: None → 25
 - Illusion of Cool Flames (`lib-peim-illusion-cool-flames`)
-  - description: None → "A source of heat, such as a fire, seems to lose its heat and drop to the surrounding temperature. It still, however, has its normal beneficial and harmful effects (that is, glowing coals still cook meat or burn a person's hand, though they do not feel hot)."
+  - printedLevel: None → 10
 - Invisibility of the Standing Wizard (`lib-peim-invisibility-standing-wizard`)
-  - description: None → 'The target becomes invisible, but the spell is broken if the target moves (aside from breathing and shifting slightly in place). He still casts a shadow.'
+  - printedLevel: None → 15
 - Removal of the Conspicuous Sigil (`lib-peim-removal-conspicuous-sigil`)
-  - description: None → 'Grooves, runes, writings, and similar markings are obscured so that they are not visible, but the overall shape of the medium remains constant. For example, runes carved into a sword blade can be made invisible, making the sword appear normal.'
+  - printedLevel: None → 20
 - Taste of the Dulled Tongue (`lib-peim-taste-dulled-tongue`)
-  - description: None → 'Hides the taste of any substance, liquid or solid.'
+  - printedLevel: None → 5
 - Blessing of Childlike Bliss (`lib-peme-blessing-childlike-bliss`)
-  - description: None → "Reduces an adult mind to a child's level. The target solves problems, reasons, and expresses emotions as would a three-year-old. Magi affected cannot cast spells. At first, anyway, the target is likely to be happy at having lost a world of cares and troubles that are no longer imaginable."
+  - printedLevel: None → 25
 - Calm the Motion of the Heart (`lib-peme-calm-motion-heart`)
-  - description: None → "Removes one emotion from the target until it appears again naturally. An angry person stops being angry, and a curious one stops being inquisitive. Many a magus finds this spell useful for keeping his apprentice's nose out of his immediate business."
+  - printedLevel: None → 15
 - Enchantment of Detachment (`lib-peme-enchantment-detachment`)
-  - description: None → "Calms and greatly lowers the intensity of the target's current emotions."
+  - printedLevel: None → 15
 - Loss of But a Moment's Memory (`lib-peme-loss-but-moments-memory`)
-  - description: None → "Removes up to five continuous minutes from a target's memory, leaving a blank. You target the loss of memory to a specific event or time. With an Intelligence stress roll against an Ease Factor of 9, the target realizes that memories of a certain period are missing. This Ease Factor can change, depending on how important the missing memory is and what sort of circumstances surrounded the event. Careful introspection over a period of time can allow reconstruction of much of the memory, but some details are lost forever."
+  - printedLevel: None → 15
 - Passion's Lost Feeling (`lib-peme-passions-lost-feeling`)
-  - description: None → 'The target is unable to feel any sort of emotion and acts listlessly, without motivation or cares.'
+  - printedLevel: None → 25
 - Tip of the Tongue (`lib-peme-tip-tongue`)
-  - description: None → "Causes the target to forget one word of your choosing. The target cannot remember that word for the spell's duration, but afterwards he can come up with the word without assistance by making an Intelligence + Concentration stress roll against an Ease Factor of 9. If the target fails he may try again, but each additional roll adds +1 to the difficulty."
+  - printedLevel: None → 5
 - Trust of Childlike Faith (`lib-peme-trust-childlike-faith`)
-  - description: None → 'The target loses judgment and believes almost any passable lie for the duration of the spell. An Intelligence stress roll against an Ease Factor of 6 is allowed to resist. Truly incredible lies allow easier resistance rolls.'
+  - printedLevel: None → 10
 - Pit of the Gaping Earth (`lib-pete-pit-gaping-earth`)
-  - description: None → 'The dirt in a circle 6 paces across recedes into the ground, leaving a pit 9 feet deep. If the target area contains material other than dirt, that material is not affected.'
+  - printedLevel: None → 15
 - Circle of Beast Warding (`lib-rean-circle-beast-warding`)
-  - description: None → 'The caster inscribes a circle that no normal beast will cross.'
+  - printedLevel: None → 5
 - Commanding the Harnessed Beast (`lib-rean-commanding-harnessed-beast`)
-  - description: None → 'You implant a complicated command into an animal, which it carries out to the best of its abilities. The command must involve completing a certain task, such as finding a certain person. Vague orders, like "protect me," do not work. If the animal does not complete the task before the end of the spell approaches, it becomes desperately ferocious, especially at night.'
+  - printedLevel: None → 30
 - Disguise of the Putrid Aroma (`lib-rean-disguise-putrid-aroma`)
-  - description: None → 'The target takes no interest in you as long as you continue to concentrate, and do not threaten it. A carnivore treats you as if you were simply something it does not eat. It retains normal interest, however, in anyone else nearby.'
+  - printedLevel: None → 5
 - The Gentle Beast (`lib-rean-gentle-beast`)
-  - description: None → 'Calms an animal, making it nearly fearless. It does not resist being ridden, shaved, or whatever else you can think of. If the animal enters combat, is extremely frightened, or incurs any kind of wound, the spell ends. The animal must be Size +4 or less.'
+  - printedLevel: None → 25
 - Mastering the Unruly Beast (`lib-rean-mastering-unruly-beast`)
-  - description: None → "You can make an animal perform any act it is capable of. You can only issue new commands while touching the animal, but the animal will carry them out without requiring constant contact. Further, the animal will allow you to touch it throughout the duration of the spell. It is difficult to maintain control of particularly stubborn or fierce animals, such as mules or boars — creatures with appropriate Personality Traits may roll against an Ease Factor of 12 each round. When Chavin of Tytalus casts this spell, the creature acts surly and unfriendly while going about its tasks, even when Chavin doesn't specifically tell it to act that way."
+  - printedLevel: None → 25
 - Panic of the Elephant's Mouse (`lib-rean-panic-elephants-mouse`)
-  - description: None → "Makes an animal afraid of the target by preying upon its instinctive fears, causing it to attempt escape by the quickest, most feasible means possible. The animal may make a Size stress roll against an Ease Factor of 9 to resist. (The title refers to the elephant's legendary fear of mice, but note that this spell cannot actually affect elephants, as they are too large.)"
+  - printedLevel: None → 15
 - Soothe the Ferocious Bear (`lib-rean-soothe-ferocious-bear`)
-  - description: None → 'Calms an animal until it is threatened or aroused again. You must speak soothingly or musically to it, and something as simple as approaching it may arouse it again.'
+  - printedLevel: None → 10
 - Viper's Gaze (`lib-rean-vipers-gaze`)
-  - description: None → 'Holds an animal rigid as long as you maintain eye contact with it and concentrate on it.'
+  - printedLevel: None → 15
 - Breath of Winter (`lib-reaq-breath-winter`)
-  - description: None → 'Turns a circle of water up to five paces across into snow. The Duration ensures that it will not melt until the spell expires, no matter how warm the weather.'
+  - printedLevel: None → 15
 - Bridge of Frost (`lib-reaq-bridge-frost`)
-  - description: None → "Causes a thick layer of frost (firm enough to walk on) to form on the surface of a body of water. The frost can take any shape up to fifteen paces in any direction. In Cralian of Tremere's version of this spell, the frost is so crystal clear that it can hardly be seen. All of his spells are very subtle."
+  - printedLevel: None → 30
 - Chaos of the Angry Waves (`lib-reaq-chaos-angry-waves`)
-  - description: None → 'Causes water to churn wildly, overturning small water craft and forcing Swim rolls at -6, in a circular area 20 paces across.'
+  - printedLevel: None → 30
 - Cloak of the Duck's Feathers (`lib-reaq-cloak-ducks-feathers`)
-  - description: None → "Makes water run off one object or creature, protecting the target and the target's apparel from dampness. The spell is broken if the target is submerged in water."
+  - printedLevel: None → 5
 - Parting the Waves (`lib-reaq-parting-waves`)
-  - description: None → 'Parts a body of water, revealing a dry path 5 paces wide along the bottom. Very large bodies of water are too large for the Group target, and are thus unaffected.'
+  - printedLevel: None → 30
 - Pull of the Watery Grave (`lib-reaq-pull-watery-grave`)
-  - description: None → 'Creates a strong undertow that pulls any object smaller than a rowboat 25 fathoms (150 feet) into the depths. Each of those caught in the undercurrent must make a Strength + Swim stress roll against an Ease Factor of 9 to avoid being dragged down. A roll is made each round that the spell is maintained.'
+  - printedLevel: None → 35
 - Push of the Gentle Wave (`lib-reaq-push-gentle-wave`)
-  - description: None → "A low wave is formed to propel a small boat slowly through the water. When casting this spell, you commonly make a pushing gesture. This spell, and other similar ones, pick out a particular current in the body of water and make it behave as desired, and thus have Individual Targets. In Silva of Merinita's version of this spell, the wave occasionally drifts or bobs about, as if it is happy and playful."
+  - printedLevel: None → 15
 - Tower of Whirling Water (`lib-reaq-tower-whirling-water`)
-  - description: None → "From a large body of water you form a waterspout that moves under your mental direction. It causes a simple die + 15 damage to anyone it hits (no Attack roll necessary). In addition, those struck must make a Quickness stress roll against an Ease Factor of 6 to avoid being sucked up by the waterspout. Those who fail are helplessly pulled into the spout and begin to drown immediately. When the waterspout fails, they fall up to 20 feet to the water's surface. If you direct the waterspout to move across land, you must make an Intelligence + Concentration stress roll against an Ease Factor of 9 each round to maintain it."
+  - printedLevel: None → 35
 - Waves of Drowning and Smashing (`lib-reaq-waves-drowning-and-smashing`)
-  - description: None → 'Raises a wave 5 feet high and 30 paces wide, which can submerge swimmers, overturn rowboats, and damage sailing ships. It starts as a small, curved wave and grows for the first 10 paces, at which point it reaches maximum size. If it travels 100 paces without striking an object large enough to break it up, it dissipates.'
+  - printedLevel: None → 30
 - Clouds of Thunderous Might (`lib-reau-clouds-thunderous-might`)
-  - description: None → "Gathers pre-existing clouds and winds into a small storm. The storm gathers at a normal speed, but is under the caster's control as long as he can see it. The caster may use the control granted by this spell to dissipate small storms as well. If the caster does not dissipate the storm before stopping concentrating, the storm continues as normal."
+  - printedLevel: None → 30
 - Gathering of the Stormy Might (`lib-reau-gathering-stormy-might`)
-  - description: None → "As for Clouds of Thunderous Might, but the storm is larger, possibly covering the entire visible sky. Again, it is under the caster's control."
+  - printedLevel: None → 40
 - Ward against Rain (`lib-reau-ward-against-rain`)
-  - description: None → 'No rain falls on the caster, no matter how bad the weather.'
+  - printedLevel: None → 10
 - Awaken the Slumbering Corpse (`lib-reco-awaken-slumbering-corpse`)
-  - description: None → 'Causes a corpse to function at your verbal command. Commands have to be very simple, like "attack anyone who comes through here." The corpse used cannot have been buried by Church ceremony.'
+  - printedLevel: None → 25
 - Curse of the Unruly Tongue (`lib-reco-curse-unruly-tongue`)
-  - description: None → 'Causes the target to stutter and slur words. Communication rolls are at -3. Spoken spells are at -6 to the spellcasting roll, and there is an extra botch die.'
+  - printedLevel: None → 5
 - Despair of the Quivering Manacles (`lib-reco-despair-quivering-manacles`)
-  - description: None → 'Your target shakes vigorously from side to side without falling. Those affected get -3 on rolls requiring physical movement, and -1 to most other rolls.'
+  - printedLevel: None → 15
 - Endurance of the Berserkers (`lib-reco-endurance-berserkers`)
-  - description: None → 'Your body acts as though it were unwounded and unfatigued for as long as you concentrate. Keep track of the actual Fatigue levels that the body loses while "berserk," because as soon as the spell wears off, you lose those levels. If you run out of Fatigue levels, the spell terminates immediately and you fall unconscious. A character under the influence of this spell does risk worsening wounds, but he may not notice.'
+  - printedLevel: None → 15
 - Gift of the Frog's Legs (`lib-reco-gift-frogs-legs`)
-  - description: None → "Allows the target to leap up to 15 feet vertically or 25 feet horizontally (2 feet less for every Encumbrance point). The person must make a Dexterity - Encumbrance stress roll against an Ease Factor of 0 to land without injury. A miss indicates that he takes a Light Wound, and a botch indicates a Medium Wound. The target can only leap once for each casting of the spell, and that leap must be made within ten seconds. As with a frog's leap, a running start does not improve the leap."
+  - printedLevel: None → 15
 - The Gift of Vigor (`lib-reco-gift-vigor`)
-  - description: None → "Transfers bodily energy from you to any target who is at a lower Fatigue level than you. You are thus at the target's current Fatigue level, and he or she assumes your previous level. If you lose a Fatigue level from casting this spell, the loss comes after the transfer. Magi have long looked for a way to restore their energy in order to cast more spells. This is the closest they've come."
+  - printedLevel: None → 20
 - The Leap of Homecoming (`lib-reco-leap-homecoming`)
-  - description: None → 'Transports you to any place to which you have an Arcane Connection. Most magi use this to return to their laboratories.'
+  - printedLevel: None → 35
 - Lifting the Dangling Puppet (`lib-reco-lifting-dangling-puppet`)
-  - description: None → 'Lifts a person of Size +1 or less vertically into the air. Generally, you can make the target rise or descend as fast as smoke rises, but a heavier person rises more slowly and falls more quickly.'
+  - printedLevel: None → 15
 - Rise of the Feathery Body (`lib-reco-rise-feathery-body`)
-  - description: None → 'Allows the target to float vertically to any height, carrying up to 50 pounds, and rising as fast as smoke rises, slower if carrying a heavy load. The target cannot move horizontally through this spell.'
+  - printedLevel: None → 10
 - Seven-league Stride (`lib-reco-seven-league-stride`)
-  - description: None → "Transports you to any place within seven leagues either that you can see or that you have an Arcane Connection with. If you fail an Intelligence + Finesse stress roll against an Ease Factor of 9, your arrival goes slightly awry. For instance, you might fall when you appear, or just be facing the wrong way. A botch means you appear in the wrong place, perhaps even in a wall. Praefactus of Bonisagus's version of this spell always allows him to appear in a safe, unembarrassing place (assuming he doesn't fail his Finesse roll). All Praefactus's spells make him seem as dignified as possible - manifesting his wizard's sigil."
+  - printedLevel: None → 30
 - Spasms of the Uncontrolled Hand (`lib-reco-spasms-uncontrolled-hand`)
-  - description: None → "One of the target's hands spasms, causing him to drop anything he is holding in it. It keeps spasming for as long as you concentrate."
+  - printedLevel: None → 5
 - Strings of the Unwilling Marionette (`lib-reco-strings-unwilling-marionette`)
-  - description: None → "You can control the physical movements of a person, such as walking, standing, and turning. If the target resists the control, the movements are jerky. The target can yell, but you can prevent intelligible speech by controlling the target's mouth. The target must be conscious to be moved about."
+  - printedLevel: None → 25
 - The Walking Corpse (`lib-reco-walking-corpse`)
-  - description: None → 'Turns a corpse into a nearly mindless servant that can follow your simple verbal commands faithfully but unimaginatively. Unless the corpse is preserved with *Charm Against Putrefaction* or the equivalent, the body decays normally, but even a skeleton can be animated.'
+  - printedLevel: None → 35
 - Calling the Council of the Trees (`lib-rehe-calling-council-trees`)
-  - description: None → 'Req: Intellego You call all magical and potentially mobile trees within the woodland where you cast the ritual to the site of the ritual. The trees are compelled to come, and will likely be interested in whoever has called them. The attitude of the trees depends on the forest and the nature of the one who called. Once gathered, the trees hold meetings, summon ancient powers, and discuss the problems facing their kind. You may speak, and understand what the trees are discussing. The results of the conference may not be entirely in your favor. The trees remain animated for a month and may seek to return home before the end of that period.'
+  - printedLevel: None → 45
 - Coils of the Entangling Plants (`lib-rehe-coils-entangling-plants`)
-  - description: None → 'Animates all the grass and small plants within a field delineated from side to side by your outstretched arms and in front by no more than 15 paces of distance. The plants grab and wrap themselves around the people nearest to them (Strength stress roll of 9+ to break free, rolled once per minute). If a roll to break free ever botches, the victim cannot escape on his or her own. With a Concentration roll of 6+, you can release one individual a round.'
+  - printedLevel: None → 20
 - Dance of the Staves (`lib-rehe-dance-staves`)
-  - description: None → 'Causes a pole, staff, haft, or any other long, thin, non-living wooden object to bend and lash about wildly for a few seconds and then stop suddenly. A whirling staff strikes its holder and does +4 Damage, with a possible bonus if the weapon at the head of the pole hits the person.'
+  - printedLevel: None → 5
 - Freeing the Striding Tree (`lib-rehe-freeing-striding-tree`)
-  - description: None → 'Like Lord of the Trees, above, but the tree can walk half as fast as a human can. If you botch a Concentration roll to maintain control, the tree attacks you, having been awakened and disturbed by this spell.'
+  - printedLevel: None → 30
 - Lord of the Trees (`lib-rehe-lord-trees`)
-  - description: None → 'Causes a tree to move its branches and bend its trunk in any way you mentally direct. A large tree striking with branches has Initiative +5, Attack +7, and Damage +10. Normal weapons are practically useless against large trees.'
+  - printedLevel: None → 25
 - Repel the Wooden Shafts (`lib-rehe-repel-wooden-shafts`)
-  - description: None → 'Deflects a single blow of any weapon made of wood, up to the size of a twohanded club. The attack automatically misses, but the attacker still rolls to see if he or she botches (with two extra botch rolls for melee weapons). If you ordinarily carry a wooden staff, it must be tossed aside for the casting.'
+  - printedLevel: None → 10
 - Strike of the Angered Branch (`lib-rehe-strike-angered-branch`)
-  - description: None → "Causes a large tree branch to swing at a target. The branch's Attack score is equal to your Perception + Finesse. Damage is +10. You may strike repeatedly with the branch, striking once per round for as long as the spell lasts."
+  - printedLevel: None → 15
 - Tangle of Wood and Thorns (`lib-rehe-tangle-wood-and-thorns`)
-  - description: None → 'Takes a length of wood that you designate and hurls it at a target (a Targeting roll is required). The wood wraps around and immobilizes the target (assuming that there is enough wood), who must make a Strength stress roll against an Ease Factor of 9 to break free (one attempt per round). If the victim ever botches, he cannot escape without outside help. If the length of wood has thorns, it does +6 damage when it hits, and again each time the target tries to break free, whether successful or not. When the caster stops concentrating, the target can escape on a Strength roll against an Ease Factor of 6.'
+  - printedLevel: None → 15
 - The Treacherous Spear (`lib-rehe-treacherous-spear`)
-  - description: None → "This spell animates a wooden or wooden-hafted melee weapon in someone else's hand, and makes that weapon attack its holder until the wielder is dead or the weapon is destroyed. When the spell is cast, the weapon tries to break its wielder's hold (Quickness – Encumbrance stress roll against an Ease Factor of 9 to hang on). On subsequent rounds, the wielder hangs on by making Strength stress rolls against an Ease Factor of 6, allowed once per round. If a roll to hold on ever botches, the wielder loses control of the weapon and is hit by it automatically (see below). While still in its wielder's grip, the weapon does not strike him or her, but does not strike on the wielder's behalf either. Once the weapon breaks free or is released, it attacks its wielder, using his Attack and Damage scores. The former wielder may fight the rebellious weapon. The weapon uses its defense rating as its Defense total. It has no Soak, and is 'killed' after it takes a wound depending on its size. One-handed weapons must take a Medium Wound, while two-handed weapons must take a Heavy Wound. The damage of thrusting and missile weapons is halved when attacking the renegade weapon."
+  - printedLevel: None → 25
 - Twist the Living Tree (`lib-rehe-twist-living-tree`)
-  - description: None → 'You make a living tree bend into unusual positions. Depending on your needs, you can make a cage, a shelter, or a wall. Even the leaves can be commanded, maybe to form a solid roof that sheds rain. Takes one to ten minutes to complete (depending on the complexity of the new shape), during which time you must maintain concentration.'
+  - printedLevel: None → 25
 - Ward against Wood (`lib-rehe-ward-against-wood`)
-  - description: None → 'The caster is protected from nonenchanted wood, so that none of it can contact his body. If he is walking on a wooden surface, he is actually suspended very slightly above it.'
+  - printedLevel: None → 25
 - Burst of the Sweeping Flames (`lib-reig-burst-sweeping-flames`)
-  - description: None → 'This spell causes a fire to explode outwards from its source along the ground, as if a giant wind were blowing on it from above. The fire travels for no more than 10 paces, but it ferociously ignites anything in its path. The original fire is left dead, but in all probability a number of new fires will be started. The flames cause +5 to +15 damage, depending on the intensity of the original fire.'
+  - printedLevel: None → 25
 - Leap of the Fire (`lib-reig-leap-fire`)
-  - description: None → 'Causes a bonfire to make a leap of up to 10 paces in any direction, where it catches if there is fuel, or burns out if there is none. Make a Targeting roll to hit a target; the flames do +10 damage.'
+  - printedLevel: None → 10
 - Light Shaft of the Night (`lib-reig-light-shaft-night`)
-  - description: None → 'Collects moonbeams and starlight into a single vertical shaft of soft, silvery light that moves under your control. It illuminates an area 15 paces across with light nearly equal to sunlight (if the moon is out) or moonlight (if the moon is not out). If the sky is overcast, the spell does not work. Can only be cast under the night sky.'
+  - printedLevel: None → 20
 - Tremulous Vault of the Torch's Flame (`lib-reig-tremulous-vault-torchs-flame`)
-  - description: None → 'Causes a fire to guiver a few seconds and then make a leap of up to 10 feet in any direction. A Targeting roll is required to hit a specific target. The flame stays at the spot it hits if it can burn there (see rules for fire damage on page 407). Otherwise, it simply scorches the spot and goes out (doing +5 damage).'
+  - printedLevel: None → 5
 - Illusion of the Misplaced Castle (`lib-reim-illusion-misplaced-castle`)
-  - description: None → 'Moves the image of any bounded structure or set of structures the size of a castle or less up to one mile from its actual position.'
+  - printedLevel: None → 50
 - Illusion of the Shifted Image (`lib-reim-illusion-shifted-image`)
-  - description: None → 'Makes any person or object appear to be a pace away from its actual position. The image cannot be placed in a solid object. As soon as the original or image moves, the spell ends.'
+  - printedLevel: None → 10
 - Aura of Rightful Authority (`lib-reme-aura-rightful-authority`)
-  - description: None → 'The target of the spell is strongly inclined to obey you, as if you were his natural superior.'
+  - printedLevel: None → 20
 - The Call to Slumber (`lib-reme-call-to-slumber`)
-  - description: None → 'The target becomes sleepy and falls asleep within a few seconds.'
+  - printedLevel: None → 10
 - Coerce the Spirits of the Night (`lib-reme-coerce-spirits-night`)
-  - description: None → "Makes a ghost obey you as long as you can coerce it with threats, such as a threat to defile its grave or to banish it to Hell. The more lurid and dramatic the threat, the more cooperative the ghost is. If the spell penetrates the ghost's Magic Resistance, roll Communication + Leadership to see how effective your threats are. The storyguide should always give a bonus or penalty that depends on the potency of the threat, and any roll other than a botch will compel at least minimal obedience."
+  - printedLevel: None → 20
 - Confusion of the Numbed Will (`lib-reme-confusion-numbed-will`)
-  - description: None → 'Confuses a person, who must make an Intelligence stress roll to take any direct action. A roll of 12+ ends the spell, while a roll of 9+ lets the character take the intended action, but the spell remains in effect. Any lower roll means the character is confused and takes some other type of action. When it is imperative for the victim to take an action, the storyguide should allow an appropriate modifier to the roll. While under this spell, a character always strikes last in combat and gets at least a -1 on all attacking and defending rolls.'
+  - printedLevel: None → 15
 - Enslave the Mortal Mind (`lib-reme-enslave-mortal-mind`)
-  - description: None → 'Enables you to completely control the loyalty, emotions, desires, interests, and activities of any person. People revert to normal when the spell ends, and may be extremely angry with the magus.'
+  - printedLevel: None → 40
 - Exchange of the Two Minds (`lib-reme-exchange-two-minds`)
-  - description: None → 'This spell switches the minds (but not the souls) of two creatures. A new body greatly confuses those who are unprepared for the shock, and even those who are ready take a day to adjust completely. Magi who transport their own minds into younger, healthier bodies usually find that having a strong body entails having powerful passions that interfere with the clear thinking needed to pursue the magical Arts. Both people involved must make a Stamina stress roll against an Ease Factor of 3, rolled before the switch is made, to survive the transfer. If only one person fails the roll, that person dies and the spell fails. The other target is unaffected.'
+  - printedLevel: None → 55
 - Incantation of Summoning the Dead (`lib-reme-incantation-summoning-dead`)
-  - description: None → "Calls up a person's ghost. You must be on the spot where the person died, or must have the corpse (either of these constitutes an Arcane Connection). Alternatively, you can summon any ghost that haunts the area you are in, if you know the ghost's full name, according to the Law of Names. Those buried by Church ceremony and those have who gone straight to heaven (that is, saints and crusaders, as opposed to the normal folk who must wait for a time before going on) are not available for summoning. This spell is a ritual because it can summon those who are beyond the mortal world, as long as they are not in heaven. If the ghost has Magic Resistance, you must penetrate that resistance in order to summon it."
+  - printedLevel: None → 40
 - Scent of Peaceful Slumber (`lib-reme-scent-peaceful-slumber`)
-  - description: None → 'Everyone in the room falls asleep over a few seconds, with the smell of lilacs in their nostrils'
+  - printedLevel: None → 20
 - The Shrouded Glen (`lib-reme-shrouded-glen`)
-  - description: None → 'Enchants the Boundary in which the ritual is cast so that anyone moving through it is subtly diverted, effectively keeping some place within it from being discovered accidentally. Anyone not actively searching for the hidden place never finds it. Those actively searching can find the place by making a Perception stress roll against an Ease Factor of 12 (allowed once per day). If the surrounding terrain is more difficult to search than the average forest, the Ease Factor increases. Likewise, the Ease Factor drops if the terrain is more open than a forest, and completely open terrain is unsuitable for this spell. Once a searcher spots the hidden place, the spell does not prevent approach. Those who are present for the ritual are unaffected by the spell. This spell mimics the properties of many faerie forests.'
+  - printedLevel: None → 40
 - Snap of Awakening (`lib-reme-snap-awakening`)
-  - description: None → 'When you snap your fingers you instantly awaken the target from sleep to alert consciousness. Does not work on someone unconscious from Fatiguelevel loss, wounds, or magic.'
+  - printedLevel: None → 10
 - Visions of the Infernal Terrors (`lib-reme-visions-infernal-terrors`)
-  - description: None → 'Causes everything the target sees to look and sound terrifying. The world looks basically the same, save that everything is hideously transformed somehow. The target must roll a stress die, adding his Stamina and adding or subtracting an appropriate Personality Trait to see what the effects are. The nature of the Personality Trait used determines how it affects the Stamina roll. A Trait like Brave makes you resistant to fear, while one like Cowardly reduces the result of your roll. | Roll | Result | | --------- | ------------------------------------------------------------------------------- | | 0 or less | Scared to death (literally) | | 1–5 | Incapacitated with fear, permanent –1 to Stamina | | 6–9 | Incapacitated with fear | | 10–15 | Flee, fight at –6 if cornered or obstructed | | 16+ | Carry on, -3 on all rolls |'
+  - printedLevel: None → 30
 - Creeping Chasm (`lib-rete-creeping-chasm`)
-  - description: None → 'Creates a chasm that runs from the ground in front of your feet towards some target within range that you designate. The chasm travels about 4 paces per round, growing wider as it travels, reaching a maximum width of 20 feet at a distance of 30 paces. The chasm is 20 to 30 feet deep, and the sides are likely to collapse, so any caught in it are in a bit of a bind. To avoid the growing chasm, a target must make a Quickness stress roll against an Ease Factor of 9. The spell effect lasts a moment, creating the stresses that then open the chasm over a few rounds. The normal forces of the earth tend to close the chasm in a week or so, but may not in some locations.'
+  - printedLevel: None → 30
 - Crest of the Earth Wave (`lib-rete-crest-earth-wave`)
-  - description: None → 'Creates a wave in the earth that starts at your feet and travels out to the range of your Voice in a designated direction. It starts as a narrow ripple and within 5 paces reaches its full size of 5 feet high and 30 paces wide. It moves about 50 paces per round. Those caught in its path must make Dexterity stress rolls against an Ease Factor of 12 to leap over the wave, or they are tossed aside and take +10 Damage. The wave overturns trees and damages buildings in its path.'
+  - printedLevel: None → 20
 - Earth Shock (`lib-rete-earth-shock`)
-  - description: None → 'Shakes the ground in a 100 pace radius. All affected by this spell must make a Quickness - Encumbrance stress roll against an Ease Factor of 10 or fall. Apply these modifiers: standing still, +2; on solid stone, +2; moving slowly, +0; on earth, +0; running, -2; standing on a narrow bridge, -6.'
+  - printedLevel: None → 30
 - The Earth's Carbuncle (`lib-rete-earths-carbuncle`)
-  - description: None → 'Req: Muto Causes a 1-pace circle of ground to become jagged stone, just under the surface, and those fragments burst into the air. Anyone standing on the circle is thrown into the air and hit with flying debris. Damage is +10.'
+  - printedLevel: None → 15
 - The Forgiving Earth (`lib-rete-forgiving-earth`)
-  - description: None → 'Loosens earth in a 15-pace-by-15-pace area to a depth of one foot, making packed dirt as loose as plowed ground.'
+  - printedLevel: None → 10
 - Hands of the Grasping Earth (`lib-rete-hands-grasping-earth`)
-  - description: None → "Reg: Muto Earthen hands from beneath the target rise out of the ground, and grasp the target's ankles. To break free requires a Strength stress roll of 15+. (One attempt is allowed per round, and each requires a Fatigue roll.) Each hand can be destroyed by beating its +25 Soak roll (hacking weapons do double normal damage) and inflicting a Light Wound."
+  - printedLevel: None → 15
 - Invisible Sling of Vilano (`lib-rete-invisible-sling-vilano`)
-  - description: None → 'Hurl a stone (of a size that could be thrown with a mundane sling) at a target within range. Unlike Wielding the Invisible Sling, this spell hurls the stone as a projectile. An aiming roll is required to hit the intended target, but if it succeeds, Magic Resistance offers no protection. The stone inflicts +5 damage on impact and has a range increment of 20 paces.'
+  - printedLevel: None → 10
 - Unseen Arm (`lib-rete-unseen-arm`)
-  - description: None → "Slowly moves a nonliving thing, like a mug, instrument, or small pouch of coins; it cannot oppose intentional resistance. Magi use this spell to manipulate things at a distance, but the spell cannot be used to pull something from a person's hand or to move something that is held. Casting requisites of an appropriate Form for the target are required."
+  - printedLevel: None → 5
 - The Unseen Porter (`lib-rete-unseen-porter`)
-  - description: None → 'Like *Unseen Arm* (ReTe 5), but it can carry large objects such as crates. Roughly speaking, it has the capabilities of a very strong person (Str +5). The heavier the object is, the slower the unseen porter moves. If delicacy is required, high Finesse stress rolls (Ease Factor 12 or so) are needed. The spell can only carry inanimate objects, and cannot carry you. It also cannot lift things more than 6 feet above the ground. Casting requisites of an appropriate Form for the target are required.'
+  - printedLevel: None → 10
 - Unyielding Earth (`lib-rete-unyielding-earth`)
-  - description: None → 'Compacts the surface of the ground in a 15-pace-by-15-pace area to a depth of one foot, making it more solid. Mud becomes as soft earth, and soft earth becomes as packed dirt.'
+  - printedLevel: None → 10
 - Wielding the Invisible Sling (`lib-rete-wielding-invisible-sling`)
-  - description: None → 'Hurls any nearby object that could normally be thrown by a person at any target within range. The object must not be held down or otherwise restrained. Damage depends on the object thrown, up to +5 for a fist-sized stone. The object always hits, but it is resisted by Magic Resistance. Casting requisites of an appropriate Form for the target are required.'
+  - printedLevel: None → 10
 - Gather the Essence of the Beast (`lib-revi-gather-essence-beast`)
-  - description: None → 'Concentrates the raw vis in a corpse into one part of that corpse, which can then be removed. This spell lets you gather all the raw vis you find without lugging around entire corpses of beasts. Note that the vis in many magical creatures is already concentrated in this manner in some specific organ, though this spell will allow you to relocate that vis if you wish.'
+  - printedLevel: None → 15

@@ -219,12 +219,17 @@ void main() {
     final spells = await loader.loadSpellLibrary();
     final modifiers = await loader.loadModifiers();
 
+    // Reads the rulebook's printed level directly off the spell rather than
+    // regex-scraping it out of the prose summary. Scraping made this
+    // assertion depend on English prose formatting ("Level N.") and blocked
+    // a planned rework of the summary text; printedLevel is its own field
+    // precisely so this check does not have to parse prose. A spell with no
+    // printed level fails loudly here rather than being silently skipped.
     int levelStatedInDescription(spell) {
-      final match = RegExp(r'Level (\d+)\.').firstMatch(spell.summary ?? '');
-      expect(match, isNotNull,
-          reason: '${spell.name}: summary does not contain a "Level N." phrase '
-              '(summary was: "${spell.summary}")');
-      return int.parse(match!.group(1)!);
+      final printedLevel = spell.printedLevel;
+      expect(printedLevel, isNotNull,
+          reason: '${spell.name}: has no printedLevel');
+      return printedLevel as int;
     }
 
     final effects = await loader.loadBaseEffects();

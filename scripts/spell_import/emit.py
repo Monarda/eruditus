@@ -78,6 +78,16 @@ def build_spell(
     if description:
         spell["description"] = description
 
+    if block.printed_level is None:
+        # A spell without a printed level should never reach emission --
+        # blocks.SpellBlock.printed_level is None only for "#### GENERAL"
+        # entries, and extract_spells.py routes those to `blocked` before
+        # build_spell is ever called. Raising here, rather than emitting a
+        # null or omitting the key, turns a routing bug into a loud failure
+        # instead of a silently un-checkable spell.
+        raise ValueError(f"{block.name}: no printed level to emit")
+    spell["printedLevel"] = block.printed_level
+
     spell["citations"] = [{"bookId": CORE_BOOK_ID}]
 
     adjustments = [
@@ -207,10 +217,13 @@ def _parameter_name(design: designline.Design, slot: str, block) -> str:
 
 
 def _summary(block) -> str:
-    """Prose plus the printed level, which the level-equality test reads back.
+    """Prose plus the printed level, kept as a trailing "Level N." phrase.
 
-    The existing 36 entries end their summary with "Level N." and
-    asset_data_loader_test.dart parses exactly that. Keep the shape.
+    asset_data_loader_test.dart no longer parses this -- it reads the
+    `printedLevel` field build_spell emits instead. The suffix stays here
+    verbatim anyway: churning existing summaries is out of scope for this
+    change (see .superpowers/todo.md's ledger-authored-summaries item), and a
+    real per-spell summary will drop this suffix when that lands.
     """
     prose = " ".join(block.prose.split())
     if len(prose) > 400:
