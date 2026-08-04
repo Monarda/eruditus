@@ -150,15 +150,14 @@ class WriteGateTest(unittest.TestCase):
         for spell in report.spells:
             self.assertIn(spell["id"], report.design_lines, msg=spell["id"])
 
-    def test_the_committed_lock_matches_the_current_source(self):
+    def test_source_lock_exists(self):
         from scripts.spell_import import provenance
+        # Existence gate only. The lock is diagnostic, not gating: drift is detected
+        # by asset equivalence (RegenerationTest), not by source hash. A hash-equality
+        # assertion would gate on every byte to the rulebook. See spec's "Rejected
+        # alternatives" for why the lock does not constrain which source is read.
         lock = provenance.load()
         self.assertIsNotNone(lock, "source.lock is missing — run --write --accept-source")
-        report = extract_spells.run(write=False)
-        self.assertTrue(
-            provenance.matches(lock, report.identity),
-            msg="\n\n" + provenance.describe_change(lock, report.identity),
-        )
 
 
 class RegenerationMessageTest(unittest.TestCase):

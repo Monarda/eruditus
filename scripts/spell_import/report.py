@@ -4,8 +4,10 @@ A diff across 250 JSON objects is not a review surface. This renders the same
 information as a short markdown summary, which is what makes the
 `--accept-source` gate meaningful rather than ceremonial.
 
-Pure: dicts and identities in, a string out. No file or git access, so it is
-fully testable with no rulebook present.
+The diff and rendering functions are pure: dicts and identities in, a string out,
+fully testable with no rulebook present. One function (old_design_lines) reaches
+git on a best-effort basis to enrich the report; it gracefully degrades when
+unavailable.
 """
 import dataclasses
 
@@ -121,6 +123,7 @@ def render(
 
 def design_lines_of(text: str) -> dict[str, str]:
     """Spell id to printed design line, for any revision of the rulebook."""
+    # Local import to keep this function testable without catalog files.
     from . import blocks, catalog as catalog_module
 
     parsed, _ = blocks.parse_de(text.split("\n"))
@@ -138,6 +141,7 @@ def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
     not fetched, or git is unavailable. The report degrades to omitting the
     design-line column; it never fails because of this.
     """
+    # Local import to keep render() and diff_assets() testable without git.
     import subprocess
 
     try:
