@@ -1,7 +1,7 @@
 # Eruditus Todo List
 
 **Status:** Active development
-**Last Updated:** 2026-07-28
+**Last Updated:** 2026-08-04
 **Base Effects:** ✅ Complete (604 effects extracted)
 
 **Current goal:** every published spell in the Definitive Edition core rules is in
@@ -25,14 +25,21 @@ families:
 | Family | Spells | Item |
 |---|---|---|
 | General-level — base level is chosen, not fixed | 33 | **25** |
-| Ad-hoc per-spell magnitude (`+1 fancy effect`) | 21 | **24** |
+| Ad-hoc per-spell magnitude (`+1 fancy effect`) | 21 | ✅ **24** |
 | Ritual only by storyguide ruling | 7 | 18 |
-| Non-standard Range/Duration/Target | 6 | **26** |
+| Non-standard Range/Duration/Target | 6 | ✅ **26** (mechanism only) |
 | Guideline level absent from the rulebook's own table | 5 | **28** |
 | Size ladder above +4 | 4 | 19 |
 | Ward mechanics in the design line | 1 | 4 |
 
 Families overlap, so the numbers sum to more than 74.
+
+**Measured again 2026-08-04, after item 24:** `python -m
+scripts.spell_import.extract_spells` reports **263 imported / 97 blocked / 0
+unresolved**, up from 250 / 110 / 0. The 13 added are the ad-hoc-magnitude
+family, minus the six that carry a second blocker (item 26's `Special`
+durations, item 25's General levels, and the unmodelled `for no words` /
+`not needing to gesture` / `Techniques and Forms` mechanisms).
 
 **A further finding: base-effect resolution needs human judgement 186 times.**
 A design line names its guideline only by level (`Base level 15`), and Creo
@@ -156,13 +163,41 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   derives its expected effect count from the raw JSON rather than hardcoding it
   (item 5). Take the same self-healing approach here.
 
-### 24. Ad-hoc Level Adjustments — **NEW, not previously recorded**
-- [ ] Add a list of `(magnitude, note)` adjustments to `Spell` and `SpellDraft`
-- [ ] One repeatable UI row in the creation screen (magnitude stepper + note)
-- [ ] One line per adjustment in the level breakdown, showing the note
-- [ ] Decide whether a negative magnitude is allowed — at least one published
-      spell needs it
-- **Rationale:** 21 published spells carry a one-off magnitude the storyguide
+### 24. Ad-hoc Level Adjustments — ✅ COMPLETE
+**Spec:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`
+**Plan:** `docs/superpowers/plans/2026-08-04-level-adjustments.md`
+
+- [x] Add a list of `(magnitude, note)` adjustments to `Spell` and `SpellDraft`
+- [x] One repeatable UI row in the creation screen (magnitude stepper + note)
+- [x] One line per adjustment in the level breakdown, showing the note
+- [x] Decide whether a negative magnitude is allowed — **yes.**
+      `SpellLevelCalculator` mirrors the positive rule (worth 1 inside the
+      additive tier, 5 above it) and restores the additive capacity it gives
+      back, so `[1, -1]` is a no-op at any base level. *The Severed Limb Made
+      Whole* is the one published spell that needs it and now imports.
+- **What landed.** A `LevelAdjustment` model, negative magnitudes in the level
+  calculator, a breakdown line per adjustment, a globally-scoped
+  `elaborate-effect` catalog Modifier for the five recurring "more elaborate
+  than the guideline" wordings, creation-screen add/edit/remove, and extractor
+  recognition of both token families. The library went **250 → 263 imported,
+  110 → 97 blocked**, zero existing entries changed.
+- **Two token families, not one.** The recurring wordings (`fancy effect`,
+  `complex effect`, `for special effect`, `additional effect`,
+  `elaborate design`) became a real catalog Modifier, because they *are*
+  reusable. Only the genuinely per-spell prose became adjustments, matched
+  against a closed allow-list (`designline.ADJUSTMENT_LABELS`) so that an
+  unmodelled mechanism keeps blocking its spell instead of importing at a
+  correct level with wrong modelling.
+- **One hand-derived magnitude.** *The Shadow of Human Life* prints
+  "for a very elaborate effect" with no number; the literal 5 and its
+  arithmetic live in `extract_spells.HAND_DERIVED_ADJUSTMENT`, checked by
+  assertion 1 rather than derived from it.
+- **Still blocked, and why:** *The Kiss of Death* (`+2 for no words`),
+  *Black Whisper* (`+1 for not needing to gesture`) and *Sight of the Active
+  Magics* (`+2 Techniques and Forms`) are deliberately not in the allow-list —
+  each is a real unmodelled mechanism, not a one-off note. *Ball of Abysmal
+  Flame* needs `;` handling in the design-line splitter (see item 29).
+- **Original rationale.** 21 published spells carry a one-off magnitude the storyguide
   assigned with a prose justification. **No catalog entry can ever cover these** —
   they are per-spell, not per-guideline. Examples:
   - `+1 fancy effect` — *Treading the Ashen Path*, *Creeping Chasm*,
@@ -216,20 +251,38 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   `lib/engine/spell_level_calculator.dart`, `assets/data/base_effects.json`
   (the 47 zero-level entries), creation screen + bloc
 
-### 26. Non-standard Ranges, Durations and Targets — **NEW, not previously recorded**
-- [ ] Decide whether these need a mechanism at all, or are covered by item 24
-- **6 published spells** build a parameter out of a standard one rather than
-  using it directly:
-  - `+2 Special (based on Concentration)` — *Wind at the Back*, *Trackless Step*
-  - `+1 Special based on Mom` — *The Earth Split Asunder*
-  - `+4 Special (equivalent to Boundary)` — *The Bountiful Feast*
-  - `Duration is non-standard` — *Watching Ward*
-  - `D: Sun & Year` — one spell carries two durations
-- **Recommendation: fold into item 24 rather than extending the parameter
-  catalog.** Five of the six are one-offs with prose justification, which is
-  exactly item 24's shape. Adding six `Special` parameters would make them
-  selectable on every spell, where they are meaningless. *Watching Ward* and the
-  `Sun & Year` case may still want a look — check them before folding.
+### 26. Non-standard Ranges, Durations and Targets — ✅ DECIDED via item 24, spells still blocked
+**Spec:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`
+**Plan:** `docs/superpowers/plans/2026-08-04-level-adjustments.md`
+
+- [x] Decide whether these need a mechanism at all, or are covered by item 24 —
+      **covered by item 24, as recommended.** No `Special` parameters were
+      added. `designline.ADJUSTMENT_LABELS` now carries
+      `Special (based on Concentration)`, `Special (equivalent to Boundary)` and
+      `Special based on Mom`, matched against the token's *bracketed* text
+      rather than the bare word `Special`, because the corpus hides two
+      different mechanisms behind that one word (a nonstandard Duration and a
+      nonstandard Target).
+- **The mechanism is done; none of the six import yet, each for a second
+  reason that is not item 24's:**
+  - `+2 Special (based on Concentration)` — *Wind at the Back*,
+    *Trackless Step*; `+1 Special based on Mom` — *The Earth Split Asunder*.
+    **The design line now parses.** All three block on their *stat* line
+    instead: `D: Spec` / `D: Special` is not a Duration in
+    `parameters.json`, so `emit._parameter_name` raises. Needs a decision on
+    what a `Special` Duration resolves to — most likely the parameter the
+    adjustment is "based on", read off the adjustment's own note.
+    (*Trackless Step* also now has a ledger entry, `rete-2b`.)
+  - `+4 Special (equivalent to Boundary)` — *The Bountiful Feast*. Listed in
+    the allow-list, but the same design line has unbalanced brackets, so the
+    later `+1 Size (for a total of ...` token never closes. A splitter fix,
+    not a modelling one.
+  - `Duration is non-standard` — *Watching Ward*. Numberless, and the spell is
+    `Base effect` (General-level), so it needs **item 25** regardless.
+  - `D: Sun & Year` — *Mists of Change*. Two durations in one stat line, which
+    no adjustment can express; it also prints a numberless "slightly
+    nonstandard effect". Deliberately left blocked — a hand-derived magnitude
+    could paper over the second blocker but not the first.
 
 ### 28. Guideline Levels Absent from the Rulebook's Own Table — **NEW**
 - [ ] Decide how a spell cites a guideline level the table does not list
@@ -337,13 +390,33 @@ more time than closing out item 27 warranted.
       impossible ("change it to a deliberate override"), but the actual
       decision — implement the override, or drop the promise from the spec
       — is still open.
-- [ ] **Wire the Imaginem complexity-factor mapping that already exists as
-      prose.** `designline.MODIFIER_LABELS`'s comment already documents a
-      verified `label -> (modifier_id, option_id)` mapping for ~10 Creo/Rego
-      Imaginem spells (all four Phantasm-* spells among them — currently
-      blocked, which is also why `library_repository_test.dart`'s search
-      test had to move off the query `'phantasm'`). Turning that comment
-      into real data `emit.py` consumes would unblock those spells directly.
+- [ ] **Wire the rest of the Imaginem complexity-factor mapping.**
+      `emit._MODIFIER_OPTIONS` now exists as real data, but holds exactly one
+      entry — `("Creo", "Imaginem", "intricacy") -> crim-intricate-design`,
+      added by item 24 because *The Shadow of Human Life* needed it and
+      nothing else did (no spell was blocked on `intricacy` alone). The
+      remaining labels documented in `designline.MODIFIER_LABELS`'s comment
+      (`move at/under your command`, `intelligible speech`, `moved image
+      matches changes`, `additional sense(s)`, `moving image`) are still
+      prose. Wiring them would unblock ~10 more Creo/Rego Imaginem spells
+      (all four Phantasm-* spells among them — currently blocked, which is
+      also why `library_repository_test.dart`'s search test had to move off
+      the query `'phantasm'`), each needing its own printed-level check.
+- [ ] **`;` handling in the design-line splitter.** *Ball of Abysmal Flame*
+      prints `(Base 25, +2 Voice; the ball appearing to shoot from your hand
+      is a cosmetic effect)` — a semicolon where every other spell uses a
+      comma, so `designline._split_parts` never separates the magnitude from
+      the trailing prose and the whole thing fails `_TOKEN`. Found while
+      closing item 24. Splitting on `;` at depth 0 alongside `,` and `.` is
+      the obvious fix; check the corpus for a `;` that is *not* a token
+      boundary before making it unconditional.
+- [ ] **Minor: adjustments were missing from one Dart level assertion.**
+      `asset_data_loader_test.dart`'s "every loaded spell calculates to the
+      level stated in its description" builds its own magnitude list rather
+      than calling `SpellEngine.calculateBreakdown`, and item 24 had to add
+      `spell.adjustments` to it. Two hand-maintained copies of the same sum
+      will drift again; consider collapsing it onto the engine, as
+      `published_spell_import_test.dart`'s assertion 1 already does.
 - [ ] **`rego-transport-distance` extension for Hermes' Portal** (already
       named in item 27's hand-derivation note) — implementing it would also
       make `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
