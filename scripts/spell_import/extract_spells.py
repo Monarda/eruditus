@@ -102,6 +102,53 @@ HAND_DERIVED: dict[str, str] = {
 }
 
 
+# One published design line names an adjustment and prints no magnitude for it.
+# The magnitude below is a literal, worked out by hand and then *checked by*
+# assertion 1 (published_spell_import_test.dart) -- it is never computed as
+# `printed - computed`, which would make that assertion tautological here and
+# unable to fail.
+#
+# The Shadow of Human Life (Creo Imaginem, R: Touch, D: Sun, T: Ind, Req:
+# Mentem), printed LEVEL 40, design line:
+#
+#     (Base 2, +1 Touch, +2 Sun, +1 intricacy, +6 Mentem requisite,
+#      for a very elaborate effect)
+#
+# In the rulebook's own arithmetic the numbered tokens already reach 40 --
+# 2 -> 3 (Touch) -> 5 (Sun) -> 10 (intricacy) -> 40 (+6 requisite) -- and "for
+# a very elaborate effect" is the text's *justification* for charging six
+# magnitudes on a requisite instead of the usual one. This app does not model a
+# requisite that way: `Requisite.magnitude` is 1 for every `adding` requisite
+# (lib/models/requisite.dart), so the six-magnitude charge has to be split into
+# the one magnitude the requisite carries and the five that the elaborateness
+# carries. Hence:
+#
+#     base 2, additive capacity 3 (5 - 2)
+#     +1 Touch                 -> 3   (additive tier)
+#     +2 Sun                   -> 5   (additive tier, capacity spent)
+#     +1 intricacy             -> 10  (crim-intricate-design, magnitude 1)
+#     +1 Mentem requisite      -> 15  (adding requisite, magnitude 1)
+#     +5 very elaborate effect -> 40  (5 x 5)
+#
+#     40 == the printed level. Any other magnitude misses it by 5 per step, so
+#     assertion 1 discriminates this value exactly.
+#
+# Not modelled as an `elaborate-effect` modifier option: that modifier tops out
+# at magnitude 3 (assets/data/modifiers.json), and inventing a magnitude-5
+# option to fit one spell would be fitting the catalog to the arithmetic. A
+# per-spell LevelAdjustment is what the rulebook's phrasing actually is.
+#
+# Mists of Change is the other numberless case and stays blocked. It prints
+# "slightly nonstandard effect" (no magnitude) and its stat line carries
+# "D: Sun & Year" -- two durations, which no adjustment can express. A
+# hand-derived magnitude could paper over the first but not the second.
+#
+# Keyed by spell name -> (magnitude, the printed phrase to attach it to).
+HAND_DERIVED_ADJUSTMENT: dict[str, tuple[int, str]] = {
+    "The Shadow of Human Life": (5, "for a very elaborate effect"),
+}
+
+
 @dataclasses.dataclass
 class Report:
     spells: list[dict]
@@ -156,8 +203,22 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             blocked.append((block.name, "no design line printed"))
             continue
 
+        # The printed line is what the report records; only the parsed copy
+        # gains the hand-derived magnitude, so import_report.md keeps showing
+        # the rulebook's own words.
+        parsed_text = design_text
+        derived = HAND_DERIVED_ADJUSTMENT.get(block.name)
+        if derived is not None:
+            magnitude, phrase = derived
+            if phrase not in parsed_text:
+                blocked.append(
+                    (block.name, f"hand-derived adjustment {phrase!r} is not in the design line")
+                )
+                continue
+            parsed_text = parsed_text.replace(phrase, f"+{magnitude} {phrase}", 1)
+
         try:
-            design = designline.parse_design(design_text)
+            design = designline.parse_design(parsed_text)
         except designline.UnknownToken as error:
             blocked.append((block.name, str(error)))
             continue

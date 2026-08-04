@@ -158,6 +158,14 @@ ADJUSTMENT_LABELS = frozenset({
     "Special (based on Concentration)",
     "Special (equivalent to Boundary)",
     "Special based on Mom",
+    # The one corpus adjustment printed with no number at all: The Shadow of
+    # Human Life's "(..., +6 Mentem requisite, for a very elaborate effect)".
+    # It only ever reaches this tokenizer with a magnitude already attached,
+    # supplied by extract_spells.HAND_DERIVED_ADJUSTMENT -- listing it here is
+    # what lets that synthesised "+5 for a very elaborate effect" resolve as an
+    # adjustment rather than an unknown token. A bare, numberless occurrence
+    # still fails _TOKEN and still blocks its spell.
+    "for a very elaborate effect",
 })
 
 

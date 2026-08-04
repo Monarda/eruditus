@@ -375,6 +375,32 @@
     "ritualDeclaration": "lastingCreation"
   },
   {
+    "id": "lib-crco-severed-limb-made-whole",
+    "name": "The Severed Limb Made Whole",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crco-25c",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "A limb that has been detached from the body can be reattached, but any decay that has occurred on the severed limb remains after the limb is reattached. After a day of decomposition, a limb is weak. After seven days, it is nearly useless and infects the character on whom it is replaced (Stamina stress roll against an Ease Factor of 6 or take a Medium Wound). If it's been severed for more than t... Level 25.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": -1,
+        "note": "because the old limb is needed"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-crco-shadow-life-renewed",
     "name": "The Shadow of Life Renewed",
     "requisites": [],
@@ -697,6 +723,40 @@
     ]
   },
   {
+    "id": "lib-crim-shadow-human-life",
+    "name": "The Shadow of Human Life",
+    "requisites": [
+      {
+        "art": "Mentem",
+        "kind": "adding"
+      }
+    ],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-intricate-design"
+      ]
+    },
+    "baseEffectId": "crim-2",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Req: Mentem The human image created (as in Phantasm of the Human Form) has limited freedom and simulated intellect. It functions as an independent human, albeit a stupid one, capable of interpreting general orders in new situations. Level 40.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 5,
+        "note": "for a very elaborate effect"
+      }
+    ]
+  },
+  {
     "id": "lib-crme-gift-reason",
     "name": "Gift of Reason",
     "requisites": [],
@@ -793,6 +853,29 @@
     ]
   },
   {
+    "id": "lib-crme-weight-thousand-hells",
+    "name": "Weight of a Thousand Hells",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "elaborate-effect": [
+        "elaborate-effect-minor"
+      ]
+    },
+    "baseEffectId": "crme-4a",
+    "rangeId": "range-eye",
+    "durationId": "duration-moon",
+    "targetId": "target-individual",
+    "summary": "Causes the victim to feel the despair, anguish, pain, and sorrow of a thousand sinners in Hell. This is a horrible spell, for the victim loses almost all motivation and earthly cares. All he can feel is his own pain – endless, inexorable, and searing. Appropriate Personality Trait rolls suffer a harmful adjustment of –5, and the target suffers –2 on any rolls that require thought or concentrati... Level 25.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crme-words-unbroken-silence",
     "name": "Words of the Unbroken Silence",
     "requisites": [],
@@ -810,6 +893,33 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "lib-crte-conjuring-mystic-tower",
+    "name": "Conjuring the Mystic Tower",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-terram": [
+        "size-terram-4"
+      ],
+      "elaborate-effect": [
+        "elaborate-effect-extensive"
+      ]
+    },
+    "baseEffectId": "crte-3",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "An elaborately carved tower, formed from a single block of stone, rises out of the ground. The tower stands 80 feet high and is 30 feet wide, with a foundation set 20 feet into the ground. You determine the design of the chambers within. Level 35.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
   },
   {
     "id": "lib-crte-seal-earth",
@@ -889,6 +999,31 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-inan-hunters-sense",
+    "name": "Hunter's Sense",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "inan-4a",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-hearing",
+    "summary": "You sense the shapes and primary motivations of all animals above a certain size that you can hear, or could hear if they were making a noise. You decide the size threshold when you cast the spell, such as \"all animals larger than a fox.\" The 'noise' of an animal's shape is louder the larger it is, while the 'noise' of its motivations increases depending on how intense the motivation is. A rabb... Level 30.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 1,
+        "note": "for shape and primary motivation"
       }
     ]
   },
@@ -1640,6 +1775,31 @@
     ]
   },
   {
+    "id": "lib-inte-miners-keen-eye",
+    "name": "The Miner's Keen Eye",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "inte-2",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-vision",
+    "summary": "You can see any one type of mineral (gold, diamond, sand), specified at the time of casting, through up to 3 paces of intervening material. You have a good idea of how much is there and how pure it is, if appropriate. Level 20.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 1,
+        "note": "see through intervening material"
+      }
+    ]
+  },
+  {
     "id": "lib-inte-probe-for-pure-silver",
     "name": "Probe for Pure Silver",
     "requisites": [],
@@ -2129,6 +2289,31 @@
     ]
   },
   {
+    "id": "lib-muco-preternatural-growth-and-shrinking",
+    "name": "Preternatural Growth and Shrinking",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "muco-3a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Adds +1 to the target's normal Size or decreases it by up to 2 points. Level 15.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 1,
+        "note": "because the spell allows growth or two kinds of shrinking"
+      }
+    ]
+  },
+  {
     "id": "lib-muco-shape-woodland-prowler",
     "name": "Shape of the Woodland Prowler",
     "requisites": [],
@@ -2141,6 +2326,29 @@
     "durationId": "duration-sun",
     "targetId": "target-individual",
     "summary": "Req: Animal You place a wolf skin over yourself or another, and the target changes into a wolf. The target may change back at will, ending the spell. Before casting this spell, you must first, of course, acquire the skin of a wolf, if you want to be able to end the spell early. Level 25.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-muco-silent-vigil",
+    "name": "The Silent Vigil",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "elaborate-effect": [
+        "elaborate-effect-minor"
+      ]
+    },
+    "baseEffectId": "muco-25a",
+    "rangeId": "range-personal",
+    "durationId": "duration-moon",
+    "targetId": "target-individual",
+    "summary": "Req: Terram You can move into and become part of a rock formation that is at least twice your size. While in the stone, you can hear what is going on around you, but you cannot use other senses. The spell lasts until you come out, and you must come out where you went in. You have no need for food or drink, though you do age. Rolls to recover from Fatigue or wounds take twice as long to make whi... Level 45.",
     "citations": [
       {
         "bookId": "arm5-core"
@@ -2620,6 +2828,29 @@
     "durationId": "duration-sun",
     "targetId": "target-individual",
     "summary": "Makes a flexible object stiff or a stiff object flexible. Casting requisites of Forms appropriate to the materials affected are required. Note that, despite the name, this spell is not high enough level to affect iron. Level 10.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mute-teeth-earth-mother",
+    "name": "Teeth of the Earth Mother",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "elaborate-effect": [
+        "elaborate-effect-considerable"
+      ]
+    },
+    "baseEffectId": "mute-3c",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-group",
+    "summary": "You cause twenty pointed pillars of white marble to spring up from the ground to a height of 12 feet, forming a circle 3 paces in diameter. At their tops, the pillars are thin and as sharp as spears. At the base, where they touch, they are 18 inches thick. When the pillars spring up, they can be used to cage people, to form a wall, or simply to skewer enemies. Climbing to the top of the pillars... Level 35.",
     "citations": [
       {
         "bookId": "arm5-core"
@@ -3151,6 +3382,32 @@
     "durationId": "duration-momentary",
     "targetId": "target-individual",
     "summary": "Withers and destroys one living plant, up to and including a plant the size of a small tree. Level 20.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-pehe-treading-ashen-path",
+    "name": "Treading the Ashen Path",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-herbam": [
+        "size-herbam-3"
+      ],
+      "elaborate-effect": [
+        "elaborate-effect-minor"
+      ]
+    },
+    "baseEffectId": "pehe-3",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-group",
+    "summary": "As you walk through a forest after casting this spell, all the plant material 10 paces in front of you and 5 paces to either side withers and dies. Trees are reduced to bare trunks, while their leaves and all smaller plants turn to ash. You can walk for 7 miles with each casting of this spell. Use of this spell in faerie woods is not recommended. This spell was originally invented by a magus of... Level 30.",
     "citations": [
       {
         "bookId": "arm5-core"
@@ -3707,6 +3964,35 @@
     ]
   },
   {
+    "id": "lib-reaq-bridge-frost",
+    "name": "Bridge of Frost",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-aquam": [
+        "size-aquam-1"
+      ]
+    },
+    "baseEffectId": "reaq-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-part",
+    "summary": "Causes a thick layer of frost (firm enough to walk on) to form on the surface of a body of water. The frost can take any shape up to fifteen paces in any direction. In Cralian of Tremere's version of this spell, the frost is so crystal clear that it can hardly be seen. All of his spells are very subtle. Level 30.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 1,
+        "note": "to allow various shapes"
+      }
+    ]
+  },
+  {
     "id": "lib-reaq-chaos-angry-waves",
     "name": "Chaos of the Angry Waves",
     "requisites": [],
@@ -3726,6 +4012,31 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-reaq-cloak-ducks-feathers",
+    "name": "Cloak of the Duck's Feathers",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "reaq-1a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Makes water run off one object or creature, protecting the target and the target's apparel from dampness. The spell is broken if the target is submerged in water. Level 5.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 1,
+        "note": "for slightly unnatural control"
       }
     ]
   },
@@ -4693,6 +5004,32 @@
     "durationId": "duration-sun",
     "targetId": "target-individual",
     "summary": "Causes everything the target sees to look and sound terrifying. The world looks basically the same, save that everything is hideously transformed somehow. The target must roll a stress die, adding his Stamina and adding or subtracting an appropriate Personality Trait to see what the effects are. The nature of the Personality Trait used determines how it affects the Stamina roll. A Trait like Br... Level 30.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-rete-creeping-chasm",
+    "name": "Creeping Chasm",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-terram": [
+        "size-terram-3"
+      ],
+      "elaborate-effect": [
+        "elaborate-effect-minor"
+      ]
+    },
+    "baseEffectId": "rete-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-part",
+    "summary": "Creates a chasm that runs from the ground in front of your feet towards some target within range that you designate. The chasm travels about 4 paces per round, growing wider as it travels, reaching a maximum width of 20 feet at a distance of 30 paces. The chasm is 20 to 30 feet deep, and the sides are likely to collapse, so any caught in it are in a bit of a bind. To avoid the growing chasm, a... Level 30.",
     "citations": [
       {
         "bookId": "arm5-core"

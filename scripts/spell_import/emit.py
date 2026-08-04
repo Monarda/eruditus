@@ -20,6 +20,25 @@ _ELABORATE_OPTIONS = {
     3: "elaborate-effect-extensive",
 }
 
+# Design-line modifier labels that resolve to one named modifiers.json option,
+# keyed by (Technique, Form, label) because the Imaginem complexity modifiers
+# are Technique/Form-scoped and the same label can mean different options under
+# different Arts. The magnitude is checked against the catalog by
+# `_option_exists`, so a printed magnitude the option does not carry blocks the
+# spell instead of importing it at the wrong level.
+#
+# Deliberately one entry, not the whole label census `_selected_modifiers`'s
+# docstring describes. "intricacy" is wired because The Shadow of Human Life
+# needs it and nothing else does: no spell is currently blocked on "intricacy"
+# alone -- every other spell that prints it also prints a label with no verified
+# mapping ("move at your command", "changing image") and stays blocked on that.
+# So this entry changes exactly one spell. Wiring the remaining Imaginem labels
+# would unblock ~10 more, each needing its own level check, and remains
+# .superpowers/todo.md item 27.
+_MODIFIER_OPTIONS = {
+    ("Creo", "Imaginem", "intricacy"): ("crim-complexity", "crim-intricate-design"),
+}
+
 
 def build_spell(
     block,
@@ -75,12 +94,12 @@ def _selected_modifiers(
 ) -> dict[str, list[str]]:
     """Map design-line modifier tokens onto modifiers.json option ids.
 
-    Only "size" is wired up here — it is the one modifier-kind token whose
-    value translates mechanically (magnitude N -> the Form's
-    `size-<form>-N` option, verified to exist for every case actually in
-    the corpus except Mentem, which has no size modifier at all, and three
-    spells whose printed magnitude (5) exceeds every size modifier's top
-    option (4)).
+    "size" is the one modifier-kind token whose value translates
+    mechanically (magnitude N -> the Form's `size-<form>-N` option, verified
+    to exist for every case actually in the corpus except Mentem, which has
+    no size modifier at all, and three spells whose printed magnitude (5)
+    exceeds every size modifier's top option (4)). Everything else must be
+    named explicitly in `_MODIFIER_OPTIONS`, which today holds one entry.
 
     Everything else raises here rather than guessing, which is what routes
     those spells to `blocked` in extract_spells.py instead of importing
@@ -121,6 +140,16 @@ def _selected_modifiers(
             selected.setdefault("elaborate-effect", []).append(option_id)
             continue
         if token.kind != "modifier":
+            continue
+        mapped = _MODIFIER_OPTIONS.get((block.technique, block.form, token.label))
+        if mapped is not None:
+            modifier_id, option_id = mapped
+            if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+                raise designline.UnknownToken(
+                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                    f"{option_id!r} at magnitude {token.magnitude}"
+                )
+            selected.setdefault(modifier_id, []).append(option_id)
             continue
         if token.label.lower() != "size":
             raise designline.UnknownToken(

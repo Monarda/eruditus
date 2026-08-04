@@ -244,6 +244,11 @@ void main() {
           for (final optionId in entry.value)
             modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,
         ...spell.requisites.map((r) => r.magnitude),
+        // Adjustments are magnitudes like any other (see
+        // SpellEngine.calculateBreakdown). Omitting them silently overstated
+        // every spell that carries one — the first such spell in the library,
+        // The Severed Limb Made Whole, computed 30 against a printed 25.
+        ...spell.adjustments.map((a) => a.magnitude),
       ];
 
       expect(SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes), statedLevel,

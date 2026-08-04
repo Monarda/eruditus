@@ -114,3 +114,40 @@ class ElaborateEffectEmissionTest(unittest.TestCase):
             with self.subTest(option_id=option_id):
                 self.assertIn(option_id, options)
                 self.assertEqual(options[option_id], magnitude)
+
+
+class ModifierOptionTableTest(unittest.TestCase):
+    """`emit._MODIFIER_OPTIONS` is hand-written; the catalog is the authority."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_every_entry_names_a_real_option_under_a_real_modifier(self):
+        for (technique, form, label), (modifier_id, option_id) in emit._MODIFIER_OPTIONS.items():
+            with self.subTest(label=label):
+                modifier = next(
+                    (m for m in self.catalog.modifiers if m["id"] == modifier_id), None
+                )
+                self.assertIsNotNone(modifier, msg=modifier_id)
+                self.assertIn(option_id, {o["id"] for o in modifier["options"]})
+                scope = modifier["scope"]
+                for key, value in (("technique", technique), ("form", form)):
+                    if scope.get(key) is not None:
+                        self.assertEqual(scope[key], value, msg=f"{modifier_id}.{key}")
+
+    def test_a_mapped_label_selects_its_option(self):
+        design = designline.parse_design("(Base 2, +1 Touch, +1 intricacy)")
+        spell = emit.build_spell(
+            _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+        )
+        self.assertEqual(spell["selectedModifiers"]["crim-complexity"], ["crim-intricate-design"])
+
+    def test_a_printed_magnitude_the_option_does_not_carry_raises(self):
+        # crim-intricate-design is magnitude 1. A "+2 intricacy" would import a
+        # spell one magnitude short of its printed level; block it instead.
+        design = designline.parse_design("(Base 2, +1 Touch, +2 intricacy)")
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(
+                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+            )
