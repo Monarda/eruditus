@@ -5,6 +5,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
 import 'package:eruditus/models/ritual_declaration.dart';
@@ -102,6 +103,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
+      ));
+    } else if (event is AdjustmentAdded) {
+      final updated = [
+        ...state.draft.adjustments,
+        LevelAdjustment(magnitude: 0, note: '(describe this adjustment)'),
+      ];
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(adjustments: updated),
+      ));
+    } else if (event is AdjustmentRemoved) {
+      // Index-keyed, so a stale index from a rebuild-in-flight must be
+      // ignored rather than throwing RangeError into the bloc.
+      if (event.index < 0 || event.index >= state.draft.adjustments.length) return;
+      final updated = [...state.draft.adjustments]..removeAt(event.index);
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(adjustments: updated),
+      ));
+    } else if (event is AdjustmentUpdated) {
+      if (event.index < 0 || event.index >= state.draft.adjustments.length) return;
+      final updated = [...state.draft.adjustments];
+      updated[event.index] =
+          LevelAdjustment(magnitude: event.magnitude, note: event.note);
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(adjustments: updated),
       ));
     } else if (event is ModifierOptionSelected) {
       final modifier =

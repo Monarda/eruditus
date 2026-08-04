@@ -860,4 +860,54 @@ void main() {
         bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
     );
   });
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentAdded appends a zero-magnitude row',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc.add(const AdjustmentAdded()),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.length, 1);
+      expect(bloc.state.draft.adjustments.first.magnitude, 0);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentUpdated replaces the row at that index',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, -1, 'because the old limb is needed')),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.first.magnitude, -1);
+      expect(bloc.state.draft.adjustments.first.note,
+          'because the old limb is needed');
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentRemoved drops only that row and keeps the rest in order',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, 1, 'first'))
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(1, 2, 'second'))
+      ..add(const AdjustmentRemoved(0)),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.map((a) => a.note).toList(), ['second']);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'an out-of-range index is ignored rather than throwing',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentRemoved(0))
+      ..add(const AdjustmentUpdated(3, 1, 'nowhere')),
+    verify: (bloc) => expect(bloc.state.draft.adjustments, isEmpty),
+  );
 }

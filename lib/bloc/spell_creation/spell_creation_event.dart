@@ -123,3 +123,25 @@ class RitualDeclarationChanged extends SpellCreationEvent {
   @override
   List<Object?> get props => [declaration];
 }
+
+class AdjustmentAdded extends SpellCreationEvent {
+  const AdjustmentAdded();
+  @override
+  List<Object?> get props => const [];
+}
+
+class AdjustmentRemoved extends SpellCreationEvent {
+  final int index;
+  const AdjustmentRemoved(this.index);
+  @override
+  List<Object?> get props => [index];
+}
+
+class AdjustmentUpdated extends SpellCreationEvent {
+  final int index;
+  final int magnitude;
+  final String note;
+  const AdjustmentUpdated(this.index, this.magnitude, this.note);
+  @override
+  List<Object?> get props => [index, magnitude, note];
+}

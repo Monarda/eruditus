@@ -16,6 +16,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -674,6 +675,71 @@ void main() {
       expect(find.byKey(const Key('requisite-row-Terram')), findsOneWidget);
       expect(find.byKey(const Key('requisite-row-Rego')), findsOneWidget);
       expect(find.text('No requisites.'), findsNothing);
+    });
+  });
+
+  group('adjustments section', () {
+    testWidgets('removing a row leaves the surviving notes on the right rows',
+        (tester) async {
+      // A mocked bloc emits no new state, so an interaction never triggers the
+      // rebuild — which is exactly how the add-requisite crash stayed invisible
+      // to six passing widget tests (todo item 6). Drive real states through a
+      // controller so the rebuild actually happens.
+      useTallSurface(tester);
+      final controller = StreamController<SpellCreationState>.broadcast();
+      addTearDown(controller.close);
+
+      SpellCreationState stateWith(List<String> notes) => SpellCreationState(
+            status: SpellCreationStatus.editing,
+            draft: SpellDraft(
+              id: 'draft-1',
+              adjustments: [
+                for (var i = 0; i < notes.length; i++)
+                  LevelAdjustment(magnitude: i + 1, note: notes[i]),
+              ],
+            ),
+          );
+
+      final initial = stateWith(['first', 'second', 'third']);
+      when(() => bloc.state).thenReturn(initial);
+      whenListen(bloc, controller.stream, initialState: initial);
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [voiceParam],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(
+            techniques: ArsArts.all,
+            forms: ArsForms.all,
+          ),
+        ),
+      ));
+      await tester.pump();
+      expect(find.text('second'), findsOneWidget);
+
+      // Now the middle row goes away.
+      final after = stateWith(['first', 'third']);
+      when(() => bloc.state).thenReturn(after);
+      controller.add(after);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('first'), findsOneWidget);
+      expect(find.text('third'), findsOneWidget);
+      expect(find.text('second'), findsNothing,
+          reason: 'a stale TextEditingController would keep rendering the '
+              'removed row’s text against a surviving row');
     });
   });
 }
