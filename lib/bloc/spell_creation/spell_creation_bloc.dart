@@ -124,9 +124,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       ));
     } else if (event is AdjustmentUpdated) {
       if (event.index < 0 || event.index >= state.draft.adjustments.length) return;
+      final existing = state.draft.adjustments[event.index];
+      // LevelAdjustment rejects a blank note, and the note field commits on
+      // every focus loss — so select-all, delete, tab away arrives here as an
+      // empty note. Constructing one would throw FormatException out of this
+      // handler: no state emitted, the field left showing empty while the
+      // draft still held the old value, and the user's next edit operating on
+      // stale data. Keep the note the draft already has instead; the magnitude
+      // in the event is still honoured.
+      final note = event.note.trim().isEmpty ? existing.note : event.note;
       final updated = [...state.draft.adjustments];
-      updated[event.index] =
-          LevelAdjustment(magnitude: event.magnitude, note: event.note);
+      updated[event.index] = LevelAdjustment(magnitude: event.magnitude, note: note);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(adjustments: updated),

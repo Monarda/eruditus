@@ -32,6 +32,21 @@ void main() {
           throwsA(isA<FormatException>()));
     });
 
+    test('fromMap rejects a missing note', () {
+      expect(() => LevelAdjustment.fromMap({'magnitude': 1}),
+          throwsA(isA<FormatException>()));
+    });
+
+    test('fromMap rejects an empty or whitespace-only note', () {
+      // Not a completeness box: SpellCreationBloc handles this same "the note
+      // went blank" case when the creation screen's note field is cleared, and
+      // a hand-edited backup JSON reaches the model by this path instead.
+      expect(() => LevelAdjustment.fromMap({'magnitude': 1, 'note': ''}),
+          throwsA(isA<FormatException>()));
+      expect(() => LevelAdjustment.fromMap({'magnitude': 1, 'note': '  '}),
+          throwsA(isA<FormatException>()));
+    });
+
     test('two adjustments with the same magnitude and note are equal', () {
       expect(LevelAdjustment(magnitude: 2, note: 'n'),
           LevelAdjustment(magnitude: 2, note: 'n'));

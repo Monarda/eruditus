@@ -902,6 +902,41 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentUpdated with a blank note keeps the previous note instead of throwing',
+    // The note field commits on every focus loss, so select-all, delete, tab
+    // away arrives as AdjustmentUpdated(0, 0, ''). LevelAdjustment rejects a
+    // blank note, and constructing one here threw FormatException out of the
+    // handler: no state emitted, the field showing empty over a draft that
+    // still held the old value, and the next edit operating on stale data.
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, -1, 'because the old limb is needed'))
+      ..add(const AdjustmentUpdated(0, -1, '')),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.first.note,
+          'because the old limb is needed');
+      expect(bloc.state.draft.adjustments.first.magnitude, -1);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a whitespace-only note is blank too, and the magnitude in the event still applies',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, 1, 'see through intervening material'))
+      ..add(const AdjustmentUpdated(0, 2, '   ')),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.first.note,
+          'see through intervening material');
+      expect(bloc.state.draft.adjustments.first.magnitude, 2);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'an out-of-range index is ignored rather than throwing',
     build: () => SpellCreationBloc(
         spellEngine: spellEngine, spellRepository: spellRepository),

@@ -540,9 +540,21 @@ class _AdjustmentNoteFieldState extends State<_AdjustmentNoteField> {
   late final FocusNode _focusNode = FocusNode()..addListener(_handleFocusChange);
 
   void _handleFocusChange() {
-    if (!_focusNode.hasFocus) {
-      widget.onCommitted(_controller.text);
+    if (!_focusNode.hasFocus) _commit();
+  }
+
+  /// A blank note is not a valid [LevelAdjustment] — the note *is* the
+  /// justification — so the bloc keeps the previous note rather than accept
+  /// one. Restore the field to what the draft still holds instead of leaving
+  /// it visibly empty over a value that did not change: keeping the old note
+  /// can leave the bloc's state equal to the one before it, and an equal state
+  /// is never emitted, so no rebuild would arrive to resync this controller.
+  void _commit() {
+    if (_controller.text.trim().isEmpty) {
+      _controller.text = widget.note;
+      return;
     }
+    widget.onCommitted(_controller.text);
   }
 
   @override
@@ -568,7 +580,7 @@ class _AdjustmentNoteFieldState extends State<_AdjustmentNoteField> {
       controller: _controller,
       focusNode: _focusNode,
       decoration: const InputDecoration(labelText: 'Note'),
-      onFieldSubmitted: widget.onCommitted,
+      onFieldSubmitted: (_) => _commit(),
     );
   }
 }
