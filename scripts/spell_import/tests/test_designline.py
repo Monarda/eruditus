@@ -176,6 +176,37 @@ class SplittingTest(unittest.TestCase):
         self.assertIn("Size", labels)
         self.assertNotIn("including the +3 from the guideline", labels)
 
+    def test_split_parts_keeps_a_nested_aside_whole(self):
+        """The case that actually distinguishes the two splitters.
+
+        The test above passes under the old strip-then-split code too: with a
+        singly-nested aside, removing it wholesale before splitting also
+        happens to leave the right tokens. The discriminating shape is a
+        *nested* aside, because `_PARENTHETICAL` is not nesting-aware -- its
+        `[^)]*` stops at the inner ")", so the old code removed only
+        "(a total of (x)" and the comma that aside was protecting became a
+        top-level one, splitting the token in two.
+        """
+        parts = designline._split_parts(
+            "Base 5, +1 Size (a total of (x) +4 Size, including the +3), +1 Touch"
+        )
+        self.assertEqual([raw for raw, _ in parts], [
+            "Base 5",
+            "+1 Size (a total of (x) +4 Size, including the +3)",
+            "+1 Touch",
+        ])
+        # The old code split this into "+1 Size  +4 Size" and a second bogus
+        # part "including the +3)".
+        self.assertEqual(parts[1][1], "+1 Size  +4 Size, including the +3)")
+
+    def test_a_nested_aside_still_blocks_its_spell(self):
+        # Keeping the aside whole does not make it parseable — it makes the
+        # blocked token honest about what it contains.
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design(
+                "(Base 5, +1 Size (a total of (x) +4 Size, including the +3), +1 Touch)"
+            )
+
 
 class ElaborateEffectTest(unittest.TestCase):
     def test_each_known_wording_becomes_an_elaborate_token(self):
@@ -210,6 +241,23 @@ class AdjustmentTest(unittest.TestCase):
         )
         adj = [t for t in design.tokens if t.kind == "adjustment"]
         self.assertEqual(adj[0].note, "Special (based on Concentration)")
+
+    def test_a_special_token_matches_on_its_bracket_not_the_bare_word(self):
+        """"Special" alone would be a partial catch-all.
+
+        The word carries none of the mechanism; the bracket carries all of it,
+        and the corpus hides two different mechanisms behind the same word --
+        "(based on Concentration)" is a nonstandard Duration, "(equivalent to
+        Boundary)" a nonstandard Target. Matching the bare label would absorb
+        any "+N Special (<anything>)", including a future rulebook's third
+        mechanism, silently. The spec's table lists these tokens with their
+        brackets and requires them "matched exactly".
+        """
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 2, +1 Touch, +2 Special (invented mechanism))")
+        # A bare "+2 Special" with no bracket at all is equally unlisted.
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 2, +1 Touch, +2 Special)")
 
     def test_an_unlisted_token_still_raises(self):
         # The allow-list is closed on purpose: absorbing unknown tokens would

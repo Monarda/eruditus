@@ -127,10 +127,27 @@ ELABORATE_LABELS = frozenset({
     "elaborate design",
 })
 
-# Closed allow-list of per-spell adjustments, matched exactly. Anything not
-# here keeps blocking its spell -- absorbing unknown "+N <prose>" tokens
-# would import real mechanisms (metal/gems, damage scaling, requisites) with
-# a correct computed level and wrong modelling, invisible to the level test.
+# Closed allow-list of per-spell adjustments, matched exactly against the
+# token's *note* -- the raw text with its "+N "/"-N " prefix removed, brackets
+# and all. Anything not here keeps blocking its spell: absorbing unknown
+# "+N <prose>" tokens would import real mechanisms (metal/gems, damage
+# scaling, requisites) with a correct computed level and wrong modelling,
+# invisible to the level test.
+#
+# Matching the note rather than the parenthetical-stripped label is what keeps
+# this an allow-list. A bare "Special" entry would absorb any
+# "+N Special (<anything>)", and the corpus already hides two different
+# mechanisms behind that one word: "(based on Concentration)" is a nonstandard
+# Duration, "(equivalent to Boundary)" a nonstandard Target. The spec's table
+# lists these tokens with their brackets, and "matched exactly" is only true
+# of the bracketed form.
+#
+# "Special (equivalent to Boundary)" does match its corpus token (The
+# Bountiful Feast), but does not unblock that spell: the same design line has
+# unbalanced brackets, so the later "+1 Size (for a total of ..." token never
+# closes and blocks it anyway. Listed regardless -- it is a real corpus token
+# in the spec's table, and an entry whose spell blocks downstream is worth
+# more than a silent omission.
 ADJUSTMENT_LABELS = frozenset({
     "for shape and primary motivation",
     "see through intervening material",
@@ -138,7 +155,8 @@ ADJUSTMENT_LABELS = frozenset({
     "for slightly unnatural control",
     "because the spell allows growth or two kinds of shrinking",
     "because the old limb is needed",
-    "Special",
+    "Special (based on Concentration)",
+    "Special (equivalent to Boundary)",
     "Special based on Mom",
 })
 
@@ -220,14 +238,20 @@ def parse_design(text: str) -> Design:
             magnitude = -magnitude
         label = token_match.group("label").strip()
 
+        # The elaborate wordings carry no bracketed mechanism, so they match on
+        # the stripped label — that is what lets "+1 fancy effect (the spell
+        # effectively keeps being cast...)" resolve. Adjustments must not:
+        # see ADJUSTMENT_LABELS.
         if label in ELABORATE_LABELS:
             tokens.append(Token(magnitude, label, "elaborate"))
             continue
 
-        if label in ADJUSTMENT_LABELS:
-            raw_match = _TOKEN.match(raw)
-            note = raw_match.group("label").strip() if raw_match else raw
-            tokens.append(Token(magnitude, label, "adjustment", note=note))
+        raw_match = _TOKEN.match(raw)
+        note = raw_match.group("label").strip() if raw_match else raw
+        if note in ADJUSTMENT_LABELS:
+            # label is the note here, so the token records the allow-list key
+            # it actually matched rather than a truncated form of it.
+            tokens.append(Token(magnitude, note, "adjustment", note=note))
             continue
 
         requisite_match = _REQUISITE.match(label) or _REQUISITE_EFFECT.match(label)
