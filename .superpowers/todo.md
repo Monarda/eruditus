@@ -261,7 +261,21 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   list. Fixing this item (adding the derived rows) is what would let them
   import.
 
-### 29. Follow-ups from item 27's Final Whole-Branch Review — **NEW**
+### 30. Weekly Rulebook Freshness Check — ✅ COMPLETE
+**Spec:** `docs/superpowers/specs/2026-08-03-rulebook-source-provenance.md`
+
+The freshness job needs no new comparison logic: running the existing Python
+suite with the rulebook at `origin/main` fails precisely when an upstream
+change reaches the library, via `RegenerationTest`, and stays quiet for chapter
+reviews that touch no spells.
+
+- [x] `.github/workflows/rulebook-freshness.yml`: a weekly scheduled job that
+      clones the rulebook at origin/main, sets `ARS_RULEBOOK_ROOT` to the clone,
+      and runs the import harness suite. Deliberately unpinned so a failure means
+      "upstream improved, go adopt it" rather than "something broke".
+- **Status:** ✅ COMPLETE (commit `77c8b01`)
+
+### 29. Follow-ups from item 27's Final Whole-Branch Review — **UPDATED**
 Everything below is a genuine finding from the merge-readiness review of the
 published-spell-import branch (item 27) — none block that merge (the
 committed data and code are correct today), all concern *future* safety or
@@ -272,16 +286,15 @@ of closing item 27 out (`KnownUnresolvableStalenessTest` in
 `_selected_modifiers`); what's left needs either more design judgement or
 more time than closing out item 27 warranted.
 
-- [ ] **No CI runs either test suite.** The harness's whole correctness
-      argument (`assets/data/spell_library.json` is verified-correct
-      generator output) depends on both `python -m unittest discover` and
-      `flutter test` actually running on every change — today neither does
-      automatically (`.github/workflows` doesn't exist). A regression that
-      silently reintroduces the `selectedModifiers: {}` bug (item 27's
-      Wizard's Mount defect) would pass every Python test (the golden-file
-      `RegenerationTest` just says "stale, re-run --write", which launders
-      the bug into the asset) — only the Dart-side assertion 1 catches it.
-      Highest-value single follow-up on this list.
+- [ ] **No CI runs either test suite (partially addressed by item 30).**
+      Item 30 delivers a weekly freshness job that runs both test suites against
+      the upstream rulebook. The remaining gap: a push/PR `tests` job that runs
+      on every commit to this repo. When that job lands (separate tracked work),
+      it should read the rulebook SHA from `source.lock` to ensure reproducible
+      testing against a known rulebook revision, rather than pulling `origin/main`.
+      The freshness job's unpinned behaviour ("upstream improved") is correct for
+      weekly drift detection; the push/PR job's pinned behaviour (known-good
+      baseline) is correct for regression testing.
 - [ ] **Decide on the ledger's "explicit override" promise.** The spec says
       an entry disagreeing with an unambiguous spell's sole candidate is
       valid "as an explicit override, which needs a rationale like any
@@ -375,14 +388,16 @@ Four Creo Animal rows, plus six more the Definitive Edition audit found.
 - **Context:** pure extraction gap, no design decisions. The four General rows
   are also item 25 cases once added.
 - **Source precedence — the catalog is built from the wrong file.** The rulebook
-  repo holds the same book in `reviewed/`, `wip/` and `raw-md/`, in descending
-  quality. Always resolve `reviewed` → `wip` → `raw-md` and stop at the first
-  hit; `raw-md` is unreviewed OCR (`tHe Bitten toad`, `infl icted`) and also
-  carries two alternate core-rules copies and a file marked `DO NOT USE`.
-  Filenames differ between folders, so match on book title.
-  The 604 base effects came from `raw-md/Ars Magica 5e - Core Rules.md` while a
-  reviewed Definitive Edition exists — so this item should end with the catalog
-  rebuilt from `reviewed`, not with ten rows patched onto a raw-OCR base.
+  repo holds the same book in `reviewed/` and `wip/`, in descending quality
+  (note: `raw-md/` was removed from the upstream repo). Always resolve `reviewed`
+  → `wip` and stop at the first hit; the earlier `raw-md` was unreviewed OCR and
+  also carried two alternate core-rules copies. Filenames differ between folders,
+  so match on book title. The 604 base effects came from what was `raw-md/Ars
+  Magica 5e - Core Rules.md` (now retrievable via
+  `git -C <rulebook> show 8b6c4d6^:"raw-md/Ars Magica 5e - Core Rules.md"` if
+  needed for historical reference) while a reviewed Definitive Edition exists —
+  so this item should end with the catalog rebuilt from `reviewed`, not with ten
+  rows patched onto a raw-OCR base.
 
 ### 4. Conditional Wards *(the last open piece of the original item 4)*
 - [ ] Add ward type field to BaseEffect
