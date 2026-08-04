@@ -869,6 +869,11 @@ void main() {
     verify: (bloc) {
       expect(bloc.state.draft.adjustments.length, 1);
       expect(bloc.state.draft.adjustments.first.magnitude, 0);
+      // LevelAdjustment rejects a blank note, so the new row cannot start
+      // empty. This literal is what the note field shows until the user types
+      // over it, and what AdjustmentUpdated falls back to when the user
+      // clears the field.
+      expect(bloc.state.draft.adjustments.first.note, '(describe this adjustment)');
     },
   );
 

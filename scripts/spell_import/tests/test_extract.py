@@ -18,9 +18,14 @@ class RunTest(unittest.TestCase):
 
     def test_every_emitted_spell_has_the_required_fields(self):
         for spell in self.report.spells:
+            # printedLevel and description are in this list for the same
+            # reason as the rest: dropping either from emit.build_spell would
+            # otherwise go unnoticed in Python and surface only in
+            # `flutter test`, where asset_data_loader_test.dart reads
+            # printedLevel and spell cards fall back to description.
             for field in ("id", "name", "baseEffectId", "rangeId", "durationId",
                           "targetId", "source", "createdAt", "updatedAt",
-                          "summary", "citations"):
+                          "summary", "description", "printedLevel", "citations"):
                 self.assertIn(field, spell, msg=spell.get("id"))
             self.assertEqual(spell["source"], "published")
             self.assertEqual(spell["citations"], [{"bookId": "arm5-core"}])
