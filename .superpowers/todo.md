@@ -554,20 +554,19 @@ recorded".
   imported (263 of 360 today, 97 still blocked), so the work is done once
   against the full set rather than being redone as more spells clear their
   blockers.
-- **When it happens:** the `" Level N."` suffix can go from the summary — but
-  **not before the import oracle stops reading it**. An earlier version of this
-  item said "nothing reads the suffix out of the prose anymore"; that is false.
-  `test/data/published_spell_import_test.dart`'s `printedLevel(String? summary)`
-  helper still does `RegExp(r'Level (\d+)\.$').firstMatch(spell.summary)`, and
-  it is the oracle for **assertion 1, "every spell computes to its printed
-  level"** — the harness's primary assertion. Only `asset_data_loader_test.dart`
-  was moved onto the `printedLevel` field. So the order is: move that helper
-  onto `spell.printedLevel`, confirm `flutter test` is green, *then* drop the
-  suffix. Doing it the other way round reds assertion 1 for all 263 spells.
-- **Files:** `scripts/spell_import/emit.py` (`_summary`),
-  `test/data/published_spell_import_test.dart` (`printedLevel` helper, first),
-  a new per-spell summary ledger alongside
-  `scripts/spell_import/resolutions.json`, `assets/data/spell_library.json`
+- **When it happens:** the `" Level N."` suffix can now go from the summary.
+  It is genuinely vestigial as of the level-adjustments branch: both readers
+  that parsed it back out of the prose have been moved onto the typed
+  `printedLevel` field — `asset_data_loader_test.dart` in Task 9, and
+  `test/data/published_spell_import_test.dart`'s oracle for **assertion 1,
+  "every spell computes to its printed level"** in the branch's final fix
+  wave. Nothing in the repo reads `RegExp(r'Level (\d+)\.$')` anymore.
+  Removing the suffix from `emit._summary` is therefore purely an asset
+  churn question — it rewrites all 263 summaries — which is why it waits for
+  this item rather than for a code dependency.
+- **Files:** `scripts/spell_import/emit.py` (`_summary`), a new per-spell
+  summary ledger alongside `scripts/spell_import/resolutions.json`,
+  `assets/data/spell_library.json`
 
 ---
 

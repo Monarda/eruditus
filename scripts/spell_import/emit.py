@@ -219,13 +219,13 @@ def _parameter_name(design: designline.Design, slot: str, block) -> str:
 def _summary(block) -> str:
     """Prose plus the printed level, kept as a trailing "Level N." phrase.
 
-    The suffix is NOT vestigial. `test/data/published_spell_import_test.dart`
-    parses it back out with `RegExp(r'Level (\\d+)\\.$')` and uses it as the
-    oracle for assertion 1, "every spell computes to its printed level" --
-    the harness's primary assertion. Only asset_data_loader_test.dart was
-    moved onto the `printedLevel` field build_spell also emits. Dropping the
-    suffix (see .superpowers/todo.md item 31) reds that assertion unless the
-    oracle moves onto `printedLevel` first.
+    The suffix is now vestigial: no test parses it back out. Both readers
+    that used to -- asset_data_loader_test.dart and, as the oracle for the
+    import harness's assertion 1, published_spell_import_test.dart -- were
+    moved onto the `printedLevel` field build_spell also emits. It is kept
+    here only because dropping it would rewrite all 263 summaries in
+    assets/data/spell_library.json, which .superpowers/todo.md item 31 owns
+    along with the rest of the summary rework.
     """
     prose = " ".join(block.prose.split())
     if len(prose) > 400:

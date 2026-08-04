@@ -159,11 +159,13 @@ class DescriptionEmissionTest(unittest.TestCase):
     """`description` is the full verbatim prose; `summary` stays untouched.
 
     emit._summary truncates block.prose to 400 characters and appends
-    "Level N.". asset_data_loader_test.dart no longer parses that suffix (it
-    reads the `printedLevel` field, see PrintedLevelEmissionTest below), but
-    published_spell_import_test.dart still does — it is the oracle for
-    assertion 1, so the suffix is load-bearing, not merely unchurned.
-    description exists so the untruncated rulebook text is available too.
+    "Level N.". Nothing parses that suffix back out anymore: both Dart
+    readers — asset_data_loader_test.dart and published_spell_import_test's
+    assertion-1 oracle — now read the `printedLevel` field instead (see
+    PrintedLevelEmissionTest below). The suffix survives only because
+    removing it would rewrite all 263 summaries in the asset, which
+    .superpowers/todo.md item 31 owns. description exists so the
+    untruncated rulebook text is available too.
     """
 
     @classmethod
