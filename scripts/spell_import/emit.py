@@ -72,8 +72,13 @@ def build_spell(
         "durationId": duration_id,
         "targetId": target_id,
         "summary": _summary(block),
-        "citations": [{"bookId": CORE_BOOK_ID}],
     }
+
+    description = _description(block)
+    if description:
+        spell["description"] = description
+
+    spell["citations"] = [{"bookId": CORE_BOOK_ID}]
 
     adjustments = [
         {"magnitude": token.magnitude, "note": token.note}
@@ -211,3 +216,14 @@ def _summary(block) -> str:
     if len(prose) > 400:
         prose = prose[:397].rstrip() + "..."
     return f"{prose} Level {block.printed_level}."
+
+
+def _description(block) -> str:
+    """The full, untruncated verbatim rulebook prose, whitespace-collapsed.
+
+    Unlike _summary, this carries no truncation and no "Level N." suffix --
+    that suffix belongs to the paraphrase field alone. Empty prose yields an
+    empty string here, and build_spell omits the key entirely in that case,
+    the same way it omits "adjustments" when there are none.
+    """
+    return " ".join(block.prose.split())

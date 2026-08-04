@@ -17,7 +17,9 @@ from scripts.spell_import import blocks, catalog as catalog_module, designline, 
 from scripts.spell_import import statline
 
 
-def _block(name: str, technique: str, form: str, level: int) -> blocks.SpellBlock:
+def _block(
+    name: str, technique: str, form: str, level: int, prose: str = "Test prose."
+) -> blocks.SpellBlock:
     return blocks.SpellBlock(
         name=name,
         technique=technique,
@@ -27,7 +29,7 @@ def _block(name: str, technique: str, form: str, level: int) -> blocks.SpellBloc
             range_name="Touch", duration_name="Sun", target_name="Ind",
             is_ritual=False, requisite_arts=[], trailing="",
         ),
-        prose="Test prose.",
+        prose=prose,
         design_line=None,
         line_no=1,
     )
@@ -151,3 +153,43 @@ class ModifierOptionTableTest(unittest.TestCase):
             emit.build_spell(
                 _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
             )
+
+
+class DescriptionEmissionTest(unittest.TestCase):
+    """`description` is the full verbatim prose; `summary` stays untouched.
+
+    emit._summary truncates block.prose to 400 characters and appends
+    "Level N." — that shape is load-bearing for
+    asset_data_loader_test.dart and must not change. description exists so
+    the untruncated rulebook text is available too.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def _build(self, prose: str, design_text: str = "(Base 1, +1 Touch, +2 Sun)") -> dict:
+        design = designline.parse_design(design_text)
+        block = _block("Test Spell", "Rego", "Aquam", 10, prose=prose)
+        return emit.build_spell(block, "reaq-3", self.catalog, design)
+
+    def test_description_is_the_full_prose_and_longer_than_the_truncated_summary(self):
+        long_prose = "This is a very long sentence about magical effects. " * 20
+        self.assertGreater(len(long_prose), 400)
+        spell = self._build(long_prose)
+        expected = " ".join(long_prose.split())
+        self.assertEqual(spell["description"], expected)
+        self.assertGreater(len(spell["description"]), len(spell["summary"]))
+
+    def test_description_carries_no_level_suffix(self):
+        spell = self._build("Some prose about the spell's effect.")
+        self.assertNotRegex(spell["description"], r"Level \d+\.$")
+
+    def test_description_whitespace_is_collapsed(self):
+        spell = self._build("Some prose\nwith a  newline and  double  spaces.")
+        self.assertNotIn("\n", spell["description"])
+        self.assertNotIn("  ", spell["description"])
+
+    def test_empty_prose_omits_the_description_key(self):
+        spell = self._build("")
+        self.assertNotIn("description", spell)
