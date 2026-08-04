@@ -854,16 +854,27 @@ This is the test that matters. Append to `test/presentation/screens/spell_creati
           );
 
       final initial = stateWith(['first', 'second', 'third']);
-      when(() => mockBloc.state).thenReturn(initial);
-      whenListen(mockBloc, controller.stream, initialState: initial);
+      when(() => bloc.state).thenReturn(initial);
+      whenListen(bloc, controller.stream, initialState: initial);
 
-      await tester.pumpWidget(/* the file's creation-screen pump helper */);
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(
+            techniques: ArsArts.all,
+            forms: ArsForms.all,
+          ),
+        ),
+      ));
       await tester.pump();
       expect(find.text('second'), findsOneWidget);
 
       // Now the middle row goes away.
       final after = stateWith(['first', 'third']);
-      when(() => mockBloc.state).thenReturn(after);
+      when(() => bloc.state).thenReturn(after);
       controller.add(after);
       await tester.pump();
 
@@ -875,7 +886,7 @@ This is the test that matters. Append to `test/presentation/screens/spell_creati
     });
 ```
 
-Two things to reconcile against the file as you write it: its existing mock-bloc variable name and `pumpWidget` helper (substitute them for `mockBloc` and the marked call), and whether it already imports `dart:async` and `bloc_test`'s `whenListen`. Add whichever imports are missing.
+The `bloc`/`configBloc` mocks and the `MaterialApp` wrapper above are the file's own, from its `setUp` at line 75 and its pump at line 110. Check whether it already imports `dart:async` and `bloc_test`'s `whenListen`, and add whichever is missing.
 
 If the file's mock setup makes `whenListen` impractical, cover this in `integration_test/` instead and say so explicitly in your report. **Do not** substitute a single-state test that asserts a row renders — that passes without exercising the rebuild, and proves nothing about the failure this guards.
 
