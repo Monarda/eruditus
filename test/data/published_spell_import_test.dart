@@ -40,6 +40,7 @@ void main() {
         target: parameters[spell.targetId]!,
         selectedModifiers: spell.selectedModifiers,
         requisites: spell.requisites,
+        adjustments: spell.adjustments,
         ritualDeclaration: spell.ritualDeclaration,
       );
       final want = printedLevel(spell.summary);
@@ -80,6 +81,7 @@ void main() {
             target: parameters[spell.targetId]!,
             selectedModifiers: spell.selectedModifiers,
             requisites: spell.requisites,
+            adjustments: spell.adjustments,
             ritualDeclaration: spell.ritualDeclaration,
           )
           .ritualStatus

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -9,6 +10,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 
 Parameter _sp(String id, String name, String category) => Parameter(
     id: id, name: name, category: category, magnitude: 0,
@@ -516,6 +518,55 @@ void main() {
 
       expect(similar.any((s) => s.id == 'orphan'), isFalse);
       expect(similar.map((s) => s.id).toList(), ['1']);
+    });
+  });
+
+  group('adjustments', () {
+    final baseEffect = BaseEffect(
+      id: '1', technique: 'Creo', form: 'Ignem',
+      description: 'test', baseLevel: 10,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+
+    LevelBreakdown breakdownWith(List<LevelAdjustment> adjustments) =>
+        SpellEngine(allSpells: const [], allModifiers: const []).calculateBreakdown(
+          baseEffect: baseEffect,
+          range: _range,
+          duration: _duration,
+          target: _target,
+          selectedModifiers: const {},
+          requisites: const [],
+          adjustments: adjustments,
+        );
+
+    test('each adjustment contributes one labelled breakdown line', () {
+      final labels = breakdownWith([
+        LevelAdjustment(magnitude: 1, note: 'see through intervening material'),
+        LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
+      ]).contributions.map((c) => c.label).toList();
+
+      expect(labels, contains('Adjustment · see through intervening material'));
+      expect(labels, contains('Adjustment · because the old limb is needed'));
+    });
+
+    test('a positive adjustment raises the level by 5 above the additive tier', () {
+      // baseLevel 10, and _range/_duration/_target are all magnitude 0.
+      expect(breakdownWith(const []).level, 10);
+      expect(
+          breakdownWith([LevelAdjustment(magnitude: 1, note: 'fancy')]).level, 15);
+    });
+
+    test('a negative adjustment lowers it by 5', () {
+      expect(breakdownWith([LevelAdjustment(magnitude: -1, note: 'old limb')]).level,
+          5);
+    });
+
+    test('a zero-magnitude adjustment shows a line but changes no level', () {
+      final breakdown =
+          breakdownWith([LevelAdjustment(magnitude: 0, note: 'cosmetic, free')]);
+      expect(breakdown.level, 10);
+      expect(breakdown.contributions.map((c) => c.label),
+          contains('Adjustment · cosmetic, free'));
     });
   });
 }

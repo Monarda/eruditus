@@ -2,6 +2,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -87,6 +88,7 @@ class SpellEngine {
     required Parameter target,
     required Map<String, List<String>> selectedModifiers,
     required List<Requisite> requisites,
+    List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) {
     final contributions = <LevelContribution>[
@@ -103,6 +105,14 @@ class SpellEngine {
       contributions.add(LevelContribution(
           label: 'Requisite · ${requisite.art}, ${requisite.kind.name}',
           magnitude: requisite.magnitude));
+    }
+
+    // Adjustments are magnitudes like any other, so they flow into the same
+    // calculator call below and need no special case there.
+    for (final adjustment in adjustments) {
+      contributions.add(LevelContribution(
+          label: 'Adjustment · ${adjustment.note}',
+          magnitude: adjustment.magnitude));
     }
 
     // A selected id that no longer resolves (a modifier deleted after the

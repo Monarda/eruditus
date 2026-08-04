@@ -1,5 +1,6 @@
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -55,5 +56,6 @@ class ResolvedSpell {
   DateTime get updatedAt => record.updatedAt;
   Map<String, List<String>> get selectedModifiers => record.selectedModifiers;
   List<Requisite> get requisites => record.requisites;
+  List<LevelAdjustment> get adjustments => record.adjustments;
   RitualDeclaration get ritualDeclaration => record.ritualDeclaration;
 }

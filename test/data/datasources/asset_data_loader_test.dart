@@ -156,6 +156,7 @@ void main() {
         target: parameters[spell.targetId]!,
         selectedModifiers: spell.selectedModifiers,
         requisites: spell.requisites,
+        adjustments: spell.adjustments,
         ritualDeclaration: spell.ritualDeclaration,
       );
 

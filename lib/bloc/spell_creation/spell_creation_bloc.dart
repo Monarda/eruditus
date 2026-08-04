@@ -193,6 +193,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       target: state.draft.target!,
       selectedModifiers: state.draft.selectedModifiers,
       requisites: state.draft.requisites,
+      adjustments: state.draft.adjustments,
       ritualDeclaration: state.draft.ritualDeclaration,
     );
     final level = breakdown.level;
@@ -213,6 +214,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       final suggestionBreakdown = spellEngine.calculateBreakdown(
         baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
         selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+        adjustments: s.adjustments,
         ritualDeclaration: s.ritualDeclaration,
       );
       suggestionLevels[s.id] = suggestionBreakdown.level;

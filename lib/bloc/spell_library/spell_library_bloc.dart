@@ -44,7 +44,8 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
           final breakdown = spellEngine.calculateBreakdown(
             baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
             target: s.target!, selectedModifiers: s.selectedModifiers,
-            requisites: s.requisites, ritualDeclaration: s.ritualDeclaration,
+            requisites: s.requisites, adjustments: s.adjustments,
+            ritualDeclaration: s.ritualDeclaration,
           );
           levels[s.id] = breakdown.level;
           if (breakdown.ritualStatus.isRitual) ritualIds.add(s.id);
