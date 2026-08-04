@@ -616,5 +616,61 @@ void main() {
           contains('Adjustment · cosmetic, free'));
     });
 
+    test('calculateSpellLevel agrees with calculateBreakdown on adjustments', () {
+      // The two paths answer the same question and must not diverge.
+      // calculateSpellLevel used to drop adjustments entirely, so
+      // findSimilarSpells sorted *The Shadow of Human Life* as though it were
+      // level 15 while its card displayed 40.
+      final adjustments = [
+        LevelAdjustment(magnitude: 2, note: 'the shadow acts on its own'),
+        LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
+      ];
+      final engine = SpellEngine(allSpells: const [], allModifiers: const []);
+
+      final viaLevel = engine.calculateSpellLevel(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        requisites: const [],
+        adjustments: adjustments,
+      );
+
+      expect(viaLevel, breakdownWith(adjustments).level);
+      // And that it is the adjusted number, not the unadjusted one: base 10
+      // plus a net +1 magnitude above the additive tier.
+      expect(viaLevel, 15);
+      expect(viaLevel, isNot(breakdownWith(const []).level));
+    });
+
+    test('findSimilarSpells sorts by the adjusted level, not the bare one', () {
+      // findSimilarSpells is the only caller of calculateSpellLevel, and this
+      // is what the dropped parameter actually broke.
+      ResolvedSpell spellWith(String id, int baseLevel, List<LevelAdjustment> adj) {
+        final effect = BaseEffect(
+          id: 'e$id', technique: 'Muto', form: 'Imaginem',
+          description: 'test', baseLevel: baseLevel,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        );
+        return ResolvedSpell(
+          record: Spell(
+            id: id, name: id, baseEffectId: effect.id,
+            rangeId: _range.id, durationId: _duration.id, targetId: _target.id,
+            requisites: const [], adjustments: adj,
+            provenance: Provenance(source: PublicationSource.userCreated),
+            createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+          ),
+          baseEffect: effect, range: _range, duration: _duration, target: _target,
+        );
+      }
+
+      final adjusted = spellWith('adjusted', 15,
+          [LevelAdjustment(magnitude: 5, note: 'the shadow acts on its own')]);
+      final plain = spellWith('plain', 15, const []);
+      final engine = SpellEngine(allSpells: [plain, adjusted]);
+
+      final nearForty =
+          engine.findSimilarSpells('Muto', 'Imaginem', referenceLevel: 40);
+
+      expect(nearForty.first.id, 'adjusted');
+    });
   });
 }

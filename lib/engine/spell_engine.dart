@@ -227,6 +227,7 @@ class SpellEngine {
     required Parameter target,
     Map<String, List<String>> selectedModifiers = const {},
     required List<Requisite> requisites,
+    List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) =>
       calculateBreakdown(
@@ -236,6 +237,7 @@ class SpellEngine {
         target: target,
         selectedModifiers: selectedModifiers,
         requisites: requisites,
+        adjustments: adjustments,
         ritualDeclaration: ritualDeclaration,
       ).level;
 
@@ -249,12 +251,12 @@ class SpellEngine {
         final levelA = calculateSpellLevel(
           baseEffect: a.baseEffect!, range: a.range!, duration: a.duration!, target: a.target!,
           selectedModifiers: a.selectedModifiers, requisites: a.requisites,
-          ritualDeclaration: a.ritualDeclaration,
+          adjustments: a.adjustments, ritualDeclaration: a.ritualDeclaration,
         );
         final levelB = calculateSpellLevel(
           baseEffect: b.baseEffect!, range: b.range!, duration: b.duration!, target: b.target!,
           selectedModifiers: b.selectedModifiers, requisites: b.requisites,
-          ritualDeclaration: b.ritualDeclaration,
+          adjustments: b.adjustments, ritualDeclaration: b.ritualDeclaration,
         );
         return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());
       });
