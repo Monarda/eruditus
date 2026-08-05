@@ -742,14 +742,9 @@ Add `int? chosenBaseLevel;` and `String? templateId;` as fields and constructor 
 
 - [ ] **Step 5: Bump the database schema**
 
-`lib/data/database/app_database.dart:6` — `_databaseVersion` 6 → 7, and add both columns to the `spells` table's `CREATE TABLE`:
+**Corrected during execution — the original instruction here was wrong.** It said to add `chosen_base_level INTEGER` and `template_id TEXT` columns to the `spells` table. There are no per-field columns to add to: `spells` is `(id, name, source, data, created_at, updated_at)`, where `data` holds the whole serialized `Spell` as JSON. Adding those columns would have created two that nothing ever reads or writes.
 
-```sql
-        chosen_base_level INTEGER,
-        template_id TEXT,
-```
-
-`onUpgrade` already drops and recreates `spells`. Add nothing else — no migration path is wanted.
+What to do instead: bump `_databaseVersion` 6 → 7 in `lib/data/database/app_database.dart:6` and change no DDL. The new fields ride inside the `data` blob for free. The bump still earns its place — `onUpgrade` drops and recreates `spells`, which discards any stored blob predating the new fields. That is wanted, not tolerated: backwards compatibility is explicitly not a goal. Add no migration.
 
 - [ ] **Step 6: Run the model and database suites**
 
