@@ -230,13 +230,18 @@ void main() {
     // Regression test for the residual finding: a saved spell whose
     // adjustments drive it below level 1 has no computable level (same
     // construction as spell_library_bloc_test.dart's `uncomputableSpell`),
-    // and calculateSpellLevel/calculateBreakdown throw for it. Before this
-    // fix, that throw came straight out of findSimilarSpells' comparator (or
-    // the per-suggestion loop right after it) with no try/catch in
-    // _handleSpellCalculated, so pressing Calculate for the same
-    // Technique+Form broke the Create tab every time. It must survive and
-    // simply omit the bad spell from `suggestions` instead — a spell with no
-    // level cannot be "similar to" the one just calculated.
+    // and calculateSpellLevel/calculateBreakdown throw for it. This engine
+    // holds only that one candidate, so findSimilarSpells' sort never calls
+    // its comparator at all (Dart's List.sort skips the comparator on a
+    // one-element list) — the comparator guard is instead pinned by
+    // spell_engine_test.dart's own regression test, which uses two
+    // candidates to force it to run. What this test pins is the second
+    // guard: before this fix, the per-suggestion calculateBreakdown loop
+    // right after findSimilarSpells in _handleSpellCalculated had no
+    // try/catch, so pressing Calculate for the same Technique+Form broke the
+    // Create tab every time. It must survive and simply omit the bad spell
+    // from `suggestions` instead — a spell with no level cannot be "similar
+    // to" the one just calculated.
     'SpellCalculated survives when the engine holds an uncomputable spell of the same Technique and Form',
     build: () {
       final uncomputableRecord = Spell(

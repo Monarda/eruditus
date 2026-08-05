@@ -436,9 +436,6 @@ more time than closing out item 27 warranted.
       make `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
       start failing on purpose; whoever does this should expect and update
       that test, not be surprised by it.
-- [ ] Minor: no `test_emit.py` — `emit.py` is the only pipeline module
-      without a direct unit test, and it's the module that carried the
-      `selectedModifiers` bug.
 - [ ] Minor: `main()` in `extract_spells.py` never prints *why* spells are
       blocked (only the count) — a `--show-blocked` flag or always-print
       would make the CLI more useful for items 24/25/26/28's ongoing work.
