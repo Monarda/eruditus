@@ -1,3 +1,5 @@
+import 'package:eruditus/models/general_effect_formula.dart';
+import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
@@ -58,6 +60,14 @@ class BaseEffect {
   final RitualRequirement ritualRequirement;
   final Provenance provenance;
 
+  /// What this guideline is priced against. Absent in JSON means
+  /// [ParameterTriple.standard].
+  final ParameterTriple reference;
+
+  /// How the guideline's effect strength derives from the chosen level.
+  /// Present on every General entry, absent on every other.
+  final GeneralEffectFormula? effectFormula;
+
   BaseEffect({
     required this.id,
     required this.technique,
@@ -66,6 +76,8 @@ class BaseEffect {
     required this.baseLevel,
     this.ritualRequirement = RitualRequirement.none,
     required this.provenance,
+    this.reference = const ParameterTriple.standard(),
+    this.effectFormula,
   });
 
   Map<String, dynamic> toMap() => {
@@ -76,6 +88,8 @@ class BaseEffect {
     'baseLevel': baseLevel,
     'ritualRequirement': ritualRequirement.name,
     ...provenance.toMap(),
+    'reference': reference.toMap(),
+    if (effectFormula != null) 'effectFormula': effectFormula!.toMap(),
   };
 
   factory BaseEffect.fromMap(Map<String, dynamic> map) => BaseEffect(
@@ -89,6 +103,12 @@ class BaseEffect {
         : _ritualRequirementFromName(
             requireField<String>(map, 'ritualRequirement', 'BaseEffect')),
     provenance: Provenance.fromMap(map),
+    reference: map['reference'] == null
+        ? const ParameterTriple.standard()
+        : ParameterTriple.fromMap(map['reference'] as Map<String, dynamic>),
+    effectFormula: map['effectFormula'] == null
+        ? null
+        : GeneralEffectFormula.fromMap(map['effectFormula'] as Map<String, dynamic>),
   );
 
   // Value equality by id. Effects are re-parsed from JSON/DB on every
