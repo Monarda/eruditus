@@ -415,10 +415,12 @@ more time than closing out item 27 warranted.
             above. The library went **269 → 273 imported, 91 → 87 blocked**,
             zero existing entries changed: *Veil of Invisibility* and *Silence
             of the Smothered Sound* (Perdo Imaginem), *The Captive Voice* and
-            *Wizard's Sidestep* (Rego Imaginem, which also prints `moved image
-            matches changes`, wired separately — both now select two options
-            under `reim-complexity`). All four compute to their printed level
-            under assertion 1.
+            *Wizard's Sidestep* (Rego Imaginem). Of the four, only *Wizard's
+            Sidestep* selects two options under `reim-complexity` — it also
+            prints `moved image matches changes`, wired separately — and
+            `reim-complexity` is `selectionMode: multi`, so that is a shape
+            the app's own `validateSpellDraft` accepts. All four compute to
+            their printed level under assertion 1.
 - [ ] **`;` handling in the design-line splitter.** *Ball of Abysmal Flame*
       prints `(Base 25, +2 Voice; the ball appearing to shoot from your hand
       is a cosmetic effect)` — a semicolon where every other spell uses a
