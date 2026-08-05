@@ -36,11 +36,9 @@ _ELABORATE_OPTIONS = {
 # against the real catalog on every run.
 #
 # Still deliberately not a census of every modifier label the tokenizer knows.
-# "changing image" (Perdo and Rego Imaginem), "unnatural" and "metal" are absent
-# because their mappings are not verified, not because they were overlooked --
-# see `_selected_modifiers`'s docstring and .superpowers/todo.md item 27. Four
-# spells stay blocked on "changing image" as a result, including Wizard's
-# Sidestep, which also prints a label this table does map.
+# "unnatural" and "metal" are absent because their mappings are not verified,
+# not because they were overlooked -- see `_selected_modifiers`'s docstring
+# and .superpowers/todo.md item 27.
 _MODIFIER_OPTIONS = {
     ("Creo", "Imaginem", "intricacy"): ("crim-complexity", "crim-intricate-design"),
     # "Image moves or makes noise at your direction as you concentrate",
@@ -51,6 +49,12 @@ _MODIFIER_OPTIONS = {
     # "Increasing Sensory Complexity" -- clear words instead of noise, magnitude
     # 1. Phantasm of the Talking Head.
     ("Creo", "Imaginem", "intelligible speech"): ("crim-complexity", "crim-sensory-complexity"),
+    # "Destroying or dulling an image that changes, rather than a static
+    # one", magnitude 1. Perdo Imaginem's preamble states the rule directly:
+    # "Destroying changing images is more difficult -- add one level of
+    # magnitude to spells that do so." Veil of Invisibility, Silence of the
+    # Smothered Sound.
+    ("Perdo", "Imaginem", "changing image"): ("peim-complexity", "peim-changing-image"),
     # "The moved image continues to match changes in the original", magnitude 1.
     # Wizard's Sidestep.
     ("Rego", "Imaginem", "moved image matches changes"): (
@@ -64,6 +68,12 @@ _MODIFIER_OPTIONS = {
     # "Moving an image that changes, rather than a static one", magnitude 1.
     # Image from the Wizard Torn prints this as "moving image".
     ("Rego", "Imaginem", "moving image"): ("reim-complexity", "reim-changing-image"),
+    # Same option, this time reached via the literal "changing image" label
+    # (rather than "moving image" above). Rego Imaginem's preamble: "it is
+    # slightly harder to affect changing images. Add one level of magnitude
+    # to spells that do so." The Captive Voice, Wizard's Sidestep (which also
+    # prints "moved image matches changes", wired separately above).
+    ("Rego", "Imaginem", "changing image"): ("reim-complexity", "reim-changing-image"),
 }
 
 
@@ -150,18 +160,13 @@ def _selected_modifiers(
 
     - The Imaginem complexity-factor labels ("move at/under your command",
       "intelligible speech", "moved image matches changes", "additional
-      sense(s)", "moving image") are now in `_MODIFIER_OPTIONS`: their
-      per-spell mapping was already recorded as prose in
-      designline.MODIFIER_LABELS's comment, and each id and magnitude was
-      checked against the catalog before being wired. That unblocked six
-      spells.
-    - "changing image" is NOT wired, and four spells stay blocked on it
-      (Veil of Invisibility, Silence of the Smothered Sound, The Captive
-      Voice, Wizard's Sidestep). Both `peim-changing-image` and
-      `reim-changing-image` exist at magnitude 1, but MODIFIER_LABELS's
-      comment records no per-spell confirmation for this label the way it
-      does for the six above, and a label that reads plausible is not a
-      label that has been checked.
+      sense(s)", "moving image", "changing image") are now in
+      `_MODIFIER_OPTIONS`: their per-spell mapping was already recorded as
+      prose in designline.MODIFIER_LABELS's comment, and each id and
+      magnitude was checked against the catalog before being wired. That
+      unblocked ten spells, the last four of them on "changing image" --
+      Veil of Invisibility and Silence of the Smothered Sound (Perdo
+      Imaginem), The Captive Voice and Wizard's Sidestep (Rego Imaginem).
     - "unnatural" genuinely has no mapping for most of its spells:
       `creo-auram-unnatural` only covers Creo Auram, and most "unnatural"
       tokens are on Muto/Rego Auram spells it doesn't scope to.

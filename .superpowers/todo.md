@@ -1,7 +1,7 @@
 # Eruditus Todo List
 
 **Status:** Active development
-**Last Updated:** 2026-08-04
+**Last Updated:** 2026-08-05
 **Base Effects:** ✅ Complete (604 effects extracted)
 
 **Current goal:** every published spell in the Definitive Edition core rules is in
@@ -404,18 +404,21 @@ more time than closing out item 27 warranted.
       Human Form*, *Haunt of the Living Ghost*, *Confusion of the Insane
       Vibrations*, *Image from the Wizard Torn*. All six compute to their
       printed level under assertion 1.
-      - [ ] **`changing image` is still not wired**, and is the sole remaining
-            blocker for four spells: *Veil of Invisibility* and *Silence of
-            the Smothered Sound* (Perdo Imaginem, `peim-changing-image`),
-            *The Captive Voice* and *Wizard's Sidestep* (Rego Imaginem,
-            `reim-changing-image`). Both options exist at magnitude 1 and the
-            `(Technique, Form, label)` key would disambiguate them, so this
-            looks like a one-line addition — but `MODIFIER_LABELS`'s comment
-            records no per-spell confirmation for this label the way it does
-            for the six above, which is exactly why it was left out. Confirm
-            it against those four spells first. Note *Wizard's Sidestep* also
-            prints `moved image matches changes`, which *is* wired; it blocks
-            on `changing image` alone.
+      - [x] **`changing image` is now wired.** Confirmed against both
+            preambles that state the rule outright: Perdo Imaginem's "Destroying
+            changing images is more difficult — add one level of magnitude to
+            spells that do so" (`peim-changing-image`) and Rego Imaginem's "it
+            is slightly harder to affect changing images. Add one level of
+            magnitude to spells that do so" (`reim-changing-image`), each
+            checked at magnitude 1 against `assets/data/modifiers.json` by
+            `test_emit.ModifierOptionTableTest` the same way as the six labels
+            above. The library went **269 → 273 imported, 91 → 87 blocked**,
+            zero existing entries changed: *Veil of Invisibility* and *Silence
+            of the Smothered Sound* (Perdo Imaginem), *The Captive Voice* and
+            *Wizard's Sidestep* (Rego Imaginem, which also prints `moved image
+            matches changes`, wired separately — both now select two options
+            under `reim-complexity`). All four compute to their printed level
+            under assertion 1.
 - [ ] **`;` handling in the design-line splitter.** *Ball of Abysmal Flame*
       prints `(Base 25, +2 Voice; the ball appearing to shoot from your hand
       is a cosmetic effect)` — a semicolon where every other spell uses a
