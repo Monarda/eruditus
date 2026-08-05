@@ -58,4 +58,16 @@ void main() {
     expect(draft.copyWith(technique: 'Creo').ritualDeclaration,
         RitualDeclaration.lastingCreation);
   });
+
+  test('copyWith clears templateId when passed null explicitly', () {
+    final draft = SpellDraft(templateId: 'tpl-1');
+
+    expect(draft.copyWith(templateId: null).templateId, isNull);
+  });
+
+  test('copyWith leaves templateId alone when omitted', () {
+    final draft = SpellDraft(templateId: 'tpl-1');
+
+    expect(draft.copyWith(technique: 'Rego').templateId, 'tpl-1');
+  });
 }

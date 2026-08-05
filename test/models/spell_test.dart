@@ -386,6 +386,36 @@ void main() {
 
       expect(Spell.fromMap(map).adjustments, isEmpty);
     });
+
+    test('chosenBaseLevel and templateId round-trip', () {
+      final spell = Spell(
+        id: 's-1', name: 'Circular Ward against Demons 20',
+        baseEffectId: 'revi-G1', rangeId: 'range-touch',
+        durationId: 'duration-ring', targetId: 'target-circle',
+        chosenBaseLevel: 20, templateId: 'tpl-revi-circular-ward-against-demons',
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime.utc(2026), updatedAt: DateTime.utc(2026),
+      );
+
+      final restored = Spell.fromMap(spell.toMap());
+
+      expect(restored.chosenBaseLevel, 20);
+      expect(restored.templateId, 'tpl-revi-circular-ward-against-demons');
+    });
+
+    test('both fields default to null', () {
+      final spell = Spell(
+        id: 's-2', baseEffectId: 'crig-10', rangeId: 'range-voice',
+        durationId: 'duration-momentary', targetId: 'target-individual',
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime.utc(2026), updatedAt: DateTime.utc(2026),
+      );
+
+      expect(spell.chosenBaseLevel, isNull);
+      expect(spell.templateId, isNull);
+    });
   });
 
   group('spell field invariants', () {

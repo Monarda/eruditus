@@ -63,6 +63,19 @@ class Spell {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// The level the caster chose for a General guideline. Required when the
+  /// referenced [BaseEffect] is General, absent otherwise. The engine reads
+  /// it in place of `BaseEffect.baseLevel`.
+  final int? chosenBaseLevel;
+
+  /// The [SpellTemplate] this spell was instantiated from, when it was.
+  ///
+  /// **Provenance only — nothing dereferences it.** A spell shared between
+  /// users without its template validates and computes exactly as if the
+  /// field were absent, in the same spirit as `calculateBreakdown` treating
+  /// an unresolvable modifier id as contributing 0.
+  final String? templateId;
+
   Spell({
     required this.id,
     this.name,
@@ -81,6 +94,8 @@ class Spell {
     this.ritualDeclaration = RitualDeclaration.none,
     required this.createdAt,
     required this.updatedAt,
+    this.chosenBaseLevel,
+    this.templateId,
   }) {
     final problems = validateSpellProse(
       source: provenance.source,
@@ -110,6 +125,8 @@ class Spell {
         'ritualDeclaration': ritualDeclaration.name,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        'chosenBaseLevel': chosenBaseLevel,
+        'templateId': templateId,
       };
 
   factory Spell.fromMap(Map<String, dynamic> map) => Spell(
@@ -142,6 +159,8 @@ class Spell {
                 requireField<String>(map, 'ritualDeclaration', 'Spell'), 'Spell'),
         createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
         updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
+        chosenBaseLevel: map['chosenBaseLevel'] as int?,
+        templateId: map['templateId'] as String?,
       );
 }
 
@@ -160,6 +179,8 @@ class SpellDraft {
   String? description;
   int? printedLevel;
   RitualDeclaration ritualDeclaration;
+  int? chosenBaseLevel;
+  String? templateId;
 
   SpellDraft({
     String? id,
@@ -176,6 +197,8 @@ class SpellDraft {
     this.description,
     this.printedLevel,
     this.ritualDeclaration = RitualDeclaration.none,
+    this.chosenBaseLevel,
+    this.templateId,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
         requisites = requisites ?? [],
@@ -225,6 +248,8 @@ class SpellDraft {
       description: description,
       printedLevel: printedLevel,
       ritualDeclaration: ritualDeclaration,
+      chosenBaseLevel: chosenBaseLevel,
+      templateId: templateId,
       provenance: Provenance(source: source),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -245,6 +270,8 @@ class SpellDraft {
     String? description,
     int? printedLevel,
     RitualDeclaration? ritualDeclaration,
+    Object? chosenBaseLevel = _unset,
+    Object? templateId = _unset,
   }) {
     return SpellDraft(
       id: id,
@@ -261,6 +288,10 @@ class SpellDraft {
       description: description ?? this.description,
       printedLevel: printedLevel ?? this.printedLevel,
       ritualDeclaration: ritualDeclaration ?? this.ritualDeclaration,
+      chosenBaseLevel: identical(chosenBaseLevel, _unset)
+          ? this.chosenBaseLevel
+          : chosenBaseLevel as int?,
+      templateId: identical(templateId, _unset) ? this.templateId : templateId as String?,
     );
   }
 }

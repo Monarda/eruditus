@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 6;
+  static const int _databaseVersion = 7;
 
   final Database db;
 
@@ -40,6 +40,13 @@ class AppDatabase {
         // v5, and dropped anyway under the same policy: backward compatibility
         // is not a goal here, and a silent per-field default is one more
         // implicit behavior to maintain forever.
+        // The v7 bump adds `chosenBaseLevel` and `templateId` to the `spells`
+        // blob. Like v5/v6, no DDL change is needed here: `spells` stores the
+        // whole `Spell` as one JSON blob in its `data` column (see
+        // `LocalSpellDatasource`), so new `Spell` fields land inside that blob
+        // for free. Bumped and dropped anyway, for the same reason as v5/v6 —
+        // old rows don't have the new keys and a silent per-field default is
+        // one more implicit behavior to maintain forever.
         onUpgrade: (db, oldVersion, newVersion) async {
           for (final table in const ['spells', 'custom_factors']) {
             await db.execute('DROP TABLE IF EXISTS $table');
