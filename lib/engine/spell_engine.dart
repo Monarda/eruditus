@@ -118,9 +118,10 @@ class SpellEngine {
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) {
     final contributions = <LevelContribution>[
+      // TASK 6 replaces this with the chosen level for General effects.
       LevelContribution(
           label: 'Base effect · ${baseEffect.description}',
-          magnitude: baseEffect.baseLevel,
+          magnitude: baseEffect.baseLevel!,
           isBase: true),
       LevelContribution(label: 'Range · ${range.name}', magnitude: range.magnitude),
       LevelContribution(label: 'Duration · ${duration.name}', magnitude: duration.magnitude),
@@ -161,7 +162,8 @@ class SpellEngine {
         if (!contribution.isBase) contribution.magnitude,
     ];
 
-    final rawLevel = SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes);
+    // TASK 6 replaces this with the chosen level for General effects.
+    final rawLevel = SpellLevelCalculator.calculate(baseEffect.baseLevel!, magnitudes);
 
     final ritualStatus = _deriveRitualStatus(
       baseEffect: baseEffect,

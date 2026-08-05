@@ -105,6 +105,50 @@ void main() {
       expect(effect.provenance.citations, isEmpty);
     });
 
+    test('a null baseLevel marks the effect General', () {
+      final effect = BaseEffect(
+        id: 'revi-G1', technique: 'Rego', form: 'Vim',
+        description: 'Ward against supernatural beings from one realm',
+        baseLevel: null,
+        provenance: Provenance(source: PublicationSource.published, citations: [
+          Citation(bookId: 'arm5-core'),
+        ]),
+      );
+
+      expect(effect.isGeneral, isTrue);
+      expect(effect.baseLevel, isNull);
+      expect(effect.toMap()['baseLevel'], isNull);
+    });
+
+    test('an ordinary effect is not General', () {
+      final effect = BaseEffect(
+        id: 'crig-10', technique: 'Creo', form: 'Ignem',
+        description: 'Create flame', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      expect(effect.isGeneral, isFalse);
+    });
+
+    test('fromMap round-trips a null baseLevel', () {
+      final map = {
+        'id': 'revi-G1', 'technique': 'Rego', 'form': 'Vim',
+        'description': 'Ward', 'baseLevel': null,
+        'source': 'user-created',
+      };
+
+      expect(BaseEffect.fromMap(map).isGeneral, isTrue);
+    });
+
+    test('fromMap rejects a missing baseLevel key', () {
+      final map = {
+        'id': 'revi-G1', 'technique': 'Rego', 'form': 'Vim',
+        'description': 'Ward', 'source': 'userCreated',
+      };
+
+      expect(() => BaseEffect.fromMap(map), throwsFormatException);
+    });
+
     test('ritualRequirement defaults to none and round-trips every value', () {
       for (final value in RitualRequirement.values) {
         final effect = BaseEffect(

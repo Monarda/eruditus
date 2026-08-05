@@ -10,6 +10,23 @@ import 'package:eruditus/utils/map_serialization.dart';
 /// when cast as anything other than a Momentary Ritual.
 enum RitualRequirement { none, suggested, required }
 
+/// Reads the nullable `baseLevel` field, distinguishing three cases that
+/// [requireField] cannot: the key is absent (an error — every stored effect
+/// must state its base level, even if that statement is General), the key
+/// is `null` (General), or the key holds a non-int value (an error).
+int? _baseLevelFromMap(Map<String, dynamic> map) {
+  if (!map.containsKey('baseLevel')) {
+    throw FormatException("BaseEffect.fromMap: missing required field 'baseLevel'");
+  }
+  final value = map['baseLevel'];
+  if (value == null) return null;
+  if (value is int) return value;
+  throw FormatException(
+    "BaseEffect.fromMap: required field 'baseLevel' has the wrong type "
+    "(expected int?, got ${value.runtimeType})",
+  );
+}
+
 RitualRequirement _ritualRequirementFromName(String name) {
   for (final value in RitualRequirement.values) {
     if (value.name == name) return value;
@@ -25,7 +42,19 @@ class BaseEffect {
   final String technique;
   final String form;
   final String description;
-  final int baseLevel;
+  /// The guideline's base level, or null when the guideline is **General** —
+  /// the rulebook prints `General` where every other row prints a number,
+  /// because the caster chooses it (Core Rules line 12410). Null is the
+  /// marker; there is deliberately no separate `isGeneral` field, so the two
+  /// cannot disagree.
+  ///
+  /// A General guideline's level arrives on the spell as
+  /// `Spell.chosenBaseLevel`, and what it is priced against arrives as
+  /// [reference].
+  final int? baseLevel;
+
+  bool get isGeneral => baseLevel == null;
+
   final RitualRequirement ritualRequirement;
   final Provenance provenance;
 
@@ -54,7 +83,7 @@ class BaseEffect {
     technique: requireField<String>(map, 'technique', 'BaseEffect'),
     form: requireField<String>(map, 'form', 'BaseEffect'),
     description: requireField<String>(map, 'description', 'BaseEffect'),
-    baseLevel: requireField<int>(map, 'baseLevel', 'BaseEffect'),
+    baseLevel: _baseLevelFromMap(map),
     ritualRequirement: map['ritualRequirement'] == null
         ? RitualRequirement.none
         : _ritualRequirementFromName(

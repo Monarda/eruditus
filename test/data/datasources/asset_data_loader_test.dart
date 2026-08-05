@@ -256,7 +256,10 @@ void main() {
         ...spell.adjustments.map((a) => a.magnitude),
       ];
 
-      expect(SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes), statedLevel,
+      // TASK 6 replaces this with the chosen level for General effects. No
+      // spell in the library references a General base effect yet (that
+      // arrives in Task 12), so this assertion is never actually reached.
+      expect(SpellLevelCalculator.calculate(baseEffect.baseLevel!, magnitudes), statedLevel,
           reason: '${spell.name}: calculated level does not match the stated level');
     }
   });

@@ -103,7 +103,7 @@ class BaseEffectIdSchemeTest(unittest.TestCase):
         for effect in self.effects:
             suffix = effect["id"].split("-", 1)[1]
             if self._GENERAL_SUFFIX.match(suffix):
-                if effect["baseLevel"] != 0:
+                if effect["baseLevel"] is not None:
                     mismatches.append((effect["id"], "General", effect["baseLevel"]))
                 continue
             level_match = self._LEVEL_SUFFIX.match(suffix)
