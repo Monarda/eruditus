@@ -584,6 +584,31 @@ recorded".
   summary ledger alongside `scripts/spell_import/resolutions.json`,
   `assets/data/spell_library.json`
 
+### 32. Audit `resolutions.json` — no Test Can Check It
+- [ ] Re-read every entry in `scripts/spell_import/resolutions.json` against
+      its spell's published text and its candidate guidelines' wording
+- [ ] Consider recording, per entry, whether its candidates differ in base
+      level — the ones that do not are the entries carrying all the risk
+- **Why this is needed — a demonstrated failure, not a theoretical one.**
+  `lib-reim-image-from-wizard-torn` shipped for months pointing at `reim-15b`,
+  *"Summon a disembodied spirit associated with Imaginem"*. The spell summons
+  nothing — it relocates the caster's own image — and its committed rationale
+  argued "no Arcane Connection involved" when the spell's own text says *"you
+  must use an Arcane Connection to yourself"*. Corrected in `cf0b40b`.
+- **Why nothing caught it:** the entry was written when the spell was blocked,
+  so it sat inert and unexercised until the level-adjustments branch unblocked
+  the spell. And **both candidates are base level 15** — which is why the
+  extractor could not disambiguate them in the first place — so assertion 1
+  computed the printed 35 either way. Assertion 3 saw a ledger entry present;
+  assertion 4 saw the id resolve. Every automated check passed.
+- **The general rule this establishes:** when an ambiguous spell's candidates
+  share a base level, the printed-vs-computed assertion confirms the base
+  level and nothing more. It cannot discriminate between guidelines, so those
+  entries rest entirely on the prose reasoning recorded in the ledger. This is
+  true of all seven entries added for the level-adjustments branch, by
+  construction.
+- **Files:** `scripts/spell_import/resolutions.json`
+
 ---
 
 ## C. Not on the Critical Path
