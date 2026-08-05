@@ -98,6 +98,22 @@ class ElaborateEffectEmissionTest(unittest.TestCase):
     def test_a_spell_with_no_elaborate_token_does_not_select_the_modifier(self):
         self.assertNotIn("elaborate-effect", self._selected("(Base 1, +1 Touch)"))
 
+    def test_two_elaborate_tokens_raise_rather_than_selecting_two_options(self):
+        # elaborate-effect is selectionMode "single" in modifiers.json, so two
+        # option ids under it is an asset the app's own validateSpellDraft
+        # rejects. No corpus spell prints two elaborate tokens; blocking is the
+        # correct outcome if one ever appears.
+        with self.assertRaises(designline.UnknownToken):
+            self._selected("(Base 1, +1 Touch, +1 fancy effect, +2 complex effect)")
+
+    def test_elaborate_effect_is_a_single_selection_modifier_in_the_catalog(self):
+        # The reason the check above exists. If this ever became "multi", the
+        # raise would be wrong rather than merely unreachable.
+        modifier = next(
+            m for m in self.catalog.modifiers if m["id"] == "elaborate-effect"
+        )
+        self.assertEqual(modifier["selectionMode"], "single")
+
     def test_a_magnitude_outside_the_table_raises_rather_than_defaulting(self):
         # 4 is not a real elaborate-effect option. Blocking the spell is the
         # correct outcome; silently clamping to -extensive would import it with
@@ -144,6 +160,75 @@ class ModifierOptionTableTest(unittest.TestCase):
             _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
         )
         self.assertEqual(spell["selectedModifiers"]["crim-complexity"], ["crim-intricate-design"])
+
+    # The Imaginem complexity factors, each pinned at the magnitude its corpus
+    # spell prints. The magnitude is half the pin: an option id that exists but
+    # carries a different magnitude would import a real mechanism at the wrong
+    # level, and the printed-vs-computed level check only catches that when the
+    # error does not happen to cancel against another one.
+    IMAGINEM_LABELS = [
+        ("Creo", "Imaginem", "intricacy", "crim-complexity", "crim-intricate-design", 1),
+        ("Creo", "Imaginem", "move at your command",
+         "crim-complexity", "crim-directed-image", 2),
+        ("Creo", "Imaginem", "move under your command",
+         "crim-complexity", "crim-directed-image", 2),
+        ("Creo", "Imaginem", "intelligible speech",
+         "crim-complexity", "crim-sensory-complexity", 1),
+        ("Rego", "Imaginem", "moved image matches changes",
+         "reim-complexity", "reim-moved-image-matches", 1),
+        ("Rego", "Imaginem", "additional senses",
+         "reim-complexity", "reim-additional-senses", 1),
+        ("Rego", "Imaginem", "additional sense",
+         "reim-complexity", "reim-additional-senses", 1),
+        ("Rego", "Imaginem", "moving image", "reim-complexity", "reim-changing-image", 1),
+    ]
+
+    def test_the_table_is_exactly_these_entries(self):
+        # A new entry must be added here deliberately, with its verified
+        # magnitude, rather than slipping in unpinned.
+        self.assertEqual(
+            emit._MODIFIER_OPTIONS,
+            {
+                (technique, form, label): (modifier_id, option_id)
+                for technique, form, label, modifier_id, option_id, _ in self.IMAGINEM_LABELS
+            },
+        )
+
+    def test_each_label_selects_its_option_at_its_printed_magnitude(self):
+        for technique, form, label, modifier_id, option_id, magnitude in self.IMAGINEM_LABELS:
+            with self.subTest(label=label):
+                design = designline.parse_design(
+                    f"(Base 2, +1 Touch, +{magnitude} {label})"
+                )
+                spell = emit.build_spell(
+                    _block("Test Spell", technique, form, 10),
+                    f"{modifier_id[:4]}-2",
+                    self.catalog,
+                    design,
+                )
+                self.assertEqual(spell["selectedModifiers"][modifier_id], [option_id])
+
+    def test_a_label_the_table_does_not_map_still_raises(self):
+        # "changing image" is a MODIFIER_LABELS token with a plausible-looking
+        # catalog option (reim-changing-image, magnitude 1) that this table
+        # deliberately does not wire, because its per-spell mapping was never
+        # confirmed. It must keep blocking its four spells rather than being
+        # absorbed by proximity to the entries that were confirmed.
+        design = designline.parse_design("(Base 2, +1 Touch, +1 changing image)")
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(
+                _block("Test Spell", "Rego", "Imaginem", 10), "reim-2", self.catalog, design
+            )
+
+    def test_a_mapped_label_under_the_wrong_art_raises(self):
+        # The table is keyed on (Technique, Form) for a reason: "additional
+        # sense" is a Rego Imaginem factor, and a Creo Imaginem spell printing
+        # it has no verified meaning.
+        design = designline.parse_design("(Base 2, +1 Touch, +1 additional sense)")
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(
+                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+            )
 
     def test_a_printed_magnitude_the_option_does_not_carry_raises(self):
         # crim-intricate-design is magnitude 1. A "+2 intricacy" would import a
