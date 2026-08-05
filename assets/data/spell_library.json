@@ -4083,6 +4083,31 @@
     ]
   },
   {
+    "id": "lib-peim-silence-smothered-sound",
+    "name": "Silence of the Smothered Sound",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "peim-complexity": [
+        "peim-changing-image"
+      ]
+    },
+    "baseEffectId": "peim-3a",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Makes one being or object incapable of producing sound. Magi who cannot utter their magic words suffer the normal penalties to their spellcasting rolls. Level 20.",
+    "description": "Makes one being or object incapable of producing sound. Magi who cannot utter their magic words suffer the normal penalties to their spellcasting rolls.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-peim-taste-dulled-tongue",
     "name": "Taste of the Dulled Tongue",
     "requisites": [],
@@ -4097,6 +4122,31 @@
     "summary": "Hides the taste of any substance, liquid or solid. Level 5.",
     "description": "Hides the taste of any substance, liquid or solid.",
     "printedLevel": 5,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-peim-veil-invisibility",
+    "name": "Veil of Invisibility",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "peim-complexity": [
+        "peim-changing-image"
+      ]
+    },
+    "baseEffectId": "peim-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "The target becomes completely undetectable to normal sight, regardless of what it does, but still casts a shadow. Level 20.",
+    "description": "The target becomes completely undetectable to normal sight, regardless of what it does, but still casts a shadow.",
+    "printedLevel": 20,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -5343,6 +5393,31 @@
     ]
   },
   {
+    "id": "lib-reim-captive-voice",
+    "name": "The Captive Voice",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-changing-image"
+      ]
+    },
+    "baseEffectId": "reim-4b",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-part",
+    "summary": "Captures a person's voice and places it in a bag. The person may not speak unless the bag is open, in which case the voice comes from the bag, not the victim's mouth. If the victim screams while the bag is shut, the bag vibrates visibly. Level 30.",
+    "description": "Captures a person's voice and places it in a bag. The person may not speak unless the bag is open, in which case the voice comes from the bag, not the victim's mouth. If the victim screams while the bag is shut, the bag vibrates visibly.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-reim-confusion-insane-vibrations",
     "name": "Confusion of the Insane Vibrations",
     "requisites": [],
@@ -5435,6 +5510,32 @@
     "summary": "Req: Intellego Your image separates from your body. It can speak whatever you say and do so in your voice, and you can see through its eyes. You must make an Int + Concentration stress roll for each solid object the image passes through and for each mile it travels. If you wish the image to be able to leave your sight, you must use an Arcane Connection to yourself (for example, a fingernail or... Level 35.",
     "description": "Req: Intellego Your image separates from your body. It can speak whatever you say and do so in your voice, and you can see through its eyes. You must make an Int + Concentration stress roll for each solid object the image passes through and for each mile it travels. If you wish the image to be able to leave your sight, you must use an Arcane Connection to yourself (for example, a fingernail or a lock of hair) when you cast the spell. That connection becomes an integral part of the image, and when the spell ends, it falls to the ground wherever the image was located. As your image is away from your body, you are invisible and silent at your actual location. The image is your image, so while you may move it in space you may not have it sit down if you are standing. Further, it appears as if illuminated by whatever light is falling on you, no matter what the level of illumination is at the image.",
     "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-reim-wizards-sidestep",
+    "name": "Wizard's Sidestep",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-changing-image",
+        "reim-moved-image-matches"
+      ]
+    },
+    "baseEffectId": "reim-2",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Your image appears up to 1 pace from where you actually are, so attacks aimed there are likely to miss you. Whenever the image is successfully struck, it disappears and reappears in another spot. In combat, early attacks are aimed at the image, and so automatically miss you. Once the image has been hit once, you have a +9 bonus to Defense, as attackers must try to find you in a fairly large area. Level 10.",
+    "description": "Your image appears up to 1 pace from where you actually are, so attacks aimed there are likely to miss you. Whenever the image is successfully struck, it disappears and reappears in another spot. In combat, early attacks are aimed at the image, and so automatically miss you. Once the image has been hit once, you have a +9 bonus to Defense, as attackers must try to find you in a fairly large area.",
+    "printedLevel": 10,
     "citations": [
       {
         "bookId": "arm5-core"
