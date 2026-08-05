@@ -18,9 +18,14 @@ class RunTest(unittest.TestCase):
 
     def test_every_emitted_spell_has_the_required_fields(self):
         for spell in self.report.spells:
+            # printedLevel and description are in this list for the same
+            # reason as the rest: dropping either from emit.build_spell would
+            # otherwise go unnoticed in Python and surface only in
+            # `flutter test`, where asset_data_loader_test.dart reads
+            # printedLevel and spell cards fall back to description.
             for field in ("id", "name", "baseEffectId", "rangeId", "durationId",
                           "targetId", "source", "createdAt", "updatedAt",
-                          "summary", "citations"):
+                          "summary", "description", "printedLevel", "citations"):
                 self.assertIn(field, spell, msg=spell.get("id"))
             self.assertEqual(spell["source"], "published")
             self.assertEqual(spell["citations"], [{"bookId": "arm5-core"}])
@@ -196,3 +201,42 @@ class RegenerationMessageTest(unittest.TestCase):
         self.assertIn("--accept-source", message)
         self.assertNotIn("hand-edited", message)
         self.assertNotIn("rulebook source moved", message)
+
+
+class HandDerivedAdjustmentTest(unittest.TestCase):
+    """The one design line that names an adjustment but prints no magnitude.
+
+    The magnitude in `extract_spells.HAND_DERIVED_ADJUSTMENT` is a literal with
+    its arithmetic recorded beside it, never `printed - computed`. These tests
+    pin the import and the emitted shape; the magnitude itself is checked by
+    assertion 1 in test/data/published_spell_import_test.dart, which is only a
+    real check because the value was not derived from that assertion.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.report = extract_spells.run(write=False)
+
+    def test_the_shadow_of_human_life_imports(self):
+        self.assertIn("The Shadow of Human Life", {s["name"] for s in self.report.spells})
+
+    def test_it_carries_the_hand_derived_adjustment(self):
+        spell = next(s for s in self.report.spells if s["name"] == "The Shadow of Human Life")
+        self.assertEqual(
+            spell["adjustments"],
+            [{"magnitude": 5, "note": "for a very elaborate effect"}],
+        )
+
+    def test_the_report_keeps_the_printed_design_line_not_the_patched_one(self):
+        # import_report.md must show the rulebook's words, so the synthesised
+        # "+5 " must not leak into the recorded design line.
+        printed = self.report.design_lines["lib-crim-shadow-human-life"]
+        self.assertIn("for a very elaborate effect", printed)
+        self.assertNotIn("+5 for a very elaborate effect", printed)
+
+    def test_mists_of_change_stays_blocked_on_its_two_durations(self):
+        # D: Sun & Year -- two durations, which no adjustment can express.
+        # (It blocks one token earlier, on the numberless "slightly nonstandard
+        # effect"; both blockers are real and neither is derivable, so no
+        # hand-derived magnitude is offered for it.)
+        self.assertIn("Mists of Change", {name for name, _ in self.report.blocked})

@@ -156,6 +156,7 @@ void main() {
         target: parameters[spell.targetId]!,
         selectedModifiers: spell.selectedModifiers,
         requisites: spell.requisites,
+        adjustments: spell.adjustments,
         ritualDeclaration: spell.ritualDeclaration,
       );
 
@@ -218,12 +219,17 @@ void main() {
     final spells = await loader.loadSpellLibrary();
     final modifiers = await loader.loadModifiers();
 
+    // Reads the rulebook's printed level directly off the spell rather than
+    // regex-scraping it out of the prose summary. Scraping made this
+    // assertion depend on English prose formatting ("Level N.") and blocked
+    // a planned rework of the summary text; printedLevel is its own field
+    // precisely so this check does not have to parse prose. A spell with no
+    // printed level fails loudly here rather than being silently skipped.
     int levelStatedInDescription(spell) {
-      final match = RegExp(r'Level (\d+)\.').firstMatch(spell.summary ?? '');
-      expect(match, isNotNull,
-          reason: '${spell.name}: summary does not contain a "Level N." phrase '
-              '(summary was: "${spell.summary}")');
-      return int.parse(match!.group(1)!);
+      final printedLevel = spell.printedLevel;
+      expect(printedLevel, isNotNull,
+          reason: '${spell.name}: has no printedLevel');
+      return printedLevel as int;
     }
 
     final effects = await loader.loadBaseEffects();
@@ -243,6 +249,11 @@ void main() {
           for (final optionId in entry.value)
             modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,
         ...spell.requisites.map((r) => r.magnitude),
+        // Adjustments are magnitudes like any other (see
+        // SpellEngine.calculateBreakdown). Omitting them silently overstated
+        // every spell that carries one — the first such spell in the library,
+        // The Severed Limb Made Whole, computed 30 against a printed 25.
+        ...spell.adjustments.map((a) => a.magnitude),
       ];
 
       expect(SpellLevelCalculator.calculate(baseEffect.baseLevel, magnitudes), statedLevel,
@@ -372,5 +383,16 @@ void main() {
                 'books.json — add the book, do not relax this check');
       }
     }
+  });
+
+  test('the elaborate-effect modifier is globally scoped with a 0-3 ladder', () async {
+    final modifiers = await loader.loadModifiers();
+    final elaborate = modifiers.firstWhere((m) => m.id == 'elaborate-effect');
+
+    expect(elaborate.scope.technique, isNull,
+        reason: 'the rule applies to any Technique');
+    expect(elaborate.scope.form, isNull, reason: 'the rule applies to any Form');
+    expect(elaborate.selectionMode, ModifierSelectionMode.single);
+    expect(elaborate.options.map((o) => o.magnitude).toList(), [0, 1, 2, 3]);
   });
 }

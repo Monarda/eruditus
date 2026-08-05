@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell.dart';
 
 /// Assertions 1-4 of the published spell import harness.
 /// See docs/superpowers/specs/2026-07-28-published-spell-import-design.md
@@ -18,11 +19,18 @@ void main() {
 
   final loader = AssetDataLoader();
 
-  /// The printed level, which every generated summary ends with.
-  int printedLevel(String? summary) {
-    final match = RegExp(r'Level (\d+)\.$').firstMatch((summary ?? '').trim());
-    expect(match, isNotNull, reason: 'summary must end with "Level N.": "$summary"');
-    return int.parse(match!.group(1)!);
+  /// The rulebook's printed level, read off the spell's own typed field.
+  ///
+  /// This used to regex-scrape `Level (\d+)\.` out of the summary prose, which
+  /// made the harness's primary assertion depend on English prose formatting
+  /// and pinned the `" Level N."` suffix in place (see .superpowers/todo.md
+  /// item 31). `printedLevel` is emitted as its own field precisely so this
+  /// oracle does not have to parse prose. A spell carrying no printed level
+  /// fails loudly here rather than being silently skipped.
+  int printedLevelOf(Spell spell) {
+    final printed = spell.printedLevel;
+    expect(printed, isNotNull, reason: '${spell.name}: has no printedLevel');
+    return printed as int;
   }
 
   test('assertion 1: every spell computes to its printed level', () async {
@@ -40,9 +48,10 @@ void main() {
         target: parameters[spell.targetId]!,
         selectedModifiers: spell.selectedModifiers,
         requisites: spell.requisites,
+        adjustments: spell.adjustments,
         ritualDeclaration: spell.ritualDeclaration,
       );
-      final want = printedLevel(spell.summary);
+      final want = printedLevelOf(spell);
       if (breakdown.level != want) {
         mismatches.add('${spell.name}: computed ${breakdown.level}, printed $want');
       }
@@ -80,6 +89,7 @@ void main() {
             target: parameters[spell.targetId]!,
             selectedModifiers: spell.selectedModifiers,
             requisites: spell.requisites,
+            adjustments: spell.adjustments,
             ritualDeclaration: spell.ritualDeclaration,
           )
           .ritualStatus

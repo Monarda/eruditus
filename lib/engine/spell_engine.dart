@@ -2,6 +2,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -77,6 +78,32 @@ class SpellEngine {
       }
     });
 
+    // Last, and only once the draft is complete enough to compute: a draft
+    // whose negative magnitudes drive the level below 1 has no level at all.
+    // SpellLevelCalculator signals that by throwing, and nothing downstream
+    // catches it — SpellCreationBloc._handleSpellCalculated would take the
+    // ArgumentError straight out of the handler, and _handleSpellSaveRequested
+    // never calls the calculator at all, so an uncomputable draft would save.
+    // Reported here instead, as one more validation message the creation
+    // screen already renders, which also keeps the Save button unreachable
+    // (it only renders once a draft has calculated).
+    if (errors.isEmpty) {
+      try {
+        calculateBreakdown(
+          baseEffect: draft.baseEffect!,
+          range: draft.range!,
+          duration: draft.duration!,
+          target: draft.target!,
+          selectedModifiers: draft.selectedModifiers,
+          requisites: draft.requisites,
+          adjustments: draft.adjustments,
+          ritualDeclaration: draft.ritualDeclaration,
+        );
+      } on ArgumentError {
+        errors.add('Negative magnitudes reduce this spell below level 1');
+      }
+    }
+
     return errors;
   }
 
@@ -87,6 +114,7 @@ class SpellEngine {
     required Parameter target,
     required Map<String, List<String>> selectedModifiers,
     required List<Requisite> requisites,
+    List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) {
     final contributions = <LevelContribution>[
@@ -103,6 +131,14 @@ class SpellEngine {
       contributions.add(LevelContribution(
           label: 'Requisite · ${requisite.art}, ${requisite.kind.name}',
           magnitude: requisite.magnitude));
+    }
+
+    // Adjustments are magnitudes like any other, so they flow into the same
+    // calculator call below and need no special case there.
+    for (final adjustment in adjustments) {
+      contributions.add(LevelContribution(
+          label: 'Adjustment · ${adjustment.note}',
+          magnitude: adjustment.magnitude));
     }
 
     // A selected id that no longer resolves (a modifier deleted after the
@@ -191,6 +227,7 @@ class SpellEngine {
     required Parameter target,
     Map<String, List<String>> selectedModifiers = const {},
     required List<Requisite> requisites,
+    List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) =>
       calculateBreakdown(
@@ -200,6 +237,7 @@ class SpellEngine {
         target: target,
         selectedModifiers: selectedModifiers,
         requisites: requisites,
+        adjustments: adjustments,
         ritualDeclaration: ritualDeclaration,
       ).level;
 
@@ -209,19 +247,33 @@ class SpellEngine {
         .toList();
 
     if (referenceLevel != null) {
-      matches.sort((a, b) {
-        final levelA = calculateSpellLevel(
-          baseEffect: a.baseEffect!, range: a.range!, duration: a.duration!, target: a.target!,
-          selectedModifiers: a.selectedModifiers, requisites: a.requisites,
-          ritualDeclaration: a.ritualDeclaration,
-        );
-        final levelB = calculateSpellLevel(
-          baseEffect: b.baseEffect!, range: b.range!, duration: b.duration!, target: b.target!,
-          selectedModifiers: b.selectedModifiers, requisites: b.requisites,
-          ritualDeclaration: b.ritualDeclaration,
-        );
-        return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());
+      // A match here is resolved (isResolved above) but not necessarily
+      // computable: one may carry adjustments/magnitudes that drive it below
+      // level 1, which SpellLevelCalculator signals by throwing rather than
+      // by leaving it unresolved. Such a spell has no level to compare
+      // against referenceLevel, so it cannot be "similar to level N" —
+      // dropped here rather than kept unsorted or sorted last, same as an
+      // unresolved spell already is by the `isResolved &&` filter above.
+      // Levels are computed once per spell up front (not per comparator
+      // call) so a bad spell can be removed before matches.sort ever runs,
+      // and so a good spell isn't recomputed on every comparison.
+      final levels = <String, int>{};
+      matches.removeWhere((s) {
+        try {
+          levels[s.id] = calculateSpellLevel(
+            baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+            selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+            adjustments: s.adjustments, ritualDeclaration: s.ritualDeclaration,
+          );
+          return false;
+        } on ArgumentError {
+          return true;
+        }
       });
+
+      matches.sort((a, b) => (levels[a.id]! - referenceLevel)
+          .abs()
+          .compareTo((levels[b.id]! - referenceLevel).abs()));
     }
 
     return matches;

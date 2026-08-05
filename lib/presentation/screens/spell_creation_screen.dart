@@ -8,6 +8,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
@@ -171,6 +172,8 @@ class SpellCreationScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _buildRequisitesSection(context, bloc, draft),
+                const SizedBox(height: 16),
+                _buildAdjustmentsSection(context, bloc, draft),
                 const SizedBox(height: 16),
                 ModifiersSection(
                   modifiers: modifiersForSelection,
@@ -373,6 +376,107 @@ class SpellCreationScreen extends StatelessWidget {
     );
   }
 
+  /// The band the adjustment stepper may reach.
+  ///
+  /// The published corpus spans -1 (*The Severed Limb Made Whole*) to +4, so
+  /// this is deliberately much wider — a house rule should not be blocked by
+  /// an arbitrary bound. What it does stop is an unbounded stepper: before
+  /// this, six taps on a fresh row reached -6, and any spell that far under
+  /// its base level has no computable level at all. The buttons disable at
+  /// the bound rather than swallowing taps, so the limit is visible.
+  static const int _minAdjustmentMagnitude = -5;
+  static const int _maxAdjustmentMagnitude = 10;
+
+  Widget _buildAdjustmentsSection(
+    BuildContext context,
+    SpellCreationBloc bloc,
+    SpellDraft draft,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Adjustments', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text(
+          'A one-off magnitude with the prose that justifies it, positive or negative.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        if (draft.adjustments.isEmpty)
+          const Text('No adjustments.')
+        else
+          for (var index = 0; index < draft.adjustments.length; index++)
+            Padding(
+              key: Key('adjustment-row-$index'),
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    key: Key('adjustment-decrement-$index'),
+                    icon: const Icon(Icons.remove),
+                    tooltip: 'Decrease magnitude',
+                    onPressed:
+                        draft.adjustments[index].magnitude <= _minAdjustmentMagnitude
+                            ? null
+                            : () => bloc.add(AdjustmentUpdated(
+                                  index,
+                                  draft.adjustments[index].magnitude - 1,
+                                  draft.adjustments[index].note,
+                                )),
+                  ),
+                  SizedBox(
+                    width: 32,
+                    child: Text(
+                      '${draft.adjustments[index].magnitude}',
+                      key: Key('adjustment-magnitude-$index'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    key: Key('adjustment-increment-$index'),
+                    icon: const Icon(Icons.add),
+                    tooltip: 'Increase magnitude',
+                    onPressed:
+                        draft.adjustments[index].magnitude >= _maxAdjustmentMagnitude
+                            ? null
+                            : () => bloc.add(AdjustmentUpdated(
+                                  index,
+                                  draft.adjustments[index].magnitude + 1,
+                                  draft.adjustments[index].note,
+                                )),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _AdjustmentNoteField(
+                      key: ValueKey('adjustment-note-$index'),
+                      note: draft.adjustments[index].note,
+                      onCommitted: (note) => bloc.add(AdjustmentUpdated(
+                        index,
+                        draft.adjustments[index].magnitude,
+                        note,
+                      )),
+                    ),
+                  ),
+                  IconButton(
+                    key: Key('adjustment-remove-$index'),
+                    icon: const Icon(Icons.close),
+                    tooltip: 'Remove adjustment',
+                    onPressed: () => bloc.add(AdjustmentRemoved(index)),
+                  ),
+                ],
+              ),
+            ),
+        OutlinedButton.icon(
+          key: const Key('adjustment-add-button'),
+          onPressed: () => bloc.add(const AdjustmentAdded()),
+          icon: const Icon(Icons.add),
+          label: const Text('Add adjustment'),
+        ),
+      ],
+    );
+  }
+
   Widget _buildParameterDropdown({
     required Key key,
     required String label,
@@ -395,6 +499,88 @@ class SpellCreationScreen extends StatelessWidget {
               ))
           .toList(),
       onChanged: onChanged,
+    );
+  }
+}
+
+/// The note field for one [LevelAdjustment] row.
+///
+/// Deliberately a private [StatefulWidget] rather than a bare
+/// [TextFormField]: a `TextFormField` with no explicit `controller` seeds its
+/// own internal controller from `initialValue` exactly once, at creation, and
+/// never resyncs it on a later rebuild that hands the same keyed Element a
+/// different `initialValue`. That is exactly what happens here when a row
+/// above this one is removed: this row's index (and so its `Key`) now maps
+/// to a different adjustment's note, but Flutter reuses the existing Element
+/// rather than recreating it. Owning the controller explicitly and resyncing
+/// it in [didUpdateWidget] whenever the incoming note differs from what the
+/// controller currently shows keeps the field correct across such a
+/// reshuffle, while leaving in-progress, uncommitted typing untouched (a
+/// rebuild triggered by some other row's edit hands this row the same
+/// [note] it already had, so no resync happens).
+///
+/// Commits on submit or focus loss, not on every keystroke, so typing a note
+/// does not re-emit bloc state (and rebuild the whole list) per character.
+class _AdjustmentNoteField extends StatefulWidget {
+  final String note;
+  final ValueChanged<String> onCommitted;
+
+  const _AdjustmentNoteField({
+    required Key key,
+    required this.note,
+    required this.onCommitted,
+  }) : super(key: key);
+
+  @override
+  State<_AdjustmentNoteField> createState() => _AdjustmentNoteFieldState();
+}
+
+class _AdjustmentNoteFieldState extends State<_AdjustmentNoteField> {
+  late final TextEditingController _controller = TextEditingController(text: widget.note);
+  late final FocusNode _focusNode = FocusNode()..addListener(_handleFocusChange);
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus) _commit();
+  }
+
+  /// A blank note is not a valid [LevelAdjustment] — the note *is* the
+  /// justification — so the bloc keeps the previous note rather than accept
+  /// one. Restore the field to what the draft still holds instead of leaving
+  /// it visibly empty over a value that did not change: keeping the old note
+  /// can leave the bloc's state equal to the one before it, and an equal state
+  /// is never emitted, so no rebuild would arrive to resync this controller.
+  void _commit() {
+    if (_controller.text.trim().isEmpty) {
+      _controller.text = widget.note;
+      return;
+    }
+    widget.onCommitted(_controller.text);
+  }
+
+  @override
+  void didUpdateWidget(covariant _AdjustmentNoteField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.note != _controller.text) {
+      _controller.text = widget.note;
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode
+      ..removeListener(_handleFocusChange)
+      ..dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: _controller,
+      focusNode: _focusNode,
+      decoration: const InputDecoration(labelText: 'Note'),
+      onFieldSubmitted: (_) => _commit(),
     );
   }
 }

@@ -12,6 +12,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -222,6 +223,69 @@ void main() {
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', {'ritual-suggestion'}),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // Regression test for the residual finding: a saved spell whose
+    // adjustments drive it below level 1 has no computable level (same
+    // construction as spell_library_bloc_test.dart's `uncomputableSpell`),
+    // and calculateSpellLevel/calculateBreakdown throw for it. This engine
+    // holds only that one candidate, so findSimilarSpells' sort never calls
+    // its comparator at all (Dart's List.sort skips the comparator on a
+    // one-element list) — the comparator guard is instead pinned by
+    // spell_engine_test.dart's own regression test, which uses two
+    // candidates to force it to run. What this test pins is the second
+    // guard: before this fix, the per-suggestion calculateBreakdown loop
+    // right after findSimilarSpells in _handleSpellCalculated had no
+    // try/catch, so pressing Calculate for the same Technique+Form broke the
+    // Create tab every time. It must survive and simply omit the bad spell
+    // from `suggestions` instead — a spell with no level cannot be "similar
+    // to" the one just calculated.
+    'SpellCalculated survives when the engine holds an uncomputable spell of the same Technique and Form',
+    build: () {
+      final uncomputableRecord = Spell(
+        id: 'uncomputable-1',
+        name: 'Over-Discounted Spell',
+        baseEffectId: creoIgnemEffect.id,
+        rangeId: rangeParam.id,
+        durationId: durationParam.id,
+        targetId: targetParam.id,
+        requisites: const [],
+        adjustments: [LevelAdjustment(magnitude: -20, note: 'far too generous')],
+        provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+      final uncomputable = ResolvedSpell(
+        record: uncomputableRecord, baseEffect: creoIgnemEffect,
+        range: rangeParam, duration: durationParam, target: targetParam);
+      return SpellCreationBloc(
+        spellEngine: SpellEngine(allSpells: [uncomputable]),
+        spellRepository: spellRepository,
+      );
+    },
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          // Base 10 + (10 magnitude * 5) = 60, same as the plain-draft test
+          // above — proves the handler still reaches a normal calculated
+          // state rather than throwing out of the bloc.
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
+          .having((s) => s.validationErrors, 'validationErrors', isEmpty)
+          // The uncomputable spell is dropped, not kept as a level-less
+          // suggestion card.
+          .having((s) => s.suggestions, 'suggestions', isEmpty)
+          .having((s) => s.suggestionLevels.containsKey('uncomputable-1'), 'suggestionLevels',
+              isFalse),
     ],
   );
 
@@ -860,4 +924,94 @@ void main() {
         bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
     );
   });
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentAdded appends a zero-magnitude row',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc.add(const AdjustmentAdded()),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.length, 1);
+      expect(bloc.state.draft.adjustments.first.magnitude, 0);
+      // LevelAdjustment rejects a blank note, so the new row cannot start
+      // empty. This literal is what the note field shows until the user types
+      // over it, and what AdjustmentUpdated falls back to when the user
+      // clears the field.
+      expect(bloc.state.draft.adjustments.first.note, '(describe this adjustment)');
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentUpdated replaces the row at that index',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, -1, 'because the old limb is needed')),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.first.magnitude, -1);
+      expect(bloc.state.draft.adjustments.first.note,
+          'because the old limb is needed');
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentRemoved drops only that row and keeps the rest in order',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, 1, 'first'))
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(1, 2, 'second'))
+      ..add(const AdjustmentRemoved(0)),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.map((a) => a.note).toList(), ['second']);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'AdjustmentUpdated with a blank note keeps the previous note instead of throwing',
+    // The note field commits on every focus loss, so select-all, delete, tab
+    // away arrives as AdjustmentUpdated(0, 0, ''). LevelAdjustment rejects a
+    // blank note, and constructing one here threw FormatException out of the
+    // handler: no state emitted, the field showing empty over a draft that
+    // still held the old value, and the next edit operating on stale data.
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, -1, 'because the old limb is needed'))
+      ..add(const AdjustmentUpdated(0, -1, '')),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.first.note,
+          'because the old limb is needed');
+      expect(bloc.state.draft.adjustments.first.magnitude, -1);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a whitespace-only note is blank too, and the magnitude in the event still applies',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentAdded())
+      ..add(const AdjustmentUpdated(0, 1, 'see through intervening material'))
+      ..add(const AdjustmentUpdated(0, 2, '   ')),
+    verify: (bloc) {
+      expect(bloc.state.draft.adjustments.first.note,
+          'see through intervening material');
+      expect(bloc.state.draft.adjustments.first.magnitude, 2);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'an out-of-range index is ignored rather than throwing',
+    build: () => SpellCreationBloc(
+        spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) => bloc
+      ..add(const AdjustmentRemoved(0))
+      ..add(const AdjustmentUpdated(3, 1, 'nowhere')),
+    verify: (bloc) => expect(bloc.state.draft.adjustments, isEmpty),
+  );
 }

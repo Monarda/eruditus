@@ -5,8 +5,10 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 import 'package:eruditus/models/publication_source.dart';
@@ -103,6 +105,41 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
+    } else if (event is AdjustmentAdded) {
+      final updated = [
+        ...state.draft.adjustments,
+        LevelAdjustment(magnitude: 0, note: '(describe this adjustment)'),
+      ];
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(adjustments: updated),
+      ));
+    } else if (event is AdjustmentRemoved) {
+      // Index-keyed, so a stale index from a rebuild-in-flight must be
+      // ignored rather than throwing RangeError into the bloc.
+      if (event.index < 0 || event.index >= state.draft.adjustments.length) return;
+      final updated = [...state.draft.adjustments]..removeAt(event.index);
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(adjustments: updated),
+      ));
+    } else if (event is AdjustmentUpdated) {
+      if (event.index < 0 || event.index >= state.draft.adjustments.length) return;
+      final existing = state.draft.adjustments[event.index];
+      // LevelAdjustment rejects a blank note, and the note field commits on
+      // every focus loss — so select-all, delete, tab away arrives here as an
+      // empty note. Constructing one would throw FormatException out of this
+      // handler: no state emitted, the field left showing empty while the
+      // draft still held the old value, and the user's next edit operating on
+      // stale data. Keep the note the draft already has instead; the magnitude
+      // in the event is still honoured.
+      final note = event.note.trim().isEmpty ? existing.note : event.note;
+      final updated = [...state.draft.adjustments];
+      updated[event.index] = LevelAdjustment(magnitude: event.magnitude, note: note);
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(adjustments: updated),
+      ));
     } else if (event is ModifierOptionSelected) {
       final modifier =
           spellEngine.allModifiers.where((m) => m.id == event.modifierId).firstOrNull;
@@ -193,11 +230,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       target: state.draft.target!,
       selectedModifiers: state.draft.selectedModifiers,
       requisites: state.draft.requisites,
+      adjustments: state.draft.adjustments,
       ritualDeclaration: state.draft.ritualDeclaration,
     );
     final level = breakdown.level;
 
-    final suggestions = spellEngine.findSimilarSpells(
+    final candidateSuggestions = spellEngine.findSimilarSpells(
       state.draft.technique!,
       state.draft.form!,
       referenceLevel: level,
@@ -207,16 +245,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     // SpellEngine's single calculateBreakdown implementation rather than
     // duplicating the magnitude-summing/Ritual-deriving logic) so cards can
     // display both, matching the library screen's chip.
+    //
+    // findSimilarSpells already drops a same-Technique-Form spell it cannot
+    // compute a level for (adjustments/magnitudes driving it below level 1 —
+    // see the comparator there), but this loop guards independently rather
+    // than trusting that upstream filtering: a spell reaching here that still
+    // throws is dropped from `suggestions` outright, not kept as a level-less
+    // card. Unlike the Library screen (which shows every saved spell and so
+    // degrades an uncomputable one to a missing-level row), every entry here
+    // exists to be compared against the just-calculated level — a spell with
+    // no level cannot be "similar to level N", so it is not a suggestion.
     final suggestionLevels = <String, int>{};
     final ritualSuggestionIds = <String>{};
-    for (final s in suggestions) {
-      final suggestionBreakdown = spellEngine.calculateBreakdown(
-        baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
-        selectedModifiers: s.selectedModifiers, requisites: s.requisites,
-        ritualDeclaration: s.ritualDeclaration,
-      );
-      suggestionLevels[s.id] = suggestionBreakdown.level;
-      if (suggestionBreakdown.ritualStatus.isRitual) ritualSuggestionIds.add(s.id);
+    final suggestions = <ResolvedSpell>[];
+    for (final s in candidateSuggestions) {
+      try {
+        final suggestionBreakdown = spellEngine.calculateBreakdown(
+          baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+          selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+          adjustments: s.adjustments,
+          ritualDeclaration: s.ritualDeclaration,
+        );
+        suggestionLevels[s.id] = suggestionBreakdown.level;
+        if (suggestionBreakdown.ritualStatus.isRitual) ritualSuggestionIds.add(s.id);
+        suggestions.add(s);
+      } on ArgumentError {
+        continue;
+      }
     }
 
     emit(state.copyWith(

@@ -89,7 +89,11 @@ class UnknownToken(ValueError):
     28, 18, 19 and 4). A census against the real Definitive Edition corpus
     found 36 such spells blocked on 34 distinct unrecognised tokens, after
     the recognised vocabulary was extended to cover every genuine
-    parameter/modifier alias the census turned up.
+    parameter/modifier alias the census turned up. ELABORATE_LABELS and
+    ADJUSTMENT_LABELS below then cleared 15 of those 36, leaving 21 spells
+    blocked on 21 distinct tokens — every one of them a real, unmodelled
+    mechanism (metal/gems, damage scaling, bare requisites, Techniques and
+    Forms), which is exactly why those two tables stay closed.
     """
 
 
@@ -98,6 +102,11 @@ class Token:
     magnitude: int
     label: str
     kind: str
+    # Only kind="adjustment" sets this: the raw token text with its leading
+    # "+N "/"-N " removed, brackets included. The bracket is not decoration
+    # for an adjustment — "+2 Special (based on Concentration)" carries all
+    # its meaning there — so the note is taken before parenthetical stripping.
+    note: str | None = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -106,20 +115,114 @@ class Design:
     tokens: list[Token]
 
 
+# Eight spells give the same reason -- "this effect is more elaborate than the
+# guideline describes" -- in five wordings. Each maps to the `elaborate-effect`
+# modifier; the magnitude comes from the printed token, never from arithmetic
+# on the printed level.
+ELABORATE_LABELS = frozenset({
+    "fancy effect",
+    "complex effect",
+    "for special effect",
+    "additional effect",
+    "elaborate design",
+})
+
+# Closed allow-list of per-spell adjustments, matched exactly against the
+# token's *note* -- the raw text with its "+N "/"-N " prefix removed, brackets
+# and all. Anything not here keeps blocking its spell: absorbing unknown
+# "+N <prose>" tokens would import real mechanisms (metal/gems, damage
+# scaling, requisites) with a correct computed level and wrong modelling,
+# invisible to the level test.
+#
+# Matching the note rather than the parenthetical-stripped label is what keeps
+# this an allow-list. A bare "Special" entry would absorb any
+# "+N Special (<anything>)", and the corpus already hides two different
+# mechanisms behind that one word: "(based on Concentration)" is a nonstandard
+# Duration, "(equivalent to Boundary)" a nonstandard Target. The spec's table
+# lists these tokens with their brackets, and "matched exactly" is only true
+# of the bracketed form.
+#
+# "Special (equivalent to Boundary)" does match its corpus token (The
+# Bountiful Feast), but does not unblock that spell: the same design line has
+# unbalanced brackets, so the later "+1 Size (for a total of ..." token never
+# closes and blocks it anyway. Listed regardless -- it is a real corpus token
+# in the spec's table, and an entry whose spell blocks downstream is worth
+# more than a silent omission.
+ADJUSTMENT_LABELS = frozenset({
+    "for shape and primary motivation",
+    "see through intervening material",
+    "to allow various shapes",
+    "for slightly unnatural control",
+    "because the spell allows growth or two kinds of shrinking",
+    "because the old limb is needed",
+    "Special (based on Concentration)",
+    "Special (equivalent to Boundary)",
+    "Special based on Mom",
+    # The one corpus adjustment printed with no number at all: The Shadow of
+    # Human Life's "(..., +6 Mentem requisite, for a very elaborate effect)".
+    # It only ever reaches this tokenizer with a magnitude already attached,
+    # supplied by extract_spells.HAND_DERIVED_ADJUSTMENT -- listing it here is
+    # what lets that synthesised "+5 for a very elaborate effect" resolve as an
+    # adjustment rather than an unknown token. A bare, numberless occurrence
+    # still fails _TOKEN and still blocks its spell.
+    "for a very elaborate effect",
+})
+
+
+def _split_parts(text: str) -> list[tuple[str, str]]:
+    """Split on top-level commas and periods, keeping raw and stripped forms.
+
+    Parentheticals must survive splitting for two reasons: a bracketed aside
+    can itself contain a comma ("+1 Size (for a total of +4 Size, including
+    ...)"), which the old blanket strip-then-split turned into two bogus
+    tokens; and for adjustment tokens the aside IS the content -- "+2 Special
+    (based on Concentration)" carries all its meaning in the bracket.
+
+    Returns (raw, stripped) pairs. Tokenising reads `stripped`; adjustment
+    notes read `raw`.
+    """
+    parts: list[str] = []
+    depth = 0
+    current: list[str] = []
+
+    for index, char in enumerate(text):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth = max(0, depth - 1)
+
+        at_boundary = char in ",." and depth == 0 and (
+            index + 1 >= len(text) or text[index + 1].isspace()
+        )
+        if at_boundary:
+            parts.append("".join(current))
+            current = []
+        else:
+            current.append(char)
+
+    parts.append("".join(current))
+
+    result = []
+    for part in parts:
+        raw = part.strip()
+        if not raw:
+            continue
+        result.append((raw, _PARENTHETICAL.sub("", raw).strip()))
+    return result
+
+
 def parse_design(text: str) -> Design:
     inner = text.strip()
     if inner.startswith("("):
         inner = inner[1:]
     if inner.endswith(")"):
         inner = inner[:-1]
-    # Drop bracketed asides such as "(a very unnatural liquid)" before splitting.
-    inner = _PARENTHETICAL.sub("", inner)
 
-    parts = [p.strip() for p in re.split(r"[,.](?=\s|$)", inner) if p.strip()]
+    parts = _split_parts(inner)
     if not parts:
         raise UnknownToken(f"empty design line: {text!r}")
 
-    head = parts[0]
+    head = parts[0][1]
     base_match = _BASE.match(head)
     if base_match:
         base_level: int | None = int(base_match.group("level"))
@@ -129,7 +232,7 @@ def parse_design(text: str) -> Design:
         raise UnknownToken(f"unrecognised base term {head!r} in {text!r}")
 
     tokens: list[Token] = []
-    for part in parts[1:]:
+    for raw, part in parts[1:]:
         if _FREE_REQUISITE.match(part):
             tokens.append(Token(magnitude=0, label="free", kind="requisite"))
             continue
@@ -142,6 +245,22 @@ def parse_design(text: str) -> Design:
         if token_match.group("sign") == "-":
             magnitude = -magnitude
         label = token_match.group("label").strip()
+
+        # The elaborate wordings carry no bracketed mechanism, so they match on
+        # the stripped label — that is what lets "+1 fancy effect (the spell
+        # effectively keeps being cast...)" resolve. Adjustments must not:
+        # see ADJUSTMENT_LABELS.
+        if label in ELABORATE_LABELS:
+            tokens.append(Token(magnitude, label, "elaborate"))
+            continue
+
+        raw_match = _TOKEN.match(raw)
+        note = raw_match.group("label").strip() if raw_match else raw
+        if note in ADJUSTMENT_LABELS:
+            # label is the note here, so the token records the allow-list key
+            # it actually matched rather than a truncated form of it.
+            tokens.append(Token(magnitude, note, "adjustment", note=note))
+            continue
 
         requisite_match = _REQUISITE.match(label) or _REQUISITE_EFFECT.match(label)
         if requisite_match:

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -9,6 +10,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 
 Parameter _sp(String id, String name, String category) => Parameter(
     id: id, name: name, category: category, magnitude: 0,
@@ -207,6 +209,53 @@ void main() {
       );
 
       expect(testEngine.validateSpellDraft(draft), isEmpty);
+    });
+
+    test('reports a draft whose adjustments drive it below level 1', () {
+      // Nothing downstream catches SpellLevelCalculator's ArgumentError: the
+      // creation bloc's Calculate handler would take it straight out, and its
+      // Save handler never calls the calculator at all, so the spell would
+      // save and then break the Library tab on the next launch. It has to
+      // surface as a validation message instead.
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Ignem',
+        baseEffect: BaseEffect(
+          id: 'e1', technique: 'Creo', form: 'Ignem',
+          description: 'test', baseLevel: 5,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        range: _range, duration: _duration, target: _target,
+        adjustments: [
+          LevelAdjustment(magnitude: -5, note: 'far too generous a discount'),
+        ],
+      );
+
+      expect(engine.validateSpellDraft(draft),
+          contains('Negative magnitudes reduce this spell below level 1'));
+    });
+
+    test('a base-0 guideline draft is valid, because level 0 is a real level', () {
+      final draft = SpellDraft(
+        technique: 'Creo',
+        form: 'Vim',
+        baseEffect: BaseEffect(
+          id: 'crvi-G1', technique: 'Creo', form: 'Vim',
+          description: 'Ward against a General guideline', baseLevel: 0,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        ),
+        range: _range, duration: _duration, target: _target,
+      );
+
+      expect(engine.validateSpellDraft(draft), isEmpty);
+      expect(
+        engine.calculateSpellLevel(
+          baseEffect: draft.baseEffect!,
+          range: _range, duration: _duration, target: _target,
+          requisites: const [],
+        ),
+        0,
+      );
     });
   });
 
@@ -516,6 +565,157 @@ void main() {
 
       expect(similar.any((s) => s.id == 'orphan'), isFalse);
       expect(similar.map((s) => s.id).toList(), ['1']);
+    });
+
+    test('drops an uncomputable spell rather than throwing out of the sort', () {
+      // Base 5 with a -5 adjustment: five steps down from level 5 lands on 0,
+      // which is below both 1 and where it started, so it has no level at
+      // all. calculateSpellLevel throws for it — same construction as
+      // spell_library_bloc_test.dart's `uncomputableSpell`. Resolved (so it
+      // isn't caught by the `isResolved &&` filter already covered above),
+      // it must instead be dropped by the comparator's own guard: a spell
+      // whose level is unknowable cannot be "similar to level 10".
+      final computable = buildSpell('1', 'Creo', 'Ignem', 'Pillar of Fire', 5);
+      final uncomputableEffect = BaseEffect(
+        id: 'e-uncomputable', technique: 'Creo', form: 'Ignem',
+        description: 'Over-Discounted', baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final uncomputable = ResolvedSpell(
+        record: Spell(
+          id: 'uncomputable',
+          name: 'Over-Discounted Spell',
+          baseEffectId: uncomputableEffect.id,
+          rangeId: _range.id,
+          durationId: _duration.id,
+          targetId: _target.id,
+          requisites: const [],
+          adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        ),
+        baseEffect: uncomputableEffect,
+        range: _range,
+        duration: _duration,
+        target: _target,
+      );
+
+      final engine = SpellEngine(allSpells: [computable, uncomputable]);
+
+      // referenceLevel forces the sort/comparator path to run.
+      expect(
+        () => engine.findSimilarSpells('Creo', 'Ignem', referenceLevel: 10),
+        returnsNormally,
+      );
+      final similar = engine.findSimilarSpells('Creo', 'Ignem', referenceLevel: 10);
+      expect(similar.map((s) => s.id).toList(), ['1']);
+    });
+  });
+
+  group('adjustments', () {
+    final baseEffect = BaseEffect(
+      id: '1', technique: 'Creo', form: 'Ignem',
+      description: 'test', baseLevel: 10,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+
+    LevelBreakdown breakdownWith(List<LevelAdjustment> adjustments) =>
+        SpellEngine(allSpells: const [], allModifiers: const []).calculateBreakdown(
+          baseEffect: baseEffect,
+          range: _range,
+          duration: _duration,
+          target: _target,
+          selectedModifiers: const {},
+          requisites: const [],
+          adjustments: adjustments,
+        );
+
+    test('each adjustment contributes one labelled breakdown line', () {
+      final labels = breakdownWith([
+        LevelAdjustment(magnitude: 1, note: 'see through intervening material'),
+        LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
+      ]).contributions.map((c) => c.label).toList();
+
+      expect(labels, contains('Adjustment · see through intervening material'));
+      expect(labels, contains('Adjustment · because the old limb is needed'));
+    });
+
+    test('a positive adjustment raises the level by 5 above the additive tier', () {
+      // baseLevel 10, and _range/_duration/_target are all magnitude 0.
+      expect(breakdownWith(const []).level, 10);
+      expect(
+          breakdownWith([LevelAdjustment(magnitude: 1, note: 'fancy')]).level, 15);
+    });
+
+    test('a negative adjustment lowers it by 5', () {
+      expect(breakdownWith([LevelAdjustment(magnitude: -1, note: 'old limb')]).level,
+          5);
+    });
+
+    test('a zero-magnitude adjustment shows a line but changes no level', () {
+      final breakdown =
+          breakdownWith([LevelAdjustment(magnitude: 0, note: 'cosmetic, free')]);
+      expect(breakdown.level, 10);
+      expect(breakdown.contributions.map((c) => c.label),
+          contains('Adjustment · cosmetic, free'));
+    });
+
+    test('calculateSpellLevel agrees with calculateBreakdown on adjustments', () {
+      // The two paths answer the same question and must not diverge.
+      // calculateSpellLevel used to drop adjustments entirely, so
+      // findSimilarSpells sorted *The Shadow of Human Life* as though it were
+      // level 15 while its card displayed 40.
+      final adjustments = [
+        LevelAdjustment(magnitude: 2, note: 'the shadow acts on its own'),
+        LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
+      ];
+      final engine = SpellEngine(allSpells: const [], allModifiers: const []);
+
+      final viaLevel = engine.calculateSpellLevel(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        requisites: const [],
+        adjustments: adjustments,
+      );
+
+      expect(viaLevel, breakdownWith(adjustments).level);
+      // And that it is the adjusted number, not the unadjusted one: base 10
+      // plus a net +1 magnitude above the additive tier.
+      expect(viaLevel, 15);
+      expect(viaLevel, isNot(breakdownWith(const []).level));
+    });
+
+    test('findSimilarSpells sorts by the adjusted level, not the bare one', () {
+      // findSimilarSpells is the only caller of calculateSpellLevel, and this
+      // is what the dropped parameter actually broke.
+      ResolvedSpell spellWith(String id, int baseLevel, List<LevelAdjustment> adj) {
+        final effect = BaseEffect(
+          id: 'e$id', technique: 'Muto', form: 'Imaginem',
+          description: 'test', baseLevel: baseLevel,
+          provenance: Provenance(source: PublicationSource.userCreated),
+        );
+        return ResolvedSpell(
+          record: Spell(
+            id: id, name: id, baseEffectId: effect.id,
+            rangeId: _range.id, durationId: _duration.id, targetId: _target.id,
+            requisites: const [], adjustments: adj,
+            provenance: Provenance(source: PublicationSource.userCreated),
+            createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+          ),
+          baseEffect: effect, range: _range, duration: _duration, target: _target,
+        );
+      }
+
+      final adjusted = spellWith('adjusted', 15,
+          [LevelAdjustment(magnitude: 5, note: 'the shadow acts on its own')]);
+      final plain = spellWith('plain', 15, const []);
+      final engine = SpellEngine(allSpells: [plain, adjusted]);
+
+      final nearForty =
+          engine.findSimilarSpells('Muto', 'Imaginem', referenceLevel: 40);
+
+      expect(nearForty.first.id, 'adjusted');
     });
   });
 }

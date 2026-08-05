@@ -99,12 +99,12 @@
     "rationale": "Makes everything the target perceives vibrate at high speed and sounds seem to come from the wrong place — objects appearing to move rapidly in a disorientating way is reim-3b's guideline exactly, not reim-3a's flat five-pace repositioning."
   },
   "lib-reim-image-from-wizard-torn": {
-    "baseEffectId": "reim-15b",
+    "baseEffectId": "reim-15a",
     "candidates": [
       "reim-15a",
       "reim-15b"
     ],
-    "rationale": "The caster's own image detaches and acts with independent senses and speech at Personal range (no Arcane Connection involved), matching reim-15b 'summon a disembodied spirit associated with Imaginem' rather than reim-15a, which relocates an image to a place reached via Arcane Connection."
+    "rationale": "The caster's own image separates from his body and, to leave his sight, requires 'an Arcane Connection to yourself... when you cast the spell' that 'becomes an integral part of the image' — matching reim-15a 'make an object appear (to one sense) to be in a location that the caster has an Arcane Connection to' verbatim, not reim-15b's 'summon a disembodied spirit associated with Imaginem': nothing is summoned, the caster's own image is relocated."
   },
   "lib-inme-thoughts-within-babble": {
     "baseEffectId": "inme-5b",
@@ -184,6 +184,14 @@
       "inan-4b"
     ],
     "rationale": "Detects whether a person or beast is actually a lycanthrope — learning a specific bodily fact (inan-4b), not sensing the target's dominant emotional drive (inan-4a)."
+  },
+  "lib-inan-hunters-sense": {
+    "baseEffectId": "inan-4a",
+    "candidates": [
+      "inan-4a",
+      "inan-4b"
+    ],
+    "rationale": "Senses the \"primary motivations\" of every animal within Hearing — inan-4a's 'sense the dominant drive of a beast' in the spell's own words; the shape-sensing it also grants is the level-3 guideline 'get general information about an animal's body', which is what the design line's \"+1 for shape and primary motivation\" pays for, not inan-4b's 'learn a specific fact about an animal's body' — a silhouette heard at a distance is general information about the body, not a specific fact about it."
   },
   "lib-muan-beast-outlandish-size": {
     "baseEffectId": "muan-4a",
@@ -628,6 +636,16 @@
     ],
     "rationale": "Explicitly 'does not heal wounds, only extra effects,' removing crippling after-effects of injury, poison, or disease, matching crco-20b rather than crco-20a (Medium Wound); the passing mention of premature aging never uses the book's 'aging crisis' terminology (crco-20c)."
   },
+  "lib-crco-severed-limb-made-whole": {
+    "baseEffectId": "crco-25c",
+    "candidates": [
+      "crco-25a",
+      "crco-25b",
+      "crco-25c",
+      "crco-25d"
+    ],
+    "rationale": "Reattaches a limb that has been detached from the body, matching crco-25c 'restore a lost limb' — the design line's -1 \"because the old limb is needed\" is a discount on precisely that guideline. A missing limb is not a wound (Incantation of the Body Made Whole can heal \"only wounds, not such damage as missing limbs\"), so this is neither crco-25a's Heavy Wound nor crco-25b's across-the-board improvement of wound severity, and no aging crisis is involved (crco-25d)."
+  },
   "lib-crco-cheating-reaper": {
     "baseEffectId": "crco-25d",
     "candidates": [
@@ -661,6 +679,14 @@
       "muco-3b"
     ],
     "rationale": "Transforms the target's facial features to another human configuration, matching muco-3a's changing a person's appearance while remaining human in form, not muco-3b's transformation of non-living human bone."
+  },
+  "lib-muco-preternatural-growth-and-shrinking": {
+    "baseEffectId": "muco-3a",
+    "candidates": [
+      "muco-3a",
+      "muco-3b"
+    ],
+    "rationale": "Changes the target's Size up by one point or down by two while he remains an ordinary human, matching muco-3a's 'utterly change the appearance or size of a person (though they must still remain human in form)' — the size clause verbatim, with the extra magnitude buying the choice of three outcomes rather than a different guideline. Nothing is done to non-living bone (muco-3b)."
   },
   "lib-muco-arm-infant": {
     "baseEffectId": "muco-3a",
@@ -702,6 +728,15 @@
       "muco-25c"
     ],
     "rationale": "Turns the caster into a living tree that senses day/night and wind, matching muco-25c 'turn a human into a plant' rather than a transformation into a solid inanimate object (muco-25a) or a Soak bonus (muco-25b)."
+  },
+  "lib-muco-silent-vigil": {
+    "baseEffectId": "muco-25a",
+    "candidates": [
+      "muco-25a",
+      "muco-25b",
+      "muco-25c"
+    ],
+    "rationale": "The caster becomes part of a rock formation, and the spell is printed with Req: Terram exactly as muco-25a specifies ('turn a human into a solid inanimate object', Terram requisite); the retained hearing and the ability to step back out are what the design line's \"+1 for special effect\" buys. The spell grants no Soak at all (muco-25b), and a transformation into a plant would carry a Herbam requisite rather than a Terram one (muco-25c)."
   },
   "lib-peco-dust-to-dust": {
     "baseEffectId": "peco-5b",
@@ -1114,6 +1149,15 @@
     ],
     "rationale": "Doubles an inanimate object's dimensions (and hence roughly its order of magnitude in volume), matching mute-4d 'make something grow to ten times its previous volume' verbatim, not the material-composition guidelines (mute-4a/b/c), since no material change occurs."
   },
+  "lib-mute-teeth-earth-mother": {
+    "baseEffectId": "mute-3c",
+    "candidates": [
+      "mute-3a",
+      "mute-3b",
+      "mute-3c"
+    ],
+    "rationale": "Turns the ground into twenty pillars of white marble — dirt changed to stone, mute-3c verbatim, the guideline already carrying the one magnitude the Muto Terram introduction charges 'to change to or from stone or glass' (hence base 3 where the earth-to-earth change is base 2). The marble is ordinary marble, so the material itself is not unnatural (mute-3a) — the spear-point shape and circular arrangement are what the \"+2 fancy effect\" pays for — and no liquid or gas is produced (mute-3b)."
+  },
   "lib-rete-unseen-arm": {
     "baseEffectId": "rete-2a",
     "candidates": [
@@ -1122,6 +1166,15 @@
       "rete-2c"
     ],
     "rationale": "Slowly moves a nonliving thing like a mug, instrument, or pouch of coins at a distance, matching rete-2a 'control or move dirt in a slightly unnatural fashion', not rete-2b (keeping dirt away) or rete-2c (shaping/forming dirt)."
+  },
+  "lib-rete-trackless-step": {
+    "baseEffectId": "rete-2b",
+    "candidates": [
+      "rete-2a",
+      "rete-2b",
+      "rete-2c"
+    ],
+    "rationale": "The target leaves no tracks at all while he keeps moving, and the spell lapses the moment he stops — the earth is held off him for as long as he is attending to it, which is rete-2b's 'keep dirt away from you, under your conscious control (that is, you must be aware of its presence)', the limited form of the level-5 'keep all dirt away from your body'. The Duration is printed as \"Special (based on Concentration)\", that conscious control expressed as a Duration. The spell prevents tracks rather than erasing them, so no dirt is moved unnaturally back into place (rete-2a), and nothing is worked into a shape (rete-2c, which The Forgiving Earth and The Unyielding Earth use)."
   },
   "lib-rete-invisible-sling-vilano": {
     "baseEffectId": "rete-5d",
@@ -1351,6 +1404,14 @@
       "crme-4b"
     ],
     "rationale": "Gives the target a nagging, painful anxious emotion out of nowhere, matching crme-4a 'Put a thought or emotion into another's mind', not crme-4b's memory restoration."
+  },
+  "lib-crme-weight-thousand-hells": {
+    "baseEffectId": "crme-4a",
+    "candidates": [
+      "crme-4a",
+      "crme-4b"
+    ],
+    "rationale": "Makes the victim feel \"the despair, anguish, pain, and sorrow of a thousand sinners in Hell\" — an emotion placed into another's mind out of nothing, crme-4a, with the design line's \"+1 complex effect\" paying for the Personality Trait and concentration penalties that follow. Nothing of the target's own is recovered from a surviving fragment, which is all crme-4b does."
   },
   "lib-inme-sight-transparent-motive": {
     "baseEffectId": "inme-5a",

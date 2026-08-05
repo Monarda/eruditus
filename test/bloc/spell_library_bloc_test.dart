@@ -14,6 +14,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
@@ -77,6 +78,29 @@ void main() {
     baseEffect: effect1,
     range: rangeParam,
     duration: ritualDurationParam,
+    target: targetParam,
+  );
+  // Base 5 with a -5 adjustment: five steps down from level 5 lands on 0,
+  // which is below both 1 and where it started, so it has no level at all.
+  // Reachable before this fix by tapping the creation screen's unbounded
+  // decrement button, since saving never ran the calculator.
+  final uncomputableSpell = ResolvedSpell(
+    record: Spell(
+      id: 'uncomputable-1',
+      name: 'Over-Discounted Spell',
+      baseEffectId: 'e1',
+      rangeId: 'p1',
+      durationId: 'p2',
+      targetId: 'p3',
+      requisites: const [],
+      adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    ),
+    baseEffect: effect1,
+    range: rangeParam,
+    duration: durationParam,
     target: targetParam,
   );
   final ordinarySpell = ResolvedSpell(
@@ -184,10 +208,9 @@ void main() {
     // selectedModifiers), then later deleted that custom modifier in the
     // Settings tab. Deletion doesn't cascade to already-saved spells, so
     // this spell keeps a dangling id. SpellEngine.calculateSpellLevel must
-    // not throw for this id, and because LibraryRequested wraps the whole
-    // load in one try/catch, a bad reference that did throw would drop the
-    // *entire* Library tab into its error state, hiding every spell. It
-    // must instead load successfully.
+    // not throw for this id — the spell has to keep its real level 5, not
+    // merely survive as the level-less row an uncomputable spell degrades to
+    // (see 'one uncomputable spell does not take the whole library down').
     setUp: () async {
       final spellRepository = SpellRepository(
           datasource: LocalSpellDatasource(database: database), resolver: resolver);
@@ -232,6 +255,33 @@ void main() {
     verify: (bloc) {
       expect(bloc.state.ritualSpellIds, contains(ritualSpell.id));
       expect(bloc.state.ritualSpellIds, isNot(contains(ordinarySpell.id)));
+    },
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'one uncomputable spell does not take the whole library down',
+    // A spell saved with adjustments that drive it below level 1 has no
+    // computable level, and calculateBreakdown throws for it. With one try
+    // around the whole loop that single row put the Library tab into its
+    // error state on every launch — and since the tab was the only way to
+    // reach the spell, there was no in-app way to delete it. It must degrade
+    // to one level-less row instead, with every other spell intact.
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells())
+          .thenAnswer((_) async => [ritualSpell, uncomputableSpell, ordinarySpell]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    verify: (bloc) {
+      expect(bloc.state.status, SpellLibraryStatus.loaded);
+      expect(bloc.state.allSpells.length, 3);
+      // The good rows keep their levels; the bad one is simply absent from
+      // spellLevels, exactly as an unresolved spell is, and SpellCard renders
+      // that as "Creo Ignem" with no level.
+      expect(bloc.state.spellLevels[ordinarySpell.id], 5);
+      expect(bloc.state.spellLevels[ritualSpell.id], isNotNull);
+      expect(bloc.state.spellLevels.containsKey(uncomputableSpell.id), isFalse);
     },
   );
 

@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 5;
+  static const int _databaseVersion = 6;
 
   final Database db;
 
@@ -36,6 +36,10 @@ class AppDatabase {
         // consistency with the v4 policy above — backward compatibility is
         // not a goal for this prototype, and a silent per-field default is
         // one more implicit behavior to maintain forever.
+        // The v6 bump adds `adjustments` to the `spells` blob. Additive, like
+        // v5, and dropped anyway under the same policy: backward compatibility
+        // is not a goal here, and a silent per-field default is one more
+        // implicit behavior to maintain forever.
         onUpgrade: (db, oldVersion, newVersion) async {
           for (final table in const ['spells', 'custom_factors']) {
             await db.execute('DROP TABLE IF EXISTS $table');
