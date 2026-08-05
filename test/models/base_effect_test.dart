@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/general_effect_formula.dart';
+import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 
@@ -203,6 +205,99 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('a non-standard reference and populated effectFormula round-trip', () {
+      final effect = BaseEffect(
+        id: 'rego-vim-g1',
+        technique: 'Rego',
+        form: 'Vim',
+        description: 'Ward against supernatural beings',
+        baseLevel: null,
+        reference: const ParameterTriple(
+          rangeId: 'range-touch',
+          durationId: 'duration-ring',
+          targetId: 'target-circle',
+        ),
+        effectFormula: const GeneralEffectFormula(
+          kind: GeneralEffectKind.mightThreshold,
+          multiplier: GeneralEffectMultiplier.one,
+          offsetMagnitudes: 0,
+          unit: GeneralEffectUnit.levels,
+          stressDie: false,
+        ),
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+
+      final restored = BaseEffect.fromMap(effect.toMap());
+
+      expect(restored.reference.rangeId, 'range-touch');
+      expect(restored.reference.durationId, 'duration-ring');
+      expect(restored.reference.targetId, 'target-circle');
+      expect(restored.effectFormula!.kind, GeneralEffectKind.mightThreshold);
+      expect(restored.effectFormula!.multiplier, GeneralEffectMultiplier.one);
+      expect(restored.effectFormula!.offsetMagnitudes, 0);
+      expect(restored.effectFormula!.unit, GeneralEffectUnit.levels);
+      expect(restored.effectFormula!.stressDie, isFalse);
+    });
+
+    test('an absent reference key in fromMap yields ParameterTriple.standard()', () {
+      final map = {
+        'id': 'creo-ignem-10',
+        'technique': 'Creo',
+        'form': 'Ignem',
+        'description': 'Create flame',
+        'baseLevel': 10,
+        'source': 'user-created',
+        // 'reference' is absent
+      };
+
+      final restored = BaseEffect.fromMap(map);
+
+      expect(restored.reference.rangeId, 'range-personal');
+      expect(restored.reference.durationId, 'duration-momentary');
+      expect(restored.reference.targetId, 'target-individual');
+    });
+
+    test('toMap omits effectFormula when null but always writes reference', () {
+      final effect = BaseEffect(
+        id: 'creo-ignem-10',
+        technique: 'Creo',
+        form: 'Ignem',
+        description: 'Create flame',
+        baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final map = effect.toMap();
+
+      expect(map.containsKey('reference'), isTrue);
+      expect(map.containsKey('effectFormula'), isFalse);
+    });
+
+    test('toMap includes effectFormula when non-null', () {
+      final effect = BaseEffect(
+        id: 'rego-vim-g1',
+        technique: 'Rego',
+        form: 'Vim',
+        description: 'Ward',
+        baseLevel: null,
+        effectFormula: const GeneralEffectFormula(
+          kind: GeneralEffectKind.mightThreshold,
+        ),
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+
+      final map = effect.toMap();
+
+      expect(map.containsKey('effectFormula'), isTrue);
+      expect(map['effectFormula'] is Map, isTrue);
     });
   });
 }

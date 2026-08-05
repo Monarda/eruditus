@@ -5,12 +5,14 @@ void main() {
   test('every kind and multiplier round-trips through a map', () {
     for (final kind in GeneralEffectKind.values) {
       for (final multiplier in GeneralEffectMultiplier.values) {
-        final formula = GeneralEffectFormula(
-          kind: kind, multiplier: multiplier, offsetMagnitudes: 2,
-          unit: GeneralEffectUnit.levels, stressDie: true);
+        for (final unit in GeneralEffectUnit.values) {
+          final formula = GeneralEffectFormula(
+            kind: kind, multiplier: multiplier, offsetMagnitudes: 2,
+            unit: unit, stressDie: true);
 
-        expect(GeneralEffectFormula.fromMap(formula.toMap()).toMap(),
-            formula.toMap());
+          expect(GeneralEffectFormula.fromMap(formula.toMap()).toMap(),
+              formula.toMap());
+        }
       }
     }
   });
@@ -38,5 +40,33 @@ void main() {
     expect(
         () => GeneralEffectFormula.fromMap({'kind': 'noSuchKind'}),
         throwsFormatException);
+  });
+
+  test('an unknown multiplier name is a FormatException', () {
+    expect(
+        () => GeneralEffectFormula.fromMap({
+          'kind': 'mightThreshold',
+          'multiplier': 'noSuchMultiplier',
+        }),
+        throwsFormatException);
+  });
+
+  test('an unknown unit name is a FormatException', () {
+    expect(
+        () => GeneralEffectFormula.fromMap({
+          'kind': 'mightThreshold',
+          'unit': 'noSuchUnit',
+        }),
+        throwsFormatException);
+  });
+
+  test('fromMap with only kind set uses all other defaults', () {
+    final formula = GeneralEffectFormula.fromMap({'kind': 'damage'});
+
+    expect(formula.kind, GeneralEffectKind.damage);
+    expect(formula.multiplier, GeneralEffectMultiplier.one);
+    expect(formula.offsetMagnitudes, 0);
+    expect(formula.unit, GeneralEffectUnit.levels);
+    expect(formula.stressDie, isFalse);
   });
 }
