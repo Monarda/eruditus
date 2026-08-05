@@ -19,6 +19,14 @@
 - **A magnitude is 5 levels above level 5, and 1 level inside the 1–5 additive tier.** Never hardcode `× 5`; go through `SpellLevelCalculator`.
 - **Reference parameter ids:** `range-personal`, `duration-momentary`, `target-individual` (all magnitude 0).
 - **Run both suites.** `flutter test` does not run `integration_test/`. See todo item 6.
+- **Never reformat a committed JSON asset.** `base_effects.json`, `parameters.json`, `modifiers.json` and `spell_library.json` are stored as **one compact line per entry**, so a data change diffs as the values that changed. `json.dumps(data, indent=2)` rewrites all 604 rows and buries the real change; write them back with:
+
+  ```python
+  body = ",\n".join("  " + json.dumps(e, ensure_ascii=False) for e in effects)
+  path.write_text(f"[\n{body}\n]\n", encoding="utf-8")
+  ```
+
+  Verify with `git diff --stat` before committing: a 47-entry change must show roughly 47 changed lines, not thousands.
 
 ---
 
@@ -196,10 +204,13 @@ for e in effects:
         e["baseLevel"] = None
         changed += 1
 assert changed == 47, f"expected 47 General entries, converted {changed}"
-p.write_text(json.dumps(effects, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+body = ",\n".join("  " + json.dumps(e, ensure_ascii=False) for e in effects)
+p.write_text(f"[\n{body}\n]\n", encoding="utf-8")
 print(f"converted {changed}")
 PY
 ```
+
+Then confirm the diff is small: `git diff --stat assets/data/base_effects.json` must show ~47 changed lines, not thousands. See Global Constraints.
 
 - [ ] **Step 6: Update the Python catalog test**
 
