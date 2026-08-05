@@ -174,6 +174,8 @@ class ModifierOptionTableTest(unittest.TestCase):
          "crim-complexity", "crim-directed-image", 2),
         ("Creo", "Imaginem", "intelligible speech",
          "crim-complexity", "crim-sensory-complexity", 1),
+        ("Perdo", "Imaginem", "changing image",
+         "peim-complexity", "peim-changing-image", 1),
         ("Rego", "Imaginem", "moved image matches changes",
          "reim-complexity", "reim-moved-image-matches", 1),
         ("Rego", "Imaginem", "additional senses",
@@ -181,6 +183,8 @@ class ModifierOptionTableTest(unittest.TestCase):
         ("Rego", "Imaginem", "additional sense",
          "reim-complexity", "reim-additional-senses", 1),
         ("Rego", "Imaginem", "moving image", "reim-complexity", "reim-changing-image", 1),
+        ("Rego", "Imaginem", "changing image",
+         "reim-complexity", "reim-changing-image", 1),
     ]
 
     def test_the_table_is_exactly_these_entries(self):
@@ -209,15 +213,15 @@ class ModifierOptionTableTest(unittest.TestCase):
                 self.assertEqual(spell["selectedModifiers"][modifier_id], [option_id])
 
     def test_a_label_the_table_does_not_map_still_raises(self):
-        # "changing image" is a MODIFIER_LABELS token with a plausible-looking
-        # catalog option (reim-changing-image, magnitude 1) that this table
-        # deliberately does not wire, because its per-spell mapping was never
-        # confirmed. It must keep blocking its four spells rather than being
-        # absorbed by proximity to the entries that were confirmed.
+        # "changing image" is wired for Perdo and Rego Imaginem (see
+        # IMAGINEM_LABELS above), but the table is keyed on (Technique, Form).
+        # Creo Imaginem has no confirmed "changing image" mapping, so it must
+        # keep blocking rather than being absorbed by proximity to the
+        # Perdo/Rego entries that share the same label.
         design = designline.parse_design("(Base 2, +1 Touch, +1 changing image)")
         with self.assertRaises(designline.UnknownToken):
             emit.build_spell(
-                _block("Test Spell", "Rego", "Imaginem", 10), "reim-2", self.catalog, design
+                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
             )
 
     def test_a_mapped_label_under_the_wrong_art_raises(self):

@@ -78,6 +78,14 @@ MODIFIER_LABELS = {
     # moves" concept as "changing image" above, just worded differently).
     "moved image matches changes", "additional senses", "additional sense",
     "moving image",
+    # "changing image" itself, confirmed against both Techniques that print
+    # it. Perdo Imaginem's preamble: "Destroying changing images is more
+    # difficult — add one level of magnitude to spells that do so" ->
+    # peim-changing-image (+1, Veil of Invisibility; Silence of the
+    # Smothered Sound). Rego Imaginem's preamble: "it is slightly harder to
+    # affect changing images. Add one level of magnitude to spells that do
+    # so" -> reim-changing-image, the same option "moving image" above
+    # reaches (+1, The Captive Voice; Wizard's Sidestep).
 }
 
 
