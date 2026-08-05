@@ -921,6 +921,39 @@ directly — see commit `ca3c28a`). None affect correctness.
   load, is a real change to startup cost — this item's premise gets tested for
   the first time then.
 
+### 33. Write-Only Columns on the `spells` Table — **MAYBE, revisit when relevant**
+Filed as a *maybe*: nothing is wrong today, and this should be picked up only
+when a task actually lands in this area — most likely item 9 (tag filtering)
+or item 7 (backup validation). Do not do it on its own.
+
+- [ ] Decide whether to drop `name`, `source`, `created_at` and `updated_at`
+      from the `spells` table, or to start using them
+- **What was found (2026-08-05, during item 25's Task 4).** `spells` is
+  `(id, name, source, data, created_at, updated_at)`, where `data` holds the
+  whole serialized `Spell` as JSON. `LocalSpellDatasource._toRow` writes both
+  the projected columns *and* the blob from the same object, but every read
+  goes through `jsonDecode(row['data'])`, and every query is either
+  `where: 'id = ?'` or a bare `query('spells')` with no `WHERE` and no
+  `ORDER BY`. So those four columns are **write-only duplication**: they carry
+  a drift risk and buy nothing.
+- **The blob itself is the right design here, and should stay.** Three
+  reasons, all specific to this app:
+  - The table holds **only user-created spells**. All published spells load
+    from `assets/data/spell_library.json`, so this is a small hand-authored
+    set, not a corpus worth querying.
+  - `Spell` carries four nested collections — `requisites`, `adjustments`,
+    `tags`, and `selectedModifiers` as a `Map<String, List<String>>`.
+    Normalizing them means four or five join tables serving queries nothing
+    issues.
+  - **The interesting joins are impossible in SQL anyway.** `baseEffectId`,
+    `rangeId` and the rest point into JSON assets, not tables, so "every spell
+    using guideline `pevi-G3`" can never be a SQL join in this design. That
+    removes the main argument for normalizing.
+- **If per-spell predicates ever outgrow Dart-side filtering**, the fix is a
+  generated column or an index on a JSON path — not a schema rewrite.
+- **Files:** `lib/data/database/app_database.dart` (the `spells` DDL),
+  `lib/data/datasources/local_spell_datasource.dart` (`_toRow`)
+
 ---
 
 ## Completed ✅
