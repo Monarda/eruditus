@@ -123,29 +123,37 @@ void main() {
           throwsArgumentError);
     });
 
-    test('a base-0 guideline with no magnitudes is level 0, not an error', () {
-      // Regression: base_effects.json holds 47 base-level-0 guidelines (the
-      // General and ward lines — crvi-G1, rean-gen, inco-gen…), all selectable
-      // in the creation screen. One at Personal/Momentary/Individual is
-      // exactly this call, and it returned 0 until the "level >= 1" guard
-      // this branch added started rejecting it.
-      expect(SpellLevelCalculator.calculate(0, const []), 0);
-      expect(SpellLevelCalculator.calculate(0, const [0, 0, 0]), 0);
-    });
-
-    test('a base-0 guideline that adds then removes a magnitude is still 0', () {
-      expect(SpellLevelCalculator.calculate(0, const [1, -1]), 0);
-    });
-
-    test('a base-0 guideline pushed below 0 by a magnitude still throws', () {
-      // The guard fires on magnitudes driving the level below where it
-      // started, so base 0 is not a blanket exemption.
-      expect(() => SpellLevelCalculator.calculate(0, const [-1]),
-          throwsArgumentError);
-    });
-
     test('a negative base level still throws', () {
       expect(() => SpellLevelCalculator.calculate(-1, const []), throwsArgumentError);
+    });
+
+    group('base level floor', () {
+      test('a base level of 0 is rejected', () {
+        expect(() => SpellLevelCalculator.calculate(0, const []),
+            throwsA(isA<ArgumentError>()));
+      });
+
+      test('a base level of 1 is accepted', () {
+        expect(SpellLevelCalculator.calculate(1, const []), 1);
+      });
+    });
+
+    group('parameter refunds', () {
+      test('base 10 refunded three magnitudes lands at 3, not -5', () {
+        // 10 is above the additive tier, so the first refund costs 5;
+        // 5 and 4 are inside it, so the next two cost 1 each: 10 -> 5 -> 4 -> 3.
+        expect(SpellLevelCalculator.calculate(10, const [-1, -2]), 3);
+      });
+
+      test('splitting a refund across parameters matches one combined refund', () {
+        expect(SpellLevelCalculator.calculate(10, const [-1, -2]),
+            SpellLevelCalculator.calculate(10, const [-3]));
+      });
+
+      test('a refund that would cross 1 throws', () {
+        expect(() => SpellLevelCalculator.calculate(5, const [-5]),
+            throwsA(isA<ArgumentError>()));
+      });
     });
   });
 }

@@ -11,20 +11,17 @@ class SpellLevelCalculator {
   /// 5 above it — and restore the additive capacity they give back, so that
   /// `[1, -1]` is always a no-op regardless of base level.
   ///
-  /// The invariant is **not** the flat "the result must be at least 1" this
-  /// method was first written with. `assets/data/base_effects.json` holds 47
-  /// base-level-0 guidelines (the General and ward lines — `crvi-G1`,
-  /// `rean-gen`, `inco-gen`…), and one of those at Personal/Momentary/
-  /// Individual is `calculate(0, [0, 0, 0])`, a legitimate level 0 that this
-  /// method has always returned. What is rejected is magnitudes *driving* a
-  /// spell below where it started: `level < 1 && level < baseLevel`. So base 0
-  /// with no net magnitude still returns 0, while base 5 with five -1s throws.
+  /// The invariant is that a spell always has a level of at least 1. Base
+  /// level 0 used to be permitted because `base_effects.json` held 47
+  /// General guidelines stored with `baseLevel: 0`; those now carry
+  /// `baseLevel: null` and supply the caster's chosen level instead, so the
+  /// allowance and its special case are gone.
   static int calculate(int baseLevel, List<int> magnitudes) {
-    if (baseLevel < 0) {
+    if (baseLevel < 1) {
       throw ArgumentError.value(
         baseLevel,
         'baseLevel',
-        'Base level must not be negative',
+        'Base level must be at least 1',
       );
     }
 
@@ -51,13 +48,11 @@ class SpellLevelCalculator {
       }
     }
 
-    // Only magnitudes that pushed the spell below where it started are an
-    // error. A base-0 guideline that never moved is level 0 and always was.
-    if (level < 1 && level < baseLevel) {
+    if (level < 1) {
       throw ArgumentError.value(
         level,
         'magnitudes',
-        'Negative magnitudes reduced the spell below level 1',
+        'Magnitudes reduced the spell below level 1',
       );
     }
 

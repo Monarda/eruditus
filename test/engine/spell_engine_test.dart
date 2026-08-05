@@ -234,29 +234,6 @@ void main() {
       expect(engine.validateSpellDraft(draft),
           contains('Negative magnitudes reduce this spell below level 1'));
     });
-
-    test('a base-0 guideline draft is valid, because level 0 is a real level', () {
-      final draft = SpellDraft(
-        technique: 'Creo',
-        form: 'Vim',
-        baseEffect: BaseEffect(
-          id: 'crvi-G1', technique: 'Creo', form: 'Vim',
-          description: 'Ward against a General guideline', baseLevel: 0,
-          provenance: Provenance(source: PublicationSource.userCreated),
-        ),
-        range: _range, duration: _duration, target: _target,
-      );
-
-      expect(engine.validateSpellDraft(draft), isEmpty);
-      expect(
-        engine.calculateSpellLevel(
-          baseEffect: draft.baseEffect!,
-          range: _range, duration: _duration, target: _target,
-          requisites: const [],
-        ),
-        0,
-      );
-    });
   });
 
   group('SpellEngine.pruneModifierSelections', () {
