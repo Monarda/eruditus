@@ -795,6 +795,88 @@
     ]
   },
   {
+    "id": "lib-crim-haunt-living-ghost",
+    "name": "Haunt of the Living Ghost",
+    "requisites": [
+      {
+        "art": "Intellego",
+        "kind": "adding"
+      }
+    ],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-directed-image",
+        "crim-intricate-design"
+      ]
+    },
+    "baseEffectId": "crim-2",
+    "rangeId": "range-arcane-connection",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Req: Intellego With this spell, you can instantly project your own image and voice to any designated spot that you have an Arcane Connection to (though troupes may wish to limit this range to some absolute distance like 300 miles). You can see and hear through the image. The image must appear in some medium, such as a fire, mirror, or pool. Some magi use this spell to attend inter-covenant coun... Level 35.",
+    "description": "Req: Intellego With this spell, you can instantly project your own image and voice to any designated spot that you have an Arcane Connection to (though troupes may wish to limit this range to some absolute distance like 300 miles). You can see and hear through the image. The image must appear in some medium, such as a fire, mirror, or pool. Some magi use this spell to attend inter-covenant councils without traveling the intervening distance. Because other magi can see you, this spell is not held to constitute scrying by magic. Using it through another covenant's Aegis counts as showing off, however.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crim-human-form",
+    "name": "Phantasm of the Human Form",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-directed-image",
+        "crim-intricate-design"
+      ]
+    },
+    "baseEffectId": "crim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Makes an image of a clothed and equipped person that can make noise. Under your direct, unspoken command, the person can move about, speak, and behave as a human does. Level 25.",
+    "description": "Makes an image of a clothed and equipped person that can make noise. Under your direct, unspoken command, the person can move about, speak, and behave as a human does.",
+    "printedLevel": 25,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crim-phantasmal-animal",
+    "name": "Phantasmal Animal",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-directed-image"
+      ]
+    },
+    "baseEffectId": "crim-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-diameter",
+    "targetId": "target-individual",
+    "summary": "Creates an image of any animal or beast up to the size of a pony (Size +1). Under your direct mental command, it moves about (within range) and makes appropriate noises. You need to be able to concentrate, and be within range, whenever you wish to direct the illusion to move in some manner. If you move out of range or stop concentrating, the illusion just freezes in place. The image does smell... Level 20.",
+    "description": "Creates an image of any animal or beast up to the size of a pony (Size +1). Under your direct mental command, it moves about (within range) and makes appropriate noises. You need to be able to concentrate, and be within range, whenever you wish to direct the illusion to move in some manner. If you move out of range or stop concentrating, the illusion just freezes in place. The image does smell like an animal, but it has absolutely no effect on the sense of touch. Of course, a magus may not use this spell to create the image of an animal he or she does not know exists.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crim-shadow-human-life",
     "name": "The Shadow of Human Life",
     "requisites": [
@@ -827,6 +909,31 @@
       {
         "magnitude": 5,
         "note": "for a very elaborate effect"
+      }
+    ]
+  },
+  {
+    "id": "lib-crim-talking-head",
+    "name": "Phantasm of the Talking Head",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-sensory-complexity"
+      ]
+    },
+    "baseEffectId": "crim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-diameter",
+    "targetId": "target-individual",
+    "summary": "Creates an illusory face on a wall or other flat object. The visage can speak during the spell's duration. Individual wizards' sigils can produce very interesting differences in how the voice sounds, how the face looks, and so on. Level 10.",
+    "description": "Creates an illusory face on a wall or other flat object. The visage can speak during the spell's duration. Individual wizards' sigils can produce very interesting differences in how the voice sounds, how the face looks, and so on.",
+    "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
       }
     ]
   },
@@ -5236,6 +5343,31 @@
     ]
   },
   {
+    "id": "lib-reim-confusion-insane-vibrations",
+    "name": "Confusion of the Insane Vibrations",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-additional-senses"
+      ]
+    },
+    "baseEffectId": "reim-3b",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-vision",
+    "summary": "The target of the spell sees everything vibrate back and forth at varying high speeds. In addition, sounds are displaced and seem to come from the wrong areas. Anyone trying to fight in these circumstances suffers –3 on Attack and Defense scores, and must roll two extra botch dice. The target is likely to become desperate and terribly confused. Navigation is exceedingly difficult. The visual ef... Level 30.",
+    "description": "The target of the spell sees everything vibrate back and forth at varying high speeds. In addition, sounds are displaced and seem to come from the wrong areas. Anyone trying to fight in these circumstances suffers –3 on Attack and Defense scores, and must roll two extra botch dice. The target is likely to become desperate and terribly confused. Navigation is exceedingly difficult. The visual effects of this spell are negated if the target is in complete darkness or if they close their eyes.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-reim-illusion-misplaced-castle",
     "name": "Illusion of the Misplaced Castle",
     "requisites": [],
@@ -5272,6 +5404,37 @@
     "summary": "Makes any person or object appear to be a pace away from its actual position. The image cannot be placed in a solid object. As soon as the original or image moves, the spell ends. Level 10.",
     "description": "Makes any person or object appear to be a pace away from its actual position. The image cannot be placed in a solid object. As soon as the original or image moves, the spell ends.",
     "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-reim-image-from-wizard-torn",
+    "name": "Image from the Wizard Torn",
+    "requisites": [
+      {
+        "art": "Intellego",
+        "kind": "adding"
+      }
+    ],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "reim-complexity": [
+        "reim-additional-senses",
+        "reim-changing-image"
+      ]
+    },
+    "baseEffectId": "reim-15b",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Req: Intellego Your image separates from your body. It can speak whatever you say and do so in your voice, and you can see through its eyes. You must make an Int + Concentration stress roll for each solid object the image passes through and for each mile it travels. If you wish the image to be able to leave your sight, you must use an Arcane Connection to yourself (for example, a fingernail or... Level 35.",
+    "description": "Req: Intellego Your image separates from your body. It can speak whatever you say and do so in your voice, and you can see through its eyes. You must make an Int + Concentration stress roll for each solid object the image passes through and for each mile it travels. If you wish the image to be able to leave your sight, you must use an Arcane Connection to yourself (for example, a fingernail or a lock of hair) when you cast the spell. That connection becomes an integral part of the image, and when the spell ends, it falls to the ground wherever the image was located. As your image is away from your body, you are invisible and silent at your actual location. The image is your image, so while you may move it in space you may not have it sit down if you are standing. Further, it appears as if illuminated by whatever light is falling on you, no matter what the level of illumination is at the image.",
+    "printedLevel": 35,
     "citations": [
       {
         "bookId": "arm5-core"

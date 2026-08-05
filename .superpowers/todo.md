@@ -390,18 +390,32 @@ more time than closing out item 27 warranted.
       impossible ("change it to a deliberate override"), but the actual
       decision — implement the override, or drop the promise from the spec
       — is still open.
-- [ ] **Wire the rest of the Imaginem complexity-factor mapping.**
-      `emit._MODIFIER_OPTIONS` now exists as real data, but holds exactly one
-      entry — `("Creo", "Imaginem", "intricacy") -> crim-intricate-design`,
-      added by item 24 because *The Shadow of Human Life* needed it and
-      nothing else did (no spell was blocked on `intricacy` alone). The
-      remaining labels documented in `designline.MODIFIER_LABELS`'s comment
-      (`move at/under your command`, `intelligible speech`, `moved image
-      matches changes`, `additional sense(s)`, `moving image`) are still
-      prose. Wiring them would unblock ~10 more Creo/Rego Imaginem spells
-      (all four Phantasm-* spells among them — currently blocked, which is
-      also why `library_repository_test.dart`'s search test had to move off
-      the query `'phantasm'`), each needing its own printed-level check.
+- [x] **Wire the rest of the Imaginem complexity-factor mapping.** Done for
+      the six labels `designline.MODIFIER_LABELS`'s comment records as
+      confirmed: `move at/under your command` → `crim-directed-image` (2),
+      `intelligible speech` → `crim-sensory-complexity` (1), `moved image
+      matches changes` → `reim-moved-image-matches` (1), `additional
+      sense(s)` → `reim-additional-senses` (1), `moving image` →
+      `reim-changing-image` (1). Every id and magnitude was checked against
+      `assets/data/modifiers.json` before wiring and is now re-checked on
+      every test run by `test_emit.ModifierOptionTableTest`. The library went
+      **263 → 269 imported, 97 → 91 blocked**, zero existing entries changed:
+      *Phantasm of the Talking Head*, *Phantasmal Animal*, *Phantasm of the
+      Human Form*, *Haunt of the Living Ghost*, *Confusion of the Insane
+      Vibrations*, *Image from the Wizard Torn*. All six compute to their
+      printed level under assertion 1.
+      - [ ] **`changing image` is still not wired**, and is the sole remaining
+            blocker for four spells: *Veil of Invisibility* and *Silence of
+            the Smothered Sound* (Perdo Imaginem, `peim-changing-image`),
+            *The Captive Voice* and *Wizard's Sidestep* (Rego Imaginem,
+            `reim-changing-image`). Both options exist at magnitude 1 and the
+            `(Technique, Form, label)` key would disambiguate them, so this
+            looks like a one-line addition — but `MODIFIER_LABELS`'s comment
+            records no per-spell confirmation for this label the way it does
+            for the six above, which is exactly why it was left out. Confirm
+            it against those four spells first. Note *Wizard's Sidestep* also
+            prints `moved image matches changes`, which *is* wired; it blocks
+            on `changing image` alone.
 - [ ] **`;` handling in the design-line splitter.** *Ball of Abysmal Flame*
       prints `(Base 25, +2 Voice; the ball appearing to shoot from your hand
       is a cosmetic effect)` — a semicolon where every other spell uses a
@@ -429,9 +443,14 @@ more time than closing out item 27 warranted.
       blocked (only the count) — a `--show-blocked` flag or always-print
       would make the CLI more useful for items 24/25/26/28's ongoing work.
 - [ ] Minor: `catalog._STOPWORDS` still contains `"phantasm"`, a content
-      word, not a real stopword — currently a no-op (nothing named
-      "Phantasm" imports today) but will start silently shaping ids the
-      moment the Imaginem modifier mapping above is wired up.
+      word, not a real stopword. **No longer a no-op** — the Imaginem
+      mapping above landed and three Phantasm spells now import with the
+      word stripped out of their ids: `lib-crim-human-form` (*Phantasm of the
+      Human Form*) and `lib-crim-talking-head` (*Phantasm of the Talking
+      Head*) both lost it; `lib-crim-phantasmal-animal` kept it only because
+      "Phantasmal" is not the listed token. Removing `"phantasm"` from
+      `_STOPWORDS` would rename those two committed ids, so this is now an
+      asset change with migration weight, not a tidy-up.
 - [ ] Minor: `README.md` is still the stock Flutter template and never
       mentions `scripts/spell_import/`.
 
