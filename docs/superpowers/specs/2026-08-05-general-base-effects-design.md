@@ -355,7 +355,13 @@ for a third, unrelated reason.
 - `deriveGeneralEffect` across every formula kind, both units, and all three
   multipliers, including that its value is **invariant** when Range, Duration
   or Target change.
-- Template round-tripping through serialization and backup.
+- Template serialization round-trips, and every template resolves to a
+  General base effect.
+- A spell carrying `chosenBaseLevel` and `templateId` survives a round trip
+  through the real `BackupService`. Templates themselves are **not** backed
+  up: they are read-only published asset data, like `spell_library.json`.
+  Calling through the service rather than re-testing `toMap`/`fromMap` also
+  closes the coverage hole item 7 records.
 - A spell whose `templateId` names nothing still validates and computes.
 
 **Integration — `integration_test/`**

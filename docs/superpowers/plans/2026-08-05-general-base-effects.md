@@ -820,18 +820,6 @@ test('loads every template in the asset', () async {
   expect(templates, hasLength(raw.length));
 });
 
-test('templates survive a backup round-trip through the real service', () async {
-  // Note this calls through BackupService rather than re-testing
-  // serialization — todo item 7 records that the existing backup test
-  // duplicates spell_test.dart and never exercises the service itself.
-  final service = BackupService(/* … as constructed elsewhere in this file … */);
-
-  final restored = await service.importBackup(await service.exportBackup());
-
-  expect(restored.templates.map((t) => t.id),
-      (await AssetDataLoader().loadSpellTemplates()).map((t) => t.id));
-});
-
 test('every template references a General base effect', () async {
   final effects = {
     for (final e in await AssetDataLoader().loadBaseEffects()) e.id: e,
@@ -1267,6 +1255,28 @@ group('General level validation', () {
     final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: 20);
 
     expect(engine.validateSpellDraft(draft), isEmpty);
+  });
+
+  test('a spell with a chosen level survives the real backup service', () async {
+    // Deliberately calls through BackupService rather than re-testing
+    // serialization: todo item 7 records that the existing backup test
+    // duplicates spell_test.dart and never exercises the service at all.
+    // Templates are NOT covered here — they are read-only published asset
+    // data, like spell_library.json, which no backup carries.
+    final service = BackupService(
+      spellRepository: spellRepository,
+      configurationRepository: configurationRepository,
+    );
+    await spellRepository.saveSpell(wardSpell(chosenBaseLevel: 20,
+        templateId: 'tpl-rean-ward-against-beasts-of-legend'));
+
+    await service.importFromJson(await service.exportToJson());
+
+    final restored = (await spellRepository.getAllSpells())
+        .firstWhere((s) => s.record.id == wardSpellId);
+
+    expect(restored.record.chosenBaseLevel, 20);
+    expect(restored.record.templateId, 'tpl-rean-ward-against-beasts-of-legend');
   });
 
   test('a spell whose templateId names nothing still validates', () {
