@@ -247,19 +247,33 @@ class SpellEngine {
         .toList();
 
     if (referenceLevel != null) {
-      matches.sort((a, b) {
-        final levelA = calculateSpellLevel(
-          baseEffect: a.baseEffect!, range: a.range!, duration: a.duration!, target: a.target!,
-          selectedModifiers: a.selectedModifiers, requisites: a.requisites,
-          adjustments: a.adjustments, ritualDeclaration: a.ritualDeclaration,
-        );
-        final levelB = calculateSpellLevel(
-          baseEffect: b.baseEffect!, range: b.range!, duration: b.duration!, target: b.target!,
-          selectedModifiers: b.selectedModifiers, requisites: b.requisites,
-          adjustments: b.adjustments, ritualDeclaration: b.ritualDeclaration,
-        );
-        return (levelA - referenceLevel).abs().compareTo((levelB - referenceLevel).abs());
+      // A match here is resolved (isResolved above) but not necessarily
+      // computable: one may carry adjustments/magnitudes that drive it below
+      // level 1, which SpellLevelCalculator signals by throwing rather than
+      // by leaving it unresolved. Such a spell has no level to compare
+      // against referenceLevel, so it cannot be "similar to level N" —
+      // dropped here rather than kept unsorted or sorted last, same as an
+      // unresolved spell already is by the `isResolved &&` filter above.
+      // Levels are computed once per spell up front (not per comparator
+      // call) so a bad spell can be removed before matches.sort ever runs,
+      // and so a good spell isn't recomputed on every comparison.
+      final levels = <String, int>{};
+      matches.removeWhere((s) {
+        try {
+          levels[s.id] = calculateSpellLevel(
+            baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+            selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+            adjustments: s.adjustments, ritualDeclaration: s.ritualDeclaration,
+          );
+          return false;
+        } on ArgumentError {
+          return true;
+        }
       });
+
+      matches.sort((a, b) => (levels[a.id]! - referenceLevel)
+          .abs()
+          .compareTo((levels[b.id]! - referenceLevel).abs()));
     }
 
     return matches;

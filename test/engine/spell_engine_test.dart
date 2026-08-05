@@ -566,6 +566,51 @@ void main() {
       expect(similar.any((s) => s.id == 'orphan'), isFalse);
       expect(similar.map((s) => s.id).toList(), ['1']);
     });
+
+    test('drops an uncomputable spell rather than throwing out of the sort', () {
+      // Base 5 with a -5 adjustment: five steps down from level 5 lands on 0,
+      // which is below both 1 and where it started, so it has no level at
+      // all. calculateSpellLevel throws for it — same construction as
+      // spell_library_bloc_test.dart's `uncomputableSpell`. Resolved (so it
+      // isn't caught by the `isResolved &&` filter already covered above),
+      // it must instead be dropped by the comparator's own guard: a spell
+      // whose level is unknowable cannot be "similar to level 10".
+      final computable = buildSpell('1', 'Creo', 'Ignem', 'Pillar of Fire', 5);
+      final uncomputableEffect = BaseEffect(
+        id: 'e-uncomputable', technique: 'Creo', form: 'Ignem',
+        description: 'Over-Discounted', baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final uncomputable = ResolvedSpell(
+        record: Spell(
+          id: 'uncomputable',
+          name: 'Over-Discounted Spell',
+          baseEffectId: uncomputableEffect.id,
+          rangeId: _range.id,
+          durationId: _duration.id,
+          targetId: _target.id,
+          requisites: const [],
+          adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        ),
+        baseEffect: uncomputableEffect,
+        range: _range,
+        duration: _duration,
+        target: _target,
+      );
+
+      final engine = SpellEngine(allSpells: [computable, uncomputable]);
+
+      // referenceLevel forces the sort/comparator path to run.
+      expect(
+        () => engine.findSimilarSpells('Creo', 'Ignem', referenceLevel: 10),
+        returnsNormally,
+      );
+      final similar = engine.findSimilarSpells('Creo', 'Ignem', referenceLevel: 10);
+      expect(similar.map((s) => s.id).toList(), ['1']);
+    });
   });
 
   group('adjustments', () {

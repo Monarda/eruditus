@@ -12,6 +12,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -222,6 +223,64 @@ void main() {
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', {'ritual-suggestion'}),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // Regression test for the residual finding: a saved spell whose
+    // adjustments drive it below level 1 has no computable level (same
+    // construction as spell_library_bloc_test.dart's `uncomputableSpell`),
+    // and calculateSpellLevel/calculateBreakdown throw for it. Before this
+    // fix, that throw came straight out of findSimilarSpells' comparator (or
+    // the per-suggestion loop right after it) with no try/catch in
+    // _handleSpellCalculated, so pressing Calculate for the same
+    // Technique+Form broke the Create tab every time. It must survive and
+    // simply omit the bad spell from `suggestions` instead — a spell with no
+    // level cannot be "similar to" the one just calculated.
+    'SpellCalculated survives when the engine holds an uncomputable spell of the same Technique and Form',
+    build: () {
+      final uncomputableRecord = Spell(
+        id: 'uncomputable-1',
+        name: 'Over-Discounted Spell',
+        baseEffectId: creoIgnemEffect.id,
+        rangeId: rangeParam.id,
+        durationId: durationParam.id,
+        targetId: targetParam.id,
+        requisites: const [],
+        adjustments: [LevelAdjustment(magnitude: -20, note: 'far too generous')],
+        provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+      final uncomputable = ResolvedSpell(
+        record: uncomputableRecord, baseEffect: creoIgnemEffect,
+        range: rangeParam, duration: durationParam, target: targetParam);
+      return SpellCreationBloc(
+        spellEngine: SpellEngine(allSpells: [uncomputable]),
+        spellRepository: spellRepository,
+      );
+    },
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellCalculated());
+    },
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          // Base 10 + (10 magnitude * 5) = 60, same as the plain-draft test
+          // above — proves the handler still reaches a normal calculated
+          // state rather than throwing out of the bloc.
+          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
+          .having((s) => s.validationErrors, 'validationErrors', isEmpty)
+          // The uncomputable spell is dropped, not kept as a level-less
+          // suggestion card.
+          .having((s) => s.suggestions, 'suggestions', isEmpty)
+          .having((s) => s.suggestionLevels.containsKey('uncomputable-1'), 'suggestionLevels',
+              isFalse),
     ],
   );
 

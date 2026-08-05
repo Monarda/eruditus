@@ -8,6 +8,7 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 import 'package:eruditus/models/publication_source.dart';
@@ -234,7 +235,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     );
     final level = breakdown.level;
 
-    final suggestions = spellEngine.findSimilarSpells(
+    final candidateSuggestions = spellEngine.findSimilarSpells(
       state.draft.technique!,
       state.draft.form!,
       referenceLevel: level,
@@ -244,17 +245,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     // SpellEngine's single calculateBreakdown implementation rather than
     // duplicating the magnitude-summing/Ritual-deriving logic) so cards can
     // display both, matching the library screen's chip.
+    //
+    // findSimilarSpells already drops a same-Technique-Form spell it cannot
+    // compute a level for (adjustments/magnitudes driving it below level 1 —
+    // see the comparator there), but this loop guards independently rather
+    // than trusting that upstream filtering: a spell reaching here that still
+    // throws is dropped from `suggestions` outright, not kept as a level-less
+    // card. Unlike the Library screen (which shows every saved spell and so
+    // degrades an uncomputable one to a missing-level row), every entry here
+    // exists to be compared against the just-calculated level — a spell with
+    // no level cannot be "similar to level N", so it is not a suggestion.
     final suggestionLevels = <String, int>{};
     final ritualSuggestionIds = <String>{};
-    for (final s in suggestions) {
-      final suggestionBreakdown = spellEngine.calculateBreakdown(
-        baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
-        selectedModifiers: s.selectedModifiers, requisites: s.requisites,
-        adjustments: s.adjustments,
-        ritualDeclaration: s.ritualDeclaration,
-      );
-      suggestionLevels[s.id] = suggestionBreakdown.level;
-      if (suggestionBreakdown.ritualStatus.isRitual) ritualSuggestionIds.add(s.id);
+    final suggestions = <ResolvedSpell>[];
+    for (final s in candidateSuggestions) {
+      try {
+        final suggestionBreakdown = spellEngine.calculateBreakdown(
+          baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+          selectedModifiers: s.selectedModifiers, requisites: s.requisites,
+          adjustments: s.adjustments,
+          ritualDeclaration: s.ritualDeclaration,
+        );
+        suggestionLevels[s.id] = suggestionBreakdown.level;
+        if (suggestionBreakdown.ritualStatus.isRitual) ritualSuggestionIds.add(s.id);
+        suggestions.add(s);
+      } on ArgumentError {
+        continue;
+      }
     }
 
     emit(state.copyWith(
