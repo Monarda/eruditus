@@ -99,12 +99,12 @@
     "rationale": "Makes everything the target perceives vibrate at high speed and sounds seem to come from the wrong place — objects appearing to move rapidly in a disorientating way is reim-3b's guideline exactly, not reim-3a's flat five-pace repositioning."
   },
   "lib-reim-image-from-wizard-torn": {
-    "baseEffectId": "reim-15b",
+    "baseEffectId": "reim-15a",
     "candidates": [
       "reim-15a",
       "reim-15b"
     ],
-    "rationale": "The caster's own image detaches and acts with independent senses and speech at Personal range (no Arcane Connection involved), matching reim-15b 'summon a disembodied spirit associated with Imaginem' rather than reim-15a, which relocates an image to a place reached via Arcane Connection."
+    "rationale": "The caster's own image separates from his body and, to leave his sight, requires 'an Arcane Connection to yourself... when you cast the spell' that 'becomes an integral part of the image' — matching reim-15a 'make an object appear (to one sense) to be in a location that the caster has an Arcane Connection to' verbatim, not reim-15b's 'summon a disembodied spirit associated with Imaginem': nothing is summoned, the caster's own image is relocated."
   },
   "lib-inme-thoughts-within-babble": {
     "baseEffectId": "inme-5b",
