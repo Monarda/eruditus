@@ -88,3 +88,17 @@ class GeneralEffectFormula {
         stressDie: map['stressDie'] as bool? ?? false,
       );
 }
+
+/// The strength of a General guideline's effect at the level the caster
+/// chose, ready to render. Produced by `SpellEngine.deriveGeneralEffect`.
+class GeneralEffectValue {
+  final int value;
+  final GeneralEffectUnit unit;
+  final String sentence;
+
+  const GeneralEffectValue({
+    required this.value,
+    required this.unit,
+    required this.sentence,
+  });
+}

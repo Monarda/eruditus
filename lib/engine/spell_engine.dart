@@ -3,6 +3,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -354,5 +355,73 @@ class SpellEngine {
       }
     });
     return kept;
+  }
+
+  /// The strength of a General guideline's effect at the level the caster
+  /// chose, or null when the guideline is not General or no level is set yet.
+  ///
+  /// Reads [chosenBaseLevel] and never the computed spell level. That is
+  /// deliberate and load-bearing: a ward moved from Touch/Ring/Circle to
+  /// Personal/Sun/Individual is one magnitude cheaper, and must still keep out
+  /// exactly the same Might.
+  GeneralEffectValue? deriveGeneralEffect({
+    required BaseEffect baseEffect,
+    required int? chosenBaseLevel,
+  }) {
+    final formula = baseEffect.effectFormula;
+    if (!baseEffect.isGeneral || formula == null || chosenBaseLevel == null) {
+      return null;
+    }
+
+    // Through the calculator, never `offsetMagnitudes * 5`. Above level 5 the
+    // two agree; inside the 1-5 additive tier they do not, and the calculator
+    // is right. A base-3 DEO produces a level-5 spell, so "the level of the
+    // spell + 2 magnitudes" is 5 — `* 5` would claim 13. See Global
+    // Constraints.
+    final int inLevels;
+    try {
+      inLevels = SpellLevelCalculator.calculate(
+          chosenBaseLevel, [formula.offsetMagnitudes]);
+    } on ArgumentError {
+      // A negative offset drove the value below 1, so there is no strength to
+      // report. Null rather than a throw: this renders a sentence, and one bad
+      // saved spell must not take out the Library tab. Task 8 stops such a
+      // spell being saved at all.
+      return null;
+    }
+
+    final scaled = switch (formula.multiplier) {
+      // Halving rounds DOWN. The only "round up" the rulebook states is for
+      // magnitudes (line 12030), applied below; halving a spell level has no
+      // such rule, and rounding down is the reading that never lets a
+      // dispelling spell reach one level higher than its guideline allows.
+      GeneralEffectMultiplier.half => inLevels ~/ 2,
+      GeneralEffectMultiplier.one => inLevels,
+      GeneralEffectMultiplier.two => inLevels * 2,
+    };
+
+    final value = formula.unit == GeneralEffectUnit.magnitudes
+        ? (scaled / 5).ceil()
+        : scaled;
+
+    return GeneralEffectValue(
+      value: value,
+      unit: formula.unit,
+      sentence: _effectSentence(formula, value),
+    );
+  }
+
+  static String _effectSentence(GeneralEffectFormula formula, int value) {
+    final body = switch (formula.kind) {
+      GeneralEffectKind.mightThreshold => 'Affects beings with Might $value or less',
+      GeneralEffectKind.mightReduction => 'Reduces Might by $value',
+      GeneralEffectKind.damage => 'Does +$value damage',
+      GeneralEffectKind.targetSpellLevel => 'Affects effects of level $value or less',
+      GeneralEffectKind.visDestroyed => 'Destroys $value pawns\' worth of raw vis',
+      GeneralEffectKind.spellTraceMagnitude =>
+        'Reaches spell traces down to negative magnitude $value',
+    };
+
+    return formula.stressDie ? '$body, + a stress die (no botch)' : body;
   }
 }
