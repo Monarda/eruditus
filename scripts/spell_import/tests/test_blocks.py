@@ -55,3 +55,23 @@ class ParseDefinitiveEditionTest(unittest.TestCase):
         names = {b.name for b in self.blocks}
         self.assertNotIn("Crush", names)
         self.assertNotIn("Healing Gaze", names)
+
+    def test_ward_against_the_beasts_of_legend_gets_the_general_design_line(self):
+        # (As ward guideline) is its own General shorthand, distinct from the
+        # "(Base ...)" family _DESIGN otherwise looks for.
+        block = next(b for b in self.blocks
+                    if b.name == "Ward against the Beasts of Legend")
+        self.assertEqual(block.design_line, "(As ward guideline)")
+
+    def test_special_and_variable_design_notes_are_not_mistaken_for_a_design_line(self):
+        # Recognising "(As ward guideline)" must not widen _DESIGN into a
+        # catch-all for every one-line parenthetical note. "(Special spell)"
+        # and "(Variable base)" are prose asides of their own, not a design
+        # line by any name, so they stay part of the prose and design_line
+        # stays None -- exactly as before the widening.
+        special = next(b for b in self.blocks
+                       if b.name == "Enchantment of the Scrying Pool")
+        self.assertIsNone(special.design_line)
+        variable = next(b for b in self.blocks
+                        if b.name == "Sight of the True Form")
+        self.assertIsNone(variable.design_line)

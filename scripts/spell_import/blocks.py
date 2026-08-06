@@ -29,7 +29,7 @@ _SECTION = re.compile(
 )
 _LEVEL = re.compile(r"^####\s+(?:\*{0,2})(?:LEVEL\s+(?P<level>\d+)|(?P<general>GENERAL))")
 _NAME = re.compile(r"^#####\s+(?P<name>.+?)\s*$")
-_DESIGN = re.compile(r"^\(\s*Base\b")
+_DESIGN = re.compile(r"^\(\s*(?:Base\b|As ward guideline\s*\))")
 
 
 def _normalize_stat_line(line: str) -> str:
