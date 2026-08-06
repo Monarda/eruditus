@@ -1303,14 +1303,18 @@ git commit -m "feat: derive a General guideline's effect strength from the chose
 ### Task 8: Validation for a missing or invalid chosen level
 
 **Files:**
-- Modify: `lib/engine/spell_engine.dart:34-108`
-- Test: `test/engine/spell_engine_test.dart`
+- Modify: `lib/engine/spell_engine.dart:52-130` (`validateSpellDraft`)
+- Test: `test/engine/spell_engine_test.dart`, `test/data/services/backup_service_test.dart`
 
 **Interfaces:**
 - Consumes: Tasks 1, 4, 6.
 - Produces: two new `validateSpellDraft` messages.
 
+**Helpers you must write — none of these exist yet.** `wardGuideline()` exists but is scoped inside the `reference deltas` group at `test/engine/spell_engine_test.dart:725`; lift it to a shared scope or duplicate it into the new group. `completeDraft(...)` does not exist at all — write it as a local helper returning a `SpellDraft` that passes every other validation rule, with named overrides for `baseEffect`, `chosenBaseLevel`, `range`, `duration` and `target`. `wardSpell(...)` and `wardSpellId` do not exist either; they belong to the backup test in its own file (below).
+
 - [ ] **Step 1: Write the failing tests**
+
+In `test/engine/spell_engine_test.dart`:
 
 ```dart
 group('General level validation', () {
@@ -1334,28 +1338,6 @@ group('General level validation', () {
     expect(engine.validateSpellDraft(draft), isEmpty);
   });
 
-  test('a spell with a chosen level survives the real backup service', () async {
-    // Deliberately calls through BackupService rather than re-testing
-    // serialization: todo item 7 records that the existing backup test
-    // duplicates spell_test.dart and never exercises the service at all.
-    // Templates are NOT covered here — they are read-only published asset
-    // data, like spell_library.json, which no backup carries.
-    final service = BackupService(
-      spellRepository: spellRepository,
-      configurationRepository: configurationRepository,
-    );
-    await spellRepository.saveSpell(wardSpell(chosenBaseLevel: 20,
-        templateId: 'tpl-rean-ward-against-beasts-of-legend'));
-
-    await service.importFromJson(await service.exportToJson());
-
-    final restored = (await spellRepository.getAllSpells())
-        .firstWhere((s) => s.record.id == wardSpellId);
-
-    expect(restored.record.chosenBaseLevel, 20);
-    expect(restored.record.templateId, 'tpl-rean-ward-against-beasts-of-legend');
-  });
-
   test('a spell whose templateId names nothing still validates', () {
     // The link is provenance. A spell shared without its template must
     // compute exactly as if the field were absent.
@@ -1373,6 +1355,9 @@ group('General level validation', () {
   });
 
   test('a refund that crosses level 1 is reported, not thrown', () {
+    // Reference Touch(1)/Ring(2)/Circle(0) against Personal/Mom/Individual
+    // gives deltas of -1, -2, 0 on a chosen base of 1, which the calculator
+    // refuses. validateSpellDraft must surface that as a message.
     final draft = completeDraft(
       baseEffect: wardGuideline(), chosenBaseLevel: 1,
       range: personal, duration: momentary, target: individual);
@@ -1382,6 +1367,31 @@ group('General level validation', () {
   });
 });
 ```
+
+Then in `test/data/services/backup_service_test.dart`, which already has the sqflite-ffi setup this needs (`sqfliteFfiInit()` in `setUpAll`, both repositories built in `setUp`):
+
+```dart
+test('a spell with a chosen level and template link survives a round trip', () async {
+  // Deliberately calls through BackupService rather than re-testing
+  // serialization: todo item 7 records that the existing backup round-trip
+  // test duplicates spell_test.dart and never exercises the service at all.
+  // Templates are NOT covered — they are read-only published asset data,
+  // like spell_library.json, which no backup carries.
+  await spellRepository.saveSpell(wardSpell(
+      chosenBaseLevel: 20,
+      templateId: 'tpl-rean-ward-against-beasts-of-legend'));
+
+  await backupService.importFromJson(await backupService.exportToJson());
+
+  final restored = (await spellRepository.getAllSpells())
+      .firstWhere((s) => s.record.id == wardSpellId);
+
+  expect(restored.record.chosenBaseLevel, 20);
+  expect(restored.record.templateId, 'tpl-rean-ward-against-beasts-of-legend');
+});
+```
+
+Use the `spellRepository` and `backupService` that file's `setUp` already builds — do not construct your own. Note the constructor parameter is `configRepository`, not `configurationRepository`. The spell must be `PublicationSource.userCreated`: `exportToJson` calls `getAllUserSpells`, so a published spell would not be exported and the test would pass vacuously.
 
 - [ ] **Step 2: Run tests to verify they fail**
 
@@ -1410,17 +1420,20 @@ Widen the existing catch-block message from item 24's wording, since refunds now
       }
 ```
 
-and pass `chosenBaseLevel: draft.chosenBaseLevel` into the `calculateBreakdown` call inside that `try`.
+`chosenBaseLevel` is **already** forwarded into that `try`'s `calculateBreakdown` call — Task 6 did it (`spell_engine.dart:112`). Nothing to add there.
+
+Where the new checks go matters. The `try` is guarded by `if (errors.isEmpty)` (`spell_engine.dart:108`), so putting the two checks up near the `draft.baseEffect == null` check means a draft missing its chosen level never reaches `calculateBreakdown` at all. That is what stops `calculateBreakdown`'s own `ArgumentError('A General guideline needs a chosen level')` from surfacing to the user as the misleading below-level-1 message. The ordering *is* the fix — do not also add a second catch or an error-message branch.
 
 - [ ] **Step 4: Run the tests**
 
-Run: `flutter test test/engine/ test/bloc/`
-Expected: PASS. Update any existing test asserting the old "Negative magnitudes reduce this spell below level 1" wording.
+Run: `flutter test` and `flutter analyze`.
+Expected: PASS. Update any existing test asserting the old "Negative magnitudes reduce this spell below level 1" wording. `integration_test/` is not required: no bloc, screen or signature changes.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add lib/engine/spell_engine.dart test/engine/spell_engine_test.dart
+git add lib/engine/spell_engine.dart test/engine/spell_engine_test.dart \
+        test/data/services/backup_service_test.dart
 git commit -m "feat: validate the chosen level of a General guideline"
 ```
 
