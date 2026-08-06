@@ -643,6 +643,29 @@ Real work, none of it blocking the import.
   verified by `flutter test` alone — run the integration suite too.
 - **Worth raising if item 27 grows an authoring pipeline** — a 360-spell asset
   test is exactly the kind of thing that must run in `flutter test`.
+- **The suite has rotted again — 2 of 5 currently fail** (found 2026-08-06,
+  during the General base effects branch, exactly the failure mode predicted
+  above):
+  - `end-to-end: create a spell matching an existing Technique+Form, see
+    suggestions, save it, and find it in the library` —
+    `spell_creation_flow_test.dart:179`
+  - `end-to-end: a spell built on a custom effect stays listed and marked
+    unavailable after that effect is deleted` —
+    `spell_creation_flow_test.dart:537`
+
+  Both are `StateError: Bad state: No element` inside
+  `WidgetController.dragUntilVisible` / `scrollUntilVisible` — the finder
+  cannot locate the widget it is asked to scroll to. Most likely
+  environment-dependent (window size, DPI or font metrics on this Windows
+  runner) rather than a logic fault, but unconfirmed.
+
+  **Not caused by the General base effects branch.** Verified by running the
+  identical command in throwaway worktrees at `b901c09` (one commit before the
+  engine change) and at `6d84a14` (the branch point from `main`): same two
+  tests, same stack traces, same 3-pass/2-fail split at all three commits.
+
+  Fix these before adding to the suite — a suite that is already red cannot
+  tell anyone their change broke something, which is how it rotted twice.
 - **Files:** Test helpers, widget test templates, `integration_test/`
 
 ### 7. Spell Export/Backup Validation
