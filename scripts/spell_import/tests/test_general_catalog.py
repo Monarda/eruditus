@@ -1,4 +1,3 @@
-import json
 import unittest
 
 from .. import catalog as catalog_module
