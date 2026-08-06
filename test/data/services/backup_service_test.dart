@@ -172,4 +172,39 @@ void main() {
 
     expect(restored.ritualDeclaration, RitualDeclaration.lastingCreation);
   });
+
+  test('a spell with a chosen level and template link survives a round trip', () async {
+    // Deliberately calls through BackupService rather than re-testing
+    // serialization: todo item 7 records that the existing backup round-trip
+    // test duplicates spell_test.dart and never exercises the service at all.
+    // Templates are NOT covered — they are read-only published asset data,
+    // like spell_library.json, which no backup carries.
+    const wardSpellId = 'ward-1';
+    Spell wardSpell({required int chosenBaseLevel, required String templateId}) => Spell(
+          id: wardSpellId,
+          name: 'Ward Against Beasts of Legend',
+          baseEffectId: 'rean-gen',
+          rangeId: 'range-touch',
+          durationId: 'duration-ring',
+          targetId: 'target-circle',
+          requisites: const [],
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+          chosenBaseLevel: chosenBaseLevel,
+          templateId: templateId,
+        );
+
+    await spellRepository.saveSpell(wardSpell(
+        chosenBaseLevel: 20,
+        templateId: 'tpl-rean-ward-against-beasts-of-legend'));
+
+    await backupService.importFromJson(await backupService.exportToJson());
+
+    final restored = (await spellRepository.getAllUserSpells())
+        .firstWhere((s) => s.record.id == wardSpellId);
+
+    expect(restored.record.chosenBaseLevel, 20);
+    expect(restored.record.templateId, 'tpl-rean-ward-against-beasts-of-legend');
+  });
 }

@@ -233,7 +233,7 @@ void main() {
       );
 
       expect(engine.validateSpellDraft(draft),
-          contains('Negative magnitudes reduce this spell below level 1'));
+          contains('Magnitudes reduce this spell below level 1'));
     });
   });
 
@@ -780,6 +780,100 @@ void main() {
         'Target · Individual|0',
       ]);
       expect(breakdown.level, 30);
+    });
+  });
+
+  group('General level validation', () {
+    Parameter param(String id, String name, String category, int magnitude) => Parameter(
+        id: id, name: name, category: category, magnitude: magnitude,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+    final touch = param('range-touch', 'Touch', 'Range', 1);
+    final personal = param('range-personal', 'Personal', 'Range', 0);
+    final ring = param('duration-ring', 'Ring', 'Duration', 2);
+    final momentary = param('duration-momentary', 'Momentary', 'Duration', 0);
+    final circle = param('target-circle', 'Circle', 'Target', 0);
+    final individual = param('target-individual', 'Individual', 'Target', 0);
+
+    final engine = SpellEngine(
+      allSpells: const [],
+      allParameters: [touch, personal, ring, momentary, circle, individual],
+    );
+
+    BaseEffect wardGuideline() => BaseEffect(
+        id: 'rean-gen', technique: 'Rego', form: 'Animal',
+        description: 'Ward against beings associated with Animal',
+        baseLevel: null,
+        reference: const ParameterTriple(
+            rangeId: 'range-touch',
+            durationId: 'duration-ring',
+            targetId: 'target-circle'),
+        provenance: Provenance(source: PublicationSource.published,
+            citations: [Citation(bookId: 'arm5-core')]));
+
+    SpellDraft completeDraft({
+      BaseEffect? baseEffect,
+      int? chosenBaseLevel,
+      Parameter? range,
+      Parameter? duration,
+      Parameter? target,
+    }) =>
+        SpellDraft(
+          technique: 'Rego',
+          form: 'Animal',
+          baseEffect: baseEffect,
+          chosenBaseLevel: chosenBaseLevel,
+          range: range ?? touch,
+          duration: duration ?? ring,
+          target: target ?? circle,
+        );
+
+    test('a General guideline with no chosen level is an error', () {
+      final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: null);
+
+      expect(engine.validateSpellDraft(draft),
+          contains('Choose a level for this General guideline'));
+    });
+
+    test('a chosen level below 1 is an error', () {
+      final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: 0);
+
+      expect(engine.validateSpellDraft(draft),
+          contains('The chosen level must be at least 1'));
+    });
+
+    test('a valid chosen level produces no errors', () {
+      final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: 20);
+
+      expect(engine.validateSpellDraft(draft), isEmpty);
+    });
+
+    test('a spell whose templateId names nothing still validates', () {
+      // The link is provenance. A spell shared without its template must
+      // compute exactly as if the field were absent.
+      final draft = completeDraft(
+          baseEffect: wardGuideline(), chosenBaseLevel: 20)
+        ..templateId = 'tpl-does-not-exist';
+
+      expect(engine.validateSpellDraft(draft), isEmpty);
+      expect(
+          engine.calculateSpellLevel(
+              baseEffect: wardGuideline(), chosenBaseLevel: 20,
+              range: touch, duration: ring, target: circle,
+              requisites: const []),
+          20);
+    });
+
+    test('a refund that crosses level 1 is reported, not thrown', () {
+      // Reference Touch(1)/Ring(2)/Circle(0) against Personal/Mom/Individual
+      // gives deltas of -1, -2, 0 on a chosen base of 1, which the calculator
+      // refuses. validateSpellDraft must surface that as a message.
+      final draft = completeDraft(
+          baseEffect: wardGuideline(), chosenBaseLevel: 1,
+          range: personal, duration: momentary, target: individual);
+
+      expect(engine.validateSpellDraft(draft),
+          contains('Magnitudes reduce this spell below level 1'));
     });
   });
 }

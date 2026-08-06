@@ -64,6 +64,14 @@ class SpellEngine {
       errors.add('Base effect must be selected');
     }
 
+    if (draft.baseEffect != null && draft.baseEffect!.isGeneral) {
+      if (draft.chosenBaseLevel == null) {
+        errors.add('Choose a level for this General guideline');
+      } else if (draft.chosenBaseLevel! < 1) {
+        errors.add('The chosen level must be at least 1');
+      }
+    }
+
     if (draft.range == null) {
       errors.add('Range must be selected');
     }
@@ -119,7 +127,7 @@ class SpellEngine {
           ritualDeclaration: draft.ritualDeclaration,
         );
       } on ArgumentError {
-        errors.add('Negative magnitudes reduce this spell below level 1');
+        errors.add('Magnitudes reduce this spell below level 1');
       }
     }
 
