@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
@@ -385,6 +386,26 @@ void main() {
             reason: '${modifier.id}: cited book ${citation.bookId} is not in '
                 'books.json — add the book, do not relax this check');
       }
+    }
+  });
+
+  test('loads every template in the asset', () async {
+    final raw = jsonDecode(
+        await File('assets/data/spell_templates.json').readAsString()) as List;
+
+    final templates = await AssetDataLoader().loadSpellTemplates();
+
+    expect(templates, hasLength(raw.length));
+  });
+
+  test('every template references a General base effect', () async {
+    final effects = {
+      for (final e in await AssetDataLoader().loadBaseEffects()) e.id: e,
+    };
+
+    for (final template in await AssetDataLoader().loadSpellTemplates()) {
+      expect(effects[template.baseEffectId]?.isGeneral, isTrue,
+          reason: '${template.id} points at a non-General base effect');
     }
   });
 

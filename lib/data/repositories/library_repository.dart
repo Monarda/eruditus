@@ -4,6 +4,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell_template.dart';
 
 class LibraryRepository {
   final AssetDataLoader assetLoader;
@@ -48,6 +49,8 @@ class LibraryRepository {
     _cachedBuiltInSpells ??= resolver.resolveAll(await assetLoader.loadSpellLibrary());
     return _cachedBuiltInSpells!;
   }
+
+  Future<List<SpellTemplate>> getTemplates() => assetLoader.loadSpellTemplates();
 
   Future<List<ResolvedSpell>> getAllSpells() async {
     // Refresh before resolving anything: getBuiltInSpells caches its result

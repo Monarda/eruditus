@@ -7,6 +7,7 @@ import 'package:eruditus/models/book.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 
 class AssetDataLoader {
   Future<List<BaseEffect>> loadBaseEffects() async {
@@ -31,6 +32,12 @@ class AssetDataLoader {
     final jsonString = await rootBundle.loadString('assets/data/spell_library.json');
     final list = jsonDecode(jsonString) as List<dynamic>;
     return list.map((e) => Spell.fromMap(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<SpellTemplate>> loadSpellTemplates() async {
+    final jsonString = await rootBundle.loadString('assets/data/spell_templates.json');
+    final list = jsonDecode(jsonString) as List<dynamic>;
+    return list.map((e) => SpellTemplate.fromMap(e as Map<String, dynamic>)).toList();
   }
 
   Future<List<Book>> loadBooks() async {
