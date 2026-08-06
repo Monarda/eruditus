@@ -428,6 +428,7 @@ class SpellEngine {
       GeneralEffectKind.visDestroyed => 'Destroys $value pawns\' worth of raw vis',
       GeneralEffectKind.spellTraceMagnitude =>
         'Reaches spell traces down to negative magnitude $value',
+      GeneralEffectKind.castingTotalReduction => 'Reduces the casting total by $value',
     };
 
     return formula.stressDie ? '$body, + a stress die (no botch)' : body;

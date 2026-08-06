@@ -21,6 +21,12 @@ enum GeneralEffectKind {
   /// "Detect the traces of magic of negative magnitude up to the magnitude of
   /// the guideline used − 2" — the one family measured in magnitudes.
   spellTraceMagnitude,
+
+  /// "Reduce the casting total for all supernatural powers of one realm …
+  /// by half the (level + 2 magnitudes)" — the two Perdo Vim rows that
+  /// penalize a casting total rather than sizing a Might, a spell level,
+  /// damage, vis, or a spell trace.
+  castingTotalReduction,
 }
 
 enum GeneralEffectMultiplier { half, one, two }

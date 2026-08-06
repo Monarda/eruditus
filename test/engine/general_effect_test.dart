@@ -98,6 +98,11 @@ void main() {
     const visDestroyedFormula =
         GeneralEffectFormula(kind: GeneralEffectKind.visDestroyed);
 
+    // pevi-G7: "Reduce casting total for specific effect type by spell
+    // level + 2 magnitudes".
+    const castingTotalReductionFormula = GeneralEffectFormula(
+        kind: GeneralEffectKind.castingTotalReduction, offsetMagnitudes: 2);
+
     test('a ward threshold is the chosen base', () {
       expect(derive(mightThreshold, chosen: 20)!.value, 20);
     });
@@ -190,6 +195,12 @@ void main() {
     test('a vis-destroyed formula prints its sentence', () {
       expect(derive(visDestroyedFormula, chosen: 20)!.sentence,
           "Destroys 20 pawns' worth of raw vis");
+    });
+
+    test('a casting-total-reduction formula prints its sentence', () {
+      // chosen 10 + offset 2 magnitudes -> 20 through the calculator.
+      expect(derive(castingTotalReductionFormula, chosen: 10)!.sentence,
+          'Reduces the casting total by 20');
     });
 
     test('a magnitudes unit converts after the multiplier, not before', () {
