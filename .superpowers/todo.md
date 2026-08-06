@@ -944,34 +944,49 @@ directly — see commit `ca3c28a`). None affect correctness.
   load, is a real change to startup cost — this item's premise gets tested for
   the first time then.
 
-### 34. Two Ward Guidelines Are Missing From the Catalog
-Found 2026-08-06, while authoring item 25's General effect formulas (Task 9).
-An extraction-fidelity bug, not a formula bug — deliberately left alone there
-because fixing it changes the General-guideline count the whole plan is built
-on (47).
+### 34. Guidelines Missing From the Catalog — ✅ FIXED (2026-08-06, commit `8a70889`)
+Found while authoring item 25's General effect formulas, fixed on the same
+branch before its whole-branch review.
 
-- [ ] Add the second Rego Animal ward bullet to `base_effects.json`
-- [ ] Split `reme-G` into its two Rego Mentem bullets
-- [ ] Check whether the same multi-bullet merge has silently dropped guidelines
-      in **non**-General rows — this was only noticed because General rows were
-      being counted one by one
-- **What was found.** The rulebook prints **12** ward bullets across the
-  General rows; the catalog holds **10**.
-  1. `rean-gen` (rulebook line 12706) keeps only the first bullet. The second,
-     *"Create a circle warding against animals from one realm (Divine, Faerie,
-     Infernal, or Magic) with Might less than or equal to the level of the
-     spell (Touch, Ring, Circle). Note that animals are not necessarily
-     associated with Animal, or vice versa"*, is absent entirely. It is a
-     genuinely distinct guideline — it wards *animals*, not *beings associated
-     with Animal*, and the rulebook says so explicitly.
-  2. `reme-G` (rulebook line 15183) merges two bullets into one description
-     reading "beings associated with Mentem **or spirits**". The rulebook
-     prints them separately: beings associated with Mentem, and spirits
-     belonging to one realm.
-- **Why it matters.** A magus cannot build the missing ward at all, and the
-  merged Mentem entry misstates one guideline as two things at once.
-- **Files:** `assets/data/base_effects.json`, and whatever in
-  `scripts/spell_import/` extracts guideline bullets from a `| General |` row.
+- [x] Compare every guideline table in the rulebook against `base_effects.json`
+      bullet by bullet
+- [x] Restore the four missing General guidelines
+- [x] Restore the five missing ordinary guidelines
+- [x] Confirm no recorded resolution was invalidated
+- [ ] **Still open: nobody knows why the extraction dropped them.** The
+      producing script is not in the tree — `scripts/spell_import/catalog.py`
+      only *reads* `base_effects.json`. If item 22 rebuilds this asset, it must
+      reproduce all 613 entries, and the count comparison below is the test to
+      run first.
+
+- **How it was measured.** Parse every `| Level | <Technique> <Form> Guideline |`
+  table, count `•` bullets per row, compare against catalog entries grouped by
+  technique/form/baseLevel. Result: **610 rulebook bullets against 604 catalog
+  entries, short in 9 places.** Worth re-running after any catalog rebuild.
+- **Two distinct failure modes**, which is why a single-cause fix would have
+  missed half of it:
+  1. *A multi-bullet row keeping only its first bullet* — `rean-gen`,
+     `muaq-gen`, `cran-35`, `cran-40`, `cran-50`.
+  2. *A row dropped entirely* — Muto Terram General, Creo Animal 45 and 55.
+     These had exactly one bullet each and produced no entry at all.
+  `reme-G` was a third variant: two bullets **merged** into one description
+  reading "beings associated with Mentem **or spirits**", which misstated one
+  guideline as two things at once.
+- **The four General ones** (this is why it blocked item 25): `rean-gen-2` (the
+  circle warding *animals*, which the rulebook explicitly distinguishes from
+  beings *associated with Animal*), `reme-G2` (spirits of one realm),
+  `muaq-gen-2` and `mute-gen` (the water and earth elemental conversions —
+  the family had air and fire but was missing the other two). Wards went 10 →
+  12, matching the rulebook exactly. General entries 47 → 51.
+- **The five ordinary ones** are Creo Animal 35–55, most of the
+  Characteristic-increase ladder. Safe to add: the only four Creo Animal
+  resolutions sit at levels 5 and 15, so no candidate set changed.
+- **Consequence recorded in item 25's plan (Task 11):** Rego Animal and Rego
+  Mentem now have *two* General candidates each, so spells in those arts need
+  a recorded ledger pick instead of auto-resolving.
+- **Files:** `assets/data/base_effects.json` (604 → 613 entries),
+  `scripts/spell_import/tests/test_general_catalog.py`,
+  `test/data/repositories/configuration_repository_test.dart`.
 
 ### 33. Write-Only Columns on the `spells` Table — **MAYBE, revisit when relevant**
 Filed as a *maybe*: nothing is wrong today, and this should be picked up only

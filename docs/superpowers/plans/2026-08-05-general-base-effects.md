@@ -69,7 +69,7 @@
 | `scripts/spell_import/emit.py` | `build_template()` |
 | `scripts/spell_import/extract_spells.py` | General branch; assertions 6 and 7 |
 | `scripts/spell_import/resolutions.json` | ledger entries for the 22 General spells |
-| `assets/data/base_effects.json` | 47 entries: `baseLevel: null`, `reference`, `effectFormula` |
+| `assets/data/base_effects.json` | 51 entries: `baseLevel: null`, `reference`, `effectFormula` |
 | `assets/data/spell_templates.json` | **new**, generated |
 
 **Ordering that matters:** Task 9 (authoring references and formulas) **must precede** Task 11 (ledger entries). Every General row has the same absent base level, so `resolutions.json` has no discriminator until the formulas exist. *Disenchant* faces 13 co-equal Perdo Vim candidates until `pevi-G9`'s formula — "guideline + 1 magnitude + a stress die (no botch); the spell must be a Ritual" — makes the pick textually forced. Reversing these two tasks reproduces item 32's failure by construction.
@@ -1829,6 +1829,16 @@ git commit -m "feat: General candidates, the ward design line, and the reference
 - Produces: a resolution entry per importable General spell.
 
 **Do not start this before Task 9 is committed.** The formulas are what make these picks textually forced rather than guesses.
+
+**Three arts now have two General candidates where they used to have one.** Restoring the nine guidelines the catalog had dropped (todo item 34, commit `8a70889`) means a General spell in these arts is no longer auto-resolved by having a single candidate — it needs a recorded pick:
+
+| Art | Candidates | How to tell them apart |
+|---|---|---|
+| Rego Animal | `rean-gen`, `rean-gen-2` | Beings *associated with Animal* versus a circle warding *animals*. The rulebook says explicitly that animals are not necessarily associated with Animal. `rean-gen-2` is the one that needs Ring/Circle. |
+| Rego Mentem | `reme-G`, `reme-G2` | Beings associated with Mentem versus *spirits* of one realm. A spell that names spirits takes `reme-G2`. |
+| Muto Aquam | `muaq-gen`, `muaq-gen-2` | Not ambiguous in practice — one does `+(Level)` damage, the other reduces a water elemental's Might pool. The formulas differ (`damage` versus `mightReduction`), so assertion 6 discriminates. |
+
+Muto Terram's `mute-gen` is new and is the only General candidate in its art, so it resolves without a ledger entry.
 
 - [ ] **Step 1: List what needs resolving**
 
