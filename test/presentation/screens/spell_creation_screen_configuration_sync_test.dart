@@ -138,6 +138,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Custom Reach'), findsOneWidget);
+
+      // AvailableParametersSynced should have been dispatched to
+      // SpellCreationBloc with the updated parameters list so its SpellEngine
+      // can resolve a General guideline's reference parameter by id (rather
+      // than silently degrading to charging the raw magnitude the next time
+      // one is looked up). Guards against `listenWhen` ever being narrowed
+      // back to comparing `modifiers` alone.
+      verify(() => spellCreationBloc.add(AvailableParametersSynced([customParameter]))).called(1);
     },
   );
 
