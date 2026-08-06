@@ -1122,11 +1122,47 @@ group('deriveGeneralEffect', () {
     expect(result.value, 2); // (20 - 10) / 5
   });
 
+  test('an offset inside the additive tier is worth 1 level, not 5', () {
+    // The discriminating case. Every other test here uses a chosen level of
+    // 10 or more, where a magnitude is worth 5 and `+ offset * 5` happens to
+    // agree with the calculator. At chosen 3 they diverge: the additive tier
+    // makes "+2 magnitudes" worth 2, so a base-3 DEO drains 5 Might — exactly
+    // the level of the spell it produces. Hardcoding `* 5` would claim 13.
+    expect(derive(mightReductionPlus2, chosen: 3)!.value, 5);
+  });
+
   test('the value does not change when Range, Duration or Target change', () {
     // This is the whole point of anchoring to the chosen base: a
     // Personal-range ward is five levels cheaper but keeps out the same Might.
-    expect(derive(mightThreshold, chosen: 20)!.value,
-        derive(mightThreshold, chosen: 20)!.value);
+    // Assert it against real breakdowns at two parameter sets, not against
+    // deriveGeneralEffect twice — that method takes no R/D/T, so calling it
+    // twice with the same arguments proves nothing.
+    final ward = wardGuideline(); // reference Touch/Ring/Circle
+
+    final printed = engine.calculateBreakdown(
+      baseEffect: ward, chosenBaseLevel: 20,
+      range: touch, duration: ring, target: circle,
+      selectedModifiers: const {}, requisites: const []);
+    final cheaper = engine.calculateBreakdown(
+      baseEffect: ward, chosenBaseLevel: 20,
+      range: personal, duration: sun, target: individual,
+      selectedModifiers: const {}, requisites: const []);
+
+    expect(cheaper.level, lessThan(printed.level),
+        reason: 'the cheaper parameter set must actually be cheaper, or this '
+            'test proves nothing');
+    expect(
+        engine.deriveGeneralEffect(baseEffect: ward, chosenBaseLevel: 20)!.value,
+        20,
+        reason: 'the Might threshold follows the chosen base, not the level');
+  });
+
+  test('returns null when the offset drives the value below 1', () {
+    // A level-1 guideline carrying a -2 offset has no meaningful strength.
+    // Degrade to null rather than throwing: this is called to render a
+    // sentence, and the Library tab must not crash on one bad saved spell.
+    // Task 8 is what stops such a spell being saved in the first place.
+    expect(derive(traceMagnitudeMinus2, chosen: 1), isNull);
   });
 
   test('a stress-die formula says so in its sentence', () {
@@ -1192,7 +1228,23 @@ class GeneralEffectValue {
       return null;
     }
 
-    final inLevels = chosenBaseLevel + formula.offsetMagnitudes * 5;
+    // Through the calculator, never `offsetMagnitudes * 5`. Above level 5 the
+    // two agree; inside the 1-5 additive tier they do not, and the calculator
+    // is right. A base-3 DEO produces a level-5 spell, so "the level of the
+    // spell + 2 magnitudes" is 5 — `* 5` would claim 13. See Global
+    // Constraints.
+    final int inLevels;
+    try {
+      inLevels = SpellLevelCalculator.calculate(
+          chosenBaseLevel, [formula.offsetMagnitudes]);
+    } on ArgumentError {
+      // A negative offset drove the value below 1, so there is no strength to
+      // report. Null rather than a throw: this renders a sentence, and one bad
+      // saved spell must not take out the Library tab. Task 8 stops such a
+      // spell being saved at all.
+      return null;
+    }
+
     final scaled = switch (formula.multiplier) {
       // Halving rounds DOWN. The only "round up" the rulebook states is for
       // magnitudes (line 12030), applied below; halving a spell level has no
@@ -1231,10 +1283,12 @@ class GeneralEffectValue {
 
 Rounding, decided: `half` rounds **down** (`~/`), so `pevi-G5` at chosen 15 gives `(15 + 20) ~/ 2 = 17`, which is what the test asserts. `ceil` appears exactly once, in the `magnitudes` unit conversion, because line 12030 states that rule explicitly for magnitudes and only for magnitudes.
 
+The multiplier is plain arithmetic on a level and does **not** go through the calculator — "twice the (level + 2 magnitudes)" doubles a number, it does not add magnitudes. Only the offset is magnitude arithmetic.
+
 - [ ] **Step 5: Run the tests**
 
-Run: `flutter test test/engine/`
-Expected: PASS.
+Run: `flutter test` and `flutter analyze`.
+Expected: PASS. `deriveGeneralEffect` is new and unreferenced, so a focused run would be adequate for it alone — but this step also adds `GeneralEffectValue` to a file Task 2's tests cover, so run the whole Dart suite. `integration_test/` is not needed here: no bloc, screen or existing signature changes.
 
 - [ ] **Step 6: Commit**
 
