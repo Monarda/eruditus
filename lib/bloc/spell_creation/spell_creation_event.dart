@@ -115,6 +115,17 @@ class AvailableModifiersSynced extends SpellCreationEvent {
   List<Object?> get props => [modifiers];
 }
 
+/// Dispatched whenever ConfigurationBloc's known parameters change, so the
+/// SpellEngine can resolve a General guideline's reference parameter (e.g.
+/// Touch for a ward) by id without a restart. Mirrors
+/// [AvailableModifiersSynced].
+class AvailableParametersSynced extends SpellCreationEvent {
+  final List<Parameter> parameters;
+  const AvailableParametersSynced(this.parameters);
+  @override
+  List<Object?> get props => [parameters];
+}
+
 /// The caster's own statement about a spell's Ritual status — the part the
 /// rulebook leaves to judgement rather than to the spell's configuration.
 class RitualDeclarationChanged extends SpellCreationEvent {

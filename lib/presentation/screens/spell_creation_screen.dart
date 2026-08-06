@@ -34,14 +34,17 @@ class SpellCreationScreen extends StatelessWidget {
     // (rather than taken as static constructor lists) so a custom item added
     // in the Settings tab becomes selectable here immediately, without an app
     // restart and without needing to leave/re-enter this tab. Whenever the
-    // known modifiers change, AvailableModifiersSynced keeps
-    // SpellCreationBloc's SpellEngine in sync too, since the engine resolves
-    // a selected modifier option's magnitude by id lookup and would otherwise
-    // not recognize a newly added custom modifier.
+    // known modifiers or parameters change, AvailableModifiersSynced /
+    // AvailableParametersSynced keep SpellCreationBloc's SpellEngine in sync
+    // too: the engine resolves a selected modifier option's magnitude by id
+    // lookup, and a General guideline's reference parameter the same way,
+    // and would otherwise not recognize a newly added custom one.
     return BlocListener<ConfigurationBloc, ConfigurationState>(
-      listenWhen: (previous, current) => previous.modifiers != current.modifiers,
+      listenWhen: (previous, current) =>
+          previous.modifiers != current.modifiers || previous.parameters != current.parameters,
       listener: (context, configState) {
         context.read<SpellCreationBloc>().add(AvailableModifiersSynced(configState.modifiers));
+        context.read<SpellCreationBloc>().add(AvailableParametersSynced(configState.parameters));
       },
       child: BlocConsumer<SpellCreationBloc, SpellCreationState>(
         listener: (context, state) {

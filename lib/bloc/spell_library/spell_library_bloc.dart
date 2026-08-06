@@ -51,7 +51,8 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
           // "Technique Form" with no level suffix.
           try {
             final breakdown = spellEngine.calculateBreakdown(
-              baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!,
+              baseEffect: s.baseEffect!, chosenBaseLevel: s.record.chosenBaseLevel,
+              range: s.range!, duration: s.duration!,
               target: s.target!, selectedModifiers: s.selectedModifiers,
               requisites: s.requisites, adjustments: s.adjustments,
               ritualDeclaration: s.ritualDeclaration,

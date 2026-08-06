@@ -170,6 +170,8 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       ));
     } else if (event is AvailableModifiersSynced) {
       spellEngine.updateModifiers(event.modifiers);
+    } else if (event is AvailableParametersSynced) {
+      spellEngine.updateParameters(event.parameters);
     } else if (event is RitualDeclarationChanged) {
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
@@ -225,6 +227,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
     final breakdown = spellEngine.calculateBreakdown(
       baseEffect: state.draft.baseEffect!,
+      chosenBaseLevel: state.draft.chosenBaseLevel,
       range: state.draft.range!,
       duration: state.draft.duration!,
       target: state.draft.target!,
@@ -261,7 +264,8 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     for (final s in candidateSuggestions) {
       try {
         final suggestionBreakdown = spellEngine.calculateBreakdown(
-          baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+          baseEffect: s.baseEffect!, chosenBaseLevel: s.record.chosenBaseLevel,
+          range: s.range!, duration: s.duration!, target: s.target!,
           selectedModifiers: s.selectedModifiers, requisites: s.requisites,
           adjustments: s.adjustments,
           ritualDeclaration: s.ritualDeclaration,

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
@@ -18,9 +19,16 @@ class SpellEngine {
   // [updateModifiers].
   List<Modifier> allModifiers;
 
+  // Mutable for the same reason as [allModifiers]: kept in sync so
+  // [_parameterById] can resolve a General guideline's reference parameter
+  // (e.g. Touch for a ward) without the caller having to thread the whole
+  // catalog through every call.
+  List<Parameter> allParameters;
+
   SpellEngine({
     required this.allSpells,
     this.allModifiers = const [],
+    this.allParameters = const [],
   });
 
   /// Replaces the known modifiers used for magnitude lookups in
@@ -30,6 +38,15 @@ class SpellEngine {
   void updateModifiers(List<Modifier> modifiers) {
     allModifiers = modifiers;
   }
+
+  /// Replaces the known parameters used to resolve a reference id in
+  /// [_parameterContribution]. Mirrors [updateModifiers].
+  void updateParameters(List<Parameter> parameters) {
+    allParameters = parameters;
+  }
+
+  Parameter? _parameterById(String id) =>
+      allParameters.where((p) => p.id == id).firstOrNull;
 
   List<String> validateSpellDraft(SpellDraft draft) {
     final errors = <String>[];
@@ -91,6 +108,7 @@ class SpellEngine {
       try {
         calculateBreakdown(
           baseEffect: draft.baseEffect!,
+          chosenBaseLevel: draft.chosenBaseLevel,
           range: draft.range!,
           duration: draft.duration!,
           target: draft.target!,
@@ -109,6 +127,7 @@ class SpellEngine {
 
   LevelBreakdown calculateBreakdown({
     required BaseEffect baseEffect,
+    int? chosenBaseLevel,
     required Parameter range,
     required Parameter duration,
     required Parameter target,
@@ -117,15 +136,23 @@ class SpellEngine {
     List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) {
+    final baseLevel = baseEffect.isGeneral ? chosenBaseLevel : baseEffect.baseLevel;
+    if (baseLevel == null) {
+      throw ArgumentError.value(
+        chosenBaseLevel,
+        'chosenBaseLevel',
+        'A General guideline needs a chosen level',
+      );
+    }
+
     final contributions = <LevelContribution>[
-      // TASK 6 replaces this with the chosen level for General effects.
       LevelContribution(
           label: 'Base effect · ${baseEffect.description}',
-          magnitude: baseEffect.baseLevel!,
+          magnitude: baseLevel,
           isBase: true),
-      LevelContribution(label: 'Range · ${range.name}', magnitude: range.magnitude),
-      LevelContribution(label: 'Duration · ${duration.name}', magnitude: duration.magnitude),
-      LevelContribution(label: 'Target · ${target.name}', magnitude: target.magnitude),
+      _parameterContribution('Range', range, baseEffect.reference.rangeId),
+      _parameterContribution('Duration', duration, baseEffect.reference.durationId),
+      _parameterContribution('Target', target, baseEffect.reference.targetId),
     ];
 
     for (final requisite in requisites) {
@@ -162,8 +189,7 @@ class SpellEngine {
         if (!contribution.isBase) contribution.magnitude,
     ];
 
-    // TASK 6 replaces this with the chosen level for General effects.
-    final rawLevel = SpellLevelCalculator.calculate(baseEffect.baseLevel!, magnitudes);
+    final rawLevel = SpellLevelCalculator.calculate(baseLevel, magnitudes);
 
     final ritualStatus = _deriveRitualStatus(
       baseEffect: baseEffect,
@@ -186,6 +212,31 @@ class SpellEngine {
       rawLevel: rawLevel,
       ritualStatus: ritualStatus,
       contributions: contributions,
+    );
+  }
+
+  /// One Range/Duration/Target line, charged as the difference between what
+  /// the spell actually uses and what its guideline was priced against.
+  ///
+  /// For an ordinary guideline the reference is Personal/Momentary/Individual,
+  /// all magnitude 0, so the delta equals the raw magnitude and the emitted
+  /// label is unchanged. That identity is why this is one code path and not a
+  /// branch on `isGeneral`.
+  LevelContribution _parameterContribution(
+      String slot, Parameter actual, String referenceId) {
+    if (actual.id == referenceId) {
+      return LevelContribution(label: '$slot · ${actual.name}', magnitude: 0);
+    }
+
+    final reference = _parameterById(referenceId);
+    if (reference == null || reference.magnitude == 0) {
+      return LevelContribution(
+          label: '$slot · ${actual.name}', magnitude: actual.magnitude);
+    }
+
+    return LevelContribution(
+      label: '$slot · ${actual.name} (guideline assumes ${reference.name})',
+      magnitude: actual.magnitude - reference.magnitude,
     );
   }
 
@@ -224,6 +275,7 @@ class SpellEngine {
 
   int calculateSpellLevel({
     required BaseEffect baseEffect,
+    int? chosenBaseLevel,
     required Parameter range,
     required Parameter duration,
     required Parameter target,
@@ -234,6 +286,7 @@ class SpellEngine {
   }) =>
       calculateBreakdown(
         baseEffect: baseEffect,
+        chosenBaseLevel: chosenBaseLevel,
         range: range,
         duration: duration,
         target: target,
@@ -263,7 +316,8 @@ class SpellEngine {
       matches.removeWhere((s) {
         try {
           levels[s.id] = calculateSpellLevel(
-            baseEffect: s.baseEffect!, range: s.range!, duration: s.duration!, target: s.target!,
+            baseEffect: s.baseEffect!, chosenBaseLevel: s.record.chosenBaseLevel,
+            range: s.range!, duration: s.duration!, target: s.target!,
             selectedModifiers: s.selectedModifiers, requisites: s.requisites,
             adjustments: s.adjustments, ritualDeclaration: s.ritualDeclaration,
           );

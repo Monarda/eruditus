@@ -8,6 +8,7 @@ import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/level_adjustment.dart';
@@ -693,6 +694,92 @@ void main() {
           engine.findSimilarSpells('Muto', 'Imaginem', referenceLevel: 40);
 
       expect(nearForty.first.id, 'adjusted');
+    });
+  });
+
+  group('reference deltas', () {
+    Parameter param(String id, String name, String category, int magnitude) => Parameter(
+        id: id, name: name, category: category, magnitude: magnitude,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+    final touch = param('range-touch', 'Touch', 'Range', 1);
+    final voice = param('range-voice', 'Voice', 'Range', 2);
+    final personal = param('range-personal', 'Personal', 'Range', 0);
+    final ring = param('duration-ring', 'Ring', 'Duration', 2);
+    final sun = param('duration-sun', 'Sun', 'Duration', 2);
+    final momentary = param('duration-momentary', 'Momentary', 'Duration', 0);
+    final circle = param('target-circle', 'Circle', 'Target', 0);
+    final individual = param('target-individual', 'Individual', 'Target', 0);
+
+    final engine = SpellEngine(
+      allSpells: const [],
+      allParameters: [touch, voice, personal, ring, sun, momentary, circle, individual],
+    );
+
+    final creoIgnem10 = BaseEffect(
+      id: 'crig-10', technique: 'Creo', form: 'Ignem',
+      description: 'Create flame', baseLevel: 10,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+
+    BaseEffect wardGuideline() => BaseEffect(
+        id: 'rean-gen', technique: 'Rego', form: 'Animal',
+        description: 'Ward against beings associated with Animal',
+        baseLevel: null,
+        reference: const ParameterTriple(
+            rangeId: 'range-touch',
+            durationId: 'duration-ring',
+            targetId: 'target-circle'),
+        provenance: Provenance(source: PublicationSource.published,
+            citations: [Citation(bookId: 'arm5-core')]));
+
+    test('a ward at its reference parameters is exactly the chosen level', () {
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: wardGuideline(), chosenBaseLevel: 20,
+        range: touch, duration: ring, target: circle,
+        selectedModifiers: const {}, requisites: const []);
+
+      expect(breakdown.level, 20);
+    });
+
+    test('a cheaper parameter set refunds the difference', () {
+      // Personal(0)+Sun(2)+Individual(0) = 2 against a reference of
+      // Touch(1)+Ring(2)+Circle(0) = 3, so one magnitude comes back.
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: wardGuideline(), chosenBaseLevel: 20,
+        range: personal, duration: sun, target: individual,
+        selectedModifiers: const {}, requisites: const []);
+
+      expect(breakdown.level, 15);
+    });
+
+    test('the breakdown names the reference it is charging against', () {
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: wardGuideline(), chosenBaseLevel: 20,
+        range: personal, duration: sun, target: individual,
+        selectedModifiers: const {}, requisites: const []);
+
+      final rangeLine = breakdown.contributions
+          .firstWhere((c) => c.label.startsWith('Range'));
+
+      expect(rangeLine.label, 'Range · Personal (guideline assumes Touch)');
+      expect(rangeLine.magnitude, -1);
+    });
+
+    test('an ordinary guideline produces contributions identical to before', () {
+      // This is the argument for there being one code path rather than a
+      // branch: a standard reference makes every delta equal the raw cost.
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: creoIgnem10, range: voice, duration: sun, target: individual,
+        selectedModifiers: const {}, requisites: const []);
+
+      expect(breakdown.contributions.map((c) => '${c.label}|${c.magnitude}'), [
+        'Base effect · Create flame|10',
+        'Range · Voice|2',
+        'Duration · Sun|2',
+        'Target · Individual|0',
+      ]);
+      expect(breakdown.level, 30);
     });
   });
 }
