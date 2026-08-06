@@ -84,6 +84,20 @@ void main() {
         offsetMagnitudes: -2,
         unit: GeneralEffectUnit.magnitudes);
 
+    // Discriminates conversion order: doubles the level, THEN converts to
+    // magnitudes. No published guideline needs this combination, but the
+    // engine must still get the order right.
+    const doubleMagnitudes = GeneralEffectFormula(
+        kind: GeneralEffectKind.spellTraceMagnitude,
+        multiplier: GeneralEffectMultiplier.two,
+        unit: GeneralEffectUnit.magnitudes);
+
+    const targetSpellLevelFormula =
+        GeneralEffectFormula(kind: GeneralEffectKind.targetSpellLevel);
+
+    const visDestroyedFormula =
+        GeneralEffectFormula(kind: GeneralEffectKind.visDestroyed);
+
     test('a ward threshold is the chosen base', () {
       expect(derive(mightThreshold, chosen: 20)!.value, 20);
     });
@@ -121,30 +135,31 @@ void main() {
       expect(derive(mightReductionPlus2, chosen: 3)!.value, 5);
     });
 
-    test('the value does not change when Range, Duration or Target change', () {
-      // This is the whole point of anchoring to the chosen base: a
-      // Personal-range ward is five levels cheaper but keeps out the same Might.
-      // Assert it against real breakdowns at two parameter sets, not against
-      // deriveGeneralEffect twice — that method takes no R/D/T, so calling it
-      // twice with the same arguments proves nothing.
-      final ward = wardGuideline(); // reference Touch/Ring/Circle
+    test('the ward keeps out the same Might at a cheaper parameter set', () {
+      // Independence from Range/Duration/Target is structural: deriveGeneralEffect
+      // takes none of them, so it cannot track the computed level. What this test
+      // pins is the pair of numbers that makes the design visible — the same ward,
+      // same chosen level, is FIVE LEVELS CHEAPER at Personal/Sun/Individual and
+      // still wards exactly Might 20.
+      final ward = wardGuideline();
 
-      final printed = engine.calculateBreakdown(
-          baseEffect: ward, chosenBaseLevel: 20,
-          range: touch, duration: ring, target: circle,
-          selectedModifiers: const {}, requisites: const []);
-      final cheaper = engine.calculateBreakdown(
-          baseEffect: ward, chosenBaseLevel: 20,
-          range: personal, duration: sun, target: individual,
-          selectedModifiers: const {}, requisites: const []);
+      int levelAt(Parameter r, Parameter d, Parameter t) => engine
+          .calculateBreakdown(
+              baseEffect: ward, chosenBaseLevel: 20,
+              range: r, duration: d, target: t,
+              selectedModifiers: const {}, requisites: const [])
+          .level;
 
-      expect(cheaper.level, lessThan(printed.level),
-          reason: 'the cheaper parameter set must actually be cheaper, or this '
-              'test proves nothing');
-      expect(
-          engine.deriveGeneralEffect(baseEffect: ward, chosenBaseLevel: 20)!.value,
-          20,
-          reason: 'the Might threshold follows the chosen base, not the level');
+      final printed = levelAt(touch, ring, circle);
+      final cheaper = levelAt(personal, sun, individual);
+      expect(printed, 20);
+      expect(cheaper, 15);
+
+      final strength =
+          engine.deriveGeneralEffect(baseEffect: ward, chosenBaseLevel: 20)!.value;
+      expect(strength, 20);
+      expect(strength, isNot(cheaper),
+          reason: 'strength must not track the computed level');
     });
 
     test('returns null when the offset drives the value below 1', () {
@@ -160,9 +175,54 @@ void main() {
           contains('+ a stress die (no botch)'));
     });
 
+    test('a non-stress-die formula omits the stress die clause', () {
+      // Guards against an implementation that appends the clause
+      // unconditionally, which would still pass the test above.
+      expect(derive(mightThreshold, chosen: 20)!.sentence,
+          isNot(contains('stress die')));
+    });
+
+    test('a target-spell-level formula prints its sentence', () {
+      expect(derive(targetSpellLevelFormula, chosen: 20)!.sentence,
+          'Affects effects of level 20 or less');
+    });
+
+    test('a vis-destroyed formula prints its sentence', () {
+      expect(derive(visDestroyedFormula, chosen: 20)!.sentence,
+          "Destroys 20 pawns' worth of raw vis");
+    });
+
+    test('a magnitudes unit converts after the multiplier, not before', () {
+      // chosen 12, multiplier two: the level scales to 24 before conversion,
+      // giving ceil(24 / 5) = 5. Converting first (ceil(12 / 5) = 3) and then
+      // doubling would wrongly give 6.
+      expect(derive(doubleMagnitudes, chosen: 12)!.value, 5);
+    });
+
     test('returns null for a non-General base effect', () {
       expect(
           engine.deriveGeneralEffect(baseEffect: creoIgnem10, chosenBaseLevel: null),
+          isNull);
+    });
+
+    test('returns null for a non-General base effect even with a level supplied', () {
+      // Isolates the `isGeneral` clause from the `chosenBaseLevel == null`
+      // clause: this case can only fail the first one.
+      expect(
+          engine.deriveGeneralEffect(baseEffect: creoIgnem10, chosenBaseLevel: 20),
+          isNull);
+    });
+
+    test('returns null for a General base effect with no effectFormula', () {
+      final noFormula = BaseEffect(
+          id: 'general-no-formula', technique: 'Perdo', form: 'Vim',
+          description: 'General guideline missing its formula',
+          baseLevel: null,
+          provenance: Provenance(source: PublicationSource.published,
+              citations: [Citation(bookId: 'arm5-core')]));
+
+      expect(
+          engine.deriveGeneralEffect(baseEffect: noFormula, chosenBaseLevel: 20),
           isNull);
     });
 
