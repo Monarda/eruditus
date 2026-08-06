@@ -75,3 +75,28 @@ class ParseDefinitiveEditionTest(unittest.TestCase):
         variable = next(b for b in self.blocks
                         if b.name == "Sight of the True Form")
         self.assertIsNone(variable.design_line)
+
+    def test_seven_spells_have_no_design_line(self):
+        # The exact-set regression guard for the _DESIGN widening: 8 spells
+        # had no design line before "(As ward guideline)" was recognised;
+        # Ward against the Beasts of Legend resolved out of that set, leaving
+        # these 7. Pinning the full set (not just a count, and not just the
+        # two spot-checked above) is what would notice a future regex change
+        # quietly moving a *different* spell instead.
+        #
+        # Ward against Faeries of the Mountain belongs on this list on
+        # purpose: it has no design line at all. Its entry cross-references
+        # "Ward Against Faeries of the Waters" in prose ("As Ward Against
+        # Faeries of the Waters (ReAq Gen), but for faeries of earth and
+        # stone") rather than printing a parenthetical, so it is not a
+        # candidate for the widening and stays blocked.
+        missing = sorted(b.name for b in self.blocks if b.design_line is None)
+        self.assertEqual(missing, [
+            "Aegis of the Hearth",
+            "Enchantment of the Scrying Pool",
+            "Hermes' Portal",
+            "Sight of the True Form",
+            "Ward against Faeries of the Mountain",
+            "Whispering Winds",
+            "Wizard's Vigil",
+        ])

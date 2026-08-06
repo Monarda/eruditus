@@ -55,11 +55,23 @@ class CandidatesTest(unittest.TestCase):
     def test_reference_cost_sums_the_triple(self):
         # Touch(1) + Ring(2) + Circle(0)
         self.assertEqual(self.catalog.reference_cost("rean-gen"), 3)
-        # No reference key: Personal(0) + Momentary(0) + Individual(0)
+        # No reference key: Personal(0) + Momentary(0) + Individual(0). Weak
+        # on its own -- all three defaults are magnitude 0 by definition, so
+        # this pins the value without proving the lookup actually built the
+        # default triple and summed it via `by_id`; a shortcut that special-
+        # cased "no reference -> 0" would pass this line identically. The
+        # mixed case below is what actually discriminates.
         self.assertEqual(self.catalog.reference_cost("pevi-G3"), 0)
+        # A mixed triple: two defaults and one that costs. This is the case
+        # that discriminates -- a lookup that summed only the non-default key,
+        # or one that bailed out to 0 whenever it saw a default, gets this
+        # wrong. rean-gen (3) and pevi-G3 (0) do not distinguish those bugs.
+        # inim-G's reference is Personal/Momentary/Vision, and Vision is
+        # magnitude 4.
+        self.assertEqual(self.catalog.reference_cost("inim-G"), 4)
 
-    def test_reference_cost_names_an_unknown_effect_id(self):
-        with self.assertRaises(KeyError):
+    def test_reference_cost_message_names_the_unknown_effect_id(self):
+        with self.assertRaisesRegex(KeyError, "not-a-real-effect-id"):
             self.catalog.reference_cost("not-a-real-effect-id")
 
 
