@@ -944,6 +944,35 @@ directly — see commit `ca3c28a`). None affect correctness.
   load, is a real change to startup cost — this item's premise gets tested for
   the first time then.
 
+### 34. Two Ward Guidelines Are Missing From the Catalog
+Found 2026-08-06, while authoring item 25's General effect formulas (Task 9).
+An extraction-fidelity bug, not a formula bug — deliberately left alone there
+because fixing it changes the General-guideline count the whole plan is built
+on (47).
+
+- [ ] Add the second Rego Animal ward bullet to `base_effects.json`
+- [ ] Split `reme-G` into its two Rego Mentem bullets
+- [ ] Check whether the same multi-bullet merge has silently dropped guidelines
+      in **non**-General rows — this was only noticed because General rows were
+      being counted one by one
+- **What was found.** The rulebook prints **12** ward bullets across the
+  General rows; the catalog holds **10**.
+  1. `rean-gen` (rulebook line 12706) keeps only the first bullet. The second,
+     *"Create a circle warding against animals from one realm (Divine, Faerie,
+     Infernal, or Magic) with Might less than or equal to the level of the
+     spell (Touch, Ring, Circle). Note that animals are not necessarily
+     associated with Animal, or vice versa"*, is absent entirely. It is a
+     genuinely distinct guideline — it wards *animals*, not *beings associated
+     with Animal*, and the rulebook says so explicitly.
+  2. `reme-G` (rulebook line 15183) merges two bullets into one description
+     reading "beings associated with Mentem **or spirits**". The rulebook
+     prints them separately: beings associated with Mentem, and spirits
+     belonging to one realm.
+- **Why it matters.** A magus cannot build the missing ward at all, and the
+  merged Mentem entry misstates one guideline as two things at once.
+- **Files:** `assets/data/base_effects.json`, and whatever in
+  `scripts/spell_import/` extracts guideline bullets from a `| General |` row.
+
 ### 33. Write-Only Columns on the `spells` Table — **MAYBE, revisit when relevant**
 Filed as a *maybe*: nothing is wrong today, and this should be picked up only
 when a task actually lands in this area — most likely item 9 (tag filtering)

@@ -1512,9 +1512,14 @@ class GeneralCatalogTest(unittest.TestCase):
 
     def test_every_ward_is_priced_against_touch_ring_circle(self):
         # Every ward row in the rulebook ends "(Touch, Ring, Circle)".
+        # Exactly 10 in the catalog: rean-gen, reaq-gen, reau-gen, reco-gen,
+        # rehe-gen, reig-gen, reim-G, reme-G, rete-G, revi-G1. Assert equality,
+        # not a lower bound — a bound would not notice a ward losing its
+        # formula. See the catalog-gap note in Step 3 for why this is 10 and
+        # not the 12 ward bullets the rulebook prints.
         wards = [e for e in self.general
                  if e["effectFormula"]["kind"] == "mightThreshold"]
-        self.assertGreaterEqual(len(wards), 11)
+        self.assertEqual(len(wards), 10)
         for effect in wards:
             with self.subTest(effect["id"]):
                 self.assertEqual(effect["reference"], {
@@ -1540,21 +1545,75 @@ Open the rulebook at `../Ars-Magica-Open-License/reviewed/Ars Magica - Definitiv
 
 Do **not** infer a reference from a spell's design line. Task 10's assertion 6 is the only automated check General spells will ever have, and inferring the reference from the thing the assertion compares against makes it vacuous.
 
-**Formula** — read it off the row's wording:
+**Formula** — transcribe from the table below. Every one of the 47 rows has been read off the rulebook and checked against the catalog description; **transcribe it, do not re-derive it.** If a row looks wrong to you, say so in your report rather than changing it — a wrong pick here passes every automated test, so a disagreement is worth surfacing, not silently resolving.
 
-| Row wording | `kind` | `multiplier` | `offsetMagnitudes` | `unit` | `stressDie` |
-|---|---|---|---|---|---|
-| "Might ≤ the level of the spell" | `mightThreshold` | `one` | 0 | `levels` | false |
-| "Reduce … Might Score by the level of the spell + 2 magnitudes" | `mightReduction` | `one` | 2 | `levels` | false |
-| "+(Level) damage" / "+level damage" | `damage` | `one` | 0 | `levels` | false |
-| "twice the (level + 2 magnitudes)" | `targetSpellLevel` | `two` | 2 | `levels` | false |
-| "the level + 4 magnitudes … + a stress die (no botch)" | `targetSpellLevel` | `one` | 4 | `levels` | true |
-| "half the (level + 4 magnitudes … stress die)" | `targetSpellLevel` | `half` | 4 | `levels` | true |
-| "level + 5 magnitudes" | `targetSpellLevel` | `one` | 5 | `levels` | false |
-| "an amount of raw vis equal to the level of the spell" | `visDestroyed` | `one` | 0 | `levels` | false |
-| "negative magnitude … up to the magnitude of the guideline − 2" | `spellTraceMagnitude` | `one` | −2 | `magnitudes` | false |
+`multiplier` omitted means `one`; `unit` omitted means `levels`; `offset` is `offsetMagnitudes`; `stress` means `stressDie: true`. `reference` blank means **omit the key entirely** (it defaults to Personal/Momentary/Individual); `T/R/C` means Touch/Ring/Circle.
 
-Two rows need care. The elemental rows ("reducing the elemental's Might pool by the level of the spell +2 magnitudes") are `mightReduction`, offset 2 — the same as `pevi-G3`, even though the prose differs. `pevi-G8` ("Age a spell trace to a negative magnitude equal to the guideline used") is `spellTraceMagnitude`, offset 0, unit `magnitudes` — note it is *equal to*, not *minus 2*, unlike `invi-G`.
+| id | kind | mult | offset | unit | stress | reference |
+|---|---|---|---|---|---|---|
+| `rean-gen` | mightThreshold | | 0 | | | T/R/C |
+| `craq-gen` | damage | | 0 | | | |
+| `muaq-gen` | damage | | 0 | | | |
+| `peaq-gen` | mightReduction | | 2 | | | |
+| `reaq-gen` | mightThreshold | | 0 | | | T/R/C |
+| `muau-gen` | damage | | 0 | | | |
+| `muau-gen-2` | mightReduction | | 2 | | | |
+| `peau-gen` | mightReduction | | 2 | | | |
+| `reau-gen` | mightThreshold | | 0 | | | T/R/C |
+| `inco-gen` | targetSpellLevel | | 0 | | | |
+| `reco-gen` | mightThreshold | | 0 | | | T/R/C |
+| `rehe-gen` | mightThreshold | | 0 | | | T/R/C |
+| `muig-gen` | mightReduction | | 2 | | | |
+| `peig-gen` | mightReduction | | 2 | | | |
+| `reig-gen` | mightThreshold | | 0 | | | T/R/C |
+| `inim-G` | targetSpellLevel | | 0 | | | Personal/Momentary/**Vision** |
+| `reim-G` | mightThreshold | | 0 | | | T/R/C |
+| `peme-G` | mightReduction | | **0** | | | |
+| `reme-G` | mightThreshold | | 0 | | | T/R/C |
+| `pete-G` | mightReduction | | 2 | | | |
+| `rete-G` | mightThreshold | | 0 | | | T/R/C |
+| `crvi-G1` | targetSpellLevel | two | 1 | | | |
+| `crvi-G2` | targetSpellLevel | | 1 | | | |
+| `crvi-G3` | targetSpellLevel | half | 1 | | | |
+| `crvi-G4` | spellTraceMagnitude | | **−1** | magnitudes | | |
+| `invi-G` | spellTraceMagnitude | | **−2** | magnitudes | | |
+| `muvi-G1` | targetSpellLevel | two | 1 | | | |
+| `muvi-G2` | targetSpellLevel | | 1 | | | |
+| `muvi-G3` | targetSpellLevel | half | 1 | | | |
+| `pevi-G1` | targetSpellLevel | two | 2 | | | |
+| `pevi-G2` | targetSpellLevel | | 4 | | stress | |
+| `pevi-G3` | mightReduction | | 2 | | | |
+| `pevi-G4` | mightReduction | | 2 | | | |
+| `pevi-G5` | targetSpellLevel | half | 4 | | stress | |
+| `pevi-G6` | **castingTotalReduction** | half | 2 | | | |
+| `pevi-G7` | **castingTotalReduction** | | 2 | | | |
+| `pevi-G8` | spellTraceMagnitude | | **0** | magnitudes | | |
+| `pevi-G9` | targetSpellLevel | | 1 | | stress | |
+| `pevi-G10` | targetSpellLevel | two | 2 | | stress | |
+| `pevi-G11` | targetSpellLevel | | 2 | | stress | |
+| `pevi-G12` | targetSpellLevel | | 4 | | stress | |
+| `pevi-G13` | visDestroyed | | 0 | | | |
+| `revi-G1` | mightThreshold | | 0 | | | T/R/C |
+| `revi-G2` | targetSpellLevel | | 2 | | | |
+| `revi-G3` | targetSpellLevel | | 5 | | | |
+| `revi-G4` | targetSpellLevel | half | 5 | | | |
+| `revi-G5` | targetSpellLevel | | 2 | | | |
+
+Rows worth a second look, all verified against the rulebook:
+
+- **`peme-G` takes offset 0, not 2.** "Reduce a spirit's Might by spell level" — plain, unlike the elemental rows.
+- **The elemental rows** (`muau-gen-2`, `muig-gen`, `peaq-gen`, `peau-gen`, `peig-gen`, `pete-G`) are `mightReduction` offset 2, the same as `pevi-G3`, even though the prose says "Might pool" or "Might Score" and reads quite differently.
+- **The three spell-trace rows all differ.** `crvi-G4` is "less than the magnitude of the guideline −1" → −1. `invi-G` is "up to the magnitude of the guideline −2" → −2. `pevi-G8` is "equal to the guideline used" → 0.
+- **`inco-gen` is `targetSpellLevel`, not a Corpus-specific kind.** Its "level 10" is the mundane-disguise threshold, a fixed number in the prose, not a formula input; the formula tracks "spells equal to or lower than this spell's level".
+- **`pevi-G9` and `pevi-G10` say "guideline level used"**, not "level of the spell". Same thing for our purposes — the chosen base *is* the guideline level — but do not let the wording tempt you into a different `kind`.
+
+**Step 3a: `castingTotalReduction` is a new `GeneralEffectKind`.** Two rows need it and the enum has no home for them: `pevi-G6` ("Reduce the casting total for all supernatural powers of one realm … by half the (level + 2 magnitudes)") and `pevi-G7` (the same, for a specific effect type, undoubled). A casting-total penalty is not a Might, a spell level, damage, vis, or a spell trace, and mapping it onto `mightReduction` would make the rendered sentence say "Reduces Might by 25" for a spell that does nothing of the kind. Add the value in three places:
+
+1. `lib/models/general_effect_formula.dart` — the enum, with a doc comment quoting the guideline.
+2. `lib/engine/spell_engine.dart` — an `_effectSentence` arm: `'Reduces the casting total by $value'`.
+3. `test/models/general_effect_formula_test.dart` — the round-trip loop must cover the new value, and `test/engine/general_effect_test.dart` must assert the new sentence.
+
+**Catalog gap, out of scope — do not fix it here.** The rulebook prints **12** ward bullets; the catalog holds **10**. `rean-gen` drops the second Rego Animal bullet ("Create a circle warding against animals from one realm…", rulebook line 12706), and `reme-G` merges the two Rego Mentem bullets (line 15183) into one entry. That is an extraction-fidelity problem in the catalog, not a formula problem, and fixing it would change the count this whole plan is built on. It is filed as its own todo item. Author formulas for the 10 that exist.
 
 - [ ] **Step 4: Run the table test**
 
@@ -1563,13 +1622,15 @@ Expected: PASS.
 
 - [ ] **Step 5: Run both full suites**
 
-Run: `python -m unittest discover -s scripts/spell_import/tests -t . && flutter test`
-Expected: PASS.
+Run: `python -m unittest discover -s scripts/spell_import/tests -t . && flutter test && flutter analyze`
+Expected: PASS. Then confirm the asset diff is the values you changed and nothing else: `git diff --stat assets/data/base_effects.json` must show roughly 47 changed lines, not thousands. See Global Constraints.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add assets/data/base_effects.json scripts/spell_import/tests/test_general_catalog.py
+git add assets/data/base_effects.json scripts/spell_import/tests/test_general_catalog.py \
+        lib/models/general_effect_formula.dart lib/engine/spell_engine.dart \
+        test/models/general_effect_formula_test.dart test/engine/general_effect_test.dart
 git commit -m "feat: author reference parameters and effect formulas for the 47 General guidelines"
 ```
 
