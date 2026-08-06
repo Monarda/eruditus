@@ -1762,6 +1762,14 @@ class ReferenceOracleTest(unittest.TestCase):
     def test_design_line_tokens_equal_actual_cost_minus_reference_cost(self):
         for template in self.templates:
             block = self.blocks_by_name[template["name"]]
+            # `SpellBlock.design_line` is `str | None`. A spell with no design
+            # line prints no magnitudes to compare, so there is nothing for
+            # this oracle to say about it — skip rather than crash. Task 12's
+            # review confirms how many are skipped; if that number is not
+            # small, the ledger is importing spells this assertion cannot
+            # actually vouch for.
+            if block.design_line is None:
+                continue
             design = designline.parse_design(block.design_line)
 
             actual = sum(self.magnitudes[template[key]] for key in
