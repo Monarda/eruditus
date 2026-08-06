@@ -1035,7 +1035,13 @@ and add the helper, plus a lookup for the reference parameter's own magnitude:
   }
 ```
 
-`_parameterById` needs the parameter catalog, which `SpellEngine` does not currently hold. Add `List<Parameter> allParameters` beside `allModifiers`, defaulting to `const []`, with an `updateParameters` setter mirroring `updateModifiers`, and wire it from `ConfigurationBloc` at the same place `updateModifiers` is called. An unknown reference id degrades to charging the raw magnitude — the same "a dangling id contributes nothing surprising" rule the modifier lookup already follows.
+`_parameterById` needs the parameter catalog, which `SpellEngine` does not currently hold. Add `List<Parameter> allParameters` beside `allModifiers`, defaulting to `const []`, with an `updateParameters` setter mirroring `updateModifiers`.
+
+Wire it at the same place `updateModifiers` is reached. That place is **not** `ConfigurationBloc` — it is the `BlocListener<ConfigurationBloc, ConfigurationState>` at `lib/presentation/screens/spell_creation_screen.dart:41-45`, which watches `ConfigurationState` and dispatches `AvailableModifiersSynced`; `SpellCreationBloc` handles that event at `spell_creation_bloc.dart:171-172` by calling `spellEngine.updateModifiers`. `ConfigurationState` already carries `parameters` alongside `modifiers`, so mirror the existing path: add an `AvailableParametersSynced` event, handle it in the bloc, and widen the listener's `listenWhen` to fire when either list changes.
+
+One `SpellEngine` instance is shared by `SpellCreationBloc` and `SpellLibraryBloc` (`lib/main.dart:60-66`), so syncing once at that listener reaches the Library tab's level math too — there is no second engine to keep in sync.
+
+An unknown reference id degrades to charging the raw magnitude — the same "a dangling id contributes nothing surprising" rule the modifier lookup already follows.
 
 Note the `actual.id == referenceId` short-circuit: it returns magnitude 0 without needing the catalog at all, which is the common case for wards and keeps the standard reference (`range-personal`, magnitude 0) working even before `allParameters` is populated.
 
@@ -1047,15 +1053,26 @@ Finally, replace line 164:
 
 and forward `chosenBaseLevel` from `calculateSpellLevel`, `validateSpellDraft` and `findSimilarSpells` (the last reads `s.record.chosenBaseLevel`).
 
-- [ ] **Step 4: Run the engine and bloc suites**
+`calculateBreakdown` has three further call sites outside the engine, all of which must forward the saved spell's `chosenBaseLevel` or they will throw the moment Task 12 lands a General spell in the library:
 
-Run: `flutter test test/engine/ test/bloc/`
-Expected: PASS.
+| Call site | Source of the level |
+|---|---|
+| `lib/bloc/spell_library/spell_library_bloc.dart:53` | `s.chosenBaseLevel` (the resolved saved spell) |
+| `lib/bloc/spell_creation/spell_creation_bloc.dart:226` | the live draft's `chosenBaseLevel` |
+| `lib/bloc/spell_creation/spell_creation_bloc.dart:263` | the suggestion's own `chosenBaseLevel`, not the draft's |
+
+The Library site is already wrapped in a per-spell `try`/`continue` (see its comment at lines 44-51), so a missing chosen level degrades to one level-less row rather than throwing — but forward it anyway; silently dropping every General spell from the Library is not the intent.
+
+- [ ] **Step 4: Run the suites**
+
+Run: `flutter test` and `flutter analyze`.
+Expected: PASS. This task changes a signature used across the engine, both blocs and a screen, so a subdirectory run is not sufficient evidence.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add lib/engine/spell_engine.dart lib/bloc/configuration/ test/engine/spell_engine_test.dart
+git add lib/engine/spell_engine.dart lib/bloc/spell_creation/ lib/bloc/spell_library/ \
+        lib/presentation/screens/spell_creation_screen.dart test/engine/spell_engine_test.dart
 git commit -m "feat: charge Range/Duration/Target against the guideline's reference"
 ```
 
