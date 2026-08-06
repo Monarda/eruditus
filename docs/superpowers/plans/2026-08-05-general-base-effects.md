@@ -1918,7 +1918,7 @@ Mirror `build_spell`, dropping `printedLevel` and the level arithmetic, and pref
 
 Line 227's `blocked.append((block.name, "General level — todo item 25"))` becomes the General branch: resolve through `general_candidates` + the ledger, then `build_template`. Keep every other blocker path intact, and record a reason for each of the eleven that stay blocked:
 
-- **No design line (5):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of the True Form*, and — unless Task 10's splitter change resolved them — *Ward against the Beasts of Legend* and *Ward against Faeries of the Mountain*.
+- **No design line (4):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of the True Form* (`(Variable base)`), and *Ward against Faeries of the Mountain*. *Ward against the Beasts of Legend* is **no longer** in this group — Task 10 widened `blocks._DESIGN` so its `(As ward guideline)` line is captured.
 - **Fails assertion 6 (5):** *Wizard's Communion*, *Restore the Moved Image*, *Lay to Rest the Haunting Spirit*, *The Invisible Eye Revealed*, *Dispel the Phantom Image*.
 - **Item 26's `Special` duration (1):** *Watching Ward*, whose stat line reads `D: Spec`.
 
@@ -1957,7 +1957,13 @@ class GeneralBlockedStalenessTest(unittest.TestCase):
             "spec's blocked list rather than leaving a stale record")
 ```
 
-Two ward spells are deliberately absent from `GENERAL_BLOCKED`: *Ward against the Beasts of Legend* and *Ward against Faeries of the Mountain* resolve if Task 10's `(As ward guideline)` splitter change landed. If it did not, add them with the reason `"no design line"` and update the expected counts in Step 6 from ~295/~65 to ~293/~67.
+**Corrected during Task 10 — this said two ward spells, and it is one.**
+
+*Ward against the Beasts of Legend* is absent from `GENERAL_BLOCKED` and should resolve: its design line really is `(As ward guideline)` (rulebook line 12722), and Task 10 widened **both** gates it has to pass — `blocks._DESIGN`, which decides whether a line is a design line at all, and `designline._BASE_GENERAL`, which tokenizes it. Widening only the second, as Task 10 originally specified, would have been inert.
+
+*Ward against Faeries of the Mountain* **stays blocked** with the reason `"no design line"`. It has none: its entry reads *"As Ward Against Faeries of the Waters (ReAq Gen), but for faeries of earth and stone"* — a cross-reference to another spell, not a parenthetical of magnitudes. Resolving it would mean following spell-to-spell references, which is a separate feature nobody has asked for.
+
+Expected counts in Step 6 assume that split. If *Beasts of Legend* does not resolve, something regressed in `blocks._DESIGN` — do not paper over it by adding the spell to `GENERAL_BLOCKED`.
 
 - [ ] **Step 6: Regenerate**
 
