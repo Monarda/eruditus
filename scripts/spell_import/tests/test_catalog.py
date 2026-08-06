@@ -46,6 +46,22 @@ class CandidatesTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.catalog.parameter_id("Target", "Flavor")
 
+    def test_general_candidates_are_the_levelless_rows(self):
+        candidates = self.catalog.general_candidates("Perdo", "Vim")
+
+        self.assertEqual(len(candidates), 13)
+        self.assertIn("pevi-G3", candidates)
+
+    def test_reference_cost_sums_the_triple(self):
+        # Touch(1) + Ring(2) + Circle(0)
+        self.assertEqual(self.catalog.reference_cost("rean-gen"), 3)
+        # No reference key: Personal(0) + Momentary(0) + Individual(0)
+        self.assertEqual(self.catalog.reference_cost("pevi-G3"), 0)
+
+    def test_reference_cost_names_an_unknown_effect_id(self):
+        with self.assertRaises(KeyError):
+            self.catalog.reference_cost("not-a-real-effect-id")
+
 
 class ExistingIdsTest(unittest.TestCase):
     def test_slugger_reproduces_every_committed_library_id(self):

@@ -47,6 +47,12 @@ class ParseDesignTest(unittest.TestCase):
         self.assertEqual(design.tokens[-1].kind, "modifier")
         self.assertEqual(design.tokens[-1].label, "size")
 
+    def test_as_ward_guideline_is_a_general_line_with_no_tokens(self):
+        design = designline.parse_design("(As ward guideline)")
+
+        self.assertIsNone(design.base_level)
+        self.assertEqual(design.tokens, [])
+
     def test_unknown_token_raises(self):
         # "+2 metal/gems" is a real, unmodelled mechanism (Stone to Falling
         # Dust). It must fail loudly so the spell is reported blocked, not

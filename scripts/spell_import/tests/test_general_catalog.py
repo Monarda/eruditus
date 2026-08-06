@@ -1,6 +1,7 @@
+import json
 import unittest
 
-from .. import catalog as catalog_module
+from .. import blocks, catalog as catalog_module, designline, sources
 
 VALID_KINDS = {
     "mightThreshold", "mightReduction", "damage",
@@ -74,3 +75,71 @@ class GeneralCatalogTest(unittest.TestCase):
                     "durationId": "duration-ring",
                     "targetId": "target-circle",
                 })
+
+
+class ReferenceOracleTest(unittest.TestCase):
+    """Assertion 6 — the only automated check a General spell can have.
+
+    Assertion 1 ("every spell computes to its printed level") discriminates
+    nothing here: there is no printed level, and every candidate shares the
+    same absent base level, so a wrong ledger pick computes identically to a
+    right one. This is todo item 32's hazard at full strength, on 22 spells.
+
+    The check is non-circular only because references are authored from the
+    guideline row's printed parenthetical, never inferred from the design
+    lines this test compares them against.
+    """
+
+    def setUp(self):
+        self.catalog = catalog_module.Catalog.load()
+        self.magnitudes = {p["id"]: p["magnitude"] for p in self.catalog.parameters}
+        path = catalog_module.DATA_DIR / "spell_templates.json"
+        self.templates = json.loads(path.read_text(encoding="utf-8"))
+        book = sources.resolve_book(sources.DE_TITLE)
+        parsed, _ = blocks.parse_de(sources.read_lines(book))
+        self.blocks_by_name = {b.name: b for b in parsed}
+
+    def test_design_line_tokens_equal_actual_cost_minus_reference_cost(self):
+        for template in self.templates:
+            block = self.blocks_by_name[template["name"]]
+            # `SpellBlock.design_line` is `str | None`. A spell with no design
+            # line prints no magnitudes to compare, so there is nothing for
+            # this oracle to say about it — skip rather than crash. Task 12's
+            # review confirms how many are skipped; if that number is not
+            # small, the ledger is importing spells this assertion cannot
+            # actually vouch for.
+            if block.design_line is None:
+                continue
+            design = designline.parse_design(block.design_line)
+
+            actual = sum(self.magnitudes[template[key]] for key in
+                         ("rangeId", "durationId", "targetId"))
+            reference = self.catalog.reference_cost(template["baseEffectId"])
+            printed = sum(token.magnitude for token in design.tokens
+                          if token.label in designline.PARAMETER_LABELS)
+
+            with self.subTest(template["id"]):
+                self.assertEqual(
+                    printed, actual - reference,
+                    f"{template['name']}: the rulebook prints {printed} magnitudes "
+                    f"of Range/Duration/Target, but its stat line costs {actual} "
+                    f"against a guideline reference of {reference}. Either the "
+                    f"ledger picked the wrong guideline, or "
+                    f"{template['baseEffectId']}'s reference is mis-authored. "
+                    f"Do NOT adjust the reference to make this pass.")
+
+
+class FormulaRenderingTest(unittest.TestCase):
+    """Assertion 7 — every emitted effect sentence is generated, not copied."""
+
+    def test_every_general_entry_a_template_uses_has_a_formula(self):
+        catalog = catalog_module.Catalog.load()
+        by_id = {e["id"]: e for e in catalog.base_effects}
+        path = catalog_module.DATA_DIR / "spell_templates.json"
+
+        for template in json.loads(path.read_text(encoding="utf-8")):
+            effect = by_id[template["baseEffectId"]]
+            with self.subTest(template["id"]):
+                self.assertIsNone(effect["baseLevel"],
+                                  "a template must point at a General guideline")
+                self.assertIsNotNone(effect.get("effectFormula"))

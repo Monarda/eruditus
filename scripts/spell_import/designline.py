@@ -12,7 +12,8 @@ import re
 
 _PARENTHETICAL = re.compile(r"\([^)]*\)")
 _BASE = re.compile(r"^Base(?:\s+level)?:?\s+(?P<level>\d+)")
-_BASE_GENERAL = re.compile(r"^Base\s+(effect|spell)\b|^Base$")
+_BASE_GENERAL = re.compile(
+    r"^Base\s+(effect|spell)\b|^Base$|^As\s+ward\s+guideline$")
 _TOKEN = re.compile(r"^(?P<sign>[+-])\s*(?P<magnitude>\d+)\s+(?P<label>.+)$")
 _REQUISITE = re.compile(r"^(?P<art>[A-Z][a-z]+)\s+requisites?$")
 # A handful of design lines spell the requisite cost as "<Technique> effect"

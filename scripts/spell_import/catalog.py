@@ -59,6 +59,35 @@ class Catalog:
             and effect["baseLevel"] == base_level
         })
 
+    def general_candidates(self, technique: str, form: str) -> list[str]:
+        """Every General row for a Technique/Form.
+
+        Unlike `candidates`, this cannot narrow by level: a General row has
+        none. Perdo Vim therefore returns all 13, and the pick rests entirely
+        on the ledger's recorded rationale plus assertion 6.
+        """
+        return sorted({
+            effect["id"]
+            for effect in self.base_effects
+            if effect["technique"] == technique
+            and effect["form"] == form
+            and effect["baseLevel"] is None
+        })
+
+    def reference_cost(self, effect_id: str) -> int:
+        """Total magnitude of the parameters a guideline is priced against."""
+        effect = next((e for e in self.base_effects if e["id"] == effect_id), None)
+        if effect is None:
+            raise KeyError(f"no base effect with id {effect_id!r} in base_effects.json")
+        reference = effect.get("reference") or {
+            "rangeId": "range-personal",
+            "durationId": "duration-momentary",
+            "targetId": "target-individual",
+        }
+        by_id = {p["id"]: p["magnitude"] for p in self.parameters}
+        return sum(by_id[reference[key]]
+                   for key in ("rangeId", "durationId", "targetId"))
+
     def parameter_id(self, category: str, name: str) -> str:
         for parameter in self.parameters:
             if parameter["category"] == category and parameter["name"] == name:
