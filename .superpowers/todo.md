@@ -928,6 +928,47 @@ directly — see commit `ca3c28a`). None affect correctness.
   correctness bug — see `.superpowers/sdd/progress.md` in the (now-merged)
   `feature/ritual-spells` history for the full review context.
 
+### 35. A Guideline's Realm Is a Choice, Like Its Level
+Raised 2026-08-06 during item 25. **Not implemented there** — item 25 models the
+*level* choice a General guideline leaves open, and this is the same shape of
+problem on a different axis. Filed so the two can be designed together.
+
+- [ ] Decide where the chosen realm lives — most likely `Spell.chosenRealm`
+      alongside `chosenBaseLevel`, with `SpellTemplate` carrying the *set* of
+      legal choices rather than a value
+- [ ] Decide whether the realm is part of validation (a ward with no realm
+      chosen is not yet a spell) — the level answer was yes, and the argument
+      looks identical
+- [ ] Decide whether the import should read the realm out of published prose,
+      or leave imported wards realm-less
+- [ ] Check whether "one realm" is the only such axis, or the first of several
+
+- **What was noticed.** Sixteen catalog entries leave a realm open, phrased
+  *"from one supernatural realm (Divine, Faerie, Infernal, or Magic)"*. Fourteen
+  are General — all twelve wards, plus `pevi-G6` (reduce the casting total for
+  all powers of one realm) and `pevi-G12` (dispel Magic Resistance aligned to
+  one Realm). Two are ordinary Rego Vim rows, `revi-5` and `revi-15`, which
+  control and summon a disembodied spirit from one realm — so **this is not a
+  General-only problem**, which is the main reason it is not being folded into
+  item 25.
+- **Why it matters, concretely.** The realm is not decoration; it is what tells
+  two otherwise identical spells apart. *Ward against the Beasts of Legend* and
+  a hypothetical infernal equivalent would share a guideline, a level, and a
+  Touch/Ring/Circle stat line, and differ only in realm. The rulebook makes the
+  choice visible in the published prose — *"No **magical** beast whose **Magic**
+  Might…"*, *"No water **faerie** whose **Faerie** Might…"* — so it is
+  recoverable from the corpus, not invented.
+- **The parallel with item 25 is exact, and worth exploiting.** A template is a
+  published spell with the caster's choices left open. Item 25 established that
+  the open choice is what makes a template not-a-spell, and that instantiating
+  means supplying it. Realm is a second such choice. If a third turns up
+  (`pevi-G7` and `pevi-G10` say "a specific type of supernatural effect", which
+  smells similar but is free text rather than a closed set), the right answer is
+  probably a general mechanism rather than a third bespoke field — but two
+  points do not justify that abstraction yet.
+- **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
+  `lib/engine/spell_engine.dart` (validation), and the creation UI.
+
 ---
 
 ## D. Low Priority / Nice-to-Have
@@ -938,7 +979,7 @@ directly — see commit `ca3c28a`). None affect correctness.
 - [ ] Document Aquam sub-type limitations (MVP context)
 
 ### 11. Performance
-- [ ] Optimize base effects JSON (currently 604 effects, all loaded at startup)
+- [ ] Optimize base effects JSON (currently 613 effects, all loaded at startup)
 - [ ] Consider lazy-loading or caching strategy if app grows
 - **Re-measure after item 27.** A 360-spell library, each computing a level on
   load, is a real change to startup cost — this item's premise gets tested for
