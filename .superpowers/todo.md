@@ -69,12 +69,23 @@ durations, item 25's General levels, and the unmodelled `for no words` /
 **Measured again 2026-08-05, after item 25:**
 **273 imported / 23 emitted as templates / 64 blocked / 0 unresolved.**
 
-**Measured again 2026-08-07, after wiring Creo Auram unnatural modifiers:**
-**281 imported / 23 emitted as templates / 56 blocked / 0 unresolved.**
+**Measured again 2026-08-07, after wiring documented guideline preamble modifiers:**
+**285 imported / 23 emitted as templates / 52 blocked / 0 unresolved.**
 
-8 Creo Auram spells unblocked by recognizing documented "unnatural" modifiers
-in the rulebook preamble and wiring them to the existing `creo-auram-unnatural`
-modifier entry in modifiers.json. See commit 036df9d.
+12 spells unblocked by wiring modifiers documented in rulebook guideline
+preambles but missing from emit.py:
+- 8 Creo Auram (unnatural context modifiers) — commit 036df9d
+- 4 Perdo Terram (material hierarchy) — commit ade8fdf
+- 0 Muto Terram (material hierarchy covered alongside Perdo) — commit 7fb1fe4
+
+Refactored emit.py to extract magnitude-dependent modifier handling into
+a dedicated helper (commit 394e6b1), improving maintainability. Also wired
+but not yet blocking any spells:
+- aquam-base-individual (liquid type selection, 5 options)
+- rego-transport-distance (distance scaling for transport spells, 6 options)
+
+Subagent audit (run 2026-08-07) identified 2 more missing implementations
+in modifiers.json (Creo Aquam unnatural liquids, Creo/Perdo Herbam modifiers).
 
 **A further finding: base-effect resolution needs human judgement 186 times.**
 A design line names its guideline only by level (`Base level 15`), and Creo
@@ -580,15 +591,9 @@ more time than closing out item 27 warranted.
       make `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
       start failing on purpose; whoever does this should expect and update
       that test, not be surprised by it.
-- [ ] **`--show-blocked` flag for `extract_spells.py`.** Elevated out of
-      "Minor" 2026-08-07: `main()` only prints the blocked *count*, never the
-      per-spell reasons, and the last full reason breakdown — item 27's, at
-      110 blocked — is now stale (see the note added there 2026-08-07). Items
-      24, 26 and this item's own Imaginem/changing-image wiring have each
-      closed out buckets that breakdown names, and the count has moved to 64
-      (item 25) with no fresh per-reason tally since. This is a prerequisite
-      for prioritizing items 19/26/28/39 accurately, not just a CLI nicety —
-      do this before starting any of them.
+- [x] **`--show-blocked` flag for `extract_spells.py`.** Elevated out of
+      "Minor" 2026-08-07 and implemented immediately. Shows per-spell blocked
+      reasons, enabling targeted work on remaining gaps.
 - [ ] Minor: `catalog._STOPWORDS` still contains `"phantasm"`, a content
       word, not a real stopword. **No longer a no-op** — the Imaginem
       mapping above landed and three Phantasm spells now import with the
@@ -600,6 +605,15 @@ more time than closing out item 27 warranted.
       asset change with migration weight, not a tidy-up.
 - [ ] Minor: `README.md` is still the stock Flutter template and never
       mentions `scripts/spell_import/`.
+- [ ] **Modifier audit completed (2026-08-07):** subagent scan of rulebook
+      preambles vs modifiers.json vs emit.py wiring identified:
+      - ✅ 9 systematically-wired modifiers (complete)
+      - ✅ 2 wired this session (Creo Auram unnatural, Terram materials)
+      - ✅ 2 wired but not yet blocking spells (Aquam liquids, Rego transport)
+      - ❌ 3 missing implementations (Creo Aquam unnatural, Creo Herbam treatment,
+        Perdo Herbam live wood) — these need to be added to modifiers.json
+      Full audit report saved in scratchpad. See this for complete list of what
+      else might need wiring once the missing modifiers are added to the catalog.
 
 ### 19. Size-Ladder Ceiling
 - [ ] Every Size ladder in `modifiers.json` stops at +4 (×10,000); 4 published
