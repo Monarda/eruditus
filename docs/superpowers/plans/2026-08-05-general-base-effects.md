@@ -72,7 +72,7 @@
 | `assets/data/base_effects.json` | 51 entries: `baseLevel: null`, `reference`, `effectFormula` |
 | `assets/data/spell_templates.json` | **new**, generated |
 
-**Ordering that matters:** Task 9 (authoring references and formulas) **must precede** Task 11 (ledger entries). Every General row has the same absent base level, so `resolutions.json` has no discriminator until the formulas exist. *Disenchant* faces 13 co-equal Perdo Vim candidates until `pevi-G9`'s formula — "guideline + 1 magnitude + a stress die (no botch); the spell must be a Ritual" — makes the pick textually forced. Reversing these two tasks reproduces item 32's failure by construction.
+**Ordering that matters:** Task 9 (authoring references and formulas) **must precede** Task 12 (ledger entries). Every General row has the same absent base level, so `resolutions.json` has no discriminator until the formulas exist. *Disenchant* faces 13 co-equal Perdo Vim candidates until `pevi-G9`'s formula — "guideline + 1 magnitude + a stress die (no botch); the spell must be a Ritual" — makes the pick textually forced. Reversing these two tasks reproduces item 32's failure by construction.
 
 ---
 
@@ -1449,7 +1449,7 @@ git commit -m "feat: validate the chosen level of a General guideline"
 - Consumes: the JSON shape from Task 2 (`reference`, `effectFormula`).
 - Produces: every General entry in `base_effects.json` carries both fields.
 
-**This task must complete before Task 11.** Every General row has the same absent base level, so `resolutions.json` has no discriminator until these formulas exist. Authoring the ledger first reproduces item 32's failure by construction.
+**This task must complete before Task 12.** Every General row has the same absent base level, so `resolutions.json` has no discriminator until these formulas exist. Authoring the ledger first reproduces item 32's failure by construction.
 
 - [ ] **Step 1: Write the failing table test**
 
@@ -1827,70 +1827,17 @@ git commit -m "feat: General candidates, the ward design line, and the reference
 
 ---
 
-### Task 11: Ledger entries for the 22 importable General spells
+### Task 11: `build_template` and the General branch in the extractor
 
 **Files:**
-- Modify: `scripts/spell_import/resolutions.json`
+- Modify: `scripts/spell_import/emit.py`, `scripts/spell_import/extract_spells.py:226-228`
+- Modify: `scripts/spell_import/tests/test_emit.py`
 
 **Interfaces:**
-- Consumes: Task 9's formulas (the discriminator) and Task 10's `general_candidates`.
-- Produces: a resolution entry per importable General spell.
+- Consumes: Task 9's formulas, Task 10's `general_candidates` and `reference_cost`.
+- Produces: `emit.build_template(block, base_effect_id, catalog, design) -> dict` matching `SpellTemplate.fromMap`; an extractor run that reports the General spells as **unresolved** instead of blocked.
 
-**Do not start this before Task 9 is committed.** The formulas are what make these picks textually forced rather than guesses.
-
-**Three arts now have two General candidates where they used to have one.** Restoring the nine guidelines the catalog had dropped (todo item 34, commit `8a70889`) means a General spell in these arts is no longer auto-resolved by having a single candidate — it needs a recorded pick:
-
-| Art | Candidates | How to tell them apart |
-|---|---|---|
-| Rego Animal | `rean-gen`, `rean-gen-2` | Beings *associated with Animal* versus a circle warding *animals*. The rulebook says explicitly that animals are not necessarily associated with Animal. `rean-gen-2` is the one that needs Ring/Circle. |
-| Rego Mentem | `reme-G`, `reme-G2` | Beings associated with Mentem versus *spirits* of one realm. A spell that names spirits takes `reme-G2`. |
-| Muto Aquam | `muaq-gen`, `muaq-gen-2` | Not ambiguous in practice — one does `+(Level)` damage, the other reduces a water elemental's Might pool. The formulas differ (`damage` versus `mightReduction`), so assertion 6 discriminates. |
-
-Muto Terram's `mute-gen` is new and is the only General candidate in its art, so it resolves without a ledger entry.
-
-- [ ] **Step 1: List what needs resolving**
-
-```bash
-python -m scripts.spell_import.extract_spells
-```
-
-Read the `unresolved` output. Each General spell now proposes a candidate set from `general_candidates`.
-
-- [ ] **Step 2: Resolve each one against the guideline's formula and the spell's own prose**
-
-Follow the existing entry format exactly: `baseEffectId`, the `candidates` list it was decided against, and a `rationale`. Worked example — *Disenchant*, 13 Perdo Vim candidates:
-
-> Its prose reads "You make a Hermetic magic item lose all its powers permanently if the level of this spell + a stress die (no botch) equals or exceeds the highest level of the enchantments in the item", and its stat line prints `Ritual`. `pevi-G9` is "Dispel a Hermetic enchantment with a level less than the guideline level used + 1 magnitude + a stress die (no botch); the spell must be a Ritual" — the only candidate of the 13 that is both enchantment-specific and Ritual-required. `pevi-G10` is the near miss and is excluded because it requires the spell to "specify a particular Hermetic Form or a specific type of enchantment", which *Disenchant* does not.
-
-Write each rationale to that standard: name the chosen row, name the nearest rejected candidate, and say what textually excludes it.
-
-- [ ] **Step 3: Where no rationale can be written without guessing, add to `KNOWN_UNRESOLVABLE` instead**
-
-Item 27's precedent: an entry that picks "the most general-sounding" candidate is worse than a recorded blocker, because it looks resolved. `extract_spells.KNOWN_UNRESOLVABLE` takes a spell id and a one-line reason.
-
-- [ ] **Step 4: Verify**
-
-Run: `python -m scripts.spell_import.extract_spells`
-Expected: 0 unresolved. Blocked spells carry a reason each.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add scripts/spell_import/resolutions.json scripts/spell_import/extract_spells.py
-git commit -m "data: resolve the base effects of the importable General spells"
-```
-
----
-
-### Task 12: Emit templates and regenerate the assets
-
-**Files:**
-- Modify: `scripts/spell_import/emit.py`, `scripts/spell_import/extract_spells.py:227`
-- Modify: `assets/data/spell_templates.json`, `assets/data/spell_library.json`, `scripts/spell_import/source.lock`, `scripts/spell_import/import_report.md`
-
-**Interfaces:**
-- Consumes: Tasks 9–11.
-- Produces: `emit.build_template(block, base_effect_id, catalog) -> dict` matching `SpellTemplate.fromMap`.
+**This task and Task 12 were swapped after measurement.** The original order had Task 11 authoring ledger entries and Task 12 wiring the branch that produces them — but `extract_spells.py:226-228` routes every General spell to `blocked` before the ledger is ever consulted, so `general_candidates` has no caller and a run today reports **0 unresolved**. The ledger task had nothing to read and no way to check its own work. The wiring comes first.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1898,7 +1845,7 @@ In `test_emit.py`:
 
 ```python
     def test_build_template_omits_every_level_field(self):
-        template = emit.build_template(block, "pevi-G3", catalog)
+        template = emit.build_template(block, "pevi-G3", catalog, design)
 
         self.assertNotIn("chosenBaseLevel", template)
         self.assertNotIn("printedLevel", template)
@@ -1912,34 +1859,154 @@ Expected: FAIL — `build_template` is not defined.
 
 - [ ] **Step 3: Implement `build_template`**
 
-Mirror `build_spell`, dropping `printedLevel` and the level arithmetic, and prefixing the id with `tpl-` instead of `lib-`.
+Mirror `build_spell`, dropping `printedLevel` and the level arithmetic. Two details worth stating because both are easy to get wrong in opposite directions:
 
-- [ ] **Step 4: Replace the General blocker in `extract_spells.py`**
+- **The template id is not the ledger key.** `catalog_module.slug_id` returns `lib-<tefo>-<words>`, and that `lib-` id is what `resolutions.json` and `KNOWN_UNRESOLVABLE` are keyed by — every existing entry uses it. The template's own `id` field is the same slug with `tpl-` in place of `lib-`. Derive one from the other; do not introduce a second slug function.
+- `build_spell` raises `ValueError` when `printed_level is None` (`emit.py:118-126`), and that guard is correct for spells and must stay. `build_template` is the routing path that guard was protecting against, so it simply does not read `printed_level`.
 
-Line 227's `blocked.append((block.name, "General level — todo item 25"))` becomes the General branch: resolve through `general_candidates` + the ledger, then `build_template`. Keep every other blocker path intact, and record a reason for each of the eleven that stay blocked:
+- [ ] **Step 4: Replace the General blocker**
 
-- **No design line (4):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of the True Form* (`(Variable base)`), and *Ward against Faeries of the Mountain*. *Ward against the Beasts of Legend* is **no longer** in this group — Task 10 widened `blocks._DESIGN` so its `(As ward guideline)` line is captured.
-- **Fails assertion 6 (5):** *Wizard's Communion*, *Restore the Moved Image*, *Lay to Rest the Haunting Spirit*, *The Invisible Eye Revealed*, *Dispel the Phantom Image*.
-- **Item 26's `Special` duration (1):** *Watching Ward*, whose stat line reads `D: Spec`.
+`extract_spells.py:226-228` currently reads:
 
-Add an `Aegis of the Hearth` note in the module docstring alongside the existing *Whispering Winds* and *Hermes' Portal* notes: Touch/Year/Boundary is nine magnitudes, so a level-30 Aegis needs base −15; the rulebook itself calls it a Major Breakthrough that is "more powerful than it ought to be". It is permanently blocked, not pending.
+```python
+        if design.base_level is None or block.printed_level is None:
+            blocked.append((block.name, "General level — todo item 25"))
+            continue
+```
 
-- [ ] **Step 5: Add a staleness test for the eleven blocked spells**
+It becomes the General branch: compute the spell id, record the design line, get `catalog.general_candidates(block.technique, block.form)`, block with `"no General base effect for that Technique/Form"` if the list is empty, then resolve through `book.resolve` with the **same** `MissingEntry` / `LedgerError` handling and the same `proposals` payload the ordinary path uses, and finally append `emit.build_template(...)` to a new `templates` list.
 
-In `scripts/spell_import/tests/test_extract.py`, beside the existing
-`KnownUnresolvableStalenessTest`:
+`Report` gains a `templates: list[dict]` field. Do not merge templates into `spells` — they have different shapes and different destination assets.
+
+**`Ledger.resolve` auto-resolves a sole candidate and rejects an entry for one** (`ledger.py:71-82`, `UnnecessaryEntry`). That is the intended behaviour here, and it is why Task 12 authors 19 entries and not 23: four General spells have exactly one candidate in their art and must *not* get a ledger entry.
+
+- [ ] **Step 5: Verify the branch reports work to do**
+
+Run: `python -m scripts.spell_import.extract_spells`
+
+Expected: **19 unresolved**, exit code 1, and `resolutions.proposed.json` written. The extractor is supposed to fail here — "unresolved" is its way of saying a human decision is outstanding, and Task 12 is that decision. Confirm the 19 names against the measured table in Task 12 before moving on; a different set means the branch is selecting differently than the sweep did.
+
+Also expect `blocked` to *drop* by the number that now import and *not* to lose the ten recorded in Task 12's `GENERAL_BLOCKED`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add scripts/spell_import/emit.py scripts/spell_import/extract_spells.py \
+        scripts/spell_import/tests/test_emit.py
+git commit -m "feat: emit spell templates and route General spells to the ledger"
+```
+
+---
+
+### Task 12: Ledger entries for the 19 undetermined General spells, and regeneration
+
+**Files:**
+- Modify: `scripts/spell_import/resolutions.json`, `scripts/spell_import/extract_spells.py`
+- Modify: `scripts/spell_import/tests/test_extract.py`
+- Modify: `assets/data/spell_templates.json`, `assets/data/spell_library.json`, `scripts/spell_import/source.lock`, `scripts/spell_import/import_report.md`
+
+**Interfaces:**
+- Consumes: Task 11's General branch.
+- Produces: a resolution entry per undetermined General spell; the regenerated assets.
+
+#### What the measurement found, and why it matters more than the plan first said
+
+Twenty-eight General spells carry a parsable design line. Five fail assertion 6 and stay blocked; **23 import**, of which four have a single candidate and auto-resolve. **Nineteen need a rationale.**
+
+The number that should govern how this task is done is this one:
+
+> **Assertion 6 eliminates zero candidates in Perdo Vim, Creo Vim and Muto Vim.**
+
+Every General row inside one art almost always shares the same reference triple — measured, `reference_cost` is uniformly 0 across all 13 Perdo Vim rows, all 4 Creo Vim, all 3 Muto Vim. Assertion 6 subtracts the same number from every candidate, so it cannot separate them. Rego Vim is the sole exception (`revi-G1` is a ward priced Touch/Ring/Circle = 3, the other four are 0), and there it narrows five candidates to one.
+
+So assertion 6 is a **spell-level sanity check** — "this design line is consistent with this stat line" — and not, except in Rego Vim, a **candidate discriminator**. The ledger docstring calls it "the only automated check a General spell can have", which is true and has been read as more reassuring than it is. For 18 of the 19 picks below, **nothing automated can tell a right answer from a wrong one.** The rationale is the whole of the evidence.
+
+That is the branch's standing hazard at full strength. Three tests on this branch have already claimed to verify a property they structurally could not (Task 7's invariance test, twice; Task 10's `reference_cost("pevi-G3") == 0`). A rationale that restates the guideline's own description without excluding a rival is the same failure in prose.
+
+Measured candidate sets, worst first:
+
+| Spell | Art | Candidates | Survive assertion 6 |
+|---|---|---|---|
+| Demon's Eternal Oblivion | PeVi | 13 | 13 |
+| Disenchant | PeVi | 13 | 13 |
+| Masking the Odor of Magic | PeVi | 13 | 13 |
+| Unravelling the Fabric of (Form) | PeVi | 13 | 13 |
+| Wind of Mundane Silence | PeVi | 13 | 13 |
+| Restore the Faded Threads | CrVi | 4 | 4 |
+| Shell of False Determinations | CrVi | 4 | 4 |
+| Shell of Opaque Mysteries | CrVi | 4 | 4 |
+| Maintaining the Demanding Spell | ReVi | 5 | 4 |
+| Opening the Intangible Tunnel | ReVi | 5 | 4 |
+| Suppressing the Wizard's Handiwork | ReVi | 5 | 4 |
+| Mirror of Opposition (form) | MuVi | 3 | 3 |
+| Shroud Magic | MuVi | 3 | 3 |
+| The Sorcerer's Fork | MuVi | 3 | 3 |
+| Wizard's Boost (Form) | MuVi | 3 | 3 |
+| Wizard's Reach (Form) | MuVi | 3 | 3 |
+| Ring of Warding against Spirits | ReMe | 2 | 2 |
+| Ward against the Beasts of Legend | ReAn | 2 | 2 |
+| Circular Ward against Demons | ReVi | 5 | **1** (`revi-G1`) |
+
+*Circular Ward against Demons* is the one case where assertion 6 does the work; write the rationale anyway, and say that the oracle forces it.
+
+**The two-candidate pairs are todo item 34's doing.** Restoring the nine dropped guidelines means these no longer auto-resolve:
+
+| Art | Candidates | How to tell them apart |
+|---|---|---|
+| Rego Animal | `rean-gen`, `rean-gen-2` | Beings *associated with Animal* versus a circle warding *animals*. The rulebook says explicitly that animals are not necessarily associated with Animal. `rean-gen-2` is the one that needs Ring/Circle. |
+| Rego Mentem | `reme-G`, `reme-G2` | Beings associated with Mentem versus *spirits* of one realm. A spell that names spirits takes `reme-G2`. |
+
+- [ ] **Step 1: List what needs resolving**
+
+```bash
+python -m scripts.spell_import.extract_spells
+```
+
+Read `resolutions.proposed.json`, which Task 11's branch now writes. It carries each spell's candidate list and the candidates' descriptions.
+
+- [ ] **Step 2: Resolve each one against the guideline's text and the spell's own prose**
+
+Follow the existing entry format exactly: `baseEffectId`, the `candidates` list it was decided against, and a `rationale`. Worked example — *Disenchant*, 13 Perdo Vim candidates:
+
+> Its prose reads "You make a Hermetic magic item lose all its powers permanently if the level of this spell + a stress die (no botch) equals or exceeds the highest level of the enchantments in the item", and its stat line prints `Ritual`. `pevi-G9` is "Dispel a Hermetic enchantment with a level less than the guideline level used + 1 magnitude + a stress die (no botch); the spell must be a Ritual" — the only candidate of the 13 that is both enchantment-specific and Ritual-required. `pevi-G10` is the near miss and is excluded because it requires the spell to "specify a particular Hermetic Form or a specific type of enchantment", which *Disenchant* does not.
+
+Write every rationale to that standard. **Name the chosen row, name the nearest rejected candidate, and quote what textually excludes it.** A rationale that only describes the chosen row has not done the work — with 13 candidates and no oracle, "this guideline fits" is not evidence, because several others fit too.
+
+- [ ] **Step 3: Where no rationale can be written without guessing, add to `KNOWN_UNRESOLVABLE` instead**
+
+Item 27's precedent: an entry that picks "the most general-sounding" candidate is worse than a recorded blocker, because it looks resolved. `extract_spells.KNOWN_UNRESOLVABLE` takes a spell id (the `lib-` slug) and a one-line reason. Reaching for this on a couple of the Perdo Vim five is a legitimate outcome, not a failure of the task.
+
+- [ ] **Step 4: Record the blocked spells**
+
+Ten General spells stay blocked. **The plan previously said eleven and listed nine — both were wrong; this list is measured.**
+
+- **No design line (4):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of the True Form*, *Ward against Faeries of the Mountain*.
+- **Fails assertion 6 (4):** *Wizard's Communion*, *Restore the Moved Image*, *Lay to Rest the Haunting Spirit*, *The Invisible Eye Revealed*.
+- **No General row in the art (1):** *Dispel the Phantom Image* — Perdo Imaginem has none, so its candidate list is empty. Grouped under assertion 6 in the old plan; it is a different failure and gets its own reason string.
+- **Unparsable design-line token (1):** *Watching Ward*. Its line is `(Base effect, +1 Touch, Duration is non-standard)` and `parse_design` raises `UnknownToken` on the last phrase — so it never reaches the General branch at all. The old plan attributed this to `D: Spec` not being in `parameters.json`; the stat line is indeed non-standard, but the token is what actually blocks it. Todo item 26 still owns the underlying problem.
+
+Add an *Aegis of the Hearth* note to the module docstring alongside the existing *Whispering Winds* and *Hermes' Portal* notes: Touch/Year/Boundary is nine magnitudes, so a level-30 Aegis needs base −15; the rulebook itself calls it a Major Breakthrough that is "more powerful than it ought to be". It is permanently blocked, not pending.
+
+*Ward against the Beasts of Legend* is **not** in this list and must resolve — its design line really is `(As ward guideline)` (rulebook line 12722), and Task 10 widened both gates it has to pass. If it does not resolve, something regressed in `blocks._DESIGN`; do not paper over it by adding the spell to `GENERAL_BLOCKED`.
+
+*Ward against Faeries of the Mountain* has no design line at all: its entry reads *"As Ward Against Faeries of the Waters (ReAq Gen), but for faeries of earth and stone"* — a cross-reference to another spell, not a parenthetical of magnitudes. Resolving it would mean following spell-to-spell references, a separate feature nobody has asked for.
+
+- [ ] **Step 5: Add a staleness test for the ten blocked spells**
+
+In `scripts/spell_import/tests/test_extract.py`, beside the existing `KnownUnresolvableStalenessTest`:
 
 ```python
 GENERAL_BLOCKED = {
     "Aegis of the Hearth": "no design line; a Major Breakthrough outside the guidelines",
     "Wizard's Vigil": "no design line",
     "Sight of the True Form": "no design line",
+    "Ward against Faeries of the Mountain": "no design line; a prose cross-reference to another spell",
     "Wizard's Communion": "fails assertion 6",
     "Restore the Moved Image": "fails assertion 6",
     "Lay to Rest the Haunting Spirit": "fails assertion 6",
     "The Invisible Eye Revealed": "fails assertion 6",
     "Dispel the Phantom Image": "no Perdo Imaginem General row in the catalog",
-    "Watching Ward": "D: Spec is not a Duration in parameters.json — todo item 26",
+    "Watching Ward": "design line token 'Duration is non-standard' — todo item 26",
 }
 
 
@@ -1957,32 +2024,24 @@ class GeneralBlockedStalenessTest(unittest.TestCase):
             "spec's blocked list rather than leaving a stale record")
 ```
 
-**Corrected during Task 10 — this said two ward spells, and it is one.**
-
-*Ward against the Beasts of Legend* is absent from `GENERAL_BLOCKED` and should resolve: its design line really is `(As ward guideline)` (rulebook line 12722), and Task 10 widened **both** gates it has to pass — `blocks._DESIGN`, which decides whether a line is a design line at all, and `designline._BASE_GENERAL`, which tokenizes it. Widening only the second, as Task 10 originally specified, would have been inert.
-
-*Ward against Faeries of the Mountain* **stays blocked** with the reason `"no design line"`. It has none: its entry reads *"As Ward Against Faeries of the Waters (ReAq Gen), but for faeries of earth and stone"* — a cross-reference to another spell, not a parenthetical of magnitudes. Resolving it would mean following spell-to-spell references, which is a separate feature nobody has asked for.
-
-Expected counts in Step 6 assume that split. If *Beasts of Legend* does not resolve, something regressed in `blocks._DESIGN` — do not paper over it by adding the spell to `GENERAL_BLOCKED`.
-
 - [ ] **Step 6: Regenerate**
 
 ```bash
 python -m scripts.spell_import.extract_spells --write --accept-source
 ```
 
-Expected: **~295 imported, ~65 blocked, 0 unresolved**, of 360. Read `import_report.md` before committing — that is the point of the gate.
+Expected: **0 unresolved**, and `spell_templates.json` non-empty for the first time. Read `import_report.md` before committing — that is the point of the gate. Note that `assets/data/spell_templates.json` is currently the two bytes `[]`, so every template in it is new; there is no prior version to diff against.
 
 - [ ] **Step 7: Run both suites**
 
 Run: `python -m unittest discover -s scripts/spell_import/tests -t . && flutter test`
-Expected: PASS. Assertions 6 and 7 are now load-bearing, and Task 5's loader tests now assert against real data.
+Expected: PASS. Assertions 6 and 7 are now load-bearing against real data rather than an empty list — until this step, `ReferenceOracleTest` and `FormulaRenderingTest` both iterated over zero templates and could not fail. Task 5's loader tests likewise now assert against real data.
 
 - [ ] **Step 8: Commit**
 
 ```bash
 git add scripts/spell_import/ assets/data/spell_templates.json assets/data/spell_library.json
-git commit -m "feat: import the published General spells as templates"
+git commit -m "data: resolve and import the published General spells as templates"
 ```
 
 ---
