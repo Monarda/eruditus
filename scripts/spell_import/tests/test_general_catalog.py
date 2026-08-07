@@ -1,7 +1,46 @@
+import collections
 import json
+import re
 import unittest
 
 from .. import blocks, catalog as catalog_module, designline, sources
+
+_TABLE_HEADER = re.compile(r"^\|\s*Level\s*\|\s*(\w+)\s+(\w+)\s+Guideline\s*\|")
+_GENERAL_ROW = re.compile(r"^\|\s*General\s*\|\s*(.+?)\s*\|\s*$")
+
+
+def _rulebook_general_bullets() -> dict[tuple[str, str], list[str]]:
+    """Every `| General |` bullet in the printed guideline tables, by art.
+
+    Deliberately a separate, dumber parser than `blocks.py`: this is the
+    oracle the catalog is measured against, so it must not share code with
+    the extractor that produced the catalog. If both had the same bug they
+    would agree, and the test would pass while both were wrong.
+    """
+    path = sources.resolve_book(sources.DE_TITLE, sources.default_root())
+    art: tuple[str, str] | None = None
+    bullets: dict[tuple[str, str], list[str]] = {}
+
+    for line in sources.read_lines(path):
+        header = _TABLE_HEADER.match(line)
+        if header:
+            art = (header.group(1), header.group(2))
+            continue
+        if art is None:
+            continue
+        row = _GENERAL_ROW.match(line)
+        if row:
+            bullets[art] = [
+                cell.strip().lstrip("•").strip()
+                for cell in row.group(1).split("<br>")
+                if cell.strip()
+            ]
+        elif line.strip() and not line.startswith("|"):
+            # Out of the table. Without this the next art's rows would be
+            # attributed to the previous art's header.
+            art = None
+
+    return bullets
 
 VALID_KINDS = {
     "mightThreshold", "mightReduction", "damage",
@@ -25,11 +64,54 @@ class GeneralCatalogTest(unittest.TestCase):
                         if e["baseLevel"] is None]
         self.parameter_ids = {p["id"] for p in self.catalog.parameters}
 
-    def test_there_are_51_general_entries(self):
+    def test_there_are_49_general_entries(self):
         # 47 when this test was written, plus the four the extractor had
         # silently dropped (todo item 34): rean-gen-2, muaq-gen-2, reme-G2
         # and mute-gen. Muto Terram had no General entry at all.
-        self.assertEqual(len(self.general), 51)
+        #
+        # Then minus two. Item 34 counted rulebook bullets the catalog was
+        # missing; it never counted catalog rows the rulebook does not
+        # contain. peme-G and inco-gen were both of the latter: neither the
+        # Perdo Mentem table (levels 3-25) nor the Intellego Corpus table
+        # (levels 3-35) prints a General row at all, and each entry's
+        # description is its spell's own effect text read backwards into a
+        # guideline. Removing them is what blocks Lay to Rest the Haunting
+        # Spirit honestly rather than importing it against a row invented
+        # to receive it.
+        self.assertEqual(len(self.general), 49)
+
+    def test_general_entries_match_the_rulebook_bullet_for_bullet(self):
+        """Todo item 34 in both directions, derived from the rulebook.
+
+        Item 34 counted the bullets the extractor had dropped and stopped
+        there. It never counted the other direction, and there were two:
+        peme-G and inco-gen, in arts whose guideline tables print no General
+        row at all. Each described its spell's own effect text read backwards
+        into a guideline, which is why no other test here could see them —
+        a fabricated row has a well-formed id, a plausible description and a
+        formula, and the spell that needed it imports cleanly.
+
+        Counting per art rather than in total is what makes this bite: a
+        dropped bullet in one art and an invented row in another cancel out
+        in a single number, and that is very nearly what had happened.
+
+        The expectation is parsed from the rulebook, not written down here,
+        so it cannot drift out of date the way a hand-maintained constant
+        does. That is also what keeps it honest: the catalog is checked
+        against the source it was extracted from, never against itself.
+        """
+        book = _rulebook_general_bullets()
+        catalog_counts = collections.Counter(
+            (e["technique"], e["form"]) for e in self.general)
+        book_counts = collections.Counter(
+            {art: len(bullets) for art, bullets in book.items()})
+
+        self.assertEqual(
+            sorted(catalog_counts.items()), sorted(book_counts.items()),
+            "the catalog's General rows no longer match the rulebook's "
+            "General bullets art by art. A shortfall means the extractor "
+            "dropped a bullet; a surplus means somebody invented a "
+            "guideline. Fix the catalog, never this test.")
 
     def test_every_general_entry_has_a_formula(self):
         missing = [e["id"] for e in self.general if not e.get("effectFormula")]
