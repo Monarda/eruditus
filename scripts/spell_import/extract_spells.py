@@ -40,6 +40,23 @@ KNOWN_UNRESOLVABLE = {
 }
 
 
+# General spells whose printed design line cannot be reconciled with their
+# stat line. Not a wrong ledger pick and not an ambiguity between candidates
+# -- KNOWN_UNRESOLVABLE means "two candidates fit equally", which is a
+# different thing. Deliberately a hand-maintained list and NOT an inline
+# assertion-6 check: ReferenceOracleTest exists to catch a template that
+# violates assertion 6, and a filter that removes exactly what the test
+# looks for would make the test unable to fail.
+DESIGN_LINE_INCOMPLETE = {
+    "lib-reim-restore-moved-image":
+        "prints (Base effect) but the stat line costs 2 magnitudes",
+    "lib-invi-invisible-eye-revealed":
+        "prints (Base effect) but the stat line costs 2 magnitudes",
+    "lib-muvi-wizards-communion":
+        "prose disclaims guideline arithmetic: a remnant of Mercurian rituals",
+}
+
+
 # The rulebook prints no design line for these three. Each derivation below is
 # done by hand from the spell's stat line and a chosen guideline, and each is
 # then checked by assertion 1 — if a derivation is wrong the computed level
@@ -97,6 +114,15 @@ KNOWN_UNRESOLVABLE = {
 #   left blocked rather than forced through an unimplemented modifier or an
 #   unrelated candidate whose math happens to work: rete-15b (+4 size) lands
 #   on exactly 75, but describes hurling a projectile, not a travel portal.
+#
+# - Aegis of the Hearth (R: Touch, D: Year, T: Boundary, level 30) prints no
+#   design line at all. Touch(1) + Year(4) + Boundary(4) is nine magnitudes,
+#   so a level-30 spell needs base -15 -- there is no General base effect
+#   that low, and none is meant to exist here: the rulebook itself calls
+#   Aegis of the Hearth a Major Breakthrough that is "more powerful than it
+#   ought to be", i.e. explicitly outside the guidelines. Permanently
+#   blocked, not pending -- there is no future ledger entry or catalog fix
+#   that resolves this one.
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
 }
@@ -234,6 +260,16 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 blocked.append((block.name, "no General base effect for that Technique/Form"))
                 continue
 
+            if spell_id in DESIGN_LINE_INCOMPLETE:
+                blocked.append(
+                    (block.name, f"design line incomplete: {DESIGN_LINE_INCOMPLETE[spell_id]}")
+                )
+                continue
+
+            if spell_id in KNOWN_UNRESOLVABLE:
+                blocked.append((block.name, f"unresolvable: {KNOWN_UNRESOLVABLE[spell_id]}"))
+                continue
+
             try:
                 base_effect_id = book.resolve(spell_id, general_candidates)
             except ledger_module.MissingEntry as error:
@@ -366,6 +402,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     print(f"imported : {len(report.spells)}")
+    print(f"templates: {len(report.templates)}")
     print(f"blocked  : {len(report.blocked)}")
     print(f"unresolved: {len(report.unresolved)}")
 

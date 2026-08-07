@@ -137,6 +137,34 @@ class KnownUnresolvableStalenessTest(unittest.TestCase):
         ) + str(stale))
 
 
+GENERAL_BLOCKED = {
+    "Aegis of the Hearth": "no design line; a Major Breakthrough outside the guidelines",
+    "Wizard's Vigil": "no design line",
+    "Sight of the True Form": "no design line",
+    "Ward against Faeries of the Mountain": "no design line; a prose cross-reference to another spell",
+    "Dispel the Phantom Image": "no Perdo Imaginem General row in the rulebook",
+    "Lay to Rest the Haunting Spirit": "no Perdo Mentem General row in the rulebook",
+    "Watching Ward": "design line token 'Duration is non-standard' — todo item 26",
+    "Restore the Moved Image": "design line does not account for the stat line",
+    "The Invisible Eye Revealed": "design line does not account for the stat line",
+    "Wizard's Communion": "prose disclaims guideline arithmetic",
+}
+
+
+class GeneralBlockedStalenessTest(unittest.TestCase):
+    """A blocker that quietly stops applying must fail, not pass silently."""
+
+    def test_every_recorded_general_blocker_still_blocks(self):
+        blocked_names = {name for name, _ in extract_spells.run(write=False).blocked}
+
+        no_longer_blocked = sorted(set(GENERAL_BLOCKED) - blocked_names)
+
+        self.assertEqual(
+            no_longer_blocked, [],
+            "these now import — remove them from GENERAL_BLOCKED and from the "
+            "spec's blocked list rather than leaving a stale record")
+
+
 class WriteGateTest(unittest.TestCase):
     """The gate is exercised through run()'s return value, not by writing.
 
