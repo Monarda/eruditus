@@ -16,6 +16,7 @@ from . import blocks, catalog as catalog_module, designline, ledger as ledger_mo
 from . import emit, provenance, report as report_module, sources
 
 LIBRARY_PATH = catalog_module.DATA_DIR / "spell_library.json"
+TEMPLATES_PATH = catalog_module.DATA_DIR / "spell_templates.json"
 PROPOSALS_PATH = ledger_module.LEDGER_PATH.with_name("resolutions.proposed.json")
 REPORT_PATH = ledger_module.LEDGER_PATH.with_name("import_report.md")
 
@@ -358,6 +359,18 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         if would_change:
             LIBRARY_PATH.write_text(fresh, encoding="utf-8")
 
+        # Templates go through the same serializer, so they get the same
+        # id-sorted, byte-stable output the idempotency test relies on. The
+        # SourceMoved guard above covers both assets: it is checked before
+        # either write, and a moved rulebook is a reason to rewrite neither.
+        fresh_templates = serialize(templates)
+        if TEMPLATES_PATH.is_file():
+            committed_templates = TEMPLATES_PATH.read_text(encoding="utf-8")
+        else:
+            committed_templates = ""
+        if fresh_templates != committed_templates:
+            TEMPLATES_PATH.write_text(fresh_templates, encoding="utf-8")
+
         if accept_source:
             if would_change:
                 old = json.loads(committed) if committed else []
@@ -418,6 +431,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if args.write:
         print(f"wrote {LIBRARY_PATH}")
+        print(f"wrote {TEMPLATES_PATH}")
     return 0
 
 
