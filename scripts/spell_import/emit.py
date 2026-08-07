@@ -304,16 +304,16 @@ def _selected_modifiers(
             selected.setdefault(modifier_id, []).append(option_id)
             continue
 
-        # Perdo Terram "material" modifiers: magnitude determines which option
-        # Guideline preamble: "To destroy sand/mud/clay use base level, stone/glass
-        # add +1, metal/gemstone add +2"
+        # Terram "material" modifiers for Muto and Perdo: magnitude determines option
+        # Both share the same preamble rule: sand/mud/clay at base level, stone/glass
+        # at +1, metal/gemstone at +2
         if (
-            block.technique == "Perdo"
-            and block.form == "Terram"
+            block.form == "Terram"
+            and block.technique in ("Muto", "Perdo")
             and token.label.lower()
             in ("material", "stone", "glass", "metal", "gemstone")
         ):
-            modifier_id = "perdo-terram-material"
+            modifier_id = f"{block.technique.lower()}-terram-material"
             # Map label and magnitude to the correct option
             material_options = {
                 (0, "dirt"): "perdo-terram-material-dirt",
