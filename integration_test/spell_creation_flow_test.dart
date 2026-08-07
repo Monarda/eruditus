@@ -24,6 +24,40 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
+/// Switches to the Library tab and lets the transition settle. Shared by the
+/// two General-level tests below (Test B needs it directly; Test A does not,
+/// but both were added together so the helper lives once at file scope).
+Future<void> openLibraryTab(WidgetTester tester) async {
+  await tester.tap(find.text('Library'));
+  await tester.pumpAndSettle();
+}
+
+/// Picks a Technique then a Form from their dropdowns. Factored out because
+/// both new tests below need this exact three-tap sequence.
+Future<void> selectTechniqueAndForm(
+    WidgetTester tester, String technique, String form) async {
+  await tester.tap(find.byKey(const Key('technique-dropdown')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(technique).last);
+  await tester.pumpAndSettle();
+
+  await tester.tap(find.byKey(const Key('form-dropdown')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(form).last);
+  await tester.pumpAndSettle();
+}
+
+/// Picks a base effect by matching a substring of its rendered description,
+/// since the dropdown has no id-based lookup available to a widget test —
+/// items render as '${description} (${General or Base N})'
+/// (spell_creation_screen.dart).
+Future<void> selectBaseEffect(WidgetTester tester, String descriptionSubstring) async {
+  await tester.tap(find.byKey(const Key('base-effect-dropdown')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.textContaining(descriptionSubstring).last);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -678,6 +712,158 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
+
+      await database.close();
+    },
+  );
+
+  // General base effects (Task 25) have no fixed level in the catalog; the
+  // caster chooses one. The chosen-level field must appear only while a
+  // General effect is selected, and must disappear again — without leaving a
+  // stale value behind — the moment the selection moves to an ordinary,
+  // fixed-level effect.
+  testWidgets(
+    'end-to-end: the guideline level field appears only for General effects',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final resolver = SpellResolver(
+        effects: await configRepository.getAllEffects(),
+        parameters: await configRepository.getAllParameters(),
+      );
+      final spellRepository = SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      final libraryRepository = LibraryRepository(
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+      final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final spellEngine = SpellEngine(allSpells: allSpells);
+
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      await selectTechniqueAndForm(tester, 'Rego', 'Animal');
+
+      // rean-gen: the sole Rego Animal General entry.
+      await selectBaseEffect(tester, 'Ward against beings associated with Animal');
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('chosen-base-level-field')), findsOneWidget);
+
+      // rean-1 (Base 1): an ordinary, fixed-level Rego Animal row. Switching
+      // to it clears chosenBaseLevel (spell_creation_bloc.dart: only a
+      // General->General switch preserves it), so the field must be gone.
+      await selectBaseEffect(tester, 'Manipulate items made from animal products');
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('chosen-base-level-field')), findsNothing);
+
+      await database.close();
+    },
+  );
+
+  // Learning a template (Task 14b) instantiates a draft on the Create tab
+  // with its base effect pre-selected. When that base effect is General
+  // (rean-gen -> reaq-gen for the ward templates), the chosen-level field
+  // must appear there too, and the resulting effect sentence and calculated
+  // level must reflect the level the user types in.
+  testWidgets(
+    'end-to-end: learning a ward template produces a levelled spell',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final resolver = SpellResolver(
+        effects: await configRepository.getAllEffects(),
+        parameters: await configRepository.getAllParameters(),
+      );
+      final spellRepository = SpellRepository(
+          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      final libraryRepository = LibraryRepository(
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+      final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final spellEngine = SpellEngine(allSpells: allSpells);
+
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      await openLibraryTab(tester);
+
+      // IndexedStack keeps both tabs' scrollables in the tree at once, so
+      // this scroll must scope to the Library screen's ListView's
+      // Scrollable specifically (do not reuse find.byType(Scrollable).first,
+      // which would find the Create tab's scrollable instead). There are 23
+      // template cards above the spell list, so the target card needs
+      // scrolling into view before it's built.
+      final libraryListView = find.descendant(
+        of: find.byType(SpellLibraryScreen), matching: find.byType(ListView));
+      final libraryScrollable = find.descendant(
+        of: libraryListView, matching: find.byType(Scrollable));
+
+      const learnKey = Key('learn-tpl-reaq-ward-against-faeries-waters');
+      await tester.scrollUntilVisible(find.byKey(learnKey), 200.0, scrollable: libraryScrollable);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(learnKey));
+      await tester.pumpAndSettle();
+
+      // Tapping Learn dispatches TemplateInstantiated and (via main.dart's
+      // onTemplateLearned callback) switches straight to the Create tab, so
+      // no explicit tab switch is needed before the assertion below.
+      await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '20');
+      await tester.pumpAndSettle();
+
+      // reaq-gen's reference is Touch/Ring/Circle, and Ward against Faeries
+      // of the Waters has that same stat line, so the actual R/D/T cost
+      // equals the reference cost and level = chosenBaseLevel + 0.
+      expect(find.text('Affects beings with Might 20 or less'), findsOneWidget);
+
+      // Back on the Create tab, use the same scroll pattern as every other
+      // calculate-button scroll in this file.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('calculate-button')), 200.0,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('calculate-button')));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('20'), findsWidgets);
 
       await database.close();
     },

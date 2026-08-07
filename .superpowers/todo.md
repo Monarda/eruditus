@@ -223,17 +223,19 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   `lib/presentation/screens/spell_creation_screen.dart`,
   `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart` (schema bump)
 
-### 25. General-Level Spells — base level is chosen, not fixed
+### 25. General-Level Spells — base level is chosen, not fixed — ✅ COMPLETE
 **Absorbs item 4's "Variable Base Levels" bullet, which understated this badly.**
+**Spec:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`
+**Plan:** `docs/superpowers/plans/2026-08-05-general-base-effects.md`
 
-- [ ] Model a base effect whose level the caster chooses (47 catalog entries
+- [x] Model a base effect whose level the caster chooses (47 catalog entries
       carry `baseLevel: 0` today — a General entry computes as `0 + magnitudes`,
       which is simply wrong)
-- [ ] Level input in the creation screen, shown only for General entries
-- [ ] Engine: the chosen level replaces the guideline's base in
+- [x] Level input in the creation screen, shown only for General entries
+- [x] Engine: the chosen level replaces the guideline's base in
       `calculateBreakdown`
-- [ ] Decide what the breakdown line reads for a chosen base
-- [ ] Validate: a General entry with no chosen level is an error, not a zero
+- [x] Decide what the breakdown line reads for a chosen base
+- [x] Validate: a General entry with no chosen level is an error, not a zero
 - **33 published spells are General-level**, including **every Vim spell** and
   **every ward**. This is the gate on the whole of Vim (54 catalog effects) and
   on item 4's conditional wards.
@@ -243,13 +245,54 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   That reasoning does not reach the **General entries**, where there is no ladder
   and no correct integer, because the level *is* the caster's choice. The spec's
   own count of "one genuinely variable base level" counted rungs, not Generals.
-- **This is the only remaining item in this section needing real design.** The
-  open question is how a chosen level interacts with
-  `SpellLevelCalculator`'s additive-tier/multiplier split — magnitudes are added
-  to a base, and here the base arrives from the user rather than the catalog.
-- **Files:** `lib/models/base_effect.dart`, `lib/engine/spell_engine.dart`,
-  `lib/engine/spell_level_calculator.dart`, `assets/data/base_effects.json`
-  (the 47 zero-level entries), creation screen + bloc
+- **What landed.** `GeneralEffectFormula` on `BaseEffect` (a reference R/D/T plus
+  a `GeneralEffectKind` and an offset), a `chosen-base-level-field` in the
+  creation screen shown only while the selected effect `isGeneral`, the bloc
+  clearing `chosenBaseLevel` on any switch away from General
+  (`spell_creation_bloc.dart:87` — only a General→General switch preserves it),
+  `calculateBreakdown` substituting `chosenBaseLevel` for the guideline's base,
+  a `_effectSentence` breakdown line per `GeneralEffectKind`
+  (`spell_engine.dart:422-431`), and validation (`spell_engine.dart:67-72`)
+  rejecting both a missing chosen level (`'Choose a level for this General
+  guideline'`) and one below 1 (`'The chosen level must be at least 1'`) —
+  neither computes a silent zero. Template learning (Task 14b) also carries a
+  General base effect's chosen-level flow through correctly, exercised
+  end-to-end in `integration_test/spell_creation_flow_test.dart`.
+- **Final extractor counts:** running
+  `python -m scripts.spell_import.extract_spells` now gives **273 imported, 23
+  emitted as templates, 64 blocked, 0 unresolved** (imported is unchanged —
+  templates are counted separately, not folded into it; blocked dropped from
+  87 as the 23 templates left that bucket). Of the 33 published General
+  spells, 23 are now templates and **ten remain blocked**, each for a reason
+  unrelated to this item:
+  - **No design line printed (4):** *Aegis of the Hearth*, *Wizard's Vigil*,
+    *Sight of the True Form*, *Ward against Faeries of the Mountain*.
+    (*Ward against the Beasts of Legend* — a fifth spell originally expected
+    in this group — now imports; the ward-guideline splitter change floated as
+    a stretch goal in the spec landed for at least this one.)
+  - **Design line incomplete, prints `(Base effect)` but the stat line costs
+    magnitudes (2):** *Restore the Moved Image*, *The Invisible Eye Revealed*.
+  - **No General base effect for that Technique/Form (2):** *Lay to Rest the
+    Haunting Spirit*, *Dispel the Phantom Image*.
+  - **Design line disclaims guideline arithmetic (1):** *Wizard's Communion* —
+    "a remnant of Mercurian rituals."
+  - **Unrecognised token, not this branch's concern (1):** *Watching Ward* —
+    `'Duration is non-standard'` is a `Special`-Duration problem, item 26's,
+    not item 25's (see item 26 below).
+- **This was the design-heavy item in this section.** The open question was
+  how a chosen level interacts with `SpellLevelCalculator`'s additive-tier/
+  multiplier split — magnitudes are added to a base, and here the base arrives
+  from the user rather than the catalog. Resolved by treating the chosen level
+  exactly as the guideline's base would have been: it enters the same additive/
+  multiplicative split unmodified.
+- **Files:** `lib/models/base_effect.dart` (`GeneralEffectFormula`,
+  `GeneralEffectKind`), `lib/engine/spell_engine.dart` (validation,
+  `calculateBreakdown`, `deriveGeneralEffect`, `_effectSentence`),
+  `lib/bloc/spell_creation/spell_creation_bloc.dart`,
+  `lib/presentation/screens/spell_creation_screen.dart`
+  (`chosen-base-level-field`), `assets/data/base_effects.json` (the 47
+  General entries), `scripts/spell_import/` (template emission),
+  `integration_test/spell_creation_flow_test.dart`
 
 ### 26. Non-standard Ranges, Durations and Targets — ✅ DECIDED via item 24, spells still blocked
 **Spec:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`
@@ -277,8 +320,10 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
     the allow-list, but the same design line has unbalanced brackets, so the
     later `+1 Size (for a total of ...` token never closes. A splitter fix,
     not a modelling one.
-  - `Duration is non-standard` — *Watching Ward*. Numberless, and the spell is
-    `Base effect` (General-level), so it needs **item 25** regardless.
+  - `Duration is non-standard` — *Watching Ward*. Numberless. The spell is
+    `Base effect` (General-level) — item 25 has now landed, so this spell is
+    blocked on this item alone: a `Special` Duration with no parameter to
+    resolve to.
   - `D: Sun & Year` — *Mists of Change*. Two durations in one stat line, which
     no adjustment can express; it also prints a numberless "slightly
     nonstandard effect". Deliberately left blocked — a hand-derived magnitude
@@ -513,7 +558,10 @@ Four Creo Animal rows, plus six more the Definitive Edition audit found.
 - [ ] **Muto Terram** — General "Convert part of an earth elemental's body into
       another type of earth"
 - **Context:** pure extraction gap, no design decisions. The four General rows
-  are also item 25 cases once added.
+  are also item 25 cases once added — item 25 is done, so when these four rows
+  are eventually added to `base_effects.json`, each needs a `reference` and an
+  `effectFormula` (`GeneralEffectFormula`) alongside its `baseLevel: 0`, the
+  same shape as the other 47 General entries, not a bare zero-level row.
 - **Source precedence — the catalog is built from the wrong file.** The rulebook
   repo holds the same book in `reviewed/` and `wip/`, in descending quality
   (note: `raw-md/` was removed from the upstream repo). Always resolve `reviewed`
@@ -531,9 +579,11 @@ Four Creo Animal rows, plus six more the Definitive Edition audit found.
 - [ ] Level threshold: a ward affects creatures whose Might is below the spell's
       level — display it, do not compute a different level from it
 - [ ] UI section for ward configuration
-- **Depends on item 25.** 13 published ward spells; 8 of them are General-level,
-  and for those the ward threshold *is* the chosen level. Item 25 lands the hard
-  half; what remains here is display.
+- **Depends on item 25 — item 25 is done.** 13 published ward spells; 8 of them
+  are General-level, and for those the ward threshold *is* the chosen level.
+  `deriveGeneralEffect` now supplies that threshold (item 25's
+  `GeneralEffectFormula`/`GeneralEffectKind.mightThreshold`); what remains here
+  is the ward-type field itself and its display, not the threshold math.
 - **Only 1 spell has ward mechanics in its design line** — *Break the Oncoming
   Wave* (`ward, so the target is the warded Individual, not the water`). The
   other 12 need nothing beyond item 25.
@@ -550,12 +600,21 @@ is what the rulebook itself does.
 - [ ] Muto/Perdo Ignem: add 1 magnitude per 5 points fire damage exceeds +5
 - **Only 1 published spell touches this in a design line** — *Ward against Heat
   and Flames* (`+2 for up to +15 damage`), which item 24 can express.
+- **Item 25 retires this for General rows only.** `GeneralEffectFormula`
+  (`GeneralEffectKind.damage`) covers the 47 General catalog entries whose
+  output — including fire-damage magnitude — depends on the chosen level; that
+  is a genuinely different mechanism from this item's non-General, fixed-base
+  fire-damage magnitudes, which remain deferred exactly as before.
 
 ### 4c. Level-Dependent Might Reduction
 - [ ] Muto/Perdo Ignem/Auram: elemental Might reduced by spell level
 - [ ] Note that Might reduction = spell level (not magnitude)
 - **No published spell's level depends on this** — it describes the spell's
   runtime effect, not its cost. Display concern only.
+- **Item 25 retires the General-row half of this problem shape.**
+  `GeneralEffectKind.mightReduction` already reads the chosen level and prints
+  it (`spell_engine.dart:425`) for General entries; this item's remaining scope
+  is non-General Might reduction, unaffected by item 25.
 
 **Why these two are together:** both read the *final computed level* and produce
 a different quantity from it. That is a genuinely different shape from
@@ -612,6 +671,16 @@ recorded".
   entries rest entirely on the prose reasoning recorded in the ledger. This is
   true of all seven entries added for the level-adjustments branch, by
   construction.
+- **The same is true of every General entry, for a related reason.** A
+  General base effect has no fixed level to check the printed level against —
+  `chosenBaseLevel` comes from the caster, not the catalog — so assertion 1's
+  printed-vs-computed check can't discriminate a wrong General guideline
+  choice the way it can for a fixed-level one. Assertion 6 (introduced with
+  item 25) is the only automated check standing between a `resolutions.json`
+  entry and a wrong General guideline; every General entry therefore rests
+  entirely on its written rationale plus assertion 6, by construction — the
+  same shape as the seven level-adjustments-branch entries above, extended
+  from "candidates share a base level" to "there is no base level to share."
 - **Files:** `scripts/spell_import/resolutions.json`
 
 ---
