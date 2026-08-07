@@ -1911,7 +1911,9 @@ git commit -m "feat: emit spell templates and route General spells to the ledger
 
 #### What the measurement found, and why it matters more than the plan first said
 
-Twenty-eight General spells carry a parsable design line. Five fail assertion 6 and stay blocked; **23 import**, of which four have a single candidate and auto-resolve. **Nineteen need a rationale.**
+Twenty-eight General spells carry a parsable design line. Ten stay blocked; **up to 23 import**, of which six have a single candidate and auto-resolve without a ledger entry. **Nineteen need a rationale**, and Task 11's run reports exactly those nineteen plus *Wizard's Communion*, which Step 4 blocks.
+
+**Commit `87ac754` changed the inputs to this task.** Two General guidelines were removed because the rulebook does not contain them: the Perdo Mentem table runs 3–25 and the Intellego Corpus table 3–35, and neither prints a General row, yet `peme-G` and `inco-gen` sat in the catalog describing their spells' own effect text read backwards into a guideline. The catalog now agrees with the source exactly — 24 arts, 49 General bullets, 49 General entries — and `test_general_entries_match_the_rulebook_bullet_for_bullet` holds it there in both directions. The practical effect here is that *Lay to Rest the Haunting Spirit* now blocks with no candidate instead of importing against a row invented to receive it.
 
 The number that should govern how this task is done is this one:
 
@@ -1978,12 +1980,44 @@ Item 27's precedent: an entry that picks "the most general-sounding" candidate i
 
 - [ ] **Step 4: Record the blocked spells**
 
-Ten General spells stay blocked. **The plan previously said eleven and listed nine — both were wrong; this list is measured.**
+Ten General spells stay blocked. **The plan previously said eleven and listed nine — both were wrong, and the reasons were wrong too; this list is measured.** Four block already; three need a new mechanism, below.
+
+Blocking today, with no work needed:
 
 - **No design line (4):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of the True Form*, *Ward against Faeries of the Mountain*.
-- **Fails assertion 6 (4):** *Wizard's Communion*, *Restore the Moved Image*, *Lay to Rest the Haunting Spirit*, *The Invisible Eye Revealed*.
-- **No General row in the art (1):** *Dispel the Phantom Image* — Perdo Imaginem has none, so its candidate list is empty. Grouped under assertion 6 in the old plan; it is a different failure and gets its own reason string.
+- **No General row in the art (2):** *Dispel the Phantom Image* (Perdo Imaginem prints no General row) and *Lay to Rest the Haunting Spirit* (Perdo Mentem prints none either, since `87ac754`). Their candidate lists are empty, so the branch's `not general_candidates` guard catches both. The old plan filed the first under assertion 6; it is a different failure and gets its own reason string.
 - **Unparsable design-line token (1):** *Watching Ward*. Its line is `(Base effect, +1 Touch, Duration is non-standard)` and `parse_design` raises `UnknownToken` on the last phrase — so it never reaches the General branch at all. The old plan attributed this to `D: Spec` not being in `parameters.json`; the stat line is indeed non-standard, but the token is what actually blocks it. Todo item 26 still owns the underlying problem.
+
+Needing the new mechanism — **these three currently emit or resolve, and must not**:
+
+- **The printed design line does not account for the stat line (2):** *Restore the Moved Image* (Voice/Mom/Ind, cost 2) and *The Invisible Eye Revealed* (Per/Conc/Touch, cost 2) both print a bare `(Base effect)` and both have a sole candidate, so they auto-resolve and emit a template that assertion 6 then fails. This is a rulebook omission, not a wrong pick — *Wizard's Reach (Form)*, four lines from *Wizard's Communion* in the same table, prints `(Base effect, +2 Voice)` for the same Voice range, so the abbreviation is not systematic and cannot be assumed away.
+- **The rulebook disclaims guideline arithmetic (1):** *Wizard's Communion*, whose own prose reads *"Communion is a remnant of Mercurian rituals, so it does not perfectly fit into the guidelines of Hermetic theory."* That is the same self-disclaimer that already permanently blocks *Whispering Winds* and *Hermes' Portal*. It has three candidates and would otherwise sit in `unresolved` forever.
+
+##### Block these three with a recorded reason — do **not** add an assertion-6 gate to the extractor
+
+The obvious fix is to test assertion 6 inside the General branch and block whatever fails. **Do not do this.** `ReferenceOracleTest` asserts that every emitted template satisfies assertion 6. If the extractor only ever emits templates that satisfy assertion 6, that test cannot fail — it would be checking a filter against itself. This branch has already produced three tests that asserted properties they structurally could not verify, and an inline gate would quietly turn the branch's *only* automated oracle into a fourth.
+
+The oracle has to stay an independent check on the output, which means a wrong ledger pick must be able to reach emission and be caught there. So these three go in a recorded constant instead, checked in the General branch the same way `KNOWN_UNRESOLVABLE` is checked in the ordinary path:
+
+```python
+# General spells whose printed design line cannot be reconciled with their
+# stat line. Not a wrong ledger pick and not an ambiguity between candidates
+# -- KNOWN_UNRESOLVABLE means "two candidates fit equally", which is a
+# different thing. Deliberately a hand-maintained list and NOT an inline
+# assertion-6 check: ReferenceOracleTest exists to catch a template that
+# violates assertion 6, and a filter that removes exactly what the test
+# looks for would make the test unable to fail.
+DESIGN_LINE_INCOMPLETE = {
+    "lib-reim-restore-moved-image":
+        "prints (Base effect) but the stat line costs 2 magnitudes",
+    "lib-invi-invisible-eye-revealed":
+        "prints (Base effect) but the stat line costs 2 magnitudes",
+    "lib-muvi-wizards-communion":
+        "prose disclaims guideline arithmetic: a remnant of Mercurian rituals",
+}
+```
+
+Check it immediately after the empty-candidates guard, before `book.resolve`, so *Wizard's Communion* never reaches `unresolved`. Note the keys are `lib-` slugs — the ledger key, not the `tpl-` template id.
 
 Add an *Aegis of the Hearth* note to the module docstring alongside the existing *Whispering Winds* and *Hermes' Portal* notes: Touch/Year/Boundary is nine magnitudes, so a level-30 Aegis needs base −15; the rulebook itself calls it a Major Breakthrough that is "more powerful than it ought to be". It is permanently blocked, not pending.
 
@@ -2001,12 +2035,12 @@ GENERAL_BLOCKED = {
     "Wizard's Vigil": "no design line",
     "Sight of the True Form": "no design line",
     "Ward against Faeries of the Mountain": "no design line; a prose cross-reference to another spell",
-    "Wizard's Communion": "fails assertion 6",
-    "Restore the Moved Image": "fails assertion 6",
-    "Lay to Rest the Haunting Spirit": "fails assertion 6",
-    "The Invisible Eye Revealed": "fails assertion 6",
-    "Dispel the Phantom Image": "no Perdo Imaginem General row in the catalog",
+    "Dispel the Phantom Image": "no Perdo Imaginem General row in the rulebook",
+    "Lay to Rest the Haunting Spirit": "no Perdo Mentem General row in the rulebook",
     "Watching Ward": "design line token 'Duration is non-standard' — todo item 26",
+    "Restore the Moved Image": "design line does not account for the stat line",
+    "The Invisible Eye Revealed": "design line does not account for the stat line",
+    "Wizard's Communion": "prose disclaims guideline arithmetic",
 }
 
 
@@ -2031,6 +2065,10 @@ python -m scripts.spell_import.extract_spells --write --accept-source
 ```
 
 Expected: **0 unresolved**, and `spell_templates.json` non-empty for the first time. Read `import_report.md` before committing — that is the point of the gate. Note that `assets/data/spell_templates.json` is currently the two bytes `[]`, so every template in it is new; there is no prior version to diff against.
+
+Template count: **4 that auto-resolve** (*Ward against Faeries of the Waters*, *…of the Air*, *…of the Wood*, *Discern the Images of Truth and Falsehood*) plus one per rationale written in Step 2, so **up to 23**. Fewer is fine and expected if Step 3 sends some of the Perdo Vim five to `KNOWN_UNRESOLVABLE`; more is not, and means something reached emission that should have been blocked.
+
+`Ledger.resolve` raises `UnnecessaryEntry` for a sole candidate, so do not write entries for those four.
 
 - [ ] **Step 7: Run both suites**
 

@@ -979,7 +979,7 @@ problem on a different axis. Filed so the two can be designed together.
 - [ ] Document Aquam sub-type limitations (MVP context)
 
 ### 11. Performance
-- [ ] Optimize base effects JSON (currently 613 effects, all loaded at startup)
+- [ ] Optimize base effects JSON (currently 611 effects, all loaded at startup)
 - [ ] Consider lazy-loading or caching strategy if app grows
 - **Re-measure after item 27.** A 360-spell library, each computing a level on
   load, is a real change to startup cost — this item's premise gets tested for
@@ -997,7 +997,7 @@ branch before its whole-branch review.
 - [ ] **Still open: nobody knows why the extraction dropped them.** The
       producing script is not in the tree — `scripts/spell_import/catalog.py`
       only *reads* `base_effects.json`. If item 22 rebuilds this asset, it must
-      reproduce all 613 entries, and the count comparison below is the test to
+      reproduce all 611 entries, and the count comparison below is the test to
       run first.
 
 - **How it was measured.** Parse every `| Level | <Technique> <Form> Guideline |`
@@ -1022,10 +1022,26 @@ branch before its whole-branch review.
 - **The five ordinary ones** are Creo Animal 35–55, most of the
   Characteristic-increase ladder. Safe to add: the only four Creo Animal
   resolutions sit at levels 5 and 15, so no candidate set changed.
-- **Consequence recorded in item 25's plan (Task 11):** Rego Animal and Rego
+- **Consequence recorded in item 25's plan (Task 12):** Rego Animal and Rego
   Mentem now have *two* General candidates each, so spells in those arts need
   a recorded ledger pick instead of auto-resolving.
-- **Files:** `assets/data/base_effects.json` (604 → 613 entries),
+- **The audit only ran in one direction, and the other direction had two hits**
+  (found later, during item 25's Task 11; fixed in `87ac754`). Counting the
+  bullets the catalog was *missing* says nothing about catalog rows the
+  rulebook does not contain, and there were two: `peme-G` and `inco-gen`, in
+  arts whose guideline tables print no General row at all — Perdo Mentem runs
+  3–25, Intellego Corpus 3–35. Each described its spell's own effect text read
+  backwards into a guideline (`peme-G` for *Lay to Rest the Haunting Spirit*,
+  `inco-gen` for *Sight of the True Form*), which is precisely the failure item
+  32 is about. Removing them brought the catalog into exact agreement with the
+  source: **24 arts, 49 General bullets, 49 General entries.** General entries
+  went 47 → 51 → **49**; total 604 → 613 → **611**.
+- **The standing check is now a test, not a one-off audit.**
+  `test_general_entries_match_the_rulebook_bullet_for_bullet` parses the
+  guideline tables and compares **per art**, in both directions. Per art
+  matters: a dropped bullet in one art and an invented row in another cancel
+  out in a single total, which is very nearly what had happened here.
+- **Files:** `assets/data/base_effects.json` (604 → 613 → 611 entries),
   `scripts/spell_import/tests/test_general_catalog.py`,
   `test/data/repositories/configuration_repository_test.dart`.
 
