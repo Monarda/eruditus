@@ -1,7 +1,7 @@
 # Eruditus Todo List
 
 **Status:** Active development
-**Last Updated:** 2026-08-05
+**Last Updated:** 2026-08-07
 **Base Effects:** ✅ Complete (604 effects extracted)
 
 **Current goal:** every published spell in the Definitive Edition core rules is in
@@ -24,15 +24,40 @@ families:
 
 | Family | Spells | Item |
 |---|---|---|
-| General-level — base level is chosen, not fixed | 33 | **25** |
 | Ad-hoc per-spell magnitude (`+1 fancy effect`) | 21 | ✅ **24** |
-| Ritual only by storyguide ruling | 7 | 18 |
+| Ritual only by storyguide ruling | 7 | 18 ⚠️ see note below |
 | Non-standard Range/Duration/Target | 6 | ✅ **26** (mechanism only) |
 | Guideline level absent from the rulebook's own table | 5 | **28** |
 | Size ladder above +4 | 4 | 19 |
-| Ward mechanics in the design line | 1 | 4 |
+| Ward mechanics in the design line | 1 | 4 ⚠️ see note below |
 
-Families overlap, so the numbers sum to more than 74.
+This accounts for 43 of the 74; the remaining 31 are mostly General-level
+spells, which are not in this table because they have no printed level to
+match against — see note below.
+
+**⚠️ Critical note (2026-08-07): two rows deleted from this table.** The
+2026-07-28 manual audit counted 33 General-level spells and 1 Ward-mechanics
+spell as "inexpressible" — that was 2026-07-28, before the harness
+(item 27) and before item 25. But this file's goal (line 7-8) is "computed
+level matching printed level," and:
+
+- **The 33 General-level spells have no printed level** — the rulebook
+  prints "#### GENERAL" instead of a number. Item 25 solved the modeling
+  problem (user picks a level), but a template with no printed level **can
+  never satisfy this goal as stated**. That row no longer belongs here.
+  (23 of the 33 are now templates; 10 remain blocked for other reasons —
+  see item 25.)
+- **The Ritual and Ward rows (7 + 1 = 8 spells)** don't belong either —
+  neither is a blocker for *this* goal's test (`extract_spells.py` has no
+  check for Ritual correctness or ward mechanics, and all 8 already import
+  or template). Items 18 and 4 (moved to section C) are fidelity work on
+  spells the count already includes, not spells blocking the import.
+
+The 43 remaining spells in the table are the ones that can actually complete
+this goal. Reaching completion means clearing those six families, plus
+working through the ~31 remaining General-level blockers that belong to a
+different goal (making templates actually instantiable), which is items
+35/37's job.
 
 **Measured again 2026-08-04, after item 24:** `python -m
 scripts.spell_import.extract_spells` reports **263 imported / 97 blocked / 0
@@ -40,6 +65,22 @@ unresolved**, up from 250 / 110 / 0. The 13 added are the ad-hoc-magnitude
 family, minus the six that carry a second blocker (item 26's `Special`
 durations, item 25's General levels, and the unmodelled `for no words` /
 `not needing to gesture` / `Techniques and Forms` mechanisms).
+
+**Measured again 2026-08-05, after item 25 — last confirmed number:**
+**273 imported / 23 emitted as templates / 64 blocked / 0 unresolved.** This
+is the first measurement with three buckets instead of two: a template is a
+General-level published spell that parses and resolves but isn't a concrete
+recreated spell yet — no chosen level, and (per items 35/37) no chosen
+realm/Form/"specific type" where its guideline leaves one open. For this
+goal, "template" is progress but not the finish line the same way "imported"
+is.
+
+**This is also the last number anyone can vouch for.** Items 26 and 29 wired
+fixes after this measurement (Imaginem/changing-image mapping), and this
+file has since split items 28/39 and fixed two splitter bugs (item 26/29),
+none of which have been run through the extractor and re-tallied. Item 29's
+`--show-blocked` bullet is the prerequisite for updating this section
+again — do not quote 273/23/64/0 as current without re-running it.
 
 **A further finding: base-effect resolution needs human judgement 186 times.**
 A design line names its guideline only by level (`Base level 15`), and Creo
@@ -60,6 +101,18 @@ matching does not close the 186 — see item 27's spec.
 ## A. Blocks the Library Import
 
 Listed in dependency order. Item 27 is the next branch.
+
+**Reclassified 2026-08-07:** items 4, 18 and 22 moved out of this section to
+section C. None of them gate the extractor — confirmed against
+`scripts/spell_import/extract_spells.py`, which has no ritual-correctness or
+ward-type check, and against item 22's and item 4's own text, which already
+said as much ("pure extraction gap, no design decisions"; "display it, do not
+compute a different level from it"). They're fidelity/display work on spells
+that already import, not import blockers — the same shape as items 35/37,
+next to which they now sit. **Item 39 was split out of item 27's "9 spells"
+bullet** the same day, for the same reason: item 28's 5 spells and item 39's 4
+spells need different kinds of decision and were getting lost bundled
+together under a checklist item flagged complete.
 
 ### 27. Published Spell Import Harness — ✅ COMPLETE (11/11 tasks)
 **Spec:** `docs/superpowers/specs/2026-07-28-published-spell-import-design.md`
@@ -112,25 +165,18 @@ Listed in dependency order. Item 27 is the next branch.
         non-standard. Stays blocked.
 - [ ] **9 spells the ledger cannot resolve — needs a rules decision, not a
       ledger entry.** Found while filling `resolutions.json` (Task 10 of the
-      harness's implementation plan). Two distinct shapes of blocker:
-      - **Zero base-effect candidates at the computed level** — these are
-        exactly **item 28's 5 spells** (cross-referenced there in detail:
+      harness's implementation plan). **Split into two items 2026-08-07** —
+      the two shapes of blocker need different kinds of decision and were
+      getting lost bundled under one checklist line inside an item flagged
+      complete:
+      - **Zero base-effect candidates at the computed level (5 spells)** —
         the level is genuinely derived from a prose rule above the
-        guideline table, not missing from extraction, and item 28's own
-        "add the derived rows as ordinary catalog entries" option is
-        probably the fix that also unblocks these for import):
-        `lib-muau-infernal-smoke-death`, `lib-muau-fog-confusion`,
-        `lib-peig-wizards-icy-grip`, `lib-crvi-enigmas-gift`,
-        `lib-invi-sense-lingering-magic`.
-      - **Genuinely ambiguous between 2-3 candidates**, no textual
-        discriminator strong enough to write a non-guessed rationale — each
-        was actually resolved once, then pulled after a reviewer found the
-        rationale was picking "the most general-sounding" candidate rather
-        than a textually forced one: `lib-inte-tracks-faerie-glow` (`inte-4a`
-        vs `inte-4b`), `lib-inte-sense-feet-that-thread-earth` (same pair,
-        same shape of ambiguity), `lib-mute-crystal-dart` (`mute-3a`/`3b`/`3c`,
-        stone-vs-crystal boundary), `lib-peig-conjuration-indubitable-cold`
-        (`peig-4a`/`4b`/`4c`, three co-equally-supported readings).
+        guideline table, not missing from extraction. **See item 28.**
+      - **Genuinely ambiguous between 2-3 candidates (4 spells)**, no
+        textual discriminator strong enough to write a non-guessed
+        rationale — each was actually resolved once, then pulled after a
+        reviewer found the rationale was picking "the most general-sounding"
+        candidate rather than a textually forced one. **See item 39.**
       All 9 are excluded from the 250 spells the extractor currently
       imports (Task 10's `KNOWN_UNRESOLVABLE`/zero-candidate routing in
       `scripts/spell_import/extract_spells.py` blocks them explicitly rather
@@ -140,14 +186,23 @@ Listed in dependency order. Item 27 is the next branch.
 
 **Final tally:** 250 imported, 110 blocked, 0 unresolved — 360 published
 spells in the Definitive Edition core rules, all accounted for. Of the 110
-blocked: 9 need a rules decision (the literal list above — 5 catalog gaps,
-4 real ambiguity); *Whispering Winds* and *Hermes' Portal* are 2 more
+blocked: 9 need a rules decision (5 catalog gaps — item 28; 4 real
+ambiguity — item 39); *Whispering Winds* and *Hermes' Portal* are 2 more
 blocked separately, under "no design line printed" (see the hand-derivation
 item above — 7 spells share that reason: these 2 plus 5 General-level ones
 belonging to item 25); the rest are mechanical
 (General level → item 25; an unrecognised or unmapped design-line token —
 mostly Imaginem complexity factors and Auram "unnatural" tokens, neither
 modelled yet; a handful of genuinely malformed rulebook stat/design lines).
+
+**Note (2026-08-07): this breakdown is now stale.** It was accurate at 110
+blocked; items 24, 25, 26 and 29 have since closed out buckets it names — the
+"Imaginem complexity factors and Auram 'unnatural' tokens, neither modelled
+yet" clause in particular is no longer true, both are wired (see item 29).
+The blocked count has moved to 64 (item 25's tally) but nobody has re-run the
+extractor with per-spell reasons since — see item 29's `--show-blocked`
+bullet, elevated the same day for exactly this reason. Re-run that before
+prioritizing among items 19/26/28/39.
       (Five further spells lack a design line but are General-level, so they
       belong to item 25, not here: *Ward against the Beasts of Legend*,
       *Sight of the True Form*, *Ward against Faeries of the Mountain*,
@@ -320,7 +375,8 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   - `+4 Special (equivalent to Boundary)` — *The Bountiful Feast*. Listed in
     the allow-list, but the same design line has unbalanced brackets, so the
     later `+1 Size (for a total of ...` token never closes. A splitter fix,
-    not a modelling one.
+    not a modelling one — same function and same shape of bug as item 29's
+    `;`-splitter finding (`designline._split_parts`), worth fixing together.
   - `Duration is non-standard` — *Watching Ward*. Numberless. The spell is
     `Base effect` (General-level) — item 25 has now landed, so this spell is
     blocked on this item alone: a `Special` Duration with no parameter to
@@ -331,34 +387,74 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
     could paper over the second blocker but not the first.
 
 ### 28. Guideline Levels Absent from the Rulebook's Own Table — **NEW**
-- [ ] Decide how a spell cites a guideline level the table does not list
-- **5 published spells** name a base level with no corresponding row, derived
-  instead from a **prose rule stated above the table**:
-  - *Infernal Smoke of Death* (MuAu 40) needs MuAu base 25; the table stops at 10
-  - *Fog of Confusion* (MuAu 45) needs MuAu base 2; the table starts at 3
-  - *Wizard's Icy Grip* (PeIg 30) needs PeIg base 20; the table stops at 10
-  - *The Enigma's Gift* (CrVi 30) needs CrVi base 20
-  - *Sense of the Lingering Magic* (InVi 30) needs InVi base 10
-- **This is not item 22.** Those rows are genuinely absent from the Definitive
-  Edition, not missed during extraction. Two prose rules generate them:
-  - Muto Auram: "Transforming only one property of air generally lowers the
-    level by one magnitude" — this is how *Fog of Confusion* reaches base 2
-  - Perdo Ignem: "For every five points by which the fire's damage exceeds +5,
-    add one magnitude" — the same rule as item 4b, applied to the base rather
-    than to the spell
-  The harmful-gas and chill-damage ladders are also extrapolated upward beyond
-  their printed last rung.
-- **Options worth weighing:** add the derived rows to the catalog as ordinary
-  entries with a note recording the prose rule they came from (simplest, and
-  the catalog already holds extracted rather than printed data); or model the
-  prose rules; or let item 24's ad-hoc adjustments absorb the difference from
-  the nearest printed rung.
-- **Found by the 2026-07-28 audit** as the 5 spells whose `Base N` matched no
+- [ ] Decide how to handle spells that cite a base-effect level the table does
+      not list, but is **recoverable from documented prose rules**
+- **5 published spells** name a base level derived from prose rules, not from
+  the guideline table. All are recoverable; none are genuinely missing:
+  - *Infernal Smoke of Death* (MuAu 40) — cites MuAu General "Transform air
+    into a gas doing +**level** damage" instantiated at +25 damage; base = 25
+  - *Fog of Confusion* (MuAu 45) — cites MuAu base 3 "Transform air into
+    another form of air" with Muto Auram prose rule: "Transforming only one
+    property of air generally lowers the level by one magnitude"; base = 3 - 1 = 2
+  - *Wizard's Icy Grip* (PeIg 30) — cites Perdo Ignem damage-scaling rule
+    (rulebook prose above the table); base derived from +20 damage
+  - *The Enigma's Gift* (CrVi 30) — Creo Vim, base 20 (prose rule TBD)
+  - *Sense of the Lingering Magic* (InVi 30) — Intellego Vim, base 10 (prose
+    rule TBD)
+- **This is not item 22.** Item 22 identifies rows genuinely absent from the
+  Definitive Edition. These 5 are all derivable from prose rules stated above
+  their guideline tables, and the catalog already holds extracted rather than
+  printed data — so a derived row is the natural place for them.
+- **Options worth weighing:**
+  1. Add the 5 derived rows to the catalog with notes recording their prose
+     rules (simplest, most maintainable; catalog is already extracted data)
+  2. Model the prose rules themselves in the modifier system (ambitious;
+     generalizes to future cases; requires careful design)
+  3. Let item 24's ad-hoc adjustments absorb the difference from the nearest
+     printed rung (works for all 5, but less transparent about the rule)
+- **Note:** options 1 and 3 would unblock all 5; option 2 would unblock them
+  while also documenting the rules for reuse elsewhere.
+- **Found by the 2026-07-28 audit** as 5 spells whose `Base N` matched no
   catalog entry at all.
 - **Confirmed again** when item 27's import harness ran for real: these are
   exactly the 5 "zero base-effect candidates" spells in item 27's blocked
-  list. Fixing this item (adding the derived rows) is what would let them
-  import.
+  list. Fixing this item (adding the derived rows or modeling the rules) is
+  what would let them import.
+
+### 39. Ambiguous Ledger Resolutions Needing a Rules Decision — **NEW, split from item 27**
+- [ ] Decide each of the 4 spells below against a reading its own candidate
+      guidelines textually force — not "the most general-sounding" one — and
+      record the rationale in `resolutions.json`
+- **4 published spells** have 2-3 base-effect candidates at their computed
+  level, with no catalog gap and no missing data — the ambiguity is genuinely
+  in the rulebook prose. Each was resolved once during item 27's Task 10,
+  then pulled after a reviewer found the recorded rationale was picking the
+  most general-sounding candidate rather than one the text actually forces:
+  - *Tracks of the Faerie Glow* (`lib-inte-tracks-faerie-glow`) — `inte-4a`
+    vs `inte-4b`
+  - *Sense the Feet that Thread the Earth*
+    (`lib-inte-sense-feet-that-thread-earth`) — same pair, same shape of
+    ambiguity
+  - *Crystal Dart* (`lib-mute-crystal-dart`) — `mute-3a`/`3b`/`3c`,
+    stone-vs-crystal boundary
+  - *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
+    — `peig-4a`/`4b`/`4c`, three co-equally-supported readings
+- **Why this is a different problem from item 28, not a duplicate of it.**
+  Item 28 is a catalog gap — the correct row is missing and needs adding.
+  Here every candidate row already exists in the catalog and is individually
+  plausible; the work is close reading against the spell's own prose, not
+  data entry. The two were bundled under one item-27 checklist line before
+  2026-08-07; splitting them keeps "add a row" separate from "make a
+  judgement call."
+- **Not a blocker for the harness itself.** `KNOWN_UNRESOLVABLE` in
+  `extract_spells.py` already routes all 4 to `blocked` rather than
+  `unresolved`, so nothing crashes; this item is about actually resolving
+  them so they import.
+- **See also item 32**, which audits *already-recorded* ledger entries for
+  the same failure mode (a plausible-sounding rationale that isn't textually
+  forced). This item is the same discipline applied to 4 entries that never
+  made it past that standard in the first place.
+- **Found by:** item 27's Task 10; carved out as its own item 2026-08-07.
 
 ### 30. Rulebook Source Provenance — ✅ COMPLETE (7/7 tasks)
 **Spec:** `docs/superpowers/specs/2026-08-03-rulebook-source-provenance-design.md`
@@ -474,7 +570,10 @@ more time than closing out item 27 warranted.
       the trailing prose and the whole thing fails `_TOKEN`. Found while
       closing item 24. Splitting on `;` at depth 0 alongside `,` and `.` is
       the obvious fix; check the corpus for a `;` that is *not* a token
-      boundary before making it unconditional.
+      boundary before making it unconditional. **Same function, same shape of
+      bug as item 26's *Bountiful Feast* unbalanced-bracket finding** — each
+      blocks exactly one spell; worth fixing both in one pass over
+      `_split_parts` rather than two.
 - [ ] **Minor: adjustments were missing from one Dart level assertion.**
       `asset_data_loader_test.dart`'s "every loaded spell calculates to the
       level stated in its description" builds its own magnitude list rather
@@ -487,9 +586,15 @@ more time than closing out item 27 warranted.
       make `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
       start failing on purpose; whoever does this should expect and update
       that test, not be surprised by it.
-- [ ] Minor: `main()` in `extract_spells.py` never prints *why* spells are
-      blocked (only the count) — a `--show-blocked` flag or always-print
-      would make the CLI more useful for items 24/25/26/28's ongoing work.
+- [ ] **`--show-blocked` flag for `extract_spells.py`.** Elevated out of
+      "Minor" 2026-08-07: `main()` only prints the blocked *count*, never the
+      per-spell reasons, and the last full reason breakdown — item 27's, at
+      110 blocked — is now stale (see the note added there 2026-08-07). Items
+      24, 26 and this item's own Imaginem/changing-image wiring have each
+      closed out buckets that breakdown names, and the count has moved to 64
+      (item 25) with no fresh per-reason tally since. This is a prerequisite
+      for prioritizing items 19/26/28/39 accurately, not just a CLI nicety —
+      do this before starting any of them.
 - [ ] Minor: `catalog._STOPWORDS` still contains `"phantasm"`, a content
       word, not a real stopword. **No longer a no-op** — the Imaginem
       mapping above landed and three Phantasm spells now import with the
@@ -519,76 +624,6 @@ more time than closing out item 27 warranted.
 - **Related deferred work:** the Spell Modifiers spec deferred sizing for Part,
   Group, Room, Structure and Boundary targets entirely (its ladders assume
   Individual). *Poisoning the Will* is the first published spell to need it.
-
-### 18. Storyguide-Ruling UI for Rituals
-- [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
-      three built-in spells already use, but no control sets
-- [ ] Revisit `SpellCreationBloc._withRitualDeclaration` so the two declaration
-      kinds stay distinguishable once both are user-settable
-- **Rationale:** Core Rules line 12352 lets the troupe declare any spell a
-  Ritual. The Creo+Momentary-only checkbox cannot express them.
-- **Count corrected by the audit: 7, not 4.** Of the 39 Ritual-flagged published
-  spells, 32 are derivable today (Year duration, Boundary target, level > 50, or
-  the Creo+Momentary checkbox). These 7 are not:
-  *Curse of the Ravenous Swarm* (CrAn 50), *Neptune's Wrath* (ReAq 40),
-  *Breath of the Open Sky* (CrAu 40), *Rain of Oil* (MuAu 50),
-  *Incantation of Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen),
-  *Watching Ward* (ReVi Gen).
-- **Some of the 7 may want a guideline flag instead of a ruling.** Three carry
-  the reason in their own design line (`ritual because it has a really major
-  effect`, `ritual for large effect`, `ritual because of spectacular effect`) —
-  that is a storyguide ruling. The two Vim Generals may be guideline-level.
-- **Spec:** `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`
-
-### 22. Catalog Extraction Gaps
-Four Creo Animal rows, plus six more the Definitive Edition audit found.
-
-- [ ] **Creo Animal** — L35 "Increase a Characteristic to one above average",
-      L40 "Cause an animal to reach full maturity in a moment",
-      L45 "…three above average", L55 "…five above average"
-      (re-verify against the DE table at line 12468; the original research was
-      done against the 5e core rules, and the DE rows may differ slightly)
-- [ ] **Creo Corpus** — L70 "Raise the dead, to a point (see *The Shadow of Life
-      Renewed*)"
-- [ ] **Rego Animal** — General "Create a circle warding against animals from one
-      realm … with Might less than the level"
-- [ ] **Rego Mentem** — General "Ward against spirits belonging to one realm …
-      with a Might less than the level"
-- [ ] **Muto Aquam** — General "Convert part of a water elemental's body into
-      another type of water"
-- [ ] **Muto Terram** — General "Convert part of an earth elemental's body into
-      another type of earth"
-- **Context:** pure extraction gap, no design decisions. The four General rows
-  are also item 25 cases once added — item 25 is done, so when these four rows
-  are eventually added to `base_effects.json`, each needs a `reference` and an
-  `effectFormula` (`GeneralEffectFormula`) alongside its `baseLevel: null`, the
-  same shape as the other 49 General entries, not a bare zero-level row.
-- **Source precedence — the catalog is built from the wrong file.** The rulebook
-  repo holds the same book in `reviewed/` and `wip/`, in descending quality
-  (note: `raw-md/` was removed from the upstream repo). Always resolve `reviewed`
-  → `wip` and stop at the first hit; the earlier `raw-md` was unreviewed OCR and
-  also carried two alternate core-rules copies. Filenames differ between folders,
-  so match on book title. The 604 base effects came from what was `raw-md/Ars
-  Magica 5e - Core Rules.md` (now retrievable via
-  `git -C <rulebook> show 8b6c4d6^:"raw-md/Ars Magica 5e - Core Rules.md"` if
-  needed for historical reference) while a reviewed Definitive Edition exists —
-  so this item should end with the catalog rebuilt from `reviewed`, not with ten
-  rows patched onto a raw-OCR base.
-
-### 4. Conditional Wards *(the last open piece of the original item 4)*
-- [ ] Add ward type field to BaseEffect
-- [ ] Level threshold: a ward affects creatures whose Might is below the spell's
-      level — display it, do not compute a different level from it
-- [ ] UI section for ward configuration
-- **Depends on item 25 — item 25 is done.** 13 published ward spells; 8 of them
-  are General-level, and for those the ward threshold *is* the chosen level.
-  `deriveGeneralEffect` now supplies that threshold (item 25's
-  `GeneralEffectFormula`/`GeneralEffectKind.mightThreshold`); what remains here
-  is the ward-type field itself and its display, not the threshold math.
-- **Only 1 spell has ward mechanics in its design line** — *Break the Oncoming
-  Wave* (`ward, so the target is the warded Individual, not the water`). The
-  other 12 need nothing beyond item 25.
-- **See item 4's full audit below** for the other eight sub-items' outcomes.
 
 ---
 
@@ -1118,6 +1153,92 @@ problem on a different axis. Filed so the two can be designed together.
   points do not justify that abstraction yet.
 - **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
   `lib/engine/spell_engine.dart` (validation), and the creation UI.
+
+### 18. Storyguide-Ruling UI for Rituals
+**Moved from section A, 2026-08-07** — see that section's note. Confirmed
+against `extract_spells.py`: nothing in the import pipeline gates on Ritual
+correctness, so these 7 spells already import or template today, just with
+an incomplete `RitualDeclaration`. Fidelity work on already-imported spells,
+not an import blocker — the same shape as items 35/37 above.
+
+- [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
+      three built-in spells already use, but no control sets
+- [ ] Revisit `SpellCreationBloc._withRitualDeclaration` so the two declaration
+      kinds stay distinguishable once both are user-settable
+- **Rationale:** Core Rules line 12352 lets the troupe declare any spell a
+  Ritual. The Creo+Momentary-only checkbox cannot express them.
+- **Count corrected by the audit: 7, not 4.** Of the 39 Ritual-flagged published
+  spells, 32 are derivable today (Year duration, Boundary target, level > 50, or
+  the Creo+Momentary checkbox). These 7 are not:
+  *Curse of the Ravenous Swarm* (CrAn 50), *Neptune's Wrath* (ReAq 40),
+  *Breath of the Open Sky* (CrAu 40), *Rain of Oil* (MuAu 50),
+  *Incantation of Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen),
+  *Watching Ward* (ReVi Gen).
+- **Some of the 7 may want a guideline flag instead of a ruling.** Three carry
+  the reason in their own design line (`ritual because it has a really major
+  effect`, `ritual for large effect`, `ritual because of spectacular effect`) —
+  that is a storyguide ruling. The two Vim Generals may be guideline-level.
+- **Spec:** `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`
+
+### 22. Catalog Extraction Gaps
+**Moved from section A, 2026-08-07** — see that section's note. None of the
+360 published spells cite these missing rows (the item's own text already
+said so: "pure extraction gap, no design decisions"), so nothing here blocks
+an import; it's catalog completeness against the rulebook.
+
+Four Creo Animal rows, plus six more the Definitive Edition audit found.
+
+- [ ] **Creo Animal** — L35 "Increase a Characteristic to one above average",
+      L40 "Cause an animal to reach full maturity in a moment",
+      L45 "…three above average", L55 "…five above average"
+      (re-verify against the DE table at line 12468; the original research was
+      done against the 5e core rules, and the DE rows may differ slightly)
+- [ ] **Creo Corpus** — L70 "Raise the dead, to a point (see *The Shadow of Life
+      Renewed*)"
+- [ ] **Rego Animal** — General "Create a circle warding against animals from one
+      realm … with Might less than the level"
+- [ ] **Rego Mentem** — General "Ward against spirits belonging to one realm …
+      with a Might less than the level"
+- [ ] **Muto Aquam** — General "Convert part of a water elemental's body into
+      another type of water"
+- [ ] **Muto Terram** — General "Convert part of an earth elemental's body into
+      another type of earth"
+- **Context:** pure extraction gap, no design decisions. The four General rows
+  are also item 25 cases once added — item 25 is done, so when these four rows
+  are eventually added to `base_effects.json`, each needs a `reference` and an
+  `effectFormula` (`GeneralEffectFormula`) alongside its `baseLevel: null`, the
+  same shape as the other 49 General entries, not a bare zero-level row.
+- **Source precedence — the catalog is built from the wrong file.** The rulebook
+  repo holds the same book in `reviewed/` and `wip/`, in descending quality
+  (note: `raw-md/` was removed from the upstream repo). Always resolve `reviewed`
+  → `wip` and stop at the first hit; the earlier `raw-md` was unreviewed OCR and
+  also carried two alternate core-rules copies. Filenames differ between folders,
+  so match on book title. The 604 base effects came from what was `raw-md/Ars
+  Magica 5e - Core Rules.md` (now retrievable via
+  `git -C <rulebook> show 8b6c4d6^:"raw-md/Ars Magica 5e - Core Rules.md"` if
+  needed for historical reference) while a reviewed Definitive Edition exists —
+  so this item should end with the catalog rebuilt from `reviewed`, not with ten
+  rows patched onto a raw-OCR base.
+
+### 4. Conditional Wards *(the last open piece of the original item 4)*
+**Moved from section A, 2026-08-07** — see that section's note. The item's
+own text already says the ward threshold is "display it, do not compute a
+different level from it": wards already import and compute correctly via
+item 25's General mechanism. Display-fidelity work, not an import blocker.
+
+- [ ] Add ward type field to BaseEffect
+- [ ] Level threshold: a ward affects creatures whose Might is below the spell's
+      level — display it, do not compute a different level from it
+- [ ] UI section for ward configuration
+- **Depends on item 25 — item 25 is done.** 13 published ward spells; 8 of them
+  are General-level, and for those the ward threshold *is* the chosen level.
+  `deriveGeneralEffect` now supplies that threshold (item 25's
+  `GeneralEffectFormula`/`GeneralEffectKind.mightThreshold`); what remains here
+  is the ward-type field itself and its display, not the threshold math.
+- **Only 1 spell has ward mechanics in its design line** — *Break the Oncoming
+  Wave* (`ward, so the target is the warded Individual, not the water`). The
+  other 12 need nothing beyond item 25.
+- **See item 4's full audit below** for the other eight sub-items' outcomes.
 
 ---
 

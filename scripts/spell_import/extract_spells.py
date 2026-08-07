@@ -403,6 +403,10 @@ def main(argv: list[str] | None = None) -> int:
         "--accept-source", action="store_true",
         help="adopt a changed rulebook: rewrite source.lock and the change report",
     )
+    parser.add_argument(
+        "--show-blocked", action="store_true",
+        help="list each blocked spell and its reason",
+    )
     args = parser.parse_args(argv)
 
     if args.accept_source and not args.write:
@@ -418,6 +422,21 @@ def main(argv: list[str] | None = None) -> int:
     print(f"templates: {len(report.templates)}")
     print(f"blocked  : {len(report.blocked)}")
     print(f"unresolved: {len(report.unresolved)}")
+
+    if args.show_blocked and report.blocked:
+        print("\nBlocked spells by reason:")
+        # Group by reason for better readability
+        by_reason: dict[str, list[str]] = {}
+        for name, reason in report.blocked:
+            if reason not in by_reason:
+                by_reason[reason] = []
+            by_reason[reason].append(name)
+
+        for reason in sorted(by_reason.keys()):
+            spells = sorted(by_reason[reason])
+            print(f"\n{reason} ({len(spells)}):")
+            for spell in spells:
+                print(f"  - {spell}")
 
     for problem in report.problems:
         print(f"  PARSE  {problem}", file=sys.stderr)

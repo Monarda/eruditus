@@ -36,9 +36,11 @@ _ELABORATE_OPTIONS = {
 # against the real catalog on every run.
 #
 # Still deliberately not a census of every modifier label the tokenizer knows.
-# "unnatural" and "metal" are absent because their mappings are not verified,
-# not because they were overlooked -- see `_selected_modifiers`'s docstring
-# and .superpowers/todo.md item 27.
+# "metal" is absent because its mapping is ambiguous (see `_selected_modifiers`'s
+# docstring). "unnatural" is now included for Creo Auram, verified against the
+# rulebook's Creo Auram preamble.
+#
+# See .superpowers/todo.md item 27 for tracked follow-up on these and other tokens.
 _MODIFIER_OPTIONS = {
     ("Creo", "Imaginem", "intricacy"): ("crim-complexity", "crim-intricate-design"),
     # "Image moves or makes noise at your direction as you concentrate",
@@ -269,6 +271,33 @@ def _selected_modifiers(
             continue
         if token.kind != "modifier":
             continue
+
+        # Creo Auram "unnatural" modifiers: magnitude determines which option
+        if (
+            block.technique == "Creo"
+            and block.form == "Auram"
+            and token.label.lower() in ("unnatural", "slightly unnatural", "very unnatural", "wholly divorced")
+        ):
+            modifier_id = "creo-auram-unnatural"
+            unnatural_options = {
+                1: "creo-auram-unnatural-slight",
+                2: "creo-auram-unnatural-very",
+                4: "creo-auram-unnatural-divorced",
+            }
+            option_id = unnatural_options.get(token.magnitude)
+            if option_id is None:
+                raise designline.UnknownToken(
+                    f"{block.name}: creo-auram-unnatural has no option at magnitude "
+                    f"{token.magnitude}"
+                )
+            if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+                raise designline.UnknownToken(
+                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                    f"{option_id!r} at magnitude {token.magnitude}"
+                )
+            selected.setdefault(modifier_id, []).append(option_id)
+            continue
+
         mapped = _MODIFIER_OPTIONS.get((block.technique, block.form, token.label))
         if mapped is not None:
             modifier_id, option_id = mapped
