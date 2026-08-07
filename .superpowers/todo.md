@@ -1228,6 +1228,152 @@ or item 7 (backup validation). Do not do it on its own.
 - **Files:** `lib/data/database/app_database.dart` (the `spells` DDL),
   `lib/data/datasources/local_spell_datasource.dart` (`_toRow`)
 
+### 38. Follow-ups from item 25's Final Whole-Branch Review
+None of this blocks the branch — the code and data committed for item 25 are
+correct, 445 Dart tests pass, and it merges as-is. This is the same shape as
+item 29 (item 27's equivalent list): three real, cheap, high-value findings
+were fixed immediately; the rest need more design judgement or more time than
+closing out item 25 warranted.
+
+- [x] **Three regressions fixed immediately** (commit `4a49e78`), each
+      independently regression-tested:
+      - `configuration_screen.dart:81` printed `'Base ${e.baseLevel}'`
+        unconditionally, so Settings > Effects showed **"Base null"** for
+        every one of the 49 General guidelines — the `isGeneral` guard the
+        creation screen's dropdown already had was never applied here.
+      - The Add Custom Effect dialog (`configuration_screen.dart`,
+        `_AddEffectDialogState`) still accepted a base level of `0`.
+        `SpellLevelCalculator.calculate` now rejects any `baseLevel < 1`
+        (item 25 removed the old `baseLevel: 0`-as-General allowance), so a
+        level-0 custom effect created without error and then threw
+        `ArgumentError` the first time a spell built on it was calculated.
+        The dialog now rejects `level < 1` up front.
+      - `spell_creation_screen.dart`'s suggestions-list `SpellCard` never
+        passed `isGeneral`, so a saved spell built on a General guideline
+        showed no "Gen" chip there, unlike the Library screen's template
+        cards, which hardcode `isGeneral: true`. Now reads
+        `s.baseEffect?.isGeneral ?? false`.
+- [ ] **`SpellEngine.allParameters` starts empty and is populated only by a
+      listener scoped to the Create screen.** `SpellEngine(allSpells:
+      allSpells)` (`main.dart`) defaults `allParameters` to `const []`
+      (`spell_engine.dart:32`); it's only filled via
+      `AvailableParametersSynced`, dispatched from
+      `SpellCreationScreen`'s `BlocListener<ConfigurationBloc, ...>`
+      (`spell_creation_screen.dart`). `main.dart`'s `IndexedStack` builds the
+      Library tab eagerly at app start, so `SpellLibraryBloc`'s
+      `LibraryRequested` handler can call `calculateBreakdown` for a saved
+      General ward-type spell before that sync lands. When it does,
+      `_parameterById(referenceId)` (`spell_engine.dart:49`,
+      `_parameterContribution` at `:240`) returns null, and the reference
+      discount is silently skipped — the spell is momentarily overcharged
+      the raw magnitude instead of the delta against its guideline's
+      reference, with no error surfaced. Not observed with today's shipped
+      library (no built-in spell both uses a ward guideline and picks a
+      non-reference Range/Duration/Target), so it hasn't manifested yet, but
+      nothing prevents it for the first user-saved spell that does. Fix is
+      probably to seed `allParameters` from `ConfigurationRepository`
+      synchronously at construction (`main.dart`, alongside `allSpells`)
+      rather than waiting for a bloc round-trip.
+- [ ] **A cluster of duplicated join/filter logic between `Spell`'s path and
+      `SpellTemplate`'s new, parallel path**, all real, all independently
+      confirmed by re-reading the cited lines, none urgent enough to
+      refactor on this branch:
+      - `SpellResolver.resolve`/`resolveAll` and `resolveTemplate`/
+        `resolveAllTemplates` (`spell_resolver.dart:46-66`) perform the
+        identical four-field id lookup, differing only in the wrapper type.
+      - `SpellLibraryState.visibleSpells`/`visibleTemplates`
+        (`spell_library_state.dart:40-69`) run the identical
+        filter-by-source-then-substring-match pipeline. (Its "My Spells"
+        branch on `visibleTemplates` always returning empty is not dead
+        code — it's correct and already commented: a template is published
+        catalog data and can never be user-created.)
+      - `ResolvedSpell`/`ResolvedTemplate` (`lib/models/resolved_spell.dart`,
+        `lib/models/resolved_template.dart`) duplicate the same
+        `isResolved`/`unresolvedReferences`/`technique`/`form` derivation
+        and the same run of pass-through getters; only the `LibraryEntry`
+        interface between them is shared, not the implementation.
+      - `scripts/spell_import/emit.py`'s `build_template` (144-207) mirrors
+        `build_spell` (80-141) near-verbatim for range/duration/target
+        lookup, requisite construction, citations, adjustments and ritual
+        declaration — the function's own docstring says "mirrors
+        `build_spell`" without factoring the shared part out.
+      - `scripts/spell_import/extract_spells.py`'s General-guideline branch
+        (255-291) duplicates the ordinary-spell ledger-resolution pipeline
+        just below it (300-332), and the two have already started to drift:
+        `DESIGN_LINE_INCOMPLETE` exists only on the General side, though
+        nothing about that check is General-specific.
+      - A generic mixin/base class on the Dart side (parametrized on the
+        record's four catalog-id fields) and a shared `_common_fields`-style
+        helper on the Python side would collapse each pair to one
+        implementation. Worth doing before a third catalog-referencing
+        record type shows up, not urgent before then.
+- [ ] **Efficiency, all in the Library-load path, none correctness-affecting:**
+      `SpellLibraryBloc._onEvent` (`spell_library_bloc.dart:36-37`) awaits
+      `getAllSpells()` then `getTemplates()` sequentially, and each
+      independently calls `LibraryRepository._refreshResolver()` — two
+      catalog reloads where one would do, on every single Library tab visit
+      (`main.dart`'s bottom-nav re-requests on every visit, by design).
+      `getTemplates()` also re-reads and re-parses `spell_templates.json`
+      from the asset bundle on every call, unlike `getBuiltInSpells`, which
+      caches the parse. `SpellEngine._parameterById`
+      (`spell_engine.dart:49`) does a linear scan instead of a map lookup,
+      unlike `SpellResolver`'s own id maps. Running the two repository calls
+      concurrently (`Future.wait`), refreshing the resolver once, and
+      caching the parsed template list would fix all three cheaply.
+- [ ] **`deriveGeneralEffect` silently returns null when a negative
+      `offsetMagnitudes` drives the value below 1** (`spell_engine.dart`,
+      the `on ArgumentError { return null; }` branch), and
+      `validateSpellDraft` doesn't check this independently of the overall
+      spell level — a General guideline with a negative offset, chosen at a
+      low enough level, can save successfully with a blank effect sentence
+      and no validation error. No current catalog entry has a negative
+      `offsetMagnitudes`, so unobserved today. Matches the spec's own
+      documented "Task 8 stops such a spell being saved at all" gap for this
+      specific path — a known deferral, not a surprise, but recorded here so
+      it isn't lost.
+- [ ] **`TemplateInstantiated` silently discards an in-progress, unsaved
+      draft.** Deliberate by design (Task 14a: a stale breakdown/
+      suggestions/calculated level must not follow the user into a new
+      spell), but there is no confirmation before an unsaved edit is
+      dropped. Worth a "discard changes?" prompt if this becomes a reported
+      annoyance; not blocking.
+- [ ] **36 of the 49 General catalog entries omit an explicit `reference`
+      triple**, falling back to `ParameterTriple.standard()` (Personal/
+      Momentary/Individual) rather than stating it. Correct for guidelines
+      that are genuinely Personal/Momentary/Individual, but the fallback
+      can't distinguish "explicitly so" from "field just wasn't authored" —
+      a future audit (natural extension of item 32) should confirm each of
+      the 36 against its own rulebook row rather than trust the default.
+      One specific candidate for that audit: `crvi-G4`'s `effectFormula`
+      codes `offsetMagnitudes: -1` (matching the guideline table's own
+      extracted description, "less than guideline magnitude -1"), but its
+      one template's verbatim rulebook prose (*Restore the Faded Threads*)
+      reads "up to the magnitude of this spell –3". Low confidence either
+      number is wrong — they may describe different quantities (a guideline
+      threshold vs. a per-spell magnitude) — but it's exactly the kind of
+      thing item 32's audit exists to check and nobody has yet.
+- [ ] **Two latent, unexercised gaps in the Python import pipeline**, neither
+      hit by the current 611-entry corpus:
+      - `extract_spells.py`'s General-branch routing
+        (`design.base_level is None or block.printed_level is None`) treats
+        *either* side being absent as "General", so a spell filed under a
+        `#### GENERAL` heading whose own design line nonetheless parses a
+        concrete numeric base level has that number silently discarded in
+        favor of `general_candidates()`. Would only matter for a future
+        source spell shaped that way.
+      - `emit.py`'s `_selected_modifiers` "size" token branch has no
+        duplicate-selection guard, unlike the structurally identical
+        `elaborate-effect` branch just above it, even though every
+        `size-<form>` modifier is `selectionMode: single`. Would only
+        matter for a design line printing two size tokens for one spell —
+        none currently does.
+- **Found by:** an Opus-run, multi-angle `code-review --max` of the whole
+  branch (`feature/general-base-effects` vs `main`) — six independent
+  reviewer passes (correctness/line-by-line, reuse, efficiency,
+  simplification, altitude, removed-behavior, cross-file tracing), each
+  independently re-verified against the current source before being recorded
+  here.
+
 ---
 
 ## Completed ✅
