@@ -78,7 +78,13 @@ class _EffectsTab extends StatelessWidget {
           final isCustom = e.provenance.source == PublicationSource.userCreated;
           return ListTile(
             title: Text(e.description),
-            subtitle: Text('${e.technique} ${e.form} • Base ${e.baseLevel}'),
+            // A General guideline has no baseLevel to print (the caster
+            // chooses it) -- the literal null would otherwise read as
+            // "Base null". Mirrors the same guard in the base-effect dropdown
+            // on the creation screen.
+            subtitle: Text(
+              '${e.technique} ${e.form} • ${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'}',
+            ),
             trailing: isCustom
                 ? IconButton(
                     key: Key('delete-effect-${e.id}'),
@@ -157,7 +163,19 @@ class _AddEffectDialogState extends State<_AddEffectDialog> {
           key: const Key('confirm-add-effect'),
           onPressed: () {
             final level = int.tryParse(_levelController.text);
-            if (_technique == null || _form == null || _descriptionController.text.isEmpty || level == null) {
+            // A custom effect is never General (there is no UI here to
+            // author a GeneralEffectFormula), so its baseLevel must be a real
+            // guideline number. SpellLevelCalculator.calculate now rejects
+            // any baseLevel below 1 -- it used to tolerate 0 only because the
+            // catalog briefly overloaded 0 as the "General" marker before
+            // BaseEffect.isGeneral switched to null. Reject it here too, or a
+            // level-0 custom effect creates fine and then throws the first
+            // time a spell built on it is calculated.
+            if (_technique == null ||
+                _form == null ||
+                _descriptionController.text.isEmpty ||
+                level == null ||
+                level < 1) {
               return;
             }
             Navigator.of(context).pop(BaseEffect(

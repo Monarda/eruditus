@@ -254,6 +254,11 @@ class SpellCreationScreen extends StatelessWidget {
                         entry: s,
                         level: state.suggestionLevels[s.id],
                         isRitual: state.ritualSuggestionIds.contains(s.id),
+                        // Missing here would mean a suggested spell built on
+                        // a General guideline shows no "Gen" chip, unlike the
+                        // Library screen's template cards -- the same badge
+                        // should read the same way everywhere it appears.
+                        isGeneral: s.baseEffect?.isGeneral ?? false,
                       ),
                     ),
                   if (state.status == SpellCreationStatus.error)

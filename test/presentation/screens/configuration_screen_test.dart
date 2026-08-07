@@ -8,6 +8,7 @@ import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
 import 'package:eruditus/bloc/configuration/configuration_event.dart';
 import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
@@ -60,6 +61,49 @@ void main() {
     await pumpScreen(tester, loadedState(effects: [customEffect]));
 
     expect(find.text('My custom effect'), findsOneWidget);
+  });
+
+  testWidgets('a General effect shows "General" rather than "Base null"', (tester) async {
+    final generalEffect = BaseEffect(
+      id: 'rean-gen', technique: 'Rego', form: 'Animal',
+      description: 'Ward against beings associated with Animal', baseLevel: null,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    await pumpScreen(tester, loadedState(effects: [generalEffect]));
+
+    expect(find.textContaining('General'), findsOneWidget);
+    expect(find.textContaining('null'), findsNothing);
+  });
+
+  testWidgets('the add-effect dialog rejects a base level below 1', (tester) async {
+    await pumpScreen(tester, loadedState());
+
+    await tester.tap(find.byKey(const Key('add-effect-button')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('new-effect-technique')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Creo').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('new-effect-form')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ignem').last);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('new-effect-description')), 'A degenerate effect');
+    // A custom effect has no way to author a GeneralEffectFormula, so 0 is
+    // not "General" here -- it is simply an invalid guideline level, and
+    // SpellLevelCalculator.calculate rejects it as soon as a spell built on
+    // this effect is calculated. The dialog must reject it up front instead.
+    await tester.enterText(find.byKey(const Key('new-effect-level')), '0');
+
+    await tester.tap(find.byKey(const Key('confirm-add-effect')));
+    await tester.pumpAndSettle();
+
+    verifyNever(() => bloc.add(any(that: isA<CustomEffectAdded>())));
+    // The dialog stays open rather than silently discarding the input.
+    expect(find.byKey(const Key('confirm-add-effect')), findsOneWidget);
   });
 
   testWidgets('filling the add-effect dialog dispatches CustomEffectAdded with the entered values',

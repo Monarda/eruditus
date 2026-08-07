@@ -335,6 +335,37 @@ void main() {
     expect(find.text('A roaring pillar of flame.'), findsOneWidget);
   });
 
+  testWidgets('a suggestion built on a General guideline shows the Gen chip', (tester) async {
+    final generalSuggestionRecord = Spell(
+      id: 's-gen',
+      name: 'Ward against the Undying',
+      baseEffectId: generalWardEffect.id,
+      rangeId: voiceParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      requisites: const [],
+      description: 'A ward against beings associated with Animal.',
+      chosenBaseLevel: 20,
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    final generalSuggestion = ResolvedSpell(
+      record: generalSuggestionRecord, baseEffect: generalWardEffect,
+      range: voiceParam, duration: durationParam, target: targetParam);
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
+      calculatedLevel: 10,
+      suggestions: [generalSuggestion],
+      suggestionLevels: const {'s-gen': 20},
+    );
+    await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.text('Ward against the Undying'), 200);
+
+    expect(find.byKey(const Key('general-chip')), findsOneWidget);
+  });
+
   testWidgets('tapping discard dispatches SpellDiscarded', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
