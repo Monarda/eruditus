@@ -928,6 +928,52 @@ directly — see commit `ca3c28a`). None affect correctness.
   correctness bug — see `.superpowers/sdd/progress.md` in the (now-merged)
   `feature/ritual-spells` history for the full review context.
 
+### 37. A Template Has Open Slots Beyond Its Level — Realm, Form, "Specific Type"
+Raised 2026-08-07 by the user, from *Wizard's Reach (Form)*: the Form must be
+chosen before the template can become a spell, exactly as the level must be.
+**This generalises item 35** — realm is one slot of several — but only for part
+of the corpus, and the part it does not cover is a different mechanism.
+Both are named here so they can be designed together; [[35]] stays as the realm
+instance rather than being deleted into this one.
+
+- **Case 1 — the guideline itself leaves a slot open.** Measured: **20 of the 49
+  General bullets**, 41%. By slot kind: **realm** ~15 (*"beings … from one
+  supernatural realm (Divine, Faerie, Infernal, or Magic)"*, and PeVi's *"any
+  supernatural effect of one realm"*); **"a specific type"** 4 (PeVi bullets 2,
+  7, 10 and ReVi 5 — the rulebook's own examples are *"Hermetic Terram magic, or
+  Shamanic spirit control magic"*); **Form** 2 (PeVi 10's *"a particular
+  Hermetic Form"*, PeVi 11's *"a given Form"*). Filling the slot is part of
+  choosing the guideline, and the slot is a property of the catalog row.
+  - Note: item 35 counted 14 General realm entries and this scan finds 15
+    (it adds `pevi-G5`). Reconcile before implementing; one of the two counts
+    is wrong.
+- **Case 2 — the guideline says nothing and the *spell* comes in ten versions.**
+  Three Muto Vim spells: *Mirror of Opposition (form)* (*"There are ten versions
+  of this spell, each affecting spells of one of the Hermetic forms"*),
+  *Wizard's Boost (Form)*, *Wizard's Reach (Form)*. Their guidelines
+  `muvi-G1/G2/G3` mention Form nowhere — they are Form-agnostic, and the
+  restriction belongs to the published spell. *Unravelling the Fabric of (Form)*
+  looks like this group by its name but is **case 1**: `pevi-G2` is *"Dispel
+  effects of a specific type"* and the Form is that slot being filled.
+- **Measured scope of the bracketed-name pattern:** exactly 4 spells in the
+  rulebook carry a `(Form)`/`(form)` placeholder, all 4 are General, and **0 of
+  the 273 ordinary imported spells do.** No Technique placeholder exists. So
+  case 2 is small and closed; case 1 is large and open.
+- **Why this is the same problem as item 25.** A template is a published spell
+  with the caster's choices left open, and instantiating it means supplying
+  them. Item 25 supplies the level. This supplies everything else. If the
+  template model grows a general `choices` map, all three axes fit it; if each
+  axis gets a bespoke field, there will be three.
+- **The observable that makes case 1 recoverable:** the chosen value is visible
+  in the published prose and is often the only thing distinguishing two
+  otherwise-identical spells — *"No **magical** beast whose **Magic** Might…"*
+  against *"No water **faerie** whose **Faerie** Might…"*, same guideline, same
+  level, same Touch/Ring/Circle. See [[35]] for the worked realm example.
+- **Open question, unanswered:** whether "a specific type" is a closed set (like
+  realm's four, or Form's ten) or free text. PeVi 7's *"a specific type of
+  supernatural effect"* reads open-ended, which would make it a different UI
+  affordance from a four-way or ten-way picker.
+
 ### 36. Audit the Catalog's `description` Fields Against the Rulebook
 Raised 2026-08-07 during item 25's Task 12. One confirmed defect, fixed in
 `2338430`; the question is how many more there are.
@@ -961,6 +1007,8 @@ Raised 2026-08-07 during item 25's Task 12. One confirmed defect, fixed in
   description does real damage.
 
 ### 35. A Guideline's Realm Is a Choice, Like Its Level
+**Generalised by item 37** (2026-08-07): realm is one open slot of several, alongside Form and "a specific type". Design the two together; the realm measurements below are still the authority for that slice, but item 37's scan finds 15 General realm rows against the 14 counted here, so reconcile first.
+
 Raised 2026-08-06 during item 25. **Not implemented there** — item 25 models the
 *level* choice a General guideline leaves open, and this is the same shape of
 problem on a different axis. Filed so the two can be designed together.
