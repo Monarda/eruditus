@@ -928,6 +928,38 @@ directly — see commit `ca3c28a`). None affect correctness.
   correctness bug — see `.superpowers/sdd/progress.md` in the (now-merged)
   `feature/ritual-spells` history for the full review context.
 
+### 36. Audit the Catalog's `description` Fields Against the Rulebook
+Raised 2026-08-07 during item 25's Task 12. One confirmed defect, fixed in
+`2338430`; the question is how many more there are.
+
+- **The defect.** `pevi-G2`'s description read *"Dispel specific effect type
+  **with Intellego spell** (level <= spell level +4 magnitudes + stress)"*. The
+  rulebook row contains no Intellego at all — it reads *"Dispel effects of a
+  specific type with a level less than or equal to the level + 4 magnitudes of
+  **the Vim spell** + a stress die (no botch)"*. The word almost certainly bled
+  from the row's first bullet, which does mention Intellego.
+- **Why it matters more than a typo.** These descriptions are what the app shows
+  the user when they pick a guideline, and they are what an agent reads when
+  resolving a spell. A description that misstates its guideline can drive a
+  wrong ledger pick that no test can catch — see the oracle measurement in item
+  25's plan, where assertion 6 caught one of five deliberately wrong picks.
+- **Why the existing audits missed it.** Item 34 compared bullet *counts* per
+  technique/form/level, in both directions, and never compared *content*. Counts
+  can match perfectly while every description is wrong.
+- **What has been checked so far.** A per-bullet scan for Art names appearing in
+  a description but not in its own rulebook bullet, across all 49 General
+  entries: exactly one hit, `pevi-G2`. That is a narrow probe — it catches
+  fabricated Art references and nothing else.
+- **What has not.** The other 562 entries, and every kind of drift that is not an
+  Art name: wrong thresholds, dropped conditions, merged clauses, inverted
+  senses. `inte-30a`/`inte-30b` are a known benign case of one bullet
+  deliberately split into two entries, so a strict one-to-one text comparison
+  will need to tolerate that.
+- **Suggested approach:** align each entry to its bullet positionally (the
+  ordering already matches — item 34's fix relies on it), then diff the numbers
+  and the modal verbs first; those carry the arithmetic and are where a wrong
+  description does real damage.
+
 ### 35. A Guideline's Realm Is a Choice, Like Its Level
 Raised 2026-08-06 during item 25. **Not implemented there** — item 25 models the
 *level* choice a General guideline leaves open, and this is the same shape of
