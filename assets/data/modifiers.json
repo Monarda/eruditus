@@ -96,7 +96,8 @@
       { "id": "size-animal-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-animal-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-animal-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-animal-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-animal-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-animal-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -122,7 +123,8 @@
       { "id": "size-aquam-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-aquam-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-aquam-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-aquam-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-aquam-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-aquam-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -148,7 +150,8 @@
       { "id": "size-auram-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-auram-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-auram-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-auram-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-auram-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-auram-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -174,7 +177,8 @@
       { "id": "size-corpus-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-corpus-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-corpus-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-corpus-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-corpus-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-corpus-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -200,7 +204,8 @@
       { "id": "size-herbam-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-herbam-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-herbam-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-herbam-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-herbam-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-herbam-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -226,7 +231,8 @@
       { "id": "size-ignem-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-ignem-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-ignem-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-ignem-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-ignem-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-ignem-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -252,7 +258,8 @@
       { "id": "size-imaginem-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-imaginem-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-imaginem-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-imaginem-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-imaginem-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-imaginem-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -278,7 +285,8 @@
       { "id": "size-terram-1", "label": "Up to 10x base", "magnitude": 1 },
       { "id": "size-terram-2", "label": "Up to 100x base", "magnitude": 2 },
       { "id": "size-terram-3", "label": "Up to 1,000x base", "magnitude": 3 },
-      { "id": "size-terram-4", "label": "Up to 10,000x base", "magnitude": 4 }
+      { "id": "size-terram-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-terram-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },
@@ -480,6 +488,33 @@
       { "id": "rego-distance-1-league", "label": "Up to 1 league", "magnitude": 3 },
       { "id": "rego-distance-7-leagues", "label": "Up to 7 leagues", "magnitude": 4 },
       { "id": "rego-distance-arcane", "label": "Somewhere you have an Arcane Connection", "magnitude": 5 }
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
+  },
+  {
+    "id": "size-mentem",
+    "name": "Size",
+    "description": "Each magnitude multiplies the maximum size of the target by ten. Applies when targeting multiple minds via area targets.",
+    "selectionMode": "single",
+    "scope": {
+      "technique": null,
+      "form": "Mentem",
+      "effectIds": [],
+      "excludeTechniques": ["Intellego"]
+    },
+    "source": "published",
+    "options": [
+      {
+        "id": "size-mentem-0",
+        "label": "Base Individual",
+        "baseIndividual": "a single human mind",
+        "magnitude": 0
+      },
+      { "id": "size-mentem-1", "label": "Up to 10x base", "magnitude": 1 },
+      { "id": "size-mentem-2", "label": "Up to 100x base", "magnitude": 2 },
+      { "id": "size-mentem-3", "label": "Up to 1,000x base", "magnitude": 3 },
+      { "id": "size-mentem-4", "label": "Up to 10,000x base", "magnitude": 4 },
+      { "id": "size-mentem-5", "label": "Up to 100,000x base", "magnitude": 5 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
   },

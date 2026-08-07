@@ -1,0 +1,117 @@
+imported : 292
+templates: 23
+blocked  : 45
+unresolved: 0
+
+Blocked spells by reason:
+
+Poisoning the Will: no 'size-mentem' modifier exists (1):
+  - Poisoning the Will
+
+Thaumaturgical Transformation of Plants to Iron: unknown target 'Ind Reg' (1):
+  - Thaumaturgical Transformation of Plants to Iron
+
+The Earth Split Asunder: unknown duration 'Spec' (1):
+  - The Earth Split Asunder
+
+Trackless Step: unknown duration 'Special' (1):
+  - Trackless Step
+
+Wind at the Back: unknown duration 'Spec' (1):
+  - Wind at the Back
+
+design line incomplete: prints (Base effect) but the stat line costs 2 magnitudes (2):
+  - Restore the Moved Image
+  - The Invisible Eye Revealed
+
+design line incomplete: prose disclaims guideline arithmetic: a remnant of Mercurian rituals (1):
+  - Wizard's Communion
+
+no General base effect for that Technique/Form (2):
+  - Dispel the Phantom Image
+  - Lay to Rest the Haunting Spirit
+
+no base effect at that Technique/Form/level (5):
+  - Fog of Confusion
+  - Infernal Smoke of Death
+  - Sense of the Lingering Magic
+  - The Enigma's Gift
+  - Wizard's Icy Grip
+
+no design line printed (6):
+  - Aegis of the Hearth
+  - Hermes' Portal
+  - Sight of the True Form
+  - Ward against Faeries of the Mountain
+  - Whispering Winds
+  - Wizard's Vigil
+
+unrecognised token '+1 Rego to fling the fragments away' in '(Base 3, +2 metal, +1 Touch, +1 size, +1 Rego to fling the fragments away)' (1):
+  - Obliteration of the Metallic Barrier
+
+unrecognised token '+1 Size (for a total of +4 Size, including the +3 from the guideline, so that the area affected is up to about 6 miles across' in '(Base 1, +1 Touch, +4 Year, +4 Special (equivalent to Boundary), +1 Size (for a total of +4 Size, including the +3 from the guideline, so that the area affected is up to about 6 miles across)' (1):
+  - The Bountiful Feast
+
+unrecognised token '+1 for light from Ignem requisite' in '(Base 3, +2 Voice, +2 Sun, +1 for light from Ignem requisite)' (1):
+  - Phantasmal Fire
+
+unrecognised token '+1 for not needing to gesture' in '(Base 15, +1 Touch, +3 Moon, +1 for not needing to gesture)' (1):
+  - Black Whisper
+
+unrecognised token '+1 requisite' in '(Base 4, +4 Arc, +1 Conc, +1 requisite)' (1):
+  - The Eye of the Sage
+
+unrecognised token '+2 Techniques and Forms' in '(Base 5, +1 Conc, +4 Vision, +2 Techniques and Forms)' (1):
+  - Sight of the Active Magics
+
+unrecognised token '+2 Voice; the ball appearing to shoot from your hand is a cosmetic effect' in '(Base 25, +2 Voice; the ball appearing to shoot from your hand is a cosmetic effect)' (1):
+  - Ball of Abysmal Flame
+
+unrecognised token '+2 for no words' in '(Base 30, +1 Touch, +2 for no words)' (1):
+  - The Kiss of Death
+
+unrecognised token '+2 for up to +15 damage' in '(Base 4, +2 for up to +15 damage, +1Touch, +2 Sun)' (1):
+  - Ward against Heat and Flames
+
+unrecognised token '+2 metal/gems' in '(Base 3, +2 metal/gems, +3 Sight)' (1):
+  - Stone to Falling Dust
+
+unrecognised token '+2' in '(Base 5, +1 Touch, +1 Conc, +2, highly unnatural, +1 Rego requisite)' (1):
+  - Wings of the Soaring Wind
+
+unrecognised token 'Duration is non-standard' in '(Base effect, +1 Touch, Duration is non-standard)' (1):
+  - Watching Ward
+
+unrecognised token 'changing the water to ice' in '(Base 5 (for the violent pounding), +2 Voice, +1 Concentration, +1 Part, +1 size, +1 additional effect, changing the water to ice)' (1):
+  - Ice of Drowning
+
+unrecognised token 'for a swarm weighing as much as one thousand pigs' in '(Base 5, +1 Touch, +3 Moon, +2 Group, +2 size, for a swarm weighing as much as one thousand pigs, +1 extra effect from requisite, ritual because it has a really major effect)' (1):
+  - Curse of the Ravenous Swarm
+
+unrecognised token 'mist is a purely cosmetic effect and thus is free' in '(Base 10, +1 Eye, +1 Conc, mist is a purely cosmetic effect and thus is free)' (1):
+  - Frosty Breath of the Spoken Lie
+
+unrecognised token 'ritual because of spectacular effect' in '(Base 5, +1 Touch, +1 Conc, +4 size, +1 unnatural, ritual because of spectacular effect)' (1):
+  - Breath of the Open Sky
+
+unrecognised token 'ritual for large effect' in '(Base 10, +3 Sight, +3 size, ritual for large effect)' (1):
+  - Neptune's Wrath
+
+unrecognised token 'slightly nonstandard effect' in '(Base 10, +2 Voice, +4 Year, +4 Bound, slightly nonstandard effect, mist and wind are cosmetic only)' (1):
+  - Mists of Change
+
+unrecognised token 'so that the whole stream floods' in '(Base 10, +2 Voice, +1 Concentration, +3 size, so that the whole stream floods)' (1):
+  - Deluge of Rushing and Dashing
+
+unrecognised token 'ward' in '(Base 5, +1 Conc, ward, so the target is the warded Individual, not the water)' (1):
+  - Break the Oncoming Wave
+
+unresolvable: ambiguous between inte-4a/4b, no textual discriminator (2):
+  - Sense the Feet That Thread the Earth
+  - Tracks of the Faerie Glow
+
+unresolvable: ambiguous between mute-3a/3b/3c, stone-vs-crystal boundary (1):
+  - The Crystal Dart
+
+unresolvable: ambiguous between peig-4a/4b/4c, three co-equal readings (1):
+  - Conjuration of the Indubitable Cold

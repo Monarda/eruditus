@@ -152,6 +152,136 @@
     ]
   },
   {
+    "id": "lib-crau-airs-ghostly-form",
+    "name": "Air's Ghostly Form",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-slight"
+      ]
+    },
+    "baseEffectId": "crau-2",
+    "rangeId": "range-touch",
+    "durationId": "duration-diameter",
+    "targetId": "target-individual",
+    "summary": "A thick fog forms around the magus, extending outwards for several paces. A breeze can push the fog around. The fog dissipates at its natural rate, and may be too thin to restrict sight within a minute. Level 5.",
+    "description": "A thick fog forms around the magus, extending outwards for several paces. A breeze can push the fog around. The fog dissipates at its natural rate, and may be too thin to restrict sight within a minute.",
+    "printedLevel": 5,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-broom-winds",
+    "name": "Broom of the Winds",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-very"
+      ]
+    },
+    "baseEffectId": "crau-3a",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "Whips up violent, swirling winds around the target. The target must make a Size stress roll against an Ease Factor of 9 to remain standing. If the target is braced or holding onto some support, he may also make a Strength stress roll against an Ease Factor of 9. If both rolls fail, the target is knocked in a random direction. The target may be damaged, depending on whether he strikes anything. Level 15.",
+    "description": "Whips up violent, swirling winds around the target. The target must make a Size stress roll against an Ease Factor of 9 to remain standing. If the target is braced or holding onto some support, he may also make a Strength stress roll against an Ease Factor of 9. If both rolls fail, the target is knocked in a random direction. The target may be damaged, depending on whether he strikes anything.",
+    "printedLevel": 15,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-chamber-spring-breezes",
+    "name": "Chamber of Spring Breezes",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-slight"
+      ]
+    },
+    "baseEffectId": "crau-1",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Creates a breeze of fresh air that continually moves throughout a room, keeping the air continuously breathable even if the room is airtight. Rose of Jerbiton's version of this spell always causes the air to smell of roses. The breeze can be created outdoors, but there it has little effect. Level 5.",
+    "description": "Creates a breeze of fresh air that continually moves throughout a room, keeping the air continuously breathable even if the room is airtight. Rose of Jerbiton's version of this spell always causes the air to smell of roses. The breeze can be created outdoors, but there it has little effect.",
+    "printedLevel": 5,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-charge-angry-winds",
+    "name": "Charge of the Angry Winds",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-slight"
+      ]
+    },
+    "baseEffectId": "crau-3a",
+    "rangeId": "range-voice",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "A wall of wind roars away from you, starting up to 10 paces away and continuing until it dissipates naturally. The wind is confined by any existing barriers, but if unconfined it can be up to a hundred paces wide. All within the area must make a Dexterity + Size stress roll against an Ease Factor of 9 or fall down and be blown along by the winds. The rolls must be made at the start of the gale... Level 15.",
+    "description": "A wall of wind roars away from you, starting up to 10 paces away and continuing until it dissipates naturally. The wind is confined by any existing barriers, but if unconfined it can be up to a hundred paces wide. All within the area must make a Dexterity + Size stress roll against an Ease Factor of 9 or fall down and be blown along by the winds. The rolls must be made at the start of the gale and each subsequent round that the wind is maintained. You must concentrate on the gale. Missile fire into or out of the gale is futile, and marching against the gale requires a Strength + Size stress roll against an Ease Factor of 15. Failure in this attempt mandates another Dexterity + Size stress roll against an Ease Factor of 12 to keep from falling.",
+    "printedLevel": 15,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-circling-winds-protection",
+    "name": "Circling Winds of Protection",
+    "requisites": [
+      {
+        "art": "Rego",
+        "kind": "adding"
+      }
+    ],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-very"
+      ]
+    },
+    "baseEffectId": "crau-3a",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Req: Rego Surrounds you with winds that circle at great speed. Since the wind picks up dust and other small, loose objects, you may be obscured. Anyone standing near enough to attack you with a hand weapon must make a Size stress roll against an Ease Factor of 9 at the beginning of each round or be blown back. Melee Attack rolls against you are at –3, and missile or thrown attacks are at –9. Level 20.",
+    "description": "Req: Rego Surrounds you with winds that circle at great speed. Since the wind picks up dust and other small, loose objects, you may be obscured. Anyone standing near enough to attack you with a hand weapon must make a Size stress roll against an Ease Factor of 9 at the beginning of each round or be blown back. Melee Attack rolls against you are at –3, and missile or thrown attacks are at –9.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crau-clouds-rain-and-thunder",
     "name": "Clouds of Rain and Thunder",
     "requisites": [],
@@ -198,6 +328,81 @@
     ]
   },
   {
+    "id": "lib-crau-incantation-lightning",
+    "name": "The Incantation of Lightning",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-divorced"
+      ]
+    },
+    "baseEffectId": "crau-5",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "A lightning bolt shoots forth from your outstretched hand in the direction you are pointing, doing +30 damage to a single target it hits. There must be nothing between you and the target. Those near the target must make Size stress rolls against an Ease Factor of 6 to remain standing. Level 35.",
+    "description": "A lightning bolt shoots forth from your outstretched hand in the direction you are pointing, doing +30 damage to a single target it hits. There must be nothing between you and the target. Those near the target must make Size stress rolls against an Ease Factor of 6 to remain standing.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-jupiters-resounding-blow",
+    "name": "Jupiter's Resounding Blow",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-slight"
+      ]
+    },
+    "baseEffectId": "crau-3a",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "Creates a thunderclap, anyone directly underneath must make a Stamina stress roll against an Ease Factor of 9 or be deafened. If deafened, the target gets another Stamina simple roll each minute against the same Ease Factor and recovers on a success. If the first roll botches, the victim is rendered deaf for a month. Level 10.",
+    "description": "Creates a thunderclap, anyone directly underneath must make a Stamina stress roll against an Ease Factor of 9 or be deafened. If deafened, the target gets another Stamina simple roll each minute against the same Ease Factor and recovers on a success. If the first roll botches, the victim is rendered deaf for a month.",
+    "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-pull-skybound-winds",
+    "name": "Pull of the Skybound Winds",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-very"
+      ]
+    },
+    "baseEffectId": "crau-5",
+    "rangeId": "range-voice",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Makes winds rise upward, pulling one object, creature, or person up to 50 feet into the sky before letting that target drop. Even a small building can be torn from its foundation, though such a building can be no larger than 20 feet to a side, and cannot be built out of a material heavier than stout wood. Uprooted objects fall randomly, unless you make a Finesse stress roll against an Ease Fact... Level 30.",
+    "description": "Makes winds rise upward, pulling one object, creature, or person up to 50 feet into the sky before letting that target drop. Even a small building can be torn from its foundation, though such a building can be no larger than 20 feet to a side, and cannot be built out of a material heavier than stout wood. Uprooted objects fall randomly, unless you make a Finesse stress roll against an Ease Factor of 12 to choose where the objects will fall.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crau-stench-twenty-corpses",
     "name": "Stench of the Twenty Corpses",
     "requisites": [],
@@ -217,6 +422,32 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "lib-crau-wrath-whirling-winds-and-water",
+    "name": "Wrath of Whirling Winds and Water",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-auram": [
+        "size-auram-5"
+      ]
+    },
+    "baseEffectId": "crau-5",
+    "rangeId": "range-sight",
+    "durationId": "duration-sun",
+    "targetId": "target-group",
+    "summary": "This spell creates an immense storm. 40 or more miles wide, of hurricane intensity. The storm builds up while you cast the ritual, and dissipates in a few seconds when the spell's duration ends. The gale-force winds and lashing waves cause immense damage along shorelines, and the winds, rain, and lightning cause extensive damage inland as well. Visibility is reduced to a few paces, missile fire... Level 65.",
+    "description": "This spell creates an immense storm. 40 or more miles wide, of hurricane intensity. The storm builds up while you cast the ritual, and dissipates in a few seconds when the spell's duration ends. The gale-force winds and lashing waves cause immense damage along shorelines, and the winds, rain, and lightning cause extensive damage inland as well. Visibility is reduced to a few paces, missile fire is futile, and travel is nearly suicidal. Weak structures are blown over, and all but the most seaworthy ships are certain to founder unless they can be beached before the storm reaches full intensity. The storm is not under the caster's control, and moves normally.",
+    "printedLevel": 65,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
   },
   {
     "id": "lib-crau-wreaths-foul-smoke",
@@ -2432,6 +2663,32 @@
     "ritualDeclaration": "lastingCreation"
   },
   {
+    "id": "lib-muau-rain-oil",
+    "name": "Rain of Oil",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-auram": [
+        "size-auram-5"
+      ]
+    },
+    "baseEffectId": "muau-4a",
+    "rangeId": "range-sight",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Req: Aquam Turns rain into droplets of oil. Within the spell's duration, the rain of oil continues as long as the storm does, drenching the landscape with flammable liquid. The oil will evaporate at a natural rate after the rain ceases. A Creo Ignem spell can ignite the storm so that the oil burns as it falls, but this requires a Group target large enough to catch all the raindrops. Lighting th... Level 50.",
+    "description": "Req: Aquam Turns rain into droplets of oil. Within the spell's duration, the rain of oil continues as long as the storm does, drenching the landscape with flammable liquid. The oil will evaporate at a natural rate after the rain ceases. A Creo Ignem spell can ignite the storm so that the oil burns as it falls, but this requires a Group target large enough to catch all the raindrops. Lighting the oil after it has landed is much easier.",
+    "printedLevel": 50,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-muau-rain-stones",
     "name": "Rain of Stones",
     "requisites": [],
@@ -2741,6 +2998,32 @@
     ]
   },
   {
+    "id": "lib-muhe-curse-haunted-forest",
+    "name": "Curse of the Haunted Forest",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-herbam": [
+        "size-herbam-5"
+      ]
+    },
+    "baseEffectId": "muhe-4b",
+    "rangeId": "range-touch",
+    "durationId": "duration-year",
+    "targetId": "target-group",
+    "summary": "Req: Perdo Turns a previously normal small forest into a haunted and dangerous place. The trees become gnarled and hideous, and the imaginative can see menacing faces in them. The trees also become conscious and cruel; capable of sight, hearing, and limited movement. While they cannot uproot themselves, they can move their branches about, and can reach the ground in an hour or two. Only ill-tem... Level 60.",
+    "description": "Req: Perdo Turns a previously normal small forest into a haunted and dangerous place. The trees become gnarled and hideous, and the imaginative can see menacing faces in them. The trees also become conscious and cruel; capable of sight, hearing, and limited movement. While they cannot uproot themselves, they can move their branches about, and can reach the ground in an hour or two. Only ill-tempered animals, such as boars and crows, live in these woods, and nothing in them is edible. The only knowledge of what might happen should this ritual be attempted in a faerie forest comes from ancient and disputed legends of the Order of Hermes.",
+    "printedLevel": 60,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-muhe-pass-unyielding-portal",
     "name": "Pass the Unyielding Portal",
     "requisites": [],
@@ -2827,6 +3110,36 @@
     "summary": "Req: Mentem Raises any tree into a state of consciousness resembling that of a human. Such a tree can see and hear what is going on around it, and at a normal human level of perception. Such a tree may share some mental attributes or personality traits with the caster. The tree can rearrange its branches over the course of several hours, though too slowly for people to observe the movement from... Level 25.",
     "description": "Req: Mentem Raises any tree into a state of consciousness resembling that of a human. Such a tree can see and hear what is going on around it, and at a normal human level of perception. Such a tree may share some mental attributes or personality traits with the caster. The tree can rearrange its branches over the course of several hours, though too slowly for people to observe the movement from second to second. Most trees in magical areas are already awake.",
     "printedLevel": 25,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-muhe-thaumaturgical-transformation-plants-to-iron",
+    "name": "Thaumaturgical Transformation of Plants to Iron",
+    "requisites": [
+      {
+        "art": "Terram",
+        "kind": "free"
+      }
+    ],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-herbam": [
+        "size-herbam-1"
+      ]
+    },
+    "baseEffectId": "muhe-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Makes any plant, dead or alive, as hard as iron. Affects any amount of continuous plant material up to the size of a small tree. Sharp-edged plants can become deadly when they are made this hard. Level 20.",
+    "description": "Makes any plant, dead or alive, as hard as iron. Affects any amount of continuous plant material up to the size of a small tree. Sharp-edged plants can become deadly when they are made this hard.",
+    "printedLevel": 20,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -3198,6 +3511,109 @@
     "summary": "Req: Imaginem All spirits within the target area become visible, although they might remain unseen if hiding behind something. This includes the spirits of living people, which appear as the person normally does. If the person is invisible or otherwise changed from his normal shape, his normal appearance is superimposed on his current appearance. Level 40.",
     "description": "Req: Imaginem All spirits within the target area become visible, although they might remain unseen if hiding behind something. This includes the spirits of living people, which appear as the person normally does. If the person is invisible or otherwise changed from his normal shape, his normal appearance is superimposed on his current appearance.",
     "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mute-earth-that-breaks-no-more",
+    "name": "Earth That Breaks No More",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "muto-terram-material": [
+        "muto-terram-material-stone"
+      ],
+      "size-terram": [
+        "size-terram-1"
+      ]
+    },
+    "baseEffectId": "mute-2",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-part",
+    "summary": "Turns a volume of packed dirt up to ten cubic paces into stone. Level 20.",
+    "description": "Turns a volume of packed dirt up to ten cubic paces into stone.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mute-edge-razor",
+    "name": "Edge of the Razor",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "muto-terram-material": [
+        "muto-terram-material-base-metal"
+      ]
+    },
+    "baseEffectId": "mute-3a",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Sharpens any metal edge to a degree unequaled by manual methods. An edged or pointed weapon gains a +2 bonus to Damage. Good-natured magi reward grogs by enchanting their weapons in this way, although since the resulting sword is resisted by Magic Resistance they rarely do this for all their grogs. Level 20.",
+    "description": "Sharpens any metal edge to a degree unequaled by manual methods. An edged or pointed weapon gains a +2 bonus to Damage. Good-natured magi reward grogs by enchanting their weapons in this way, although since the resulting sword is resisted by Magic Resistance they rarely do this for all their grogs.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mute-object-increased-size",
+    "name": "Object of Increased Size",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "muto-terram-material": [
+        "muto-terram-material-stone"
+      ]
+    },
+    "baseEffectId": "mute-4d",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "This spell enlarges an inanimate object originally no bigger than a large chest. The object doubles in each dimension and increases its weight eight times. The size increase is based on the object's original, natural size, so casting the spell more than once on an object has no effect. Noble elements like gold, silver, and gems, are not affected by this spell. If any part of the item resists gr... Level 20.",
+    "description": "This spell enlarges an inanimate object originally no bigger than a large chest. The object doubles in each dimension and increases its weight eight times. The size increase is based on the object's original, natural size, so casting the spell more than once on an object has no effect. Noble elements like gold, silver, and gems, are not affected by this spell. If any part of the item resists growth, the item as a whole does not grow. Casting requisites are required for the appropriate Form for the target.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mute-rock-viscid-clay",
+    "name": "Rock of Viscid Clay",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "muto-terram-material": [
+        "muto-terram-material-stone"
+      ]
+    },
+    "baseEffectId": "mute-2",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-part",
+    "summary": "Softens rock enough that it may be dug out, molded, and otherwise manipulated in the same way that hard river clay can be. The rock is slightly sticky. The spell affects rock in a roughly spherical shape with a three-foot diameter. Level 15.",
+    "description": "Softens rock enough that it may be dug out, molded, and otherwise manipulated in the same way that hard river clay can be. The rock is slightly sticky. The spell affects rock in a roughly spherical shape with a three-foot diameter.",
+    "printedLevel": 15,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -4259,6 +4675,32 @@
     ]
   },
   {
+    "id": "lib-peme-poisoning-will",
+    "name": "Poisoning the Will",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-mentem": [
+        "size-mentem-5"
+      ]
+    },
+    "baseEffectId": "peme-4c",
+    "rangeId": "range-touch",
+    "durationId": "duration-moon",
+    "targetId": "target-boundary",
+    "summary": "You curse a place, be it a valley, town, city, or covenant. The curse gradually saps the will and vitality from the people there. They become less energetic, and slowly stop caring about the place, what happens there, other people, and finally themselves. Colors seem more drab and the days longer, and there is an all-pervading sense of boredom and lassitude. Strong-willed individuals and those... Level 65.",
+    "description": "You curse a place, be it a valley, town, city, or covenant. The curse gradually saps the will and vitality from the people there. They become less energetic, and slowly stop caring about the place, what happens there, other people, and finally themselves. Colors seem more drab and the days longer, and there is an all-pervading sense of boredom and lassitude. Strong-willed individuals and those with strong Personality Traits are less affected, but still suffer to an extent. All Personality Trait rolls while in the area suffer a -3modifier. This spell affects only those who are within the cursed area, including visitors to it. Those who leave the area are overwhelmed by the return of their vigor and sense of purpose.",
+    "printedLevel": 65,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-peme-tip-tongue",
     "name": "Tip of the Tongue",
     "requisites": [],
@@ -4301,6 +4743,84 @@
     ]
   },
   {
+    "id": "lib-pete-cascade-rocks",
+    "name": "Cascade of Rocks",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-stone"
+      ],
+      "size-terram": [
+        "size-terram-4"
+      ]
+    },
+    "baseEffectId": "pete-3",
+    "rangeId": "range-sight",
+    "durationId": "duration-momentary",
+    "targetId": "target-part",
+    "summary": "Makes a cliff collapse, causing an avalanche. The effects depend on the size of the cliff and what lies below it. Level 40.",
+    "description": "Makes a cliff collapse, causing an avalanche. The effects depend on the size of the cliff and what lies below it.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-pete-end-mighty-castle",
+    "name": "End of the Mighty Castle",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-stone"
+      ]
+    },
+    "baseEffectId": "pete-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-structure",
+    "summary": "A single stone structure, such as a castle keep or manor house, crumbles to dust and small pebbles. Anyone inside at the time takes +10 damage from falling and having stones land on them, possibly more if the structure is particularly large. Level 25.",
+    "description": "A single stone structure, such as a castle keep or manor house, crumbles to dust and small pebbles. Anyone inside at the time takes +10 damage from falling and having stones land on them, possibly more if the structure is particularly large.",
+    "printedLevel": 25,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-pete-fist-shattering",
+    "name": "Fist of Shattering",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-stone"
+      ]
+    },
+    "baseEffectId": "pete-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "An object of stone or weaker material up to a pace across breaks apart. The appropriate Form for the target is a casting requisite. Level 10.",
+    "description": "An object of stone or weaker material up to a pace across breaks apart. The appropriate Form for the target is a casting requisite.",
+    "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-pete-pit-gaping-earth",
     "name": "Pit of the Gaping Earth",
     "requisites": [],
@@ -4319,6 +4839,31 @@
     "summary": "The dirt in a circle 6 paces across recedes into the ground, leaving a pit 9 feet deep. If the target area contains material other than dirt, that material is not affected. Level 15.",
     "description": "The dirt in a circle 6 paces across recedes into the ground, leaving a pit 9 feet deep. If the target area contains material other than dirt, that material is not affected.",
     "printedLevel": 15,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-pete-rusted-decay-ten-score-years",
+    "name": "Rusted Decay of Ten-score Years",
+    "requisites": [],
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-base-metal"
+      ]
+    },
+    "baseEffectId": "pete-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "After the spell is cast, the metal of the target becomes so thoroughly rusted that it breaks if used in any demanding way (for example, used to strike a blow in combat or to pry open a door). It also loses any sharpness it might once have had. Level 10.",
+    "description": "After the spell is cast, the metal of the target becomes so thoroughly rusted that it breaks if used in any demanding way (for example, used to strike a blow in combat or to pry open a door). It also loses any sharpness it might once have had.",
+    "printedLevel": 10,
     "citations": [
       {
         "bookId": "arm5-core"

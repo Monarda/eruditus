@@ -1,12 +1,12 @@
 {
   "book": "Ars Magica - Definitive Edition (Core Rules)",
   "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
-  "sha256": "716ae3658ae47526a5f4e7a2b5f9606355db5ae31bc874e113e5a63ba4bede85",
+  "sha256": "e4c1a0924adc82f42f6e02c05300800caa6915976868ea0eda714051091c7023",
   "rulebook": {
-    "commit": "97cc62d",
-    "date": "2026-07-18",
-    "subject": "Review Definitive Edition chapter 16"
+    "commit": "4a6887f",
+    "date": "2026-08-01",
+    "subject": "Fix various typos in the spell section."
   },
   "spellsParsed": 360,
-  "spellsImported": 273
+  "spellsImported": 294
 }

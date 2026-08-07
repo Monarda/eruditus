@@ -285,27 +285,28 @@ def _handle_magnitude_dependent_modifier(
         in ("material", "stone", "glass", "metal", "gemstone")
     ):
         modifier_id = f"{block.technique.lower()}-terram-material"
+        technique_prefix = block.technique.lower()
         material_options = {
-            (0, "dirt"): "perdo-terram-material-dirt",
-            (0, "sand"): "perdo-terram-material-dirt",
-            (0, "mud"): "perdo-terram-material-dirt",
-            (0, "clay"): "perdo-terram-material-dirt",
-            (1, "stone"): "perdo-terram-material-stone",
-            (1, "glass"): "perdo-terram-material-stone",
-            (2, "metal"): "perdo-terram-material-base-metal",
-            (2, "gemstone"): "perdo-terram-material-gemstone",
+            (0, "dirt"): f"{technique_prefix}-terram-material-dirt",
+            (0, "sand"): f"{technique_prefix}-terram-material-dirt",
+            (0, "mud"): f"{technique_prefix}-terram-material-dirt",
+            (0, "clay"): f"{technique_prefix}-terram-material-dirt",
+            (1, "stone"): f"{technique_prefix}-terram-material-stone",
+            (1, "glass"): f"{technique_prefix}-terram-material-stone",
+            (2, "metal"): f"{technique_prefix}-terram-material-base-metal",
+            (2, "gemstone"): f"{technique_prefix}-terram-material-gemstone",
         }
         option_id = material_options.get((token.magnitude, token.label.lower()))
         if option_id is None:
             by_magnitude = {
-                0: "perdo-terram-material-dirt",
-                1: "perdo-terram-material-stone",
-                2: "perdo-terram-material-base-metal",
+                0: f"{technique_prefix}-terram-material-dirt",
+                1: f"{technique_prefix}-terram-material-stone",
+                2: f"{technique_prefix}-terram-material-base-metal",
             }
             option_id = by_magnitude.get(token.magnitude)
         if option_id is None:
             raise designline.UnknownToken(
-                f"{block.name}: perdo-terram-material has no option at magnitude "
+                f"{block.name}: {modifier_id} has no option at magnitude "
                 f"{token.magnitude} with label {token.label!r}"
             )
         if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
