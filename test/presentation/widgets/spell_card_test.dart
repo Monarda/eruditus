@@ -6,7 +6,9 @@ import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 void main() {
@@ -65,7 +67,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          spell: buildSpell(name: 'Pillar of Fire', summary: 'Test summary.'),
+          entry: buildSpell(name: 'Pillar of Fire', summary: 'Test summary.'),
           level: 25,
         ),
       ),
@@ -80,7 +82,7 @@ void main() {
   testWidgets('shows "My Spell" badge for user-created spells', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: SpellCard(spell: buildSpell(name: 'My Fireball', source: PublicationSource.userCreated)),
+        body: SpellCard(entry: buildSpell(name: 'My Fireball', source: PublicationSource.userCreated)),
       ),
     ));
 
@@ -89,7 +91,7 @@ void main() {
 
   testWidgets('falls back to "Untitled Technique Form" when name is null', (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: buildSpell(name: null, summary: 'Test summary.'))),
+      home: Scaffold(body: SpellCard(entry: buildSpell(name: null, summary: 'Test summary.'))),
     ));
 
     expect(find.text('Untitled Creo Ignem'), findsOneWidget);
@@ -99,7 +101,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          spell: buildSpell(name: 'Pillar of Fire', description: 'A wall of roaring flame.'),
+          entry: buildSpell(name: 'Pillar of Fire', description: 'A wall of roaring flame.'),
           level: 25,
         ),
       ),
@@ -112,7 +114,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          spell: buildSpell(name: 'Pillar of Fire', source: PublicationSource.userCreated),
+          entry: buildSpell(name: 'Pillar of Fire', source: PublicationSource.userCreated),
           level: 25,
         ),
       ),
@@ -127,7 +129,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          spell: buildSpell(name: 'Test', source: PublicationSource.userCreated),
+          entry: buildSpell(name: 'Test', source: PublicationSource.userCreated),
           onTap: () => tapped = true,
         ),
       ),
@@ -161,7 +163,7 @@ void main() {
     );
 
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: unresolved)),
+      home: Scaffold(body: SpellCard(entry: unresolved)),
     ));
 
     expect(find.byKey(const Key('spell-card-unresolved')), findsOneWidget);
@@ -176,14 +178,57 @@ void main() {
     final spell = buildSpell(name: 'Touch of Midas', summary: 'Test summary.');
 
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: spell, level: 20, isRitual: true)),
+      home: Scaffold(body: SpellCard(entry: spell, level: 20, isRitual: true)),
     ));
     expect(find.byKey(const Key('ritual-chip')), findsOneWidget);
     expect(find.text('Ritual'), findsOneWidget);
 
     await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(spell: spell, level: 20)),
+      home: Scaffold(body: SpellCard(entry: spell, level: 20)),
     ));
     expect(find.byKey(const Key('ritual-chip')), findsNothing);
+  });
+
+  ResolvedTemplate buildTemplate({String? summary, String? description}) {
+    final record = SpellTemplate(
+      id: 'tpl-1',
+      name: 'Ward against Faeries of the Waters',
+      baseEffectId: effect.id,
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      summary: summary,
+      description: description,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    return ResolvedTemplate(
+        record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
+  }
+
+  testWidgets('a card built from a template renders its name, Technique/Form, blurb, and Published chip',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: buildTemplate(summary: 'Wards against faeries of water.'))),
+    ));
+
+    expect(find.text('Ward against Faeries of the Waters'), findsOneWidget);
+    expect(find.textContaining('Creo Ignem'), findsOneWidget);
+    expect(find.text('Wards against faeries of water.'), findsOneWidget);
+    expect(find.text('Published'), findsOneWidget);
+  });
+
+  testWidgets('shows a Gen chip only when isGeneral is true', (tester) async {
+    final template = buildTemplate(summary: 'Test summary.');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: template, isGeneral: true)),
+    ));
+    expect(find.byKey(const Key('general-chip')), findsOneWidget);
+    expect(find.text('Gen'), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: template)),
+    ));
+    expect(find.byKey(const Key('general-chip')), findsNothing);
   });
 }

@@ -4,6 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
+import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
@@ -13,15 +16,24 @@ import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
 class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
     implements SpellLibraryBloc {}
 
+class MockSpellCreationBloc extends MockBloc<SpellCreationEvent, SpellCreationState>
+    implements SpellCreationBloc {}
+
 class FakeSpellLibraryEvent extends Fake implements SpellLibraryEvent {}
 
 class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
+
+class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
+
+class FakeSpellCreationState extends Fake implements SpellCreationState {}
 
 void main() {
   late MockSpellLibraryBloc bloc;
@@ -68,9 +80,31 @@ void main() {
   final builtInSpell = buildSpell('built-1', 'Phantasm of the Talking Head');
   final userSpell = buildSpell('user-1', 'My Custom Fireball', source: PublicationSource.userCreated);
 
+  ResolvedTemplate buildTemplate(String id, String name, {bool resolved = true}) {
+    final record = SpellTemplate(
+      id: id,
+      name: name,
+      baseEffectId: effect.id,
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      description: 'A test template.',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    return ResolvedTemplate(
+      record: record,
+      baseEffect: resolved ? effect : null,
+      range: rangeParam,
+      duration: durationParam,
+      target: targetParam,
+    );
+  }
+
   setUpAll(() {
     registerFallbackValue(FakeSpellLibraryEvent());
     registerFallbackValue(FakeSpellLibraryState());
+    registerFallbackValue(FakeSpellCreationEvent());
+    registerFallbackValue(FakeSpellCreationState());
   });
 
   setUp(() {
@@ -81,6 +115,32 @@ void main() {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
     await tester.pumpWidget(MaterialApp(
       home: BlocProvider<SpellLibraryBloc>.value(value: bloc, child: const SpellLibraryScreen()),
+    ));
+  }
+
+  // The template section reaches for SpellCreationBloc only where its "Learn
+  // at level…" button is built (see Step 3's note on the brief), so this is a
+  // second helper rather than a change to pumpScreen above -- the five
+  // existing tests above prove that lookup stays lazy by continuing to pump
+  // with only a SpellLibraryBloc in scope.
+  Future<void> pumpScreenWithCreationBloc(
+    WidgetTester tester,
+    SpellLibraryState state, {
+    MockSpellCreationBloc? creationBloc,
+    VoidCallback? onTemplateLearned,
+  }) async {
+    whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
+    final resolvedCreationBloc = creationBloc ?? MockSpellCreationBloc();
+    whenListen(resolvedCreationBloc, const Stream<SpellCreationState>.empty(),
+        initialState: SpellCreationState.initial());
+    await tester.pumpWidget(MaterialApp(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<SpellLibraryBloc>.value(value: bloc),
+          BlocProvider<SpellCreationBloc>.value(value: resolvedCreationBloc),
+        ],
+        child: SpellLibraryScreen(onTemplateLearned: onTemplateLearned),
+      ),
     ));
   }
 
@@ -151,5 +211,72 @@ void main() {
 
     expect(find.text('My Custom Fireball'), findsOneWidget);
     expect(find.text('Phantasm of the Talking Head'), findsNothing);
+  });
+
+  group('General templates section', () {
+    testWidgets('renders templates above the spells, under a heading', (tester) async {
+      final template = buildTemplate('tpl-1', 'Ward against Faeries of the Waters');
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(
+          status: SpellLibraryStatus.loaded,
+          allSpells: [builtInSpell],
+          templates: [template],
+        ),
+      );
+
+      expect(find.text('General spells — learn at any level'), findsOneWidget);
+      expect(find.text('Ward against Faeries of the Waters'), findsOneWidget);
+      expect(find.text('Phantasm of the Talking Head'), findsOneWidget);
+
+      // The heading, and every template card, must sit above the spells.
+      final headingY = tester.getTopLeft(find.text('General spells — learn at any level')).dy;
+      final templateY = tester.getTopLeft(find.text('Ward against Faeries of the Waters')).dy;
+      final spellY = tester.getTopLeft(find.text('Phantasm of the Talking Head')).dy;
+      expect(headingY, lessThan(templateY));
+      expect(templateY, lessThan(spellY));
+    });
+
+    testWidgets(
+        'tapping "Learn at level…" dispatches TemplateInstantiated and invokes onTemplateLearned',
+        (tester) async {
+      final template = buildTemplate('tpl-1', 'Ward against Faeries of the Waters');
+      var learned = false;
+      final creationBloc = MockSpellCreationBloc();
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(status: SpellLibraryStatus.loaded, templates: [template]),
+        creationBloc: creationBloc,
+        onTemplateLearned: () => learned = true,
+      );
+
+      await tester.tap(find.byKey(Key('learn-${template.id}')));
+      await tester.pump();
+
+      verify(() => creationBloc.add(TemplateInstantiated(template))).called(1);
+      expect(learned, isTrue);
+    });
+
+    testWidgets('an unresolved template offers no "Learn at level…" button', (tester) async {
+      final unresolved = buildTemplate('tpl-1', 'Broken Template', resolved: false);
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(status: SpellLibraryStatus.loaded, templates: [unresolved]),
+      );
+
+      expect(find.text('Broken Template'), findsOneWidget);
+      expect(find.byKey(Key('learn-${unresolved.id}')), findsNothing);
+      expect(find.text('Learn at level…'), findsNothing);
+    });
+
+    testWidgets('a state with no templates renders no heading and no empty section',
+        (tester) async {
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell]),
+      );
+
+      expect(find.text('General spells — learn at any level'), findsNothing);
+    });
   });
 }

@@ -123,7 +123,11 @@ class _MainTabViewState extends State<_MainTabView> {
         techniques: ArsArts.all,
         forms: ArsForms.all,
       ),
-      const SpellLibraryScreen(),
+      // Learning a template dispatches TemplateInstantiated (which the Create
+      // tab's IndexedStack-preserved state picks up on its next build) and
+      // then jumps there, so the caster lands straight on the draft they just
+      // asked to build rather than staying on the Library tab to find it.
+      SpellLibraryScreen(onTemplateLearned: () => setState(() => _index = 0)),
       const ConfigurationScreen(),
       BackupScreen(
         backupService: widget.backupService,

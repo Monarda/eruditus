@@ -140,32 +140,19 @@ class SpellCreationScreen extends StatelessWidget {
                   ),
                 if (draft.baseEffect?.isGeneral ?? false) ...[
                   const SizedBox(height: 8),
-                  TextFormField(
-                    key: const Key('chosen-base-level-field'),
-                    keyboardType: TextInputType.number,
-                    // No controller, and deliberately so: this field only
-                    // ever exists while draft.baseEffect is General, and is
-                    // torn down (not merely rebuilt) the instant that stops
-                    // being true, because the `if` above removes it from the
-                    // widget list entirely. Every path that flips isGeneral
-                    // to false -- TechniqueSelected, FormSelected, and
-                    // BaseEffectSelected with a non-General effect -- clears
-                    // chosenBaseLevel in the very same emit (see
-                    // SpellCreationBloc), and switching between two General
-                    // guidelines never unmounts this field at all (isGeneral
-                    // stays true throughout, so the `if` never flips and the
-                    // Element is reused, not recreated). So every time
-                    // Flutter actually mounts a fresh Element here,
-                    // draft.chosenBaseLevel has already settled to exactly
-                    // what initialValue reads below -- there is no path left
-                    // where a freshly-seeded initialValue could disagree with
-                    // the draft.
-                    initialValue: draft.chosenBaseLevel?.toString(),
-                    decoration: const InputDecoration(
-                      labelText: 'Guideline level',
-                      helperText: 'General guidelines have no fixed level — you choose it.',
-                    ),
-                    onChanged: (value) => bloc.add(ChosenBaseLevelChanged(int.tryParse(value))),
+                  // Controlled, because it is externally settable: picking
+                  // "Learn at level…" on a template in the Library tab
+                  // (TemplateInstantiated) can set a *new* General base
+                  // effect with chosenBaseLevel reset to null while this
+                  // screen's widget state survives underneath main.dart's
+                  // IndexedStack. isGeneral stays true across that swap, so
+                  // the `if` above never flips and this field's Element is
+                  // never torn down -- an uncontrolled field would never
+                  // re-read initialValue and would keep showing whatever the
+                  // previous guideline's level was typed as.
+                  _GuidelineLevelField(
+                    value: draft.chosenBaseLevel,
+                    onChanged: (value) => bloc.add(ChosenBaseLevelChanged(value)),
                   ),
                   if (state.generalEffectSentence != null)
                     Text(state.generalEffectSentence!, key: const Key('general-effect-sentence')),
@@ -264,7 +251,7 @@ class SpellCreationScreen extends StatelessWidget {
                   else
                     ...state.suggestions.map(
                       (s) => SpellCard(
-                        spell: s,
+                        entry: s,
                         level: state.suggestionLevels[s.id],
                         isRitual: state.ritualSuggestionIds.contains(s.id),
                       ),
@@ -539,6 +526,73 @@ class SpellCreationScreen extends StatelessWidget {
               ))
           .toList(),
       onChanged: onChanged,
+    );
+  }
+}
+
+/// The level field for a General guideline (`BaseEffect.isGeneral`).
+///
+/// Controlled, because [value] can change out from under this field: picking
+/// "Learn at level…" on a *different* General template (TemplateInstantiated)
+/// sets a new General base effect with `chosenBaseLevel: null` while this
+/// screen's widget state survives underneath main.dart's IndexedStack, so the
+/// field's Element is reused rather than recreated (see the doc comment above
+/// this widget's call site).
+///
+/// [didUpdateWidget] resyncs the controller under exactly one condition:
+/// `int.tryParse(_controller.text) != widget.value`. Working through why that
+/// condition, and no other, is the whole point of this widget:
+///  - User types "20" -> the bloc echoes chosenBaseLevel back as 20 ->
+///    parse("20") == 20 -> equal -> **not** overwritten. If this fought every
+///    incoming value the field would never hold what was just typed.
+///  - User types "abc" -> tryParse gives null -> the draft is (still) null ->
+///    equal -> **not** overwritten, so a partial or invalid entry is left
+///    alone rather than snapped back to empty mid-edit.
+///  - User clears the field -> "" parses to null, draft null -> equal ->
+///    untouched.
+///  - A template swap sets the draft to null while the text still reads "20"
+///    -> 20 != null -> **overwritten** to "". This is the one case the
+///    condition exists to catch, and the only one where the text should move
+///    out from under the user.
+class _GuidelineLevelField extends StatefulWidget {
+  final int? value;
+  final ValueChanged<int?> onChanged;
+
+  const _GuidelineLevelField({required this.value, required this.onChanged});
+
+  @override
+  State<_GuidelineLevelField> createState() => _GuidelineLevelFieldState();
+}
+
+class _GuidelineLevelFieldState extends State<_GuidelineLevelField> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.value?.toString() ?? '');
+
+  @override
+  void didUpdateWidget(covariant _GuidelineLevelField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (int.tryParse(_controller.text) != widget.value) {
+      _controller.text = widget.value?.toString() ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      key: const Key('chosen-base-level-field'),
+      controller: _controller,
+      keyboardType: TextInputType.number,
+      decoration: const InputDecoration(
+        labelText: 'Guideline level',
+        helperText: 'General guidelines have no fixed level — you choose it.',
+      ),
+      onChanged: (value) => widget.onChanged(int.tryParse(value)),
     );
   }
 }

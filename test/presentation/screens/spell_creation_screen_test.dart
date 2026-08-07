@@ -618,6 +618,127 @@ void main() {
       expect(find.byKey(const Key('general-effect-sentence')), findsOneWidget);
       expect(find.text('Affects beings with Might 20 or less'), findsOneWidget);
     });
+
+    // Regression test for Correction 4: TemplateInstantiated sets a new
+    // (also General) base effect and chosenBaseLevel: null while the Create
+    // tab's widget state survives underneath an IndexedStack. isGeneral never
+    // flips false, so the field's Element is never torn down and an
+    // uncontrolled TextFormField would never re-read initialValue -- it would
+    // keep showing the level typed for the *previous* guideline over a draft
+    // that now holds null.
+    testWidgets(
+        'a template swap (new General base effect, null chosenBaseLevel) clears a level '
+        'typed for the previous guideline', (tester) async {
+      useTallSurface(tester);
+      final stateController = StreamController<SpellCreationState>();
+      addTearDown(stateController.close);
+
+      final otherGeneralEffect = BaseEffect(
+        id: 'rean-gen-2', technique: 'Creo', form: 'Ignem',
+        description: 'Ward against beings associated with Aquam', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+        effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+      );
+
+      final initial = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
+      );
+      whenListen(bloc, stateController.stream, initialState: initial);
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalWardEffect, otherGeneralEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+
+      await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '20');
+      await tester.pump();
+      expect(find.text('20'), findsOneWidget);
+
+      // What TemplateInstantiated's handler emits: a different General base
+      // effect and chosenBaseLevel reset to null. The field's `if` guard
+      // (isGeneral) never flips, so its Element survives this rebuild.
+      stateController.add(SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: otherGeneralEffect),
+      ));
+      await tester.pump();
+
+      expect(
+        tester.widget<TextFormField>(find.byKey(const Key('chosen-base-level-field'))).controller?.text,
+        '',
+      );
+      expect(find.text('20'), findsNothing);
+    });
+
+    // The sync condition (int.tryParse(text) != draft.value) must not fight
+    // the user's own typing: entering "2" makes the field read "2" and the
+    // draft (echoed back by the bloc) become 2, which is equal under that
+    // comparison and so must not be overwritten before "0" is typed too.
+    testWidgets('typing "2" then "0" is not fought back to leave the field reading "20"',
+        (tester) async {
+      useTallSurface(tester);
+      final stateController = StreamController<SpellCreationState>();
+      addTearDown(stateController.close);
+
+      final initial = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
+      );
+      whenListen(bloc, stateController.stream, initialState: initial);
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalWardEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+
+      await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '2');
+      // The real bloc echoes the parsed value straight back onto the draft.
+      stateController.add(SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+            technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect, chosenBaseLevel: 2),
+      ));
+      await tester.pump();
+
+      await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '20');
+      stateController.add(SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+            technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect, chosenBaseLevel: 20),
+      ));
+      await tester.pump();
+
+      expect(find.text('20'), findsOneWidget);
+    });
   });
 
   group('requisites section', () {
