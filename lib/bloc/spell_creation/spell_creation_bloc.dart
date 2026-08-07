@@ -214,6 +214,51 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(ritualDeclaration: event.declaration),
       ));
+    } else if (event is TemplateInstantiated) {
+      final template = event.template;
+      // The repository never hands out an unresolved template for this
+      // purpose in normal use, but a stale reference (a custom effect or
+      // parameter deleted between the Library screen's load and the tap)
+      // can still reach here. There is nothing to build a draft from, so
+      // emit nothing rather than seed one missing a baseEffect/range/
+      // duration/target -- the same "degrade, don't half-build" policy
+      // ResolvedTemplate/ResolvedSpell already follow.
+      if (!template.isResolved) return;
+
+      // A fresh SpellDraft (constructed, not copyWith-ed off state.draft), so
+      // it gets a new id -- the in-progress draft, if any, is abandoned
+      // rather than mutated in place.
+      final draft = _withPrunedModifiers(SpellDraft(
+        technique: template.technique,
+        form: template.form,
+        baseEffect: template.baseEffect,
+        range: template.range,
+        duration: template.duration,
+        target: template.target,
+        selectedModifiers: template.selectedModifiers,
+        requisites: template.requisites,
+        adjustments: template.adjustments,
+        summary: template.summary,
+        description: template.description,
+        // Verbatim, NOT run through _withRitualDeclaration. A template's
+        // declaration is published catalog data about *this* effect, not
+        // something to re-derive from the draft's current Technique/
+        // Duration -- Disenchant (Perdo Vim, Momentary) declares
+        // lastingCreation, and _withRitualDeclaration only reapplies that
+        // default for Creo + Momentary, so routing it through there would
+        // silently strip a Ritual status the guideline actually has.
+        ritualDeclaration: template.ritualDeclaration,
+        templateId: template.id,
+      ));
+
+      // From SpellCreationState.initial(), not state.copyWith(...): a stale
+      // breakdown/suggestions/calculatedLevel left over from whatever the
+      // user was doing before must not follow them into the new spell.
+      emit(SpellCreationState.initial().copyWith(
+        status: SpellCreationStatus.editing,
+        draft: draft,
+        generalEffectSentence: _generalEffectSentenceFor(draft),
+      ));
     } else if (event is SpellCalculated) {
       _handleSpellCalculated(emit);
     } else if (event is SpellSaveRequested) {

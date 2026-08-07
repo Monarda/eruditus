@@ -3,8 +3,8 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/publication_source.dart';
-import 'package:eruditus/models/spell_template.dart';
 
 class LibraryRepository {
   final AssetDataLoader assetLoader;
@@ -50,7 +50,16 @@ class LibraryRepository {
     return _cachedBuiltInSpells!;
   }
 
-  Future<List<SpellTemplate>> getTemplates() => assetLoader.loadSpellTemplates();
+  // No cache here, unlike getBuiltInSpells: _cachedBuiltInSpells caches a
+  // *resolution*, computed once because built-in spells don't change during a
+  // run. Caching a template resolution the same way would reintroduce the
+  // exact staleness _refreshResolver exists to prevent — a template built on
+  // a custom effect added (or deleted) mid-session would keep resolving
+  // against whatever catalog snapshot happened to exist on the first call.
+  Future<List<ResolvedTemplate>> getTemplates() async {
+    await _refreshResolver();
+    return resolver.resolveAllTemplates(await assetLoader.loadSpellTemplates());
+  }
 
   Future<List<ResolvedSpell>> getAllSpells() async {
     // Refresh before resolving anything: getBuiltInSpells caches its result

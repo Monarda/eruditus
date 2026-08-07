@@ -6,6 +6,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 
 void main() {
   final effect = BaseEffect(
@@ -80,5 +81,56 @@ void main() {
 
     expect(resolved.single.isResolved, isFalse);
     expect(resolved.single.unresolvedReferences.length, 4);
+  });
+
+  SpellTemplate template({String baseEffectId = 'crim-2', String rangeId = 'range-voice'}) =>
+      SpellTemplate(
+        id: 'tpl-1',
+        name: 'Phantasm',
+        baseEffectId: baseEffectId,
+        rangeId: rangeId,
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        description: 'A face on a wall.',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+
+  test('resolveTemplate joins a record to its catalog entries', () {
+    final resolved = resolver.resolveTemplate(template());
+
+    expect(resolved.isResolved, isTrue);
+    expect(resolved.baseEffect?.description, 'Create an image that affects two senses');
+    expect(resolved.range?.magnitude, 2);
+    expect(resolved.technique, 'Creo');
+  });
+
+  test('resolveTemplate yields null (not a throw) for an unknown base effect id', () {
+    final resolved = resolver.resolveTemplate(template(baseEffectId: 'deleted-custom-effect'));
+
+    expect(resolved.isResolved, isFalse);
+    expect(resolved.baseEffect, isNull);
+    expect(resolved.unresolvedReferences, ['deleted-custom-effect']);
+    // The other three still resolve — one bad id degrades one field.
+    expect(resolved.range?.id, 'range-voice');
+  });
+
+  test('resolveTemplate yields null (not a throw) for an unknown parameter id', () {
+    final resolved = resolver.resolveTemplate(template(rangeId: 'deleted-custom-parameter'));
+
+    expect(resolved.isResolved, isFalse);
+    expect(resolved.range, isNull);
+    expect(resolved.baseEffect?.id, 'crim-2');
+  });
+
+  test('resolveAllTemplates resolves each record independently', () {
+    final resolved =
+        resolver.resolveAllTemplates([template(), template(baseEffectId: 'gone')]);
+
+    expect(resolved.length, 2);
+    expect(resolved[0].isResolved, isTrue);
+    expect(resolved[1].isResolved, isFalse);
   });
 }

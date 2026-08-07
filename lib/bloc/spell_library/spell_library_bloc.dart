@@ -34,6 +34,7 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
       emit(state.copyWith(status: SpellLibraryStatus.loading));
       try {
         final spells = await libraryRepository.getAllSpells();
+        final templates = await libraryRepository.getTemplates();
         final levels = <String, int>{};
         final ritualIds = <String>{};
         for (final s in spells) {
@@ -67,6 +68,7 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
         emit(state.copyWith(
           status: SpellLibraryStatus.loaded,
           allSpells: spells,
+          templates: templates,
           spellLevels: levels,
           ritualSpellIds: ritualIds,
         ));

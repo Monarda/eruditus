@@ -1,7 +1,9 @@
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 
 /// Joins [Spell] records to the catalogs their ids refer to.
 ///
@@ -51,4 +53,15 @@ class SpellResolver {
 
   List<ResolvedSpell> resolveAll(Iterable<Spell> records) =>
       records.map(resolve).toList();
+
+  ResolvedTemplate resolveTemplate(SpellTemplate record) => ResolvedTemplate(
+        record: record,
+        baseEffect: _effectsById[record.baseEffectId],
+        range: _parametersById[record.rangeId],
+        duration: _parametersById[record.durationId],
+        target: _parametersById[record.targetId],
+      );
+
+  List<ResolvedTemplate> resolveAllTemplates(Iterable<SpellTemplate> records) =>
+      records.map(resolveTemplate).toList();
 }

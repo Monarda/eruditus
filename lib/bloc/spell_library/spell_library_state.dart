@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/publication_source.dart';
 
 enum SpellLibraryStatus { loading, loaded, error }
@@ -7,6 +8,11 @@ enum SpellLibraryStatus { loading, loaded, error }
 class SpellLibraryState extends Equatable {
   final SpellLibraryStatus status;
   final List<ResolvedSpell> allSpells;
+  // Published General templates, alongside allSpells rather than merged into
+  // it: a template has no level and cannot go through the same
+  // calculateBreakdown/spellLevels path a Spell does (see
+  // SpellLibraryBloc._onEvent) -- it is instantiated into a draft first.
+  final List<ResolvedTemplate> templates;
   final String query;
   final String filter;
   // Precomputed spell levels keyed by spell id (via SpellEngine.
@@ -21,6 +27,7 @@ class SpellLibraryState extends Equatable {
   const SpellLibraryState({
     required this.status,
     this.allSpells = const [],
+    this.templates = const [],
     this.query = '',
     this.filter = 'All',
     this.spellLevels = const {},
@@ -44,9 +51,27 @@ class SpellLibraryState extends Equatable {
     return result;
   }
 
+  // Same three rules as visibleSpells, because a template is published
+  // catalog data and can never be one of the user's own spells -- under "My
+  // Spells" this is always empty.
+  List<ResolvedTemplate> get visibleTemplates {
+    var result = templates;
+    if (filter == 'Published') {
+      result = result.where((t) => t.source == PublicationSource.published).toList();
+    } else if (filter == 'My Spells') {
+      result = result.where((t) => t.source == PublicationSource.userCreated).toList();
+    }
+    if (query.isNotEmpty) {
+      final lowerQuery = query.toLowerCase();
+      result = result.where((t) => (t.name ?? '').toLowerCase().contains(lowerQuery)).toList();
+    }
+    return result;
+  }
+
   SpellLibraryState copyWith({
     SpellLibraryStatus? status,
     List<ResolvedSpell>? allSpells,
+    List<ResolvedTemplate>? templates,
     String? query,
     String? filter,
     Map<String, int>? spellLevels,
@@ -56,6 +81,7 @@ class SpellLibraryState extends Equatable {
     return SpellLibraryState(
       status: status ?? this.status,
       allSpells: allSpells ?? this.allSpells,
+      templates: templates ?? this.templates,
       query: query ?? this.query,
       filter: filter ?? this.filter,
       spellLevels: spellLevels ?? this.spellLevels,
@@ -65,6 +91,14 @@ class SpellLibraryState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, allSpells, query, filter, spellLevels, ritualSpellIds, errorMessage];
+  List<Object?> get props => [
+        status,
+        allSpells,
+        templates,
+        query,
+        filter,
+        spellLevels,
+        ritualSpellIds,
+        errorMessage,
+      ];
 }

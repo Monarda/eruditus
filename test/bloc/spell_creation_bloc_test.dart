@@ -20,8 +20,10 @@ import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
 
@@ -1155,6 +1157,181 @@ void main() {
         ..add(const ChosenBaseLevelChanged(20))
         ..add(BaseEffectSelected(creoIgnemEffect)),
       verify: (bloc) => expect(bloc.state.generalEffectSentence, isNull),
+    );
+  });
+
+  group('TemplateInstantiated', () {
+    // The real ward template (Correction 4) -- built by hand, not loaded from
+    // the asset file, per the same rule as the other fixtures in this file.
+    final touchParam = Parameter(
+      id: 'range-touch', name: 'Touch', category: 'Range', magnitude: 1,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final ringParam = Parameter(
+      id: 'duration-ring', name: 'Ring', category: 'Duration', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final circleParam = Parameter(
+      id: 'target-circle', name: 'Circle', category: 'Target', magnitude: 1,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final wardBaseEffect = BaseEffect(
+      id: 'reaq-gen', technique: 'Rego', form: 'Aquam',
+      description: 'Ward against beings associated with Aquam',
+      baseLevel: null,
+      reference: const ParameterTriple(
+          rangeId: 'range-touch', durationId: 'duration-ring', targetId: 'target-circle'),
+      provenance: Provenance(source: PublicationSource.published,
+          citations: [Citation(bookId: 'arm5-core')]),
+      effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+    );
+    final wardTemplateRecord = SpellTemplate(
+      id: 'tpl-reaq-ward-against-faeries-waters',
+      name: 'Ward against Faeries of the Waters',
+      baseEffectId: 'reaq-gen',
+      rangeId: 'range-touch',
+      durationId: 'duration-ring',
+      targetId: 'target-circle',
+      description: 'No water faerie whose Faerie Might is equal to or less than '
+          'the level of the spell can affect those targeted by the spell.',
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+      // ritualDeclaration omitted -> RitualDeclaration.none, as on the real asset.
+    );
+    final wardTemplate = ResolvedTemplate(
+      record: wardTemplateRecord,
+      baseEffect: wardBaseEffect,
+      range: touchParam,
+      duration: ringParam,
+      target: circleParam,
+    );
+
+    // The real Disenchant template (Correction 4/5): Perdo Vim, General,
+    // Touch/Momentary/Individual, and it declares lastingCreation on the
+    // asset itself -- despite not being Creo + Momentary, the one case
+    // _withRitualDeclaration would normally default it for. Proves the
+    // handler takes the declaration verbatim rather than re-deriving it.
+    final individualParam = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final disenchantBaseEffect = BaseEffect(
+      id: 'pevi-G9', technique: 'Perdo', form: 'Vim',
+      description: 'Dispel Hermetic enchantment',
+      baseLevel: null,
+      ritualRequirement: RitualRequirement.required,
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+      effectFormula: const GeneralEffectFormula(
+          kind: GeneralEffectKind.targetSpellLevel, offsetMagnitudes: 1, stressDie: true),
+    );
+    final disenchantTemplateRecord = SpellTemplate(
+      id: 'tpl-pevi-disenchant',
+      name: 'Disenchant',
+      baseEffectId: 'pevi-G9',
+      rangeId: 'range-touch',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
+      description: 'Destroy a Hermetic magic item\'s enchantments permanently.',
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+      ritualDeclaration: RitualDeclaration.lastingCreation,
+    );
+    final disenchantTemplate = ResolvedTemplate(
+      record: disenchantTemplateRecord,
+      baseEffect: disenchantBaseEffect,
+      range: touchParam,
+      duration: durationParam,
+      target: individualParam,
+    );
+
+    final unresolvedTemplate = ResolvedTemplate(
+      record: wardTemplateRecord,
+      baseEffect: null,
+      range: touchParam,
+      duration: ringParam,
+      target: circleParam,
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'sets baseEffect, range, duration, target, technique, form, summary, description and '
+      'templateId, but leaves chosenBaseLevel null -- the one thing the user is there to supply',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(TemplateInstantiated(wardTemplate)),
+      verify: (bloc) {
+        final draft = bloc.state.draft;
+        expect(draft.baseEffect, wardBaseEffect);
+        expect(draft.range, touchParam);
+        expect(draft.duration, ringParam);
+        expect(draft.target, circleParam);
+        expect(draft.technique, 'Rego');
+        expect(draft.form, 'Aquam');
+        expect(draft.summary, wardTemplateRecord.summary);
+        expect(draft.description, wardTemplateRecord.description);
+        expect(draft.templateId, 'tpl-reaq-ward-against-faeries-waters');
+        expect(draft.chosenBaseLevel, isNull);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'gives the draft a fresh id, not the id of whatever draft was in progress',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(id: 'in-progress-draft-id', technique: 'Creo'),
+      ),
+      act: (bloc) => bloc.add(TemplateInstantiated(wardTemplate)),
+      verify: (bloc) => expect(bloc.state.draft.id, isNot('in-progress-draft-id')),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'clears a previous calculation',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.calculated,
+        draft: SpellDraft(),
+        calculatedLevel: 42,
+      ),
+      act: (bloc) => bloc.add(TemplateInstantiated(wardTemplate)),
+      verify: (bloc) => expect(bloc.state.calculatedLevel, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      // Every other base-effect-changing handler runs the draft through
+      // _withRitualDeclaration, which would wipe this since Perdo Vim +
+      // Momentary is not Creo + Momentary (Correction 5). A template's
+      // declaration is published catalog data, taken verbatim.
+      "tpl-pevi-disenchant's lastingCreation declaration survives instantiation",
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(TemplateInstantiated(disenchantTemplate)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.lastingCreation),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an unresolved template (null baseEffect) emits nothing, rather than seeding a '
+      'half-built draft',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(TemplateInstantiated(unresolvedTemplate)),
+      expect: () => <SpellCreationState>[],
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'generalEffectSentence is null immediately after instantiation, and a following '
+      'ChosenBaseLevelChanged produces one',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(TemplateInstantiated(wardTemplate))
+        ..add(const ChosenBaseLevelChanged(20)),
+      expect: () => [
+        isA<SpellCreationState>().having(
+            (s) => s.generalEffectSentence, 'generalEffectSentence (right after instantiation)',
+            isNull),
+        isA<SpellCreationState>()
+            .having((s) => s.draft.chosenBaseLevel, 'draft.chosenBaseLevel', 20)
+            .having((s) => s.generalEffectSentence, 'generalEffectSentence (after level chosen)',
+                isNotNull),
+      ],
     );
   });
 }

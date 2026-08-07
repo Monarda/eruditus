@@ -18,7 +18,9 @@ import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/models/parameter.dart';
 
 class MockLibraryRepository extends Mock implements LibraryRepository {}
@@ -248,6 +250,10 @@ void main() {
     setUp: () {
       when(() => mockLibraryRepository.getAllSpells())
           .thenAnswer((_) async => [ritualSpell, ordinarySpell]);
+      // Unstubbed otherwise: mocktail throws on the call, the handler's catch
+      // swallows it, and the bloc lands in `error` instead of `loaded` — see
+      // Correction 3.
+      when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -269,6 +275,7 @@ void main() {
     setUp: () {
       when(() => mockLibraryRepository.getAllSpells())
           .thenAnswer((_) async => [ritualSpell, uncomputableSpell, ordinarySpell]);
+      when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -326,6 +333,166 @@ void main() {
           .having((s) => s.query, 'query', 'fireball')
           .having((s) => s.visibleSpells.length, 'visibleSpells.length', 1)
           .having((s) => s.visibleSpells.single.id, 'visibleSpells.single.id', 'user-1'),
+    ],
+  );
+
+  // Template fixtures for the templates/visibleTemplates tests below. Built by
+  // hand rather than loaded from the asset file — see Correction 4: a bloc
+  // test must not depend on the asset file's contents.
+  final templateRecordA = SpellTemplate(
+    id: 'tpl-a',
+    name: 'Template Alpha',
+    baseEffectId: 'e1',
+    rangeId: 'p1',
+    durationId: 'p2',
+    targetId: 'p3',
+    description: 'Alpha template',
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+  final templateRecordB = SpellTemplate(
+    id: 'tpl-b',
+    name: 'Template Beta',
+    baseEffectId: 'e2',
+    rangeId: 'p1',
+    durationId: 'p2',
+    targetId: 'p3',
+    description: 'Beta template',
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+  final templateA = ResolvedTemplate(
+      record: templateRecordA,
+      baseEffect: effect1,
+      range: rangeParam,
+      duration: durationParam,
+      target: targetParam);
+  final templateB = ResolvedTemplate(
+      record: templateRecordB,
+      baseEffect: effect2,
+      range: rangeParam,
+      duration: durationParam,
+      target: targetParam);
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'LibraryRequested populates templates with every template the repository returns',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates())
+          .thenAnswer((_) async => [templateA, templateB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    verify: (bloc) {
+      expect(bloc.state.status, SpellLibraryStatus.loaded);
+      expect(bloc.state.templates, [templateA, templateB]);
+    },
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'templates survives a subsequent SearchQueryChanged and FilterChanged',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates())
+          .thenAnswer((_) async => [templateA, templateB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) {
+      bloc.add(const LibraryRequested());
+      bloc.add(const SearchQueryChanged('alpha'));
+      bloc.add(const FilterChanged('Published'));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) {
+      // Neither copyWith call named `templates`, so it must have been
+      // carried forward from the load rather than reset to the default [].
+      expect(bloc.state.templates, [templateA, templateB]);
+    },
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'visibleTemplates includes every template under the "All" filter',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates())
+          .thenAnswer((_) async => [templateA, templateB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    verify: (bloc) => expect(bloc.state.visibleTemplates.length, 2),
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'visibleTemplates includes every template under the "Published" filter',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates())
+          .thenAnswer((_) async => [templateA, templateB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) {
+      bloc.add(const LibraryRequested());
+      bloc.add(const FilterChanged('Published'));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) => expect(bloc.state.visibleTemplates.length, 2),
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    // A template is published catalog data and can never be one of the
+    // user's own spells -- same rule visibleSpells follows for "My Spells".
+    'visibleTemplates is empty under the "My Spells" filter',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates())
+          .thenAnswer((_) async => [templateA, templateB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) {
+      bloc.add(const LibraryRequested());
+      bloc.add(const FilterChanged('My Spells'));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) => expect(bloc.state.visibleTemplates, isEmpty),
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'visibleTemplates narrows by name under a query, case-insensitively',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates())
+          .thenAnswer((_) async => [templateA, templateB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) {
+      bloc.add(const LibraryRequested());
+      bloc.add(const SearchQueryChanged('alpha'));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) {
+      expect(bloc.state.visibleTemplates.length, 1);
+      expect(bloc.state.visibleTemplates.single.id, 'tpl-a');
+    },
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'a repository that throws from getTemplates puts the bloc in error, like any other load failure',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates()).thenThrow(Exception('boom'));
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    expect: () => [
+      isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
+      isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.error),
     ],
   );
 }

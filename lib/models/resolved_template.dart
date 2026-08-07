@@ -6,23 +6,24 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
-import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 
-/// A [Spell] record joined to the catalog entries its ids refer to.
+/// A [SpellTemplate] record joined to the catalog entries its ids refer to.
 ///
 /// The record is the persisted truth; the catalog objects are looked up fresh
 /// on every load. Any of them may be null when the id no longer resolves —
-/// which happens when a user deletes a custom base effect or parameter a saved
-/// spell was built on. Such a spell is not repaired and not discarded: it stays
-/// listed, reports [isResolved] false, and yields no calculated level.
-class ResolvedSpell implements LibraryEntry {
-  final Spell record;
+/// which happens when a user deletes a custom base effect or parameter a
+/// template was built on. Such a template is not repaired and not discarded:
+/// it stays listed, reports [isResolved] false, and cannot be instantiated
+/// into a draft.
+class ResolvedTemplate implements LibraryEntry {
+  final SpellTemplate record;
   final BaseEffect? baseEffect;
   final Parameter? range;
   final Parameter? duration;
   final Parameter? target;
 
-  const ResolvedSpell({
+  const ResolvedTemplate({
     required this.record,
     this.baseEffect,
     this.range,
@@ -44,7 +45,7 @@ class ResolvedSpell implements LibraryEntry {
       ];
 
   // Derived from the resolved base effect rather than stored on the record, so
-  // a spell can never claim a technique its own base effect disagrees with.
+  // a template can never claim a technique its own base effect disagrees with.
   @override
   String? get technique => baseEffect?.technique;
   @override
@@ -61,8 +62,6 @@ class ResolvedSpell implements LibraryEntry {
   PublicationSource get source => record.provenance.source;
   List<Citation> get citations => record.provenance.citations;
   List<String> get tags => record.tags;
-  DateTime get createdAt => record.createdAt;
-  DateTime get updatedAt => record.updatedAt;
   Map<String, List<String>> get selectedModifiers => record.selectedModifiers;
   List<Requisite> get requisites => record.requisites;
   List<LevelAdjustment> get adjustments => record.adjustments;

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 
 abstract class SpellCreationEvent extends Equatable {
@@ -157,6 +158,17 @@ class AdjustmentRemoved extends SpellCreationEvent {
   const AdjustmentRemoved(this.index);
   @override
   List<Object?> get props => [index];
+}
+
+/// Fires when the user picks "Learn at level…" on a template in the Library
+/// tab. [template] arrives already resolved -- SpellCreationBloc has no
+/// catalog to resolve ids against itself (see the doc comment on
+/// SpellCreationBloc's TemplateInstantiated handler).
+class TemplateInstantiated extends SpellCreationEvent {
+  final ResolvedTemplate template;
+  const TemplateInstantiated(this.template);
+  @override
+  List<Object?> get props => [template];
 }
 
 class AdjustmentUpdated extends SpellCreationEvent {
