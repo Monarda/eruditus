@@ -66,21 +66,15 @@ family, minus the six that carry a second blocker (item 26's `Special`
 durations, item 25's General levels, and the unmodelled `for no words` /
 `not needing to gesture` / `Techniques and Forms` mechanisms).
 
-**Measured again 2026-08-05, after item 25 — last confirmed number:**
-**273 imported / 23 emitted as templates / 64 blocked / 0 unresolved.** This
-is the first measurement with three buckets instead of two: a template is a
-General-level published spell that parses and resolves but isn't a concrete
-recreated spell yet — no chosen level, and (per items 35/37) no chosen
-realm/Form/"specific type" where its guideline leaves one open. For this
-goal, "template" is progress but not the finish line the same way "imported"
-is.
+**Measured again 2026-08-05, after item 25:**
+**273 imported / 23 emitted as templates / 64 blocked / 0 unresolved.**
 
-**This is also the last number anyone can vouch for.** Items 26 and 29 wired
-fixes after this measurement (Imaginem/changing-image mapping), and this
-file has since split items 28/39 and fixed two splitter bugs (item 26/29),
-none of which have been run through the extractor and re-tallied. Item 29's
-`--show-blocked` bullet is the prerequisite for updating this section
-again — do not quote 273/23/64/0 as current without re-running it.
+**Measured again 2026-08-07, after wiring Creo Auram unnatural modifiers:**
+**281 imported / 23 emitted as templates / 56 blocked / 0 unresolved.**
+
+8 Creo Auram spells unblocked by recognizing documented "unnatural" modifiers
+in the rulebook preamble and wiring them to the existing `creo-auram-unnatural`
+modifier entry in modifiers.json. See commit 036df9d.
 
 **A further finding: base-effect resolution needs human judgement 186 times.**
 A design line names its guideline only by level (`Base level 15`), and Creo

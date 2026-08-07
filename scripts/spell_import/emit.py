@@ -276,7 +276,13 @@ def _selected_modifiers(
         if (
             block.technique == "Creo"
             and block.form == "Auram"
-            and token.label.lower() in ("unnatural", "slightly unnatural", "very unnatural", "wholly divorced")
+            and token.label.lower()
+            in (
+                "unnatural",
+                "slightly unnatural",
+                "very unnatural",
+                "wholly divorced",
+            )
         ):
             modifier_id = "creo-auram-unnatural"
             unnatural_options = {
@@ -289,6 +295,50 @@ def _selected_modifiers(
                 raise designline.UnknownToken(
                     f"{block.name}: creo-auram-unnatural has no option at magnitude "
                     f"{token.magnitude}"
+                )
+            if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+                raise designline.UnknownToken(
+                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                    f"{option_id!r} at magnitude {token.magnitude}"
+                )
+            selected.setdefault(modifier_id, []).append(option_id)
+            continue
+
+        # Perdo Terram "material" modifiers: magnitude determines which option
+        # Guideline preamble: "To destroy sand/mud/clay use base level, stone/glass
+        # add +1, metal/gemstone add +2"
+        if (
+            block.technique == "Perdo"
+            and block.form == "Terram"
+            and token.label.lower()
+            in ("material", "stone", "glass", "metal", "gemstone")
+        ):
+            modifier_id = "perdo-terram-material"
+            # Map label and magnitude to the correct option
+            material_options = {
+                (0, "dirt"): "perdo-terram-material-dirt",
+                (0, "sand"): "perdo-terram-material-dirt",
+                (0, "mud"): "perdo-terram-material-dirt",
+                (0, "clay"): "perdo-terram-material-dirt",
+                (1, "stone"): "perdo-terram-material-stone",
+                (1, "glass"): "perdo-terram-material-stone",
+                (2, "metal"): "perdo-terram-material-base-metal",
+                (2, "gemstone"): "perdo-terram-material-gemstone",
+            }
+            # Try to find option by both magnitude and label
+            option_id = material_options.get((token.magnitude, token.label.lower()))
+            if option_id is None:
+                # If not found by label, map magnitude alone (handles bare "+1" etc.)
+                by_magnitude = {
+                    0: "perdo-terram-material-dirt",
+                    1: "perdo-terram-material-stone",
+                    2: "perdo-terram-material-base-metal",
+                }
+                option_id = by_magnitude.get(token.magnitude)
+            if option_id is None:
+                raise designline.UnknownToken(
+                    f"{block.name}: perdo-terram-material has no option at magnitude "
+                    f"{token.magnitude} with label {token.label!r}"
                 )
             if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
                 raise designline.UnknownToken(
