@@ -208,6 +208,148 @@ def build_template(
     return template
 
 
+def _handle_magnitude_dependent_modifier(
+    token, block, catalog, selected
+) -> bool:
+    """Handle modifiers where the option depends on magnitude or label.
+
+    Returns True if the token was handled, False otherwise (caller should
+    continue checking other modifiers).
+    """
+    # Creo Auram "unnatural" modifiers: magnitude determines which option
+    if (
+        block.technique == "Creo"
+        and block.form == "Auram"
+        and token.label.lower()
+        in (
+            "unnatural",
+            "slightly unnatural",
+            "very unnatural",
+            "wholly divorced",
+        )
+    ):
+        modifier_id = "creo-auram-unnatural"
+        unnatural_options = {
+            1: "creo-auram-unnatural-slight",
+            2: "creo-auram-unnatural-very",
+            4: "creo-auram-unnatural-divorced",
+        }
+        option_id = unnatural_options.get(token.magnitude)
+        if option_id is None:
+            raise designline.UnknownToken(
+                f"{block.name}: creo-auram-unnatural has no option at magnitude "
+                f"{token.magnitude}"
+            )
+        if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+            raise designline.UnknownToken(
+                f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                f"{option_id!r} at magnitude {token.magnitude}"
+            )
+        selected.setdefault(modifier_id, []).append(option_id)
+        return True
+
+    # Aquam base-individual: liquid type affects base Individual size
+    # All options at magnitude 0; type is determined by design-line label
+    if (
+        block.form == "Aquam"
+        and token.label.lower()
+        in ("water", "naturally-occurring", "processed", "dangerous", "poison")
+    ):
+        modifier_id = "aquam-base-individual"
+        liquid_type_options = {
+            "water": "aquam-base-water",
+            "naturally-occurring": "aquam-base-natural",
+            "processed": "aquam-base-processed",
+            "dangerous": "aquam-base-dangerous",
+            "poison": "aquam-base-poison",
+        }
+        option_id = liquid_type_options.get(token.label.lower())
+        if option_id is None:
+            raise designline.UnknownToken(
+                f"{block.name}: aquam-base-individual has no option for liquid "
+                f"type {token.label!r}"
+            )
+        if not _option_exists(catalog, modifier_id, option_id, 0):
+            raise designline.UnknownToken(
+                f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                f"{option_id!r}"
+            )
+        selected.setdefault(modifier_id, []).append(option_id)
+        return True
+
+    # Terram material: sand/mud/clay at base, stone/glass +1, metal/gemstone +2
+    if (
+        block.form == "Terram"
+        and block.technique in ("Muto", "Perdo")
+        and token.label.lower()
+        in ("material", "stone", "glass", "metal", "gemstone")
+    ):
+        modifier_id = f"{block.technique.lower()}-terram-material"
+        material_options = {
+            (0, "dirt"): "perdo-terram-material-dirt",
+            (0, "sand"): "perdo-terram-material-dirt",
+            (0, "mud"): "perdo-terram-material-dirt",
+            (0, "clay"): "perdo-terram-material-dirt",
+            (1, "stone"): "perdo-terram-material-stone",
+            (1, "glass"): "perdo-terram-material-stone",
+            (2, "metal"): "perdo-terram-material-base-metal",
+            (2, "gemstone"): "perdo-terram-material-gemstone",
+        }
+        option_id = material_options.get((token.magnitude, token.label.lower()))
+        if option_id is None:
+            by_magnitude = {
+                0: "perdo-terram-material-dirt",
+                1: "perdo-terram-material-stone",
+                2: "perdo-terram-material-base-metal",
+            }
+            option_id = by_magnitude.get(token.magnitude)
+        if option_id is None:
+            raise designline.UnknownToken(
+                f"{block.name}: perdo-terram-material has no option at magnitude "
+                f"{token.magnitude} with label {token.label!r}"
+            )
+        if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+            raise designline.UnknownToken(
+                f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                f"{option_id!r} at magnitude {token.magnitude}"
+            )
+        selected.setdefault(modifier_id, []).append(option_id)
+        return True
+
+    # Rego transport distance: magnitude ladder for moving things at distance
+    # Applies to base effects: rehe-10b, reig-3c, rete-4, reaq-5, rean-5
+    if (
+        block.technique == "Rego"
+        and token.label.lower()
+        in ("distance", "arcane connection", "5 paces", "50 paces", "500 paces",
+            "1 league", "7 leagues")
+    ):
+        modifier_id = "rego-transport-distance"
+        distance_options = {
+            "5 paces": "rego-transport-distance-5-paces",
+            "50 paces": "rego-transport-distance-50-paces",
+            "500 paces": "rego-transport-distance-500-paces",
+            "1 league": "rego-transport-distance-1-league",
+            "7 leagues": "rego-transport-distance-7-leagues",
+            "arcane connection": "rego-transport-distance-arcane",
+        }
+        option_id = distance_options.get(token.label.lower())
+        if option_id is None:
+            raise designline.UnknownToken(
+                f"{block.name}: rego-transport-distance has no option for distance "
+                f"{token.label!r}"
+            )
+        if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+            raise designline.UnknownToken(
+                f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                f"{option_id!r}"
+            )
+        selected.setdefault(modifier_id, []).append(option_id)
+        return True
+
+    return False
+
+
 def _selected_modifiers(
     design: designline.Design, block, catalog: catalog_module.Catalog
 ) -> dict[str, list[str]]:
@@ -272,80 +414,9 @@ def _selected_modifiers(
         if token.kind != "modifier":
             continue
 
-        # Creo Auram "unnatural" modifiers: magnitude determines which option
-        if (
-            block.technique == "Creo"
-            and block.form == "Auram"
-            and token.label.lower()
-            in (
-                "unnatural",
-                "slightly unnatural",
-                "very unnatural",
-                "wholly divorced",
-            )
-        ):
-            modifier_id = "creo-auram-unnatural"
-            unnatural_options = {
-                1: "creo-auram-unnatural-slight",
-                2: "creo-auram-unnatural-very",
-                4: "creo-auram-unnatural-divorced",
-            }
-            option_id = unnatural_options.get(token.magnitude)
-            if option_id is None:
-                raise designline.UnknownToken(
-                    f"{block.name}: creo-auram-unnatural has no option at magnitude "
-                    f"{token.magnitude}"
-                )
-            if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
-                raise designline.UnknownToken(
-                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
-                    f"{option_id!r} at magnitude {token.magnitude}"
-                )
-            selected.setdefault(modifier_id, []).append(option_id)
-            continue
-
-        # Terram "material" modifiers for Muto and Perdo: magnitude determines option
-        # Both share the same preamble rule: sand/mud/clay at base level, stone/glass
-        # at +1, metal/gemstone at +2
-        if (
-            block.form == "Terram"
-            and block.technique in ("Muto", "Perdo")
-            and token.label.lower()
-            in ("material", "stone", "glass", "metal", "gemstone")
-        ):
-            modifier_id = f"{block.technique.lower()}-terram-material"
-            # Map label and magnitude to the correct option
-            material_options = {
-                (0, "dirt"): "perdo-terram-material-dirt",
-                (0, "sand"): "perdo-terram-material-dirt",
-                (0, "mud"): "perdo-terram-material-dirt",
-                (0, "clay"): "perdo-terram-material-dirt",
-                (1, "stone"): "perdo-terram-material-stone",
-                (1, "glass"): "perdo-terram-material-stone",
-                (2, "metal"): "perdo-terram-material-base-metal",
-                (2, "gemstone"): "perdo-terram-material-gemstone",
-            }
-            # Try to find option by both magnitude and label
-            option_id = material_options.get((token.magnitude, token.label.lower()))
-            if option_id is None:
-                # If not found by label, map magnitude alone (handles bare "+1" etc.)
-                by_magnitude = {
-                    0: "perdo-terram-material-dirt",
-                    1: "perdo-terram-material-stone",
-                    2: "perdo-terram-material-base-metal",
-                }
-                option_id = by_magnitude.get(token.magnitude)
-            if option_id is None:
-                raise designline.UnknownToken(
-                    f"{block.name}: perdo-terram-material has no option at magnitude "
-                    f"{token.magnitude} with label {token.label!r}"
-                )
-            if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
-                raise designline.UnknownToken(
-                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
-                    f"{option_id!r} at magnitude {token.magnitude}"
-                )
-            selected.setdefault(modifier_id, []).append(option_id)
+        # Try magnitude-dependent modifiers (Creo Auram unnatural, Aquam liquid type,
+        # Terram material hierarchy)
+        if _handle_magnitude_dependent_modifier(token, block, catalog, selected):
             continue
 
         mapped = _MODIFIER_OPTIONS.get((block.technique, block.form, token.label))
