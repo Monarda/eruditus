@@ -141,6 +141,71 @@ def build_spell(
     return spell
 
 
+def build_template(
+    block,
+    base_effect_id: str,
+    catalog: catalog_module.Catalog,
+    design: designline.Design,
+) -> dict:
+    """Build a `SpellTemplate.fromMap`-shaped entry for a General spell.
+
+    Mirrors `build_spell`, minus `printedLevel` and the level arithmetic that
+    field requires: a General block's `printed_level` is always `None`
+    (that's what routes it here instead of to `build_spell`), so this
+    function never reads it.
+    """
+    range_id = catalog.parameter_id("Range", _parameter_name(design, "range", block))
+    duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
+    target_id = catalog.parameter_id("Target", _parameter_name(design, "target", block))
+
+    requisites = [
+        {"art": token.label, "kind": "adding" if token.magnitude else "free"}
+        for token in design.tokens
+        if token.kind == "requisite" and token.label != "free"
+    ]
+    for art in block.stat.requisite_arts:
+        if not any(r["art"] == art for r in requisites):
+            requisites.append({"art": art, "kind": "free"})
+
+    # The `lib-` slug is the ledger key (resolutions.json, KNOWN_UNRESOLVABLE);
+    # the template's own id is that same slug with `tpl-` in place of `lib-`.
+    # Derived from slug_id rather than a second slug function.
+    slug = catalog_module.slug_id(block.technique, block.form, block.name)
+    template_id = "tpl-" + slug.removeprefix("lib-")
+
+    template = {
+        "id": template_id,
+        "name": block.name,
+        "requisites": requisites,
+        "source": "published",
+        "selectedModifiers": _selected_modifiers(design, block, catalog),
+        "baseEffectId": base_effect_id,
+        "rangeId": range_id,
+        "durationId": duration_id,
+        "targetId": target_id,
+        "summary": _template_summary(block),
+    }
+
+    description = _description(block)
+    if description:
+        template["description"] = description
+
+    template["citations"] = [{"bookId": CORE_BOOK_ID}]
+
+    adjustments = [
+        {"magnitude": token.magnitude, "note": token.note}
+        for token in design.tokens
+        if token.kind == "adjustment"
+    ]
+    if adjustments:
+        template["adjustments"] = adjustments
+
+    if block.stat.is_ritual:
+        template["ritualDeclaration"] = "lastingCreation"
+
+    return template
+
+
 def _selected_modifiers(
     design: designline.Design, block, catalog: catalog_module.Catalog
 ) -> dict[str, list[str]]:
@@ -264,6 +329,14 @@ def _parameter_name(design: designline.Design, slot: str, block) -> str:
     return designline.PARAMETER_LABELS[raw]
 
 
+def _truncated_prose(block) -> str:
+    """Whitespace-collapsed prose, capped at 400 characters."""
+    prose = " ".join(block.prose.split())
+    if len(prose) > 400:
+        prose = prose[:397].rstrip() + "..."
+    return prose
+
+
 def _summary(block) -> str:
     """Prose plus the printed level, kept as a trailing "Level N." phrase.
 
@@ -275,10 +348,17 @@ def _summary(block) -> str:
     assets/data/spell_library.json, which .superpowers/todo.md item 31 owns
     along with the rest of the summary rework.
     """
-    prose = " ".join(block.prose.split())
-    if len(prose) > 400:
-        prose = prose[:397].rstrip() + "..."
-    return f"{prose} Level {block.printed_level}."
+    return f"{_truncated_prose(block)} Level {block.printed_level}."
+
+
+def _template_summary(block) -> str:
+    """`_summary` without the "Level N." suffix.
+
+    A General block's `printed_level` is always `None` -- naively reusing
+    `_summary` here would emit the literal string "Level None." into the
+    template asset.
+    """
+    return _truncated_prose(block)
 
 
 def _description(block) -> str:

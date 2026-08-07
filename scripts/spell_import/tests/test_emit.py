@@ -288,6 +288,68 @@ class DescriptionEmissionTest(unittest.TestCase):
         self.assertNotIn("description", spell)
 
 
+class GeneralTemplateEmissionTest(unittest.TestCase):
+    """`build_template` is `build_spell`'s General-branch counterpart.
+
+    A General spell block carries `printed_level=None` and a design line
+    whose base is a General marker ("Base spell", "Base effect", "As ward
+    guideline") rather than a number, so `design.base_level` is also `None`.
+    `build_spell` cannot handle that shape at all -- it raises on the missing
+    printed level -- so `build_template` has to be a distinct function, not a
+    branch inside `build_spell`.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def _build(self, design_text: str = "(Base spell, +1 Touch, +2 Sun)") -> dict:
+        design = designline.parse_design(design_text)
+        block = _block("Demon's Eternal Oblivion", "Perdo", "Vim", None)
+        return emit.build_template(block, "pevi-G3", self.catalog, design)
+
+    def test_build_template_omits_every_level_field(self):
+        template = self._build()
+
+        self.assertNotIn("chosenBaseLevel", template)
+        self.assertNotIn("printedLevel", template)
+        self.assertTrue(template["id"].startswith("tpl-"))
+
+    def test_the_template_id_is_the_slug_id_with_tpl_in_place_of_lib(self):
+        # "Derive one from the other; do not introduce a second slug
+        # function" -- pin the actual relationship, not just the prefix.
+        template = self._build()
+        slug = catalog_module.slug_id("Perdo", "Vim", "Demon's Eternal Oblivion")
+        self.assertEqual(template["id"], "tpl-" + slug.removeprefix("lib-"))
+
+    def test_a_general_block_does_not_raise_despite_no_printed_level(self):
+        # build_spell raises ValueError on this exact block shape; build_template
+        # is the routing path that guard exists to protect, so it must not.
+        try:
+            self._build()
+        except ValueError as error:
+            self.fail(f"build_template raised on a printed_level=None block: {error}")
+
+    def test_the_summary_does_not_print_a_none_level(self):
+        # _summary appends "Level {block.printed_level}." -- naively reusing
+        # it here would emit the literal string "Level None." into the asset.
+        template = self._build()
+        self.assertNotIn("None", template["summary"])
+
+    def test_the_base_effect_id_passed_in_is_carried_through_unchanged(self):
+        template = self._build()
+        self.assertEqual(template["baseEffectId"], "pevi-G3")
+
+    def test_required_fields_are_present(self):
+        template = self._build()
+        for field in ("id", "name", "baseEffectId", "rangeId", "durationId",
+                      "targetId", "source", "summary", "citations", "requisites",
+                      "selectedModifiers"):
+            self.assertIn(field, template, msg=field)
+        self.assertEqual(template["source"], "published")
+        self.assertEqual(template["citations"], [{"bookId": "arm5-core"}])
+
+
 class PrintedLevelEmissionTest(unittest.TestCase):
     """`printedLevel` is the rulebook's printed level, emitted as its own field.
 

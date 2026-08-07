@@ -152,6 +152,7 @@ HAND_DERIVED_ADJUSTMENT: dict[str, tuple[int, str]] = {
 @dataclasses.dataclass
 class Report:
     spells: list[dict]
+    templates: list[dict]
     blocked: list[tuple[str, str]]
     unresolved: list[str]
     problems: list[str]
@@ -193,6 +194,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
     design_lines: dict[str, str] = {}
 
     spells: list[dict] = []
+    templates: list[dict] = []
     blocked: list[tuple[str, str]] = []
     unresolved: list[str] = []
     proposals: dict[str, dict] = {}
@@ -224,7 +226,38 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             continue
 
         if design.base_level is None or block.printed_level is None:
-            blocked.append((block.name, "General level — todo item 25"))
+            spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
+            design_lines[spell_id] = design_text
+            general_candidates = catalog.general_candidates(block.technique, block.form)
+
+            if not general_candidates:
+                blocked.append((block.name, "no General base effect for that Technique/Form"))
+                continue
+
+            try:
+                base_effect_id = book.resolve(spell_id, general_candidates)
+            except ledger_module.MissingEntry as error:
+                unresolved.append(str(error))
+                proposals[spell_id] = {
+                    "baseEffectId": "",
+                    "candidates": general_candidates,
+                    "rationale": "",
+                    "_name": block.name,
+                    "_line": block.line_no,
+                    "_descriptions": [
+                        e["description"] for e in catalog.base_effects
+                        if e["id"] in general_candidates
+                    ],
+                }
+                continue
+            except ledger_module.LedgerError as error:
+                unresolved.append(str(error))
+                continue
+
+            try:
+                templates.append(emit.build_template(block, base_effect_id, catalog, design))
+            except (designline.UnknownToken, KeyError) as error:
+                blocked.append((block.name, str(error)))
             continue
 
         spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
@@ -309,8 +342,8 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             provenance.write(identity)
 
     return Report(
-        spells=spells, blocked=blocked, unresolved=unresolved, problems=problems,
-        identity=identity, design_lines=design_lines,
+        spells=spells, templates=templates, blocked=blocked, unresolved=unresolved,
+        problems=problems, identity=identity, design_lines=design_lines,
     )
 
 
