@@ -31,6 +31,17 @@ class BaseEffectSelected extends SpellCreationEvent {
   List<Object?> get props => [effect];
 }
 
+/// The level the caster chooses for a **General** guideline (`BaseEffect
+/// .isGeneral`) — the number the rulebook leaves blank because there isn't
+/// one printed. `null` means the field was emptied, not "no change"; the
+/// bloc must actually clear `SpellDraft.chosenBaseLevel` in that case.
+class ChosenBaseLevelChanged extends SpellCreationEvent {
+  final int? level;
+  const ChosenBaseLevelChanged(this.level);
+  @override
+  List<Object?> get props => [level];
+}
+
 class RangeSelected extends SpellCreationEvent {
   final Parameter parameter;
   const RangeSelected(this.parameter);

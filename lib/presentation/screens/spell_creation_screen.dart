@@ -124,7 +124,12 @@ class SpellCreationScreen extends StatelessWidget {
                         .map((e) => DropdownMenuItem(
                               value: e,
                               child: Text(
-                                '${e.description} (Base ${e.baseLevel})',
+                                // A General guideline has no baseLevel to print
+                                // (Core Rules leaves that row's level to the
+                                // caster) -- printing the literal null would
+                                // read as "(Base null)". The numbered case is
+                                // untouched: existing tests pin its exact text.
+                                '${e.description} (${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'})',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ))
@@ -133,6 +138,38 @@ class SpellCreationScreen extends StatelessWidget {
                       if (value != null) bloc.add(BaseEffectSelected(value));
                     },
                   ),
+                if (draft.baseEffect?.isGeneral ?? false) ...[
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    key: const Key('chosen-base-level-field'),
+                    keyboardType: TextInputType.number,
+                    // No controller, and deliberately so: this field only
+                    // ever exists while draft.baseEffect is General, and is
+                    // torn down (not merely rebuilt) the instant that stops
+                    // being true, because the `if` above removes it from the
+                    // widget list entirely. Every path that flips isGeneral
+                    // to false -- TechniqueSelected, FormSelected, and
+                    // BaseEffectSelected with a non-General effect -- clears
+                    // chosenBaseLevel in the very same emit (see
+                    // SpellCreationBloc), and switching between two General
+                    // guidelines never unmounts this field at all (isGeneral
+                    // stays true throughout, so the `if` never flips and the
+                    // Element is reused, not recreated). So every time
+                    // Flutter actually mounts a fresh Element here,
+                    // draft.chosenBaseLevel has already settled to exactly
+                    // what initialValue reads below -- there is no path left
+                    // where a freshly-seeded initialValue could disagree with
+                    // the draft.
+                    initialValue: draft.chosenBaseLevel?.toString(),
+                    decoration: const InputDecoration(
+                      labelText: 'Guideline level',
+                      helperText: 'General guidelines have no fixed level — you choose it.',
+                    ),
+                    onChanged: (value) => bloc.add(ChosenBaseLevelChanged(int.tryParse(value))),
+                  ),
+                  if (state.generalEffectSentence != null)
+                    Text(state.generalEffectSentence!, key: const Key('general-effect-sentence')),
+                ],
                 const SizedBox(height: 16),
                 Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),

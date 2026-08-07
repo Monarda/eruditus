@@ -38,30 +38,67 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
   Future<void> _onEvent(SpellCreationEvent event, Emitter<SpellCreationState> emit) async {
     if (event is TechniqueSelected) {
+      final draft = _withRitualDeclaration(
+        _withPrunedModifiers(state.draft.copyWith(
+          technique: event.technique,
+          baseEffect: null,
+          // A chosen level or template link both point at the base effect
+          // that just disappeared -- neither can survive it, for the same
+          // reason pruneModifierSelections drops a stranded modifier rather
+          // than let it keep affecting the level invisibly.
+          chosenBaseLevel: null,
+          templateId: null,
+        )),
+        reapplyDefault: false,
+      );
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: _withRitualDeclaration(
-          _withPrunedModifiers(
-              state.draft.copyWith(technique: event.technique, baseEffect: null)),
-          reapplyDefault: false,
-        ),
+        draft: draft,
+        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is FormSelected) {
+      final draft = _withRitualDeclaration(
+        _withPrunedModifiers(state.draft.copyWith(
+          form: event.form,
+          baseEffect: null,
+          chosenBaseLevel: null,
+          templateId: null,
+        )),
+        reapplyDefault: false,
+      );
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: _withRitualDeclaration(
-          _withPrunedModifiers(
-              state.draft.copyWith(form: event.form, baseEffect: null)),
-          reapplyDefault: false,
-        ),
+        draft: draft,
+        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is BaseEffectSelected) {
+      final draft = _withRitualDeclaration(
+        _withPrunedModifiers(state.draft.copyWith(
+          baseEffect: event.effect,
+          // A template link asserts lineage to the *previous* base effect;
+          // it cannot survive a change to a new one, General or not.
+          templateId: null,
+          // Deliberate: unlike Technique/Form, a chosen level isn't tied to
+          // one specific General guideline -- it's "spell level N", equally
+          // meaningful against whichever General guideline is selected. Only
+          // clear it when the new effect isn't General at all; forcing a
+          // re-type on every guideline switch would be friction with no
+          // correctness gain.
+          chosenBaseLevel: event.effect.isGeneral ? state.draft.chosenBaseLevel : null,
+        )),
+        reapplyDefault: true,
+      );
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: _withRitualDeclaration(
-          _withPrunedModifiers(state.draft.copyWith(baseEffect: event.effect)),
-          reapplyDefault: true,
-        ),
+        draft: draft,
+        generalEffectSentence: _generalEffectSentenceFor(draft),
+      ));
+    } else if (event is ChosenBaseLevelChanged) {
+      final draft = state.draft.copyWith(chosenBaseLevel: event.level);
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: draft,
+        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is RangeSelected) {
       emit(state.copyWith(
@@ -184,6 +221,19 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     } else if (event is SpellDiscarded) {
       emit(SpellCreationState.initial());
     }
+  }
+
+  /// The sentence [SpellCreationState.generalEffectSentence] should carry for
+  /// [draft], or null when there is none to show. Delegates to
+  /// SpellEngine.deriveGeneralEffect, which already covers "not General", "no
+  /// formula" and "no level chosen yet" -- this just also covers "no base
+  /// effect at all", which deriveGeneralEffect can't take a null for.
+  String? _generalEffectSentenceFor(SpellDraft draft) {
+    final baseEffect = draft.baseEffect;
+    if (baseEffect == null) return null;
+    return spellEngine
+        .deriveGeneralEffect(baseEffect: baseEffect, chosenBaseLevel: draft.chosenBaseLevel)
+        ?.sentence;
   }
 
   SpellDraft _withPrunedModifiers(SpellDraft draft) => draft.copyWith(

@@ -21,6 +21,16 @@ class SpellCreationState extends Equatable {
   final Set<String> ritualSuggestionIds;
   final Spell? savedSpell;
   final String? errorMessage;
+  /// The rendered strength of a General guideline at the chosen level, or null
+  /// when the guideline is not General or no level is set. Precomputed by the
+  /// bloc from SpellEngine.deriveGeneralEffect, following suggestionLevels:
+  /// the screen renders it and never calls the engine.
+  ///
+  /// The sentence rather than the whole GeneralEffectValue, because
+  /// GeneralEffectValue is not Equatable — in `props` it would compare by
+  /// identity, and two structurally identical values would make the state
+  /// look changed when nothing had.
+  final String? generalEffectSentence;
 
   const SpellCreationState({
     required this.status,
@@ -33,6 +43,7 @@ class SpellCreationState extends Equatable {
     this.ritualSuggestionIds = const {},
     this.savedSpell,
     this.errorMessage,
+    this.generalEffectSentence,
   });
 
   factory SpellCreationState.initial() => SpellCreationState(
@@ -51,6 +62,7 @@ class SpellCreationState extends Equatable {
     Set<String>? ritualSuggestionIds,
     Spell? savedSpell,
     String? errorMessage,
+    Object? generalEffectSentence = _unset,
   }) {
     return SpellCreationState(
       status: status ?? this.status,
@@ -67,6 +79,16 @@ class SpellCreationState extends Equatable {
       // stale error unless the handler explicitly re-passes one, matching
       // the convention already used by SpellLibraryState/ConfigurationState.
       errorMessage: errorMessage,
+      // Unlike errorMessage, generalEffectSentence must be *clearable*
+      // without being wiped on every emit: only the four handlers that can
+      // change baseEffect or chosenBaseLevel ever recompute it, and every
+      // other emit needs to carry the existing value forward untouched. A
+      // plain `?? this.generalEffectSentence` can't tell "omitted" from
+      // "explicitly cleared to null" apart, so this uses the same
+      // `_unset`-sentinel trick as SpellDraft.copyWith.
+      generalEffectSentence: identical(generalEffectSentence, _unset)
+          ? this.generalEffectSentence
+          : generalEffectSentence as String?,
     );
   }
 
@@ -82,5 +104,16 @@ class SpellCreationState extends Equatable {
         ritualSuggestionIds,
         savedSpell,
         errorMessage,
+        generalEffectSentence,
       ];
 }
+
+/// Sentinel used by [SpellCreationState.copyWith] to distinguish "argument
+/// omitted" (keep current value) from "argument explicitly passed as null"
+/// (clear the field). Mirrors [SpellDraft.copyWith]'s `_unset` in
+/// lib/models/spell.dart.
+class _Unset {
+  const _Unset();
+}
+
+const _unset = _Unset();

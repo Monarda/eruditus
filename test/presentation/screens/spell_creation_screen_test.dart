@@ -16,6 +16,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -60,6 +61,15 @@ void main() {
   final targetParam = Parameter(
       id: 'p3', name: 'Individual', category: 'Target', magnitude: 8,
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  // Same Technique/Form as creoIgnemEffect, so both appear together in one
+  // dropdown -- letting a single test prove the numbered case is untouched
+  // while the General case now reads correctly (Correction 1).
+  final generalWardEffect = BaseEffect(
+    id: 'rean-gen', technique: 'Creo', form: 'Ignem',
+    description: 'Ward against beings associated with Animal', baseLevel: null,
+    provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+  );
 
   late Parameter range;
   late Parameter duration;
@@ -499,6 +509,115 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('My custom fire effect (Base 3)'), findsOneWidget);
+  });
+
+  testWidgets(
+      'the base effect dropdown prints (General) for a General guideline, leaving the '
+      'numbered case byte-identical', (tester) async {
+    await pumpScreen(
+      tester,
+      SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem'),
+      ),
+      configState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect, generalWardEffect],
+        parameters: const [],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('base-effect-dropdown')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Create flame (Base 10)'), findsOneWidget);
+    expect(
+      find.text('Ward against beings associated with Animal (General)'),
+      findsOneWidget,
+    );
+  });
+
+  group('chosen base level field (General guidelines)', () {
+    testWidgets('is absent when the selected base effect is numbered', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      );
+      await pumpScreen(tester, state);
+
+      expect(find.byKey(const Key('chosen-base-level-field')), findsNothing);
+    });
+
+    testWidgets('is present when the selected base effect is General', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalWardEffect],
+          parameters: const [],
+        ),
+      );
+
+      expect(find.byKey(const Key('chosen-base-level-field')), findsOneWidget);
+    });
+
+    testWidgets(
+        'entering a level dispatches ChosenBaseLevelChanged, and the effect sentence '
+        'renders once the bloc reports one', (tester) async {
+      // A mocked bloc never emits on `add`, so proving the sentence actually
+      // renders needs a real state to arrive afterward -- same technique the
+      // Ritual-banner and adjustments-list regression tests above use.
+      useTallSurface(tester);
+      final stateController = StreamController<SpellCreationState>();
+      addTearDown(stateController.close);
+
+      final initial = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
+      );
+      whenListen(bloc, stateController.stream, initialState: initial);
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalWardEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+
+      await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '20');
+      verify(() => bloc.add(const ChosenBaseLevelChanged(20))).called(1);
+
+      expect(find.byKey(const Key('general-effect-sentence')), findsNothing);
+
+      // What the real bloc would emit in response to that event.
+      stateController.add(SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect, chosenBaseLevel: 20),
+        generalEffectSentence: 'Affects beings with Might 20 or less',
+      ));
+      await tester.pump();
+
+      expect(find.byKey(const Key('general-effect-sentence')), findsOneWidget);
+      expect(find.text('Affects beings with Might 20 or less'), findsOneWidget);
+    });
   });
 
   group('requisites section', () {

@@ -12,9 +12,11 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
@@ -1014,4 +1016,145 @@ void main() {
       ..add(const AdjustmentUpdated(3, 1, 'nowhere')),
     verify: (bloc) => expect(bloc.state.draft.adjustments, isEmpty),
   );
+
+  group('General guideline level (ChosenBaseLevelChanged / generalEffectSentence)', () {
+    // Modeled on test/engine/general_effect_test.dart's wardGuideline: a
+    // ward, whose strength is simply the chosen base level (pevi-G4-ish
+    // mightThreshold, multiplier one, no offset).
+    final wardGuideline = BaseEffect(
+      id: 'rean-gen', technique: 'Rego', form: 'Animal',
+      description: 'Ward against beings associated with Animal',
+      baseLevel: null,
+      reference: const ParameterTriple(
+          rangeId: 'range-touch', durationId: 'duration-ring', targetId: 'target-circle'),
+      provenance: Provenance(source: PublicationSource.published,
+          citations: [Citation(bookId: 'arm5-core')]),
+      effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+    );
+
+    // A second, distinct General guideline, so "switch to a different
+    // General guideline" is actually a different BaseEffect and not just a
+    // re-selection of the same one.
+    final anotherGeneralGuideline = BaseEffect(
+      id: 'peco-gen', technique: 'Perdo', form: 'Corpus',
+      description: 'General guideline for test',
+      baseLevel: null,
+      provenance: Provenance(source: PublicationSource.published,
+          citations: [Citation(bookId: 'arm5-core')]),
+      effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightReduction),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'ChosenBaseLevelChanged sets draft.chosenBaseLevel once a General guideline is selected',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20)),
+      verify: (bloc) => expect(bloc.state.draft.chosenBaseLevel, 20),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'ChosenBaseLevelChanged(null) actually clears the level -- the path the screen '
+      'takes when the user empties the field -- rather than no-op-ing',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(const ChosenBaseLevelChanged(null)),
+      verify: (bloc) => expect(bloc.state.draft.chosenBaseLevel, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a non-General effect afterwards clears chosenBaseLevel',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(BaseEffectSelected(creoIgnemEffect)),
+      verify: (bloc) => expect(bloc.state.draft.chosenBaseLevel, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a different General effect afterwards keeps chosenBaseLevel',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(BaseEffectSelected(anotherGeneralGuideline)),
+      verify: (bloc) => expect(bloc.state.draft.chosenBaseLevel, 20),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'TechniqueSelected clears both chosenBaseLevel and templateId',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(baseEffect: wardGuideline, chosenBaseLevel: 20, templateId: 'tpl-1'),
+      ),
+      act: (bloc) => bloc.add(const TechniqueSelected('Muto')),
+      verify: (bloc) {
+        expect(bloc.state.draft.chosenBaseLevel, isNull);
+        expect(bloc.state.draft.templateId, isNull);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'FormSelected clears both chosenBaseLevel and templateId',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(baseEffect: wardGuideline, chosenBaseLevel: 20, templateId: 'tpl-1'),
+      ),
+      act: (bloc) => bloc.add(const FormSelected('Corpus')),
+      verify: (bloc) {
+        expect(bloc.state.draft.chosenBaseLevel, isNull);
+        expect(bloc.state.draft.templateId, isNull);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'BaseEffectSelected clears a previously set templateId',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      // SpellCreationState.status is required, so (unlike the plan's Task 13
+      // snippet) this must pass one -- see Correction 4.
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(templateId: 'tpl-1'),
+      ),
+      act: (bloc) => bloc.add(BaseEffectSelected(creoIgnemEffect)),
+      verify: (bloc) => expect(bloc.state.draft.templateId, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'generalEffectSentence is null when a General guideline is selected but no level is chosen yet',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(BaseEffectSelected(wardGuideline)),
+      verify: (bloc) => expect(bloc.state.generalEffectSentence, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'generalEffectSentence mentions the derived threshold once a General guideline '
+      'and a level are both set',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20)),
+      verify: (bloc) {
+        // mightThreshold, multiplier one, no offset: the threshold is simply
+        // the chosen level -- "Affects beings with Might 20 or less".
+        expect(bloc.state.generalEffectSentence, isNotNull);
+        expect(bloc.state.generalEffectSentence, contains('20'));
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'generalEffectSentence goes back to null after a non-General effect is selected',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(BaseEffectSelected(creoIgnemEffect)),
+      verify: (bloc) => expect(bloc.state.generalEffectSentence, isNull),
+    );
+  });
 }
