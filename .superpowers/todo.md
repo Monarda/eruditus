@@ -228,9 +228,9 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
 **Spec:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`
 **Plan:** `docs/superpowers/plans/2026-08-05-general-base-effects.md`
 
-- [x] Model a base effect whose level the caster chooses (47 catalog entries
-      carry `baseLevel: 0` today — a General entry computes as `0 + magnitudes`,
-      which is simply wrong)
+- [x] Model a base effect whose level the caster chooses (49 catalog entries
+      carry `baseLevel: null` today — a General entry previously computed as
+      `0 + magnitudes`, which was simply wrong)
 - [x] Level input in the creation screen, shown only for General entries
 - [x] Engine: the chosen level replaces the guideline's base in
       `calculateBreakdown`
@@ -268,8 +268,9 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   - **No design line printed (4):** *Aegis of the Hearth*, *Wizard's Vigil*,
     *Sight of the True Form*, *Ward against Faeries of the Mountain*.
     (*Ward against the Beasts of Legend* — a fifth spell originally expected
-    in this group — now imports; the ward-guideline splitter change floated as
-    a stretch goal in the spec landed for at least this one.)
+    in this group — is now a template, not blocked; the ward-guideline
+    splitter change floated as a stretch goal in the spec landed for at
+    least this one.)
   - **Design line incomplete, prints `(Base effect)` but the stat line costs
     magnitudes (2):** *Restore the Moved Image*, *The Invisible Eye Revealed*.
   - **No General base effect for that Technique/Form (2):** *Lay to Rest the
@@ -290,7 +291,7 @@ modelled yet; a handful of genuinely malformed rulebook stat/design lines).
   `calculateBreakdown`, `deriveGeneralEffect`, `_effectSentence`),
   `lib/bloc/spell_creation/spell_creation_bloc.dart`,
   `lib/presentation/screens/spell_creation_screen.dart`
-  (`chosen-base-level-field`), `assets/data/base_effects.json` (the 47
+  (`chosen-base-level-field`), `assets/data/base_effects.json` (the 49
   General entries), `scripts/spell_import/` (template emission),
   `integration_test/spell_creation_flow_test.dart`
 
@@ -560,8 +561,8 @@ Four Creo Animal rows, plus six more the Definitive Edition audit found.
 - **Context:** pure extraction gap, no design decisions. The four General rows
   are also item 25 cases once added — item 25 is done, so when these four rows
   are eventually added to `base_effects.json`, each needs a `reference` and an
-  `effectFormula` (`GeneralEffectFormula`) alongside its `baseLevel: 0`, the
-  same shape as the other 47 General entries, not a bare zero-level row.
+  `effectFormula` (`GeneralEffectFormula`) alongside its `baseLevel: null`, the
+  same shape as the other 49 General entries, not a bare zero-level row.
 - **Source precedence — the catalog is built from the wrong file.** The rulebook
   repo holds the same book in `reviewed/` and `wip/`, in descending quality
   (note: `raw-md/` was removed from the upstream repo). Always resolve `reviewed`
@@ -601,7 +602,7 @@ is what the rulebook itself does.
 - **Only 1 published spell touches this in a design line** — *Ward against Heat
   and Flames* (`+2 for up to +15 damage`), which item 24 can express.
 - **Item 25 retires this for General rows only.** `GeneralEffectFormula`
-  (`GeneralEffectKind.damage`) covers the 47 General catalog entries whose
+  (`GeneralEffectKind.damage`) covers the 49 General catalog entries whose
   output — including fire-damage magnitude — depends on the chosen level; that
   is a genuinely different mechanism from this item's non-General, fixed-base
   fire-damage magnitudes, which remain deferred exactly as before.

@@ -24,16 +24,19 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
-/// Switches to the Library tab and lets the transition settle. Shared by the
-/// two General-level tests below (Test B needs it directly; Test A does not,
-/// but both were added together so the helper lives once at file scope).
+/// Switches to the Library tab and lets the transition settle. Used by the
+/// ward-template test below, which needs to reach the "Learn at level…"
+/// button; factored out as its own helper rather than inlined, matching
+/// selectTechniqueAndForm/selectBaseEffect below.
 Future<void> openLibraryTab(WidgetTester tester) async {
   await tester.tap(find.text('Library'));
   await tester.pumpAndSettle();
 }
 
-/// Picks a Technique then a Form from their dropdowns. Factored out because
-/// both new tests below need this exact three-tap sequence.
+/// Picks a Technique then a Form from their dropdowns, in the four-tap
+/// sequence (open, choose, open, choose) every existing test in this file
+/// already repeats inline. Factored out for the General-level-field test
+/// below rather than inlined a sixth time.
 Future<void> selectTechniqueAndForm(
     WidgetTester tester, String technique, String form) async {
   await tester.tap(find.byKey(const Key('technique-dropdown')));
