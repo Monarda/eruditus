@@ -1531,5 +1531,235 @@
       "reme-10b"
     ],
     "rationale": "Causes everything the target sees and hears to be colored with terror, affecting the target's reactions across the board (per the Stamina-roll effect table), matching reme-10b 'Imbue all of a person's responses with a particular emotion' - not reme-10a's active control of one cultivated emotion."
+  },
+  "lib-rean-ward-against-beasts-legend": {
+    "baseEffectId": "rean-gen-2",
+    "candidates": [
+      "rean-gen",
+      "rean-gen-2"
+    ],
+    "rationale": "Its prose reads 'No magical beast whose Magic Might is equal to or less than the level can affect anyone within the Circle', so the warded class is beasts of the Magic realm that carry Might. rean-gen-2 is 'Create a circle warding against animals from one realm (Divine, Faerie, Infernal, or Magic) with Might less than or equal to the level of the spell (Touch, Ring, Circle)', and this art's own drafting treats 'beast' and 'animal' as the same word — Circle of Beast Warding ('a circle that no normal beast will cross') is built on the level-2 bullet 'Protect the target from animal attacks (only affects animals without supernatural abilities)', so a 'magical beast' is that same class with supernatural abilities. rean-gen is the near miss and is excluded because it wards 'beings associated with Animal', which rean-gen-2's own note says is a different class ('Note that animals are not necessarily associated with Animal, or vice versa'); this spell states no Form association at all, only that the target is a beast and that its Might is Magic."
+  },
+  "lib-reme-ring-warding-against-spirits": {
+    "baseEffectId": "reme-G2",
+    "candidates": [
+      "reme-G",
+      "reme-G2"
+    ],
+    "rationale": "Its prose reads 'Only ghosts and spirits with current Magic Might higher than the spell's level can enter the ring you create' and 'This spell does not affect ghosts or spirits associated with the other realms' — the one restriction it states is realm, and the warded class is spirits as such. reme-G2 is 'Ward against spirits belonging to one realm (Divine, Faerie, Infernal, or Magic) with a Might less than or equal to the level of the spell (Touch, Ring, Circle)', which is that scope exactly. reme-G is the near miss and is excluded because it wards 'beings associated with Mentem': the same Rego Mentem table writes 'Control a disembodied spirit associated with Mentem, such as most ghosts' (level 5) and 'Summon a disembodied spirit associated with Mentem, such as a ghost' (level 15), and Rego Animal writes 'Control a disembodied spirit associated with Animal', so in this book 'spirit' is a category that takes a Form qualifier rather than being a Mentem qualifier itself — and this spell prints no such qualifier where the table would print one."
+  },
+  "lib-crvi-restore-faded-threads": {
+    "baseEffectId": "crvi-G4",
+    "candidates": [
+      "crvi-G1",
+      "crvi-G2",
+      "crvi-G3",
+      "crvi-G4"
+    ],
+    "rationale": "Its prose reads 'This spell temporarily restores spell traces to a fresh state (as if they had just expired). The spell will restore spell traces of negative magnitude up to the magnitude of this spell –3.' crvi-G4 is the only one of the four Creo Vim General bullets about traces — 'Refreshes all spell traces within the target that are less than the magnitude of the guideline –1, in negative magnitude (this restores them to their initial strength, generally half the magnitude of the spell)' — and its arithmetic lands exactly: the design line (Base, +1 Touch, +1 Dia) puts the guideline two magnitudes below the spell, so 'the magnitude of the guideline –1' is 'the magnitude of this spell –3'. crvi-G2 is the nearest rejected candidate, being the other bullet that turns on Intellego investigation of magic, but it 'prevents Intellego spells ... from learning any details about the magic on the target' — this spell exists to make the traces examinable, which is the opposite; crvi-G1 and crvi-G3 are likewise concealment shells, not restorations."
+  },
+  "lib-crvi-shell-false-determinations": {
+    "baseEffectId": "crvi-G3",
+    "candidates": [
+      "crvi-G1",
+      "crvi-G2",
+      "crvi-G3",
+      "crvi-G4"
+    ],
+    "rationale": "Its prose reads 'All attempts to investigate the magic item give false information about its powers unless half of the level of the shell is exceeded by the magus's Investigation roll.' crvi-G3 is 'Create a magical shell which gives false information about the target to Intellego spells with level less than or equal to half its level plus one magnitude' — the only bullet that supplies false information, and the only one whose threshold is halved, matching the printed 'half of the level of the shell' (with (Base effect, +1 Touch), half the guideline plus one magnitude is half the shell's own level). crvi-G1 is the near miss and is excluded by its own parenthetical: 'this aura is generic magic only — no misleading information can be supplied'. crvi-G2's threshold is the full level, which is Shell of Opaque Mysteries, not this spell; crvi-G4 is about spell traces."
+  },
+  "lib-crvi-shell-opaque-mysteries": {
+    "baseEffectId": "crvi-G2",
+    "candidates": [
+      "crvi-G1",
+      "crvi-G2",
+      "crvi-G3",
+      "crvi-G4"
+    ],
+    "rationale": "Its prose reads 'it causes all attempts to investigate the magic item to utterly fail, unless the level of the ritual is exceeded by the magus's Investigation roll.' crvi-G2 is 'Create a magical shell which prevents Intellego spells with a level less than or equal to its level, plus one magnitude from learning any details about the magic on the target' — learning no details at all is 'utterly fail', and the threshold is the full level of the ritual, exactly as printed (with (Base effect, +1 Touch), the guideline plus one magnitude is the ritual's own level). crvi-G3 is the near miss — the entry itself says this spell is 'similar to Shell of False Determinations' — and is excluded twice over: it 'gives false information about the target', which this spell explicitly does not do, and its threshold is half the level rather than 'the level of the ritual'. crvi-G1 supplies a merely generic aura and crvi-G4 is about spell traces."
+  },
+  "lib-muvi-mirror-opposition-form": {
+    "baseEffectId": "muvi-G3",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "Its prose reads 'this causes the targeted spell to have the exact opposite of its normal effects. This effect works on spells up to half the (level – 5) of the Mirror of Opposition spell', with the worked example inverting 'a Momentary Perdo Corpus spell' into 'probably a Creo Corpus spell of Sun duration'. muvi-G3 is 'Totally change a spell of less than or equal to half the (level + 1 magnitude) of the Vim spell (this may change the Technique, Form, or both of the target spell, and needs no requisites for those Arts)'; with (Base effect, +2 Voice) the guideline sits two magnitudes below the spell, so 'half the (guideline + 1 magnitude)' is 'half the (level – 5)' exactly as printed. muvi-G2 is the near miss and is excluded because it 'may not change either the Technique or Form of the target spell', and Perdo Corpus becoming Creo Corpus is a Technique change; muvi-G1 is excluded because it 'may not change the primary effect of the spell', which inversion is."
+  },
+  "lib-muvi-shroud-magic": {
+    "baseEffectId": "muvi-G1",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "Its prose reads 'This spell allows a magus to suppress or alter the sigil in a spell that is currently being cast. The spell to be shrouded can be up to double the Shroud's level.' muvi-G1 is 'Superficially change a spell of less than or equal to twice the (level + 1 magnitude) of the Vim spell (this may not change the primary effect of the spell, or its power)'; with (Base effect, +1 Touch) the guideline is one magnitude below the spell, so twice (guideline + 1 magnitude) is exactly 'double the Shroud's level', and a sigil is neither the primary effect nor the power, so muvi-G1's restriction is satisfied rather than violated. muvi-G2 is the near miss and is excluded arithmetically: its cap is the guideline + 1 magnitude, i.e. the Shroud's own level, not double it. muvi-G3 would cap at half that again."
+  },
+  "lib-muvi-sorcerers-fork": {
+    "baseEffectId": "muvi-G2",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "Its prose reads 'This spell splits another spell (whose level must be less than or equal to the level of this spell) into two or more identical spells of reduced power ... the power of the effect is divided by the number of resulting split spells.' muvi-G2 is 'Significantly change a spell of less than or equal to the level + 1 magnitude of the Vim spell (this may not change either the Technique or Form of the target spell; a change in power of plus or minus one magnitude is a significant change, as is a change of target if the target was possible for the original spell)': with (Base effect, +1 Touch) that cap is the Fork's own level as printed, the Technique and Form are untouched, and both a reduction in power and a change of target are the bullet's own examples of significance. muvi-G1 is the near miss and is excluded because a superficial change 'may not change the primary effect of the spell, or its power', and dividing the power is what the Fork does; it would also allow double the Fork's level, which the prose forbids."
+  },
+  "lib-muvi-wizards-boost-form": {
+    "baseEffectId": "muvi-G2",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "Its prose reads 'You cast this spell as another spell of a level less than or equal to this one is cast. The effect of the other spell increases 5 levels in power, but not past the level of the Wizard's Boost.' Five levels is one magnitude, and muvi-G2 names that case outright — 'Significantly change a spell of less than or equal to the level + 1 magnitude of the Vim spell (... a change in power of plus or minus one magnitude is a significant change)' — while with (Base effect, +1 Touch) its cap is the Boost's own level, exactly the printed 'less than or equal to this one'. muvi-G1 is the near miss and is excluded because a superficial change 'may not change the primary effect of the spell, or its power', and raising the target's power is the entire spell. muvi-G3 is excluded by its halved cap and because no Technique or Form changes."
+  },
+  "lib-muvi-wizards-reach-form": {
+    "baseEffectId": "muvi-G2",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "Its prose reads 'The range of the targeted spell increases by one category. You may not affect a single spell more than once with this spell, and the targeted spell must be at least one magnitude lower in level than this spell.' With (Base effect, +2 Voice) the guideline sits two magnitudes below the spell, so muvi-G2's cap of 'the level + 1 magnitude of the Vim spell' is precisely one magnitude below the Reach's own level, matching the printed restriction; and changing a spell's Range is the same order of alteration muvi-G2 calls significant ('as is a change of target if the target was possible for the original spell'), with Technique and Form untouched. muvi-G1 is the near miss and is excluded arithmetically: twice (guideline + 1 magnitude) is roughly double the Reach's level, an order of magnitude away from the printed cap of one magnitude below it. muvi-G3 caps at about a quarter of the Reach's level and permits Technique/Form changes this spell does not make."
+  },
+  "lib-pevi-demons-eternal-oblivion": {
+    "baseEffectId": "pevi-G3",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'Weakens and possibly destroys a creature with Infernal Might. If the spell penetrates the creature's Magic Resistance, the creature loses Might Score equal to the spell's level.' pevi-G3 is 'Reduce a target's Might Score by the level of the spell + 2 magnitudes, as long as the spell penetrates the creature's Magic Resistance'; with (Base effect, +2 Voice) the guideline plus two magnitudes is the spell's own level, so the reduction is 'equal to the spell's level' exactly as printed, and the Penetration proviso is quoted almost verbatim. pevi-G4 is the near miss — same arithmetic, same Penetration clause — and is excluded on the one word that separates the two rows: pevi-G4 reduces the 'Might Pool', and this spell's prose says 'Might Score'. No other candidate reduces Might at all; the twelve others dispel, conceal, destroy vis, or reduce casting totals."
+  },
+  "lib-pevi-disenchant": {
+    "baseEffectId": "pevi-G9",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'You make a Hermetic magic item lose all its powers permanently if the level of this spell + a stress die (no botch) equals or exceeds the highest level of the enchantments in the item', and its stat line prints 'Ritual'. pevi-G9 is 'Dispel a Hermetic enchantment with a level less than the guideline level used + 1 magnitude + a stress die (no botch); the spell must be a Ritual' — the only candidate of the 13 that is both enchantment-specific and Ritual-required. pevi-G10 is the near miss and is excluded because it requires the spell to 'specify a particular Hermetic Form or a specific type of enchantment such as Talismans, Familiars or Longevity Rituals', which Disenchant does not."
+  },
+  "lib-pevi-masking-odor-magic": {
+    "baseEffectId": "pevi-G1",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'Prevents the detection of a magic spell, or of a magic power in an item or being, by InVi magic, unless the level of the InVi spell exceeds twice the level of this spell – 5 (for example, exceeds 20 for a level 15 version).' pevi-G1 is 'Make something (including a magical item) seem non-magical to any Intellego spell of less than or equal to twice the (level + 2 magnitudes) of this spell' — the only one of the thirteen bullets about concealment rather than destruction, and the arithmetic checks out: with (Base effect, +1 Touch, +2 Sun) the guideline sits three magnitudes below, so twice (guideline + 2 magnitudes) is twice (this spell's level – 5), which is 20 for the level 15 version the prose itself cites. pevi-G2 looks like the near miss only in the catalog's compressed description ('Dispel specific effect type with Intellego spell'); the rulebook row mentions no Intellego at all — it reads 'Dispel effects of a specific type with a level less than or equal to the level + 4 magnitudes of the Vim spell + a stress die (no botch)' — and Masking dispels nothing, it hides."
+  },
+  "lib-pevi-unravelling-fabric-form": {
+    "baseEffectId": "pevi-G2",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'This spell will cancel the effects of any one spell of a specified Form whose level is less than or equal to (spell level + 10 + stress die (no botch)). There are 10 variants that cover each Hermetic Form.' pevi-G2 is 'Dispel effects of a specific type with a level less than or equal to the level + 4 magnitudes of the Vim spell + a stress die (no botch); a specific type could be Hermetic Terram magic, or Shamanic spirit control magic' — 'a specified Form' is that row's own example of a specific type, and with (Base effect, +2 Voice) guideline + 4 magnitudes is the spell's level + 10, matching the printed formula term for term. pevi-G5 is the near miss and is excluded twice: it dispels 'any supernatural effect of one realm', which is a realm restriction rather than the Form restriction this spell prints, and its threshold is halved — half the (spell level + 10 + stress die) rather than the printed spell level + 10 + stress die. pevi-G9/G10 are enchantment-and-Ritual rows and this spell is neither."
+  },
+  "lib-pevi-wind-mundane-silence": {
+    "baseEffectId": "pevi-G5",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'You raise a metaphorical \"breeze\" that blows the magic away from an area, canceling the effects of any spell there. You can cancel the effects of any spell if, with this spell, you can double the level of the spell on a stress die + the level of your spell' — that is, the target spell's level may be at most half of (this spell's level + a stress die). pevi-G5 is 'Dispel any supernatural effect of one realm with a level less than or equal to half the (level + 4 magnitudes + a stress die (no botch)) of the Vim spell'; with (Base effect, +2 Voice, +2 Room) the guideline sits four magnitudes below, so 'guideline + 4 magnitudes' is the spell's own level and the row reduces to half (this spell's level + a stress die), exactly the printed rule. pevi-G2 is the near miss and is excluded on both counts: it needs 'effects of a specific type', where the Wind cancels 'any spell there' with no type named, and its threshold is not halved. The Vim preamble also assigns this spell to pevi-G5's side of the enchantment line: 'Wind of Mundane Silence could dispel a stone wall produced by a magical item, but Disenchant is needed to dispel the magic of the item itself.'"
+  },
+  "lib-revi-circular-ward-against-demons": {
+    "baseEffectId": "revi-G1",
+    "candidates": [
+      "revi-G1",
+      "revi-G2",
+      "revi-G3",
+      "revi-G4",
+      "revi-G5"
+    ],
+    "rationale": "Its prose reads 'All creatures with Infernal Might equal to or less than the level of the spell are unable to enter the circle or harm those within it.' revi-G1 is 'Ward against all supernatural beings from one realm (Divine, Faerie, Infernal, or Magic) with Might less than or equal to the level of the spell (Touch, Ring, Circle)' — the only one of the five Rego Vim General bullets whose subject is beings rather than spells, and whose printed reference parameters are this spell's own R: Touch, D: Ring, T: Circle, which is why the design line is a bare '(Base spell)' with nothing to charge. revi-G2 is the nearest rejected candidate and is excluded because it sustains or suppresses 'a spell you have cast'; this ward's target is a demon's Might, not a spell, and against revi-G2's Personal/Momentary/Individual reference the Touch/Ring/Circle stat line would owe magnitudes that the printed design line does not charge."
+  },
+  "lib-revi-maintaining-demanding-spell": {
+    "baseEffectId": "revi-G2",
+    "candidates": [
+      "revi-G1",
+      "revi-G2",
+      "revi-G3",
+      "revi-G4",
+      "revi-G5"
+    ],
+    "rationale": "Its prose reads 'You cast this spell on a spell that you have already cast and are maintaining through concentration. The spell that requires concentration is then automatically maintained for the duration of this spell ... This spell only works on spells of equal or lower level.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (this cannot make a spell last longer than it could have naturally, so the sustaining version is only useful with Concentration Duration among standard Hermetic Durations)' — the parenthetical describes this spell's use case exactly, and with (Base effect, +1 Touch, +1 Diam) the guideline + 2 magnitudes is the spell's own level, matching 'equal or lower level'. revi-G4 is the near miss and is excluded because it is for 'a spell cast by another', where this one is cast on a spell you have already cast yourself; its cap would also be halved. revi-G5 adds 'of a specific type', which this spell does not specify."
+  },
+  "lib-revi-opening-intangible-tunnel": {
+    "baseEffectId": "revi-G3",
+    "candidates": [
+      "revi-G1",
+      "revi-G2",
+      "revi-G3",
+      "revi-G4",
+      "revi-G5"
+    ],
+    "rationale": "Its prose reads 'You can open a magical channel from yourself to some target, allowing you to cast any spell with a range greater than Personal on that target ... Spells cast through the tunnel cannot be of higher level than that of this spell.' revi-G3 is 'Create a conduit or container for spells with level less than or equal to the level + 5 magnitudes of the Vim spell (a conduit puts you in mystical contact with the target at effective Touch range, while a container holds a spell for a specific length of time before releasing it)' — the conduit half of that clause is this spell's own description, and with (Base effect, +4 Arc, +1 Conc) the guideline + 5 magnitudes is the spell's own level, matching the printed cap. revi-G4 is the near miss because it carries the same '+5 magnitudes' term, but it 'sustains or suppresses a spell cast by another' and the tunnel neither sustains nor suppresses anything; its cap is halved besides, which the printed cap contradicts."
+  },
+  "lib-revi-suppressing-wizards-handiwork": {
+    "baseEffectId": "revi-G2",
+    "candidates": [
+      "revi-G1",
+      "revi-G2",
+      "revi-G3",
+      "revi-G4",
+      "revi-G5"
+    ],
+    "rationale": "Its prose reads 'Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return ... The level of the spell to be suppressed must be less than or equal to the level of this spell.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (... a suppressed spell still ends when its original duration expires)'; with (Base, +1 Touch, +1 Conc) the guideline + 2 magnitudes is the spell's own level, matching the printed cap, and 'a spell you have cast' matches 'one spell that you have cast'. revi-G4 is the near miss and is excluded by 'cast by another' plus its halved cap; revi-G5 is excluded because it is also 'cast by another' and further requires spells 'of a specific type', where this spell suppresses any one of your own."
   }
 }
