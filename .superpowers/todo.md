@@ -951,6 +951,17 @@ finding re-verified against source before being recorded.
       - `ResolvedSpell`/`ResolvedTemplate` duplicate the same
         `isResolved`/`unresolvedReferences`/`technique`/`form` derivation and the same
         pass-through getters; only the `LibraryEntry` interface is shared.
+        - **Filed here 2026-08-09 by item 40's design.** That item adds a
+          third parallel notion, `ResolvedSpell.problems`, deliberately *not*
+          merged with `isResolved` because the two answer different questions:
+          `isResolved` is a **can-I-compute gate** (the four catalog ids are
+          null, so `calculateBreakdown` cannot run at all), while `problems`
+          means the level computes but must not be trusted. Collapsing the
+          family into one concept — with a severity, if one is still needed —
+          belongs to this cleanup: rationalising `LibraryEntry`'s contract
+          once across three notions and two types beats doing it for two now
+          and three later. **Do not merge them without preserving the compute
+          gate** — `spell_library_bloc.dart:44` depends on it.
       - `emit.py`'s `build_template` (144-207) mirrors `build_spell` (80-141)
         near-verbatim for range/duration/target lookup, requisites, citations,
         adjustments and ritual declaration — its own docstring says "mirrors

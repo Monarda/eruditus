@@ -97,6 +97,8 @@ Recorded here because each was a fork with a defensible other side.
 | 5 | **`saveSpell` refreshes the resolver before validating** | Mirrors `LibraryRepository._refreshResolver` |
 | 6 | **A stray `chosenBaseLevel` on a non-General spell is invalid** | Silently-meaningless stored data is the class of bug this closes |
 | 7 | **Requisites reshape is not batched with items 35/37** | Considered and rejected: the shared cost of a shape change is modest once migration is off the table, and coupling a small fix to 35/37's open design question is the worse trade |
+| 8 | **Blocking and degrading are not converged** | They are different facts, not two treatments of one — see "Two ways a spell is unusable" below. The convergence question is filed with item 38, not left open here |
+| 9 | **`AssetDataLoader` caches its asset parses, in part A** | The new refresh-before-validate would otherwise re-parse the 611-entry effect catalog on every save. Assets are immutable at runtime, so the cache needs no invalidation |
 
 ---
 
@@ -175,7 +177,48 @@ once is what makes a restore affordable — nothing caches the 611-entry asset
 parse (`AssetDataLoader.loadBaseEffects` re-reads the bundle on every call), so
 refreshing per spell would re-parse it once per imported row.
 
-### Two supporting changes
+### Two ways a spell is unusable, kept separate
+
+`ResolvedSpell` already carries one notion of "not usable" — `isResolved` /
+`unresolvedReferences`, formalised in `LibraryEntry` and consumed across 8 files
+in `lib/`, including `SpellCard`'s existing not-usable rendering. `problems` is a
+**second** notion, deliberately not merged with it, because the two are different
+kinds of fact:
+
+| | Can compute a level? | Meaning |
+|---|---|---|
+| Unresolved | **No** — `baseEffect`/`range`/`duration`/`target` are null, so `calculateBreakdown` cannot be called | a dependency vanished |
+| Invalid (`problems`) | **Yes** — everything resolves | the combination breaks a rule; the number is computable but must not be trusted |
+
+`spell_library_bloc.dart:44` (`if (!s.isResolved) continue;`) uses `isResolved`
+precisely as a can-I-compute gate. Merging the two into one list destroys that
+distinction unless `problems` carries a severity, which is more machinery than
+this warrants.
+
+`ResolvedSpell.problems` must therefore say so in its doc comment — that it is a
+sibling of `isResolved`, and which of the two questions it answers — so the third
+parallel notion on this class is deliberate rather than accidental. **Whether the
+family should be collapsed into one concept is filed with item 38**, whose
+`ResolvedSpell`/`ResolvedTemplate` duplication cleanup is where `LibraryEntry`'s
+whole contract gets rationalised. Doing that once across three notions and two
+types is cheaper than rationalising two now and three again later.
+
+### The write boundary is what makes blocking possible
+
+Decision 1 blocks invalid spells, and that is not in tension with degrading on
+load. The axis is not invalid-vs-unresolved; it is **whether anything is being
+written**:
+
+- At a write boundary you can refuse, so blocking is available.
+- On load nothing is being written. There is nothing to refuse, and the
+  alternatives to degrading are hiding or deleting user data.
+
+The same invariant can need both. Edit a custom modifier's `selectionMode` from
+`multi` to `single` in Settings and every stored spell holding two options on it
+becomes invalid, with no write anywhere. That case can only ever degrade — which
+is why the read side is not optional.
+
+### Three supporting changes
 
 **`SpellResolver` starts carrying modifiers.** It holds `_effectsById` and
 `_parametersById` today; modifiers live on `SpellEngine.allModifiers`, so
@@ -188,7 +231,30 @@ construction site, including tests.
 **`SpellRepository` gains a `ConfigurationRepository`,** so it can refresh before
 validating. One shared `SpellResolver` instance already exists (`main.dart:44`,
 injected into both `SpellRepository` and `LibraryRepository`), so the refresh
-reaches the object the check reads — no new wiring, only a new dependency.
+reaches the object the check reads — no new wiring, only a new dependency. There
+is no cycle: `ConfigurationRepository` depends only on `assetLoader` and
+`configDatasource`, neither of which points back, so this is a diamond rather
+than a loop. It is also not a new pattern — `LibraryRepository` already holds
+exactly this pair for exactly this purpose.
+
+The mechanical cost is the constructor change: **19 `SpellRepository`
+construction sites across 10 files**, 9 of them outside `lib/`.
+
+**`AssetDataLoader` caches its three asset loads.** Without this, the refresh
+above re-reads and re-parses the 611-entry `base_effects.json` from the bundle on
+**every save**, because `ConfigurationRepository.getAllEffects` delegates
+straight to `AssetDataLoader` and nothing memoises it.
+
+Caching needs no invalidation: assets are immutable at runtime, which is exactly
+why `LibraryRepository.getBuiltInSpells` already caches (`:48-51`). Custom
+entries come from the DB and stay uncached, so freshness is preserved everywhere
+it is actually achievable.
+
+This is in part A rather than filed as an optimisation because it is what makes
+the new dependency affordable. It also pays for itself in code this work does not
+otherwise touch: `LibraryRepository._refreshResolver` currently re-parses those
+611 entries on **every Library tab visit**, the same shape of waste item 38
+records for `getTemplates()`.
 
 ### Restore
 
@@ -229,7 +295,7 @@ Only one part touches serialized data.
 
 | | Touches | Delivers |
 |---|---|---|
-| **A. Validator + enforcement** | `spell.dart`, `spell_resolver.dart`, `resolved_spell.dart`, `spell_repository.dart`, `backup_service.dart`, `spell_engine.dart`, `main.dart`, tests | all four invariants enforced on every path |
+| **A. Validator + enforcement** | `spell.dart`, `spell_resolver.dart`, `resolved_spell.dart`, `spell_repository.dart`, `backup_service.dart`, `spell_engine.dart`, `asset_data_loader.dart`, `main.dart`, tests | all five checks enforced on every path |
 | **B. Requisites reshape** | all of A's models, plus both assets, `emit.py` ×2, provenance adoption, every requisite-bearing test | converts one invariant from a runtime check into an impossibility |
 
 **Part A is planned and implemented first.** It delivers every invariant; B only
@@ -254,8 +320,10 @@ in its own reviewable change.
 
 ## What this deliberately does not do
 
-- **It does not unify blocking with the `isResolved` degrade path.** Decision 1
-  is flagged revisitable; converging them is a later question.
+- **It does not unify `problems` with the `isResolved` degrade path.** Decision 8
+  keeps them separate on their merits, not as a deferral; the collapse question
+  is filed with item 38. Decision 1's revisitability is about something else —
+  whether an invalid spell should be *refused* at a write boundary at all.
 - **It does not add validation for items 35/37's slots.** It gives them a home;
   they supply their own checks when they land.
 - **It adds no write-path enforcement for `SpellTemplate`.** Templates are
