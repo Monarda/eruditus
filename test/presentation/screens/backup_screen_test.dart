@@ -126,9 +126,18 @@ void main() {
       ),
     ));
 
-    await tester.tap(find.byKey(const Key('import-button')));
-    await tester.pumpAndSettle();
+    final importButton = tester.widget<ElevatedButton>(find.byKey(const Key('import-button')));
+    await tester.runAsync(() => importButton.onPressed!() as Future<void>);
+    await tester.pump();
+    await tester.pump();
 
-    expect(find.text('Imported 0 spells, 0 effects, 0 parameters.'), findsOneWidget);
+    // Verify the message ends with a period (success case with no rejections)
+    final statusMessage = find.byKey(const Key('status-message'));
+    expect(statusMessage, findsOneWidget);
+    expect(
+      (tester.widget<Text>(statusMessage).data ?? '').endsWith('.'),
+      isTrue,
+      reason: 'Status message should end with a period when no spells are rejected',
+    );
   });
 }

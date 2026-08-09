@@ -8,11 +8,12 @@ void main() {
 
   final loader = AssetDataLoader();
 
-  // Mentem and Vim: "Size modifiers don't apply to ... effects with
-  // Individual targets" — core rules, Base Individuals table.
-  const sizeExemptForms = ['Mentem', 'Vim'];
+  // Vim: "Size modifiers don't apply to ... effects with Individual targets"
+  // — core rules, Base Individuals table. Mentem is an exception: per the
+  // Definitive Edition Mentem Guidelines, Size affects the number of targets.
+  const sizeExemptForms = ['Vim'];
 
-  test('every Form except Mentem and Vim has exactly one Size ladder', () async {
+  test('every Form except Vim has exactly one Size ladder', () async {
     final modifiers = await loader.loadModifiers();
     final sizeLadders = modifiers.where((m) => m.id.startsWith('size-')).toList();
 
