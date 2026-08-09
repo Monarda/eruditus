@@ -156,6 +156,17 @@ this table is the ordering, not a second home for them.
       `test/data/published_spell_import_test.dart`, asserting
       `validateSpellAgainstCatalog` reports zero problems across all 294
       published spells and 23 templates; green as predicted.
+- [ ] **Surface `ResolvedSpell.problems` in the Library card — the "degrading"
+      half of the blocking-vs-degrading decision has no UI yet.** Flagged by
+      Part A's final whole-branch review (2026-08-09,
+      `.superpowers/sdd/2026-08-09-spell-invariant-enforcement/final-review-report.md`,
+      finding M4). The design doc named "Library renders an invalid card" as
+      `problems`' consumer, but no task in the plan added that UI, so a spell
+      that becomes invalid *after* being written (write-time blocking cannot
+      cover this — only a later catalog change can) is currently invisible:
+      `problems` is computed and correct but has no visible effect anywhere in
+      the app. Not a defect in what shipped — a plan-scope gap worth tracking
+      so it isn't silently dropped when Part B closes this item.
 
 **What is true today.** `validateSpellProse` (`spell.dart:24-36`) exists precisely
 so the two construction paths cannot drift, and it is called from the `Spell`
@@ -545,6 +556,18 @@ Real work, none of it blocking the import.
       `SpellRepository.saveAll`, so one invalid spell no longer aborts the whole
       restore; `BackupImportResult` gained `rejectedSpells`/`spellsRejected`,
       surfaced in the backup screen's status message.
+- [ ] **Custom modifiers are absent from backup entirely.** Flagged by Part
+      A's final whole-branch review (2026-08-09,
+      `.superpowers/sdd/2026-08-09-spell-invariant-enforcement/final-review-report.md`,
+      recommendation 3). `BackupService.exportToJson` carries only
+      `customEffects` and `customParameters` — no `customModifiers`. This now
+      interacts with item 40's validation: a restored spell that selected a
+      custom modifier resolves to nothing on import (the modifier id isn't in
+      the catalog), so check 5 (single-selection cardinality) is silently
+      skipped for it and the spell imports unvalidated on that axis.
+      Consistent with the existing "unknown modifier id is tolerated"
+      constraint — **not a regression** — but the backup gap itself should be
+      closed alongside the rest of this item.
 
 ### 9. Spell Tags / Library Organisation — half done
 - [x] `tags` field on the Spell model — landed in commit `c4242d6`; `Spell.tags` is
