@@ -6,6 +6,7 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/modifier.dart';
 
 void main() {
   final effect = BaseEffect(
@@ -21,6 +22,46 @@ void main() {
   final individual = Parameter(
       id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+  // Test helpers for the problems getter tests
+  final testRange = Parameter(
+      id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final testDuration = Parameter(
+      id: 'duration-momentary', name: 'Momentary', category: 'Duration', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final testTarget = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 0,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+  BaseEffect fixedEffect() => BaseEffect(
+        id: 'crig-10a', technique: 'Creo', form: 'Ignem',
+        description: 'A fire doing +10 damage', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+      );
+
+  BaseEffect generalEffect() => BaseEffect(
+        id: 'revi-G1', technique: 'Rego', form: 'Vim',
+        description: 'Ward against beings of one realm', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+      );
+
+  Spell buildSpell({String? baseEffectId}) => Spell(
+        id: 'spell-1',
+        name: 'Phantasm',
+        baseEffectId: baseEffectId ?? 'crig-10a',
+        rangeId: 'range-voice',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        requisites: const [],
+        description: 'A face on a wall. Level 10.',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
 
   Spell record() => Spell(
         id: 'spell-1',
@@ -76,5 +117,35 @@ void main() {
     expect(resolved.unresolvedReferences,
         containsAll(['crim-2', 'range-voice', 'target-individual']));
     expect(resolved.unresolvedReferences, isNot(contains('duration-momentary')));
+  });
+
+  test('problems is empty for a valid spell', () {
+    final resolved = ResolvedSpell(
+      record: buildSpell(),
+      baseEffect: fixedEffect(),
+      range: testRange, duration: testDuration, target: testTarget,
+    );
+    expect(resolved.problems, isEmpty);
+  });
+
+  test('problems reports a General spell with no chosen level', () {
+    final resolved = ResolvedSpell(
+      record: buildSpell(baseEffectId: 'revi-G1'),
+      baseEffect: generalEffect(),
+      range: testRange, duration: testDuration, target: testTarget,
+    );
+    expect(resolved.problems, contains('Choose a level for this General guideline'));
+  });
+
+  test('problems is empty when the base effect does not resolve', () {
+    // Nothing to validate against. isResolved already reports this, and it
+    // answers a different question -- see the class doc.
+    final resolved = ResolvedSpell(
+      record: buildSpell(),
+      baseEffect: null,
+      range: testRange, duration: testDuration, target: testTarget,
+    );
+    expect(resolved.isResolved, isFalse);
+    expect(resolved.problems, isEmpty);
   });
 }

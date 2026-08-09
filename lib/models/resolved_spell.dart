@@ -53,6 +53,33 @@ class ResolvedSpell implements LibraryEntry {
         if (target == null) record.targetId,
       ];
 
+  /// The catalog-dependent invariants this spell breaks. Empty means none.
+  ///
+  /// **A sibling of [isResolved], not a replacement for it — the two answer
+  /// different questions.** [isResolved] is a *can I compute* gate: the four
+  /// catalog ids are null, so `calculateBreakdown` cannot run at all
+  /// (`spell_library_bloc.dart` relies on exactly this). [problems] means the
+  /// level computes fine but must not be trusted, because the record and its
+  /// guideline disagree.
+  ///
+  /// Empty when [baseEffect] is null: there is nothing to validate against, and
+  /// [isResolved] already reports that case.
+  ///
+  /// Whether these two notions should collapse into one is todo item 38's
+  /// question, alongside the `ResolvedSpell`/`ResolvedTemplate` duplication.
+  /// Do not merge them without preserving the compute gate.
+  List<String> get problems {
+    final effect = baseEffect;
+    if (effect == null) return const [];
+    return validateSpellAgainstCatalog(
+      effect: effect,
+      chosenBaseLevel: record.chosenBaseLevel,
+      requisites: record.requisites,
+      selectedModifiers: record.selectedModifiers,
+      modifiers: modifiers,
+    );
+  }
+
   // Derived from the resolved base effect rather than stored on the record, so
   // a spell can never claim a technique its own base effect disagrees with.
   @override
