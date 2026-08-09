@@ -42,6 +42,8 @@ List<String> validateSpellProse({
 ///
 /// Returns a list of human-readable problems; empty means valid. Problems
 /// accumulate: a caller showing them to a user should see all of them at once.
+/// Check 3 (self-matching requisite arts) is suppressed for any art already
+/// flagged as a duplicate by check 4; see the checks-3/4 implementation for detail.
 ///
 /// **Why this is a free function taking pieces rather than a method on [Spell].**
 /// [Spell] deliberately holds `baseEffectId` and not [BaseEffect], so it cannot
@@ -83,7 +85,11 @@ List<String> validateSpellAgainstCatalog({
   }
 
   // 3 and 4. A requisite naming the spell's own Art is meaningless, and the
-  //    same Art twice is contradictory when the two carry different kinds.
+  //    same Art twice is contradictory. The two checks interact: when an art
+  //    is both self-matching and duplicated, only the duplicate message
+  //    fires -- the self-match message would be redundant noise about the
+  //    same offending row. Deduplicating down to one copy re-exposes check 3
+  //    on the remaining instance, so nothing is permanently hidden.
   final seenArts = <String>{};
   final duplicateArts = <String>{};
 

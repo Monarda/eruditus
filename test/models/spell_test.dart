@@ -553,6 +553,19 @@ void main() {
       );
     });
 
+    test('check 3: a non-duplicated requisite matching own technique still fires', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          requisites: [
+            Requisite(art: 'Creo', kind: RequisiteKind.free),  // matches fixedEffect's technique, appears once
+            Requisite(art: 'Rego', kind: RequisiteKind.adding), // unrelated, not a duplicate
+          ],
+        ),
+        contains("Requisite art cannot be the spell's own technique or form"),
+      );
+    });
+
     test('check 4: a duplicate requisite art is a problem', () {
       expect(
         validate(
