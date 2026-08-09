@@ -811,6 +811,15 @@ void main() {
         provenance: Provenance(source: PublicationSource.published,
             citations: [Citation(bookId: 'arm5-core')]));
 
+    BaseEffect fixedGuideline() => BaseEffect(
+          id: 'crig-10a',
+          technique: 'Creo',
+          form: 'Ignem',
+          description: 'A fire doing +10 damage',
+          baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.published, citations: [Citation(bookId: 'arm5-core')]),
+        );
+
     SpellDraft completeDraft({
       BaseEffect? baseEffect,
       int? chosenBaseLevel,
@@ -874,6 +883,17 @@ void main() {
 
       expect(engine.validateSpellDraft(draft),
           contains('Magnitudes reduce this spell below level 1'));
+    });
+
+    test('a chosen level on a non-General effect is rejected', () {
+      final draft = completeDraft(
+        baseEffect: fixedGuideline(),
+        chosenBaseLevel: 20,
+      );
+      expect(
+        engine.validateSpellDraft(draft),
+        contains('A chosen base level applies only to a General guideline'),
+      );
     });
   });
 }

@@ -64,14 +64,6 @@ class SpellEngine {
       errors.add('Base effect must be selected');
     }
 
-    if (draft.baseEffect != null && draft.baseEffect!.isGeneral) {
-      if (draft.chosenBaseLevel == null) {
-        errors.add('Choose a level for this General guideline');
-      } else if (draft.chosenBaseLevel! < 1) {
-        errors.add('The chosen level must be at least 1');
-      }
-    }
-
     if (draft.range == null) {
       errors.add('Range must be selected');
     }
@@ -84,25 +76,18 @@ class SpellEngine {
       errors.add('Target must be selected');
     }
 
-    // Validate requisites: no art can equal the spell's own technique or form.
-    final seenArts = <String>{};
-    for (final req in draft.requisites) {
-      if (req.art == draft.technique || req.art == draft.form) {
-        errors.add('Requisite art cannot be the spell\'s own technique or form');
-      }
-      if (seenArts.contains(req.art)) {
-        errors.add('Duplicate requisite art: ${req.art}');
-      }
-      seenArts.add(req.art);
+    // The catalog-dependent invariants live in one place, shared with
+    // SpellRepository's write-time block and ResolvedSpell.problems, so the
+    // draft path and the record path cannot drift.
+    if (draft.baseEffect != null) {
+      errors.addAll(validateSpellAgainstCatalog(
+        effect: draft.baseEffect!,
+        chosenBaseLevel: draft.chosenBaseLevel,
+        requisites: draft.requisites,
+        selectedModifiers: draft.selectedModifiers,
+        modifiers: allModifiers,
+      ));
     }
-
-    draft.selectedModifiers.forEach((modifierId, optionIds) {
-      for (final modifier in allModifiers.where((m) => m.id == modifierId).take(1)) {
-        if (modifier.selectionMode == ModifierSelectionMode.single && optionIds.length > 1) {
-          errors.add('Only one option may be selected for ${modifier.name}');
-        }
-      }
-    });
 
     // Last, and only once the draft is complete enough to compute: a draft
     // whose negative magnitudes drive the level below 1 has no level at all.
