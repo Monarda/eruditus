@@ -100,10 +100,42 @@ this table is the ordering, not a second home for them.
       blocking is the more conservative starting point, not a settled principle.
       Backwards compatibility is not a goal and the DB is droppable, so there is
       deliberately **no migration story** for rows already stored invalid.
-- [ ] Decide where an invariant that needs *resolved catalog data* is enforced,
+- [x] Decide where an invariant that needs *resolved catalog data* is enforced,
       so `Spell.fromMap` and `SpellDraft.toSpell` cannot disagree the way they
-      currently can
-- [ ] Apply the answer to the three catalog-dependent invariants below
+      currently can — **DONE 2026-08-09 (Part A of the enforcement-path plan,
+      `docs/superpowers/plans/2026-08-09-spell-invariant-enforcement.md`).**
+      `SpellResolver`/`ResolvedSpell` (`lib/data/spell_resolver.dart`,
+      `lib/models/resolved_spell.dart`) is the enforcement home, mirroring
+      `validateSpellProse` one layer down: a shared `validateSpellAgainstCatalog`
+      function (`lib/models/spell.dart`) is the one enforcement path, called from
+      `ResolvedSpell.problems` and from `SpellEngine.validateSpellDraft`, and
+      `SpellRepository` (`lib/data/repositories/spell_repository.dart`) validates
+      through it before every write. Two spec refinements made during planning:
+      the validator takes an `isTemplate` flag (templates skip the "General
+      needs a chosen level" and "chosen level present" checks, which don't apply
+      to a record whose whole purpose is to have its level supplied later); and
+      `modifiers` is now a **required** catalog on `SpellResolver` but stays
+      **defaulted** on `ResolvedSpell`, so existing test/call sites that
+      construct a `ResolvedSpell` without needing validation are unaffected.
+- [x] Apply the answer to the three catalog-dependent invariants below —
+      **DONE 2026-08-09.** All three (General ⇒ chosen level, duplicate/self
+      requisite art, single-selection-mode modifier cardinality) are now among
+      `validateSpellAgainstCatalog`'s 5 checks. One suppression rule needed a
+      human ruling: the plan's own literal spec and its own test contradicted
+      each other on duplicate-art vs. self-matching-Technique/Form, settled as
+      check 3 (self-match) suppressed when an art is already flagged as a
+      duplicate by check 4. `SpellEngine.validateSpellDraft`
+      (`lib/engine/spell_engine.dart`) now delegates to the shared validator
+      instead of its own separate checks, and `ResolvedSpell` gained a
+      `problems` field (`lib/models/resolved_spell.dart`) surfacing the
+      validator's output — deliberately *not* collapsed into `isResolved`:
+      `isResolved` stays a can-I-compute gate, `problems` means it computes but
+      must not be trusted. `SpellRepository.saveSpell`/`updateSpell` throw
+      `InvalidSpellException` (new: `lib/models/invalid_spell_exception.dart`)
+      on an invalid write; the new `saveAll` reports rejects instead of
+      throwing, used by `BackupService.importFromJson` so one bad spell in a
+      restore doesn't abort the rest. **Remaining open checkbox below (the
+      `requisites` reshape, Part B) is out of scope for this plan.**
 - [ ] Reshape `requisites` from `List<Requisite>` to a map keyed by art —
       **the one invariant fixed by modelling rather than validation.** Duplicate
       arts are representable only because the field is a list; a map makes them
@@ -113,14 +145,17 @@ this table is the ordering, not a second home for them.
       regeneration, item 30 provenance adoption, `Spell`-literal test churn) is
       real but modest once migration is off the table, and coupling a small
       self-contained fix to 35/37's open design question is the worse trade.
-- [ ] Add a build-time assertion over `spell_library.json` for the three
+- [x] Add a build-time assertion over `spell_library.json` for the three
       catalog-dependent invariants — **assertion 7**, alongside the four in
       `test/data/published_spell_import_test.dart`. A violation in the asset is a
       build-time importer bug, identical for every user and unfixable by them;
       with blocking as the runtime behaviour, this test is what stops a broken
       library tab shipping. Measured 2026-08-09: 0 violations across all 294
       spells, so it goes green on the day it lands and stands as a regression
-      guard thereafter.
+      guard thereafter. **DONE 2026-08-09** — landed in
+      `test/data/published_spell_import_test.dart`, asserting
+      `validateSpellAgainstCatalog` reports zero problems across all 294
+      published spells and 23 templates; green as predicted.
 
 **What is true today.** `validateSpellProse` (`spell.dart:24-36`) exists precisely
 so the two construction paths cannot drift, and it is called from the `Spell`
@@ -498,11 +533,18 @@ Real work, none of it blocking the import.
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to the one-Range/Duration/Target constraint
 - [ ] Add migration for legacy spell saves (if any)
-- [ ] Test backup round-trip (export → import)
-- [ ] **Known gap:** `test/data/services/backup_service_test.dart`'s "backup
-      round-trip" duplicates `spell_test.dart`'s serialization round-trip rather
-      than calling through the real `BackupService` — the service is not actually
-      exercised. Pre-existing coverage hole; close it with the checkbox above.
+- [x] Test backup round-trip (export → import)
+- [x] **Known gap — CLOSED 2026-08-09 by item 40's Part A plan (Task 7),
+      `docs/superpowers/plans/2026-08-09-spell-invariant-enforcement.md`.**
+      `test/data/services/backup_service_test.dart`'s "backup round-trip" now
+      calls through the real `BackupService.exportToJson`/`importFromJson`
+      instead of duplicating `spell_test.dart`'s serialization round-trip. The
+      same task also reordered `BackupService.importFromJson` to import custom
+      effects and parameters before spells (so a spell built on a custom effect
+      from the same backup isn't wrongly rejected) and switched it to
+      `SpellRepository.saveAll`, so one invalid spell no longer aborts the whole
+      restore; `BackupImportResult` gained `rejectedSpells`/`spellsRejected`,
+      surfaced in the backup screen's status message.
 
 ### 9. Spell Tags / Library Organisation — half done
 - [x] `tags` field on the Spell model — landed in commit `c4242d6`; `Spell.tags` is
@@ -974,16 +1016,26 @@ finding re-verified against source before being recorded.
         catalog-id fields) and a shared `_common_fields`-style helper on the Python
         side would collapse each pair to one implementation.
 - [ ] **Efficiency, all in the Library-load path, none correctness-affecting.**
-      `SpellLibraryBloc._onEvent` (`spell_library_bloc.dart:36-37`) awaits
-      `getAllSpells()` then `getTemplates()` sequentially, each independently calling
-      `LibraryRepository._refreshResolver()` — two catalog reloads where one would do,
-      on **every** Library tab visit (`main.dart`'s bottom nav re-requests on every
-      visit, by design). `getTemplates()` also re-reads and re-parses
-      `spell_templates.json` from the asset bundle on every call, unlike
-      `getBuiltInSpells`, which caches the parse. `SpellEngine._parameterById`
-      (`spell_engine.dart:49`) linear-scans instead of using a map, unlike
-      `SpellResolver`'s own id maps. `Future.wait`, one resolver refresh, and a cached
-      template list fix all three cheaply.
+      Of the three sub-problems found by the review, one is now fixed and two
+      remain open:
+      - **FIXED 2026-08-09** (item 40 Part A, Task 1,
+        `docs/superpowers/plans/2026-08-09-spell-invariant-enforcement.md`):
+        `getTemplates()` re-reading and re-parsing `spell_templates.json` from
+        the asset bundle on every call, unlike `getBuiltInSpells`, which cached
+        the parse. `AssetDataLoader` (`lib/data/datasources/asset_data_loader.dart`)
+        now memoises the `Future` for every asset load, including
+        `loadSpellTemplates()`, so concurrent/repeated callers share one parse
+        and `LibraryRepository.getTemplates()` only triggers the actual read
+        once.
+      - **Still open:** `SpellLibraryBloc._onEvent` (`spell_library_bloc.dart:36-37`)
+        awaits `getAllSpells()` then `getTemplates()` sequentially, each
+        independently calling `LibraryRepository._refreshResolver()` — two
+        catalog reloads where one would do, on **every** Library tab visit
+        (`main.dart`'s bottom nav re-requests on every visit, by design).
+        `Future.wait` and one resolver refresh fix this cheaply.
+      - **Still open:** `SpellEngine._parameterById` (`spell_engine.dart:49`)
+        linear-scans instead of using a map, unlike `SpellResolver`'s own id
+        maps.
 - [ ] **`deriveGeneralEffect` silently returns null when a negative
       `offsetMagnitudes` drives the value below 1** (the `on ArgumentError { return
       null; }` branch), and `validateSpellDraft` does not check this independently of
