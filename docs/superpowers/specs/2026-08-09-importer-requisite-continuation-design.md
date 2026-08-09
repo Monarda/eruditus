@@ -2,7 +2,7 @@
 
 **Todo item:** new (file under section A, alongside item 29's import-harness
 follow-ups). **Blocks item 40 Part B** — the `requisites` map reshape should
-land on assets whose requisites are correct, not on assets missing 24 of them.
+land on assets whose requisites are correct, not on assets missing 26 of them.
 
 **Status:** designed 2026-08-09
 
@@ -162,9 +162,11 @@ gained or lost is visible rather than buried in a 300-spell diff.
 - **Confirmed 2026-08-09, on regeneration:** **26** currently-imported spells
   gained the requisite they had lost, and **34** descriptions lost their
   `Req: <Art>` prefix (the original estimate here was 24; the actual count,
-  measured, is 26). `imported`/`templates`/`blocked` counts were unchanged and
-  the blocked *set* was identical before and after — no spell became newly
-  importable.
+  measured, is 26). `import_report.md` lists **36** total changed spells; the
+  extra 2 (*Rain of Stones*, *Hands of the Grasping Earth*) carried a `Reg:`
+  typo repaired by the pin bump itself, not by the fold. `imported`/`templates`/`blocked`
+  counts were unchanged and the blocked *set* was identical before and after — no
+  spell became newly importable.
 - *Plants to Iron* keeps its Terram requisite — it currently has one only by
   the generation-window artifact, and should now obtain it legitimately.
 - The imported count does not fall. A drop means a spell that previously parsed
