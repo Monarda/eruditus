@@ -30,13 +30,17 @@ void main() {
       parameters: await assetLoader.loadParameters(),
       modifiers: await assetLoader.loadModifiers(),
     );
+    final configRepository = ConfigurationRepository(
+      assetLoader: assetLoader,
+      configDatasource: LocalConfigurationDatasource(database: database),
+    );
     backupService = BackupService(
       spellRepository: SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver),
-      configRepository: ConfigurationRepository(
-        assetLoader: assetLoader,
-        configDatasource: LocalConfigurationDatasource(database: database),
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
       ),
+      configRepository: configRepository,
     );
   });
 

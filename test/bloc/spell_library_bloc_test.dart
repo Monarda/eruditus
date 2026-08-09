@@ -7,7 +7,9 @@ import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/data/database/app_database.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
+import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
+import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
@@ -148,8 +150,30 @@ void main() {
     // (see AssetDataLoaderTest's identically-motivated fix) and changes
     // every time the published-spell-import pipeline is re-run.
     builtInCount = (await AssetDataLoader().loadSpellLibrary()).length;
+    final configRepository = ConfigurationRepository(
+      assetLoader: AssetDataLoader(),
+      configDatasource: LocalConfigurationDatasource(database: database),
+    );
+    // SpellRepository.saveSpell refreshes the shared resolver from
+    // configRepository before validating. Registering e1/e2/p1/p2/p3 as
+    // custom entries here keeps them resolvable through that refresh —
+    // otherwise the refresh would swap this file's deliberately narrow
+    // fixture catalog (see the comment above) for the real one, which
+    // doesn't contain these ids, and the spellLevels assertions below would
+    // find 'user-1'/'user-dangling' unresolved instead of level 5. The real
+    // catalog also gets merged in alongside them, so built-in library
+    // spells now resolve too — harmless here since nothing asserts an
+    // exhaustive spellLevels map, only specific keys.
+    await configRepository.addCustomEffect(effect1);
+    await configRepository.addCustomEffect(effect2);
+    await configRepository.addCustomParameter(rangeParam);
+    await configRepository.addCustomParameter(durationParam);
+    await configRepository.addCustomParameter(targetParam);
     final spellRepository = SpellRepository(
-        datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      datasource: LocalSpellDatasource(database: database),
+      resolver: resolver,
+      configRepository: configRepository,
+    );
     await spellRepository.saveSpell(Spell(
       id: 'user-1',
       name: 'My Custom Fireball',
@@ -215,8 +239,17 @@ void main() {
     // merely survive as the level-less row an uncomputable spell degrades to
     // (see 'one uncomputable spell does not take the whole library down').
     setUp: () async {
+      // Same database as the outer setUp, which already registered e1/e2 as
+      // custom effects — this configRepository sees them too.
+      final configRepository = ConfigurationRepository(
+        assetLoader: AssetDataLoader(),
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       await spellRepository.saveSpell(Spell(
         id: 'user-dangling',
         name: 'Spell With Deleted Modifier',

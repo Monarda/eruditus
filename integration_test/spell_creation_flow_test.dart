@@ -85,7 +85,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,
@@ -254,7 +257,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,
@@ -411,7 +417,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,
@@ -517,7 +526,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,
@@ -621,7 +633,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,
@@ -745,7 +760,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,
@@ -809,7 +827,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepository = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final libraryRepository = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepository,

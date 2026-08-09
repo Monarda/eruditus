@@ -6,7 +6,10 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/database/app_database.dart';
+import 'package:eruditus/data/datasources/asset_data_loader.dart';
+import 'package:eruditus/data/datasources/local_configuration_datasource.dart';
 import 'package:eruditus/data/datasources/local_spell_datasource.dart';
+import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
@@ -28,6 +31,8 @@ import 'package:eruditus/models/spell_template.dart';
 class MockSpellRepository extends Mock implements SpellRepository {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -68,8 +73,15 @@ void main() {
       parameters: [rangeParam, durationParam, targetParam],
       modifiers: const [],
     );
+    final configRepository = ConfigurationRepository(
+      assetLoader: AssetDataLoader(),
+      configDatasource: LocalConfigurationDatasource(database: database),
+    );
     spellRepository = SpellRepository(
-        datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      datasource: LocalSpellDatasource(database: database),
+      resolver: resolver,
+      configRepository: configRepository,
+    );
     spellEngine = SpellEngine(allSpells: const []);
   });
 

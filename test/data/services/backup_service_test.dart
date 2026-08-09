@@ -37,11 +37,14 @@ void main() {
       parameters: await assetLoader.loadParameters(),
       modifiers: await assetLoader.loadModifiers(),
     );
-    spellRepository = SpellRepository(
-        datasource: LocalSpellDatasource(database: database), resolver: resolver);
     configRepository = ConfigurationRepository(
       assetLoader: assetLoader,
       configDatasource: LocalConfigurationDatasource(database: database),
+    );
+    spellRepository = SpellRepository(
+      datasource: LocalSpellDatasource(database: database),
+      resolver: resolver,
+      configRepository: configRepository,
     );
     backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
   });

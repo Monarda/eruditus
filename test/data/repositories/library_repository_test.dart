@@ -33,8 +33,15 @@ void main() {
       parameters: await assetLoader.loadParameters(),
       modifiers: await assetLoader.loadModifiers(),
     );
+    final configRepository = ConfigurationRepository(
+      assetLoader: assetLoader,
+      configDatasource: LocalConfigurationDatasource(database: database),
+    );
     spellRepository = SpellRepository(
-        datasource: LocalSpellDatasource(database: database), resolver: resolver);
+      datasource: LocalSpellDatasource(database: database),
+      resolver: resolver,
+      configRepository: configRepository,
+    );
     repository = LibraryRepository(
         assetLoader: assetLoader, spellRepository: spellRepository, resolver: resolver);
   });
@@ -126,7 +133,10 @@ void main() {
         modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepositoryWithConfig = SpellRepository(
-          datasource: LocalSpellDatasource(database: database), resolver: resolver);
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
       final repositoryWithConfig = LibraryRepository(
         assetLoader: assetLoader,
         spellRepository: spellRepositoryWithConfig,
