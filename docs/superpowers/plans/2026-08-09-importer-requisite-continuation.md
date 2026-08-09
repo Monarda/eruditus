@@ -335,14 +335,17 @@ Expected output: `imported : 294`, `templates: 23`, `blocked  : 43`,
 - [ ] **Step 8: Verify `import_report.md` matches the plan's expectations**
 
 Open `scripts/spell_import/import_report.md` and confirm its summary line
-reads `Parsed 360 → 360 · imported 294 → 294 · blocked 43 → 43 · unresolved
-0 → 0` (no change in any of the four headline counts — the fold changes
-requisites and descriptions, not import/block status), and that its
-"Newly imported" and "No longer imported" sections are both empty. Spot
-check two names from the "Verified expectations" section above — "The
-Beast Remade" and "Fog of Confusion" — appear among whatever change list
-the report shows for requisite/description content (the report's exact
-section names may vary; the point is that these two are visibly listed,
+reads `Parsed 360 → 360 · imported 294 → 294 · blocked 66 → 43 · unresolved
+0 → 0`. The `imported` and `unresolved` counts are unchanged (the fold
+changes requisites and descriptions, not import/block status), and its
+"Newly imported" and "No longer imported" sections are both empty. The `blocked`
+line shows `66 → 43` because `report.py` computes the "before" blocked count
+as (spells_parsed - spells_imported) from the previous lock, which conflates
+blocked spells with templates (23) — a pre-existing arithmetic quirk unrelated
+to the fold. Spot check two names from the "Verified expectations" section
+above — "The Beast Remade" and "Fog of Confusion" — appear among whatever
+change list the report shows for requisite/description content (the report's
+exact section names may vary; the point is that these two are visibly listed,
 not silently changed).
 
 - [ ] **Step 9: Run the full Python suite again and confirm it's fully green**
