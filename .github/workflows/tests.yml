@@ -98,6 +98,13 @@ jobs:
 
       - run: flutter pub get
 
+      # Fails the build on any analyzer error or warning (not just infos), so
+      # lint debt like an unused import can't land unnoticed the way it did
+      # partway through the 2026-08-09 spell-invariant-enforcement branch --
+      # see .superpowers/todo.md item 40's final-review recommendation 4.
+      - name: Flutter analyze
+        run: flutter analyze
+
       # No ARS_RULEBOOK_ROOT here on purpose: the Dart tests read the committed
       # assets, never the rulebook. Setting it would imply a dependency that
       # does not exist.
