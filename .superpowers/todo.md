@@ -1,730 +1,457 @@
 # Eruditus Todo List
 
-**Status:** Active development
-**Last Updated:** 2026-08-07
-**Base Effects:** ✅ Complete (604 effects extracted)
+**Status:** Active development · **Last updated:** 2026-08-09
 
-**Current goal:** every published spell in the Definitive Edition core rules is in
-the spell library, with its computed level matching its printed level.
+**Standing goal:** every published spell in the Definitive Edition core rules is
+in the spell library, with its computed level matching its printed level.
 
-**Item numbers are stable IDs, not priority order.** Sections give priority;
-numbers are never reused or renumbered, because specs, commits and other todo
-items cross-reference them.
+## How to read this file
+
+- **Item numbers are stable IDs, not priority order.** They are never reused and
+  never renumbered, because specs, commits and other items cross-reference them.
+  **Section order is priority order.**
+- **Sections 0 and A** are the work that matters now. **B/C/D** are open but off
+  the critical path. **Completed** holds closed items reduced to the decisions,
+  constraints and gotchas that still bind — follow the linked spec/plan for
+  detail, and the git history for narrative.
+- **Counts live in one place** (*Where the import stands*, below). Item bodies do
+  not restate them.
+- Each open item states what to decide or do, why, and which files it touches.
+  Where an item says "decide", that decision has not been made — do not assume an
+  answer from an adjacent item.
 
 ---
 
-## The Goal, Measured
+## Where the import stands
 
-All 360 spells in Chapter 9 of `Ars-Magica-Open-License/reviewed/Ars Magica -
-Definitive Edition (Core Rules).md` were parsed and each design line checked
-against what the app can express today (audit run 2026-07-28).
+Last extractor run, 2026-08-07 (`python -m scripts.spell_import.extract_spells`):
 
-**286 of 360 (79%) are expressible right now.** The remaining 74 fall into seven
-families:
+> **285 imported · 23 emitted as templates · 52 blocked · 0 unresolved**
+> — 360 published spells in Chapter 9, all accounted for.
 
-| Family | Spells | Item |
+**Before prioritising among items 19/26/28/35/37/39, re-run with
+`--show-blocked`.** The per-family breakdown below dates from the 2026-07-28
+manual audit and has been partially overtaken; `--show-blocked` prints the
+current per-spell reasons and is the authority.
+
+| Blocker family | Spells | Item |
 |---|---|---|
-| Ad-hoc per-spell magnitude (`+1 fancy effect`) | 21 | ✅ **24** |
-| Ritual only by storyguide ruling | 7 | 18 ⚠️ see note below |
-| Non-standard Range/Duration/Target | 6 | ✅ **26** (mechanism only) |
 | Guideline level absent from the rulebook's own table | 5 | **28** |
-| Size ladder above +4 | 4 | 19 |
-| Ward mechanics in the design line | 1 | 4 ⚠️ see note below |
+| Genuinely ambiguous ledger resolution | 4 | **39** |
+| Size ladder above +4 | 4 | **19** |
+| Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 6 | **26** |
+| General-level, each blocked for an unrelated reason | 10 | see item **25** |
+| Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
+| No printed design line and no legitimate derivation | 2 | permanent — see item **27** |
 
-This accounts for 43 of the 74; the remaining 31 are mostly General-level
-spells, which are not in this table because they have no printed level to
-match against — see note below.
+**What the goal does and does not cover.** The goal is *computed level matches
+printed level*, and the rulebook prints `#### GENERAL` instead of a number for
+General-level spells — so a General template **can never satisfy the goal as
+stated**. Item 25 solved the modelling (the caster picks a level) and routed those
+spells to `spell_templates.json`. Making templates genuinely instantiable is items
+35/37's job, and is a different goal from this one. Likewise, Ritual correctness
+(item 18) and ward mechanics (item 4) are fidelity work on spells the import
+already counts — `extract_spells.py` gates on neither.
 
-**⚠️ Critical note (2026-08-07): two rows deleted from this table.** The
-2026-07-28 manual audit counted 33 General-level spells and 1 Ward-mechanics
-spell as "inexpressible" — that was 2026-07-28, before the harness
-(item 27) and before item 25. But this file's goal (line 7-8) is "computed
-level matching printed level," and:
+**Standing finding: base-effect resolution needs human judgement 186 times.** A
+design line names its guideline only by level (`Base level 15`), and e.g. Creo
+Animal has four entries at level 15. Of the 324 spells with a numeric base, 133
+resolve uniquely, 186 have 2+ candidates, 5 have none. Automated text matching
+does not close the 186 — hence the hand-edited ledger (item 27) and the audit
+discipline in items 32 and 39.
 
-- **The 33 General-level spells have no printed level** — the rulebook
-  prints "#### GENERAL" instead of a number. Item 25 solved the modeling
-  problem (user picks a level), but a template with no printed level **can
-  never satisfy this goal as stated**. That row no longer belongs here.
-  (23 of the 33 are now templates; 10 remain blocked for other reasons —
-  see item 25.)
-- **The Ritual and Ward rows (7 + 1 = 8 spells)** don't belong either —
-  neither is a blocker for *this* goal's test (`extract_spells.py` has no
-  check for Ritual correctness or ward mechanics, and all 8 already import
-  or template). Items 18 and 4 (moved to section C) are fidelity work on
-  spells the count already includes, not spells blocking the import.
+**Two things confirmed as needing nothing further:**
+- **The parameter catalog is complete.** Every Range, Duration and Target used by
+  all 360 spells resolves against item 15's 25 entries.
+- **The base-effect catalog is near-complete** — 611 entries against the
+  Definitive Edition's own bullets, verified per art in both directions by
+  `test_general_entries_match_the_rulebook_bullet_for_bullet`. The ~10 known
+  missing rows are item 22.
 
-The 43 remaining spells in the table are the ones that can actually complete
-this goal. Reaching completion means clearing those six families, plus
-working through the ~31 remaining General-level blockers that belong to a
-different goal (making templates actually instantiable), which is items
-35/37's job.
+---
 
-**Measured again 2026-08-04, after item 24:** `python -m
-scripts.spell_import.extract_spells` reports **263 imported / 97 blocked / 0
-unresolved**, up from 250 / 110 / 0. The 13 added are the ad-hoc-magnitude
-family, minus the six that carry a second blocker (item 26's `Special`
-durations, item 25's General levels, and the unmodelled `for no words` /
-`not needing to gesture` / `Techniques and Forms` mechanisms).
+## 0. Immediate Program of Work — the `spell.dart` Foundation
 
-**Measured again 2026-08-05, after item 25:**
-**273 imported / 23 emitted as templates / 64 blocked / 0 unresolved.**
+**Opened 2026-08-09.** Model work on `lib/models/spell.dart` and its immediate
+neighbours. It sits above section A because items 35 and 37 will change the
+*serialized shape* of a spell, and every spell imported before that decision has
+to be rewritten after it. Deciding first is the cheaper order; it is not new
+scope.
 
-**Measured again 2026-08-07, after wiring documented guideline preamble modifiers:**
-**285 imported / 23 emitted as templates / 52 blocked / 0 unresolved.**
+Ordered. Each row says what it changes in the model.
 
-12 spells unblocked by wiring modifiers documented in rulebook guideline
-preambles but missing from emit.py:
-- 8 Creo Auram (unnatural context modifiers) — commit 036df9d
-- 4 Perdo Terram (material hierarchy) — commit ade8fdf
-- 0 Muto Terram (material hierarchy covered alongside Perdo) — commit 7fb1fe4
+| # | Item | Model change |
+|---|---|---|
+| 1 | **40** | Give the non-prose invariants an enforcement home both construction paths share |
+| 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields — the decision, then the implementation |
+| 3 | **13** | Tighten `validateSpellProse` to user-created spells too (waits on the creation-screen input) |
+| 4 | **19** | `ModifierScope` gains a Target restriction — `modifier.dart`, same foundation |
+| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption |
 
-Refactored emit.py to extract magnitude-dependent modifier handling into
-a dedicated helper (commit 394e6b1), improving maintainability. Also wired
-but not yet blocking any spells:
-- aquam-base-individual (liquid type selection, 5 options)
-- rego-transport-distance (distance scaling for transport spells, 6 options)
+Items 13, 14, 19, 26, 35 and 37 keep their numbers and live in their own sections;
+this table is the ordering, not a second home for them.
 
-Subagent audit (run 2026-08-07) identified 2 more missing implementations
-in modifiers.json (Creo Aquam unnatural liquids, Creo/Perdo Herbam modifiers).
+### 40. Model Invariants Have Only One Enforcement Path
 
-**A further finding: base-effect resolution needs human judgement 186 times.**
-A design line names its guideline only by level (`Base level 15`), and Creo
-Animal has four entries at level 15. Of the 324 spells with a numeric base,
-133 resolve uniquely, 186 have 2+ candidates, and 5 have none. Automated text
-matching does not close the 186 — see item 27's spec.
+- [x] **Decide what an invalid spell does — DECIDED 2026-08-09 by the user:
+      it blocks.** Rejected at the boundary (save, restore, import) rather than
+      degraded into a level-less card the way an *unresolved* spell is.
+      **Flagged as revisitable** — the two cases may want to converge later, and
+      blocking is the more conservative starting point, not a settled principle.
+      Backwards compatibility is not a goal and the DB is droppable, so there is
+      deliberately **no migration story** for rows already stored invalid.
+- [ ] Decide where an invariant that needs *resolved catalog data* is enforced,
+      so `Spell.fromMap` and `SpellDraft.toSpell` cannot disagree the way they
+      currently can
+- [ ] Apply the answer to the three catalog-dependent invariants below
+- [ ] Reshape `requisites` from `List<Requisite>` to a map keyed by art —
+      **the one invariant fixed by modelling rather than validation.** Duplicate
+      arts are representable only because the field is a list; a map makes them
+      unrepresentable, needing no validator, no enforcement point and no test.
+      **Do it here, not batched with items 35/37.** Batching was considered and
+      rejected 2026-08-09: the shared cost of a serialized-shape change (asset
+      regeneration, item 30 provenance adoption, `Spell`-literal test churn) is
+      real but modest once migration is off the table, and coupling a small
+      self-contained fix to 35/37's open design question is the worse trade.
+- [ ] Add a build-time assertion over `spell_library.json` for the three
+      catalog-dependent invariants — **assertion 7**, alongside the four in
+      `test/data/published_spell_import_test.dart`. A violation in the asset is a
+      build-time importer bug, identical for every user and unfixable by them;
+      with blocking as the runtime behaviour, this test is what stops a broken
+      library tab shipping. Measured 2026-08-09: 0 violations across all 294
+      spells, so it goes green on the day it lands and stands as a regression
+      guard thereafter.
 
-**Two things the audit confirmed need nothing further:**
+**What is true today.** `validateSpellProse` (`spell.dart:24-36`) exists precisely
+so the two construction paths cannot drift, and it is called from the `Spell`
+constructor, so both paths get it. **Three further invariants got no such
+treatment** — they live only in `SpellEngine.validateSpellDraft`, reachable only
+from the creation screen:
 
-- **The parameter catalog is complete.** Every Range, Duration and Target used
-  by all 360 spells resolves against the 25 entries item 15 delivered.
-- **The base-effect catalog is near-complete against the Definitive Edition** —
-  604 entries against ~614 real DE guideline rows. The ~10 missing rows are
-  item 22.
+- General guideline ⇒ `chosenBaseLevel` present and `>= 1` (`spell_engine.dart:67-73`)
+- no duplicate requisite art; no requisite equal to the spell's own Technique or
+  Form (`spell_engine.dart:88-97`)
+- a `selectionMode: single` modifier carries at most one option (`spell_engine.dart:99-105`)
+
+`Spell.fromMap` (`spell.dart:132-164`) applies none of the three, so a hand-edited
+asset, a restored backup, or an importer bug produces a `Spell` that constructs
+cleanly and is wrong.
+
+**The failure is silent, by two decisions that are each correct alone.**
+`calculateBreakdown` throws `ArgumentError` on a General spell with no chosen
+level (`spell_engine.dart:149-155`), and `SpellLibraryBloc` catches per spell and
+`continue`s (`spell_library_bloc.dart:53-65`) so one bad row cannot redden the
+whole tab. Together: a card renders with no level and no error anywhere.
+
+**Why this cannot simply move into the constructor.** `Spell` deliberately holds
+`baseEffectId`, not `BaseEffect` (`spell.dart:38-43`: "this record deliberately
+holds no copy of any catalog data"). It cannot see `isGeneral`, so the invariant
+is **uncheckable at the model boundary by construction**. The enforcement home
+must be somewhere holding both the record and the catalog —
+`SpellResolver`/`ResolvedSpell` is the natural candidate, mirroring what
+`validateSpellProse` does one layer down. **That choice is the work here.**
+
+**Measured 2026-08-09 — latent, not live.** All 294 spells in
+`assets/data/spell_library.json`, scanned against `base_effects.json` and
+`modifiers.json`: **0 violations**. So this is foundation work, not a bug fix.
+Note the General invariant is currently unreachable from published data at all —
+`spell_library.json` holds zero `chosenBaseLevel` keys (item 25 routed General
+published spells to `spell_templates.json`, and `SpellTemplate` has no such field,
+asserted by `spell_template_test.dart:30`). Only a user-created spell or a
+restored backup can carry one, which is exactly the path with no asset test over
+it.
+
+Items 35/37 add up to three more caster-supplied slots with the same "valid only
+against the resolved guideline" character. Settling the home now gives them
+somewhere to put their validation; settling it later retrofits four slots instead
+of one. Same shape as item 32 one layer down: checks that pass by construction,
+correctness resting elsewhere.
+
+- **Files:** `lib/models/spell.dart`, `lib/models/resolved_spell.dart`,
+  `lib/engine/spell_engine.dart`, `lib/models/spell_template.dart`
 
 ---
 
 ## A. Blocks the Library Import
 
-Listed in dependency order. Item 27 is the next branch.
+### 28. Guideline Levels Absent from the Rulebook's Own Table
 
-**Reclassified 2026-08-07:** items 4, 18 and 22 moved out of this section to
-section C. None of them gate the extractor — confirmed against
-`scripts/spell_import/extract_spells.py`, which has no ritual-correctness or
-ward-type check, and against item 22's and item 4's own text, which already
-said as much ("pure extraction gap, no design decisions"; "display it, do not
-compute a different level from it"). They're fidelity/display work on spells
-that already import, not import blockers — the same shape as items 35/37,
-next to which they now sit. **Item 39 was split out of item 27's "9 spells"
-bullet** the same day, for the same reason: item 28's 5 spells and item 39's 4
-spells need different kinds of decision and were getting lost bundled
-together under a checklist item flagged complete.
+- [ ] Decide how to handle spells citing a base-effect level the table does not
+      list, but which is **recoverable from documented prose rules**
 
-### 27. Published Spell Import Harness — ✅ COMPLETE (11/11 tasks)
-**Spec:** `docs/superpowers/specs/2026-07-28-published-spell-import-design.md`
-**Plan:** `docs/superpowers/plans/2026-07-28-published-spell-import.md`
+**5 published spells.** All recoverable; none genuinely missing:
 
-- [x] Maintained, idempotent extractor at `scripts/spell_import/extract_spells.py`
-      (`scripts/import/` in the original spec — `import` is a Python keyword,
-      so the directory was renamed; the one deliberate spec deviation)
-- [x] Hand-edited resolution ledger at `scripts/spell_import/resolutions.json`,
-      recording each base-effect decision **and the candidate set it was made
-      against** — so item 22's new guideline rows flag affected decisions as
-      stale rather than letting them stand unexamined. 167 entries.
-- [x] Five asset assertions: level equality, **Ritual agreement** (the oracle
-      that does not depend on the base effect), resolution completeness,
-      reference integrity, clean regeneration
-- [x] Import the already-expressible spells (the library held 36 before this
-      item; **250 after**, not the audit's estimated 286 — reconciled, not
-      forced: 110 spells stay blocked with a documented reason each — 360
-      total published spells accounted for exactly). See the "9 spells"
-      and "2 of 3 design-line-less spells" notes below for the two blocker
-      classes that account for the gap from 286.
-- [x] Retire `loadSpellLibrary`'s hardcoded count — see item 5's note
-- [x] Correct `Citation.page`'s doc comment: it promised page numbers arriving
-      with "the spell-parsing work", but the reviewed markdown has no page
-      markers, only prose cross-references. The promise could not be kept;
-      doc comment corrected instead.
-- [x] Hand-derive the breakdown for the **3 spells the rulebook prints no design
-      line for**. Only 1 of 3 has a legitimate derivation:
-      - *Enchantment of the Scrying Pool* (InAq 30, line 12900) — ✅ derived:
-        `(Base 5, +1 Touch, +4 Year)`, base effect `inaq-5` (sole candidate,
-        no ledger entry needed). Imported.
-      - *Whispering Winds* (InAu 15, line 13251) — ❌ no legitimate
-        derivation exists. InAu's only base levels are 1/2/4/15; with
-        Sight(3)/Conc(1)/Ind(0) fixed by the stat line, no real base level +
-        real magnitude token reproduces 15 without inventing a requisite the
-        text doesn't support. The spell's own prose says why: "fits poorly
-        into the normal framework of Hermetic magic." Stays blocked.
-      - *Hermes' Portal* (ReTe 75, line 15638) — ❌ no derivation within the
-        importer's current modelling. The thematically-right guideline
-        (`rete-4`, "Transport a non-living object... add magnitudes for
-        distance/Arcane Connection") needs the `rego-transport-distance`
-        modifier at its top rung plus 2 magnitudes of size to reach 75 —
-        `emit.build_spell` maps only `size`-kind modifier tokens to
-        `modifiers.json` today (see `_selected_modifiers` in `emit.py`).
-        Extending that mapping to `rego-transport-distance` (already scoped
-        in `modifiers.json` to exactly `rete-4`/`rehe-10b`/`reig-3c`) is a
-        real, scoped follow-up that would resolve this spell — not done
-        here, since it's infrastructure work beyond "derive one string."
-        Its own printed `(Mercurian Ritual)` marker corroborates it's
-        non-standard. Stays blocked.
-- [ ] **9 spells the ledger cannot resolve — needs a rules decision, not a
-      ledger entry.** Found while filling `resolutions.json` (Task 10 of the
-      harness's implementation plan). **Split into two items 2026-08-07** —
-      the two shapes of blocker need different kinds of decision and were
-      getting lost bundled under one checklist line inside an item flagged
-      complete:
-      - **Zero base-effect candidates at the computed level (5 spells)** —
-        the level is genuinely derived from a prose rule above the
-        guideline table, not missing from extraction. **See item 28.**
-      - **Genuinely ambiguous between 2-3 candidates (4 spells)**, no
-        textual discriminator strong enough to write a non-guessed
-        rationale — each was actually resolved once, then pulled after a
-        reviewer found the rationale was picking "the most general-sounding"
-        candidate rather than a textually forced one. **See item 39.**
-      All 9 are excluded from the 250 spells the extractor currently
-      imports (Task 10's `KNOWN_UNRESOLVABLE`/zero-candidate routing in
-      `scripts/spell_import/extract_spells.py` blocks them explicitly rather
-      than leaving them stuck as `unresolved`); they stay blocked until a
-      human with the rules text and (for the first group) the corrected
-      base-effect catalog can make the call.
+- *Infernal Smoke of Death* (MuAu 40) — MuAu General "Transform air into a gas
+  doing +**level** damage" at +25 damage; base = 25
+- *Fog of Confusion* (MuAu 45) — MuAu base 3 plus the Muto Auram prose rule
+  "Transforming only one property of air generally lowers the level by one
+  magnitude"; base = 3 − 1 = 2
+- *Wizard's Icy Grip* (PeIg 30) — Perdo Ignem damage-scaling rule (prose above the
+  table); base derived from +20 damage
+- *The Enigma's Gift* (CrVi 30) — base 20 (prose rule TBD)
+- *Sense of the Lingering Magic* (InVi 30) — base 10 (prose rule TBD)
 
-**Final tally:** 250 imported, 110 blocked, 0 unresolved — 360 published
-spells in the Definitive Edition core rules, all accounted for. Of the 110
-blocked: 9 need a rules decision (5 catalog gaps — item 28; 4 real
-ambiguity — item 39); *Whispering Winds* and *Hermes' Portal* are 2 more
-blocked separately, under "no design line printed" (see the hand-derivation
-item above — 7 spells share that reason: these 2 plus 5 General-level ones
-belonging to item 25); the rest are mechanical
-(General level → item 25; an unrecognised or unmapped design-line token —
-mostly Imaginem complexity factors and Auram "unnatural" tokens, neither
-modelled yet; a handful of genuinely malformed rulebook stat/design lines).
+**Options:**
+1. Add the 5 derived rows to the catalog with notes recording their prose rules
+   (simplest and most maintainable; the catalog is already extracted, not printed,
+   data)
+2. Model the prose rules in the modifier system (generalises; needs real design)
+3. Let item 24's ad-hoc adjustments absorb the difference from the nearest printed
+   rung (works, but less transparent about the rule)
 
-**Note (2026-08-07): this breakdown is now stale.** It was accurate at 110
-blocked; items 24, 25, 26 and 29 have since closed out buckets it names — the
-"Imaginem complexity factors and Auram 'unnatural' tokens, neither modelled
-yet" clause in particular is no longer true, both are wired (see item 29).
-The blocked count has moved to 64 (item 25's tally) but nobody has re-run the
-extractor with per-spell reasons since — see item 29's `--show-blocked`
-bullet, elevated the same day for exactly this reason. Re-run that before
-prioritizing among items 19/26/28/39.
-      (Five further spells lack a design line but are General-level, so they
-      belong to item 25, not here: *Ward against the Beasts of Legend*,
-      *Sight of the True Form*, *Ward against Faeries of the Mountain*,
-      *Wizard's Vigil*, *Aegis of the Hearth*.)
-- **Rationale for doing this first:** the harness is what makes items 24, 25 and
-  the rest *verifiable*. Without it each new mechanism is checked by hand against
-  a handful of examples. With it, every mechanism is checked against every spell
-  it touches, and a regression anywhere in the engine surfaces immediately.
-- **It also does not block on any of them.** It can run against the expressible
-  291 the day it lands, and the count rises as each blocker clears — which makes
-  it a live progress meter for this whole section.
-- **Precedent:** `test/data/datasources/asset_data_loader_test.dart` already
-  derives its expected effect count from the raw JSON rather than hardcoding it
-  (item 5). Take the same self-healing approach here.
+Options 1 and 3 unblock all 5; option 2 also documents the rules for reuse.
 
-### 24. Ad-hoc Level Adjustments — ✅ COMPLETE
-**Spec:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`
-**Plan:** `docs/superpowers/plans/2026-08-04-level-adjustments.md`
+**This is not item 22.** Item 22 is rows genuinely absent from the Definitive
+Edition. These 5 are derivable from stated prose. These are exactly the 5 "zero
+base-effect candidates" spells the harness reports.
 
-- [x] Add a list of `(magnitude, note)` adjustments to `Spell` and `SpellDraft`
-- [x] One repeatable UI row in the creation screen (magnitude stepper + note)
-- [x] One line per adjustment in the level breakdown, showing the note
-- [x] Decide whether a negative magnitude is allowed — **yes.**
-      `SpellLevelCalculator` mirrors the positive rule (worth 1 inside the
-      additive tier, 5 above it) and restores the additive capacity it gives
-      back, so `[1, -1]` is a no-op at any base level. *The Severed Limb Made
-      Whole* is the one published spell that needs it and now imports.
-- **What landed.** A `LevelAdjustment` model, negative magnitudes in the level
-  calculator, a breakdown line per adjustment, a globally-scoped
-  `elaborate-effect` catalog Modifier for the five recurring "more elaborate
-  than the guideline" wordings, creation-screen add/edit/remove, and extractor
-  recognition of both token families. The library went **250 → 263 imported,
-  110 → 97 blocked**, zero existing entries changed.
-- **Two token families, not one.** The recurring wordings (`fancy effect`,
-  `complex effect`, `for special effect`, `additional effect`,
-  `elaborate design`) became a real catalog Modifier, because they *are*
-  reusable. Only the genuinely per-spell prose became adjustments, matched
-  against a closed allow-list (`designline.ADJUSTMENT_LABELS`) so that an
-  unmodelled mechanism keeps blocking its spell instead of importing at a
-  correct level with wrong modelling.
-- **One hand-derived magnitude.** *The Shadow of Human Life* prints
-  "for a very elaborate effect" with no number; the literal 5 and its
-  arithmetic live in `extract_spells.HAND_DERIVED_ADJUSTMENT`, checked by
-  assertion 1 rather than derived from it.
-- **Still blocked, and why:** *The Kiss of Death* (`+2 for no words`),
-  *Black Whisper* (`+1 for not needing to gesture`) and *Sight of the Active
-  Magics* (`+2 Techniques and Forms`) are deliberately not in the allow-list —
-  each is a real unmodelled mechanism, not a one-off note. *Ball of Abysmal
-  Flame* needs `;` handling in the design-line splitter (see item 29).
-- **Original rationale.** 21 published spells carry a one-off magnitude the storyguide
-  assigned with a prose justification. **No catalog entry can ever cover these** —
-  they are per-spell, not per-guideline. Examples:
-  - `+1 fancy effect` — *Treading the Ashen Path*, *Creeping Chasm*,
-    *The Earth Split Asunder*; `+2 fancy effect` — *Teeth of the Earth Mother*
-  - `+3 elaborate design` — *Conjuring the Mystic Tower*
-  - `-1 because the old limb is needed` — *The Severed Limb Made Whole*
-    (the only negative adjustment found)
-  - `+2 for no words` — *The Kiss of Death*;
-    `+1 for not needing to gesture` — *Black Whisper*
-  - `+1 for shape and primary motivation` — *Hunter's Sense*;
-    `+1 see through intervening material` — *The Miner's Keen Eye*;
-    `+2 Techniques and Forms` — *Sight of the Active Magics*
-  - `+1 complex effect` — *Weight of a Thousand Hells*;
-    `+1 for special effect` — *The Silent Vigil*
-- **Best value-to-effort ratio in this file.** No research, no catalog work, no
-  rulebook derivation — a model field, one UI control, one breakdown line.
-- **Item 26 probably folds into this.** `+2 Special (based on Concentration)`
-  reads as an adjustment with a note, not as a new parameter.
-- **Do not confuse this with Modifiers.** A Modifier is a *reusable catalog
-  choice* scoped to a technique/form/effect. These are unique to one spell and
-  would pollute the catalog with 21 single-use entries.
-- **Files:** `lib/models/spell.dart`, `lib/engine/spell_engine.dart`,
-  `lib/presentation/screens/spell_creation_screen.dart`,
-  `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart` (schema bump)
+### 39. Ambiguous Ledger Resolutions Needing a Rules Decision
 
-### 25. General-Level Spells — base level is chosen, not fixed — ✅ COMPLETE
-**Absorbs item 4's "Variable Base Levels" bullet, which understated this badly.**
-**Spec:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`
-**Plan:** `docs/superpowers/plans/2026-08-05-general-base-effects.md`
-
-- [x] Model a base effect whose level the caster chooses (49 catalog entries
-      carry `baseLevel: null` today — a General entry previously computed as
-      `0 + magnitudes`, which was simply wrong)
-- [x] Level input in the creation screen, shown only for General entries
-- [x] Engine: the chosen level replaces the guideline's base in
-      `calculateBreakdown`
-- [x] Decide what the breakdown line reads for a chosen base
-- [x] Validate: a General entry with no chosen level is an error, not a zero
-- **33 published spells are General-level**, including **every Vim spell** and
-  **every ward**. This is the gate on the whole of Vim (54 catalog effects) and
-  on item 4's conditional wards.
-- **Why item 4 got this wrong.** The Spell Modifiers spec correctly established
-  that most `"Variable base level"` notes are informational — each rung of a
-  guideline ladder was extracted as its own effect with a correct integer level.
-  That reasoning does not reach the **General entries**, where there is no ladder
-  and no correct integer, because the level *is* the caster's choice. The spec's
-  own count of "one genuinely variable base level" counted rungs, not Generals.
-- **What landed.** `GeneralEffectFormula` on `BaseEffect` (a reference R/D/T plus
-  a `GeneralEffectKind` and an offset), a `chosen-base-level-field` in the
-  creation screen shown only while the selected effect `isGeneral`, the bloc
-  clearing `chosenBaseLevel` on any switch away from General
-  (`spell_creation_bloc.dart:87` — only a General→General switch preserves it),
-  `calculateBreakdown` substituting `chosenBaseLevel` for the guideline's base,
-  a `_effectSentence` breakdown line per `GeneralEffectKind`
-  (`spell_engine.dart:422-431`), and validation (`spell_engine.dart:67-72`)
-  rejecting both a missing chosen level (`'Choose a level for this General
-  guideline'`) and one below 1 (`'The chosen level must be at least 1'`) —
-  neither computes a silent zero. Template learning (Task 14b) also carries a
-  General base effect's chosen-level flow through correctly, exercised
-  end-to-end in `integration_test/spell_creation_flow_test.dart`.
-- **Final extractor counts:** running
-  `python -m scripts.spell_import.extract_spells` now gives **273 imported, 23
-  emitted as templates, 64 blocked, 0 unresolved** (imported is unchanged —
-  templates are counted separately, not folded into it; blocked dropped from
-  87 as the 23 templates left that bucket). Of the 33 published General
-  spells, 23 are now templates and **ten remain blocked**, each for a reason
-  unrelated to this item:
-  - **No design line printed (4):** *Aegis of the Hearth*, *Wizard's Vigil*,
-    *Sight of the True Form*, *Ward against Faeries of the Mountain*.
-    (*Ward against the Beasts of Legend* — a fifth spell originally expected
-    in this group — is now a template, not blocked; the ward-guideline
-    splitter change floated as a stretch goal in the spec landed for at
-    least this one.)
-  - **Design line incomplete, prints `(Base effect)` but the stat line costs
-    magnitudes (2):** *Restore the Moved Image*, *The Invisible Eye Revealed*.
-  - **No General base effect for that Technique/Form (2):** *Lay to Rest the
-    Haunting Spirit*, *Dispel the Phantom Image*.
-  - **Design line disclaims guideline arithmetic (1):** *Wizard's Communion* —
-    "a remnant of Mercurian rituals."
-  - **Unrecognised token, not this branch's concern (1):** *Watching Ward* —
-    `'Duration is non-standard'` is a `Special`-Duration problem, item 26's,
-    not item 25's (see item 26 below).
-- **This was the design-heavy item in this section.** The open question was
-  how a chosen level interacts with `SpellLevelCalculator`'s additive-tier/
-  multiplier split — magnitudes are added to a base, and here the base arrives
-  from the user rather than the catalog. Resolved by treating the chosen level
-  exactly as the guideline's base would have been: it enters the same additive/
-  multiplicative split unmodified.
-- **Files:** `lib/models/base_effect.dart` (`GeneralEffectFormula`,
-  `GeneralEffectKind`), `lib/engine/spell_engine.dart` (validation,
-  `calculateBreakdown`, `deriveGeneralEffect`, `_effectSentence`),
-  `lib/bloc/spell_creation/spell_creation_bloc.dart`,
-  `lib/presentation/screens/spell_creation_screen.dart`
-  (`chosen-base-level-field`), `assets/data/base_effects.json` (the 49
-  General entries), `scripts/spell_import/` (template emission),
-  `integration_test/spell_creation_flow_test.dart`
-
-### 26. Non-standard Ranges, Durations and Targets — ✅ DECIDED via item 24, spells still blocked
-**Spec:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`
-**Plan:** `docs/superpowers/plans/2026-08-04-level-adjustments.md`
-
-- [x] Decide whether these need a mechanism at all, or are covered by item 24 —
-      **covered by item 24, as recommended.** No `Special` parameters were
-      added. `designline.ADJUSTMENT_LABELS` now carries
-      `Special (based on Concentration)`, `Special (equivalent to Boundary)` and
-      `Special based on Mom`, matched against the token's *bracketed* text
-      rather than the bare word `Special`, because the corpus hides two
-      different mechanisms behind that one word (a nonstandard Duration and a
-      nonstandard Target).
-- **The mechanism is done; none of the six import yet, each for a second
-  reason that is not item 24's:**
-  - `+2 Special (based on Concentration)` — *Wind at the Back*,
-    *Trackless Step*; `+1 Special based on Mom` — *The Earth Split Asunder*.
-    **The design line now parses.** All three block on their *stat* line
-    instead: `D: Spec` / `D: Special` is not a Duration in
-    `parameters.json`, so `emit._parameter_name` raises. Needs a decision on
-    what a `Special` Duration resolves to — most likely the parameter the
-    adjustment is "based on", read off the adjustment's own note.
-    (*Trackless Step* also now has a ledger entry, `rete-2b`.)
-  - `+4 Special (equivalent to Boundary)` — *The Bountiful Feast*. Listed in
-    the allow-list, but the same design line has unbalanced brackets, so the
-    later `+1 Size (for a total of ...` token never closes. A splitter fix,
-    not a modelling one — same function and same shape of bug as item 29's
-    `;`-splitter finding (`designline._split_parts`), worth fixing together.
-  - `Duration is non-standard` — *Watching Ward*. Numberless. The spell is
-    `Base effect` (General-level) — item 25 has now landed, so this spell is
-    blocked on this item alone: a `Special` Duration with no parameter to
-    resolve to.
-  - `D: Sun & Year` — *Mists of Change*. Two durations in one stat line, which
-    no adjustment can express; it also prints a numberless "slightly
-    nonstandard effect". Deliberately left blocked — a hand-derived magnitude
-    could paper over the second blocker but not the first.
-
-### 28. Guideline Levels Absent from the Rulebook's Own Table — **NEW**
-- [ ] Decide how to handle spells that cite a base-effect level the table does
-      not list, but is **recoverable from documented prose rules**
-- **5 published spells** name a base level derived from prose rules, not from
-  the guideline table. All are recoverable; none are genuinely missing:
-  - *Infernal Smoke of Death* (MuAu 40) — cites MuAu General "Transform air
-    into a gas doing +**level** damage" instantiated at +25 damage; base = 25
-  - *Fog of Confusion* (MuAu 45) — cites MuAu base 3 "Transform air into
-    another form of air" with Muto Auram prose rule: "Transforming only one
-    property of air generally lowers the level by one magnitude"; base = 3 - 1 = 2
-  - *Wizard's Icy Grip* (PeIg 30) — cites Perdo Ignem damage-scaling rule
-    (rulebook prose above the table); base derived from +20 damage
-  - *The Enigma's Gift* (CrVi 30) — Creo Vim, base 20 (prose rule TBD)
-  - *Sense of the Lingering Magic* (InVi 30) — Intellego Vim, base 10 (prose
-    rule TBD)
-- **This is not item 22.** Item 22 identifies rows genuinely absent from the
-  Definitive Edition. These 5 are all derivable from prose rules stated above
-  their guideline tables, and the catalog already holds extracted rather than
-  printed data — so a derived row is the natural place for them.
-- **Options worth weighing:**
-  1. Add the 5 derived rows to the catalog with notes recording their prose
-     rules (simplest, most maintainable; catalog is already extracted data)
-  2. Model the prose rules themselves in the modifier system (ambitious;
-     generalizes to future cases; requires careful design)
-  3. Let item 24's ad-hoc adjustments absorb the difference from the nearest
-     printed rung (works for all 5, but less transparent about the rule)
-- **Note:** options 1 and 3 would unblock all 5; option 2 would unblock them
-  while also documenting the rules for reuse elsewhere.
-- **Found by the 2026-07-28 audit** as 5 spells whose `Base N` matched no
-  catalog entry at all.
-- **Confirmed again** when item 27's import harness ran for real: these are
-  exactly the 5 "zero base-effect candidates" spells in item 27's blocked
-  list. Fixing this item (adding the derived rows or modeling the rules) is
-  what would let them import.
-
-### 39. Ambiguous Ledger Resolutions Needing a Rules Decision — **NEW, split from item 27**
 - [ ] Decide each of the 4 spells below against a reading its own candidate
-      guidelines textually force — not "the most general-sounding" one — and
+      guidelines textually **force** — not "the most general-sounding" one — and
       record the rationale in `resolutions.json`
-- **4 published spells** have 2-3 base-effect candidates at their computed
-  level, with no catalog gap and no missing data — the ambiguity is genuinely
-  in the rulebook prose. Each was resolved once during item 27's Task 10,
-  then pulled after a reviewer found the recorded rationale was picking the
-  most general-sounding candidate rather than one the text actually forces:
-  - *Tracks of the Faerie Glow* (`lib-inte-tracks-faerie-glow`) — `inte-4a`
-    vs `inte-4b`
-  - *Sense the Feet that Thread the Earth*
-    (`lib-inte-sense-feet-that-thread-earth`) — same pair, same shape of
-    ambiguity
-  - *Crystal Dart* (`lib-mute-crystal-dart`) — `mute-3a`/`3b`/`3c`,
-    stone-vs-crystal boundary
-  - *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
-    — `peig-4a`/`4b`/`4c`, three co-equally-supported readings
-- **Why this is a different problem from item 28, not a duplicate of it.**
-  Item 28 is a catalog gap — the correct row is missing and needs adding.
-  Here every candidate row already exists in the catalog and is individually
-  plausible; the work is close reading against the spell's own prose, not
-  data entry. The two were bundled under one item-27 checklist line before
-  2026-08-07; splitting them keeps "add a row" separate from "make a
-  judgement call."
-- **Not a blocker for the harness itself.** `KNOWN_UNRESOLVABLE` in
-  `extract_spells.py` already routes all 4 to `blocked` rather than
-  `unresolved`, so nothing crashes; this item is about actually resolving
-  them so they import.
-- **See also item 32**, which audits *already-recorded* ledger entries for
-  the same failure mode (a plausible-sounding rationale that isn't textually
-  forced). This item is the same discipline applied to 4 entries that never
-  made it past that standard in the first place.
-- **Found by:** item 27's Task 10; carved out as its own item 2026-08-07.
 
-### 30. Rulebook Source Provenance — ✅ COMPLETE (7/7 tasks)
-**Spec:** `docs/superpowers/specs/2026-08-03-rulebook-source-provenance-design.md`
-**Plan:** `docs/superpowers/plans/2026-08-03-rulebook-source-provenance.md`
+**4 published spells** have 2-3 candidates at their computed level, with no catalog
+gap and no missing data; the ambiguity is in the rulebook prose. Each was resolved
+once during item 27, then pulled when review found the rationale was picking the
+most general-sounding candidate rather than a forced one:
 
-Record which rulebook revision produced `assets/data/spell_library.json`, so
-a source change is diagnosable as a source change and cannot be adopted without
-a human reading a readable summary of what it did. The implementation uses
-deterministic sha256-based provenance tracking in a committed sidecar (`source.lock`),
-never in the asset itself.
+- *Tracks of the Faerie Glow* (`lib-inte-tracks-faerie-glow`) — `inte-4a` vs `inte-4b`
+- *Sense the Feet that Thread the Earth* (`lib-inte-sense-feet-that-thread-earth`)
+  — same pair, same shape
+- *Crystal Dart* (`lib-mute-crystal-dart`) — `mute-3a`/`3b`/`3c`, stone-vs-crystal
+  boundary
+- *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
+  — `peig-4a`/`4b`/`4c`, three co-equally-supported readings
 
-- [x] **Retire raw-md handling in `sources.py`** — `raw-md` folder deleted upstream;
-      add `ARS_RULEBOOK_ROOT` environment override for CI; remove six dead tests.
-- [x] **`provenance.py`** — Compute and store source identity (sha256 + advisory
-      git metadata); load/compare; zero rulebook dependency for testing.
-- [x] **`report.py`** — Diff two asset lists into readable markdown with spell
-      summaries and old design lines (best-effort from git history); pure data
-      in, string out, testable without a rulebook.
-- [x] **`import_report.md`** — Committed human-readable record of the last
-      adoption that changed the asset.
-- [x] **Drift-aware `RegenerationTest` failure message** — distinguishes "source
-      moved" from "asset was hand-edited" by checking `source.lock`.
-- [x] **`--accept-source` gate on `--write`** — enforces explicit adoption of
-      upstream changes; ordered behind unresolved/problems guards.
-- [x] **Weekly `.github/workflows/rulebook-freshness.yml`** — scheduled job that
-      clones the rulebook at origin/main, sets `ARS_RULEBOOK_ROOT`, and runs the
-      Python import harness suite. Deliberately unpinned so a failure means
-      "upstream improved, go adopt it" rather than "something broke"; quiet when
-      chapter reviews touch no spells, via `RegenerationTest`'s asset comparison.
-- **Status:** ✅ COMPLETE (commits across tasks 1–7; workflow commit `77c8b01`)
+**Different from item 28**, not a duplicate: there the correct row is missing and
+needs adding; here every candidate already exists and is individually plausible,
+and the work is close reading. **Not a harness blocker** — `KNOWN_UNRESOLVABLE` in
+`extract_spells.py` routes all 4 to `blocked` rather than `unresolved`.
 
-### 29. Follow-ups from item 27's Final Whole-Branch Review — **UPDATED**
-Everything below is a genuine finding from the merge-readiness review of the
-published-spell-import branch (item 27) — none block that merge (the
-committed data and code are correct today), all concern *future* safety or
-clarity. The two cheapest, highest-value ones were fixed immediately as part
-of closing item 27 out (`KnownUnresolvableStalenessTest` in
-`test_extract.py`, `test_every_committed_key_is_a_real_spell` in
-`test_ledger.py`, and a corrected docstring in `emit.py`'s
-`_selected_modifiers`); what's left needs either more design judgement or
-more time than closing out item 27 warranted.
+**See also item 32**, which applies the same discipline to entries that *did* make
+it into the ledger.
 
-- [x] **CI now runs both test suites — ✅ CLOSED.** Two workflows, deliberately
-      answering different questions:
-      - `.github/workflows/tests.yml` — on push to `main` and on every pull
-        request. **Pinned:** reads the rulebook revision from `source.lock` and
-        clones the rulebook at exactly that commit, so upstream churn can never
-        redden a PR. Runs `python -m unittest discover` **and `flutter test`** —
-        the Dart half is the point, since a regression reintroducing the
-        `selectedModifiers: {}` bug (item 27's Wizard's Mount defect) passes
-        every Python test and only the Dart-side assertion 1 catches it.
-      - `.github/workflows/rulebook-freshness.yml` — weekly, **unpinned** (item
-        30). A failure means "upstream improved, go adopt it".
-- **Implementation note the next person will need.** `source.lock` records an
-  **abbreviated** 7-char SHA, and the git wire protocol cannot fetch one —
-  `git fetch --depth 1 origin 97cc62d` fails with `couldn't find remote ref`
-  (verified). The pinned job therefore does a blobless clone
-  (`--filter=blob:none`, ~14s) and resolves the short SHA locally at checkout.
-  Do not "simplify" it to a shallow fetch-by-SHA; it cannot work without either
-  widening the lock to a full SHA or re-deriving it. A cache keyed on the
-  recorded SHA skips the clone entirely until the lock is bumped, and a
-  post-restore `rev-parse` check guards against a cache entry holding the wrong
-  tree.
-- **Supply-chain note.** `tests.yml` uses the third-party
-  `subosito/flutter-action@v2`, pinned by major-version tag rather than commit
-  SHA. It is the de-facto standard for installing Flutter in Actions, but it is
-  the only non-first-party action in this repo. Pin it to a commit SHA if that
-  trade is not acceptable.
-- [ ] **Decide on the ledger's "explicit override" promise.** The spec says
-      an entry disagreeing with an unambiguous spell's sole candidate is
-      valid "as an explicit override, which needs a rationale like any
-      other decision" — but `ledger.py`'s `resolve()` has no code path
-      where that succeeds; it always raises `StaleEntry`. The
-      `UnnecessaryEntry` message was corrected to stop promising the
-      impossible ("change it to a deliberate override"), but the actual
-      decision — implement the override, or drop the promise from the spec
-      — is still open.
-- [x] **Wire the rest of the Imaginem complexity-factor mapping.** Done for
-      the six labels `designline.MODIFIER_LABELS`'s comment records as
-      confirmed: `move at/under your command` → `crim-directed-image` (2),
-      `intelligible speech` → `crim-sensory-complexity` (1), `moved image
-      matches changes` → `reim-moved-image-matches` (1), `additional
-      sense(s)` → `reim-additional-senses` (1), `moving image` →
-      `reim-changing-image` (1). Every id and magnitude was checked against
-      `assets/data/modifiers.json` before wiring and is now re-checked on
-      every test run by `test_emit.ModifierOptionTableTest`. The library went
-      **263 → 269 imported, 97 → 91 blocked**, zero existing entries changed:
-      *Phantasm of the Talking Head*, *Phantasmal Animal*, *Phantasm of the
-      Human Form*, *Haunt of the Living Ghost*, *Confusion of the Insane
-      Vibrations*, *Image from the Wizard Torn*. All six compute to their
-      printed level under assertion 1.
-      - [x] **`changing image` is now wired.** Confirmed against both
-            preambles that state the rule outright: Perdo Imaginem's "Destroying
-            changing images is more difficult — add one level of magnitude to
-            spells that do so" (`peim-changing-image`) and Rego Imaginem's "it
-            is slightly harder to affect changing images. Add one level of
-            magnitude to spells that do so" (`reim-changing-image`), each
-            checked at magnitude 1 against `assets/data/modifiers.json` by
-            `test_emit.ModifierOptionTableTest` the same way as the six labels
-            above. The library went **269 → 273 imported, 91 → 87 blocked**,
-            zero existing entries changed: *Veil of Invisibility* and *Silence
-            of the Smothered Sound* (Perdo Imaginem), *The Captive Voice* and
-            *Wizard's Sidestep* (Rego Imaginem). Of the four, only *Wizard's
-            Sidestep* selects two options under `reim-complexity` — it also
-            prints `moved image matches changes`, wired separately — and
-            `reim-complexity` is `selectionMode: multi`, so that is a shape
-            the app's own `validateSpellDraft` accepts. All four compute to
-            their printed level under assertion 1.
-- [ ] **`;` handling in the design-line splitter.** *Ball of Abysmal Flame*
-      prints `(Base 25, +2 Voice; the ball appearing to shoot from your hand
-      is a cosmetic effect)` — a semicolon where every other spell uses a
-      comma, so `designline._split_parts` never separates the magnitude from
-      the trailing prose and the whole thing fails `_TOKEN`. Found while
-      closing item 24. Splitting on `;` at depth 0 alongside `,` and `.` is
-      the obvious fix; check the corpus for a `;` that is *not* a token
-      boundary before making it unconditional. **Same function, same shape of
-      bug as item 26's *Bountiful Feast* unbalanced-bracket finding** — each
-      blocks exactly one spell; worth fixing both in one pass over
-      `_split_parts` rather than two.
-- [ ] **Minor: adjustments were missing from one Dart level assertion.**
-      `asset_data_loader_test.dart`'s "every loaded spell calculates to the
-      level stated in its description" builds its own magnitude list rather
-      than calling `SpellEngine.calculateBreakdown`, and item 24 had to add
-      `spell.adjustments` to it. Two hand-maintained copies of the same sum
-      will drift again; consider collapsing it onto the engine, as
-      `published_spell_import_test.dart`'s assertion 1 already does.
-- [ ] **`rego-transport-distance` extension for Hermes' Portal** (already
-      named in item 27's hand-derivation note) — implementing it would also
-      make `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
-      start failing on purpose; whoever does this should expect and update
-      that test, not be surprised by it.
-- [x] **`--show-blocked` flag for `extract_spells.py`.** Elevated out of
-      "Minor" 2026-08-07 and implemented immediately. Shows per-spell blocked
-      reasons, enabling targeted work on remaining gaps.
-- [ ] Minor: `catalog._STOPWORDS` still contains `"phantasm"`, a content
-      word, not a real stopword. **No longer a no-op** — the Imaginem
-      mapping above landed and three Phantasm spells now import with the
-      word stripped out of their ids: `lib-crim-human-form` (*Phantasm of the
-      Human Form*) and `lib-crim-talking-head` (*Phantasm of the Talking
-      Head*) both lost it; `lib-crim-phantasmal-animal` kept it only because
-      "Phantasmal" is not the listed token. Removing `"phantasm"` from
-      `_STOPWORDS` would rename those two committed ids, so this is now an
-      asset change with migration weight, not a tidy-up.
-- [ ] Minor: `README.md` is still the stock Flutter template and never
-      mentions `scripts/spell_import/`.
-- [ ] **Modifier audit completed (2026-08-07):** subagent scan of rulebook
-      preambles vs modifiers.json vs emit.py wiring identified:
-      - ✅ 9 systematically-wired modifiers (complete)
-      - ✅ 2 wired this session (Creo Auram unnatural, Terram materials)
-      - ✅ 2 wired but not yet blocking spells (Aquam liquids, Rego transport)
-      - ❌ 3 missing implementations (Creo Aquam unnatural, Creo Herbam treatment,
-        Perdo Herbam live wood) — these need to be added to modifiers.json
-      Full audit report saved in scratchpad. See this for complete list of what
-      else might need wiring once the missing modifiers are added to the catalog.
+- **Files:** `scripts/spell_import/resolutions.json`
+
+### 26. Non-standard Ranges, Durations and Targets — mechanism DECIDED, spells still blocked
+
+**Decided:** covered by item 24's adjustments; no `Special` parameters were added.
+`designline.ADJUSTMENT_LABELS` carries `Special (based on Concentration)`,
+`Special (equivalent to Boundary)` and `Special based on Mom`, matched on the
+token's *bracketed* text rather than the bare word `Special`, because the corpus
+hides two different mechanisms (a nonstandard Duration and a nonstandard Target)
+behind that one word.
+
+**In section 0 only as a "confirm no model change" check.** `rangeId` /
+`durationId` / `targetId` are `required String` catalog ids, so a `Special`
+Duration looks like a model gap. It is not: the recommended fix — resolve `Special`
+to the parameter the adjustment is "based on" — is a `parameters.json` entry plus
+importer work, with `spell.dart` untouched.
+
+**None of the six import yet, each for a second reason:**
+
+- [ ] **A `Special` Duration has nothing to resolve to.** `D: Spec` / `D: Special`
+      is not in `parameters.json`, so `emit._parameter_name` raises. Most likely
+      answer: the parameter the adjustment is "based on", read off the adjustment's
+      own note. Affects *Wind at the Back*, *Trackless Step*
+      (`+2 Special (based on Concentration)`), *The Earth Split Asunder*
+      (`+1 Special based on Mom`), and *Watching Ward* (`Duration is non-standard`,
+      numberless; General-level, so item 25 no longer blocks it — this item is its
+      sole blocker). *Trackless Step* has a ledger entry, `rete-2b`.
+- [ ] *The Bountiful Feast* (`+4 Special (equivalent to Boundary)`) — allow-listed,
+      but the same design line has unbalanced brackets so the later `+1 Size (for a
+      total of ...` token never closes. **A splitter fix — see item 29's
+      `_split_parts` bullet, which should fix this and the `;` case in one pass.**
+- **Deliberately left blocked:** *Mists of Change* prints `D: Sun & Year`. Two
+  durations in one stat line contradicts item 1's rules-correct one-Duration
+  invariant; it also prints a numberless "slightly nonstandard effect". **Do not
+  weaken the model for one spell.**
+
+- **Spec/Plan:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`,
+  `docs/superpowers/plans/2026-08-04-level-adjustments.md`
 
 ### 19. Size-Ladder Ceiling
+
+**Its architecture half is in section 0** — the `ModifierScope` Target restriction
+is model work on `modifier.dart`, the same foundation as item 40. The +5 rung is
+ordinary data work and does not need to travel with it.
+
 - [ ] Every Size ladder in `modifiers.json` stops at +4 (×10,000); 4 published
       spells need +5
-- [ ] Decide whether to add one rung or make the ladder open-ended — the
-      rulebook's rule is `+1 magnitude = ×10 size` with no stated ceiling, so a
-      fixed ceiling is an artifact of the MVP, not of the rules
-- **The 4 blocked spells:** *Wrath of Whirling Winds and Water* (CrAu 40),
-  *Rain of Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe 40),
-  *Poisoning the Will* (PeMe 40).
-- **⚠️ *Poisoning the Will* is Perdo Mentem, and Mentem deliberately has no Size
-  ladder.** The exemption item 3 recorded is real but narrower than implemented:
-  the rulebook exempts Mentem *for Individual targets*, and this spell is
-  `T: Bound`. Adding a rung will not unblock it — decide separately whether
-  Mentem gets a Boundary-scoped ladder, or whether this spell uses item 24.
-- **Related deferred work:** the Spell Modifiers spec deferred sizing for Part,
-  Group, Room, Structure and Boundary targets entirely (its ladders assume
-  Individual). *Poisoning the Will* is the first published spell to need it.
+- [ ] Decide: add one rung, or make the ladder open-ended? The rulebook's rule is
+      `+1 magnitude = ×10 size` with **no stated ceiling**, so the ceiling is an
+      artifact of the MVP, not of the rules
+- [ ] Add a Target restriction to `ModifierScope` (`excludeTargets` or
+      `allowedTargets`) and check it in `appliesTo()` alongside the existing
+      technique/form/effectIds checks
+
+**The 4 blocked spells:** *Wrath of Whirling Winds and Water* (CrAu 40), *Rain of
+Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe 40), *Poisoning the Will*
+(PeMe 40).
+
+**⚠️ Mentem's Size exemption is narrower than the code enforces.** Definitive
+Edition line 14900: "Minds do not have a size, so size modifiers do not apply to
+Mentem effects with **Individual targets**. However, minds can be counted, so for
+Groups you still need to boost the size to affect more people."
+
+- **Verified 2026-08-09:** the `size-mentem` modifier correctly exists in the data
+  and the test, because Mentem *can* take Size for Group/Room/Structure/Boundary
+  targets. The published spell import test expects it.
+- **The gap is architectural:** `ModifierScope` has no Target field, so
+  `size-mentem` applies to all Mentem spells. Its description says "Applies when
+  targeting multiple minds via area targets", but nothing enforces that — a user
+  could apply it to an Individual Mentem spell.
+- **For now:** item 24's adjustments can absorb any difference on *Poisoning the
+  Will*; its Boundary target makes it ineligible for scoped sizing under the
+  current architecture anyway.
+
+**Related deferred work:** the Spell Modifiers spec deferred sizing for Part,
+Group, Room, Structure and Boundary targets entirely (its ladders assume
+Individual). *Poisoning the Will* is the first published spell to need it.
+
+### 29. Open Follow-ups from the Import-Harness Review
+
+Genuine findings from item 27's merge-readiness review. None blocked that merge;
+all concern future safety or clarity. The cheap high-value ones were fixed at the
+time; what remains needs design judgement or more time.
+
+- [ ] **Decide on the ledger's "explicit override" promise.** The spec says an
+      entry disagreeing with an unambiguous spell's sole candidate is valid "as an
+      explicit override, which needs a rationale like any other decision" — but
+      `ledger.py`'s `resolve()` has no path where that succeeds; it always raises
+      `StaleEntry`. The `UnnecessaryEntry` message was corrected to stop promising
+      the impossible; the decision — implement the override, or drop the promise
+      from the spec — is open.
+- [ ] **Fix `designline._split_parts` for both malformed design lines in one pass.**
+      - *Ball of Abysmal Flame* prints `(Base 25, +2 Voice; the ball appearing to
+        shoot from your hand is a cosmetic effect)` — a semicolon where every other
+        spell uses a comma, so the magnitude is never separated from the trailing
+        prose and the whole thing fails `_TOKEN`. Splitting on `;` at depth 0
+        alongside `,` and `.` is the obvious fix; **check the corpus for a `;` that
+        is not a token boundary before making it unconditional.**
+      - *The Bountiful Feast*'s unbalanced brackets (item 26). Same function, same
+        shape, one spell each.
+- [ ] **Add the 3 missing modifiers to `modifiers.json`** — Creo Aquam unnatural
+      liquids, Creo Herbam treatment, Perdo Herbam live wood. Found by a
+      preamble-vs-catalog-vs-`emit.py` audit on 2026-08-07 (full report in
+      scratchpad). That audit also confirmed 9 modifiers systematically wired, 2
+      wired that session (Creo Auram unnatural, Terram materials), and 2 wired but
+      not yet unblocking any spell (`aquam-base-individual`,
+      `rego-transport-distance`).
+- [ ] **Extend `emit.build_spell`'s modifier mapping to `rego-transport-distance`.**
+      `_selected_modifiers` maps only `size`-kind tokens to `modifiers.json` today.
+      `rego-transport-distance` is already scoped in `modifiers.json` to exactly
+      `rete-4` / `rehe-10b` / `reig-3c`. This is what would unblock *Hermes' Portal*
+      (see item 27). **Expect
+      `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked` to
+      start failing on purpose, and update it** — do not be surprised by it.
+- [ ] **Collapse the duplicated level sum in `asset_data_loader_test.dart`.** Its
+      "every loaded spell calculates to the level stated in its description" builds
+      its own magnitude list rather than calling `SpellEngine.calculateBreakdown`,
+      and item 24 had to add `spell.adjustments` to it. Two hand-maintained copies
+      of the same sum will drift again; `published_spell_import_test.dart`'s
+      assertion 1 already calls the engine.
+- [ ] **`catalog._STOPWORDS` still contains `"phantasm"`,** a content word, not a
+      stopword. **No longer a harmless no-op:** three Phantasm spells now import
+      with it stripped from their ids — `lib-crim-human-form` and
+      `lib-crim-talking-head` both lost it; `lib-crim-phantasmal-animal` kept it
+      only because "Phantasmal" is not the listed token. Removing it would rename
+      two committed ids, so this is an asset change with migration weight.
+- [ ] `README.md` is still the stock Flutter template and never mentions
+      `scripts/spell_import/`.
+
+**CI notes that bind — read before touching the workflows.**
+
+- Two workflows answer deliberately different questions.
+  `.github/workflows/tests.yml` runs on push to `main` and every PR, **pinned**: it
+  reads the rulebook revision from `source.lock` and clones the rulebook at exactly
+  that commit, so upstream churn can never redden a PR. It runs `python -m unittest
+  discover` **and `flutter test`** — the Dart half is the point, since a regression
+  reintroducing the `selectedModifiers: {}` bug passes every Python test and only
+  the Dart-side assertion 1 catches it. `.github/workflows/rulebook-freshness.yml`
+  is weekly and **unpinned** (item 30): a failure there means "upstream improved,
+  go adopt it".
+- **Do not "simplify" the pinned job to a shallow fetch-by-SHA — it cannot work.**
+  `source.lock` records an **abbreviated** 7-char SHA, and the git wire protocol
+  cannot fetch one (`git fetch --depth 1 origin 97cc62d` fails with `couldn't find
+  remote ref`, verified). The job therefore does a blobless clone
+  (`--filter=blob:none`, ~14s) and resolves the short SHA locally at checkout. A
+  cache keyed on the recorded SHA skips the clone until the lock is bumped, and a
+  post-restore `rev-parse` guards against a cache entry holding the wrong tree. The
+  alternative is widening the lock to a full SHA.
+- **Supply chain:** `tests.yml` uses third-party `subosito/flutter-action@v2`,
+  pinned by major-version tag rather than commit SHA. It is the de-facto standard
+  and the only non-first-party action in the repo. Pin it to a SHA if that trade is
+  unacceptable.
 
 ---
 
 ## B. Deferred by Design — Derived Outputs
 
-Not blockers for the import. Both stay as descriptive text on the spell, which
-is what the rulebook itself does.
+Not import blockers. Both stay as descriptive text on the spell, which is what the
+rulebook itself does. **Why these two are together:** both read the *final computed
+level* and produce a different quantity from it — a genuinely different shape from
+`option → magnitude`, and the point the Spell Modifiers spec identified as where a
+code seam earns its place.
 
 ### 4b. Intensity/Damage Modifiers
 - [ ] Muto/Perdo Ignem: add 1 magnitude per 5 points fire damage exceeds +5
-- **Only 1 published spell touches this in a design line** — *Ward against Heat
-  and Flames* (`+2 for up to +15 damage`), which item 24 can express.
-- **Item 25 retires this for General rows only.** `GeneralEffectFormula`
-  (`GeneralEffectKind.damage`) covers the 49 General catalog entries whose
-  output — including fire-damage magnitude — depends on the chosen level; that
-  is a genuinely different mechanism from this item's non-General, fixed-base
-  fire-damage magnitudes, which remain deferred exactly as before.
+- **Only 1 published spell touches this in a design line** — *Ward against Heat and
+  Flames* (`+2 for up to +15 damage`), which item 24 already expresses.
+- **Item 25 retired the General-row half.** `GeneralEffectKind.damage` covers the
+  General catalog entries whose output depends on the chosen level; what remains is
+  non-General, fixed-base fire damage.
 
 ### 4c. Level-Dependent Might Reduction
 - [ ] Muto/Perdo Ignem/Auram: elemental Might reduced by spell level
-- [ ] Note that Might reduction = spell level (not magnitude)
-- **No published spell's level depends on this** — it describes the spell's
-  runtime effect, not its cost. Display concern only.
-- **Item 25 retires the General-row half of this problem shape.**
-  `GeneralEffectKind.mightReduction` already reads the chosen level and prints
-  it (`spell_engine.dart:425`) for General entries; this item's remaining scope
-  is non-General Might reduction, unaffected by item 25.
-
-**Why these two are together:** both read the *final computed level* and produce
-a different quantity from it. That is a genuinely different shape from
-`option → magnitude`, and the Spell Modifiers spec explicitly identified it as
-the point where a code seam earns its place. See that spec's "Deferred work,
-recorded".
+- [ ] Note that Might reduction = spell **level**, not magnitude
+- **No published spell's level depends on this** — it describes runtime effect, not
+  cost. Display concern only.
+- **Item 25 retired the General-row half** — `GeneralEffectKind.mightReduction`
+  reads the chosen level and prints it (`spell_engine.dart:425`).
 
 ### 31. Real Per-Spell Summaries — Ledger-Authored
-- [ ] Author real per-spell summaries into a committed ledger keyed by spell
-      id — the same pattern as `resolutions.json` — because the extractor is
-      deterministic stdlib Python and cannot summarise prose at extraction
-      time
-- **Why this is needed:** spell summaries are currently the description
-  truncated to 400 characters, which duplicates the description rather than
-  summarising it.
-- **Deferred by the human partner** until all core-rulebook spells are
-  imported (263 of 360 today, 97 still blocked), so the work is done once
-  against the full set rather than being redone as more spells clear their
-  blockers.
-- **When it happens:** the `" Level N."` suffix can now go from the summary.
-  It is genuinely vestigial as of the level-adjustments branch: both readers
-  that parsed it back out of the prose have been moved onto the typed
-  `printedLevel` field — `asset_data_loader_test.dart` in Task 9, and
-  `test/data/published_spell_import_test.dart`'s oracle for **assertion 1,
-  "every spell computes to its printed level"** in the branch's final fix
-  wave. Nothing in the repo reads `RegExp(r'Level (\d+)\.$')` anymore.
-  Removing the suffix from `emit._summary` is therefore purely an asset
-  churn question — it rewrites all 263 summaries — which is why it waits for
-  this item rather than for a code dependency.
-- **Files:** `scripts/spell_import/emit.py` (`_summary`), a new per-spell
-  summary ledger alongside `scripts/spell_import/resolutions.json`,
+- [ ] Author real per-spell summaries into a committed ledger keyed by spell id —
+      the same pattern as `resolutions.json`, because the extractor is
+      deterministic stdlib Python and cannot summarise prose
+- **Why:** summaries are currently the description truncated to 400 characters,
+  which duplicates the description rather than summarising it.
+- **Deferred by the human partner** until all core-rulebook spells import, so the
+  work is done once against the full set.
+- **Do the `" Level N."` suffix removal at the same time.** It is vestigial —
+  nothing in the repo reads `RegExp(r'Level (\d+)\.$')` anymore; both former readers
+  now use the typed `printedLevel` field. Removing it from `emit._summary` rewrites
+  every summary, which is why it waits for this item rather than for a code
+  dependency.
+- **Files:** `scripts/spell_import/emit.py` (`_summary`), a new summary ledger
+  alongside `scripts/spell_import/resolutions.json`,
   `assets/data/spell_library.json`
 
 ### 32. Audit `resolutions.json` — no Test Can Check It
-- [ ] Re-read every entry in `scripts/spell_import/resolutions.json` against
-      its spell's published text and its candidate guidelines' wording
-- [ ] Consider recording, per entry, whether its candidates differ in base
-      level — the ones that do not are the entries carrying all the risk
-- **Why this is needed — a demonstrated failure, not a theoretical one.**
+- [ ] Re-read every entry against its spell's published text and its candidate
+      guidelines' wording
+- [ ] Consider recording, per entry, whether its candidates differ in base level —
+      the ones that do not are the entries carrying all the risk
+- **A demonstrated failure, not a theoretical one.**
   `lib-reim-image-from-wizard-torn` shipped for months pointing at `reim-15b`,
   *"Summon a disembodied spirit associated with Imaginem"*. The spell summons
-  nothing — it relocates the caster's own image — and its committed rationale
-  argued "no Arcane Connection involved" when the spell's own text says *"you
-  must use an Arcane Connection to yourself"*. Corrected in `cf0b40b`.
-- **Why nothing caught it:** the entry was written when the spell was blocked,
-  so it sat inert and unexercised until the level-adjustments branch unblocked
-  the spell. And **both candidates are base level 15** — which is why the
-  extractor could not disambiguate them in the first place — so assertion 1
-  computed the printed 35 either way. Assertion 3 saw a ledger entry present;
-  assertion 4 saw the id resolve. Every automated check passed.
-- **The general rule this establishes:** when an ambiguous spell's candidates
-  share a base level, the printed-vs-computed assertion confirms the base
-  level and nothing more. It cannot discriminate between guidelines, so those
-  entries rest entirely on the prose reasoning recorded in the ledger. This is
-  true of all seven entries added for the level-adjustments branch, by
-  construction.
-- **The same is true of every General entry, for a related reason.** A
-  General base effect has no fixed level to check the printed level against —
-  `chosenBaseLevel` comes from the caster, not the catalog — so assertion 1's
-  printed-vs-computed check can't discriminate a wrong General guideline
-  choice the way it can for a fixed-level one. Assertion 6 (introduced with
-  item 25) is the only automated check standing between a `resolutions.json`
-  entry and a wrong General guideline; every General entry therefore rests
-  entirely on its written rationale plus assertion 6, by construction — the
-  same shape as the seven level-adjustments-branch entries above, extended
-  from "candidates share a base level" to "there is no base level to share."
+  nothing — it relocates the caster's own image — and its rationale argued "no
+  Arcane Connection involved" when the spell's own text says *"you must use an
+  Arcane Connection to yourself"*. Corrected in `cf0b40b`.
+- **Why nothing caught it:** both candidates are base level 15 — which is why the
+  extractor could not disambiguate them — so assertion 1 computed the printed 35
+  either way; assertion 3 saw an entry present; assertion 4 saw the id resolve.
+  Every automated check passed.
+- **The rule this establishes:** when an ambiguous spell's candidates share a base
+  level, the printed-vs-computed assertion confirms the base level and nothing
+  more. Those entries rest entirely on their written rationale. True of all seven
+  entries added for the level-adjustments branch, by construction.
+- **The same holds for every General entry, for a related reason.** A General base
+  effect has no fixed level to check against — `chosenBaseLevel` comes from the
+  caster — so assertion 1 cannot discriminate a wrong General guideline at all.
+  Assertion 6 is the only automated check standing between an entry and a wrong
+  General pick; every General entry rests on its rationale plus assertion 6.
 - **Files:** `scripts/spell_import/resolutions.json`
 
 ---
@@ -734,227 +461,177 @@ recorded".
 Real work, none of it blocking the import.
 
 ### 6. Real Bloc Hang in Widget Tests — and the coverage hole it creates
-- [ ] Document workaround: mock Blocs in widget tests, use integration_test for real E2E
-- [ ] Create widget test helper with mock bloc factories
+- [ ] Document the workaround: mock Blocs in widget tests, use `integration_test/`
+      for real E2E
+- [ ] Create a widget test helper with mock bloc factories
 - [ ] **Run integration tests as part of verification, not just `flutter test`**
-- [ ] Consider a single script/alias that runs both suites, so "tests pass" means both
-- **Context:** Real Bloc hangs forever under flutter_tester; known Bloc limitation
-- **Why the extra items matter — two failures already traced to this:**
-  1. `flutter test` does **not** run `integration_test/`; those need a device
-     (`flutter test integration_test/... -d windows`). So the integration suite
-     rots silently. Task 1 broke the end-to-end test — it never selected the
-     newly-mandatory Range/Duration/Target and tapped `calculate-button`
-     without scrolling — and that went unnoticed across several "suite is
-     green" checks, because the file simply never ran.
-  2. Mocked blocs cannot catch re-render bugs. A mock emits no new state, so
-     the rebuild after an interaction never happens. The add-requisite crash
-     (`DropdownButtonFormField` left holding a value no longer in its `items`)
-     was invisible to 6 passing widget tests for exactly this reason. When the
-     failure mode *is* "what happens on re-render", either drive states through
-     a `StreamController` on the mock, or cover it in `integration_test/`.
-- **Verification rule of thumb:** a change to a screen's widget tree is not
-  verified by `flutter test` alone — run the integration suite too.
-- **Worth raising if item 27 grows an authoring pipeline** — a 360-spell asset
-  test is exactly the kind of thing that must run in `flutter test`.
-- **The suite has rotted again — 2 of 5 currently fail** (found 2026-08-06,
-  during the General base effects branch, exactly the failure mode predicted
-  above):
-  - `end-to-end: create a spell matching an existing Technique+Form, see
-    suggestions, save it, and find it in the library` —
-    `spell_creation_flow_test.dart:179`
-  - `end-to-end: a spell built on a custom effect stays listed and marked
-    unavailable after that effect is deleted` —
-    `spell_creation_flow_test.dart:537`
+- [ ] Consider one script/alias running both suites, so "tests pass" means both
+- **Context:** a real Bloc hangs forever under flutter_tester; known Bloc limitation.
+- **Two failures already traced to this:**
+  1. `flutter test` does **not** run `integration_test/` — those need a device
+     (`flutter test integration_test/... -d windows`), so the suite rots silently. A
+     broken end-to-end test went unnoticed across several "suite is green" checks
+     because the file simply never ran.
+  2. **Mocked blocs cannot catch re-render bugs.** A mock emits no new state, so the
+     rebuild after an interaction never happens. The add-requisite crash
+     (`DropdownButtonFormField` holding a value no longer in its `items`) was
+     invisible to 6 passing widget tests for exactly this reason. When the failure
+     mode *is* "what happens on re-render", drive states through a
+     `StreamController` on the mock, or cover it in `integration_test/`.
+- **⚠️ The suite is red right now — 2 of 5 fail** (found 2026-08-06):
+  - `spell_creation_flow_test.dart:179` — "end-to-end: create a spell matching an
+    existing Technique+Form, see suggestions, save it, and find it in the library"
+  - `spell_creation_flow_test.dart:537` — "end-to-end: a spell built on a custom
+    effect stays listed and marked unavailable after that effect is deleted"
 
   Both are `StateError: Bad state: No element` inside
-  `WidgetController.dragUntilVisible` / `scrollUntilVisible` — the finder
-  cannot locate the widget it is asked to scroll to. Most likely
-  environment-dependent (window size, DPI or font metrics on this Windows
-  runner) rather than a logic fault, but unconfirmed.
-
-  **Not caused by the General base effects branch.** Verified by running the
-  identical command in throwaway worktrees at `b901c09` (one commit before the
-  engine change) and at `6d84a14` (the branch point from `main`): same two
-  tests, same stack traces, same 3-pass/2-fail split at all three commits.
-
-  Fix these before adding to the suite — a suite that is already red cannot
-  tell anyone their change broke something, which is how it rotted twice.
-- **Files:** Test helpers, widget test templates, `integration_test/`
+  `WidgetController.dragUntilVisible` / `scrollUntilVisible` — the finder cannot
+  locate the widget it is asked to scroll to. Most likely environment-dependent
+  (window size, DPI or font metrics on this Windows runner), but unconfirmed.
+  **Not caused by the General base effects branch** — verified by running the
+  identical command in throwaway worktrees at `b901c09` and `6d84a14`: same two
+  tests, same traces, same 3-pass/2-fail split at all three commits.
+  **Fix these before adding to the suite** — a red suite cannot tell anyone their
+  change broke something, which is how it rotted twice.
+- **Files:** test helpers, widget test templates, `integration_test/`
 
 ### 7. Spell Export/Backup Validation
-- [ ] Validate imported spells conform to new constraints (one Range/Duration/Target)
+- [ ] Validate imported spells conform to the one-Range/Duration/Target constraint
 - [ ] Add migration for legacy spell saves (if any)
 - [ ] Test backup round-trip (export → import)
-- [ ] **Known gap (found in the Ritual Spells whole-branch review):**
-      `test/data/services/backup_service_test.dart`'s "backup round-trip" test
-      duplicates `spell_test.dart`'s serialization round-trip rather than
-      calling through the real `BackupService` — the service itself is not
-      actually exercised by that test. Not a regression from that branch (the
-      service wasn't touched), but a pre-existing coverage hole this item
-      should close along with the checkbox above.
+- [ ] **Known gap:** `test/data/services/backup_service_test.dart`'s "backup
+      round-trip" duplicates `spell_test.dart`'s serialization round-trip rather
+      than calling through the real `BackupService` — the service is not actually
+      exercised. Pre-existing coverage hole; close it with the checkbox above.
 
-### 9. Spell Tags / Library Organisation — **half done**
-- [x] Add a `tags` field to the Spell model — **landed** with the Spell
-      Provenance and Tags work (commit `c4242d6`); `Spell.tags` is a
-      `List<String>`, serialized and persisted
-- [ ] Allow assigning tags when creating or editing a spell
+### 9. Spell Tags / Library Organisation — half done
+- [x] `tags` field on the Spell model — landed in commit `c4242d6`; `Spell.tags` is
+      a `List<String>`, serialized and persisted
+- [ ] Assign tags when creating or editing a spell
 - [ ] Filter/browse the library by tag
-- [ ] Support multiple tags per spell, and combining tag filters with existing search + source filters
-- [ ] Decide whether tags are free-text, a curated vocabulary, or free-text with suggestions from existing tags
-- **Rationale:** Thematic grouping that the Technique/Form axes can't express. A spell that raises a castle is both "defensive" and "architecture"; neither is derivable from Creo/Terram.
-- **Model and persistence are done — what remains is purely UI.** No schema
-  change needed, contrary to this item's original wording.
-- **Rises in value once item 27 lands.** Browsing 360 spells by Technique/Form
-  alone is a worse experience than browsing 36.
-- **Files:**
-  - `lib/presentation/screens/spell_library_screen.dart` (tag filter UI)
-  - `lib/presentation/screens/spell_creation_screen.dart` (tag entry)
-  - `lib/bloc/spell_library/` (filter-by-tag events/state)
+- [ ] Support multiple tags per spell, and combine tag filters with the existing
+      search + source filters
+- [ ] Decide: free-text, a curated vocabulary, or free-text with suggestions from
+      existing tags
+- **Model and persistence are done — what remains is purely UI.** No schema change
+  needed, contrary to this item's original wording.
+- **Rationale:** thematic grouping the Technique/Form axes can't express. A spell
+  that raises a castle is both "defensive" and "architecture"; neither is derivable
+  from Creo/Terram. Value rises sharply now the library holds 285+ spells rather
+  than 36.
+- **Files:** `lib/presentation/screens/spell_library_screen.dart` (tag filter UI),
+  `lib/presentation/screens/spell_creation_screen.dart` (tag entry),
+  `lib/bloc/spell_library/` (filter events/state)
 
 ### 13. Summary/Description Entry for User-Created Spells
-- [ ] Add a summary input (and optionally a description input) to the spell creation screen
+**In section 0** — the smallest item in it: `validateSpellProse` is already the
+correctly-shared validator, so the model change is deleting one
+`source == PublicationSource.published` guard (`spell.dart:32`). Gated on the UI
+input landing first.
+
+- [ ] Add a summary input (and optionally a description input) to the creation screen
 - [ ] Carry the text on the save event so it reaches `SpellDraft` → `Spell`
-- [ ] Tighten the summary-or-description invariant to apply to **both** sources,
-      not just published spells, once the UI can collect it
-- [ ] Update the invariant tests and the spec's "interim" note when it lands
-- **Rationale:** The Spell Provenance and Tags change split `description` into
-  `summary` (paraphrase) and `description` (verbatim rulebook text), and requires
-  at least one of them on published spells. User-created spells were exempted
-  **only because the creation screen collects nothing but a name** —
-  `SpellSaveRequested(name)` carries no prose, so an unconditional rule would have
-  rejected every user-created spell on save.
-- **The model is already ready.** `SpellDraft` carries `summary` and
-  `description` and `toSpell` passes both through, so this is purely
-  presentational: an input widget plus an event. No model or persistence change.
-- **Files:**
-  - `lib/presentation/screens/spell_creation_screen.dart` (input field)
-  - `lib/bloc/spell_creation/spell_creation_event.dart` (carry the text on save)
-  - `lib/bloc/spell_creation/spell_creation_bloc.dart` (set it on the draft)
-  - `lib/models/spell.dart` (tighten the shared validator)
+- [ ] Tighten the summary-or-description invariant to apply to **both** sources
+- [ ] Update the invariant tests and the spec's "interim" note
+- **Why user-created spells are exempt today:** the Spell Provenance work split
+  `description` into `summary` (paraphrase) and `description` (verbatim rulebook
+  text) and required at least one on published spells. The creation screen collects
+  nothing but a name — `SpellSaveRequested(name)` carries no prose — so an
+  unconditional rule would have rejected every user-created spell on save.
+- **The model is already ready.** `SpellDraft` carries both and `toSpell` passes
+  both through. Purely presentational: an input widget plus an event.
+- **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
+  `lib/bloc/spell_creation/spell_creation_event.dart`,
+  `lib/bloc/spell_creation/spell_creation_bloc.dart`, `lib/models/spell.dart`
 - **Spec:** `docs/superpowers/specs/2026-07-27-spell-provenance-and-tags-design.md`
 
 ### 14. Container Targets: At-Casting vs. Subsequently-Entering
-**No longer blocked** — item 15 added the Circle Target and Ring Duration.
+**In section 0 only as a "confirm no model change" check.** Read the rulebook's
+"Ranges, Durations, Targets" and "Magical Wards" sections and settle the ⚠️ note
+below **before anyone adds a field on the assumption that a user-facing choice is
+needed.**
 
-- [ ] Model whether a container-target spell affects only what is inside **at the moment of casting**, or also whatever **enters later**
-- [ ] Expose the choice in the spell creation UI, shown only when the selected Target is a container
-- [ ] Validate that the choice is absent for non-container targets, so it cannot be set meaninglessly
-- [ ] Decide whether the choice affects the calculated level, or is purely descriptive
-- **Rationale:** The two readings are different spells. A Room-target spell that
-  cleanses everyone present is not the same as one that cleanses everyone who
-  walks in for the rest of its Duration. Nothing in the model currently records
-  which was meant, so the app cannot tell them apart.
-- **Container targets in the catalog today:** `target-room` (Room, +2),
-  `target-structure` (Structure, +3), `target-boundary` (Boundary, +4),
-  `target-circle` (Circle, +0).
-- **⚠️ The rulebook may already answer this, which could collapse the whole
-  item.** ArM5 core defines the behaviour *per target*, rather than leaving it
-  to the caster:
-  - **Group:** "The things in the Group when the spell is cast are affected for
-    the entire duration, even if they split up. Things that join the Group
-    during the spell duration are **not** affected." — fixed at casting, stated
-    outright.
-  - **Circle:** a ward "prevent[s] things warded against that are within the
-    circle from leaving, and prevent[s] things warded against that are outside
-    from **entering**." — explicitly ongoing.
-  - Room, Structure and Boundary are defined spatially ("everything within…")
-    without settling the question either way.
+- [ ] Model whether a container-target spell affects only what is inside **at the
+      moment of casting**, or also whatever **enters later**
+- [ ] Expose the choice in the UI, only when the selected Target is a container
+- [ ] Validate the choice is absent for non-container targets
+- [ ] Decide whether it affects the calculated level, or is purely descriptive
+- **Rationale:** the two readings are different spells. A Room-target spell that
+  cleanses everyone present is not the same as one that cleanses everyone who walks
+  in for the rest of its Duration. Nothing records which was meant.
+- **Container targets today:** `target-room` (+2), `target-structure` (+3),
+  `target-boundary` (+4), `target-circle` (+0).
+- **⚠️ The rulebook may already answer this, collapsing the whole item.** ArM5 core
+  defines the behaviour *per target*:
+  - **Group:** "The things in the Group when the spell is cast are affected for the
+    entire duration, even if they split up. Things that join the Group during the
+    spell duration are **not** affected." — fixed at casting, stated outright.
+  - **Circle:** a ward "prevent[s] things warded against that are within the circle
+    from leaving, and prevent[s] things warded against that are outside from
+    **entering**." — explicitly ongoing.
+  - Room, Structure and Boundary are defined spatially without settling it.
 
-  So the distinction may be a **property of the Target parameter**, derivable
-  rather than stored — which would make this a data annotation on
-  `parameters.json` plus a display concern, with no `Spell` field, no schema
-  bump and no UI control at all. Read the rulebook's "Ranges, Durations,
-  Targets" and "Magical Wards" sections before assuming a user-facing choice is
-  needed. If it turns out only Room/Structure/Boundary are genuinely ambiguous,
-  the scope shrinks to those three.
-- **Note: no published core spell is blocked by this.** The audit found none of
-  the 360 whose level or expressibility depends on the distinction — it is a
-  fidelity improvement, not an import blocker. Worth doing after item 27, when
-  360 spells make the ambiguity visible in the library.
-- **Open design questions — worth brainstorming before planning:**
-  - A boolean, or an enum (`atCasting` / `ongoing`)? An enum reads better at the
-    call site and leaves room for a third case.
-  - Does it live on `Spell` directly, or as a property of the target selection?
-    The latter is tidier but there is no "target selection" object today — the
-    spell holds a bare `targetId`.
-  - Is the distinction genuinely a property of the *spell*, or is it implied by
-    the Target/Duration pairing (Circle+Ring implying ongoing)? If implied, it
-    may be derivable rather than stored — and storing derivable data is exactly
-    what the id-reference normalization removed.
-  - How should existing spells migrate? Backward compatibility is not a goal, so
-    the three container-target built-ins can simply be re-authored.
-- **Files:**
-  - `lib/models/spell.dart` (the field, plus validation in the shared validator)
-  - `assets/data/parameters.json` (target annotations, if derivable)
-  - `lib/presentation/screens/spell_creation_screen.dart` (conditional control)
-  - `lib/bloc/spell_creation/` (event + state for the choice)
-  - `lib/data/database/app_database.dart` (schema bump if the field is stored)
+  So this may be a **property of the Target parameter** — a `parameters.json`
+  annotation plus display, with no `Spell` field, no schema bump and no UI control
+  at all. If only Room/Structure/Boundary are genuinely ambiguous, scope shrinks to
+  those three.
+- **No published core spell is blocked by this** — a fidelity improvement.
+- **Open design questions:** boolean or enum (`atCasting`/`ongoing`)? On `Spell`
+  directly, or as a property of the target selection (tidier, but there is no
+  "target selection" object — the spell holds a bare `targetId`)? Is it implied by
+  the Target/Duration pairing (Circle+Ring implying ongoing), and therefore
+  derivable rather than stored? Storing derivable data is exactly what the
+  id-reference normalization removed.
+- **Files:** `lib/models/spell.dart`, `assets/data/parameters.json`,
+  `lib/presentation/screens/spell_creation_screen.dart`,
+  `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart` (if stored)
 
 ### 16. Short Forms for Parameter Names
-**The "decide alongside item 15" note is stale — item 15 shipped without this.**
-Doing it now means a second pass over `parameters.json`, which was the cost the
-original note tried to avoid. That does not make it wrong to do, only no longer
-free.
-
-- [ ] Decide whether parameters need a short display form at all — confirm a real
-      layout is actually constrained before building anything
+- [ ] Decide whether parameters need a short display form at all — **confirm a real
+      layout is constrained before building anything**
 - [ ] If so, add an optional `shortName` to `Parameter`, falling back to `name`
-- [ ] Add a small widget that picks the longest form fitting the available width
-
+- [ ] Add a small widget picking the longest form that fits the available width
+- **Check the need first.** These names appear mostly in dropdowns, where width is
+  rarely tight and substituting text makes selection confusing. More likely
+  candidates are the spell card or the level-breakdown chips — measure first. **The
+  rulebook itself abbreviates in exactly one place: the spell stat line
+  (`R: Touch, D: Sun, T: Ind`).** If the app ever renders that line, that is the
+  constrained widget.
 - **Do NOT encode alternatives as inline markup** (e.g. `"B/ound/ary"`):
-  - It puts presentation inside domain data — search, comparison, backup export
-    and tests would all need to strip markup first, and one missed call site
-    shows a user `B/ound/ary` in an exported file.
-  - It can only express prefix truncation. "Arcane Connection" → "Arc" works;
-    → "AC" does not.
-  - **`/` already means something else here.** The rulebook uses it for
-    equal-difficulty pairings — `Touch/Eye`, `Sun/Ring`, `Group/Room`,
-    `Individual/Circle`. Reusing it for abbreviation in the same catalog is a
-    trap.
-- **Precedent already in the codebase:** `Book` carries `title` *and*
-  `abbreviation` as separate fields (added by the Spell Provenance work). Doing
-  the same on `Parameter` follows house style rather than inventing a scheme.
-  The wider precedent is CLDR, which models wide / abbreviated / narrow as named
-  forms, never as markup.
-- **Flutter has no built-in string-alternatives system.** `FittedBox` scales
-  glyphs rather than substituting words; `TextOverflow.ellipsis` truncates
-  crudely ("Bound…"); `auto_size_text` is third-party, not a dependency here, and
-  shrinks the font rather than swapping text. The real mechanism is
-  `LayoutBuilder` + `TextPainter` measurement with your own selection logic.
-- **Note:** `Bound` → `Boundary` is a *data error* fixed by item 15, not a short
-  form anyone chose. Do not treat it as evidence that abbreviations are needed.
-- **Check the need first.** These names appear mostly in dropdowns, where width
-  is rarely tight and substituting text makes selection confusing. If anything
-  is genuinely constrained it is more likely the spell card or the level
-  breakdown chips — measure before building. **The rulebook itself abbreviates
-  in exactly one place: the spell stat line (`R: Touch, D: Sun, T: Ind`).** If
-  the app ever renders that line, that is the constrained widget.
-- **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`,
-  wherever a constrained widget turns out to be
+  presentation inside domain data means search, comparison, backup export and tests
+  must all strip markup first, and one missed call site shows a user `B/ound/ary` in
+  an exported file; it can only express prefix truncation ("Arcane Connection" →
+  "Arc" works, → "AC" does not); and **`/` already means something else here** — the
+  rulebook uses it for equal-difficulty pairings (`Touch/Eye`, `Sun/Ring`,
+  `Group/Room`, `Individual/Circle`).
+- **Precedent:** `Book` carries `title` *and* `abbreviation` as separate fields. The
+  wider precedent is CLDR, which models wide/abbreviated/narrow as named forms,
+  never as markup.
+- **Flutter has no built-in string-alternatives system.** `FittedBox` scales glyphs;
+  `TextOverflow.ellipsis` truncates crudely; `auto_size_text` is third-party and
+  shrinks the font. The real mechanism is `LayoutBuilder` + `TextPainter`
+  measurement with your own selection logic.
+- **Note:** `Bound` → `Boundary` was a *data error* fixed by item 15, not evidence
+  that abbreviations are needed.
+- **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`
 
 ### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic
-**Blocked on one remaining model gap.** The ritual-only flag half is done:
-`Parameter.requiresRitual` landed on `feature/ritual-spells` (item 4), so
-`Bargain`/`Until (Condition)`/`Year + 1`/the three Symbolic Magic parameters
-below can be flagged ritual today. Still missing: some way to record that a
-parameter requires a specific Mystery Virtue — which in turn implies a
-character/Virtue model the app doesn't have at all (it only models spells and
-catalog data, no characters). Do not attempt this until the Virtue-gating
-mechanism exists.
+**Blocked on one model gap: there is no way to record that a parameter requires a
+specific Mystery Virtue** — which implies a character/Virtue model the app does not
+have at all (it models spells and catalog data, no characters). **Do not attempt
+this until the Virtue-gating mechanism exists.** The ritual-only half is already
+done (`Parameter.requiresRitual`, item 4).
 
-**Not a blocker for the core-rules import** — no core spell uses these
-parameters, by definition. Relevant only when supplement spells are added.
+**Not a blocker for the core-rules import** — no core spell uses these parameters,
+by definition. Relevant only when supplement spells are added.
 
 - [ ] Add a `requiresVirtue`-style field once a Virtue-gating mechanism is designed
-- [x] Add the ritual-only flag — landed as `Parameter.requiresRitual`
-      (branch `feature/ritual-spells`, item 4); shared groundwork, not
-      specific to these 9 parameters
 - [ ] Add the 6 Faerie Magic parameters below
 - [ ] Add the 3 Symbolic Magic parameters below
 
-**Merinita: Faerie Magic** — Core Rules, "Mysteries" chapter (not Houses of
-Hermes: Mystery Cults, where the rest of the House's content lives). Granted to
-initiates of the Faerie Magic Outer Mystery only:
+**Merinita: Faerie Magic** — Core Rules, "Mysteries" chapter (not *Houses of Hermes:
+Mystery Cults*, where the rest of the House's content lives). Initiates of the
+Faerie Magic Outer Mystery only:
 
 | Name | Type | Level | Note |
 |---|---|---|---|
@@ -965,10 +642,10 @@ initiates of the Faerie Magic Outer Mystery only:
 | Year + 1 | Duration | = Year | ritual; a year and a day, by elapsed time not season |
 | Bloodline | Target | = Structure | affects all blood descendants of the immediate target |
 
-**Symbolic Magic** — Houses of Hermes: Mystery Cults, House Merinita chapter.
-Granted to initiates of the Symbolic Magic Major Folk Mystery. All three are
-always ritual and require a physical symbolic charm representing the target,
-built from at least 3 charms (9 for using all three together):
+**Symbolic Magic** — *Houses of Hermes: Mystery Cults*, House Merinita chapter.
+Initiates of the Symbolic Magic Major Folk Mystery. All three are always ritual and
+require a physical symbolic charm representing the target, built from at least 3
+charms (9 for using all three together):
 
 | Name | Type | Level | Note |
 |---|---|---|---|
@@ -976,719 +653,700 @@ built from at least 3 charms (9 for using all three together):
 | Symbol | Duration | = Year | lasts as long as the physical symbol survives intact |
 | Symbol | Target | = Boundary | affects everything the symbol represents, within range |
 
-- **Rationale:** Found during research for item 15's parameter catalog work.
-  Real, citable content — not filed as "maybe later" but as "genuinely
-  deferred pending groundwork," so the research isn't lost.
-- **Files:** `lib/models/parameter.dart` (the gating field, once designed),
-  `assets/data/parameters.json` (the 9 new entries)
+- **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`
 - **Spec:** `docs/superpowers/specs/2026-07-27-parameters-and-provenance-design.md`
-  ("Deferred Work" section)
-
-### 20. Creo Creation `suggested` Ritual Sweep
-- [ ] Decide whether every "Create X" guideline should carry
-      `RitualRequirement.suggested`, as the Creo healing guidelines now do
-- **Rationale:** Core Rules line 12176 — "An item made with Creo only lasts for
-  the duration of the spell, unless the spell was a Momentary Ritual" — makes
-  creation exactly as much a lasting-thing case as healing. Skipped deliberately
-  because it is hundreds of entries across all ten Forms, and because the
-  checkbox already defaults on for *every* Creo + Momentary draft, so nothing is
-  incorrect without it. The flag would only add explanatory text.
-- **The audit supports leaving it.** All 32 derivable Ritual spells already
-  derive correctly without it.
-
-### 21. Creo Mentem Memory Restoration
-- [ ] Decide whether `crme-4b`, `crme-5b` and `crme-10a` (renamed from
-      `creem-4b`/`creem-5b`/`creem-10a` when the base-effect id scheme was
-      corrected — see the published-spell-import branch) ("Restore a memory
-      … to a fresh state") are Momentary-Creo-lasting-thing cases
-- **Context:** The Ritual sweep's criterion arguably reaches them, but the
-  approved scope was Creo *bodily* healing across Animal, Corpus and Herbam, and
-  the healing-suspension rule at line 13415 does not cover memory. All three are
-  already flagged "Variable base level" — **but they are rung entries with real
-  integer levels, not General entries, so item 25 does not reach them.**
-
-### 12. Out-of-Scope Effects Handling
-- [ ] Create filtering/tagging UI for flagged effects (variable base levels, ritual-only, etc.)
-- [ ] User guidance: explain which effects don't fit the calculation model yet
-- **Shrinks substantially once items 24 and 25 land.** The audit reduced the
-  "~200 flagged effects" figure to two genuinely uncomputable families (section
-  B), so this item's scope should be re-measured before it is planned.
-
-### 23. Ritual Spells Review — Remaining Cosmetic/Test-Hygiene Findings
-Three Minor findings from the Ritual Spells whole-branch review, left unfixed
-as genuinely low-priority (5 of the review's 8 Minor findings were fixed
-directly — see commit `ca3c28a`). None affect correctness.
-
-- [ ] **JSON formatting inconsistency in `assets/data/spell_library.json`** —
-      the 5 Ritual spells added by that branch use multi-line citation
-      formatting; the other 31 built-in spells use compact single-line. Purely
-      cosmetic; reformat the 5 to match if a pass over this file happens for
-      any other reason. **Item 27 is exactly such a pass** — fold this in there.
-- [ ] **A widget test title promises more than it asserts** — one test in
-      the Ritual Spells work (`test/presentation/widgets/*` or
-      `test/presentation/screens/spell_creation_screen_test.dart`; not pinned
-      down further by the review) has a name broader than what it actually
-      checks. Needs a pass to find and either narrow the title or extend the
-      assertions.
-- [ ] **The "no accidental Ritual" regression-guard loop only checks
-      `ritualDeclaration`**, not a full breakdown recompute — it could in
-      theory miss a case where `ritualDeclaration == none` but
-      `RitualStatus`-derived reasons (e.g. a guideline flag or the >50
-      threshold) still fire. Tighten it to assert on a recomputed
-      `LevelBreakdown.ritualStatus.isRitual` instead of just the declaration
-      field.
-- **Rationale:** Recorded here rather than fixed immediately because none is a
-  correctness bug — see `.superpowers/sdd/progress.md` in the (now-merged)
-  `feature/ritual-spells` history for the full review context.
-
-### 37. A Template Has Open Slots Beyond Its Level — Realm, Form, "Specific Type"
-Raised 2026-08-07 by the user, from *Wizard's Reach (Form)*: the Form must be
-chosen before the template can become a spell, exactly as the level must be.
-**This generalises item 35** — realm is one slot of several — but only for part
-of the corpus, and the part it does not cover is a different mechanism.
-Both are named here so they can be designed together; [[35]] stays as the realm
-instance rather than being deleted into this one.
-
-- **Case 1 — the guideline itself leaves a slot open.** Measured: **20 of the 49
-  General bullets**, 41%. By slot kind: **realm** ~15 (*"beings … from one
-  supernatural realm (Divine, Faerie, Infernal, or Magic)"*, and PeVi's *"any
-  supernatural effect of one realm"*); **"a specific type"** 4 (PeVi bullets 2,
-  7, 10 and ReVi 5 — the rulebook's own examples are *"Hermetic Terram magic, or
-  Shamanic spirit control magic"*); **Form** 2 (PeVi 10's *"a particular
-  Hermetic Form"*, PeVi 11's *"a given Form"*). Filling the slot is part of
-  choosing the guideline, and the slot is a property of the catalog row.
-  - Note: item 35 counted 14 General realm entries and this scan finds 15
-    (it adds `pevi-G5`). Reconcile before implementing; one of the two counts
-    is wrong.
-- **Case 2 — the guideline says nothing and the *spell* comes in ten versions.**
-  Three Muto Vim spells: *Mirror of Opposition (form)* (*"There are ten versions
-  of this spell, each affecting spells of one of the Hermetic forms"*),
-  *Wizard's Boost (Form)*, *Wizard's Reach (Form)*. Their guidelines
-  `muvi-G1/G2/G3` mention Form nowhere — they are Form-agnostic, and the
-  restriction belongs to the published spell. *Unravelling the Fabric of (Form)*
-  looks like this group by its name but is **case 1**: `pevi-G2` is *"Dispel
-  effects of a specific type"* and the Form is that slot being filled.
-- **Measured scope of the bracketed-name pattern:** exactly 4 spells in the
-  rulebook carry a `(Form)`/`(form)` placeholder, all 4 are General, and **0 of
-  the 273 ordinary imported spells do.** No Technique placeholder exists. So
-  case 2 is small and closed; case 1 is large and open.
-- **Why this is the same problem as item 25.** A template is a published spell
-  with the caster's choices left open, and instantiating it means supplying
-  them. Item 25 supplies the level. This supplies everything else. If the
-  template model grows a general `choices` map, all three axes fit it; if each
-  axis gets a bespoke field, there will be three.
-- **The observable that makes case 1 recoverable:** the chosen value is visible
-  in the published prose and is often the only thing distinguishing two
-  otherwise-identical spells — *"No **magical** beast whose **Magic** Might…"*
-  against *"No water **faerie** whose **Faerie** Might…"*, same guideline, same
-  level, same Touch/Ring/Circle. See [[35]] for the worked realm example.
-- **Open question, unanswered:** whether "a specific type" is a closed set (like
-  realm's four, or Form's ten) or free text. PeVi 7's *"a specific type of
-  supernatural effect"* reads open-ended, which would make it a different UI
-  affordance from a four-way or ten-way picker.
-
-### 36. Audit the Catalog's `description` Fields Against the Rulebook
-Raised 2026-08-07 during item 25's Task 12. One confirmed defect, fixed in
-`2338430`; the question is how many more there are.
-
-- **The defect.** `pevi-G2`'s description read *"Dispel specific effect type
-  **with Intellego spell** (level <= spell level +4 magnitudes + stress)"*. The
-  rulebook row contains no Intellego at all — it reads *"Dispel effects of a
-  specific type with a level less than or equal to the level + 4 magnitudes of
-  **the Vim spell** + a stress die (no botch)"*. The word almost certainly bled
-  from the row's first bullet, which does mention Intellego.
-- **Why it matters more than a typo.** These descriptions are what the app shows
-  the user when they pick a guideline, and they are what an agent reads when
-  resolving a spell. A description that misstates its guideline can drive a
-  wrong ledger pick that no test can catch — see the oracle measurement in item
-  25's plan, where assertion 6 caught one of five deliberately wrong picks.
-- **Why the existing audits missed it.** Item 34 compared bullet *counts* per
-  technique/form/level, in both directions, and never compared *content*. Counts
-  can match perfectly while every description is wrong.
-- **What has been checked so far.** A per-bullet scan for Art names appearing in
-  a description but not in its own rulebook bullet, across all 49 General
-  entries: exactly one hit, `pevi-G2`. That is a narrow probe — it catches
-  fabricated Art references and nothing else.
-- **What has not.** The other 562 entries, and every kind of drift that is not an
-  Art name: wrong thresholds, dropped conditions, merged clauses, inverted
-  senses. `inte-30a`/`inte-30b` are a known benign case of one bullet
-  deliberately split into two entries, so a strict one-to-one text comparison
-  will need to tolerate that.
-- **Suggested approach:** align each entry to its bullet positionally (the
-  ordering already matches — item 34's fix relies on it), then diff the numbers
-  and the modal verbs first; those carry the arithmetic and are where a wrong
-  description does real damage.
-
-### 35. A Guideline's Realm Is a Choice, Like Its Level
-**Generalised by item 37** (2026-08-07): realm is one open slot of several, alongside Form and "a specific type". Design the two together; the realm measurements below are still the authority for that slice, but item 37's scan finds 15 General realm rows against the 14 counted here, so reconcile first.
-
-Raised 2026-08-06 during item 25. **Not implemented there** — item 25 models the
-*level* choice a General guideline leaves open, and this is the same shape of
-problem on a different axis. Filed so the two can be designed together.
-
-- [ ] Decide where the chosen realm lives — most likely `Spell.chosenRealm`
-      alongside `chosenBaseLevel`, with `SpellTemplate` carrying the *set* of
-      legal choices rather than a value
-- [ ] Decide whether the realm is part of validation (a ward with no realm
-      chosen is not yet a spell) — the level answer was yes, and the argument
-      looks identical
-- [ ] Decide whether the import should read the realm out of published prose,
-      or leave imported wards realm-less
-- [ ] Check whether "one realm" is the only such axis, or the first of several
-
-- **What was noticed.** Sixteen catalog entries leave a realm open, phrased
-  *"from one supernatural realm (Divine, Faerie, Infernal, or Magic)"*. Fourteen
-  are General — all twelve wards, plus `pevi-G6` (reduce the casting total for
-  all powers of one realm) and `pevi-G12` (dispel Magic Resistance aligned to
-  one Realm). Two are ordinary Rego Vim rows, `revi-5` and `revi-15`, which
-  control and summon a disembodied spirit from one realm — so **this is not a
-  General-only problem**, which is the main reason it is not being folded into
-  item 25.
-- **Why it matters, concretely.** The realm is not decoration; it is what tells
-  two otherwise identical spells apart. *Ward against the Beasts of Legend* and
-  a hypothetical infernal equivalent would share a guideline, a level, and a
-  Touch/Ring/Circle stat line, and differ only in realm. The rulebook makes the
-  choice visible in the published prose — *"No **magical** beast whose **Magic**
-  Might…"*, *"No water **faerie** whose **Faerie** Might…"* — so it is
-  recoverable from the corpus, not invented.
-- **The parallel with item 25 is exact, and worth exploiting.** A template is a
-  published spell with the caster's choices left open. Item 25 established that
-  the open choice is what makes a template not-a-spell, and that instantiating
-  means supplying it. Realm is a second such choice. If a third turns up
-  (`pevi-G7` and `pevi-G10` say "a specific type of supernatural effect", which
-  smells similar but is free text rather than a closed set), the right answer is
-  probably a general mechanism rather than a third bespoke field — but two
-  points do not justify that abstraction yet.
-- **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
-  `lib/engine/spell_engine.dart` (validation), and the creation UI.
+  ("Deferred Work")
 
 ### 18. Storyguide-Ruling UI for Rituals
-**Moved from section A, 2026-08-07** — see that section's note. Confirmed
-against `extract_spells.py`: nothing in the import pipeline gates on Ritual
-correctness, so these 7 spells already import or template today, just with
-an incomplete `RitualDeclaration`. Fidelity work on already-imported spells,
-not an import blocker — the same shape as items 35/37 above.
+Fidelity work on already-imported spells, **not an import blocker** — nothing in
+`extract_spells.py` gates on Ritual correctness, so these 7 spells import or
+template today, just with an incomplete `RitualDeclaration`.
 
 - [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
       three built-in spells already use, but no control sets
 - [ ] Revisit `SpellCreationBloc._withRitualDeclaration` so the two declaration
       kinds stay distinguishable once both are user-settable
-- **Rationale:** Core Rules line 12352 lets the troupe declare any spell a
-  Ritual. The Creo+Momentary-only checkbox cannot express them.
-- **Count corrected by the audit: 7, not 4.** Of the 39 Ritual-flagged published
-  spells, 32 are derivable today (Year duration, Boundary target, level > 50, or
-  the Creo+Momentary checkbox). These 7 are not:
-  *Curse of the Ravenous Swarm* (CrAn 50), *Neptune's Wrath* (ReAq 40),
-  *Breath of the Open Sky* (CrAu 40), *Rain of Oil* (MuAu 50),
-  *Incantation of Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen),
-  *Watching Ward* (ReVi Gen).
-- **Some of the 7 may want a guideline flag instead of a ruling.** Three carry
-  the reason in their own design line (`ritual because it has a really major
-  effect`, `ritual for large effect`, `ritual because of spectacular effect`) —
-  that is a storyguide ruling. The two Vim Generals may be guideline-level.
+- **Rationale:** Core Rules line 12352 lets the troupe declare any spell a Ritual.
+  The Creo+Momentary-only checkbox cannot express that.
+- **The 7 non-derivable Ritual spells** (of 39 Ritual-flagged published spells, 32
+  derive today from Year duration, Boundary target, level > 50, or the
+  Creo+Momentary checkbox): *Curse of the Ravenous Swarm* (CrAn 50), *Neptune's
+  Wrath* (ReAq 40), *Breath of the Open Sky* (CrAu 40), *Rain of Oil* (MuAu 50),
+  *Incantation of Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen), *Watching
+  Ward* (ReVi Gen).
+- **Some may want a guideline flag rather than a ruling.** Three carry the reason in
+  their own design line (`ritual because it has a really major effect`, `ritual for
+  large effect`, `ritual because of spectacular effect`) — that is a storyguide
+  ruling. The two Vim Generals may be guideline-level.
 - **Spec:** `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`
 
-### 22. Catalog Extraction Gaps
-**Moved from section A, 2026-08-07** — see that section's note. None of the
-360 published spells cite these missing rows (the item's own text already
-said so: "pure extraction gap, no design decisions"), so nothing here blocks
-an import; it's catalog completeness against the rulebook.
+### 20. Creo Creation `suggested` Ritual Sweep
+- [ ] Decide whether every "Create X" guideline should carry
+      `RitualRequirement.suggested`, as the Creo healing guidelines now do
+- **Rationale:** Core Rules line 12176 — "An item made with Creo only lasts for the
+  duration of the spell, unless the spell was a Momentary Ritual" — makes creation
+  exactly as much a lasting-thing case as healing.
+- **The audit supports leaving it.** Skipped deliberately: it is hundreds of entries
+  across all ten Forms, the checkbox already defaults on for *every* Creo + Momentary
+  draft, and all 32 derivable Ritual spells derive correctly without it. The flag
+  would add explanatory text only.
 
-Four Creo Animal rows, plus six more the Definitive Edition audit found.
+### 21. Creo Mentem Memory Restoration
+- [ ] Decide whether `crme-4b`, `crme-5b` and `crme-10a` ("Restore a memory … to a
+      fresh state") are Momentary-Creo-lasting-thing cases
+- **Context:** the Ritual sweep's criterion arguably reaches them, but the approved
+  scope was Creo *bodily* healing across Animal, Corpus and Herbam, and the
+  healing-suspension rule at line 13415 does not cover memory. All three are flagged
+  "Variable base level" — **but they are rung entries with real integer levels, not
+  General entries, so item 25 does not reach them.** (Renamed from
+  `creem-4b`/`creem-5b`/`creem-10a` when the base-effect id scheme was corrected.)
+
+### 12. Out-of-Scope Effects Handling
+- [ ] Create filtering/tagging UI for flagged effects (variable base levels,
+      ritual-only, etc.)
+- [ ] User guidance: explain which effects don't fit the calculation model yet
+- **Re-measure scope before planning.** The audits reduced the original "~200 flagged
+  effects" figure to section B's two genuinely uncomputable families, and items 24/25
+  have landed since.
+
+### 22. Catalog Extraction Gaps
+**Not an import blocker** — none of the 360 published spells cite these missing
+rows. Catalog completeness against the rulebook.
 
 - [ ] **Creo Animal** — L35 "Increase a Characteristic to one above average",
       L40 "Cause an animal to reach full maturity in a moment",
       L45 "…three above average", L55 "…five above average"
-      (re-verify against the DE table at line 12468; the original research was
-      done against the 5e core rules, and the DE rows may differ slightly)
+      (re-verify against the DE table at line 12468; the original research was done
+      against the 5e core rules and the DE rows may differ)
 - [ ] **Creo Corpus** — L70 "Raise the dead, to a point (see *The Shadow of Life
       Renewed*)"
 - [ ] **Rego Animal** — General "Create a circle warding against animals from one
       realm … with Might less than the level"
-- [ ] **Rego Mentem** — General "Ward against spirits belonging to one realm …
-      with a Might less than the level"
+- [ ] **Rego Mentem** — General "Ward against spirits belonging to one realm … with
+      a Might less than the level"
 - [ ] **Muto Aquam** — General "Convert part of a water elemental's body into
       another type of water"
 - [ ] **Muto Terram** — General "Convert part of an earth elemental's body into
       another type of earth"
-- **Context:** pure extraction gap, no design decisions. The four General rows
-  are also item 25 cases once added — item 25 is done, so when these four rows
-  are eventually added to `base_effects.json`, each needs a `reference` and an
-  `effectFormula` (`GeneralEffectFormula`) alongside its `baseLevel: null`, the
-  same shape as the other 49 General entries, not a bare zero-level row.
-- **Source precedence — the catalog is built from the wrong file.** The rulebook
-  repo holds the same book in `reviewed/` and `wip/`, in descending quality
-  (note: `raw-md/` was removed from the upstream repo). Always resolve `reviewed`
-  → `wip` and stop at the first hit; the earlier `raw-md` was unreviewed OCR and
-  also carried two alternate core-rules copies. Filenames differ between folders,
-  so match on book title. The 604 base effects came from what was `raw-md/Ars
-  Magica 5e - Core Rules.md` (now retrievable via
-  `git -C <rulebook> show 8b6c4d6^:"raw-md/Ars Magica 5e - Core Rules.md"` if
-  needed for historical reference) while a reviewed Definitive Edition exists —
-  so this item should end with the catalog rebuilt from `reviewed`, not with ten
-  rows patched onto a raw-OCR base.
+- **The four General rows need the full General shape when added** — a `reference`
+  and an `effectFormula` (`GeneralEffectFormula`) alongside `baseLevel: null`,
+  matching the other 49 entries. Not a bare zero-level row.
+- **⚠️ This item should end with the catalog rebuilt from `reviewed/`, not with ten
+  rows patched onto a raw-OCR base.** The 604 base effects were extracted from what
+  was `raw-md/Ars Magica 5e - Core Rules.md` (since removed upstream; retrievable via
+  `git -C <rulebook> show 8b6c4d6^:"raw-md/Ars Magica 5e - Core Rules.md"`), while a
+  reviewed Definitive Edition exists. See *Notes* for the source-precedence rule.
+- **⚠️ Any rebuild must reproduce all 611 entries** and re-run item 34's bullet-count
+  comparison first — see item 34's still-open sub-item.
+
+### 23. Ritual Spells Review — Remaining Cosmetic/Test-Hygiene Findings
+None affect correctness.
+
+- [ ] **JSON formatting inconsistency in `assets/data/spell_library.json`** — the 5
+      Ritual spells added by that branch use multi-line citation formatting; other
+      built-ins use compact single-line. Reformat if a pass over this file happens
+      for any other reason.
+- [ ] **A widget test title promises more than it asserts** — one test from the
+      Ritual Spells work (`test/presentation/widgets/*` or
+      `test/presentation/screens/spell_creation_screen_test.dart`; not pinned down
+      further). Find it, then narrow the title or extend the assertions.
+- [ ] **The "no accidental Ritual" regression guard only checks
+      `ritualDeclaration`**, not a full breakdown recompute — it could miss a case
+      where `ritualDeclaration == none` but `RitualStatus`-derived reasons (a
+      guideline flag, the >50 threshold) still fire. Assert on a recomputed
+      `LevelBreakdown.ritualStatus.isRitual` instead.
+
+### 37. A Template Has Open Slots Beyond Its Level — Realm, Form, "Specific Type"
+**In section 0, jointly with item 35.** Raised 2026-08-07 from *Wizard's Reach
+(Form)*: the Form must be chosen before the template can become a spell, exactly as
+the level must be. **This generalises item 35** (realm is one slot of several) for
+part of the corpus; the part it does not cover is a different mechanism. Both are
+named so they can be designed together; [[35]] stays as the realm instance.
+
+- **Case 1 — the guideline itself leaves a slot open.** Measured: **20 of the 49
+  General bullets (41%)**. By slot kind: **realm** ~15 (*"beings … from one
+  supernatural realm (Divine, Faerie, Infernal, or Magic)"*, and PeVi's *"any
+  supernatural effect of one realm"*); **"a specific type"** 4 (PeVi bullets 2, 7, 10
+  and ReVi 5 — the rulebook's own examples are *"Hermetic Terram magic, or Shamanic
+  spirit control magic"*); **Form** 2 (PeVi 10's *"a particular Hermetic Form"*, PeVi
+  11's *"a given Form"*). Filling the slot is part of choosing the guideline; the
+  slot is a property of the catalog row.
+  - **⚠️ Reconcile first:** item 35 counted 14 General realm entries, this scan finds
+    15 (adding `pevi-G5`). One of the two counts is wrong.
+- **Case 2 — the guideline says nothing and the *spell* comes in ten versions.**
+  Three Muto Vim spells: *Mirror of Opposition (form)* (*"There are ten versions of
+  this spell, each affecting spells of one of the Hermetic forms"*), *Wizard's Boost
+  (Form)*, *Wizard's Reach (Form)*. `muvi-G1/G2/G3` mention Form nowhere — they are
+  Form-agnostic and the restriction belongs to the published spell. *Unravelling the
+  Fabric of (Form)* looks like this group by its name but is **case 1**: `pevi-G2` is
+  *"Dispel effects of a specific type"* and the Form is that slot being filled.
+- **Scope of the bracketed-name pattern:** exactly 4 spells carry a
+  `(Form)`/`(form)` placeholder, all 4 General, and **0 of the imported ordinary
+  spells do**. No Technique placeholder exists. So case 2 is small and closed; case 1
+  is large and open.
+- **Same problem as item 25.** A template is a published spell with the caster's
+  choices left open; instantiating means supplying them. Item 25 supplies the level;
+  this supplies everything else. **If the model grows a general `choices` map, all
+  three axes fit it; if each axis gets a bespoke field, there will be three.**
+- **The observable that makes case 1 recoverable:** the chosen value is visible in
+  the published prose and is often the only thing distinguishing two otherwise
+  identical spells — *"No **magical** beast whose **Magic** Might…"* against *"No
+  water **faerie** whose **Faerie** Might…"*, same guideline, level and stat line.
+- **Open question, unanswered:** is "a specific type" a closed set (like realm's four
+  or Form's ten) or free text? PeVi 7's *"a specific type of supernatural effect"*
+  reads open-ended, which would be a different UI affordance from a four-way or
+  ten-way picker.
+
+**Three model findings arguing the `choices`-map fork is decided *before* either
+axis is implemented:**
+
+- **A bespoke field is not one field.** Each nullable slot costs an
+  `Object? x = _unset` sentinel in `SpellDraft.copyWith` (`spell.dart:262-294`), a
+  clear-on-switch branch in `spell_creation_bloc.dart` (`:49`, `:64`, `:87`), and a
+  conditional in the creation screen (`spell_creation_screen.dart:154`).
+  `chosenBaseLevel` pays this once; realm, Form and "specific type" would pay it
+  three more times.
+- **Realm cannot reuse `chosenBaseLevel`'s plumbing, because it is not
+  General-only.** `revi-5` and `revi-15` are ordinary fixed-level rows with an open
+  realm. Every existing guard — validation, clear-on-switch, the UI's `if` — keys on
+  `isGeneral`, and none of them transfer.
+- **`SpellTemplate` has nowhere to hold the legal *set*.** Item 35 wants the template
+  to carry the choices rather than a value; `spell_template.dart` is a `Spell` minus
+  `chosenBaseLevel`/`printedLevel`/`templateId` and has no slot concept. Whatever
+  shape is chosen lands on both types together.
+- **The migration argument is decisive.** Either shape works functionally; they
+  differ in when the cost falls. Choosing *after* 35 and 37 are implemented rewrites
+  the serialized form of `spell_library.json`, `spell_templates.json` and every DB
+  blob a second time.
+
+### 35. A Guideline's Realm Is a Choice, Like Its Level
+**Generalised by item 37; design the two together** — see item 37 for the model
+findings that bear on both. The realm measurements here remain the authority for
+that slice, subject to the 14-vs-15 reconciliation item 37 flags.
+
+- [ ] Decide where the chosen realm lives — most likely `Spell.chosenRealm` alongside
+      `chosenBaseLevel`, with `SpellTemplate` carrying the *set* of legal choices
+      rather than a value
+- [ ] Decide whether the realm is part of validation (a ward with no realm chosen is
+      not yet a spell) — the level answer was yes, and the argument looks identical
+- [ ] Decide whether the import reads the realm out of published prose, or leaves
+      imported wards realm-less
+- [ ] Check whether "one realm" is the only such axis (item 37 says no)
+- **What was noticed.** Sixteen catalog entries leave a realm open, phrased *"from
+  one supernatural realm (Divine, Faerie, Infernal, or Magic)"*. Fourteen are General
+  — all twelve wards, plus `pevi-G6` (reduce the casting total for all powers of one
+  realm) and `pevi-G12` (dispel Magic Resistance aligned to one Realm). **Two are
+  ordinary Rego Vim rows, `revi-5` and `revi-15`** — so this is **not** a General-only
+  problem, which is why it was not folded into item 25.
+- **Why it matters concretely.** The realm is what tells two otherwise identical
+  spells apart. *Ward against the Beasts of Legend* and a hypothetical infernal
+  equivalent would share a guideline, a level and a Touch/Ring/Circle stat line and
+  differ only in realm. The rulebook makes the choice visible in the published prose,
+  so it is recoverable from the corpus, not invented.
+- **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
+  `lib/engine/spell_engine.dart` (validation), the creation UI
+
+### 36. Audit the Catalog's `description` Fields Against the Rulebook
+Raised 2026-08-07. One confirmed defect, fixed in `2338430`; the question is how many
+more there are.
+
+- **The defect.** `pevi-G2`'s description read *"Dispel specific effect type **with
+  Intellego spell** …"*. The rulebook row contains no Intellego at all — *"…with a
+  level less than or equal to the level + 4 magnitudes of **the Vim spell** + a
+  stress die (no botch)"*. The word almost certainly bled from the row's first
+  bullet, which does mention Intellego.
+- **Why it matters more than a typo.** These descriptions are what the app shows when
+  a user picks a guideline, and what an agent reads when resolving a spell. A
+  description that misstates its guideline can drive a wrong ledger pick that no test
+  can catch.
+- **Why existing audits missed it.** Item 34 compared bullet *counts* per
+  technique/form/level in both directions and never compared *content*. Counts can
+  match perfectly while every description is wrong.
+- **Checked so far:** a per-bullet scan for Art names appearing in a description but
+  not in its own rulebook bullet, across all 49 General entries — exactly one hit,
+  `pevi-G2`. A narrow probe: it catches fabricated Art references and nothing else.
+- **Not checked:** the other 562 entries, and every kind of drift that is not an Art
+  name — wrong thresholds, dropped conditions, merged clauses, inverted senses.
+  `inte-30a`/`inte-30b` are a known benign case of one bullet deliberately split into
+  two entries, so a strict one-to-one comparison must tolerate that.
+- **Suggested approach:** align each entry to its bullet positionally (the ordering
+  already matches — item 34's fix relies on it), then diff the numbers and the modal
+  verbs first; those carry the arithmetic.
 
 ### 4. Conditional Wards *(the last open piece of the original item 4)*
-**Moved from section A, 2026-08-07** — see that section's note. The item's
-own text already says the ward threshold is "display it, do not compute a
-different level from it": wards already import and compute correctly via
-item 25's General mechanism. Display-fidelity work, not an import blocker.
+Display-fidelity work, **not an import blocker** — wards already import and compute
+correctly via item 25's General mechanism.
 
-- [ ] Add ward type field to BaseEffect
+- [ ] Add a ward type field to `BaseEffect`
 - [ ] Level threshold: a ward affects creatures whose Might is below the spell's
-      level — display it, do not compute a different level from it
+      level — **display it, do not compute a different level from it**
 - [ ] UI section for ward configuration
-- **Depends on item 25 — item 25 is done.** 13 published ward spells; 8 of them
-  are General-level, and for those the ward threshold *is* the chosen level.
-  `deriveGeneralEffect` now supplies that threshold (item 25's
-  `GeneralEffectFormula`/`GeneralEffectKind.mightThreshold`); what remains here
-  is the ward-type field itself and its display, not the threshold math.
-- **Only 1 spell has ward mechanics in its design line** — *Break the Oncoming
-  Wave* (`ward, so the target is the warded Individual, not the water`). The
-  other 12 need nothing beyond item 25.
-- **See item 4's full audit below** for the other eight sub-items' outcomes.
+- **13 published ward spells; 8 are General-level**, and for those the ward threshold
+  *is* the chosen level, already supplied by `deriveGeneralEffect`
+  (`GeneralEffectKind.mightThreshold`). What remains is the ward-type field and its
+  display, not the threshold math.
+- **Only 1 spell has ward mechanics in its design line** — *Break the Oncoming Wave*
+  (`ward, so the target is the warded Individual, not the water`). The other 12 need
+  nothing beyond item 25.
+
+### 33. Write-Only Columns on the `spells` Table — MAYBE, revisit when relevant
+Filed as a *maybe*: nothing is wrong today. Pick this up only when a task lands in
+this area — most likely item 9 (tag filtering) or item 7 (backup validation). **Do
+not do it on its own.**
+
+- [ ] Decide whether to drop `name`, `source`, `created_at` and `updated_at` from the
+      `spells` table, or to start using them
+- **What was found.** `spells` is `(id, name, source, data, created_at, updated_at)`,
+  where `data` holds the whole serialized `Spell` as JSON. `LocalSpellDatasource._toRow`
+  writes both the projected columns *and* the blob from the same object, but every
+  read goes through `jsonDecode(row['data'])` and every query is either
+  `where: 'id = ?'` or a bare `query('spells')` with no `WHERE` and no `ORDER BY`.
+  Those four columns are **write-only duplication**: drift risk, no benefit.
+- **The blob is the right design here and should stay.** The table holds **only
+  user-created spells** (published ones load from `assets/data/spell_library.json`);
+  `Spell` carries four nested collections (`requisites`, `adjustments`, `tags`,
+  `selectedModifiers` as a `Map<String, List<String>>`) whose normalization means
+  four or five join tables serving queries nothing issues; and **the interesting
+  joins are impossible in SQL anyway** — `baseEffectId`, `rangeId` and the rest point
+  into JSON assets, not tables, so "every spell using guideline `pevi-G3`" can never
+  be a SQL join in this design.
+- **If per-spell predicates ever outgrow Dart-side filtering**, the fix is a
+  generated column or an index on a JSON path — not a schema rewrite.
+- **Files:** `lib/data/database/app_database.dart` (the `spells` DDL),
+  `lib/data/datasources/local_spell_datasource.dart` (`_toRow`)
+
+### 38. Open Follow-ups from item 25's Whole-Branch Review
+None of this blocks anything — item 25's code and data are correct and 445 Dart tests
+pass. Same shape as item 29. Found by an Opus-run multi-angle `code-review --max` of
+`feature/general-base-effects` vs `main` (six independent reviewer passes), each
+finding re-verified against source before being recorded.
+
+- [ ] **`SpellEngine.allParameters` starts empty and is populated only by a listener
+      scoped to the Create screen.** `SpellEngine(allSpells: allSpells)` (`main.dart`)
+      defaults `allParameters` to `const []` (`spell_engine.dart:32`); it is filled
+      only via `AvailableParametersSynced`, dispatched from `SpellCreationScreen`'s
+      `BlocListener<ConfigurationBloc, …>`. `main.dart`'s `IndexedStack` builds the
+      Library tab eagerly at app start, so `SpellLibraryBloc` can call
+      `calculateBreakdown` for a saved General ward-type spell before that sync lands.
+      Then `_parameterById(referenceId)` (`spell_engine.dart:49`,
+      `_parameterContribution` at `:240`) returns null and the reference discount is
+      silently skipped — the spell is momentarily overcharged the raw magnitude
+      instead of the delta against its guideline's reference, with no error surfaced.
+      Not observed with today's shipped library (no built-in spell both uses a ward
+      guideline and picks a non-reference R/D/T), but nothing prevents it for the
+      first user-saved spell that does. **Fix:** seed `allParameters` from
+      `ConfigurationRepository` synchronously at construction (`main.dart`, alongside
+      `allSpells`) rather than waiting for a bloc round-trip.
+- [ ] **Duplicated join/filter logic between `Spell`'s path and `SpellTemplate`'s
+      parallel path.** All real, none urgent; worth collapsing **before a third
+      catalog-referencing record type shows up**:
+      - `SpellResolver.resolve`/`resolveAll` and `resolveTemplate`/
+        `resolveAllTemplates` (`spell_resolver.dart:46-66`) perform an identical
+        four-field id lookup, differing only in wrapper type.
+      - `SpellLibraryState.visibleSpells`/`visibleTemplates`
+        (`spell_library_state.dart:40-69`) run an identical
+        filter-by-source-then-substring pipeline. (Its "My Spells" branch on
+        `visibleTemplates` always returning empty is **not** dead code — a template is
+        published catalog data and can never be user-created.)
+      - `ResolvedSpell`/`ResolvedTemplate` duplicate the same
+        `isResolved`/`unresolvedReferences`/`technique`/`form` derivation and the same
+        pass-through getters; only the `LibraryEntry` interface is shared.
+      - `emit.py`'s `build_template` (144-207) mirrors `build_spell` (80-141)
+        near-verbatim for range/duration/target lookup, requisites, citations,
+        adjustments and ritual declaration — its own docstring says "mirrors
+        `build_spell`" without factoring the shared part out.
+      - `extract_spells.py`'s General-guideline branch (255-291) duplicates the
+        ordinary ledger-resolution pipeline below it (300-332), and the two have
+        **already drifted**: `DESIGN_LINE_INCOMPLETE` exists only on the General side,
+        though nothing about that check is General-specific.
+      - A generic mixin/base class on the Dart side (parametrized on the record's four
+        catalog-id fields) and a shared `_common_fields`-style helper on the Python
+        side would collapse each pair to one implementation.
+- [ ] **Efficiency, all in the Library-load path, none correctness-affecting.**
+      `SpellLibraryBloc._onEvent` (`spell_library_bloc.dart:36-37`) awaits
+      `getAllSpells()` then `getTemplates()` sequentially, each independently calling
+      `LibraryRepository._refreshResolver()` — two catalog reloads where one would do,
+      on **every** Library tab visit (`main.dart`'s bottom nav re-requests on every
+      visit, by design). `getTemplates()` also re-reads and re-parses
+      `spell_templates.json` from the asset bundle on every call, unlike
+      `getBuiltInSpells`, which caches the parse. `SpellEngine._parameterById`
+      (`spell_engine.dart:49`) linear-scans instead of using a map, unlike
+      `SpellResolver`'s own id maps. `Future.wait`, one resolver refresh, and a cached
+      template list fix all three cheaply.
+- [ ] **`deriveGeneralEffect` silently returns null when a negative
+      `offsetMagnitudes` drives the value below 1** (the `on ArgumentError { return
+      null; }` branch), and `validateSpellDraft` does not check this independently of
+      the overall spell level — so a General guideline with a negative offset, chosen
+      low enough, saves successfully with a blank effect sentence and no validation
+      error. No current catalog entry has a negative `offsetMagnitudes`. A known
+      deferral in the spec, recorded here so it is not lost.
+- [ ] **`TemplateInstantiated` silently discards an in-progress, unsaved draft.**
+      Deliberate (a stale breakdown/suggestions/calculated level must not follow the
+      user into a new spell), but there is no confirmation prompt. Worth a "discard
+      changes?" prompt if it becomes a reported annoyance.
+- [ ] **36 of the 49 General catalog entries omit an explicit `reference` triple**,
+      falling back to `ParameterTriple.standard()` (Personal/Momentary/Individual)
+      rather than stating it. Correct where the guideline genuinely is
+      Personal/Momentary/Individual, but the fallback cannot distinguish "explicitly
+      so" from "field just wasn't authored". A natural extension of item 32 should
+      confirm each of the 36 against its own rulebook row. **One specific candidate:**
+      `crvi-G4`'s `effectFormula` codes `offsetMagnitudes: -1` (matching its extracted
+      description, "less than guideline magnitude -1"), but its one template's
+      verbatim prose (*Restore the Faded Threads*) reads "up to the magnitude of this
+      spell –3". Low confidence either is wrong — they may describe different
+      quantities (a guideline threshold vs. a per-spell magnitude) — but it is exactly
+      what item 32 exists to check.
+- [ ] **Two latent, unexercised gaps in the Python import pipeline**, neither hit by
+      the current 611-entry corpus:
+      - `extract_spells.py`'s General routing (`design.base_level is None or
+        block.printed_level is None`) treats *either* side being absent as "General",
+        so a spell under a `#### GENERAL` heading whose design line nonetheless parses
+        a concrete numeric base has that number silently discarded in favour of
+        `general_candidates()`.
+      - `emit.py`'s `_selected_modifiers` "size" token branch has no
+        duplicate-selection guard, unlike the structurally identical
+        `elaborate-effect` branch just above it, even though every `size-<form>`
+        modifier is `selectionMode: single`. Only matters for a design line printing
+        two size tokens for one spell — none currently does.
 
 ---
 
 ## D. Low Priority / Nice-to-Have
 
 ### 10. Documentation
-- [ ] Update README: mention base effects extraction is complete
-- [ ] Add Size feature guide to docs
-- [ ] Document Aquam sub-type limitations (MVP context)
+- [ ] Update README (see also item 29 — it is still the stock Flutter template)
+- [ ] Add a Size feature guide to docs
+- [ ] Document the Aquam sub-type limitation (see *Notes*)
 
 ### 11. Performance
-- [ ] Optimize base effects JSON (currently 611 effects, all loaded at startup)
-- [ ] Consider lazy-loading or caching strategy if app grows
-- **Re-measure after item 27.** A 360-spell library, each computing a level on
-  load, is a real change to startup cost — this item's premise gets tested for
-  the first time then.
-
-### 34. Guidelines Missing From the Catalog — ✅ FIXED (2026-08-06, commit `8a70889`)
-Found while authoring item 25's General effect formulas, fixed on the same
-branch before its whole-branch review.
-
-- [x] Compare every guideline table in the rulebook against `base_effects.json`
-      bullet by bullet
-- [x] Restore the four missing General guidelines
-- [x] Restore the five missing ordinary guidelines
-- [x] Confirm no recorded resolution was invalidated
-- [ ] **Still open: nobody knows why the extraction dropped them.** The
-      producing script is not in the tree — `scripts/spell_import/catalog.py`
-      only *reads* `base_effects.json`. If item 22 rebuilds this asset, it must
-      reproduce all 611 entries, and the count comparison below is the test to
-      run first.
-
-- **How it was measured.** Parse every `| Level | <Technique> <Form> Guideline |`
-  table, count `•` bullets per row, compare against catalog entries grouped by
-  technique/form/baseLevel. Result: **610 rulebook bullets against 604 catalog
-  entries, short in 9 places.** Worth re-running after any catalog rebuild.
-- **Two distinct failure modes**, which is why a single-cause fix would have
-  missed half of it:
-  1. *A multi-bullet row keeping only its first bullet* — `rean-gen`,
-     `muaq-gen`, `cran-35`, `cran-40`, `cran-50`.
-  2. *A row dropped entirely* — Muto Terram General, Creo Animal 45 and 55.
-     These had exactly one bullet each and produced no entry at all.
-  `reme-G` was a third variant: two bullets **merged** into one description
-  reading "beings associated with Mentem **or spirits**", which misstated one
-  guideline as two things at once.
-- **The four General ones** (this is why it blocked item 25): `rean-gen-2` (the
-  circle warding *animals*, which the rulebook explicitly distinguishes from
-  beings *associated with Animal*), `reme-G2` (spirits of one realm),
-  `muaq-gen-2` and `mute-gen` (the water and earth elemental conversions —
-  the family had air and fire but was missing the other two). Wards went 10 →
-  12, matching the rulebook exactly. General entries 47 → 51.
-- **The five ordinary ones** are Creo Animal 35–55, most of the
-  Characteristic-increase ladder. Safe to add: the only four Creo Animal
-  resolutions sit at levels 5 and 15, so no candidate set changed.
-- **Consequence recorded in item 25's plan (Task 12):** Rego Animal and Rego
-  Mentem now have *two* General candidates each, so spells in those arts need
-  a recorded ledger pick instead of auto-resolving.
-- **The audit only ran in one direction, and the other direction had two hits**
-  (found later, during item 25's Task 11; fixed in `87ac754`). Counting the
-  bullets the catalog was *missing* says nothing about catalog rows the
-  rulebook does not contain, and there were two: `peme-G` and `inco-gen`, in
-  arts whose guideline tables print no General row at all — Perdo Mentem runs
-  3–25, Intellego Corpus 3–35. Each described its spell's own effect text read
-  backwards into a guideline (`peme-G` for *Lay to Rest the Haunting Spirit*,
-  `inco-gen` for *Sight of the True Form*), which is precisely the failure item
-  32 is about. Removing them brought the catalog into exact agreement with the
-  source: **24 arts, 49 General bullets, 49 General entries.** General entries
-  went 47 → 51 → **49**; total 604 → 613 → **611**.
-- **The standing check is now a test, not a one-off audit.**
-  `test_general_entries_match_the_rulebook_bullet_for_bullet` parses the
-  guideline tables and compares **per art**, in both directions. Per art
-  matters: a dropped bullet in one art and an invented row in another cancel
-  out in a single total, which is very nearly what had happened here.
-- **Files:** `assets/data/base_effects.json` (604 → 613 → 611 entries),
-  `scripts/spell_import/tests/test_general_catalog.py`,
-  `test/data/repositories/configuration_repository_test.dart`.
-
-### 33. Write-Only Columns on the `spells` Table — **MAYBE, revisit when relevant**
-Filed as a *maybe*: nothing is wrong today, and this should be picked up only
-when a task actually lands in this area — most likely item 9 (tag filtering)
-or item 7 (backup validation). Do not do it on its own.
-
-- [ ] Decide whether to drop `name`, `source`, `created_at` and `updated_at`
-      from the `spells` table, or to start using them
-- **What was found (2026-08-05, during item 25's Task 4).** `spells` is
-  `(id, name, source, data, created_at, updated_at)`, where `data` holds the
-  whole serialized `Spell` as JSON. `LocalSpellDatasource._toRow` writes both
-  the projected columns *and* the blob from the same object, but every read
-  goes through `jsonDecode(row['data'])`, and every query is either
-  `where: 'id = ?'` or a bare `query('spells')` with no `WHERE` and no
-  `ORDER BY`. So those four columns are **write-only duplication**: they carry
-  a drift risk and buy nothing.
-- **The blob itself is the right design here, and should stay.** Three
-  reasons, all specific to this app:
-  - The table holds **only user-created spells**. All published spells load
-    from `assets/data/spell_library.json`, so this is a small hand-authored
-    set, not a corpus worth querying.
-  - `Spell` carries four nested collections — `requisites`, `adjustments`,
-    `tags`, and `selectedModifiers` as a `Map<String, List<String>>`.
-    Normalizing them means four or five join tables serving queries nothing
-    issues.
-  - **The interesting joins are impossible in SQL anyway.** `baseEffectId`,
-    `rangeId` and the rest point into JSON assets, not tables, so "every spell
-    using guideline `pevi-G3`" can never be a SQL join in this design. That
-    removes the main argument for normalizing.
-- **If per-spell predicates ever outgrow Dart-side filtering**, the fix is a
-  generated column or an index on a JSON path — not a schema rewrite.
-- **Files:** `lib/data/database/app_database.dart` (the `spells` DDL),
-  `lib/data/datasources/local_spell_datasource.dart` (`_toRow`)
-
-### 38. Follow-ups from item 25's Final Whole-Branch Review
-None of this blocks the branch — the code and data committed for item 25 are
-correct, 445 Dart tests pass, and it merges as-is. This is the same shape as
-item 29 (item 27's equivalent list): three real, cheap, high-value findings
-were fixed immediately; the rest need more design judgement or more time than
-closing out item 25 warranted.
-
-- [x] **Three regressions fixed immediately** (commit `4a49e78`), each
-      independently regression-tested:
-      - `configuration_screen.dart:81` printed `'Base ${e.baseLevel}'`
-        unconditionally, so Settings > Effects showed **"Base null"** for
-        every one of the 49 General guidelines — the `isGeneral` guard the
-        creation screen's dropdown already had was never applied here.
-      - The Add Custom Effect dialog (`configuration_screen.dart`,
-        `_AddEffectDialogState`) still accepted a base level of `0`.
-        `SpellLevelCalculator.calculate` now rejects any `baseLevel < 1`
-        (item 25 removed the old `baseLevel: 0`-as-General allowance), so a
-        level-0 custom effect created without error and then threw
-        `ArgumentError` the first time a spell built on it was calculated.
-        The dialog now rejects `level < 1` up front.
-      - `spell_creation_screen.dart`'s suggestions-list `SpellCard` never
-        passed `isGeneral`, so a saved spell built on a General guideline
-        showed no "Gen" chip there, unlike the Library screen's template
-        cards, which hardcode `isGeneral: true`. Now reads
-        `s.baseEffect?.isGeneral ?? false`.
-- [ ] **`SpellEngine.allParameters` starts empty and is populated only by a
-      listener scoped to the Create screen.** `SpellEngine(allSpells:
-      allSpells)` (`main.dart`) defaults `allParameters` to `const []`
-      (`spell_engine.dart:32`); it's only filled via
-      `AvailableParametersSynced`, dispatched from
-      `SpellCreationScreen`'s `BlocListener<ConfigurationBloc, ...>`
-      (`spell_creation_screen.dart`). `main.dart`'s `IndexedStack` builds the
-      Library tab eagerly at app start, so `SpellLibraryBloc`'s
-      `LibraryRequested` handler can call `calculateBreakdown` for a saved
-      General ward-type spell before that sync lands. When it does,
-      `_parameterById(referenceId)` (`spell_engine.dart:49`,
-      `_parameterContribution` at `:240`) returns null, and the reference
-      discount is silently skipped — the spell is momentarily overcharged
-      the raw magnitude instead of the delta against its guideline's
-      reference, with no error surfaced. Not observed with today's shipped
-      library (no built-in spell both uses a ward guideline and picks a
-      non-reference Range/Duration/Target), so it hasn't manifested yet, but
-      nothing prevents it for the first user-saved spell that does. Fix is
-      probably to seed `allParameters` from `ConfigurationRepository`
-      synchronously at construction (`main.dart`, alongside `allSpells`)
-      rather than waiting for a bloc round-trip.
-- [ ] **A cluster of duplicated join/filter logic between `Spell`'s path and
-      `SpellTemplate`'s new, parallel path**, all real, all independently
-      confirmed by re-reading the cited lines, none urgent enough to
-      refactor on this branch:
-      - `SpellResolver.resolve`/`resolveAll` and `resolveTemplate`/
-        `resolveAllTemplates` (`spell_resolver.dart:46-66`) perform the
-        identical four-field id lookup, differing only in the wrapper type.
-      - `SpellLibraryState.visibleSpells`/`visibleTemplates`
-        (`spell_library_state.dart:40-69`) run the identical
-        filter-by-source-then-substring-match pipeline. (Its "My Spells"
-        branch on `visibleTemplates` always returning empty is not dead
-        code — it's correct and already commented: a template is published
-        catalog data and can never be user-created.)
-      - `ResolvedSpell`/`ResolvedTemplate` (`lib/models/resolved_spell.dart`,
-        `lib/models/resolved_template.dart`) duplicate the same
-        `isResolved`/`unresolvedReferences`/`technique`/`form` derivation
-        and the same run of pass-through getters; only the `LibraryEntry`
-        interface between them is shared, not the implementation.
-      - `scripts/spell_import/emit.py`'s `build_template` (144-207) mirrors
-        `build_spell` (80-141) near-verbatim for range/duration/target
-        lookup, requisite construction, citations, adjustments and ritual
-        declaration — the function's own docstring says "mirrors
-        `build_spell`" without factoring the shared part out.
-      - `scripts/spell_import/extract_spells.py`'s General-guideline branch
-        (255-291) duplicates the ordinary-spell ledger-resolution pipeline
-        just below it (300-332), and the two have already started to drift:
-        `DESIGN_LINE_INCOMPLETE` exists only on the General side, though
-        nothing about that check is General-specific.
-      - A generic mixin/base class on the Dart side (parametrized on the
-        record's four catalog-id fields) and a shared `_common_fields`-style
-        helper on the Python side would collapse each pair to one
-        implementation. Worth doing before a third catalog-referencing
-        record type shows up, not urgent before then.
-- [ ] **Efficiency, all in the Library-load path, none correctness-affecting:**
-      `SpellLibraryBloc._onEvent` (`spell_library_bloc.dart:36-37`) awaits
-      `getAllSpells()` then `getTemplates()` sequentially, and each
-      independently calls `LibraryRepository._refreshResolver()` — two
-      catalog reloads where one would do, on every single Library tab visit
-      (`main.dart`'s bottom-nav re-requests on every visit, by design).
-      `getTemplates()` also re-reads and re-parses `spell_templates.json`
-      from the asset bundle on every call, unlike `getBuiltInSpells`, which
-      caches the parse. `SpellEngine._parameterById`
-      (`spell_engine.dart:49`) does a linear scan instead of a map lookup,
-      unlike `SpellResolver`'s own id maps. Running the two repository calls
-      concurrently (`Future.wait`), refreshing the resolver once, and
-      caching the parsed template list would fix all three cheaply.
-- [ ] **`deriveGeneralEffect` silently returns null when a negative
-      `offsetMagnitudes` drives the value below 1** (`spell_engine.dart`,
-      the `on ArgumentError { return null; }` branch), and
-      `validateSpellDraft` doesn't check this independently of the overall
-      spell level — a General guideline with a negative offset, chosen at a
-      low enough level, can save successfully with a blank effect sentence
-      and no validation error. No current catalog entry has a negative
-      `offsetMagnitudes`, so unobserved today. Matches the spec's own
-      documented "Task 8 stops such a spell being saved at all" gap for this
-      specific path — a known deferral, not a surprise, but recorded here so
-      it isn't lost.
-- [ ] **`TemplateInstantiated` silently discards an in-progress, unsaved
-      draft.** Deliberate by design (Task 14a: a stale breakdown/
-      suggestions/calculated level must not follow the user into a new
-      spell), but there is no confirmation before an unsaved edit is
-      dropped. Worth a "discard changes?" prompt if this becomes a reported
-      annoyance; not blocking.
-- [ ] **36 of the 49 General catalog entries omit an explicit `reference`
-      triple**, falling back to `ParameterTriple.standard()` (Personal/
-      Momentary/Individual) rather than stating it. Correct for guidelines
-      that are genuinely Personal/Momentary/Individual, but the fallback
-      can't distinguish "explicitly so" from "field just wasn't authored" —
-      a future audit (natural extension of item 32) should confirm each of
-      the 36 against its own rulebook row rather than trust the default.
-      One specific candidate for that audit: `crvi-G4`'s `effectFormula`
-      codes `offsetMagnitudes: -1` (matching the guideline table's own
-      extracted description, "less than guideline magnitude -1"), but its
-      one template's verbatim rulebook prose (*Restore the Faded Threads*)
-      reads "up to the magnitude of this spell –3". Low confidence either
-      number is wrong — they may describe different quantities (a guideline
-      threshold vs. a per-spell magnitude) — but it's exactly the kind of
-      thing item 32's audit exists to check and nobody has yet.
-- [ ] **Two latent, unexercised gaps in the Python import pipeline**, neither
-      hit by the current 611-entry corpus:
-      - `extract_spells.py`'s General-branch routing
-        (`design.base_level is None or block.printed_level is None`) treats
-        *either* side being absent as "General", so a spell filed under a
-        `#### GENERAL` heading whose own design line nonetheless parses a
-        concrete numeric base level has that number silently discarded in
-        favor of `general_candidates()`. Would only matter for a future
-        source spell shaped that way.
-      - `emit.py`'s `_selected_modifiers` "size" token branch has no
-        duplicate-selection guard, unlike the structurally identical
-        `elaborate-effect` branch just above it, even though every
-        `size-<form>` modifier is `selectionMode: single`. Would only
-        matter for a design line printing two size tokens for one spell —
-        none currently does.
-- **Found by:** an Opus-run, multi-angle `code-review --max` of the whole
-  branch (`feature/general-base-effects` vs `main`) — six independent
-  reviewer passes (correctness/line-by-line, reuse, efficiency,
-  simplification, altitude, removed-behavior, cross-file tracing), each
-  independently re-verified against the current source before being recorded
-  here.
+- [ ] Optimize base effects JSON (611 effects, all loaded at startup)
+- [ ] Consider lazy loading or caching if the app grows
+- **Re-measure now that the library holds 285+ spells**, each computing a level on
+  load. This item's premise is only now testable. See also item 38's Library-load
+  efficiency bullet.
 
 ---
 
 ## Completed ✅
 
-### 15. Add All Core-Rulebook Parameters — ✅ COMPLETE
-The catalog held **17** parameters; the ArM5 core rulebook defines **25**, and
-one existing entry was misnamed. This was a correctness problem, not just a
-gap: spells needing Ring, Circle or Eye could not be expressed at all.
+Closed items, reduced to the decisions and constraints that still bind. Follow the
+linked spec/plan or git history for detail.
 
-- [x] **Range — add Eye (+1).** The rulebook pairs it with Touch: "Touch and Eye
-      are the same 'level' of range", listed as `Touch/Eye`. Not interchangeable
-      with Touch, just equal in magnitude.
-- [x] **Duration — add Ring (+2)** (paired with Sun) **and Year (+4)**.
-- [x] **Target — add Circle (+0)** (paired with Individual) **and the four
-      missing magical senses: Taste (+0), Touch (+1), Smell (+2), Hearing (+3).**
-      The senses are Intellego targets, each equivalent to a standard target:
-      Taste=Individual, Touch=Part, Smell=Group, Hearing=Structure,
-      Vision=Boundary. Vision was already present and correct.
-- [x] **Rename `Bound` → `Boundary`.** The rulebook name is Boundary. Id changed
-      to `target-boundary` (backward compatibility was not a goal, and no
-      built-in spell used the old id).
-- [x] Verify the built-in spells still calculate correctly after the rename —
-      confirmed via the full asset test suite, plus a new demonstration spell
-      ("Thoughts Within Babble," Intellego Mentem, Target: Hearing, Level 25)
-      added specifically to exercise one of the new parameters end to end.
-- **Status:** ✅ COMPLETE (commit `c835d0a`, branch `feature/parameters-and-provenance`)
-- **Independently confirmed complete by the 2026-07-28 audit:** every Range,
-  Duration and Target used by all 360 published core spells resolves against
-  these 25 entries. No parameter work remains for the import.
-- **The two open constraints were each explicitly decided, not left unresolved:**
-  - **Ritual-only gating (Year, Boundary) — since resolved.**
-    `Parameter.requiresRitual` landed on branch `feature/ritual-spells` (item
-    4's "Ritual-Only Constraints"), and `Year`/`Boundary` are exactly the two
-    entries flagged `requiresRitual: true`. See
-    `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`. Item 17's
-    Merinita/Symbolic-Magic parameters still need the *Virtue*-gating half.
-  - **Target `Touch` / Range `Touch` name collision — left as-is.** Harmless in
-    the data (ids are category-scoped: `range-touch` vs `target-touch`); the
-    creation screen's dropdowns filter by category, so the two never appear in
-    the same picker. Not disambiguated.
+### 34. Guidelines Missing From the Catalog — ✅ FIXED (2026-08-06, `8a70889`, `87ac754`)
+- [x] Compared every guideline table in the rulebook against `base_effects.json`
+      bullet by bullet, restored 4 missing General and 5 missing ordinary guidelines,
+      and removed 2 invented rows
+- [ ] **Still open: nobody knows why the extraction dropped them.** The producing
+      script is not in the tree — `scripts/spell_import/catalog.py` only *reads*
+      `base_effects.json`. **If item 22 rebuilds this asset it must reproduce all 611
+      entries, and the bullet-count comparison is the test to run first.**
+- **Final state: 24 arts, 49 General bullets, 49 General entries; 611 entries total**
+  (604 → 613 → 611; General 47 → 51 → 49; wards 10 → 12).
+- **Two failure modes**, which is why a single-cause fix would have missed half: a
+  multi-bullet row keeping only its first bullet (`rean-gen`, `muaq-gen`, `cran-35`,
+  `cran-40`, `cran-50`), and a row dropped entirely (Muto Terram General, Creo Animal
+  45 and 55). `reme-G` was a third variant: two bullets *merged* into one description
+  reading "beings associated with Mentem **or spirits**".
+- **The audit initially ran in one direction only, and the other direction had two
+  hits.** `peme-G` and `inco-gen` existed in arts whose guideline tables print no
+  General row at all (Perdo Mentem runs 3–25, Intellego Corpus 3–35); each was a
+  spell's own effect text read backwards into a guideline — precisely the failure item
+  32 is about.
+- **The standing check is now a test, not an audit.**
+  `test_general_entries_match_the_rulebook_bullet_for_bullet` parses the guideline
+  tables and compares **per art**, in both directions. Per art matters: a dropped
+  bullet in one art and an invented row in another cancel out in a single total, which
+  is very nearly what had happened.
+- **Consequence:** Rego Animal and Rego Mentem now have *two* General candidates each,
+  so spells in those arts need a recorded ledger pick instead of auto-resolving.
+- **Files:** `assets/data/base_effects.json`,
+  `scripts/spell_import/tests/test_general_catalog.py`,
+  `test/data/repositories/configuration_repository_test.dart`
+
+### 30. Rulebook Source Provenance — ✅ COMPLETE (workflow commit `77c8b01`)
+Records which rulebook revision produced `assets/data/spell_library.json`, via
+deterministic sha256 provenance in a committed sidecar (`source.lock`), never in the
+asset itself.
+
+**What binds going forward:**
+- `ARS_RULEBOOK_ROOT` overrides the rulebook location (used by CI). `raw-md` handling
+  was retired when that folder was deleted upstream.
+- `provenance.py` computes/stores/compares source identity (sha256 + advisory git
+  metadata); `report.py` diffs two asset lists into readable markdown; both are
+  testable with **zero rulebook dependency**.
+- `import_report.md` is the committed human-readable record of the last adoption that
+  changed the asset.
+- `RegenerationTest`'s failure message is drift-aware: it distinguishes "source moved"
+  from "asset was hand-edited" by checking `source.lock`.
+- **`--write` is gated on `--accept-source`**, ordered behind the unresolved/problems
+  guards — adopting upstream changes is explicit.
+- **Spec/Plan:** `docs/superpowers/specs/2026-08-03-rulebook-source-provenance-design.md`,
+  `docs/superpowers/plans/2026-08-03-rulebook-source-provenance.md`
+
+### 27. Published Spell Import Harness — ✅ COMPLETE
+The harness is what makes every other mechanism *verifiable*: each one is checked
+against every spell it touches, and a regression anywhere in the engine surfaces
+immediately.
+
+- **The extractor** is maintained and idempotent at
+  `scripts/spell_import/extract_spells.py` (`scripts/import/` in the spec — `import`
+  is a Python keyword, so the directory was renamed; the one deliberate spec
+  deviation). `--show-blocked` prints per-spell blocked reasons.
+- **The ledger** is hand-edited at `scripts/spell_import/resolutions.json` and records
+  each base-effect decision **and the candidate set it was made against**, so item
+  22's new guideline rows flag affected decisions as stale rather than letting them
+  stand unexamined.
+- **Asset assertions:** level equality, **Ritual agreement** (the oracle that does not
+  depend on the base effect), resolution completeness, reference integrity, clean
+  regeneration — plus assertion 6, added by item 25 for General picks.
+- **`loadSpellLibrary`'s hardcoded count was retired** — derive counts from the raw
+  JSON, as `asset_data_loader_test.dart` already does (item 5).
+- **`Citation.page` cannot carry page numbers.** Its doc comment promised them "with
+  the spell-parsing work", but the reviewed markdown has no page markers, only prose
+  cross-references. Comment corrected; do not re-promise it.
+- **Three spells print no design line. Only one has a legitimate derivation:**
+  - *Enchantment of the Scrying Pool* (InAq 30, line 12900) — ✅ derived
+    `(Base 5, +1 Touch, +4 Year)`, base effect `inaq-5` (sole candidate). Imported.
+  - *Whispering Winds* (InAu 15, line 13251) — ❌ **permanently blocked.** InAu's only
+    base levels are 1/2/4/15; with Sight(3)/Conc(1)/Ind(0) fixed by the stat line, no
+    real base level + real magnitude token reproduces 15 without inventing a requisite
+    the text does not support. The spell's own prose says why: "fits poorly into the
+    normal framework of Hermetic magic."
+  - *Hermes' Portal* (ReTe 75, line 15638) — ❌ blocked on infrastructure, not rules.
+    `rete-4` ("Transport a non-living object…") needs `rego-transport-distance` at its
+    top rung plus 2 magnitudes of size to reach 75, and `emit.build_spell` maps only
+    `size`-kind tokens today. **See item 29's extension bullet** — that would resolve
+    this spell. Its printed `(Mercurian Ritual)` marker corroborates it is
+    non-standard.
+  - (Five further spells lack a design line but are General-level and belong to item
+    25: *Ward against the Beasts of Legend*, *Sight of the True Form*, *Ward against
+    Faeries of the Mountain*, *Wizard's Vigil*, *Aegis of the Hearth*.)
+- **The one open checklist line was split out on 2026-08-07** into **item 28** (zero
+  candidates — a catalog/prose-rule gap) and **item 39** (genuine ambiguity — a
+  reading decision), because the two need different kinds of decision and were getting
+  lost bundled under one line inside an item flagged complete.
+- **Spec/Plan:** `docs/superpowers/specs/2026-07-28-published-spell-import-design.md`,
+  `docs/superpowers/plans/2026-07-28-published-spell-import.md`
+
+### 25. General-Level Spells — base level is chosen, not fixed — ✅ COMPLETE
+Absorbed item 4's "Variable Base Levels" bullet, which badly understated it: the Spell
+Modifiers spec correctly established that most `"Variable base level"` notes are
+informational rung entries, but that reasoning does not reach **General entries**,
+where there is no ladder and no correct integer, because the level *is* the caster's
+choice. 33 published spells are General-level, including **every Vim spell and every
+ward**.
+
+**What landed and still binds:**
+- `GeneralEffectFormula` on `BaseEffect` (a reference R/D/T plus a `GeneralEffectKind`
+  and an offset); 49 General catalog entries carry `baseLevel: null`.
+- `calculateBreakdown` substitutes `chosenBaseLevel` for the guideline's base. **The
+  chosen level enters `SpellLevelCalculator`'s additive/multiplicative split exactly
+  as the guideline's base would have** — that was the design-heavy question and this
+  is the answer.
+- Validation (`spell_engine.dart:67-72`) rejects both a missing chosen level
+  (`'Choose a level for this General guideline'`) and one below 1 (`'The chosen level
+  must be at least 1'`). **Neither computes a silent zero.**
+- `chosen-base-level-field` in the creation screen, shown only while the selected
+  effect `isGeneral`; the bloc clears `chosenBaseLevel` on any switch away from
+  General (`spell_creation_bloc.dart:87` — only General→General preserves it).
+- `_effectSentence` prints a breakdown line per `GeneralEffectKind`
+  (`spell_engine.dart:422-431`).
+- Published General spells emit to `spell_templates.json`, not `spell_library.json`.
+
+**Ten of the 33 remain blocked, each for a reason unrelated to this item:**
+- **No design line printed (4):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of
+  the True Form*, *Ward against Faeries of the Mountain*.
+- **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
+  *Restore the Moved Image*, *The Invisible Eye Revealed*.
+- **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
+  Spirit*, *Dispel the Phantom Image*.
+- **Design line disclaims guideline arithmetic (1):** *Wizard's Communion* — "a
+  remnant of Mercurian rituals."
+- **Unrecognised token (1):** *Watching Ward* — a `Special`-Duration problem, **item
+  26's**.
+
+- **Spec/Plan:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`,
+  `docs/superpowers/plans/2026-08-05-general-base-effects.md`
+- **Files:** `lib/models/base_effect.dart`, `lib/engine/spell_engine.dart`,
+  `lib/bloc/spell_creation/spell_creation_bloc.dart`,
+  `lib/presentation/screens/spell_creation_screen.dart`,
+  `assets/data/base_effects.json`, `scripts/spell_import/`,
+  `integration_test/spell_creation_flow_test.dart`
+
+### 24. Ad-hoc Level Adjustments — ✅ COMPLETE
+21 published spells carry a one-off magnitude the storyguide assigned with a prose
+justification. **No catalog entry can ever cover these** — they are per-spell, not
+per-guideline.
+
+**What landed and still binds:**
+- A `LevelAdjustment` model — a list of `(magnitude, note)` on `Spell` and
+  `SpellDraft` — one repeatable UI row in the creation screen, and one breakdown line
+  per adjustment showing the note.
+- **Negative magnitudes are allowed.** `SpellLevelCalculator` mirrors the positive
+  rule (worth 1 inside the additive tier, 5 above it) and restores the additive
+  capacity it gives back, so `[1, -1]` is a no-op at any base level. *The Severed Limb
+  Made Whole* is the one published spell that needs it.
+- **Two token families, not one.** The recurring wordings (`fancy effect`, `complex
+  effect`, `for special effect`, `additional effect`, `elaborate design`) became a
+  real globally-scoped `elaborate-effect` catalog Modifier, because they *are*
+  reusable. Only genuinely per-spell prose became adjustments, matched against a
+  **closed allow-list** (`designline.ADJUSTMENT_LABELS`) — so an unmodelled mechanism
+  keeps blocking its spell instead of importing at a correct level with wrong
+  modelling.
+- **One hand-derived magnitude.** *The Shadow of Human Life* prints "for a very
+  elaborate effect" with no number; the literal 5 and its arithmetic live in
+  `extract_spells.HAND_DERIVED_ADJUSTMENT`, checked by assertion 1 rather than derived
+  from it.
+- **Do not confuse adjustments with Modifiers.** A Modifier is a *reusable catalog
+  choice* scoped to a technique/form/effect. Adjustments are unique to one spell and
+  would pollute the catalog with 21 single-use entries.
+
+**Three spells stay deliberately blocked** — each is a real unmodelled mechanism, not
+a one-off note, so none is in the allow-list: *The Kiss of Death* (`+2 for no words`),
+*Black Whisper* (`+1 for not needing to gesture`), *Sight of the Active Magics*
+(`+2 Techniques and Forms`).
+
+- **Spec/Plan:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`,
+  `docs/superpowers/plans/2026-08-04-level-adjustments.md`
+
+### 15. Add All Core-Rulebook Parameters — ✅ COMPLETE (`c835d0a`)
+The catalog held **17** parameters; the core rulebook defines **25**, and one entry was
+misnamed. A correctness problem, not just a gap — spells needing Ring, Circle or Eye
+could not be expressed at all.
+
+- [x] **Range — Eye (+1).** The rulebook pairs it with Touch ("Touch and Eye are the
+      same 'level' of range", listed `Touch/Eye`). Equal in magnitude, **not
+      interchangeable**.
+- [x] **Duration — Ring (+2)** (paired with Sun) **and Year (+4)**
+- [x] **Target — Circle (+0)** (paired with Individual) **and the four missing magical
+      senses:** Taste (+0), Touch (+1), Smell (+2), Hearing (+3). The senses are
+      Intellego targets, each equivalent to a standard target: Taste=Individual,
+      Touch=Part, Smell=Group, Hearing=Structure, Vision=Boundary. Vision was already
+      present and correct.
+- [x] **Renamed `Bound` → `Boundary`**, id `target-boundary`
+- **Independently confirmed complete by the audit:** every Range, Duration and Target
+  used by all 360 published spells resolves against these 25 entries.
+- **Two constraints were explicitly decided, not left open:**
+  - **Ritual-only gating (Year, Boundary)** — resolved by `Parameter.requiresRitual`
+    (item 4); those two are exactly the entries flagged `requiresRitual: true`. Item
+    17 still needs the *Virtue*-gating half.
+  - **Target `Touch` / Range `Touch` name collision — left as-is.** Harmless: ids are
+    category-scoped (`range-touch` vs `target-touch`) and the creation screen's
+    dropdowns filter by category, so the two never share a picker.
 - **Spec/Plan:** `docs/superpowers/specs/2026-07-27-parameters-and-provenance-design.md`,
   `docs/superpowers/plans/2026-07-27-parameters-and-provenance.md`
-- **Files touched:** `assets/data/parameters.json` (25 entries), `assets/data/spell_library.json`
-  (1 new spell), `lib/models/parameter.dart`, `test/data/datasources/asset_data_loader_test.dart`
-
-### 1. Spell Constraint: One of Each Parameter — ✅ COMPLETE
-- [x] Add validation that each spell has exactly ONE Range
-- [x] Add validation that each spell has exactly ONE Duration
-- [x] Add validation that each spell has exactly ONE Target
-- **Rationale:** Ars Magica rules: spells have single Range/Duration/Target, modifiers scale level instead
-- **Status:** ✅ COMPLETE (commit 2d897db)
-- **Implementation:**
-  - Redesigned UI with three dedicated dropdowns (Range, Duration, Target)
-  - SpellCreationBloc enforces one-per-category in ParameterAdded handler
-  - SpellEngine.validateSpellDraft() requires all three categories
-  - Dropdown automatically replaces if same category selected again
-
-### 8. UI: Disable Multi-Select for Range/Duration/Target — ✅ OBSOLETE
-- **Superseded by item 1**, which replaced multi-select with three dedicated
-  dropdowns. Selecting multiple Ranges, Durations or Targets is no longer
-  representable in the UI at all, which is what this item asked for. Closed
-  without separate work.
-
-### 2. Requisites UI & Integration — ✅ COMPLETE
-- [x] Add requisites section to spell creation screen
-- [x] Allow selecting any number of Arts as requisites
-- [x] Validate: requisite art cannot be the spell's own Technique or Form; no duplicate arts
-- [x] Requisite magnitude feeds the calculated level (adding = +1, free = +0)
-- [x] Differentiate free vs adding requisites in UI (per-row kind dropdown)
-- **Status:** ✅ COMPLETE (branch `feature/requisites-ui`)
-- **Implementation:**
-  - Replaced RequiredRequisite/AdditionalRequisite with one `Requisite(art, kind)`
-    and a `RequisiteKind` enum (`free` = 0 magnitude, `adding` = 1)
-  - Spell/SpellDraft carry a single `requisites` list; serialization uses one
-    `requisites` key, and all 27 built-in spells were migrated
-  - Events: `RequisiteAdded(art, kind)` / `RequisiteRemoved(art)` /
-    `RequisiteKindChanged(art, newKind)`
-  - Art pool is the de-duplicated union of ArsArts + ArsForms minus the spell's
-    own Technique and Form; already-chosen arts drop out of the add dropdown
-- **The free/adding split is confirmed sufficient by the audit** — every
-  requisite-driven magnitude in the 360 published spells is +0 or +1
-  (`no cost for Intellego effect`, `+1 Rego effect`, `requisite free`).
-- **Follow-up not done here:** the level preview shows the total only; it does
-  not itemise which magnitude came from requisites vs parameters vs factors.
-  *(Since resolved — the Spell Modifiers work added the itemised breakdown.)*
-
-### 3. Size Feature (MVP) — ✅ COMPLETE
-- [x] Add Size magnitude parameter to spell model
-- [x] Add Size selection to spell creation UI
-- [x] Update spell level calculation to include Size
-- [x] Document Aquam gap: only 1 of 5 sub-Individual types per Form in MVP
-- **Status:** ✅ COMPLETE (delivered by the Spell Modifiers plan, Task 11)
-- **Implementation — it did NOT land the way this item originally anticipated.**
-  There is no bespoke `size` field on `Spell`. Size is modelled as ordinary
-  scoped Modifiers, so it needed no model change beyond the `selectedModifiers`
-  map that was already there:
-  - 8 Size ladders in `assets/data/modifiers.json`, each 5 options: Base
-    Individual (+0) then ×10/×100/×1,000/×10,000 at +1…+4
-  - Each is Form-scoped and excludes Intellego. Mentem and Vim deliberately have
-    none.
-  - Magnitude feeds the level through the normal modifier path — no special case
-    in the calculator.
-- **Aquam gap — closed as documented, not as fixed.** `size-aquam` carries one of
-  the Form's 5 base-Individual sub-types, recorded in its base option's
-  `baseIndividual` field. See the standing note at the foot of this file.
-- **Two limitations became real blockers and moved to item 19:** the +4 ceiling,
-  and the Mentem exemption being implemented Form-wide when the rulebook states
-  it only for Individual targets.
 
 ### 4. Resolve Out-of-Scope Base Effects — ⚠️ PARTIALLY COMPLETE
-Audited sub-item by sub-item on 2026-07-28. **Four done, two were never real
-gaps, three remain open and have moved to their own sections above.**
+Audited sub-item by sub-item on 2026-07-28: four done, two were never real gaps, three
+moved to their own items.
 
-- [x] **Ritual-Only Constraints** — ✅ COMPLETE (branch `feature/ritual-spells`)
-  - [x] Ritual flag on BaseEffect — landed as `RitualRequirement`
-        (`none`/`suggested`/`required`), 7 required and 38 suggested entries
-  - [x] Validate in spell creation — landed as derivation, not validation:
-        nothing is rejected, because a Year-duration spell is not an error,
-        it is a Ritual
-  - [x] Display warning in UI — landed as the `RitualSection` banner
-  - **This sub-item's original wording was wrong.** It said "force Duration =
-        Ritual". Ritual is a spell *type*, orthogonal to all eight Durations.
-- [x] **Complexity-Stacking Modifiers** — ✅ COMPLETE. Landed as
-      `crim-complexity` (3 options), `peim-complexity` (1), `reim-complexity`
-      (3), migrating the old special factors. Covers 11 published spells.
-- [x] **Material Difficulty Scaling** — ✅ COMPLETE. Landed as
-      `muto-terram-material`, `perdo-terram-material`, `rego-terram-material`
-      (5 options each, also carrying `baseIndividual`). Covers 10 published
-      spells. Creo Terram deliberately has none — material *is* the base effect
-      there.
-- [x] **Magnitude Ladders** — ✅ COMPLETE. Landed as `rego-transport-distance`
-      (6 rungs, 5 paces → Arcane Connection), scoped by `effectIds` to
-      `rehe-10b`, `reig-3c`, `rete-4` (first two renamed from `rrhe-10b`/
-      `rrig-3c` when the base-effect id scheme was corrected).
-- [x] **Characteristic Point Scaling** — ⚪ NOT A GAP. Each rung is already its
-      own base effect (`crme-30` … `crme-55`, renamed from `creem-30`…`creem-55`);
-      choosing "to no more than +2" *is* choosing `crme-40`. What looked like
-      a modelling gap was an
-      extraction gap in Creo Animal only — now item 22.
-- [ ] **Variable Base Levels** — → **moved to item 25**, and the sub-item badly
-      understated it. Most `"Variable base level"` notes are informational rung
-      entries, but 47 **General entries** have no correct integer level at all.
-- [ ] **Conditional Wards** — → **remains as item 4** in section A, now
-      dependent on item 25.
-- [ ] **Intensity/Damage Modifiers** — → **moved to item 4b**, section B.
-- [ ] **Level-Dependent Might Reduction** — → **moved to item 4c**, section B.
+- [x] **Ritual-Only Constraints** — landed as `RitualRequirement`
+      (`none`/`suggested`/`required`), 7 required and 38 suggested entries, plus the
+      `RitualSection` banner. **Landed as derivation, not validation:** nothing is
+      rejected, because a Year-duration spell is not an error, it *is* a Ritual. This
+      sub-item's original wording ("force Duration = Ritual") was wrong — **Ritual is
+      a spell *type*, orthogonal to all eight Durations.**
+- [x] **Complexity-Stacking Modifiers** — `crim-complexity` (3 options),
+      `peim-complexity` (1), `reim-complexity` (3), migrating the old special factors.
+      Covers 11 published spells.
+- [x] **Material Difficulty Scaling** — `muto-terram-material`,
+      `perdo-terram-material`, `rego-terram-material` (5 options each, also carrying
+      `baseIndividual`). Covers 10 published spells. **Creo Terram deliberately has
+      none — material *is* the base effect there.**
+- [x] **Magnitude Ladders** — `rego-transport-distance` (6 rungs, 5 paces → Arcane
+      Connection), scoped by `effectIds` to `rehe-10b`, `reig-3c`, `rete-4`.
+- [x] **Characteristic Point Scaling** — ⚪ **not a gap.** Each rung is already its own
+      base effect (`crme-30` … `crme-55`); choosing "to no more than +2" *is* choosing
+      `crme-40`. What looked like a modelling gap was an extraction gap in Creo Animal
+      only — now item 22.
+- **Variable Base Levels** → item **25** · **Conditional Wards** → item **4**
+  (section C) · **Intensity/Damage** → item **4b** · **Level-Dependent Might
+  Reduction** → item **4c**
+- **Two modifier families landed that this item never listed:**
+  `creo-auram-unnatural` (4 rungs, covers 11 published spells) and
+  `aquam-base-individual` (5 sub-types, all magnitude 0).
+- **The original "~200 flagged effects" figure was wrong and should not be quoted.**
+  The Spell Modifiers audit reduced it to 23 effects across 4 modifier families; the
+  2026-07-28 audit reduced the genuinely uncomputable remainder to section B's two
+  families.
+- **Spec:** `docs/superpowers/specs/2026-07-25-spell-modifiers-design.md`
 
-**Two modifier families landed that this item never listed:**
-`creo-auram-unnatural` (4 rungs; covers 11 published spells) and
-`aquam-base-individual` (5 sub-types, all magnitude 0).
+### 3. Size Feature (MVP) — ✅ COMPLETE
+- **It did not land the way this item anticipated.** There is **no bespoke `size`
+  field on `Spell`** — Size is modelled as ordinary scoped Modifiers, needing no model
+  change beyond the `selectedModifiers` map that already existed.
+- 8 Size ladders in `assets/data/modifiers.json`, each 5 options: Base Individual (+0)
+  then ×10/×100/×1,000/×10,000 at +1…+4. Each is Form-scoped and excludes Intellego.
+  Magnitude feeds the level through the normal modifier path — **no special case in
+  the calculator.**
+- **Two limitations became real blockers and moved to item 19:** the +4 ceiling, and
+  the Mentem exemption being implemented Form-wide when the rulebook states it only
+  for Individual targets.
+- **The Aquam gap was closed as documented, not fixed** — see *Notes*.
 
-**The original "~200 flagged effects" figure was wrong** and should not be
-quoted. The Spell Modifiers spec's audit reduced it to 23 effects across 4
-modifier families; the 2026-07-28 audit reduced the genuinely uncomputable
-remainder to section B's two families.
+### 2. Requisites UI & Integration — ✅ COMPLETE (`feature/requisites-ui`)
+- One `Requisite(art, kind)` with a `RequisiteKind` enum (`free` = 0 magnitude,
+  `adding` = 1), replacing RequiredRequisite/AdditionalRequisite. `Spell`/`SpellDraft`
+  carry a single `requisites` list under one `requisites` key. *(Item 40 will reshape
+  this list into a map keyed by art.)*
+- Validation: a requisite art cannot be the spell's own Technique or Form, and no
+  duplicates. The add dropdown offers the de-duplicated union of ArsArts + ArsForms
+  minus the spell's own Technique and Form, minus already-chosen arts.
+- **The free/adding split is confirmed sufficient by the audit** — every
+  requisite-driven magnitude in the 360 published spells is +0 or +1.
 
-**Spec:** `docs/superpowers/specs/2026-07-25-spell-modifiers-design.md`
+### 1. Spell Constraint: One of Each Parameter — ✅ COMPLETE (`2d897db`)
+Exactly one Range, one Duration, one Target. **Ars Magica rule: spells have a single
+Range/Duration/Target; modifiers scale the level instead.** Three dedicated dropdowns;
+`SpellCreationBloc` enforces one-per-category in `ParameterAdded`;
+`SpellEngine.validateSpellDraft` requires all three. *(Item 26's *Mists of Change* is
+the one published spell that contradicts this — it stays blocked.)*
 
-### 5. Asset Data Loader Test Failures (Pre-existing) — ✅ COMPLETE
-- [x] Fixed the id-mismatch failure: 19 built-in spells' embedded `baseEffect` referenced ids that don't exist in `base_effects.json` (e.g. `crim-2` vs the real `creim-2`, and 14 spells across Intellego/Muto/Perdo/Rego Imaginem whose ids were entirely made up, merging two real catalog entries into one nonexistent id). Corrected all 19 to reference the real matching entry, picked by each spell's own flavor text. No level changes — every corrected pair has an identical `baseLevel`.
-- [x] Fixed the stale-count failures: `test/data/datasources/asset_data_loader_test.dart`'s `loadBaseEffects` count and `test/bloc/configuration_bloc_test.dart`'s 3 effect-count assertions hardcoded `38`, stale since the 604-effect extraction. Rather than just updating the number, made both self-healing: the loader test now derives its expected count from `base_effects.json`'s raw entry count directly (an oracle independent of the loader itself); the bloc tests derive their baseline via `AssetDataLoader().loadBaseEffects()` once in `setUpAll`.
-- **Rationale:** `base_effects.json` is bulk-extracted and grows unpredictably across many commits; a hardcoded count is exactly what silently drifted by 566 entries
-- **Impact:** Full suite now at 207 passed, 0 failed
-- **Note for item 27:** `loadSpellLibrary`'s count was deliberately left as a
-  literal, because the library was a small hand-curated list. Importing 360
-  spells invalidates that reasoning — make it self-healing too.
+### 5. Asset Data Loader Test Failures — ✅ COMPLETE
+- Fixed 19 built-in spells whose embedded `baseEffect` referenced ids not in
+  `base_effects.json`. No level changes — every corrected pair has an identical
+  `baseLevel`.
+- **Made the counts self-healing rather than just updating them:** the loader test
+  derives its expected count from `base_effects.json`'s raw entry count (an oracle
+  independent of the loader itself); the bloc tests derive their baseline via
+  `AssetDataLoader().loadBaseEffects()` once in `setUpAll`. **`base_effects.json` is
+  bulk-extracted and grows unpredictably; a hardcoded count is exactly what silently
+  drifted by 566 entries.**
 
-### Base Effect Extraction
-- [x] Extract all 604 base effects (Ars Magica 5e Guidelines)
-  - [x] Animal (30) · Aquam (115) · Auram (41) · Corpus (98) · Herbam (49)
-  - [x] Ignem (70) · Imaginem (38) · Mentem (58) · Terram (51) · Vim (54)
-- [x] Document out-of-scope patterns
-- [x] Fix Flutter desktop setup (sqflite_common_ffi initialization)
+### 8. UI: Disable Multi-Select for Range/Duration/Target — ✅ OBSOLETE
+Superseded by item 1, which replaced multi-select with three dedicated dropdowns.
+Selecting multiple Ranges, Durations or Targets is no longer representable.
+
+### Base Effect Extraction — ✅ COMPLETE
+604 base effects extracted (Animal 30 · Aquam 115 · Auram 41 · Corpus 98 · Herbam 49 ·
+Ignem 70 · Imaginem 38 · Mentem 58 · Terram 51 · Vim 54); out-of-scope patterns
+documented; Flutter desktop setup fixed (`sqflite_common_ffi` init). Catalog now
+stands at 611 entries after item 34.
 
 ---
 
-## Notes
-
-**Aquam MVP Limitation:**
-The Aquam Form has 5 distinct base-Individual sub-types (water/liquids/poisons/blood/wine), each with slightly different guideline progressions. The Size feature MVP supports one sub-type per spell via `aquam-base-individual`. Full support (mixed sub-types within Size calculations) is deferred.
+## Notes — standing constraints
 
 **Source of truth for the import:**
 `Ars-Magica-Open-License/reviewed/Ars Magica - Definitive Edition (Core Rules).md`,
-Chapter 9 (lines 12020–16004). Note that the 604 base effects were extracted from
-`raw-md/Ars Magica 5e - Core Rules.md` — item 22 reconciles the two.
+Chapter 9 (lines 12020–16004).
 
-**Verification rule of thumb:** a change to a screen's widget tree is not
-verified by `flutter test` alone — `flutter test` does not run
-`integration_test/`. See item 6.
+**Source precedence:** the rulebook repo holds the same book in `reviewed/` and `wip/`,
+in descending quality. **Always resolve `reviewed` → `wip` and stop at the first hit.**
+Filenames differ between folders, so match on book title. (`raw-md/` was unreviewed OCR
+and also carried two alternate core-rules copies; it has been removed upstream.) The
+604 base effects came from `raw-md` — item 22 reconciles the two.
+
+**Aquam MVP limitation:** the Aquam Form has 5 distinct base-Individual sub-types
+(water/liquids/poisons/blood/wine), each with slightly different guideline
+progressions. The Size MVP supports one sub-type per spell via `aquam-base-individual`,
+recorded in its base option's `baseIndividual` field. Mixed sub-types within Size
+calculations are deferred.
+
+**Prototype, not production:** backwards compatibility is not a goal and the database
+is droppable, so a serialized-shape change needs no migration story. Correctness beats
+compatibility.
+
+**Verification rule of thumb:** a change to a screen's widget tree is **not** verified
+by `flutter test` alone — `flutter test` does not run `integration_test/`. Run both.
+See item 6, and note that the integration suite is currently red.
