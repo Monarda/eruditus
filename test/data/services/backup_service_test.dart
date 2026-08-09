@@ -53,7 +53,7 @@ void main() {
     await database.close();
   });
 
-  Spell _spell(String id, {required String baseEffectId, int? chosenBaseLevel}) => Spell(
+  Spell buildSpell(String id, {required String baseEffectId, int? chosenBaseLevel}) => Spell(
         id: id,
         name: id,
         baseEffectId: baseEffectId,
@@ -67,14 +67,14 @@ void main() {
         updatedAt: DateTime.now(),
       );
 
-  Spell validSpell(String id) => _spell(id, baseEffectId: 'crig-10a');
+  Spell validSpell(String id) => buildSpell(id, baseEffectId: 'crig-10a');
 
   /// Invalid: a General guideline with no level supplied (check 1).
   Spell generalSpellWithNoChosenLevel(String id) =>
-      _spell(id, baseEffectId: 'revi-G1');
+      buildSpell(id, baseEffectId: 'revi-G1');
 
   Spell spellOnCustomEffect(String id, String effectId) =>
-      _spell(id, baseEffectId: effectId);
+      buildSpell(id, baseEffectId: effectId);
 
   BaseEffect customEffect(String id) => BaseEffect(
         id: id,

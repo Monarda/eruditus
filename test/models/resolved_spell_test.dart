@@ -6,7 +6,6 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
-import 'package:eruditus/models/modifier.dart';
 
 void main() {
   final effect = BaseEffect(

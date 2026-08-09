@@ -62,8 +62,7 @@ class SpellResolver {
   /// longer resolve — `calculateBreakdown` already treats an unresolvable
   /// modifier id as contributing 0, and this preserves that.
   List<Modifier> _selectedModifiers(Map<String, List<String>> selected) => [
-        for (final id in selected.keys)
-          if (_modifiersById[id] case final modifier?) modifier,
+        for (final id in selected.keys) ?_modifiersById[id],
       ];
 
   List<ResolvedSpell> resolveAll(Iterable<Spell> records) =>

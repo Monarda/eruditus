@@ -11,6 +11,9 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 
 void main() {
@@ -49,6 +52,19 @@ void main() {
   tearDown(() async {
     await database.close();
   });
+
+  Spell buildSpell(String id, {required String baseEffectId}) => Spell(
+        id: id,
+        name: id,
+        baseEffectId: baseEffectId,
+        rangeId: 'range-touch',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
   testWidgets('tapping export calls exportJson with the service output and shows success', (tester) async {
     // Note: exportToJson() reads the built-in effects/parameters/factors JSON
@@ -131,13 +147,45 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    // Verify the message ends with a period (success case with no rejections)
+    // Verify the exact status message (success case with no rejections)
     final statusMessage = find.byKey(const Key('status-message'));
     expect(statusMessage, findsOneWidget);
     expect(
-      (tester.widget<Text>(statusMessage).data ?? '').endsWith('.'),
-      isTrue,
-      reason: 'Status message should end with a period when no spells are rejected',
+      (tester.widget<Text>(statusMessage).data ?? ''),
+      'Imported 0 spells, 0 effects, 0 parameters.',
+    );
+  });
+
+  testWidgets('import with one invalid and one valid spell shows the rejection suffix', (tester) async {
+    final validJson = jsonEncode({
+      'version': '2.0',
+      'exportDate': DateTime.now().toIso8601String(),
+      'spells': [
+        buildSpell('good-1', baseEffectId: 'crig-10a').toMap(),
+        buildSpell('bad-1', baseEffectId: 'revi-G1').toMap(), // General with no chosen level
+      ],
+      'customEffects': [],
+      'customParameters': [],
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      home: BackupScreen(
+        backupService: backupService,
+        exportJson: (json) async {},
+        importJson: () async => validJson,
+      ),
+    ));
+
+    final importButton = tester.widget<ElevatedButton>(find.byKey(const Key('import-button')));
+    await tester.runAsync(() => importButton.onPressed!() as Future<void>);
+    await tester.pump();
+    await tester.pump();
+
+    final statusMessage = find.byKey(const Key('status-message'));
+    expect(statusMessage, findsOneWidget);
+    expect(
+      (tester.widget<Text>(statusMessage).data ?? ''),
+      'Imported 1 spells, 0 effects, 0 parameters. Skipped 1 invalid spell(s): bad-1',
     );
   });
 }

@@ -48,7 +48,13 @@ void main() {
     await database.close();
   });
 
-  Spell buildSpell(String id, {String? name, String baseEffectId = 'crig-10a'}) => Spell(
+  Spell buildSpell(
+    String id, {
+    String? name,
+    String baseEffectId = 'crig-10a',
+    Map<String, List<String>> selectedModifiers = const {},
+  }) =>
+      Spell(
         id: id,
         name: name,
         baseEffectId: baseEffectId,
@@ -56,6 +62,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const [],
+        selectedModifiers: selectedModifiers,
         provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -112,6 +119,23 @@ void main() {
       throwsA(isA<InvalidSpellException>().having(
         (e) => e.problems, 'problems',
         contains('Choose a level for this General guideline'),
+      )),
+    );
+  });
+
+  test('saveSpell rejects two options on a single-selection modifier', () async {
+    final spell = buildSpell(
+      'bad-3',
+      selectedModifiers: {
+        'size-ignem': ['size-ignem-1', 'size-ignem-2'],
+      },
+    );
+
+    expect(
+      () => repository.saveSpell(spell),
+      throwsA(isA<InvalidSpellException>().having(
+        (e) => e.problems, 'problems',
+        contains('Only one option may be selected for Size'),
       )),
     );
   });
