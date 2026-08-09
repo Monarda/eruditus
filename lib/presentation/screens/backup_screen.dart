@@ -38,7 +38,9 @@ class _BackupScreenState extends State<BackupScreen> {
       setState(() {
         _statusMessage = 'Imported ${result.spellsImported} spells, '
             '${result.effectsImported} effects, '
-            '${result.parametersImported} parameters.';
+            '${result.parametersImported} parameters.'
+            '${result.spellsRejected == 0 ? '' : ' Skipped ${result.spellsRejected} '
+                'invalid spell(s): ${result.rejectedSpells.map((e) => e.spellId).join(', ')}'}';
       });
     } catch (e) {
       setState(() => _statusMessage = 'Import failed: $e');

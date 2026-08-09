@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -105,5 +107,28 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Import failed:'), findsOneWidget);
+  });
+
+  testWidgets('successful import with no rejections shows correct status message with trailing period', (tester) async {
+    final validJson = jsonEncode({
+      'version': '2.0',
+      'exportDate': DateTime.now().toIso8601String(),
+      'spells': [],
+      'customEffects': [],
+      'customParameters': [],
+    });
+
+    await tester.pumpWidget(MaterialApp(
+      home: BackupScreen(
+        backupService: backupService,
+        exportJson: (json) async {},
+        importJson: () async => validJson,
+      ),
+    ));
+
+    await tester.tap(find.byKey(const Key('import-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Imported 0 spells, 0 effects, 0 parameters.'), findsOneWidget);
   });
 }

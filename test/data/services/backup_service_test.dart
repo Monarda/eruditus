@@ -27,7 +27,7 @@ void main() {
   late AppDatabase database;
   late SpellRepository spellRepository;
   late ConfigurationRepository configRepository;
-  late BackupService backupService;
+  late BackupService service;
 
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
@@ -46,12 +46,44 @@ void main() {
       resolver: resolver,
       configRepository: configRepository,
     );
-    backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+    service = BackupService(spellRepository: spellRepository, configRepository: configRepository);
   });
 
   tearDown(() async {
     await database.close();
   });
+
+  Spell _spell(String id, {required String baseEffectId, int? chosenBaseLevel}) => Spell(
+        id: id,
+        name: id,
+        baseEffectId: baseEffectId,
+        rangeId: 'range-touch',
+        durationId: 'duration-momentary',
+        targetId: 'target-individual',
+        requisites: const [],
+        chosenBaseLevel: chosenBaseLevel,
+        provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+  Spell validSpell(String id) => _spell(id, baseEffectId: 'crig-10a');
+
+  /// Invalid: a General guideline with no level supplied (check 1).
+  Spell generalSpellWithNoChosenLevel(String id) =>
+      _spell(id, baseEffectId: 'revi-G1');
+
+  Spell spellOnCustomEffect(String id, String effectId) =>
+      _spell(id, baseEffectId: effectId);
+
+  BaseEffect customEffect(String id) => BaseEffect(
+        id: id,
+        technique: 'Creo',
+        form: 'Ignem',
+        description: 'A custom effect',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
+      );
 
   test('exportToJson includes only user-created spells and custom config, with version and date', () async {
     await spellRepository.saveSpell(Spell(
@@ -70,7 +102,7 @@ void main() {
       provenance: Provenance(source: PublicationSource.userCreated),
     ));
 
-    final jsonString = await backupService.exportToJson();
+    final jsonString = await service.exportToJson();
     final data = jsonDecode(jsonString) as Map<String, dynamic>;
 
     expect(data['version'], '2.0');
@@ -106,7 +138,7 @@ void main() {
       'customParameters': [],
     };
 
-    final result = await backupService.importFromJson(jsonEncode(backup));
+    final result = await service.importFromJson(jsonEncode(backup));
 
     expect(result.spellsImported, 1);
     expect(result.effectsImported, 1);
@@ -137,8 +169,8 @@ void main() {
       'customParameters': [],
     });
 
-    await backupService.importFromJson(jsonString);
-    await backupService.importFromJson(jsonString);
+    await service.importFromJson(jsonString);
+    await service.importFromJson(jsonString);
 
     final spells = await spellRepository.getAllUserSpells();
     expect(spells.where((s) => s.id == 'imported-1').length, 1);
@@ -146,7 +178,7 @@ void main() {
 
   test('importFromJson throws FormatException for malformed JSON', () {
     expect(
-      () => backupService.importFromJson('not valid json{{{'),
+      () => service.importFromJson('not valid json{{{'),
       throwsFormatException,
     );
   });
@@ -154,7 +186,7 @@ void main() {
   test('importFromJson throws FormatException for an unsupported version', () {
     final backup = jsonEncode({'version': '99.0', 'spells': []});
     expect(
-      () => backupService.importFromJson(backup),
+      () => service.importFromJson(backup),
       throwsFormatException,
     );
   });
@@ -203,12 +235,63 @@ void main() {
         chosenBaseLevel: 20,
         templateId: 'tpl-rean-ward-against-beasts-of-legend'));
 
-    await backupService.importFromJson(await backupService.exportToJson());
+    await service.importFromJson(await service.exportToJson());
 
     final restored = (await spellRepository.getAllUserSpells())
         .firstWhere((s) => s.record.id == wardSpellId);
 
     expect(restored.record.chosenBaseLevel, 20);
     expect(restored.record.templateId, 'tpl-rean-ward-against-beasts-of-legend');
+  });
+
+  test('a spell built on a custom effect from the same backup imports', () async {
+    // Regression: spells were written before the custom effects they depend
+    // on, so this spell used to be validated against a catalog missing its
+    // own effect.
+    final json = jsonEncode({
+      'version': '2.0',
+      'exportDate': DateTime.now().toIso8601String(),
+      'spells': [spellOnCustomEffect('s1', 'custom-1').toMap()],
+      'customEffects': [customEffect('custom-1').toMap()],
+      'customParameters': <Map<String, dynamic>>[],
+    });
+
+    final result = await service.importFromJson(json);
+
+    expect(result.spellsImported, 1);
+    expect(result.rejectedSpells, isEmpty);
+  });
+
+  test('an invalid spell is skipped and reported, and the good ones still land', () async {
+    final json = jsonEncode({
+      'version': '2.0',
+      'exportDate': DateTime.now().toIso8601String(),
+      'spells': [
+        validSpell('good-1').toMap(),
+        generalSpellWithNoChosenLevel('bad-1').toMap(),
+        validSpell('good-2').toMap(),
+      ],
+      'customEffects': <Map<String, dynamic>>[],
+      'customParameters': <Map<String, dynamic>>[],
+    });
+
+    final result = await service.importFromJson(json);
+
+    expect(result.spellsImported, 2);
+    expect(result.rejectedSpells.map((e) => e.spellId), ['bad-1']);
+    expect(await spellRepository.getSpellById('good-2'), isNotNull);
+  });
+
+  test('round-trip through the real service preserves a valid spell', () async {
+    // Closes todo item 7's coverage hole: the old round-trip test duplicated
+    // spell_test.dart's serialization test and never called the service.
+    await spellRepository.saveSpell(validSpell('rt-1'));
+
+    final exported = await service.exportToJson();
+    await spellRepository.deleteSpell('rt-1');
+    final result = await service.importFromJson(exported);
+
+    expect(result.spellsImported, 1);
+    expect(await spellRepository.getSpellById('rt-1'), isNotNull);
   });
 }
