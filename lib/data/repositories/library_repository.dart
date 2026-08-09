@@ -42,6 +42,7 @@ class LibraryRepository {
     resolver.updateCatalogs(
       effects: await configRepository.getAllEffects(),
       parameters: await configRepository.getAllParameters(),
+      modifiers: await configRepository.getAllModifiers(),
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -24,7 +25,7 @@ void main() {
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
   final resolver = SpellResolver(
-      effects: [effect], parameters: [voice, momentary, individual]);
+      effects: [effect], parameters: [voice, momentary, individual], modifiers: const []);
 
   Spell record({String baseEffectId = 'crim-2', String rangeId = 'range-voice'}) => Spell(
         id: 'spell-1',
@@ -37,6 +38,19 @@ void main() {
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
+      );
+
+  Spell buildSpell({Map<String, List<String>> selectedModifiers = const {}}) => Spell(
+        id: 'test-spell',
+        baseEffectId: effect.id,
+        rangeId: voice.id,
+        durationId: momentary.id,
+        targetId: individual.id,
+        selectedModifiers: selectedModifiers,
+        requisites: const [],
+        provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
   test('resolve joins a record to its catalog entries', () {
@@ -75,7 +89,8 @@ void main() {
   });
 
   test('resolveAll on an empty catalog yields unresolved spells rather than throwing', () {
-    final empty = SpellResolver(effects: const [], parameters: const []);
+    final empty =
+        SpellResolver(effects: const [], parameters: const [], modifiers: const []);
 
     final resolved = empty.resolveAll([record()]);
 
@@ -132,5 +147,54 @@ void main() {
     expect(resolved.length, 2);
     expect(resolved[0].isResolved, isTrue);
     expect(resolved[1].isResolved, isFalse);
+  });
+
+  test('resolve populates the modifiers the spell actually selects', () {
+    final sizeTerram = Modifier(
+      id: 'size-terram',
+      name: 'Size (Terram)',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(form: 'Terram'),
+      options: [ModifierOption(id: 'size-terram-0', label: 'Base', magnitude: 0)],
+      provenance: Provenance(
+          source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final unrelated = Modifier(
+      id: 'size-aquam',
+      name: 'Size (Aquam)',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(form: 'Aquam'),
+      options: [ModifierOption(id: 'size-aquam-0', label: 'Base', magnitude: 0)],
+      provenance: Provenance(
+          source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+
+    final resolver = SpellResolver(
+      effects: [effect],
+      parameters: [voice, momentary, individual],
+      modifiers: [sizeTerram, unrelated],
+    );
+
+    final resolved = resolver.resolve(
+      buildSpell(selectedModifiers: {'size-terram': ['size-terram-0']}),
+    );
+
+    expect(resolved.modifiers.map((m) => m.id), ['size-terram']);
+  });
+
+  test('an unknown modifier id is skipped, not surfaced as null', () {
+    final resolver = SpellResolver(
+      effects: [effect],
+      parameters: [voice, momentary, individual],
+      modifiers: const [],
+    );
+
+    final resolved = resolver.resolve(
+      buildSpell(selectedModifiers: {'no-such-modifier': ['x']}),
+    );
+
+    // Tolerated deliberately: calculateBreakdown treats an unresolvable
+    // modifier id as contributing 0, and this work does not tighten that.
+    expect(resolved.modifiers, isEmpty);
   });
 }

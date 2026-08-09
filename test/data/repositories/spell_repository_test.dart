@@ -26,6 +26,7 @@ void main() {
     final resolver = SpellResolver(
       effects: await assetLoader.loadBaseEffects(),
       parameters: await assetLoader.loadParameters(),
+      modifiers: await assetLoader.loadModifiers(),
     );
     repository = SpellRepository(
         datasource: LocalSpellDatasource(database: database), resolver: resolver);

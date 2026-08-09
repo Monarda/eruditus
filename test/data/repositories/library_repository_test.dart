@@ -31,6 +31,7 @@ void main() {
     final resolver = SpellResolver(
       effects: await assetLoader.loadBaseEffects(),
       parameters: await assetLoader.loadParameters(),
+      modifiers: await assetLoader.loadModifiers(),
     );
     spellRepository = SpellRepository(
         datasource: LocalSpellDatasource(database: database), resolver: resolver);
@@ -122,6 +123,7 @@ void main() {
       final resolver = SpellResolver(
         effects: await configRepository.getAllEffects(),
         parameters: await configRepository.getAllParameters(),
+        modifiers: await configRepository.getAllModifiers(),
       );
       final spellRepositoryWithConfig = SpellRepository(
           datasource: LocalSpellDatasource(database: database), resolver: resolver);

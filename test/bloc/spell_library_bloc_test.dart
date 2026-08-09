@@ -142,6 +142,7 @@ void main() {
     resolver = SpellResolver(
       effects: [effect1, effect2],
       parameters: [rangeParam, durationParam, targetParam],
+      modifiers: const [],
     );
     // Derived, not a literal — the built-in count is generator output now
     // (see AssetDataLoaderTest's identically-motivated fix) and changes

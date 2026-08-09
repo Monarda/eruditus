@@ -44,6 +44,7 @@ Future<void> main() async {
   final resolver = SpellResolver(
     effects: await configRepository.getAllEffects(),
     parameters: await configRepository.getAllParameters(),
+    modifiers: await configRepository.getAllModifiers(),
   );
   final spellRepository = SpellRepository(
       datasource: LocalSpellDatasource(database: database), resolver: resolver);

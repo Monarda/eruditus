@@ -2,6 +2,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/library_entry.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -22,12 +23,21 @@ class ResolvedSpell implements LibraryEntry {
   final Parameter? duration;
   final Parameter? target;
 
+  /// The catalog entries [Spell.selectedModifiers]' keys resolve to.
+  ///
+  /// Defaults to empty because the only direct constructions of this class
+  /// outside [SpellResolver] are test fixtures, where "no modifiers" is
+  /// accurate rather than a bypass. The production path is
+  /// [SpellResolver.resolve], which always populates it.
+  final List<Modifier> modifiers;
+
   const ResolvedSpell({
     required this.record,
     this.baseEffect,
     this.range,
     this.duration,
     this.target,
+    this.modifiers = const [],
   });
 
   @override

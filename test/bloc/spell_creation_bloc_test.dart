@@ -66,6 +66,7 @@ void main() {
     final resolver = SpellResolver(
       effects: [creoIgnemEffect],
       parameters: [rangeParam, durationParam, targetParam],
+      modifiers: const [],
     );
     spellRepository = SpellRepository(
         datasource: LocalSpellDatasource(database: database), resolver: resolver);
