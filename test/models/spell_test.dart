@@ -3,6 +3,7 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/level_adjustment.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -465,6 +466,165 @@ void main() {
         ..['source'] = 'user-created'
         ..['citations'] = <dynamic>[];
       expect(Spell.fromMap(map).provenance.source, PublicationSource.userCreated);
+    });
+  });
+
+  group('validateSpellAgainstCatalog', () {
+    BaseEffect fixedEffect() => BaseEffect(
+          id: 'crig-10a', technique: 'Creo', form: 'Ignem',
+          description: 'A fire doing +10 damage', baseLevel: 10,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+        );
+
+    BaseEffect generalEffect() => BaseEffect(
+          id: 'revi-G1', technique: 'Rego', form: 'Vim',
+          description: 'Ward against beings of one realm', baseLevel: null,
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+        );
+
+    Modifier singleChoice() => Modifier(
+          id: 'size-ignem', name: 'Size (Ignem)',
+          selectionMode: ModifierSelectionMode.single,
+          scope: const ModifierScope(form: 'Ignem'),
+          options: [
+            ModifierOption(id: 'a', label: 'A', magnitude: 0),
+            ModifierOption(id: 'b', label: 'B', magnitude: 1),
+          ],
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+        );
+
+    List<String> validate({
+      required BaseEffect effect,
+      int? chosenBaseLevel,
+      List<Requisite> requisites = const [],
+      Map<String, List<String>> selectedModifiers = const {},
+      List<Modifier> modifiers = const [],
+      bool isTemplate = false,
+    }) =>
+        validateSpellAgainstCatalog(
+          effect: effect,
+          chosenBaseLevel: chosenBaseLevel,
+          requisites: requisites,
+          selectedModifiers: selectedModifiers,
+          modifiers: modifiers,
+          isTemplate: isTemplate,
+        );
+
+    test('a valid fixed-level spell has no problems', () {
+      expect(validate(effect: fixedEffect()), isEmpty);
+    });
+
+    test('check 1: a General guideline with no chosen level is a problem', () {
+      expect(validate(effect: generalEffect()),
+          contains('Choose a level for this General guideline'));
+    });
+
+    test('check 1: a General guideline with a level below 1 is a problem', () {
+      expect(validate(effect: generalEffect(), chosenBaseLevel: 0),
+          contains('The chosen level must be at least 1'));
+    });
+
+    test('check 1: a General guideline with a valid level is fine', () {
+      expect(validate(effect: generalEffect(), chosenBaseLevel: 20), isEmpty);
+    });
+
+    test('check 2: a chosen level on a non-General guideline is a problem', () {
+      expect(validate(effect: fixedEffect(), chosenBaseLevel: 20),
+          contains('A chosen base level applies only to a General guideline'));
+    });
+
+    test('check 3: a requisite equal to the spell own Technique is a problem', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          requisites: [Requisite(art: 'Creo', kind: RequisiteKind.free)],
+        ),
+        contains("Requisite art cannot be the spell's own technique or form"),
+      );
+    });
+
+    test('check 3: a requisite equal to the spell own Form is a problem', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          requisites: [Requisite(art: 'Ignem', kind: RequisiteKind.free)],
+        ),
+        contains("Requisite art cannot be the spell's own technique or form"),
+      );
+    });
+
+    test('check 4: a duplicate requisite art is a problem', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          requisites: [
+            Requisite(art: 'Rego', kind: RequisiteKind.free),
+            Requisite(art: 'Rego', kind: RequisiteKind.adding),
+          ],
+        ),
+        contains('Duplicate requisite art: Rego'),
+      );
+    });
+
+    test('check 5: two options on a single-selection modifier is a problem', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          selectedModifiers: {'size-ignem': ['a', 'b']},
+          modifiers: [singleChoice()],
+        ),
+        contains('Only one option may be selected for Size (Ignem)'),
+      );
+    });
+
+    test('check 5: one option on a single-selection modifier is fine', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          selectedModifiers: {'size-ignem': ['a']},
+          modifiers: [singleChoice()],
+        ),
+        isEmpty,
+      );
+    });
+
+    test('an unknown modifier id is tolerated, matching calculateBreakdown', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          selectedModifiers: {'no-such-modifier': ['a', 'b']},
+          modifiers: [singleChoice()],
+        ),
+        isEmpty,
+      );
+    });
+
+    test('isTemplate skips checks 1 and 2, which cannot apply to a template', () {
+      // A General template legitimately has no chosen level -- supplying one is
+      // what instantiating it means.
+      expect(validate(effect: generalEffect(), isTemplate: true), isEmpty);
+    });
+
+    test('isTemplate still runs checks 3, 4 and 5', () {
+      expect(
+        validate(
+          effect: fixedEffect(),
+          requisites: [Requisite(art: 'Creo', kind: RequisiteKind.free)],
+          isTemplate: true,
+        ),
+        contains("Requisite art cannot be the spell's own technique or form"),
+      );
+    });
+
+    test('problems accumulate rather than short-circuiting', () {
+      final problems = validate(
+        effect: generalEffect(),
+        requisites: [
+          Requisite(art: 'Rego', kind: RequisiteKind.free),
+          Requisite(art: 'Rego', kind: RequisiteKind.adding),
+        ],
+      );
+      expect(problems.length, 2);
     });
   });
 }

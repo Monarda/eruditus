@@ -1,5 +1,6 @@
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/level_adjustment.dart';
+import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -33,6 +34,94 @@ List<String> validateSpellProse({
     return ['a published spell needs a summary or a description'];
   }
   return const [];
+}
+
+/// The catalog-dependent invariants every spell must satisfy, stated once and
+/// shared by every path that can produce or hold one — the same contract
+/// [validateSpellProse] provides for prose.
+///
+/// Returns a list of human-readable problems; empty means valid. Problems
+/// accumulate: a caller showing them to a user should see all of them at once.
+///
+/// **Why this is a free function taking pieces rather than a method on [Spell].**
+/// [Spell] deliberately holds `baseEffectId` and not [BaseEffect], so it cannot
+/// see `isGeneral`, the effect's technique/form, or a modifier's
+/// `selectionMode`. Three of these five checks are therefore uncheckable from
+/// inside the record. Taking the pieces (rather than a `ResolvedSpell`) is what
+/// lets [SpellDraft] — which holds a bare `BaseEffect?`, never a resolved
+/// wrapper — call the identical function, and avoids a circular import, since
+/// `resolved_spell.dart` imports this file.
+///
+/// [isTemplate] skips checks 1 and 2. A `SpellTemplate` built on a General
+/// guideline legitimately has no chosen level; supplying one is precisely what
+/// instantiating the template means.
+List<String> validateSpellAgainstCatalog({
+  required BaseEffect effect,
+  required int? chosenBaseLevel,
+  required List<Requisite> requisites,
+  required Map<String, List<String>> selectedModifiers,
+  required List<Modifier> modifiers,
+  bool isTemplate = false,
+}) {
+  final problems = <String>[];
+
+  if (!isTemplate) {
+    // 1. A General guideline's level comes from the caster, so it must be
+    //    present and usable. Absent it, calculateBreakdown throws.
+    if (effect.isGeneral) {
+      if (chosenBaseLevel == null) {
+        problems.add('Choose a level for this General guideline');
+      } else if (chosenBaseLevel < 1) {
+        problems.add('The chosen level must be at least 1');
+      }
+    } else if (chosenBaseLevel != null) {
+      // 2. The converse. calculateBreakdown ignores a chosen level on a
+      //    fixed-level guideline, so a stray one is silently meaningless
+      //    stored data rather than a visible error.
+      problems.add('A chosen base level applies only to a General guideline');
+    }
+  }
+
+  // 3 and 4. A requisite naming the spell's own Art is meaningless, and the
+  //    same Art twice is contradictory when the two carry different kinds.
+  final seenArts = <String>{};
+  final duplicateArts = <String>{};
+
+  // First pass: identify duplicates
+  for (final requisite in requisites) {
+    if (!seenArts.add(requisite.art)) {
+      duplicateArts.add(requisite.art);
+    }
+  }
+
+  // Second pass: report problems
+  seenArts.clear();
+  for (final requisite in requisites) {
+    if (requisite.art == effect.technique || requisite.art == effect.form) {
+      if (!duplicateArts.contains(requisite.art)) {
+        problems.add("Requisite art cannot be the spell's own technique or form");
+      }
+    }
+    if (!seenArts.add(requisite.art)) {
+      problems.add('Duplicate requisite art: ${requisite.art}');
+    }
+  }
+
+  // 5. selectionMode lives on the catalog entry, not on the record, which is
+  //    why this cannot be checked without the modifier list. An id that does
+  //    not resolve is tolerated, matching calculateBreakdown's treatment of
+  //    an unresolvable modifier as contributing 0.
+  final modifiersById = {for (final modifier in modifiers) modifier.id: modifier};
+  selectedModifiers.forEach((modifierId, optionIds) {
+    final modifier = modifiersById[modifierId];
+    if (modifier == null) return;
+    if (modifier.selectionMode == ModifierSelectionMode.single &&
+        optionIds.length > 1) {
+      problems.add('Only one option may be selected for ${modifier.name}');
+    }
+  });
+
+  return problems;
 }
 
 /// A saved spell, stored as references into the effect/parameter catalogs.
