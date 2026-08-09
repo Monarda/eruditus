@@ -161,4 +161,49 @@ void main() {
       }
     }
   });
+
+  test('assertion 7: every published spell and template satisfies the catalog invariants', () async {
+    final effects = {for (final e in await loader.loadBaseEffects()) e.id: e};
+    final modifiers = await loader.loadModifiers();
+
+    final failures = <String>[];
+
+    for (final spell in await loader.loadSpellLibrary()) {
+      final effect = effects[spell.baseEffectId];
+      // Assertion 4 already covers an id that does not resolve.
+      if (effect == null) continue;
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        chosenBaseLevel: spell.chosenBaseLevel,
+        requisites: spell.requisites,
+        selectedModifiers: spell.selectedModifiers,
+        modifiers: modifiers,
+      );
+      if (problems.isNotEmpty) {
+        failures.add('${spell.name} (${spell.id}): ${problems.join('; ')}');
+      }
+    }
+
+    for (final template in await loader.loadSpellTemplates()) {
+      final effect = effects[template.baseEffectId];
+      if (effect == null) continue;
+      // isTemplate: a General template legitimately has no chosen level --
+      // supplying one is what instantiating it means. Checks 3, 4 and 5 do
+      // still apply.
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        chosenBaseLevel: null,
+        requisites: template.requisites,
+        selectedModifiers: template.selectedModifiers,
+        modifiers: modifiers,
+        isTemplate: true,
+      );
+      if (problems.isNotEmpty) {
+        failures.add('${template.name} (${template.id}): ${problems.join('; ')}');
+      }
+    }
+
+    expect(failures, isEmpty,
+        reason: 'published assets break catalog invariants:\n${failures.join('\n')}');
+  });
 }
