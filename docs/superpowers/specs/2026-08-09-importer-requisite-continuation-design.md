@@ -159,11 +159,12 @@ gained or lost is visible rather than buried in a 300-spell diff.
 
 **Expected, and to be confirmed rather than assumed:**
 
-- **24** currently-imported spells gain the requisite they had lost, and **34**
-  descriptions lose their `Req: <Art>` prefix. The book's 45 continuation lines
-  are the upper bound, not the expected asset delta — the remainder belong to
-  spells that are blocked and therefore absent from `spell_library.json`. Some
-  of those may now become importable, which `import_report.md` will name.
+- **Confirmed 2026-08-09, on regeneration:** **26** currently-imported spells
+  gained the requisite they had lost, and **34** descriptions lost their
+  `Req: <Art>` prefix (the original estimate here was 24; the actual count,
+  measured, is 26). `imported`/`templates`/`blocked` counts were unchanged and
+  the blocked *set* was identical before and after — no spell became newly
+  importable.
 - *Plants to Iron* keeps its Terram requisite — it currently has one only by
   the generation-window artifact, and should now obtain it legitimately.
 - The imported count does not fall. A drop means a spell that previously parsed

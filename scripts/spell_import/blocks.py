@@ -30,6 +30,10 @@ _SECTION = re.compile(
 _LEVEL = re.compile(r"^####\s+(?:\*{0,2})(?:LEVEL\s+(?P<level>\d+)|(?P<general>GENERAL))")
 _NAME = re.compile(r"^#####\s+(?P<name>.+?)\s*$")
 _DESIGN = re.compile(r"^\(\s*(?:Base\b|As ward guideline\s*\))")
+# A requisite the book prints on its own line, directly beneath the stat
+# line, rather than inline within it. See
+# docs/superpowers/specs/2026-08-09-importer-requisite-continuation-design.md.
+_REQ_CONTINUATION = re.compile(r"^Req(?:uisites?)?:")
 
 
 def _normalize_stat_line(line: str) -> str:
@@ -108,9 +112,26 @@ def parse_de(lines: list[str]) -> tuple[list[SpellBlock], list[str]]:
             name = None
             continue
 
+        normalized = _normalize_stat_line(raw)
+        folded = statline.strip_markup(normalized)
+
+        # Look past any blank lines for a Req: continuation line and fold
+        # it into the stat line before parsing, so parse_statline keeps
+        # seeing one logical line exactly as it always has. If none is
+        # found, prose_start stays at index + 1 and behaviour is identical
+        # to before this fold existed.
+        prose_start = index + 1
+        cursor = prose_start
+        while cursor < len(lines) and not statline.strip_markup(lines[cursor]):
+            cursor += 1
+        if cursor < len(lines):
+            candidate = statline.strip_markup(lines[cursor])
+            if _REQ_CONTINUATION.match(candidate):
+                folded = f"{folded}, {candidate}"
+                prose_start = cursor + 1
+
         try:
-            normalized = _normalize_stat_line(raw)
-            stat = statline.parse_statline(normalized)
+            stat = statline.parse_statline(folded)
         except ValueError as e:
             problems.append(f"line {index + 1}: {e}")
             name = None
@@ -118,7 +139,7 @@ def parse_de(lines: list[str]) -> tuple[list[SpellBlock], list[str]]:
 
         prose_lines: list[str] = []
         design: str | None = None
-        cursor = index + 1
+        cursor = prose_start
         while cursor < len(lines):
             candidate = statline.strip_markup(lines[cursor])
             if _NAME.match(candidate) or _SECTION.match(candidate) or _LEVEL.match(candidate):

@@ -100,3 +100,74 @@ class ParseDefinitiveEditionTest(unittest.TestCase):
             "Whispering Winds",
             "Wizard's Vigil",
         ])
+
+    def test_continuation_line_requisite_is_read(self):
+        # "The Beast Remade" (Muto Corpus) prints its requisite on the line
+        # after the stat line:
+        #   R: Touch, D: Sun, T: Ind<br>
+        #   Req: Corpus<br>
+        # parse_statline never sees that second line unless blocks.py folds
+        # it in first.
+        block = next(b for b in self.blocks if b.name == "The Beast Remade")
+        self.assertEqual(block.stat.requisite_arts, ["Corpus"])
+
+    def test_continuation_line_requisite_does_not_leak_into_prose(self):
+        # The same unread line used to be appended to prose_lines, so the
+        # description came out prefixed "Req: Corpus Gives one land beast...".
+        block = next(b for b in self.blocks if b.name == "The Beast Remade")
+        self.assertFalse(block.prose.startswith("Req:"), block.prose[:40])
+
+    def test_continuation_line_with_multiple_arts_is_read(self):
+        # "Fog of Confusion" prints "Req: Imaginem, Rego" on its
+        # continuation line -- both arts must survive the fold and the
+        # comma split in statline._REQ.
+        block = next(b for b in self.blocks if b.name == "Fog of Confusion")
+        self.assertEqual(block.stat.requisite_arts, ["Imaginem", "Rego"])
+
+    def test_blank_line_between_stat_line_and_requisite_is_tolerated(self):
+        # No spell in the current book actually has a blank line here (every
+        # one of the 45 continuation lines sits immediately below its stat
+        # line), but the fold must not depend on that -- it looks past
+        # blank lines rather than only at index + 1.
+        lines = [
+            "##### A Made-Up Spell",
+            "R: Touch, D: Sun, T: Ind",
+            "",
+            "Req: Corpus",
+            "A description sentence.",
+            "(Base 5, +1 Touch, +2 Sun)",
+        ]
+        blocks_found, problems = blocks.parse_de(
+            ["### Muto Corpus Spells", "#### LEVEL 10"] + lines
+        )
+        self.assertEqual(problems, [])
+        self.assertEqual(len(blocks_found), 1)
+        self.assertEqual(blocks_found[0].stat.requisite_arts, ["Corpus"])
+        self.assertEqual(blocks_found[0].prose, "A description sentence.")
+
+    def test_inline_requisite_on_the_stat_line_still_parses(self):
+        # No revision of the book currently uses this form, but it is the
+        # form statline._REQ was originally written for, and the fold must
+        # not regress it: a stat line that already carries its own Req:
+        # should not look for -- or require -- a continuation line at all.
+        lines = [
+            "##### Another Made-Up Spell",
+            "R: Touch, D: Sun, T: Ind, Req: Corpus",
+            "A description sentence.",
+            "(Base 5, +1 Touch, +2 Sun)",
+        ]
+        blocks_found, problems = blocks.parse_de(
+            ["### Muto Corpus Spells", "#### LEVEL 10"] + lines
+        )
+        self.assertEqual(problems, [])
+        self.assertEqual(len(blocks_found), 1)
+        self.assertEqual(blocks_found[0].stat.requisite_arts, ["Corpus"])
+        self.assertEqual(blocks_found[0].prose, "A description sentence.")
+
+    def test_spell_with_no_requisite_line_is_unaffected(self):
+        # Regression guard: a spell with no Req: anywhere keeps
+        # requisite_arts == [] and its prose starts with its real first
+        # sentence, not with anything consumed by the new look-ahead.
+        block = next(b for b in self.blocks if b.name == "Soothe Pains of the Beast")
+        self.assertEqual(block.stat.requisite_arts, [])
+        self.assertFalse(block.prose.startswith("Req:"))
