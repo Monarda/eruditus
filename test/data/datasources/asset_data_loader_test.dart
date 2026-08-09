@@ -419,4 +419,24 @@ void main() {
     expect(elaborate.selectionMode, ModifierSelectionMode.single);
     expect(elaborate.options.map((o) => o.magnitude).toList(), [0, 1, 2, 3]);
   });
+
+  test('repeat loads return the identical parsed list, not a re-parse', () async {
+    final loader = AssetDataLoader();
+
+    final first = await loader.loadBaseEffects();
+    final second = await loader.loadBaseEffects();
+
+    // Identity, not equality: a re-parse would produce an equal-but-distinct
+    // list. ConfigurationRepository.getAllEffects delegates straight here and
+    // is called by both SpellRepository._refreshResolver (every save) and
+    // LibraryRepository._refreshResolver (every Library tab visit).
+    expect(identical(first, second), isTrue);
+  });
+
+  test('a cached list cannot be mutated by one caller and seen by another', () async {
+    final loader = AssetDataLoader();
+    final effects = await loader.loadBaseEffects();
+
+    expect(() => effects.clear(), throwsUnsupportedError);
+  });
 }
