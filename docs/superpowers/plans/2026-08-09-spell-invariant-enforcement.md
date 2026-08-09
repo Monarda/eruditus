@@ -21,10 +21,38 @@
 - **Run `flutter test` after every task.** `flutter test` does **not** run `integration_test/` — that needs `flutter test integration_test/<file> -d windows`. See todo item 6.
 - **Note:** `integration_test/spell_creation_flow_test.dart` has 2 of 5 tests failing on `main` before this work starts (todo item 6). Do not treat those two as regressions; do confirm the count stays at 2.
 
-## Two refinements to the spec, decided during planning
+## Three refinements to the spec, decided during planning and execution
 
 1. **The validator needs an `isTemplate` flag.** The spec says checks 1 and 2 do not apply to templates, but a `SpellTemplate` built on a General guideline legitimately has no chosen level — so running check 1 over `spell_templates.json` would fail every General template. The validator therefore takes `bool isTemplate = false`, which skips checks 1 and 2.
 2. **`SpellResolver.modifiers` is required; `ResolvedSpell.modifiers` defaults to `const []`.** The resolver is the production construction path and must not be able to forget modifiers. `ResolvedSpell` is constructed directly only by test fixtures (21 sites), where an empty modifier list is accurate rather than a bypass.
+3. **Checks 3 and 4 interact; they are not independent passes.** Discovered 2026-08-09 during Task 3: this plan originally specified checks 3 ("requisite art cannot match the spell's own Technique/Form") and 4 ("no duplicate requisite art") as two fully independent single-pass checks — and that version is a **self-contradiction**, confirmed by hand-tracing and by an independent task reviewer. `generalEffect()` (Rego Vim) with two `Requisite(art: 'Rego', ...)` entries produces **4** problems under the independent-passes algorithm (1 general-level + 2× check 3 + 1× check 4), but this plan's own `'problems accumulate rather than short-circuiting'` test asserted `problems.length == 2`. No implementation of the originally-specified algorithm can pass the originally-specified test.
+   **Ruling (human, 2026-08-09): suppress the redundant check-3 message when the same requisite art is already flagged as a duplicate by check 4.** A two-pass algorithm first collects arts that appear more than once, then on the report pass skips the "cannot be the spell's own technique or form" message for any requisite whose art is in that set — the duplicate message alone still fires. This is not merely cosmetic: a user who deduplicates down to one copy of that requisite still sees check 3 fire normally on the remaining single instance, so no problem is permanently hidden, only de-duplicated while the redundant row exists. Confirmed by the 2026-08-09 published-asset scan (0 spells have any duplicate-art or self-technique-art violation today) that this changes no currently-shipped spell's validation outcome — the fork only matters for malformed data that cannot exist in the shipped assets today.
+   **Corrected algorithm** (supersedes the checks-3/4 code shown originally in Task 3, Step 3, below):
+   ```dart
+     // 3 and 4. A requisite naming the spell's own Art is meaningless, and the
+     //    same Art twice is contradictory. The two checks interact: when an art
+     //    is both self-matching and duplicated, only the duplicate message
+     //    fires -- the self-match message would be redundant noise about the
+     //    same offending row. Deduplicating down to one copy re-exposes check 3
+     //    on the remaining instance, so nothing is permanently hidden.
+     final seenArts = <String>{};
+     final duplicateArts = <String>{};
+     for (final requisite in requisites) {
+       if (!seenArts.add(requisite.art)) duplicateArts.add(requisite.art);
+     }
+
+     seenArts.clear();
+     for (final requisite in requisites) {
+       if ((requisite.art == effect.technique || requisite.art == effect.form) &&
+           !duplicateArts.contains(requisite.art)) {
+         problems.add("Requisite art cannot be the spell's own technique or form");
+       }
+       if (!seenArts.add(requisite.art)) {
+         problems.add('Duplicate requisite art: ${requisite.art}');
+       }
+     }
+   ```
+   **Test coverage requirement added by this ruling:** a requisite matching the spell's own Technique/Form that is *not* duplicated must still produce the check-3 message — the original brief's test suite covered the duplicated+self-matching case only by accident (via the contradiction above) and never covered the plain, non-duplicated self-match case in isolation. Task 3 must include this test regardless of which task closes the ruling.
 
 ---
 
