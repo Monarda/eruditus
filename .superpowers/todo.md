@@ -1434,4 +1434,6 @@ compatibility.
 
 **Verification rule of thumb:** a change to a screen's widget tree is **not** verified
 by `flutter test` alone — `flutter test` does not run `integration_test/`. Run both.
-See item 6, and note that the integration suite is currently red.
+See item 6. As of 2026-08-10 the integration suite is green (7/7) — the two
+`scrollUntilVisible` calls that fell behind the library's growth to 294 spells +
+23 templates now carry a `maxScrolls: 500` budget.
