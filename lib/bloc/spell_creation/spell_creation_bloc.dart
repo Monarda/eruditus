@@ -7,7 +7,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
-import 'package:eruditus/models/requisite.dart' show Requisite, RequisiteKind;
+import 'package:eruditus/models/requisite.dart' show RequisiteKind;
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
@@ -120,24 +120,21 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       ));
     } else if (event is RequisiteAdded) {
       final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
-      final updated = [...state.draft.requisites, Requisite(art: event.art, kind: kind)];
+      final updated = {...state.draft.requisites, event.art: kind};
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
     } else if (event is RequisiteRemoved) {
-      final updated = state.draft.requisites
-          .where((r) => r.art != event.art)
-          .toList();
+      final updated = Map<String, RequisiteKind>.from(state.draft.requisites)
+        ..remove(event.art);
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
     } else if (event is RequisiteKindChanged) {
       final kind = event.newKind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
-      final updated = state.draft.requisites.map((r) {
-        return r.art == event.art ? Requisite(art: r.art, kind: kind) : r;
-      }).toList();
+      final updated = {...state.draft.requisites, event.art: kind};
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),

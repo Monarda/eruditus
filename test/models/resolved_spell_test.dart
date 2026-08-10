@@ -52,7 +52,7 @@ void main() {
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         description: 'A face on a wall. Level 10.',
         provenance: Provenance(
           source: PublicationSource.published,
@@ -69,7 +69,7 @@ void main() {
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         description: 'A face on a wall. Level 10.',
         provenance: Provenance(
           source: PublicationSource.published,

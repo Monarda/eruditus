@@ -152,7 +152,7 @@ void main() {
           .calculateBreakdown(
               baseEffect: ward, chosenBaseLevel: 20,
               range: r, duration: d, target: t,
-              selectedModifiers: const {}, requisites: const [])
+              selectedModifiers: const {}, requisites: const {})
           .level;
 
       final printed = levelAt(touch, ring, circle);

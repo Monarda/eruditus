@@ -94,7 +94,7 @@ void main() {
         range: _range,
         duration: _duration,
         target: _target,
-        requisites: [Requisite(art: 'Ignem', kind: RequisiteKind.adding)],
+        requisites: {'Ignem': RequisiteKind.adding},
       );
 
       final errors = engine.validateSpellDraft(draft);
@@ -102,28 +102,6 @@ void main() {
         errors,
         contains("Requisite art cannot be the spell's own technique or form"),
       );
-    });
-
-    test('fails if the same requisite art is listed twice', () {
-      final draft = SpellDraft(
-        technique: 'Creo',
-        form: 'Ignem',
-        baseEffect: BaseEffect(
-          id: '1', technique: 'Creo', form: 'Ignem',
-          description: 'Create flame', baseLevel: 10,
-          provenance: Provenance(source: PublicationSource.userCreated),
-        ),
-        range: _range,
-        duration: _duration,
-        target: _target,
-        requisites: [
-          Requisite(art: 'Auram', kind: RequisiteKind.free),
-          Requisite(art: 'Auram', kind: RequisiteKind.adding),
-        ],
-      );
-
-      final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Duplicate requisite art: Auram'));
     });
 
     test('passes with several distinct requisites of mixed kinds', () {
@@ -138,11 +116,11 @@ void main() {
         range: _range,
         duration: _duration,
         target: _target,
-        requisites: [
-          Requisite(art: 'Auram', kind: RequisiteKind.free),
-          Requisite(art: 'Terram', kind: RequisiteKind.adding),
-          Requisite(art: 'Rego', kind: RequisiteKind.adding),
-        ],
+        requisites: {
+          'Auram': RequisiteKind.free,
+          'Terram': RequisiteKind.adding,
+          'Rego': RequisiteKind.adding,
+        },
       );
 
       final errors = engine.validateSpellDraft(draft);
@@ -311,7 +289,7 @@ void main() {
 
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
-        range: _range, duration: _duration, target: _target, requisites: [],
+        range: _range, duration: _duration, target: _target, requisites: {},
       );
 
       expect(level, 10);
@@ -334,7 +312,7 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: touch, duration: sun, target: _target,
-        requisites: [],
+        requisites: {},
       );
 
       expect(level, 5); // Eyes of the Cat: Base 2 + Touch(+1) + Sun(+2) = 5
@@ -351,7 +329,7 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
-        requisites: [Requisite(art: 'Auram', kind: RequisiteKind.adding)],
+        requisites: {'Auram': RequisiteKind.adding},
       );
 
       expect(level, 4); // Base 3 + adding requisite(+1) = 4
@@ -368,7 +346,7 @@ void main() {
       final level = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
-        requisites: [Requisite(art: 'Auram', kind: RequisiteKind.free)],
+        requisites: {'Auram': RequisiteKind.free},
       );
 
       expect(level, 3); // Base 3 + free requisite(+0) = 3
@@ -400,7 +378,7 @@ void main() {
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {'terram-material': ['mat-metal']},
-        requisites: const [],
+        requisites: const {},
       );
 
       // Base 4 leaves 1 point of additive capacity; the modifier's 2 magnitude
@@ -424,7 +402,7 @@ void main() {
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {'deleted-modifier': ['deleted-option']},
-        requisites: const [],
+        requisites: const {},
       );
 
       expect(breakdown.level, 3);
@@ -442,7 +420,7 @@ void main() {
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
         selectedModifiers: const {},
-        requisites: [Requisite(art: 'Auram', kind: RequisiteKind.adding)],
+        requisites: {'Auram': RequisiteKind.adding},
       );
 
       expect(breakdown.contributions.first.isBase, isTrue);
@@ -466,7 +444,7 @@ void main() {
         rangeId: _range.id,
         durationId: _duration.id,
         targetId: _target.id,
-        requisites: [],
+        requisites: {},
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
       return ResolvedSpell(
@@ -525,7 +503,7 @@ void main() {
           rangeId: 'gone',
           durationId: _duration.id,
           targetId: _target.id,
-          requisites: const [],
+          requisites: const {},
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),
@@ -567,7 +545,7 @@ void main() {
           rangeId: _range.id,
           durationId: _duration.id,
           targetId: _target.id,
-          requisites: const [],
+          requisites: const {},
           adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026, 1, 1),
@@ -605,7 +583,7 @@ void main() {
           duration: _duration,
           target: _target,
           selectedModifiers: const {},
-          requisites: const [],
+          requisites: const {},
           adjustments: adjustments,
         );
 
@@ -653,7 +631,7 @@ void main() {
       final viaLevel = engine.calculateSpellLevel(
         baseEffect: baseEffect,
         range: _range, duration: _duration, target: _target,
-        requisites: const [],
+        requisites: const {},
         adjustments: adjustments,
       );
 
@@ -677,7 +655,7 @@ void main() {
           record: Spell(
             id: id, name: id, baseEffectId: effect.id,
             rangeId: _range.id, durationId: _duration.id, targetId: _target.id,
-            requisites: const [], adjustments: adj,
+            requisites: const {}, adjustments: adj,
             provenance: Provenance(source: PublicationSource.userCreated),
             createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
           ),
@@ -737,7 +715,7 @@ void main() {
       final breakdown = engine.calculateBreakdown(
         baseEffect: wardGuideline(), chosenBaseLevel: 20,
         range: touch, duration: ring, target: circle,
-        selectedModifiers: const {}, requisites: const []);
+        selectedModifiers: const {}, requisites: const {});
 
       expect(breakdown.level, 20);
     });
@@ -748,7 +726,7 @@ void main() {
       final breakdown = engine.calculateBreakdown(
         baseEffect: wardGuideline(), chosenBaseLevel: 20,
         range: personal, duration: sun, target: individual,
-        selectedModifiers: const {}, requisites: const []);
+        selectedModifiers: const {}, requisites: const {});
 
       expect(breakdown.level, 15);
     });
@@ -757,7 +735,7 @@ void main() {
       final breakdown = engine.calculateBreakdown(
         baseEffect: wardGuideline(), chosenBaseLevel: 20,
         range: personal, duration: sun, target: individual,
-        selectedModifiers: const {}, requisites: const []);
+        selectedModifiers: const {}, requisites: const {});
 
       final rangeLine = breakdown.contributions
           .firstWhere((c) => c.label.startsWith('Range'));
@@ -771,7 +749,7 @@ void main() {
       // branch: a standard reference makes every delta equal the raw cost.
       final breakdown = engine.calculateBreakdown(
         baseEffect: creoIgnem10, range: voice, duration: sun, target: individual,
-        selectedModifiers: const {}, requisites: const []);
+        selectedModifiers: const {}, requisites: const {});
 
       expect(breakdown.contributions.map((c) => '${c.label}|${c.magnitude}'), [
         'Base effect · Create flame|10',
@@ -869,7 +847,7 @@ void main() {
           engine.calculateSpellLevel(
               baseEffect: wardGuideline(), chosenBaseLevel: 20,
               range: touch, duration: ring, target: circle,
-              requisites: const []),
+              requisites: const {}),
           20);
     });
 

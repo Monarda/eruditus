@@ -50,7 +50,7 @@ void main() {
       duration: duration ?? _momentary,
       target: target ?? _individual,
       selectedModifiers: const {},
-      requisites: const [],
+      requisites: const {},
       ritualDeclaration: declaration,
     );
     return (

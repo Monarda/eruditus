@@ -20,12 +20,12 @@ void main() {
         rangeId: 'param-voice',
         durationId: 'param-sun',
         targetId: 'param-individual',
-        requisites: [
-          Requisite(art: 'Vim', kind: RequisiteKind.free),
-          Requisite(art: 'Mentem', kind: RequisiteKind.free),
-          Requisite(art: 'Auram', kind: RequisiteKind.adding),
-          Requisite(art: 'Terram', kind: RequisiteKind.adding),
-        ],
+        requisites: {
+          'Vim': RequisiteKind.free,
+          'Mentem': RequisiteKind.free,
+          'Auram': RequisiteKind.adding,
+          'Terram': RequisiteKind.adding,
+        },
         description: 'A test spell',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 7, 24, 12, 30),
@@ -47,16 +47,52 @@ void main() {
       expect(restored.updatedAt, spell.updatedAt);
 
       expect(restored.requisites.length, 4);
-      expect(restored.requisites[0].art, 'Vim');
-      expect(restored.requisites[0].kind, RequisiteKind.free);
-      expect(restored.requisites[0].magnitude, 0);
-      expect(restored.requisites[1].art, 'Mentem');
-      expect(restored.requisites[1].kind, RequisiteKind.free);
-      expect(restored.requisites[2].art, 'Auram');
-      expect(restored.requisites[2].kind, RequisiteKind.adding);
-      expect(restored.requisites[2].magnitude, 1);
-      expect(restored.requisites[3].art, 'Terram');
-      expect(restored.requisites[3].kind, RequisiteKind.adding);
+      expect(restored.requisites['Vim'], RequisiteKind.free);
+      expect(RequisiteKind.free.magnitude, 0);
+      expect(restored.requisites['Mentem'], RequisiteKind.free);
+      expect(restored.requisites['Auram'], RequisiteKind.adding);
+      expect(RequisiteKind.adding.magnitude, 1);
+      expect(restored.requisites['Terram'], RequisiteKind.adding);
+    });
+
+    test('fromMap throws a clear FormatException when a requisite kind is unknown', () {
+      final map = Spell(
+        id: 'spell-bad-kind', baseEffectId: '1', rangeId: 'param-voice',
+        durationId: 'param-sun', targetId: 'param-individual',
+        requisites: const {},
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026), updatedAt: DateTime(2026),
+      ).toMap();
+      map['requisites'] = {'Vim': 'mandatory'};
+
+      expect(
+        () => Spell.fromMap(map),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains('mandatory'), contains('free'), contains('adding')),
+          ),
+        ),
+      );
+    });
+
+    test('fromMap throws a clear FormatException when a requisite kind is not a string', () {
+      final map = Spell(
+        id: 'spell-null-kind', baseEffectId: '1', rangeId: 'param-voice',
+        durationId: 'param-sun', targetId: 'param-individual',
+        requisites: const {},
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026), updatedAt: DateTime(2026),
+      ).toMap();
+      map['requisites'] = {'Vim': null};
+
+      expect(
+        () => Spell.fromMap(map),
+        throwsA(isA<FormatException>().having(
+          (e) => e.message, 'message', allOf(contains('Vim'), contains('no kind')),
+        )),
+      );
     });
 
     test('fromMap throws a clear FormatException when a required field is missing', () {
@@ -190,7 +226,7 @@ void main() {
           'terram-material': ['mat-metal'],
           'rego-transport-distance': ['dist-500-paces'],
         },
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -209,7 +245,7 @@ void main() {
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -226,7 +262,7 @@ void main() {
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -239,7 +275,7 @@ void main() {
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         tags: const ['architecture', 'defensive'],
         createdAt: DateTime(2026, 1, 1),
@@ -270,7 +306,7 @@ void main() {
           rangeId: 'range-touch',
           durationId: 'duration-momentary',
           targetId: 'target-individual',
-          requisites: const [],
+          requisites: const {},
           ritualDeclaration: value,
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026), updatedAt: DateTime(2026),
@@ -286,7 +322,7 @@ void main() {
         'rangeId': 'range-touch',
         'durationId': 'duration-momentary',
         'targetId': 'target-individual',
-        'requisites': <Map<String, dynamic>>[],
+        'requisites': <String, dynamic>{},
         'source': 'user-created',
         'createdAt': DateTime(2026).toIso8601String(),
         'updatedAt': DateTime(2026).toIso8601String(),
@@ -302,7 +338,7 @@ void main() {
           'rangeId': 'range-touch',
           'durationId': 'duration-momentary',
           'targetId': 'target-individual',
-          'requisites': <Map<String, dynamic>>[],
+          'requisites': <String, dynamic>{},
           'ritualDeclaration': 'because-i-said-so',
           'source': 'user-created',
           'createdAt': DateTime(2026).toIso8601String(),
@@ -355,7 +391,7 @@ void main() {
         rangeId: 'param-voice',
         durationId: 'param-sun',
         targetId: 'param-individual',
-        requisites: const [],
+        requisites: const {},
         adjustments: [
           LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
           LevelAdjustment(magnitude: 0, note: 'purely cosmetic and thus free'),
@@ -377,7 +413,7 @@ void main() {
         rangeId: 'param-voice',
         durationId: 'param-sun',
         targetId: 'param-individual',
-        requisites: const [],
+        requisites: const {},
         description: 'A test spell',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
@@ -394,7 +430,7 @@ void main() {
         baseEffectId: 'revi-G1', rangeId: 'range-touch',
         durationId: 'duration-ring', targetId: 'target-circle',
         chosenBaseLevel: 20, templateId: 'tpl-revi-circular-ward-against-demons',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime.utc(2026), updatedAt: DateTime.utc(2026),
       );
@@ -409,7 +445,7 @@ void main() {
       final spell = Spell(
         id: 's-2', baseEffectId: 'crig-10', rangeId: 'range-voice',
         durationId: 'duration-momentary', targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime.utc(2026), updatedAt: DateTime.utc(2026),
       );
@@ -433,7 +469,7 @@ void main() {
           'rangeId': 'p1',
           'durationId': 'p2',
           'targetId': 'p3',
-          'requisites': <dynamic>[],
+          'requisites': <String, dynamic>{},
           'source': 'published',
           'summary': 'A summary.',
           'citations': [
@@ -496,7 +532,7 @@ void main() {
     List<String> validate({
       required BaseEffect effect,
       int? chosenBaseLevel,
-      List<Requisite> requisites = const [],
+      Map<String, RequisiteKind> requisites = const {},
       Map<String, List<String>> selectedModifiers = const {},
       List<Modifier> modifiers = const [],
       bool isTemplate = false,
@@ -535,47 +571,28 @@ void main() {
 
     test('check 3: a requisite equal to the spell own Technique is a problem', () {
       expect(
-        validate(
-          effect: fixedEffect(),
-          requisites: [Requisite(art: 'Creo', kind: RequisiteKind.free)],
-        ),
+        validate(effect: fixedEffect(), requisites: {'Creo': RequisiteKind.free}),
         contains("Requisite art cannot be the spell's own technique or form"),
       );
     });
 
     test('check 3: a requisite equal to the spell own Form is a problem', () {
       expect(
-        validate(
-          effect: fixedEffect(),
-          requisites: [Requisite(art: 'Ignem', kind: RequisiteKind.free)],
-        ),
+        validate(effect: fixedEffect(), requisites: {'Ignem': RequisiteKind.free}),
         contains("Requisite art cannot be the spell's own technique or form"),
       );
     });
 
-    test('check 3: a non-duplicated requisite matching own technique still fires', () {
+    test('check 3: an unrelated requisite alongside a self-matching one still fires', () {
       expect(
         validate(
           effect: fixedEffect(),
-          requisites: [
-            Requisite(art: 'Creo', kind: RequisiteKind.free),  // matches fixedEffect's technique, appears once
-            Requisite(art: 'Rego', kind: RequisiteKind.adding), // unrelated, not a duplicate
-          ],
+          requisites: {
+            'Creo': RequisiteKind.free, // matches fixedEffect's technique
+            'Rego': RequisiteKind.adding, // unrelated
+          },
         ),
         contains("Requisite art cannot be the spell's own technique or form"),
-      );
-    });
-
-    test('check 4: a duplicate requisite art is a problem', () {
-      expect(
-        validate(
-          effect: fixedEffect(),
-          requisites: [
-            Requisite(art: 'Rego', kind: RequisiteKind.free),
-            Requisite(art: 'Rego', kind: RequisiteKind.adding),
-          ],
-        ),
-        contains('Duplicate requisite art: Rego'),
       );
     });
 
@@ -618,11 +635,11 @@ void main() {
       expect(validate(effect: generalEffect(), isTemplate: true), isEmpty);
     });
 
-    test('isTemplate still runs checks 3, 4 and 5', () {
+    test('isTemplate still runs checks 3 and 5', () {
       expect(
         validate(
           effect: fixedEffect(),
-          requisites: [Requisite(art: 'Creo', kind: RequisiteKind.free)],
+          requisites: {'Creo': RequisiteKind.free},
           isTemplate: true,
         ),
         contains("Requisite art cannot be the spell's own technique or form"),
@@ -631,13 +648,10 @@ void main() {
 
     test('problems accumulate rather than short-circuiting', () {
       final problems = validate(
-        effect: generalEffect(),
-        requisites: [
-          Requisite(art: 'Rego', kind: RequisiteKind.free),
-          Requisite(art: 'Rego', kind: RequisiteKind.adding),
-        ],
+        effect: generalEffect(), // technique Rego, form Vim, no chosenBaseLevel
+        requisites: {'Rego': RequisiteKind.free}, // matches own technique
       );
-      expect(problems.length, 2);
+      expect(problems.length, 2); // check 1 (no chosen level) + check 3 (self-match)
     });
   });
 }

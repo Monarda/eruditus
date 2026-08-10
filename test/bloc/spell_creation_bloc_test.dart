@@ -42,7 +42,7 @@ void main() {
       rangeId: 'p1',
       durationId: 'p2',
       targetId: 'p3',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
   });
@@ -145,7 +145,7 @@ void main() {
         rangeId: rangeParam.id,
         durationId: durationParam.id,
         targetId: targetParam.id,
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final suggestion = ResolvedSpell(
@@ -202,7 +202,7 @@ void main() {
         rangeId: rangeParam.id,
         durationId: yearDuration.id,
         targetId: targetParam.id,
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final ordinaryRecord = Spell(
@@ -212,7 +212,7 @@ void main() {
         rangeId: rangeParam.id,
         durationId: durationParam.id,
         targetId: zeroTarget.id,
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final ritualSuggestion = ResolvedSpell(
@@ -268,7 +268,7 @@ void main() {
         rangeId: rangeParam.id,
         durationId: durationParam.id,
         targetId: targetParam.id,
-        requisites: const [],
+        requisites: const {},
         adjustments: [LevelAdjustment(magnitude: -20, note: 'far too generous')],
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
@@ -520,7 +520,7 @@ void main() {
     skip: 1,
     expect: () => [
       isA<SpellCreationState>().having(
-        (s) => s.draft.requisites.map((r) => '${r.art}:${r.kind.name}'),
+        (s) => s.draft.requisites.entries.map((e) => '${e.key}:${e.value.name}'),
         'requisites',
         ['Auram:free', 'Terram:adding'],
       ),
@@ -538,7 +538,7 @@ void main() {
     skip: 2,
     expect: () => [
       isA<SpellCreationState>().having(
-        (s) => s.draft.requisites.map((r) => '${r.art}:${r.kind.name}'),
+        (s) => s.draft.requisites.entries.map((e) => '${e.key}:${e.value.name}'),
         'requisites',
         ['Auram:free', 'Terram:adding'],
       ),
@@ -556,7 +556,7 @@ void main() {
     skip: 2,
     expect: () => [
       isA<SpellCreationState>().having(
-        (s) => s.draft.requisites.map((r) => r.art),
+        (s) => s.draft.requisites.keys,
         'requisites',
         ['Terram'],
       ),

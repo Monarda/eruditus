@@ -61,7 +61,7 @@ void main() {
         rangeId: 'range-touch',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         selectedModifiers: selectedModifiers,
         provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
         createdAt: DateTime.now(),

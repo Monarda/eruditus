@@ -42,8 +42,6 @@ List<String> validateSpellProse({
 ///
 /// Returns a list of human-readable problems; empty means valid. Problems
 /// accumulate: a caller showing them to a user should see all of them at once.
-/// Check 3 (self-matching requisite arts) is suppressed for any art already
-/// flagged as a duplicate by check 4; see the checks-3/4 implementation for detail.
 ///
 /// **Why this is a free function taking pieces rather than a method on [Spell].**
 /// [Spell] deliberately holds `baseEffectId` and not [BaseEffect], so it cannot
@@ -60,7 +58,7 @@ List<String> validateSpellProse({
 List<String> validateSpellAgainstCatalog({
   required BaseEffect effect,
   required int? chosenBaseLevel,
-  required List<Requisite> requisites,
+  required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
   required List<Modifier> modifiers,
   bool isTemplate = false,
@@ -84,32 +82,14 @@ List<String> validateSpellAgainstCatalog({
     }
   }
 
-  // 3 and 4. A requisite naming the spell's own Art is meaningless, and the
-  //    same Art twice is contradictory. The two checks interact: when an art
-  //    is both self-matching and duplicated, only the duplicate message
-  //    fires -- the self-match message would be redundant noise about the
-  //    same offending row. Deduplicating down to one copy re-exposes check 3
-  //    on the remaining instance, so nothing is permanently hidden.
-  final seenArts = <String>{};
-  final duplicateArts = <String>{};
-
-  // First pass: identify duplicates
-  for (final requisite in requisites) {
-    if (!seenArts.add(requisite.art)) {
-      duplicateArts.add(requisite.art);
-    }
-  }
-
-  // Second pass: report problems
-  seenArts.clear();
-  for (final requisite in requisites) {
-    if (requisite.art == effect.technique || requisite.art == effect.form) {
-      if (!duplicateArts.contains(requisite.art)) {
-        problems.add("Requisite art cannot be the spell's own technique or form");
-      }
-    }
-    if (!seenArts.add(requisite.art)) {
-      problems.add('Duplicate requisite art: ${requisite.art}');
+  // 3. A requisite naming the spell's own Art is meaningless. Duplicate arts
+  //    cannot occur here — requisites is keyed by art, so a second requisite
+  //    for the same art overwrites rather than duplicates. That was check 4;
+  //    it is deleted, not merely unreachable, because the shape now makes it
+  //    impossible rather than checked.
+  for (final art in requisites.keys) {
+    if (art == effect.technique || art == effect.form) {
+      problems.add("Requisite art cannot be the spell's own technique or form");
     }
   }
 
@@ -147,7 +127,7 @@ class Spell {
   final String durationId;
   final String targetId;
   final Map<String, List<String>> selectedModifiers;
-  final List<Requisite> requisites;
+  final Map<String, RequisiteKind> requisites;
   final List<LevelAdjustment> adjustments;
   final String? summary;
   final String? description;
@@ -210,7 +190,7 @@ class Spell {
         'durationId': durationId,
         'targetId': targetId,
         'selectedModifiers': selectedModifiers,
-        'requisites': requisites.map((r) => r.toMap()).toList(),
+        'requisites': requisitesToMap(requisites),
         'adjustments': adjustments.map((a) => a.toMap()).toList(),
         'summary': summary,
         'description': description,
@@ -235,10 +215,7 @@ class Spell {
               (k, v) => MapEntry(k as String, List<String>.from(v as List)),
             ) ??
             const {},
-        requisites: (map['requisites'] as List?)
-                ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
-                .toList() ??
-            [],
+        requisites: requisitesFromMap(map['requisites'] as Map<String, dynamic>?, 'Spell'),
         adjustments: (map['adjustments'] as List?)
                 ?.map((a) => LevelAdjustment.fromMap(a as Map<String, dynamic>))
                 .toList() ??
@@ -268,7 +245,7 @@ class SpellDraft {
   Parameter? duration;
   Parameter? target;
   Map<String, List<String>> selectedModifiers;
-  List<Requisite> requisites;
+  Map<String, RequisiteKind> requisites;
   List<LevelAdjustment> adjustments;
   String? summary;
   String? description;
@@ -286,7 +263,7 @@ class SpellDraft {
     this.duration,
     this.target,
     Map<String, List<String>>? selectedModifiers,
-    List<Requisite>? requisites,
+    Map<String, RequisiteKind>? requisites,
     List<LevelAdjustment>? adjustments,
     this.summary,
     this.description,
@@ -296,7 +273,7 @@ class SpellDraft {
     this.templateId,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
-        requisites = requisites ?? [],
+        requisites = requisites ?? {},
         adjustments = adjustments ?? [];
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
@@ -359,7 +336,7 @@ class SpellDraft {
     Object? duration = _unset,
     Object? target = _unset,
     Map<String, List<String>>? selectedModifiers,
-    List<Requisite>? requisites,
+    Map<String, RequisiteKind>? requisites,
     List<LevelAdjustment>? adjustments,
     String? summary,
     String? description,

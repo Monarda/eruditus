@@ -22,7 +22,7 @@ class SpellTemplate {
   final String durationId;
   final String targetId;
   final Map<String, List<String>> selectedModifiers;
-  final List<Requisite> requisites;
+  final Map<String, RequisiteKind> requisites;
   final List<LevelAdjustment> adjustments;
   final String? summary;
   final String? description;
@@ -38,7 +38,7 @@ class SpellTemplate {
     required this.durationId,
     required this.targetId,
     this.selectedModifiers = const {},
-    this.requisites = const [],
+    this.requisites = const {},
     this.adjustments = const [],
     this.summary,
     this.description,
@@ -64,7 +64,7 @@ class SpellTemplate {
         'durationId': durationId,
         'targetId': targetId,
         'selectedModifiers': selectedModifiers,
-        'requisites': requisites.map((r) => r.toMap()).toList(),
+        'requisites': requisitesToMap(requisites),
         'adjustments': adjustments.map((a) => a.toMap()).toList(),
         'summary': summary,
         'description': description,
@@ -84,10 +84,7 @@ class SpellTemplate {
               (k, v) => MapEntry(k as String, List<String>.from(v as List)),
             ) ??
             const {},
-        requisites: (map['requisites'] as List?)
-                ?.map((r) => Requisite.fromMap(r as Map<String, dynamic>))
-                .toList() ??
-            [],
+        requisites: requisitesFromMap(map['requisites'] as Map<String, dynamic>?, 'SpellTemplate'),
         adjustments: (map['adjustments'] as List?)
                 ?.map((a) => LevelAdjustment.fromMap(a as Map<String, dynamic>))
                 .toList() ??

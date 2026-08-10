@@ -329,7 +329,7 @@ class SpellCreationScreen extends StatelessWidget {
     SpellCreationBloc bloc,
     SpellDraft draft,
   ) {
-    final taken = draft.requisites.map((r) => r.art).toSet();
+    final taken = draft.requisites.keys.toSet();
     final available =
         _selectableRequisiteArts(draft).where((art) => !taken.contains(art)).toList();
 
@@ -346,16 +346,16 @@ class SpellCreationScreen extends StatelessWidget {
         if (draft.requisites.isEmpty)
           const Text('No requisites.')
         else
-          ...draft.requisites.map(
-            (req) => Padding(
-              key: Key('requisite-row-${req.art}'),
+          ...draft.requisites.entries.map(
+            (entry) => Padding(
+              key: Key('requisite-row-${entry.key}'),
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 children: [
-                  Expanded(child: Text(req.art)),
+                  Expanded(child: Text(entry.key)),
                   DropdownButton<RequisiteKind>(
-                    key: Key('requisite-kind-${req.art}'),
-                    value: req.kind,
+                    key: Key('requisite-kind-${entry.key}'),
+                    value: entry.value,
                     items: RequisiteKind.values
                         .map((kind) => DropdownMenuItem(
                               value: kind,
@@ -366,15 +366,15 @@ class SpellCreationScreen extends StatelessWidget {
                         .toList(),
                     onChanged: (kind) {
                       if (kind != null) {
-                        bloc.add(RequisiteKindChanged(req.art, kind.name));
+                        bloc.add(RequisiteKindChanged(entry.key, kind.name));
                       }
                     },
                   ),
                   IconButton(
-                    key: Key('requisite-remove-${req.art}'),
+                    key: Key('requisite-remove-${entry.key}'),
                     icon: const Icon(Icons.close),
-                    tooltip: 'Remove ${req.art} requisite',
-                    onPressed: () => bloc.add(RequisiteRemoved(req.art)),
+                    tooltip: 'Remove ${entry.key} requisite',
+                    onPressed: () => bloc.add(RequisiteRemoved(entry.key)),
                   ),
                 ],
               ),
@@ -383,7 +383,7 @@ class SpellCreationScreen extends StatelessWidget {
         if (available.isNotEmpty)
           // A plain DropdownButton, not a DropdownButtonFormField: this is an
           // action picker, not a field holding a value. Selecting an art moves
-          // it into the requisites list and therefore out of `available`, so a
+          // it into the requisites map and therefore out of `available`, so a
           // FormField's retained selection would match no remaining item and
           // trip Flutter's "exactly one item with value" assertion on the next
           // rebuild. Pinning value to null keeps the hint showing and leaves

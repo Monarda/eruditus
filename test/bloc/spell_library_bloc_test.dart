@@ -74,7 +74,7 @@ void main() {
       rangeId: 'p1',
       durationId: 'p4',
       targetId: 'p3',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
@@ -96,7 +96,7 @@ void main() {
       rangeId: 'p1',
       durationId: 'p2',
       targetId: 'p3',
-      requisites: const [],
+      requisites: const {},
       adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
@@ -115,7 +115,7 @@ void main() {
       rangeId: 'p1',
       durationId: 'p2',
       targetId: 'p3',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
@@ -181,7 +181,7 @@ void main() {
       rangeId: 'p1',
       durationId: 'p2',
       targetId: 'p3',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(
@@ -260,7 +260,7 @@ void main() {
         selectedModifiers: const {
           'no-longer-exists': ['no-longer-exists'],
         },
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));
     },

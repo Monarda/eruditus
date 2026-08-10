@@ -9,6 +9,7 @@ import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 
 void main() {
@@ -177,7 +178,7 @@ void main() {
             duration: parameters['duration-momentary']!,
             target: parameters['target-individual']!,
             selectedModifiers: const {},
-            requisites: const [],
+            requisites: const {},
             ritualDeclaration: RitualDeclaration.lastingCreation,
           )
           .ritualMinimumApplied,
@@ -249,7 +250,7 @@ void main() {
         for (final entry in spell.selectedModifiers.entries)
           for (final optionId in entry.value)
             modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,
-        ...spell.requisites.map((r) => r.magnitude),
+        ...spell.requisites.values.map((k) => k.magnitude),
         // Adjustments are magnitudes like any other (see
         // SpellEngine.calculateBreakdown). Omitting them silently overstated
         // every spell that carries one — the first such spell in the library,

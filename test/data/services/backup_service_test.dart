@@ -60,7 +60,7 @@ void main() {
         rangeId: 'range-touch',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         chosenBaseLevel: chosenBaseLevel,
         provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
         createdAt: DateTime.now(),
@@ -93,7 +93,7 @@ void main() {
       rangeId: 'range-personal',
       durationId: 'duration-momentary',
       targetId: 'target-individual',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     await configRepository.addCustomEffect(BaseEffect(
@@ -105,7 +105,7 @@ void main() {
     final jsonString = await service.exportToJson();
     final data = jsonDecode(jsonString) as Map<String, dynamic>;
 
-    expect(data['version'], '2.0');
+    expect(data['version'], '3.0');
     expect(data['exportDate'], isNotNull);
     expect((data['spells'] as List).length, 1);
     expect((data['spells'] as List).first['name'], 'My Fireball');
@@ -121,11 +121,11 @@ void main() {
       rangeId: 'range-personal',
       durationId: 'duration-momentary',
       targetId: 'target-individual',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final backup = {
-      'version': '2.0',
+      'version': '3.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [importedSpell.toMap()],
       'customEffects': [
@@ -158,11 +158,11 @@ void main() {
       rangeId: 'range-personal',
       durationId: 'duration-momentary',
       targetId: 'target-individual',
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final jsonString = jsonEncode({
-      'version': '2.0',
+      'version': '3.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [importedSpell.toMap()],
       'customEffects': [],
@@ -198,7 +198,7 @@ void main() {
       rangeId: 'range-touch',
       durationId: 'duration-momentary',
       targetId: 'target-individual',
-      requisites: const [],
+      requisites: const {},
       ritualDeclaration: RitualDeclaration.lastingCreation,
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026), updatedAt: DateTime(2026),
@@ -223,7 +223,7 @@ void main() {
           rangeId: 'range-touch',
           durationId: 'duration-ring',
           targetId: 'target-circle',
-          requisites: const [],
+          requisites: const {},
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),
@@ -249,7 +249,7 @@ void main() {
     // on, so this spell used to be validated against a catalog missing its
     // own effect.
     final json = jsonEncode({
-      'version': '2.0',
+      'version': '3.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [spellOnCustomEffect('s1', 'custom-1').toMap()],
       'customEffects': [customEffect('custom-1').toMap()],
@@ -264,7 +264,7 @@ void main() {
 
   test('an invalid spell is skipped and reported, and the good ones still land', () async {
     final json = jsonEncode({
-      'version': '2.0',
+      'version': '3.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [
         validSpell('good-1').toMap(),

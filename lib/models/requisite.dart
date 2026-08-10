@@ -1,5 +1,3 @@
-import 'package:eruditus/utils/map_serialization.dart';
-
 /// Whether a requisite contributes to the spell's level.
 ///
 /// A `free` requisite is demanded by the spell's nature but is incidental
@@ -9,29 +7,43 @@ import 'package:eruditus/utils/map_serialization.dart';
 /// magnitude.
 enum RequisiteKind { free, adding }
 
-class Requisite {
-  final String art;
-  final RequisiteKind kind;
+/// The level-magnitude [RequisiteKind] costs: 1 for [RequisiteKind.adding],
+/// 0 for [RequisiteKind.free].
+extension RequisiteKindMagnitude on RequisiteKind {
+  int get magnitude => this == RequisiteKind.adding ? 1 : 0;
+}
 
-  Requisite({required this.art, required this.kind});
-
-  int get magnitude => kind == RequisiteKind.adding ? 1 : 0;
-
-  Map<String, dynamic> toMap() => {'art': art, 'kind': kind.name};
-
-  factory Requisite.fromMap(Map<String, dynamic> map) {
-    final kindName = requireField<String>(map, 'kind', 'Requisite');
-    final kind = RequisiteKind.values.where((k) => k.name == kindName);
-    if (kind.isEmpty) {
-      throw FormatException(
-        'Requisite has unknown kind "$kindName" '
-        '(expected one of: ${RequisiteKind.values.map((k) => k.name).join(', ')})',
-      );
-    }
-
-    return Requisite(
-      art: requireField<String>(map, 'art', 'Requisite'),
-      kind: kind.first,
-    );
+/// Resolves a requisite kind's wire name back to the enum value, with the
+/// same clear-error convention as [ritualDeclarationFromName].
+RequisiteKind requisiteKindFromName(String name, String className) {
+  for (final value in RequisiteKind.values) {
+    if (value.name == name) return value;
   }
+  throw FormatException(
+    "$className.fromMap: unknown requisite kind '$name' (expected one of: "
+    "${RequisiteKind.values.map((k) => k.name).join(', ')})",
+  );
+}
+
+/// Serializes a requisites map to its wire shape, e.g. `{"Rego": "adding"}`.
+///
+/// Shared by [Spell] and [SpellTemplate] so the two paths cannot drift, the
+/// same reason [validateSpellProse] is shared between them.
+Map<String, String> requisitesToMap(Map<String, RequisiteKind> requisites) =>
+    requisites.map((art, kind) => MapEntry(art, kind.name));
+
+/// Parses the wire shape back, keyed by art. A missing `requisites` key
+/// ([map] is `null`) yields an empty map, matching every other optional
+/// collection field's default.
+Map<String, RequisiteKind> requisitesFromMap(
+  Map<String, dynamic>? map,
+  String className,
+) {
+  if (map == null) return const {};
+  return map.map((art, kindValue) {
+    if (kindValue is! String) {
+      throw FormatException("$className.fromMap: requisite '$art' has no kind");
+    }
+    return MapEntry(art, requisiteKindFromName(kindValue, className));
+  });
 }

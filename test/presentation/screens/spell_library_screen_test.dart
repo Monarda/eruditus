@@ -63,7 +63,7 @@ void main() {
       rangeId: rangeParam.id,
       durationId: durationParam.id,
       targetId: targetParam.id,
-      requisites: const [],
+      requisites: const {},
       description: source == PublicationSource.published ? 'A test spell.' : null,
       provenance: Provenance(
         source: source,

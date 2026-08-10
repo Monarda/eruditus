@@ -126,7 +126,7 @@ class SpellEngine {
     required Parameter duration,
     required Parameter target,
     required Map<String, List<String>> selectedModifiers,
-    required List<Requisite> requisites,
+    required Map<String, RequisiteKind> requisites,
     List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) {
@@ -149,10 +149,10 @@ class SpellEngine {
       _parameterContribution('Target', target, baseEffect.reference.targetId),
     ];
 
-    for (final requisite in requisites) {
+    for (final entry in requisites.entries) {
       contributions.add(LevelContribution(
-          label: 'Requisite · ${requisite.art}, ${requisite.kind.name}',
-          magnitude: requisite.magnitude));
+          label: 'Requisite · ${entry.key}, ${entry.value.name}',
+          magnitude: entry.value.magnitude));
     }
 
     // Adjustments are magnitudes like any other, so they flow into the same
@@ -274,7 +274,7 @@ class SpellEngine {
     required Parameter duration,
     required Parameter target,
     Map<String, List<String>> selectedModifiers = const {},
-    required List<Requisite> requisites,
+    required Map<String, RequisiteKind> requisites,
     List<LevelAdjustment> adjustments = const [],
     RitualDeclaration ritualDeclaration = RitualDeclaration.none,
   }) =>

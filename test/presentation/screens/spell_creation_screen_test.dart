@@ -313,7 +313,7 @@ void main() {
       rangeId: voiceParam.id,
       durationId: durationParam.id,
       targetId: targetParam.id,
-      requisites: const [],
+      requisites: const {},
       description: 'A roaring pillar of flame.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
@@ -343,7 +343,7 @@ void main() {
       rangeId: voiceParam.id,
       durationId: durationParam.id,
       targetId: targetParam.id,
-      requisites: const [],
+      requisites: const {},
       description: 'A ward against beings associated with Animal.',
       chosenBaseLevel: 20,
       provenance: Provenance(source: PublicationSource.userCreated),
@@ -408,7 +408,7 @@ void main() {
       rangeId: voiceParam.id,
       durationId: durationParam.id,
       targetId: targetParam.id,
-      requisites: const [],
+      requisites: const {},
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     useTallSurface(tester);
@@ -773,7 +773,7 @@ void main() {
   });
 
   group('requisites section', () {
-    SpellCreationState draftWith(List<Requisite> requisites) => SpellCreationState(
+    SpellCreationState draftWith(Map<String, RequisiteKind> requisites) => SpellCreationState(
           status: SpellCreationStatus.editing,
           draft: SpellDraft(
             technique: 'Creo',
@@ -785,7 +785,7 @@ void main() {
 
     testWidgets('shows an empty-state message when the draft has no requisites',
         (tester) async {
-      await pumpScreen(tester, draftWith(const []));
+      await pumpScreen(tester, draftWith(const {}));
       await tester.scrollUntilVisible(find.text('Requisites'), 200);
 
       expect(find.text('No requisites.'), findsOneWidget);
@@ -793,7 +793,7 @@ void main() {
 
     testWidgets('selecting an art from the add dropdown dispatches RequisiteAdded as free',
         (tester) async {
-      await pumpScreen(tester, draftWith(const []));
+      await pumpScreen(tester, draftWith(const {}));
       await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200);
 
       await tester.tap(find.byKey(const Key('requisite-add-dropdown')));
@@ -806,7 +806,7 @@ void main() {
 
     testWidgets("the add dropdown offers neither the spell's own technique nor its form",
         (tester) async {
-      await pumpScreen(tester, draftWith(const []));
+      await pumpScreen(tester, draftWith(const {}));
       await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200);
 
       // Creo and Ignem already appear on screen as the selected technique and
@@ -831,7 +831,7 @@ void main() {
         (tester) async {
       await pumpScreen(
         tester,
-        draftWith([Requisite(art: 'Auram', kind: RequisiteKind.free)]),
+        draftWith({'Auram': RequisiteKind.free}),
       );
       await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200);
 
@@ -845,7 +845,7 @@ void main() {
     testWidgets('changing a requisite kind dispatches RequisiteKindChanged', (tester) async {
       await pumpScreen(
         tester,
-        draftWith([Requisite(art: 'Auram', kind: RequisiteKind.free)]),
+        draftWith({'Auram': RequisiteKind.free}),
       );
       await tester.scrollUntilVisible(find.byKey(const Key('requisite-kind-Auram')), 200);
 
@@ -860,7 +860,7 @@ void main() {
     testWidgets('tapping remove dispatches RequisiteRemoved', (tester) async {
       await pumpScreen(
         tester,
-        draftWith([Requisite(art: 'Auram', kind: RequisiteKind.adding)]),
+        draftWith({'Auram': RequisiteKind.adding}),
       );
       await tester.scrollUntilVisible(find.byKey(const Key('requisite-remove-Auram')), 200);
 
@@ -885,7 +885,7 @@ void main() {
       final stateController = StreamController<SpellCreationState>();
       addTearDown(stateController.close);
 
-      SpellCreationState stateWith(List<Requisite> requisites) => SpellCreationState(
+      SpellCreationState stateWith(Map<String, RequisiteKind> requisites) => SpellCreationState(
             status: SpellCreationStatus.editing,
             draft: SpellDraft(
               technique: 'Creo',
@@ -895,7 +895,7 @@ void main() {
             ),
           );
 
-      whenListen(bloc, stateController.stream, initialState: stateWith(const []));
+      whenListen(bloc, stateController.stream, initialState: stateWith(const {}));
       whenListen(
         configBloc,
         const Stream<ConfigurationState>.empty(),
@@ -923,7 +923,7 @@ void main() {
 
       // What the real bloc emits in response: Auram is now a requisite, so it
       // is no longer offered in the add dropdown.
-      stateController.add(stateWith([Requisite(art: 'Auram', kind: RequisiteKind.free)]));
+      stateController.add(stateWith({'Auram': RequisiteKind.free}));
       await tester.pump();
       await tester.pump();
 
@@ -934,11 +934,11 @@ void main() {
     testWidgets('renders a row per requisite when several are present', (tester) async {
       await pumpScreen(
         tester,
-        draftWith([
-          Requisite(art: 'Auram', kind: RequisiteKind.free),
-          Requisite(art: 'Terram', kind: RequisiteKind.adding),
-          Requisite(art: 'Rego', kind: RequisiteKind.adding),
-        ]),
+        draftWith({
+          'Auram': RequisiteKind.free,
+          'Terram': RequisiteKind.adding,
+          'Rego': RequisiteKind.adding,
+        }),
       );
       await tester.scrollUntilVisible(find.byKey(const Key('requisite-row-Auram')), 200);
 

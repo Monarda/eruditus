@@ -573,7 +573,7 @@ void main() {
         rangeId: 'range-personal',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),

@@ -60,7 +60,7 @@ void main() {
         rangeId: 'range-touch',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
-        requisites: const [],
+        requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -127,7 +127,7 @@ void main() {
 
   testWidgets('successful import with no rejections shows correct status message with trailing period', (tester) async {
     final validJson = jsonEncode({
-      'version': '2.0',
+      'version': '3.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [],
       'customEffects': [],
@@ -158,7 +158,7 @@ void main() {
 
   testWidgets('import with one invalid and one valid spell shows the rejection suffix', (tester) async {
     final validJson = jsonEncode({
-      'version': '2.0',
+      'version': '3.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [
         buildSpell('good-1', baseEffectId: 'crig-10a').toMap(),
