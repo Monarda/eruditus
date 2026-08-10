@@ -46,7 +46,7 @@ List<String> validateSpellProse({
 /// **Why this is a free function taking pieces rather than a method on [Spell].**
 /// [Spell] deliberately holds `baseEffectId` and not [BaseEffect], so it cannot
 /// see `isGeneral`, the effect's technique/form, or a modifier's
-/// `selectionMode`. Three of these five checks are therefore uncheckable from
+/// `selectionMode`. All of these four checks are therefore uncheckable from
 /// inside the record. Taking the pieces (rather than a `ResolvedSpell`) is what
 /// lets [SpellDraft] — which holds a bare `BaseEffect?`, never a resolved
 /// wrapper — call the identical function, and avoids a circular import, since
