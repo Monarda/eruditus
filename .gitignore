@@ -51,3 +51,5 @@ app.*.map.json
 # incomplete. It is a worksheet, not a record — copy decisions into
 # resolutions.json by hand.
 scripts/spell_import/resolutions.proposed.json
+
+.worktrees/
