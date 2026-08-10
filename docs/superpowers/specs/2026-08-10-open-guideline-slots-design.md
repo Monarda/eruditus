@@ -37,7 +37,10 @@ rulebook leaves open the same way have no representation at all:
 
 `BaseEffect` has no concept of any of this. `SpellTemplate` is `Spell` minus
 `chosenBaseLevel`/`printedLevel`/`templateId` and has nowhere to hold a slot
-either. None of the affected spells are importable today — they sit blocked.
+either. **Realm is not a blocked-import problem** — 6 ward templates and one
+oddity (`Wind of Mundane Silence`) already import successfully today, simply
+without any realm data; see Decision 10. Form/"specific type" are the ones
+that block imports (the three case-2 spells, Part B).
 
 ### Why realm is not simply "chosenBaseLevel again"
 
@@ -76,8 +79,10 @@ Recorded here because each was a fork with a defensible other side.
 | 4 | **"Specific type" is free text, not a closed set** | The rulebook gives illustrative examples ("could be X, or Y"), not an exhaustive list. A closed set risks rejecting a legitimate type the rulebook simply didn't happen to list. |
 | 5 | **An open slot is mandatory, like `chosenBaseLevel`** | "A ward with no realm chosen is not yet a spell" is the identical argument that already governs the level check — completeness of the spell record, not a numeric dependency. |
 | 6 | **Validation requires *at least one* of an effect's declared `openSlots` kinds to be filled, not all of them** | Collapses correctly to "this one is mandatory" for every entry except `pevi-G10`, and handles `pevi-G10`'s either/or without a special case. No entry found in this audit needs two slots filled simultaneously; if one surfaces later, this rule is revisited then. |
-| 7 | **Realm extraction from prose uses a plain keyword scan (`Divine`/`Faerie`/`Infernal`/`Magic`), not inference from creature/spell names** | Mechanical and auditable, matching the project's existing extraction style. A spell whose text doesn't yield exactly one match falls back to `resolutions.json`, same as any other import ambiguity — no silent guessing. |
+| 7 | **Realm is resolved by a small hand-maintained table, not a prose scan** | A prose scan was the first idea, and the real corpus breaks it: "Ward against Faeries of the Air/Wood" don't restate "Faerie" in their own body text at all (they cross-reference "Ward against Faeries of the Waters" by name instead), and `Wind of Mundane Silence` (`pevi-G5`) contains the bare word "Magic" only via "Magic Resistance"/"Magical things" — neither a realm commitment — which a naive scan would misread as "Magic realm" with false confidence. A hand-verified table (mirroring `KNOWN_UNRESOLVABLE` in `extract_spells.py` exactly) sidesteps both failure modes: each entry is a human judgment call recorded once, not a heuristic guessing at prose. See Decision 9. |
 | 8 | **Design covers all three slot kinds now; implementation splits into two plans** | Designing only realm and revisiting Form/"specific type" later would risk re-picking the wire shape and re-serializing both assets a second time — the exact risk item 40's spec flagged when it rejected batching with these items. Splitting *implementation* (not design) still keeps each plan reviewably sized, mirroring item 40's own Part A/B split. |
+| 9 | **A template's `chosenSlots` may stay empty even for a declared-open kind, with no error** | `SpellTemplate` carries no write-boundary validation (checks 6/7 apply to `Spell`/`SpellDraft` only — see Decision 5's "Design" section). `Wind of Mundane Silence` is deliberately left out of the realm table for exactly this reason: it doesn't commit to one realm, so its template imports with `chosenSlots: {}`, and a caster fills the realm in later, the same as any case-2 spell. No override table entry, no error, no blocked import — the mechanism already handles "genuinely undecided" for free. |
+| 10 | **6 of the 17 realm entries are already-imported templates, not blocked spells** | Checked directly against `assets/data/spell_templates.json`: `Circular Ward against Demons`, `Ward against the Beasts of Legend`, `Ward against Faeries of the Waters/Air/Wood`, and `Ring of Warding against Spirits` import successfully today. `Wind of Mundane Silence` also already imports (Decision 9 covers why it gets no table entry). The remaining 10 catalog entries have no corpus spell referencing them yet. Part A's import work is backfilling `chosenSlots` onto the 7 existing templates via the hand-table, not unblocking anything. |
 
 ---
 
@@ -125,12 +130,35 @@ recorded for checks 1/2 there.
 
 ### Import behavior
 
-**Case 1 — prose commits to a value** (the ~17 realm entries): the importer
-scans each affected spell's own text for exactly one of `Divine`/`Faerie`/
-`Infernal`/`Magic` and bakes the match onto the emitted record's `chosenSlots`.
-A scan finding zero or more-than-one match reports the spell blocked with a
-reason, same as any other unresolved import case, resolvable by hand via
-`resolutions.json`.
+**Case 1 — prose commits to a value, resolved by a hand-verified table**
+(Decisions 7/9/10): a new `REALM_BY_SPELL_ID` table in `extract_spells.py`,
+keyed by the same `lib-*` slug `KNOWN_UNRESOLVABLE` already uses, giving each
+known spell's verified realm — checked once against the rulebook text, not
+inferred at build time:
+
+```python
+REALM_BY_SPELL_ID = {
+    "lib-revi-circular-ward-against-demons": "Infernal",
+    "lib-rean-ward-against-beasts-legend": "Magic",
+    "lib-reaq-ward-against-faeries-waters": "Faerie",
+    "lib-reau-ward-against-faeries-air": "Faerie",
+    "lib-rehe-ward-against-faeries-wood": "Faerie",
+    "lib-reme-ring-warding-against-spirits": "Magic",
+    # Wind of Mundane Silence (pevi-G5) is deliberately absent: its prose
+    # dispels "any spell" without committing to one realm, and its only
+    # "Magic" appearances are "Magic Resistance"/"Magical things" — neither
+    # a realm reference. Its template imports with chosenSlots: {} instead;
+    # see Decision 9.
+}
+```
+
+`build_template`/`build_spell` look up the block's slug in this table when
+`catalog.open_slots(base_effect_id)` includes `"realm"`; a hit sets
+`chosenSlots["realm"]`, a miss leaves `chosenSlots` without that key —
+**not** an error, since a template tolerates it (Decision 9) and no corpus
+`Spell` (non-template) currently references a realm-open guideline at all.
+The table starts with exactly the 6 known cases; a future rulebook addition
+that needs one gets a new entry the same way `KNOWN_UNRESOLVABLE` grows today.
 
 **Case 2 — nothing to extract** (the three Muto Vim "ten versions" spells, and
 any custom spell a user builds directly off a raw open-slot guideline): the
@@ -139,10 +167,11 @@ and the caster fills it — via a new `OpenSlotChosen(kind, value)` bloc event
 (Part B ships the Form/specificType instances of this; the event and its
 handler are generic and ship in Part A).
 
-**Expected consequence, not a surprise:** Part A's realm extraction will very
-likely unblock most of the 17 realm entries' spells — a real, visible change
-to `import_report.md`'s blocked count when Part A's importer task runs, not
-just an additive UI change.
+**Actual consequence, checked against the corpus, not assumed:** Part A does
+not unblock any currently-blocked spell. 6 templates already import
+successfully today without any realm data (Decision 10); Part A backfills
+their `chosenSlots` via the table above. `import_report.md`'s blocked count is
+unaffected by Part A.
 
 ### UI
 
@@ -190,12 +219,14 @@ prototype-stage, no-migration convention as item 40 Part B.
 
 ## Scope: two plans, planned separately
 
-Only Part A touches import behavior and unblocks spells; Part B is additive
-catalog coverage on top of a mechanism that already exists.
+Only Part A touches import behavior; Part B is additive catalog coverage on
+top of a mechanism that already exists. Neither part unblocks a spell that's
+blocked today for an unrelated reason (e.g. `Ward against Faeries of the
+Mountain`, blocked on "no design line printed" — untouched by this work).
 
 | | Touches | Delivers |
 |---|---|---|
-| **A. Mechanism + realm** | `base_effect.dart`, `spell.dart`, `spell_template.dart`, `resolved_spell.dart`, `resolved_template.dart`, `spell_engine.dart`, `spell_creation_bloc.dart`, `spell_creation_screen.dart`, `backup_service.dart`, `emit.py` (realm scan), `resolutions.json` (fallback entries as needed), both assets, every affected test | `OpenSlotKind`/`chosenSlots` generic mechanism; realm fully modeled, validated, imported, and editable; the 17 realm-slot catalog entries annotated and their spells importable |
+| **A. Mechanism + realm** | `base_effect.dart`, `spell.dart`, `spell_template.dart`, `resolved_spell.dart`, `resolved_template.dart`, `spell_engine.dart`, `spell_creation_bloc.dart`, `spell_creation_screen.dart`, `backup_service.dart`, `catalog.py` (`open_slots` lookup), `emit.py`/`extract_spells.py` (`REALM_BY_SPELL_ID` table), both assets, every affected test | `OpenSlotKind`/`chosenSlots` generic mechanism; realm fully modeled, validated, and editable; the 17 realm-slot catalog entries annotated; the 7 existing realm-guideline templates carry verified `chosenSlots` |
 | **B. Form + "specific type" + case-2 spells** | Catalog annotation for `pevi-G2/7/10`, `revi-G5`, the Form-Resistance bullet, `muvi-G1/G2/G3`; case-2 "ten versions collapse to one template" import handling; Form dropdown + specificType text field UI; both assets regenerated again | The remaining two slot kinds, and the three currently-blocked Muto Vim spells |
 
 **Part A is planned and implemented first.** It delivers the full generic
