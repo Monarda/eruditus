@@ -946,7 +946,7 @@ class RequisiteEmissionTest(unittest.TestCase):
 
 - [ ] **Step 2: Run the new tests to verify they fail**
 
-Run: `python -m pytest scripts/spell_import/tests/test_emit.py -k RequisiteEmissionTest -v`
+Run (from the repository root; this project's Python tests use stdlib `unittest`, not `pytest` — `pytest` is not installed): `python -m unittest -v scripts.spell_import.tests.test_emit.RequisiteEmissionTest`
 
 Expected: both FAIL — `build_spell` still returns a list of dicts, so `spell["requisites"] == {"Rego": "adding"}` does not hold (it holds a `[{"art": "Rego", "kind": "adding"}]` list instead).
 
@@ -984,13 +984,13 @@ Both functions' `"requisites": requisites` line is unchanged text — it now ass
 
 - [ ] **Step 4: Run the new tests to verify they pass**
 
-Run: `python -m pytest scripts/spell_import/tests/test_emit.py -k RequisiteEmissionTest -v`
+Run: `python -m unittest -v scripts.spell_import.tests.test_emit.RequisiteEmissionTest`
 
 Expected: PASS.
 
 - [ ] **Step 5: Run the full Python test suite**
 
-Run: `python -m pytest scripts/spell_import -v`
+Run (from the repository root): `python -m unittest discover -t . -s scripts/spell_import/tests -p "test_*.py"`
 
 Expected: all tests pass. `test_emit.py`'s existing tests construct spells with `stat.requisite_arts=[]` and no requisite design tokens throughout, so they produce `{}` where they previously produced `[]` — check any test in this suite that asserts on the `"requisites"` key's exact value (not just its presence) and update the expected literal from `[]` to `{}` if one exists; the earlier grep of this file found only a key-presence assertion (`"requisites"` in a set of expected keys), not a shape assertion, so this is expected to need no further change, but verify by running the suite rather than assuming.
 
@@ -1039,7 +1039,7 @@ flutter test
 Expected: all tests pass, now against the Task 2-regenerated `assets/data/spell_library.json`/`spell_templates.json` — this is the first point in the plan where the Dart side reads the Python side's actual output rather than a fixture, so it is the real integration check for the wire-format agreement Task 1 and Task 2 each assumed independently.
 
 ```bash
-python -m pytest scripts/spell_import -v
+python -m unittest discover -t . -s scripts/spell_import/tests -p "test_*.py"
 ```
 
 Expected: all tests pass (unchanged from Task 2's Step 5 — included here as a single combined confirmation before closing out).
@@ -1060,7 +1060,7 @@ git commit -m "docs: record item 40 part B as complete"
 ## Verification
 
 - `flutter analyze` and `flutter test` are green after Task 1, and remain green after Task 2 regenerates the assets Task 1's tests do not directly exercise.
-- `python -m pytest scripts/spell_import` is green after Task 2.
+- `python -m unittest discover -t . -s scripts/spell_import/tests -p "test_*.py"` is green after Task 2.
 - `grep -rn "Requisite(" lib test` returns nothing (Task 1, Step 11) — the deleted class has no surviving construction site.
 - `assets/data/spell_library.json`'s `"requisites"` values are JSON objects, not arrays, for every spell that has one (spot-check a handful, e.g. `grep -A1 '"requisites"' assets/data/spell_library.json | head -20`).
 - `scripts/spell_import/import_report.md`'s `imported`/`templates`/`blocked` counts are unchanged from the pre-task run (294/23/43) — Task 2 changes shape, not content.
