@@ -204,8 +204,9 @@ void main() {
 
       // IndexedStack keeps every tab mounted, so there are multiple
       // Scrollables in the tree now; scope to the Library screen's list
-      // specifically. The new spell is appended after 27 built-ins, so it's
-      // off-screen and needs scrolling into view before it's built.
+      // specifically. The new spell is appended after the built-in library
+      // (294 spells + 23 templates as of writing), so it's off-screen and
+      // needs scrolling into view before it's built.
       // (Scoping to SpellLibraryScreen alone still matches 2 Scrollables:
       // the search TextField's internal one, plus the actual list's, so
       // narrow down to the ListView's Scrollable specifically.)
@@ -221,6 +222,12 @@ void main() {
         find.text('My New Illusion'),
         200.0,
         scrollable: libraryScrollable,
+        // Default maxScrolls (50) covers 10,000px, sized for the ~27-spell
+        // library this test was written against; the seed library has since
+        // grown to 294 spells + 23 templates, pushing a newly-saved spell
+        // well past that budget. Bumped generously so this doesn't need
+        // retuning every time the seed library grows again.
+        maxScrolls: 500,
       );
       await tester.pumpAndSettle();
 
@@ -587,8 +594,12 @@ void main() {
       final libraryScrollable = find.descendant(
           of: libraryListView, matching: find.byType(Scrollable));
 
+      // maxScrolls bumped from the 50-scroll default: sized for the ~27-spell
+      // library this test was written against, since grown to 294 spells +
+      // 23 templates (see the comment on the equivalent scroll above).
       await tester.scrollUntilVisible(
-          find.text('Spell On Custom Effect'), 200.0, scrollable: libraryScrollable);
+          find.text('Spell On Custom Effect'), 200.0,
+          scrollable: libraryScrollable, maxScrolls: 500);
       await tester.pumpAndSettle();
 
       expect(find.text('Spell On Custom Effect'), findsOneWidget);
@@ -605,7 +616,8 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-          find.text('Spell On Custom Effect'), 200.0, scrollable: libraryScrollable);
+          find.text('Spell On Custom Effect'), 200.0,
+          scrollable: libraryScrollable, maxScrolls: 500);
       await tester.pumpAndSettle();
 
       // Still listed, now visibly unavailable, and the tab is intact.
