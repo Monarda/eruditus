@@ -136,15 +136,14 @@ this table is the ordering, not a second home for them.
       throwing, used by `BackupService.importFromJson` so one bad spell in a
       restore doesn't abort the rest. **Remaining open checkbox below (the
       `requisites` reshape, Part B) is out of scope for this plan.**
-- [ ] Reshape `requisites` from `List<Requisite>` to a map keyed by art —
+- [x] Reshape `requisites` from `List<Requisite>` to a map keyed by art —
       **the one invariant fixed by modelling rather than validation.** Duplicate
       arts are representable only because the field is a list; a map makes them
       unrepresentable, needing no validator, no enforcement point and no test.
-      **Do it here, not batched with items 35/37.** Batching was considered and
-      rejected 2026-08-09: the shared cost of a serialized-shape change (asset
-      regeneration, item 30 provenance adoption, `Spell`-literal test churn) is
-      real but modest once migration is off the table, and coupling a small
-      self-contained fix to 35/37's open design question is the worse trade.
+      **DONE 2026-08-10 (Part B of the requisites reshape, completed via Task 3
+      of the plan).** The Dart model was reshaped in Task 1, the Python importer
+      and regenerated JSON assets in Task 2, and both test suites confirmed
+      together in Task 3.
 - [x] Add a build-time assertion over `spell_library.json` for the three
       catalog-dependent invariants — **assertion 7**, alongside the four in
       `test/data/published_spell_import_test.dart`. A violation in the asset is a
