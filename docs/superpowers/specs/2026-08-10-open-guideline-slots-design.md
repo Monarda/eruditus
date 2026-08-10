@@ -104,17 +104,19 @@ other affected entry gets a single-element list.
 
 ### Validation
 
-One new check in `validateSpellAgainstCatalog` (`spell.dart`), the same
-function items 1–5 already share:
+Two new checks in `validateSpellAgainstCatalog` (`spell.dart`), continuing the
+existing numbered-check comment convention (checks 1, 2, 3, 5 exist today; 4
+was deleted, not reused, by item 40 Part B — these become **checks 6 and 7**,
+the next free numbers, not a renumbering of anything existing):
 
-- If `effect.openSlots` is non-empty, at least one of those kinds must have a
-  non-empty entry in `chosenSlots` — otherwise: *"Choose a realm for this
-  guideline"* (single-kind case) or *"Choose a Form or a specific type of
-  enchantment for this guideline"* (`pevi-G10`'s alternative case).
-- The converse: any `chosenSlots` key naming a kind `effect.openSlots` does
-  **not** declare is stray — *"A chosen realm applies only to a guideline with
-  an open realm slot"* — mirroring check 2's treatment of a stray
-  `chosenBaseLevel`.
+- **Check 6:** if `effect.openSlots` is non-empty, at least one of those kinds
+  must have a non-empty entry in `chosenSlots` — otherwise: *"Choose a realm
+  for this guideline"* (single-kind case) or *"Choose a Form or a specific
+  type of enchantment for this guideline"* (`pevi-G10`'s alternative case).
+- **Check 7:** the converse — any `chosenSlots` key naming a kind
+  `effect.openSlots` does **not** declare is stray — *"A chosen realm applies
+  only to a guideline with an open realm slot"* — mirroring check 2's
+  treatment of a stray `chosenBaseLevel`.
 
 Applies on both write paths (`Spell.fromMap`, `SpellDraft.toSpell`), same as
 every other check in this function. Does not apply to `SpellTemplate` — it is
