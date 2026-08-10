@@ -382,3 +382,40 @@ class PrintedLevelEmissionTest(unittest.TestCase):
     def test_a_missing_printed_level_raises_rather_than_emitting_null(self):
         with self.assertRaises(ValueError):
             self._build(None)
+
+
+class RequisiteEmissionTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_requisites_serialize_as_a_dict_keyed_by_art(self):
+        design = designline.parse_design("(Base 5, +1 Touch, +1 Rego requisite)")
+        block = blocks.SpellBlock(
+            name="Test Spell", technique="Creo", form="Ignem", printed_level=10,
+            stat=statline.StatLine(
+                range_name="Touch", duration_name="Sun", target_name="Ind",
+                is_ritual=False, requisite_arts=[], trailing="",
+            ),
+            prose="Test prose.", design_line=None, line_no=1,
+        )
+        spell = emit.build_spell(block, "test-effect", self.catalog, design)
+        self.assertEqual(spell["requisites"], {"Rego": "adding"})
+
+    def test_a_design_line_requisite_is_not_overwritten_by_the_stat_lines_free_default(self):
+        """setdefault, not assignment: the design line is more specific than
+        the bare Req: stat line, so it must win when both name the same art.
+        A spell whose design line prints "+1 Rego requisite" alongside a
+        "Req: Rego" stat line must keep the adding cost, not silently drop to
+        free."""
+        design = designline.parse_design("(Base 5, +1 Touch, +1 Rego requisite)")
+        block = blocks.SpellBlock(
+            name="Test Spell", technique="Creo", form="Ignem", printed_level=10,
+            stat=statline.StatLine(
+                range_name="Touch", duration_name="Sun", target_name="Ind",
+                is_ritual=False, requisite_arts=["Rego"], trailing="",
+            ),
+            prose="Test prose.", design_line=None, line_no=1,
+        )
+        spell = emit.build_spell(block, "test-effect", self.catalog, design)
+        self.assertEqual(spell["requisites"], {"Rego": "adding"})

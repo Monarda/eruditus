@@ -2,7 +2,7 @@
   {
     "id": "tpl-crvi-restore-faded-threads",
     "name": "Restore the Faded Threads",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "crvi-G4",
@@ -20,7 +20,7 @@
   {
     "id": "tpl-crvi-shell-false-determinations",
     "name": "Shell of False Determinations",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "crvi-G3",
@@ -39,7 +39,7 @@
   {
     "id": "tpl-crvi-shell-opaque-mysteries",
     "name": "Shell of Opaque Mysteries",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "crvi-G2",
@@ -58,7 +58,7 @@
   {
     "id": "tpl-inim-discern-images-truth-and-falsehood",
     "name": "Discern the Images of Truth and Falsehood",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "inim-G",
@@ -76,7 +76,7 @@
   {
     "id": "tpl-muvi-mirror-opposition-form",
     "name": "Mirror of Opposition (form)",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "muvi-G3",
@@ -94,7 +94,7 @@
   {
     "id": "tpl-muvi-shroud-magic",
     "name": "Shroud Magic",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "muvi-G1",
@@ -112,7 +112,7 @@
   {
     "id": "tpl-muvi-sorcerers-fork",
     "name": "The Sorcerer's Fork",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "muvi-G2",
@@ -130,7 +130,7 @@
   {
     "id": "tpl-muvi-wizards-boost-form",
     "name": "Wizard's Boost (Form)",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "muvi-G2",
@@ -148,7 +148,7 @@
   {
     "id": "tpl-muvi-wizards-reach-form",
     "name": "Wizard's Reach (Form)",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "muvi-G2",
@@ -166,7 +166,7 @@
   {
     "id": "tpl-pevi-demons-eternal-oblivion",
     "name": "Demon's Eternal Oblivion",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "pevi-G3",
@@ -184,7 +184,7 @@
   {
     "id": "tpl-pevi-disenchant",
     "name": "Disenchant",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "pevi-G9",
@@ -203,7 +203,7 @@
   {
     "id": "tpl-pevi-masking-odor-magic",
     "name": "Masking the Odor of Magic",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "pevi-G1",
@@ -221,7 +221,7 @@
   {
     "id": "tpl-pevi-unravelling-fabric-form",
     "name": "Unravelling the Fabric of (Form)",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "pevi-G2",
@@ -239,7 +239,7 @@
   {
     "id": "tpl-pevi-wind-mundane-silence",
     "name": "Wind of Mundane Silence",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "pevi-G5",
@@ -257,7 +257,7 @@
   {
     "id": "tpl-rean-ward-against-beasts-legend",
     "name": "Ward against the Beasts of Legend",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "rean-gen-2",
@@ -275,7 +275,7 @@
   {
     "id": "tpl-reaq-ward-against-faeries-waters",
     "name": "Ward against Faeries of the Waters",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "reaq-gen",
@@ -293,7 +293,7 @@
   {
     "id": "tpl-reau-ward-against-faeries-air",
     "name": "Ward against Faeries of the Air",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "reau-gen",
@@ -311,7 +311,7 @@
   {
     "id": "tpl-rehe-ward-against-faeries-wood",
     "name": "Ward against Faeries of the Wood",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "rehe-gen",
@@ -329,7 +329,7 @@
   {
     "id": "tpl-reme-ring-warding-against-spirits",
     "name": "Ring of Warding against Spirits",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "reme-G2",
@@ -347,7 +347,7 @@
   {
     "id": "tpl-revi-circular-ward-against-demons",
     "name": "Circular Ward against Demons",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "revi-G1",
@@ -365,7 +365,7 @@
   {
     "id": "tpl-revi-maintaining-demanding-spell",
     "name": "Maintaining the Demanding Spell",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "revi-G2",
@@ -383,7 +383,7 @@
   {
     "id": "tpl-revi-opening-intangible-tunnel",
     "name": "Opening the Intangible Tunnel",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "revi-G3",
@@ -401,7 +401,7 @@
   {
     "id": "tpl-revi-suppressing-wizards-handiwork",
     "name": "Suppressing the Wizard's Handiwork",
-    "requisites": [],
+    "requisites": {},
     "source": "published",
     "selectedModifiers": {},
     "baseEffectId": "revi-G2",

@@ -89,14 +89,12 @@ def build_spell(
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
     target_id = catalog.parameter_id("Target", _parameter_name(design, "target", block))
 
-    requisites = [
-        {"art": token.label, "kind": "adding" if token.magnitude else "free"}
-        for token in design.tokens
-        if token.kind == "requisite" and token.label != "free"
-    ]
+    requisites: dict[str, str] = {}
+    for token in design.tokens:
+        if token.kind == "requisite" and token.label != "free":
+            requisites.setdefault(token.label, "adding" if token.magnitude else "free")
     for art in block.stat.requisite_arts:
-        if not any(r["art"] == art for r in requisites):
-            requisites.append({"art": art, "kind": "free"})
+        requisites.setdefault(art, "free")
 
     spell = {
         "id": catalog_module.slug_id(block.technique, block.form, block.name),
@@ -160,14 +158,12 @@ def build_template(
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
     target_id = catalog.parameter_id("Target", _parameter_name(design, "target", block))
 
-    requisites = [
-        {"art": token.label, "kind": "adding" if token.magnitude else "free"}
-        for token in design.tokens
-        if token.kind == "requisite" and token.label != "free"
-    ]
+    requisites: dict[str, str] = {}
+    for token in design.tokens:
+        if token.kind == "requisite" and token.label != "free":
+            requisites.setdefault(token.label, "adding" if token.magnitude else "free")
     for art in block.stat.requisite_arts:
-        if not any(r["art"] == art for r in requisites):
-            requisites.append({"art": art, "kind": "free"})
+        requisites.setdefault(art, "free")
 
     # The `lib-` slug is the ledger key (resolutions.json, KNOWN_UNRESOLVABLE);
     # the template's own id is that same slug with `tpl-` in place of `lib-`.
