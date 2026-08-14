@@ -350,6 +350,50 @@ class GeneralTemplateEmissionTest(unittest.TestCase):
         self.assertEqual(template["citations"], [{"bookId": "arm5-core"}])
 
 
+class OpenSlotEmissionTest(unittest.TestCase):
+    """`chosenSlots["realm"]` is set from `REALM_BY_SPELL_ID`, never scanned
+    from prose -- see extract_spells.py's `REALM_BY_SPELL_ID` comment for why.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_build_template_sets_chosenSlots_when_the_table_has_an_entry(self):
+        design = designline.parse_design("(As ward guideline, +1 Touch, +1 Ring)")
+        block = _block("Circular Ward against Demons", "Rego", "Vim", None)
+        template = emit.build_template(
+            block, "revi-G1", self.catalog, design,
+            realm_by_spell_id={"lib-revi-circular-ward-against-demons": "Infernal"},
+        )
+        self.assertEqual(template["chosenSlots"], {"realm": "Infernal"})
+
+    def test_build_template_omits_chosenSlots_when_the_table_has_no_entry(self):
+        design = designline.parse_design("(Base effect, +2 Voice, +2 Room)")
+        block = _block("Wind of Mundane Silence", "Perdo", "Vim", None)
+        template = emit.build_template(
+            block, "pevi-G5", self.catalog, design, realm_by_spell_id={},
+        )
+        self.assertNotIn("chosenSlots", template)
+
+    def test_build_template_omits_chosenSlots_when_the_effect_declares_no_open_slot(self):
+        # pevi-G3 has no openSlots at all -- a table entry, if one existed,
+        # must not leak onto a guideline that never declared anything open.
+        design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
+        block = _block("Demon's Eternal Oblivion", "Perdo", "Vim", None)
+        template = emit.build_template(
+            block, "pevi-G3", self.catalog, design,
+            realm_by_spell_id={"lib-pede-demons-eternal-oblivion": "Infernal"},
+        )
+        self.assertNotIn("chosenSlots", template)
+
+    def test_realm_by_spell_id_defaults_to_empty_when_omitted(self):
+        design = designline.parse_design("(As ward guideline, +1 Touch, +1 Ring)")
+        block = _block("Circular Ward against Demons", "Rego", "Vim", None)
+        template = emit.build_template(block, "revi-G1", self.catalog, design)
+        self.assertNotIn("chosenSlots", template)
+
+
 class PrintedLevelEmissionTest(unittest.TestCase):
     """`printedLevel` is the rulebook's printed level, emitted as its own field.
 

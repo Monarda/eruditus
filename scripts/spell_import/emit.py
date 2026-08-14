@@ -84,6 +84,7 @@ def build_spell(
     base_effect_id: str,
     catalog: catalog_module.Catalog,
     design: designline.Design,
+    realm_by_spell_id: dict[str, str] | None = None,
 ) -> dict:
     range_id = catalog.parameter_id("Range", _parameter_name(design, "range", block))
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
@@ -110,6 +111,13 @@ def build_spell(
         "targetId": target_id,
         "summary": _summary(block),
     }
+    slug = spell["id"]
+
+    realm_by_spell_id = realm_by_spell_id or {}
+    chosen_slots: dict[str, str] = {}
+    realm = realm_by_spell_id.get(slug)
+    if realm is not None and "realm" in catalog.open_slots(base_effect_id):
+        chosen_slots["realm"] = realm
 
     description = _description(block)
     if description:
@@ -138,6 +146,9 @@ def build_spell(
     if block.stat.is_ritual:
         spell["ritualDeclaration"] = "lastingCreation"
 
+    if chosen_slots:
+        spell["chosenSlots"] = chosen_slots
+
     return spell
 
 
@@ -146,6 +157,7 @@ def build_template(
     base_effect_id: str,
     catalog: catalog_module.Catalog,
     design: designline.Design,
+    realm_by_spell_id: dict[str, str] | None = None,
 ) -> dict:
     """Build a `SpellTemplate.fromMap`-shaped entry for a General spell.
 
@@ -170,6 +182,12 @@ def build_template(
     # Derived from slug_id rather than a second slug function.
     slug = catalog_module.slug_id(block.technique, block.form, block.name)
     template_id = "tpl-" + slug.removeprefix("lib-")
+
+    realm_by_spell_id = realm_by_spell_id or {}
+    chosen_slots: dict[str, str] = {}
+    realm = realm_by_spell_id.get(slug)
+    if realm is not None and "realm" in catalog.open_slots(base_effect_id):
+        chosen_slots["realm"] = realm
 
     template = {
         "id": template_id,
@@ -200,6 +218,9 @@ def build_template(
 
     if block.stat.is_ritual:
         template["ritualDeclaration"] = "lastingCreation"
+
+    if chosen_slots:
+        template["chosenSlots"] = chosen_slots
 
     return template
 

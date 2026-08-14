@@ -41,6 +41,26 @@ KNOWN_UNRESOLVABLE = {
 }
 
 
+# Realm for every corpus spell built on a guideline whose `openSlots` includes
+# "realm" -- verified once against the rulebook's own prose (Decision 7/9/10,
+# docs/superpowers/specs/2026-08-10-open-guideline-slots-design.md), never
+# inferred at build time. A prose scan was tried first and rejected: two of
+# these spells ("Ward against Faeries of the Air"/"...of the Wood") restate
+# their realm only by cross-referencing "Ward against Faeries of the Waters"
+# by name, and Wind of Mundane Silence's only "Magic" occurrences are "Magic
+# Resistance"/"Magical things" -- neither a realm commitment, which is exactly
+# why it has no entry here (its template imports with chosenSlots: {} and the
+# caster fills the realm in later, same as any case-2 spell).
+REALM_BY_SPELL_ID = {
+    "lib-revi-circular-ward-against-demons": "Infernal",
+    "lib-rean-ward-against-beasts-legend": "Magic",
+    "lib-reaq-ward-against-faeries-waters": "Faerie",
+    "lib-reau-ward-against-faeries-air": "Faerie",
+    "lib-rehe-ward-against-faeries-wood": "Faerie",
+    "lib-reme-ring-warding-against-spirits": "Magic",
+}
+
+
 # General spells whose printed design line cannot be reconciled with their
 # stat line. Not a wrong ledger pick and not an ambiguity between candidates
 # -- KNOWN_UNRESOLVABLE means "two candidates fit equally", which is a
@@ -292,7 +312,10 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 continue
 
             try:
-                templates.append(emit.build_template(block, base_effect_id, catalog, design))
+                templates.append(emit.build_template(
+                    block, base_effect_id, catalog, design,
+                    realm_by_spell_id=REALM_BY_SPELL_ID,
+                ))
             except (designline.UnknownToken, KeyError) as error:
                 blocked.append((block.name, str(error)))
             continue
@@ -329,7 +352,10 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             continue
 
         try:
-            spells.append(emit.build_spell(block, base_effect_id, catalog, design))
+            spells.append(emit.build_spell(
+                block, base_effect_id, catalog, design,
+                realm_by_spell_id=REALM_BY_SPELL_ID,
+            ))
         except (designline.UnknownToken, KeyError) as error:
             blocked.append((block.name, str(error)))
 
