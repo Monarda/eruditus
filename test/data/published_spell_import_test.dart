@@ -264,4 +264,66 @@ void main() {
 
     expect(problems, isEmpty, reason: problems.join('; '));
   });
+
+  test(
+      "Wizard's Boost (Form) has no committed Form (case 2), but a caster's "
+      'choice at instantiation validates cleanly', () async {
+    final templates = await loader.loadSpellTemplates();
+    final template = templates.firstWhere((t) => t.name == "Wizard's Boost (Form)");
+
+    // Case 2: the template itself never commits to one Form -- its own
+    // prose says "one for each Hermetic Form" -- so chosenSlots stays empty,
+    // same rule as Wind of Mundane Silence's realm case in Part A.
+    expect(template.chosenSlots, isEmpty);
+
+    final effects = {for (final e in await loader.loadBaseEffects()) e.id: e};
+    final parameters = {for (final p in await loader.loadParameters()) p.id: p};
+    final modifiers = await loader.loadModifiers();
+    final baseEffect = effects[template.baseEffectId]!;
+
+    Spell instantiate({required Map<String, String> chosenSlots}) {
+      final draft = SpellDraft(
+        technique: baseEffect.technique,
+        form: baseEffect.form,
+        baseEffect: baseEffect,
+        range: parameters[template.rangeId],
+        duration: parameters[template.durationId],
+        target: parameters[template.targetId],
+        selectedModifiers: template.selectedModifiers,
+        requisites: template.requisites,
+        adjustments: template.adjustments,
+        summary: template.summary,
+        description: template.description,
+        chosenSlots: chosenSlots,
+        chosenBaseLevel: 20,
+      );
+      return draft.toSpell(name: template.name, source: PublicationSource.userCreated);
+    }
+
+    // A caster who instantiates without picking a Form gets a real,
+    // catchable problem -- the template's completeness rule (Decision 9)
+    // does not extend to the concrete Spell it becomes.
+    final unfilled = instantiate(chosenSlots: const {});
+    final unfilledProblems = validateSpellAgainstCatalog(
+      effect: baseEffect,
+      chosenBaseLevel: unfilled.chosenBaseLevel,
+      requisites: unfilled.requisites,
+      selectedModifiers: unfilled.selectedModifiers,
+      chosenSlots: unfilled.chosenSlots,
+      modifiers: modifiers,
+    );
+    expect(unfilledProblems, contains('Choose a Form for this guideline'));
+
+    // Filling it in satisfies check 6, same real catalog entry.
+    final filled = instantiate(chosenSlots: const {'form': 'Ignem'});
+    final filledProblems = validateSpellAgainstCatalog(
+      effect: baseEffect,
+      chosenBaseLevel: filled.chosenBaseLevel,
+      requisites: filled.requisites,
+      selectedModifiers: filled.selectedModifiers,
+      chosenSlots: filled.chosenSlots,
+      modifiers: modifiers,
+    );
+    expect(filledProblems, isEmpty, reason: filledProblems.join('; '));
+  });
 }
