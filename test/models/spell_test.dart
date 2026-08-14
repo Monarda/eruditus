@@ -731,12 +731,27 @@ void main() {
       );
     });
 
-    test('isTemplate skips checks 6 and 7, which cannot apply to a template', () {
+    test('isTemplate still skips check 6 for an unfilled open slot', () {
       // A template may legitimately have an unfilled open slot -- Wind of
       // Mundane Silence (pevi-G5) is the real corpus case: its prose doesn't
       // commit to one realm, so its chosenSlots stays empty until a caster
       // instantiates it and fills one in.
       expect(validate(effect: realmSlotEffect(), isTemplate: true), isEmpty);
+    });
+
+    test('isTemplate still runs check 7 for a stray chosenSlots key', () {
+      // Unlike check 6, check 7 is NOT skipped for a template -- a
+      // SpellTemplate genuinely carries chosenSlots now, so a stray key
+      // naming a kind the guideline never declared open is just as much a
+      // bug there as on a Spell.
+      expect(
+        validate(
+          effect: fixedEffect(),
+          chosenSlots: const {'realm': 'Infernal'},
+          isTemplate: true,
+        ),
+        contains('A chosen realm applies only to a guideline with an open realm slot'),
+      );
     });
   });
 }

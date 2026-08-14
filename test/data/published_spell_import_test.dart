@@ -196,6 +196,7 @@ void main() {
         chosenBaseLevel: null,
         requisites: template.requisites,
         selectedModifiers: template.selectedModifiers,
+        chosenSlots: template.chosenSlots,
         modifiers: modifiers,
         isTemplate: true,
       );
@@ -206,5 +207,61 @@ void main() {
 
     expect(failures, isEmpty,
         reason: 'published assets break catalog invariants:\n${failures.join('\n')}');
+  });
+
+  test(
+      "Circular Ward against Demons' chosenSlots survives the asset-load path "
+      'and instantiates cleanly', () async {
+    // Not covered by assertions 1-7 above: every other assertion here reads
+    // spell.chosenSlots/template.chosenSlots straight off the parsed model,
+    // so a future importer key-rename or serialization drift (e.g. emit.py
+    // starts writing "chosenSlot" singular, or the wire key stops matching
+    // OpenSlotKind.name) would silently produce an empty map everywhere and
+    // still pass every other test. This test pins the real corpus value.
+    final templates = await loader.loadSpellTemplates();
+    final template = templates.firstWhere((t) => t.name == 'Circular Ward against Demons');
+
+    expect(template.chosenSlots, {'realm': 'Infernal'});
+
+    final effects = {for (final e in await loader.loadBaseEffects()) e.id: e};
+    final parameters = {for (final p in await loader.loadParameters()) p.id: p};
+    final modifiers = await loader.loadModifiers();
+    final baseEffect = effects[template.baseEffectId]!;
+
+    // Instantiate the template into a SpellDraft the same way
+    // SpellCreationBloc's TemplateInstantiated handler does: a fresh draft
+    // seeded from the template's fields, chosenSlots carried across
+    // verbatim. The guideline is General (revi-G1), so a caster also fills
+    // in the level -- the same as the real handler leaves for the level
+    // field.
+    final draft = SpellDraft(
+      technique: baseEffect.technique,
+      form: baseEffect.form,
+      baseEffect: baseEffect,
+      range: parameters[template.rangeId],
+      duration: parameters[template.durationId],
+      target: parameters[template.targetId],
+      selectedModifiers: template.selectedModifiers,
+      requisites: template.requisites,
+      adjustments: template.adjustments,
+      summary: template.summary,
+      description: template.description,
+      chosenSlots: template.chosenSlots,
+      chosenBaseLevel: 20,
+    );
+
+    final spell = draft.toSpell(name: template.name, source: PublicationSource.userCreated);
+    expect(spell.chosenSlots, {'realm': 'Infernal'});
+
+    final problems = validateSpellAgainstCatalog(
+      effect: baseEffect,
+      chosenBaseLevel: spell.chosenBaseLevel,
+      requisites: spell.requisites,
+      selectedModifiers: spell.selectedModifiers,
+      chosenSlots: spell.chosenSlots,
+      modifiers: modifiers,
+    );
+
+    expect(problems, isEmpty, reason: problems.join('; '));
   });
 }

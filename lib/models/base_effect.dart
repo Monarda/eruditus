@@ -126,7 +126,7 @@ class BaseEffect {
     ...provenance.toMap(),
     'reference': reference.toMap(),
     if (effectFormula != null) 'effectFormula': effectFormula!.toMap(),
-    'openSlots': openSlots.map((k) => k.name).toList(),
+    if (openSlots.isNotEmpty) 'openSlots': openSlots.map((k) => k.name).toList(),
   };
 
   factory BaseEffect.fromMap(Map<String, dynamic> map) => BaseEffect(

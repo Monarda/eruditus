@@ -36,6 +36,18 @@ List<String> validateSpellProse({
   return const [];
 }
 
+/// Looks up an [OpenSlotKind] by [OpenSlotKind.name], or `null` if [name]
+/// does not match one. Unlike `base_effect.dart`'s private
+/// `_openSlotKindFromName` (not reusable here -- Dart privacy is per-file),
+/// this never throws: check 7 needs to tolerate an arbitrary stray
+/// `chosenSlots` key that may not parse as a known kind at all.
+OpenSlotKind? _openSlotKindByName(String name) {
+  for (final value in OpenSlotKind.values) {
+    if (value.name == name) return value;
+  }
+  return null;
+}
+
 /// Human-readable phrasing for an [OpenSlotKind] in a check-6 message.
 /// [OpenSlotKind.specificType] reads as "a specific type of enchantment" to
 /// match the rulebook's own phrasing rather than the bare enum name.
@@ -60,22 +72,25 @@ String _openSlotDescription(OpenSlotKind kind) {
 /// **Why this is a free function taking pieces rather than a method on [Spell].**
 /// [Spell] deliberately holds `baseEffectId` and not [BaseEffect], so it cannot
 /// see `isGeneral`, the effect's technique/form, or a modifier's
-/// `selectionMode`. All of these four checks are therefore uncheckable from
+/// `selectionMode`. All of these six checks are therefore uncheckable from
 /// inside the record. Taking the pieces (rather than a `ResolvedSpell`) is what
 /// lets [SpellDraft] — which holds a bare `BaseEffect?`, never a resolved
 /// wrapper — call the identical function, and avoids a circular import, since
 /// `resolved_spell.dart` imports this file.
 ///
-/// [isTemplate] skips checks 1, 2, 6 and 7. A `SpellTemplate` built on a
+/// [isTemplate] skips checks 1, 2 and 6. A `SpellTemplate` built on a
 /// General guideline legitimately has no chosen level; supplying one is
 /// precisely what instantiating the template means. An open slot may
-/// legitimately stay unfilled until instantiation.
+/// legitimately stay unfilled until instantiation (Decision 9). Check 7 is
+/// NOT skipped for templates — a `SpellTemplate` genuinely carries
+/// `chosenSlots` now, so a stray key naming a kind the guideline never
+/// declared open is just as much a bug there as on a `Spell`.
 List<String> validateSpellAgainstCatalog({
   required BaseEffect effect,
   required int? chosenBaseLevel,
   required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
-  Map<String, String> chosenSlots = const {},
+  required Map<String, String> chosenSlots,
   required List<Modifier> modifiers,
   bool isTemplate = false,
 }) {
@@ -130,7 +145,9 @@ List<String> validateSpellAgainstCatalog({
     //    a spell. "At least one" (not "every") declared kind, because pevi-G10
     //    declares two alternatives (Form OR a specific type of enchantment) and
     //    either satisfies it; every other entry declares exactly one kind, so
-    //    this collapses to "mandatory" for them.
+    //    this collapses to "mandatory" for them. Skipped for a template
+    //    (Decision 9): a template's chosenSlots may legitimately stay empty
+    //    for a declared-open kind until a caster instantiates it.
     if (effect.openSlots.isNotEmpty) {
       final filled = effect.openSlots
           .any((kind) => (chosenSlots[kind.name] ?? '').isNotEmpty);
@@ -141,15 +158,20 @@ List<String> validateSpellAgainstCatalog({
         problems.add('Choose a $kindNames for this guideline');
       }
     }
+  }
 
-    // 7. The converse of check 6: stray chosen-slot data for a kind this
-    //    guideline never declared open is silently meaningless, the same
-    //    class of bug check 2 closes for a stray chosenBaseLevel.
-    final openKindNames = effect.openSlots.map((k) => k.name).toSet();
-    for (final kind in chosenSlots.keys) {
-      if (!openKindNames.contains(kind)) {
-        problems.add('A chosen $kind applies only to a guideline with an open $kind slot');
-      }
+  // 7. The converse of check 6: stray chosen-slot data for a kind this
+  //    guideline never declared open is silently meaningless, the same
+  //    class of bug check 2 closes for a stray chosenBaseLevel. Unlike check
+  //    6, this runs for a template too -- a SpellTemplate genuinely carries
+  //    chosenSlots, so a stray key is just as much a bug there.
+  final openKindNames = effect.openSlots.map((k) => k.name).toSet();
+  for (final kind in chosenSlots.keys) {
+    if (!openKindNames.contains(kind)) {
+      final description = _openSlotKindByName(kind) != null
+          ? _openSlotDescription(_openSlotKindByName(kind)!)
+          : kind;
+      problems.add('A chosen $description applies only to a guideline with an open $description slot');
     }
   }
 

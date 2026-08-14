@@ -97,7 +97,7 @@ class Catalog:
         effect = next((e for e in self.base_effects if e["id"] == effect_id), None)
         if effect is None:
             raise KeyError(f"no base effect with id {effect_id!r} in base_effects.json")
-        return effect.get("openSlots") or []
+        return list(effect.get("openSlots") or [])
 
     def parameter_id(self, category: str, name: str) -> str:
         for parameter in self.parameters:
