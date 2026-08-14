@@ -1173,6 +1173,71 @@ void main() {
     );
   });
 
+  group('Open slots (OpenSlotChosen)', () {
+    final realmSlotGuideline = BaseEffect(
+      id: 'revi-G1', technique: 'Rego', form: 'Vim',
+      description: 'Ward against beings from one realm', baseLevel: null,
+      openSlots: const [OpenSlotKind.realm],
+      reference: const ParameterTriple(
+          rangeId: 'range-touch', durationId: 'duration-ring', targetId: 'target-circle'),
+      provenance: Provenance(source: PublicationSource.published,
+          citations: [Citation(bookId: 'arm5-core')]),
+      effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'OpenSlotChosen sets the named key in draft.chosenSlots',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(realmSlotGuideline))
+        ..add(const OpenSlotChosen('realm', 'Infernal')),
+      verify: (bloc) => expect(bloc.state.draft.chosenSlots, {'realm': 'Infernal'}),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a different base effect prunes chosenSlots keys the new effect does not declare open',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(realmSlotGuideline))
+        ..add(const OpenSlotChosen('realm', 'Infernal'))
+        ..add(BaseEffectSelected(creoIgnemEffect)),
+      verify: (bloc) => expect(bloc.state.draft.chosenSlots, isEmpty),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'TechniqueSelected clears chosenSlots, same as chosenBaseLevel',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(realmSlotGuideline))
+        ..add(const OpenSlotChosen('realm', 'Infernal'))
+        ..add(const TechniqueSelected('Perdo')),
+      verify: (bloc) => expect(bloc.state.draft.chosenSlots, isEmpty),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'TemplateInstantiated copies the template chosenSlots onto the new draft',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) {
+        final template = SpellTemplate(
+          id: 'tpl-1', name: 'Circular Ward against Demons',
+          baseEffectId: realmSlotGuideline.id,
+          rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+          chosenSlots: const {'realm': 'Infernal'},
+          description: 'No being from the chosen realm can affect those targeted by the spell.',
+          provenance: Provenance(source: PublicationSource.published,
+              citations: const [Citation(bookId: 'arm5-core')]),
+        );
+        final resolved = ResolvedTemplate(
+          record: template,
+          baseEffect: realmSlotGuideline,
+          range: rangeParam, duration: durationParam, target: targetParam,
+        );
+        bloc.add(TemplateInstantiated(resolved));
+      },
+      verify: (bloc) => expect(bloc.state.draft.chosenSlots, {'realm': 'Infernal'}),
+    );
+  });
+
   group('TemplateInstantiated', () {
     // The real ward template (Correction 4) -- built by hand, not loaded from
     // the asset file, per the same rule as the other fixtures in this file.

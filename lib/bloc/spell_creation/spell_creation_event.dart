@@ -43,6 +43,17 @@ class ChosenBaseLevelChanged extends SpellCreationEvent {
   List<Object?> get props => [level];
 }
 
+/// The caster's value for one of `BaseEffect.openSlots` — realm, Form, or
+/// "a specific type" (see `OpenSlotKind`). [kind] is `OpenSlotKind.name`
+/// (`'realm'`, `'form'`, or `'specificType'`); [value] is the chosen string.
+class OpenSlotChosen extends SpellCreationEvent {
+  final String kind;
+  final String value;
+  const OpenSlotChosen(this.kind, this.value);
+  @override
+  List<Object?> get props => [kind, value];
+}
+
 class RangeSelected extends SpellCreationEvent {
   final Parameter parameter;
   const RangeSelected(this.parameter);

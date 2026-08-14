@@ -5,6 +5,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/requisite.dart' show RequisiteKind;
@@ -48,6 +49,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           // than let it keep affecting the level invisibly.
           chosenBaseLevel: null,
           templateId: null,
+          chosenSlots: const {},
         )),
         reapplyDefault: false,
       );
@@ -63,6 +65,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           baseEffect: null,
           chosenBaseLevel: null,
           templateId: null,
+          chosenSlots: const {},
         )),
         reapplyDefault: false,
       );
@@ -85,6 +88,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           // re-type on every guideline switch would be friction with no
           // correctness gain.
           chosenBaseLevel: event.effect.isGeneral ? state.draft.chosenBaseLevel : null,
+          chosenSlots: _prunedSlots(state.draft.chosenSlots, event.effect),
         )),
         reapplyDefault: true,
       );
@@ -99,6 +103,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: draft,
         generalEffectSentence: _generalEffectSentenceFor(draft),
+      ));
+    } else if (event is OpenSlotChosen) {
+      final updated = {...state.draft.chosenSlots, event.kind: event.value};
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(chosenSlots: updated),
       ));
     } else if (event is RangeSelected) {
       emit(state.copyWith(
@@ -246,6 +256,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         // silently strip a Ritual status the guideline actually has.
         ritualDeclaration: template.ritualDeclaration,
         templateId: template.id,
+        chosenSlots: template.chosenSlots,
       ));
 
       // From SpellCreationState.initial(), not state.copyWith(...): a stale
@@ -276,6 +287,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     return spellEngine
         .deriveGeneralEffect(baseEffect: baseEffect, chosenBaseLevel: draft.chosenBaseLevel)
         ?.sentence;
+  }
+
+  /// Drops any `chosenSlots` entry [effect] no longer declares open — the
+  /// map-keyed sibling of `chosenBaseLevel: null`'s clearing above. `null`
+  /// [effect] (Technique/Form changed, base effect cleared) drops everything.
+  Map<String, String> _prunedSlots(Map<String, String> slots, BaseEffect? effect) {
+    if (effect == null) return const {};
+    final openKindNames = effect.openSlots.map((k) => k.name).toSet();
+    return Map.fromEntries(
+      slots.entries.where((entry) => openKindNames.contains(entry.key)),
+    );
   }
 
   SpellDraft _withPrunedModifiers(SpellDraft draft) => draft.copyWith(
