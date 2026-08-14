@@ -270,7 +270,10 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "chosenSlots": {
+      "realm": "Magic"
+    }
   },
   {
     "id": "tpl-reaq-ward-against-faeries-waters",
@@ -288,7 +291,10 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "chosenSlots": {
+      "realm": "Faerie"
+    }
   },
   {
     "id": "tpl-reau-ward-against-faeries-air",
@@ -306,7 +312,10 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "chosenSlots": {
+      "realm": "Faerie"
+    }
   },
   {
     "id": "tpl-rehe-ward-against-faeries-wood",
@@ -324,7 +333,10 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "chosenSlots": {
+      "realm": "Faerie"
+    }
   },
   {
     "id": "tpl-reme-ring-warding-against-spirits",
@@ -342,7 +354,10 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "chosenSlots": {
+      "realm": "Magic"
+    }
   },
   {
     "id": "tpl-revi-circular-ward-against-demons",
@@ -360,7 +375,10 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "chosenSlots": {
+      "realm": "Infernal"
+    }
   },
   {
     "id": "tpl-revi-maintaining-demanding-spell",
