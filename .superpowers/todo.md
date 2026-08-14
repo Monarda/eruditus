@@ -820,24 +820,36 @@ None affect correctness.
       guideline flag, the >50 threshold) still fire. Assert on a recomputed
       `LevelBreakdown.ritualStatus.isRitual` instead.
 
-### 37. A Template Has Open Slots Beyond Its Level — Realm, Form, "Specific Type"
+### 37. A Template Has Open Slots Beyond Its Level — Realm, Form, "Specific Type" — ✅ DONE 2026-08-15
 **In section 0, jointly with item 35.** Raised 2026-08-07 from *Wizard's Reach
 (Form)*: the Form must be chosen before the template can become a spell, exactly as
 the level must be. **This generalises item 35** (realm is one slot of several) for
 part of the corpus; the part it does not cover is a different mechanism. Both are
 named so they can be designed together; [[35]] stays as the realm instance.
 
-**Part A (realm) — ✅ DONE 2026-08-14.** Designed in
-`docs/superpowers/specs/2026-08-10-open-guideline-slots-design.md` and implemented
-via `docs/superpowers/plans/2026-08-10-open-guideline-slots-part-a.md`: the generic
-`OpenSlotKind`/`chosenSlots` mechanism (model, validation checks 6/7, bloc, UI) plus
-a full, working realm instance — 17 catalog entries annotated, a hand-verified
-`REALM_BY_SPELL_ID` table (not a prose scan — one was tried and demonstrably
-misfires on the real corpus, see the spec's Decision 7) feeds 6 real corpus
-templates their `chosenSlots`. **Part B (Form, "a specific type", and the 3 case-2
-Muto Vim spells below) is still open** — the mechanism is generic enough to take it
-without reshaping anything, per the spec's Decision 8 and the final review's
-genericity spot-check.
+**Both parts shipped.** Designed in
+`docs/superpowers/specs/2026-08-10-open-guideline-slots-design.md`.
+
+- **Part A (realm) — DONE 2026-08-14**, via
+  `docs/superpowers/plans/2026-08-10-open-guideline-slots-part-a.md`: the generic
+  `OpenSlotKind`/`chosenSlots` mechanism (model, validation checks 6/7, bloc, UI) plus
+  a full, working realm instance — 17 catalog entries annotated, a hand-verified
+  `REALM_BY_SPELL_ID` table (not a prose scan — one was tried and demonstrably
+  misfires on the real corpus, see the spec's Decision 7) feeds 6 real corpus
+  templates their `chosenSlots`.
+- **Part B (Form + "a specific type" + the 3 case-2 Muto Vim spells) — DONE
+  2026-08-15**, via
+  `docs/superpowers/plans/2026-08-14-open-guideline-slots-part-b.md`: 7 more
+  catalog entries annotated (`pevi-G2/7/10/11`, `revi-G5`, `muvi-G2/G3` —
+  `muvi-G1` deliberately excluded, its only corpus user never mentions Form), a
+  Form dropdown and a specificType free-text field added to the creation screen.
+  **No resolution table was needed for Part B at all** — unlike most of Part A's
+  realm entries, every real corpus template on these 7 guidelines is genuinely
+  case-2 (none commits to one value in its own prose), so asset regeneration
+  produced a byte-identical `spell_templates.json`, confirmed by the Python
+  suite's `RegenerationTest`, not just a git diff. The mechanism took Part B
+  with zero reshaping, exactly as Decision 8 predicted (see the spec's
+  Decision 13 for the full implementation-time confirmation).
 
 - **Case 1 — the guideline itself leaves a slot open.** Measured: **20 of the 49
   General bullets (41%)**. By slot kind: **realm** ~15 (*"beings … from one
@@ -857,9 +869,19 @@ genericity spot-check.
   Three Muto Vim spells: *Mirror of Opposition (form)* (*"There are ten versions of
   this spell, each affecting spells of one of the Hermetic forms"*), *Wizard's Boost
   (Form)*, *Wizard's Reach (Form)*. `muvi-G1/G2/G3` mention Form nowhere — they are
-  Form-agnostic and the restriction belongs to the published spell. *Unravelling the
-  Fabric of (Form)* looks like this group by its name but is **case 1**: `pevi-G2` is
-  *"Dispel effects of a specific type"* and the Form is that slot being filled.
+  Form-agnostic and the restriction belongs to the published spell.
+  - **✅ Corrected 2026-08-15, during Part B implementation:** *Unravelling the
+    Fabric of (Form)* was originally guessed here as case 1 ("the Form is that
+    slot being filled"). Checking its actual prose during implementation showed
+    it's **also case 2**: *"There are 10 variants that cover each Hermetic Form,
+    and a number of much rarer variants for different kinds of non-Hermetic
+    magic"* — a family, not one committed value, same as the three Muto Vim
+    spells. `pevi-G2` got `openSlots: [specificType]` (not `form`); a Form name
+    is simply a valid free-text value for that slot when a caster picks one.
+  - Also found during Part B: `muvi-G2` is shared by the Form-restricted spells
+    above **and** by *The Sorcerer's Fork* (already in the corpus, genuinely
+    Form-agnostic prose). Declaring the slot per-guideline anyway was a
+    deliberate, human-approved decision (design spec Decision 12) — see [[37]].
 - **Scope of the bracketed-name pattern:** exactly 4 spells carry a
   `(Form)`/`(form)` placeholder, all 4 General, and **0 of the imported ordinary
   spells do**. No Technique placeholder exists. So case 2 is small and closed; case 1
@@ -872,7 +894,7 @@ genericity spot-check.
   the published prose and is often the only thing distinguishing two otherwise
   identical spells — *"No **magical** beast whose **Magic** Might…"* against *"No
   water **faerie** whose **Faerie** Might…"*, same guideline, level and stat line.
-- **✅ Decided 2026-08-10, not yet implemented (Part B):** free text, not a closed
+- **✅ Decided 2026-08-10, implemented 2026-08-15:** free text, not a closed
   set — the rulebook gives illustrative examples ("could be X, or Y"), not an
   exhaustive list; a closed set risks rejecting a legitimate type it didn't happen
   to list (design spec Decision 4).
@@ -901,7 +923,7 @@ axis is implemented:**
 
 ### 35. A Guideline's Realm Is a Choice, Like Its Level — ✅ DONE 2026-08-14
 **Generalised by item 37; designed the two together**, then implemented as item 37's
-Part A — see [[37]] for the shipped mechanism and Part B's remaining scope.
+Part A — see [[37]] for the shipped mechanism (both parts now done).
 
 - [x] Decide where the chosen realm lives — **not `Spell.chosenRealm`**, as first
       guessed here: a general `chosenSlots: Map<String, String>` on
