@@ -827,6 +827,18 @@ the level must be. **This generalises item 35** (realm is one slot of several) f
 part of the corpus; the part it does not cover is a different mechanism. Both are
 named so they can be designed together; [[35]] stays as the realm instance.
 
+**Part A (realm) — ✅ DONE 2026-08-14.** Designed in
+`docs/superpowers/specs/2026-08-10-open-guideline-slots-design.md` and implemented
+via `docs/superpowers/plans/2026-08-10-open-guideline-slots-part-a.md`: the generic
+`OpenSlotKind`/`chosenSlots` mechanism (model, validation checks 6/7, bloc, UI) plus
+a full, working realm instance — 17 catalog entries annotated, a hand-verified
+`REALM_BY_SPELL_ID` table (not a prose scan — one was tried and demonstrably
+misfires on the real corpus, see the spec's Decision 7) feeds 6 real corpus
+templates their `chosenSlots`. **Part B (Form, "a specific type", and the 3 case-2
+Muto Vim spells below) is still open** — the mechanism is generic enough to take it
+without reshaping anything, per the spec's Decision 8 and the final review's
+genericity spot-check.
+
 - **Case 1 — the guideline itself leaves a slot open.** Measured: **20 of the 49
   General bullets (41%)**. By slot kind: **realm** ~15 (*"beings … from one
   supernatural realm (Divine, Faerie, Infernal, or Magic)"*, and PeVi's *"any
@@ -835,8 +847,12 @@ named so they can be designed together; [[35]] stays as the realm instance.
   spirit control magic"*); **Form** 2 (PeVi 10's *"a particular Hermetic Form"*, PeVi
   11's *"a given Form"*). Filling the slot is part of choosing the guideline; the
   slot is a property of the catalog row.
-  - **⚠️ Reconcile first:** item 35 counted 14 General realm entries, this scan finds
-    15 (adding `pevi-G5`). One of the two counts is wrong.
+  - **✅ Reconciled 2026-08-10:** 15 was correct, not 14 — item 35's original count
+    used a JSON keyword search whose stored description for `pevi-G5` drops the
+    words "of one realm" during extraction (an item-22-shaped gap). Reading the
+    rulebook prose directly gives 15 General + 2 fixed-level (`revi-5`, `revi-15`) =
+    **17 catalog entries with an open realm slot**, the authoritative count (design
+    spec Decision 1).
 - **Case 2 — the guideline says nothing and the *spell* comes in ten versions.**
   Three Muto Vim spells: *Mirror of Opposition (form)* (*"There are ten versions of
   this spell, each affecting spells of one of the Hermetic forms"*), *Wizard's Boost
@@ -856,10 +872,10 @@ named so they can be designed together; [[35]] stays as the realm instance.
   the published prose and is often the only thing distinguishing two otherwise
   identical spells — *"No **magical** beast whose **Magic** Might…"* against *"No
   water **faerie** whose **Faerie** Might…"*, same guideline, level and stat line.
-- **Open question, unanswered:** is "a specific type" a closed set (like realm's four
-  or Form's ten) or free text? PeVi 7's *"a specific type of supernatural effect"*
-  reads open-ended, which would be a different UI affordance from a four-way or
-  ten-way picker.
+- **✅ Decided 2026-08-10, not yet implemented (Part B):** free text, not a closed
+  set — the rulebook gives illustrative examples ("could be X, or Y"), not an
+  exhaustive list; a closed set risks rejecting a legitimate type it didn't happen
+  to list (design spec Decision 4).
 
 **Three model findings arguing the `choices`-map fork is decided *before* either
 axis is implemented:**
@@ -883,25 +899,30 @@ axis is implemented:**
   the serialized form of `spell_library.json`, `spell_templates.json` and every DB
   blob a second time.
 
-### 35. A Guideline's Realm Is a Choice, Like Its Level
-**Generalised by item 37; design the two together** — see item 37 for the model
-findings that bear on both. The realm measurements here remain the authority for
-that slice, subject to the 14-vs-15 reconciliation item 37 flags.
+### 35. A Guideline's Realm Is a Choice, Like Its Level — ✅ DONE 2026-08-14
+**Generalised by item 37; designed the two together**, then implemented as item 37's
+Part A — see [[37]] for the shipped mechanism and Part B's remaining scope.
 
-- [ ] Decide where the chosen realm lives — most likely `Spell.chosenRealm` alongside
-      `chosenBaseLevel`, with `SpellTemplate` carrying the *set* of legal choices
-      rather than a value
-- [ ] Decide whether the realm is part of validation (a ward with no realm chosen is
-      not yet a spell) — the level answer was yes, and the argument looks identical
-- [ ] Decide whether the import reads the realm out of published prose, or leaves
-      imported wards realm-less
-- [ ] Check whether "one realm" is the only such axis (item 37 says no)
-- **What was noticed.** Sixteen catalog entries leave a realm open, phrased *"from
-  one supernatural realm (Divine, Faerie, Infernal, or Magic)"*. Fourteen are General
-  — all twelve wards, plus `pevi-G6` (reduce the casting total for all powers of one
-  realm) and `pevi-G12` (dispel Magic Resistance aligned to one Realm). **Two are
-  ordinary Rego Vim rows, `revi-5` and `revi-15`** — so this is **not** a General-only
-  problem, which is why it was not folded into item 25.
+- [x] Decide where the chosen realm lives — **not `Spell.chosenRealm`**, as first
+      guessed here: a general `chosenSlots: Map<String, String>` on
+      `Spell`/`SpellDraft`/`SpellTemplate`, keyed by slot kind, absorbs all three
+      axes (and `pevi-G10`'s either/or) for one plumbing cost instead of three
+      (design spec Decisions 2/3)
+- [x] Decide whether the realm is part of validation — yes, checks 6 (mandatory,
+      unless declared open by the effect) and 7 (stray-kind rejection) in
+      `validateSpellAgainstCatalog`
+- [x] Decide whether the import reads the realm out of published prose — yes, but
+      via a **hand-verified table** (`REALM_BY_SPELL_ID`), not a scan: a scan was
+      tried and demonstrably misfires on the real corpus (design spec Decision 7)
+- [x] Check whether "one realm" is the only such axis — no, confirmed and shipped
+      generically: `OpenSlotKind` also carries `form`/`specificType` for Part B
+- **What was noticed.** Seventeen catalog entries leave a realm open (see item 37's
+  reconciled count above), phrased *"from one supernatural realm (Divine, Faerie,
+  Infernal, or Magic)"*. Fifteen are General — all twelve wards, plus `pevi-G5`,
+  `pevi-G6` (reduce the casting total for all powers of one realm) and `pevi-G12`
+  (dispel Magic Resistance aligned to one Realm). **Two are ordinary Rego Vim rows,
+  `revi-5` and `revi-15`** — so this is **not** a General-only problem, which is why
+  it was not folded into item 25.
 - **Why it matters concretely.** The realm is what tells two otherwise identical
   spells apart. *Ward against the Beasts of Legend* and a hypothetical infernal
   equivalent would share a guideline, a level and a Touch/Ring/Circle stat line and
