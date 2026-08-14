@@ -177,6 +177,7 @@ void main() {
         chosenBaseLevel: spell.chosenBaseLevel,
         requisites: spell.requisites,
         selectedModifiers: spell.selectedModifiers,
+        chosenSlots: spell.chosenSlots,
         modifiers: modifiers,
       );
       if (problems.isNotEmpty) {

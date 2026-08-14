@@ -731,11 +731,12 @@ void main() {
       );
     });
 
-    test('isTemplate still runs checks 6 and 7', () {
-      expect(
-        validate(effect: realmSlotEffect(), isTemplate: true),
-        contains('Choose a realm for this guideline'),
-      );
+    test('isTemplate skips checks 6 and 7, which cannot apply to a template', () {
+      // A template may legitimately have an unfilled open slot -- Wind of
+      // Mundane Silence (pevi-G5) is the real corpus case: its prose doesn't
+      // commit to one realm, so its chosenSlots stays empty until a caster
+      // instantiates it and fills one in.
+      expect(validate(effect: realmSlotEffect(), isTemplate: true), isEmpty);
     });
   });
 }

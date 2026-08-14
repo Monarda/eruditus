@@ -228,6 +228,7 @@ void main() {
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),
           chosenBaseLevel: chosenBaseLevel,
+          chosenSlots: const {'realm': 'Magic'},
           templateId: templateId,
         );
 

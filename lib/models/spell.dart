@@ -66,9 +66,10 @@ String _openSlotDescription(OpenSlotKind kind) {
 /// wrapper — call the identical function, and avoids a circular import, since
 /// `resolved_spell.dart` imports this file.
 ///
-/// [isTemplate] skips checks 1 and 2. A `SpellTemplate` built on a General
-/// guideline legitimately has no chosen level; supplying one is precisely what
-/// instantiating the template means.
+/// [isTemplate] skips checks 1, 2, 6 and 7. A `SpellTemplate` built on a
+/// General guideline legitimately has no chosen level; supplying one is
+/// precisely what instantiating the template means. An open slot may
+/// legitimately stay unfilled until instantiation.
 List<String> validateSpellAgainstCatalog({
   required BaseEffect effect,
   required int? chosenBaseLevel,
@@ -122,31 +123,33 @@ List<String> validateSpellAgainstCatalog({
     }
   });
 
-  // 6. An open slot (realm, Form, "a specific type") is the caster's to fill,
-  //    the same completeness requirement chosenBaseLevel already enforces for
-  //    a General guideline's level -- a ward with no realm chosen is not yet
-  //    a spell. "At least one" (not "every") declared kind, because pevi-G10
-  //    declares two alternatives (Form OR a specific type of enchantment) and
-  //    either satisfies it; every other entry declares exactly one kind, so
-  //    this collapses to "mandatory" for them.
-  if (effect.openSlots.isNotEmpty) {
-    final filled = effect.openSlots
-        .any((kind) => (chosenSlots[kind.name] ?? '').isNotEmpty);
-    if (!filled) {
-      final kindNames = effect.openSlots.length == 1
-          ? _openSlotDescription(effect.openSlots.single)
-          : effect.openSlots.map(_openSlotDescription).join(' or a ');
-      problems.add('Choose a $kindNames for this guideline');
+  if (!isTemplate) {
+    // 6. An open slot (realm, Form, "a specific type") is the caster's to fill,
+    //    the same completeness requirement chosenBaseLevel already enforces for
+    //    a General guideline's level -- a ward with no realm chosen is not yet
+    //    a spell. "At least one" (not "every") declared kind, because pevi-G10
+    //    declares two alternatives (Form OR a specific type of enchantment) and
+    //    either satisfies it; every other entry declares exactly one kind, so
+    //    this collapses to "mandatory" for them.
+    if (effect.openSlots.isNotEmpty) {
+      final filled = effect.openSlots
+          .any((kind) => (chosenSlots[kind.name] ?? '').isNotEmpty);
+      if (!filled) {
+        final kindNames = effect.openSlots.length == 1
+            ? _openSlotDescription(effect.openSlots.single)
+            : effect.openSlots.map(_openSlotDescription).join(' or a ');
+        problems.add('Choose a $kindNames for this guideline');
+      }
     }
-  }
 
-  // 7. The converse of check 6: stray chosen-slot data for a kind this
-  //    guideline never declared open is silently meaningless, the same
-  //    class of bug check 2 closes for a stray chosenBaseLevel.
-  final openKindNames = effect.openSlots.map((k) => k.name).toSet();
-  for (final kind in chosenSlots.keys) {
-    if (!openKindNames.contains(kind)) {
-      problems.add('A chosen $kind applies only to a guideline with an open $kind slot');
+    // 7. The converse of check 6: stray chosen-slot data for a kind this
+    //    guideline never declared open is silently meaningless, the same
+    //    class of bug check 2 closes for a stray chosenBaseLevel.
+    final openKindNames = effect.openSlots.map((k) => k.name).toSet();
+    for (final kind in chosenSlots.keys) {
+      if (!openKindNames.contains(kind)) {
+        problems.add('A chosen $kind applies only to a guideline with an open $kind slot');
+      }
     }
   }
 
