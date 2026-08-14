@@ -74,6 +74,31 @@ class CandidatesTest(unittest.TestCase):
         with self.assertRaisesRegex(KeyError, "not-a-real-effect-id"):
             self.catalog.reference_cost("not-a-real-effect-id")
 
+    def test_open_slots_returns_the_annotated_list(self):
+        catalog_inst = catalog.Catalog(
+            base_effects=[
+                {"id": "revi-G1", "technique": "Rego", "form": "Vim",
+                 "baseLevel": None, "openSlots": ["realm"]},
+            ],
+            parameters=[], modifiers=[],
+        )
+        self.assertEqual(catalog_inst.open_slots("revi-G1"), ["realm"])
+
+    def test_open_slots_defaults_to_empty_when_the_key_is_absent(self):
+        catalog_inst = catalog.Catalog(
+            base_effects=[
+                {"id": "crig-10a", "technique": "Creo", "form": "Ignem",
+                 "baseLevel": 10},
+            ],
+            parameters=[], modifiers=[],
+        )
+        self.assertEqual(catalog_inst.open_slots("crig-10a"), [])
+
+    def test_open_slots_raises_on_an_unknown_id(self):
+        catalog_inst = catalog.Catalog(base_effects=[], parameters=[], modifiers=[])
+        with self.assertRaises(KeyError):
+            catalog_inst.open_slots("does-not-exist")
+
 
 class ExistingIdsTest(unittest.TestCase):
     def test_slugger_reproduces_every_committed_library_id(self):

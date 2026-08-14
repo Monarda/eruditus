@@ -88,6 +88,17 @@ class Catalog:
         return sum(by_id[reference[key]]
                    for key in ("rangeId", "durationId", "targetId"))
 
+    def open_slots(self, effect_id: str) -> list[str]:
+        """The `OpenSlotKind` names this guideline declares open, or `[]`.
+
+        Mirrors `reference_cost`'s lookup shape: an unknown id is a caller
+        bug, not a "no slots" answer, so it raises rather than defaulting.
+        """
+        effect = next((e for e in self.base_effects if e["id"] == effect_id), None)
+        if effect is None:
+            raise KeyError(f"no base effect with id {effect_id!r} in base_effects.json")
+        return effect.get("openSlots") or []
+
     def parameter_id(self, category: str, name: str) -> str:
         for parameter in self.parameters:
             if parameter["category"] == category and parameter["name"] == name:
