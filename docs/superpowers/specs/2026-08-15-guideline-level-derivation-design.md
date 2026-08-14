@@ -88,7 +88,7 @@ a genuine catalog gap, it just isn't derivable, unlike its four siblings.
 | 2 | **The refactor is safe: zero corpus spells reference any of the 6 rows being restructured** (`crvi-5a`/`10a`/`15a`, `peig-5b`/`10b`) | Checked directly against `spell_library.json`/`spell_templates.json` before proposing the refactor, mirroring the same corpus-verification discipline the open-guideline-slots work established. No ledger entries, no re-import of existing spells, no risk to already-working data. |
 | 3 | **The MuAu single-property discount is scoped to the whole Form, not one guideline row** | The preamble states it as a general rule for any Muto Auram effect, not a property of `muau-3` specifically. Scoping the modifier broadly (`technique: Muto, form: Auram`, no `effectIds`) makes it reusable the next time any MuAu spell needs it, matching the "model the rule, not the one spell" instruction that motivated Group A's whole approach. |
 | 4 | **A negative-magnitude modifier option needs no new safety code** | `SpellEngine.calculateBreakdown` already folds every selected modifier's magnitude into the same `contributions` list that feeds `SpellLevelCalculator.calculate`, which already throws (surfaced to the UI as "Magnitudes reduce this spell below level 1") whenever the total drops below level 1 — the identical guard that already protects item 24's ad-hoc adjustments. Verified by reading `spell_engine.dart:123-187` directly, not assumed. |
-| 5 | **Group B is resolved by a hand-verified table, not an automatic heuristic** | A rule like "no numbered match at this level → assume it's a General guideline's committed level" would misclassify Group A's own spells, which *also* have no numbered match at their exact level. Only a human can tell "this level is missing from the table" (Group A) apart from "this level was never meant to be in the table, because the guideline is General and this spell just picked one" (Group B). A small table (`GENERAL_LEVEL_BY_SPELL_ID`), mirroring `KNOWN_UNRESOLVABLE`/`REALM_BY_SPELL_ID`'s existing pattern exactly, keeps that judgment call auditable and explicit, the same discipline as every other hand-verified table in this importer. |
+| 5 | **All four Group A/B spells are resolved by one hand-verified table, not an automatic heuristic** | A rule like "no numbered match at this level → assume it's a General guideline's committed level" would misclassify Group A's own spells, which *also* have no numbered match at their exact level — confirmed while grounding the plan: both groups hit the identical `catalog.candidates(...)` empty-result code path, not two different ones. Only a human can tell "this level is a numbered ladder's next rung" (Group A) apart from "this level was never meant to be in the numbered table, because the guideline is General and this spell just picked one" (Group B). One small table (`NUMBERED_OVERRIDES`), mirroring `KNOWN_UNRESOLVABLE`/`REALM_BY_SPELL_ID`'s existing pattern, keeps that judgment call auditable and explicit for both groups, the same discipline as every other hand-verified table in this importer. See "One resolution mechanism, not two" in Design. |
 | 6 | **`Sense of the Lingering Magic` stays under item 28, not item 39** | Item 39 is explicitly scoped to spells with "no catalog gap" — multiple existing candidate rows, ambiguous only in which one applies. This spell has a genuine catalog gap (no InVi row at level 10); it just isn't derivable from the guideline text the way its four siblings are. Moving it to item 39 would blur a distinction the todo file already draws deliberately. |
 | 7 | **Both ladders stop at the rung the corpus actually needs, not the furthest the rule could theoretically extend** | CrVi's progression (5→1WP, 10→2WP, 15→3WP) is inferred from three printed table points plus one derived point (20→4WP, confirmed by *The Enigma's Gift*'s own prose) — nothing in the rulebook states the pattern continues past 4 WP, so the ladder stops there rather than speculatively adding an untested 5th rung. PeIg's rule *is* stated as a general, open-ended formula ("for every five points..."), so its ladder fills the one gap between its two known points (+15 damage, between the printed +10 and the newly-needed +20) since that rung sits *between* two already-confirmed points on an explicit rule — a materially safer inference than extrapolating past the highest known point. |
 
@@ -166,39 +166,80 @@ effect id:
 `Fog of Confusion` imports as `muau-3` + this modifier selected. No safety
 code needed for the negative magnitude (Decision 4).
 
-### Group B: `GENERAL_LEVEL_BY_SPELL_ID`
+### One resolution mechanism, not two — `NUMBERED_OVERRIDES`
 
-A new hand-verified table in `extract_spells.py`, mirroring
-`KNOWN_UNRESOLVABLE`'s placement and style exactly:
+**Correction to the design, found while grounding the plan against the real
+`extract_spells.py` control flow (not caught during brainstorming):** Group
+A's three spells hit the *exact same* code location as Group B, not a
+different one. `catalog.candidates('Creo', 'Vim', 20)` returns empty for
+*The Enigma's Gift* for the identical reason
+`catalog.candidates('Muto', 'Auram', 25)` returns empty for *Infernal Smoke
+of Death* — the design line's numeric base doesn't literally equal any
+catalog row's `baseLevel`. The two groups don't need two mechanisms; they
+need the *same* "here's what this otherwise-unresolvable spell actually
+resolves to" override, just with different payloads. One table, mirroring
+`KNOWN_UNRESOLVABLE`'s placement and style:
 
 ```python
-# A published spell that commits to one specific level of a General
-# guideline -- the guideline itself stays open-ended (Core Rules line
-# 12414), but this particular published spell already made the choice, in
-# print, once. Verified once per entry against the rulebook, never inferred
-# ("no numbered match" is also true of every Group-A spell in item 28's
-# design spec -- conflating the two would misclassify them).
-GENERAL_LEVEL_BY_SPELL_ID = {
-    "lib-muau-infernal-smoke-death": 25,
+# A published spell whose design line's numeric base has no exact catalog
+# match, but resolves to a real base effect once a human reads the
+# guideline text: either a General guideline this specific spell commits to
+# one level of (Core Rules line 12414 says the guideline itself stays
+# open-ended; this published spell already made the choice, in print,
+# once), or a numbered guideline's own ladder rung one step past what the
+# table prints (see this file's design spec, Group A). Verified once per
+# entry against the rulebook, never inferred -- "no numbered match" alone
+# doesn't distinguish the two cases, which is why this is one hand-verified
+# table rather than an automatic "no match -> assume General" heuristic.
+NUMBERED_OVERRIDES = {
+    "lib-muau-infernal-smoke-death": {
+        "base_effect_id": "muau-gen",
+        "chosen_base_level": 25,
+        "modifiers": {},
+    },
+    "lib-crvi-enigmas-gift": {
+        "base_effect_id": "crvi-5a",
+        "chosen_base_level": None,
+        "modifiers": {"warping-point-burst": ["warping-point-burst-4"]},
+    },
+    "lib-peig-wizards-icy-grip": {
+        "base_effect_id": "peig-5b",
+        "chosen_base_level": None,
+        "modifiers": {"chill-damage": ["chill-damage-20"]},
+    },
+    "lib-muau-fog-confusion": {
+        "base_effect_id": "muau-3",
+        "chosen_base_level": None,
+        "modifiers": {"single-property-transformation": ["single-property-transformation-yes"]},
+    },
 }
 ```
 
-(The exact slug must be verified with `catalog_module.slug_id("Muto",
-"Auram", "Infernal Smoke of Death")` during implementation, not assumed —
-the stopword list can shift a guess.)
+(Every slug above must be verified with `catalog_module.slug_id(...)`
+during implementation, not assumed — the stopword list can shift a guess,
+and *Fog of Confusion* in particular drops "of" per the existing stopword
+list.)
 
 `extract_spells.py`'s numbered-resolution path, on finding zero numbered
 candidates at the design line's base level, checks this table before giving
-up: a hit routes to `emit.build_spell` with `base_effect_id` set to the
-Technique+Form's General row and the table's level supplied as
-`chosenBaseLevel` — the same field `Spell` already carries for exactly this
-purpose (item 25), just filled by the importer instead of a caster. A miss
-still blocks, unchanged from today.
+up: a hit routes to `emit.build_spell` with `base_effect_id`,
+`chosen_base_level` (only Group B's entry sets this — Group A's entries
+leave it `None` since their guideline is numbered, not General; the level
+comes from the base row's own `baseLevel` plus the selected modifier's
+magnitude, exactly like any other numbered spell), and `modifiers` (merged
+into whatever `_selected_modifiers` already derives from the design line's
+own tokens — none, for all four of these spells, so this is the entire
+`selectedModifiers` dict for each). A miss still blocks, unchanged from
+today.
 
-This makes `build_spell` grow an optional `chosen_base_level: int | None`
-parameter (defaulted, mirroring Part A's `realm_by_spell_id` lesson so no
-pre-existing call site breaks), emitted as `"chosenBaseLevel"` in the
-spell's dict only when non-null.
+This makes `build_spell` grow two optional parameters,
+`chosen_base_level: int | None = None` and
+`override_modifiers: dict[str, list[str]] | None = None` (both defaulted,
+mirroring Part A's `realm_by_spell_id` lesson so no pre-existing call site
+breaks). `chosen_base_level` is emitted as `"chosenBaseLevel"` only when
+non-null; `override_modifiers`, when present, is merged into the dict
+`_selected_modifiers` already returns before it's written to the spell's
+`"selectedModifiers"` key.
 
 ---
 
@@ -210,9 +251,10 @@ spell's dict only when non-null.
   combined with a small enough base/parameters (proving Decision 4's claim,
   not just asserting it).
 - Python: `catalog.py`/`emit.py` tests for both ladders' `_option_exists`
-  wiring (mirroring the existing `_MODIFIER_OPTIONS` test coverage), and a
-  new test for `GENERAL_LEVEL_BY_SPELL_ID`'s routing — a hit producing a
-  `Spell` with the right `baseEffectId`/`chosenBaseLevel`, a miss still
+  wiring (mirroring the existing `_MODIFIER_OPTIONS` test coverage), and new
+  tests for `NUMBERED_OVERRIDES`'s routing — each of the 4 entries producing
+  a `Spell` with the right `baseEffectId`/`chosenBaseLevel`/
+  `selectedModifiers`, and a miss (any slug not in the table) still
   blocking.
 - Corpus: after regeneration, all 4 resolvable spells (`The Enigma's Gift`,
   `Wizard's Icy Grip`, `Fog of Confusion`, `Infernal Smoke of Death`) import
@@ -225,11 +267,10 @@ spell's dict only when non-null.
 ## Scope
 
 One plan, not split — unlike the open-guideline-slots work, there's no
-natural fault line here worth two review cycles. Group A (3 spells, pure
-catalog/modifier data) and Group B (1 spell, new importer routing logic)
-are small enough combined to stay one plan; Group B's code change
-(`build_spell`'s new optional parameter) is a handful of lines, not a new
-subsystem.
+natural fault line here worth two review cycles. Group A (3 spells) and
+Group B (1 spell) share one resolution mechanism (`NUMBERED_OVERRIDES`) and
+one small code change (`build_spell`'s two new optional parameters) — there
+was never a real seam to split along once that was discovered.
 
 ---
 
@@ -238,7 +279,7 @@ subsystem.
 - **It does not resolve `Sense of the Lingering Magic`.** Left blocked,
   with its reason updated to reflect investigation, not silence.
 - **It does not build a general "General guideline + committed level"
-  UI affordance.** `GENERAL_LEVEL_BY_SPELL_ID` is import-time only; nothing
+  UI affordance.** `NUMBERED_OVERRIDES` is import-time only; nothing
   changes for a user creating a custom spell by hand — they still pick a
   General effect and type a level, exactly as today.
 - **It does not extend either ladder past the rung the corpus needs.**
