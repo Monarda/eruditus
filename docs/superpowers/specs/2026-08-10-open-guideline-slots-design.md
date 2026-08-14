@@ -7,7 +7,13 @@ spec (decision 7) already rejected batching a *different* piece of work with
 these two on the grounds that their design question was still open. It no
 longer is.
 
-**Status:** designed 2026-08-10
+**Status:** designed 2026-08-10, **implemented and merged 2026-08-15** — Part A
+(`docs/superpowers/plans/2026-08-10-open-guideline-slots-part-a.md`, commits
+`d802de5..599bb37`) and Part B
+(`docs/superpowers/plans/2026-08-14-open-guideline-slots-part-b.md`, commits
+`0699057..9af1c8d`) are both merged to `main`. Every decision below shipped as
+designed; none were reversed during implementation. See Decision 13 for
+Part B's implementation-time findings.
 
 **Rulebook:** Core Rules Chapter 9 guideline tables; specific citations inline
 below.
@@ -88,6 +94,7 @@ Recorded here because each was a fork with a defensible other side.
 | 10 | **6 of the 17 realm entries are already-imported templates, not blocked spells** | Checked directly against `assets/data/spell_templates.json`: `Circular Ward against Demons`, `Ward against the Beasts of Legend`, `Ward against Faeries of the Waters/Air/Wood`, and `Ring of Warding against Spirits` import successfully today. `Wind of Mundane Silence` also already imports (Decision 9 covers why it gets no table entry). The remaining 10 catalog entries have no corpus spell referencing them yet. Part A's import work is backfilling `chosenSlots` onto the 7 existing templates via the hand-table, not unblocking anything. |
 | 11 | **The 3 case-2 Muto Vim spells are also already-imported templates, not blocked** | Checked directly against `assets/data/spell_templates.json` (2026-08-14, re-verified before Part B planning): `tpl-muvi-mirror-opposition-form`, `tpl-muvi-wizards-boost-form`, and `tpl-muvi-wizards-reach-form` all exist and import successfully today — `muvi-G1/G2/G3`'s import path was never blocked by the missing Form concept, it simply produced a template with no Form data. This corrects both this spec's original Problem framing and the earlier "currently-blocked Muto Vim spells" phrasing in the Scope table below — Part B is annotating `muvi-G2`/`muvi-G3` (`muvi-G1` has no corpus spell referencing it yet) and backfilling 3 existing templates' `chosenSlots`, the same shape of work as Part A's realm backfill, not an unblocking operation. |
 | 12 | **`openSlots` stays declared per-guideline even where one guideline serves both Form-restricted and Form-agnostic spells** | `muvi-G2` is used by `Wizard's Boost`/`Wizard's Reach` (Form-restricted, "ten versions, one per Form") **and** by `The Sorcerer's Fork` (already in the corpus, Form-agnostic prose — no Form mention at all). Declaring `openSlots: [form]` on `muvi-G2` is harmless for every corpus use today (all three are templates, and templates never need the slot filled — Decision 9) but would force a Form choice on a hypothetical brand-new custom spell a user builds directly on `muvi-G2` in the shape of `Sorcerer's Fork`, even though that shape doesn't conceptually need one. **Accepted as a narrow, non-blocking rough edge** (human decision, 2026-08-14) rather than redesigning `openSlots` to be scoped finer than the guideline — no corpus spell is affected, and a finer-grained scope would revisit Decision 3's "one map on the record" shape for a case that has not actually occurred yet. |
+| 13 | **Part B's own predictions held exactly; only one real gap surfaced, and it was a test-coverage gap, not a design defect** | Confirmed by the final whole-branch review with independent verification: the "no hand-verified resolution table needed" prediction (Decision 11's corollary) held — `git diff --stat` on both assets after regeneration was genuinely empty, and the Python suite's `RegenerationTest.test_committed_library_matches_a_fresh_run` proved it, not just a git check. Decision 12's accepted rough edge shipped exactly as decided, with no scope drift toward per-spell granularity. The one Important finding — `_SpecificTypeField`'s `didUpdateWidget` resync path (the only genuinely new logic in Part B; everything else reuses Part A's mechanism unchanged) had no test proving an externally-set `chosenSlots` value reaches the display — was fixed with real RED/GREEN evidence (a temporary revert of the resync body made the new test fail, restoring it made it pass) and re-verified clean. No design decision from Parts A or B was reversed during implementation. |
 
 ---
 
@@ -222,7 +229,7 @@ prototype-stage, no-migration convention as item 40 Part B.
 
 ---
 
-## Scope: two plans, planned separately
+## Scope: two plans, planned separately — both ✅ DONE 2026-08-15
 
 Only Part A touches import behavior; Part B is additive catalog coverage on
 top of a mechanism that already exists. Neither part unblocks a spell that's
@@ -234,10 +241,11 @@ Mountain`, blocked on "no design line printed" — untouched by this work).
 | **A. Mechanism + realm** | `base_effect.dart`, `spell.dart`, `spell_template.dart`, `resolved_spell.dart`, `resolved_template.dart`, `spell_engine.dart`, `spell_creation_bloc.dart`, `spell_creation_screen.dart`, `backup_service.dart`, `catalog.py` (`open_slots` lookup), `emit.py`/`extract_spells.py` (`REALM_BY_SPELL_ID` table), both assets, every affected test | `OpenSlotKind`/`chosenSlots` generic mechanism; realm fully modeled, validated, and editable; the 17 realm-slot catalog entries annotated; the 7 existing realm-guideline templates carry verified `chosenSlots` |
 | **B. Form + "specific type" + case-2 spells** | Catalog annotation for `pevi-G2/7/10`, `pevi-G11` (the Form-Resistance bullet), `revi-G5`, `muvi-G2/G3` (the two guidelines the 3 case-2 templates actually reference); case-2 needs no importer table at all — unlike most realm entries, none of the 3 templates' own prose commits to one Form (each explicitly says "ten versions, one per Form"), so their `chosenSlots` correctly stays empty by the same rule that already covers `Wind of Mundane Silence` (Decision 9), extended to a second real corpus case; Form dropdown + specificType text field UI; `base_effects.json` re-annotated, `spell_templates.json` regenerated (its 3 entries are unaffected — they already have no `chosenSlots` key and correctly keep none) | The remaining two slot kinds; `muvi-G2/G3`'s Form slot is declared and immediately exercisable by a caster instantiating any of the 3 existing templates |
 
-**Part A is planned and implemented first.** It delivers the full generic
-mechanism plus one complete, working instance of it (realm) — nothing in Part
-B changes the shape Part A ships, only adds more annotated catalog rows and
-two more UI controls that reuse it as-is.
+**Part A was planned and implemented first**, delivering the full generic
+mechanism plus one complete, working instance of it (realm). **Part B
+confirmed the prediction:** it shipped as pure catalog annotation plus two
+more UI controls, with zero changes to the mechanism Part A shipped — no
+model, bloc, or importer-code reshaping was needed (Decision 13).
 
 ---
 
