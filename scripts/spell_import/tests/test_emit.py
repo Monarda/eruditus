@@ -383,7 +383,7 @@ class OpenSlotEmissionTest(unittest.TestCase):
         block = _block("Demon's Eternal Oblivion", "Perdo", "Vim", None)
         template = emit.build_template(
             block, "pevi-G3", self.catalog, design,
-            realm_by_spell_id={"lib-pede-demons-eternal-oblivion": "Infernal"},
+            realm_by_spell_id={"lib-pevi-demons-eternal-oblivion": "Infernal"},
         )
         self.assertNotIn("chosenSlots", template)
 
