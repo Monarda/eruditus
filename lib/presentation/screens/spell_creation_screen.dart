@@ -157,6 +157,28 @@ class SpellCreationScreen extends StatelessWidget {
                   if (state.generalEffectSentence != null)
                     Text(state.generalEffectSentence!, key: const Key('general-effect-sentence')),
                 ],
+                if (draft.baseEffect?.openSlots.contains(OpenSlotKind.realm) ?? false) ...[
+                  const SizedBox(height: 8),
+                  // ValueKey forces a fresh Element (and a fresh initialValue
+                  // read) whenever the chosen realm changes out from under
+                  // this field -- e.g. TemplateInstantiated setting a new
+                  // pre-filled value while this screen's widget state
+                  // survives underneath main.dart's IndexedStack. A dropdown
+                  // has no in-progress typing state to lose, unlike
+                  // _GuidelineLevelField's text field, so a full StatefulWidget
+                  // isn't needed here -- keying by value is sufficient.
+                  DropdownButtonFormField<String>(
+                    key: ValueKey('chosen-realm-field-${draft.chosenSlots['realm']}'),
+                    decoration: const InputDecoration(labelText: 'Realm'),
+                    initialValue: draft.chosenSlots['realm'],
+                    items: const ['Divine', 'Faerie', 'Infernal', 'Magic']
+                        .map((realm) => DropdownMenuItem(value: realm, child: Text(realm)))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) bloc.add(OpenSlotChosen('realm', value));
+                    },
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),

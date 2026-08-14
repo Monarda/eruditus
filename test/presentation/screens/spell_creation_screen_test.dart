@@ -70,6 +70,13 @@ void main() {
     provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
     effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
   );
+  final generalRealmEffect = BaseEffect(
+    id: 'revi-G1', technique: 'Rego', form: 'Vim',
+    description: 'Ward against beings from one realm', baseLevel: null,
+    openSlots: const [OpenSlotKind.realm],
+    provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+  );
 
   late Parameter range;
   late Parameter duration;
@@ -769,6 +776,89 @@ void main() {
       await tester.pump();
 
       expect(find.text('20'), findsOneWidget);
+    });
+  });
+
+  group('chosen realm field (open realm slot)', () {
+    // The widget's key is a ValueKey suffixed with the current chosen realm
+    // (e.g. 'chosen-realm-field-null'), not a plain Key -- see the widget's
+    // own doc comment for why. A plain find.byKey(const Key(...)) would never
+    // match, so match structurally on the key's string value instead.
+    Finder findRealmField() => find.byWidgetPredicate((w) =>
+        w is DropdownButtonFormField<String> &&
+        (w.key as ValueKey).value.toString().startsWith('chosen-realm-field'));
+
+    testWidgets('is absent when the selected base effect declares no open slot', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      );
+      await pumpScreen(tester, state);
+
+      expect(findRealmField(), findsNothing);
+    });
+
+    testWidgets('is present when the selected base effect declares an open realm slot',
+        (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Rego', form: 'Vim', baseEffect: generalRealmEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalRealmEffect],
+          parameters: const [],
+        ),
+      );
+
+      expect(findRealmField(), findsOneWidget);
+    });
+
+    testWidgets('picking a realm dispatches OpenSlotChosen', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Rego', form: 'Vim', baseEffect: generalRealmEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalRealmEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.tap(findRealmField());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Infernal').last);
+      await tester.pumpAndSettle();
+
+      verify(() => bloc.add(const OpenSlotChosen('realm', 'Infernal'))).called(1);
+    });
+
+    testWidgets('a pre-filled chosenSlots value shows as the initial selection', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Rego', form: 'Vim', baseEffect: generalRealmEffect,
+          chosenSlots: const {'realm': 'Faerie'},
+        ),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, generalRealmEffect],
+          parameters: const [],
+        ),
+      );
+
+      expect(find.text('Faerie'), findsOneWidget);
     });
   });
 
