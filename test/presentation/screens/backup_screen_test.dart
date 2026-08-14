@@ -127,7 +127,7 @@ void main() {
 
   testWidgets('successful import with no rejections shows correct status message with trailing period', (tester) async {
     final validJson = jsonEncode({
-      'version': '3.0',
+      'version': '4.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [],
       'customEffects': [],
@@ -158,7 +158,7 @@ void main() {
 
   testWidgets('import with one invalid and one valid spell shows the rejection suffix', (tester) async {
     final validJson = jsonEncode({
-      'version': '3.0',
+      'version': '4.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [
         buildSpell('good-1', baseEffectId: 'crig-10a').toMap(),

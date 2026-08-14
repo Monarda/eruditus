@@ -147,4 +147,34 @@ void main() {
     expect(resolved.isResolved, isFalse);
     expect(resolved.problems, isEmpty);
   });
+
+  test('chosenSlots passes through from the record', () {
+    final spell = Spell(
+      id: 's-1', baseEffectId: 'e1', rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      requisites: const {},
+      chosenSlots: const {'realm': 'Divine'},
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final resolved = ResolvedSpell(record: spell);
+    expect(resolved.chosenSlots, {'realm': 'Divine'});
+  });
+
+  test('problems reports check 6 when the resolved base effect declares an unfilled open slot', () {
+    final effect = BaseEffect(
+      id: 'revi-G1', technique: 'Rego', form: 'Vim',
+      description: 'Ward against beings from one realm', baseLevel: null,
+      openSlots: const [OpenSlotKind.realm],
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final spell = Spell(
+      id: 's-2', baseEffectId: effect.id, rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      requisites: const {},
+      chosenBaseLevel: 20,
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final resolved = ResolvedSpell(record: spell, baseEffect: effect);
+    expect(resolved.problems, contains('Choose a realm for this guideline'));
+  });
 }

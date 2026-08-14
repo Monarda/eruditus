@@ -86,6 +86,7 @@ class SpellEngine {
         requisites: draft.requisites,
         selectedModifiers: draft.selectedModifiers,
         modifiers: allModifiers,
+        chosenSlots: draft.chosenSlots,
       ));
     }
 

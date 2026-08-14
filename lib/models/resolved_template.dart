@@ -64,6 +64,7 @@ class ResolvedTemplate implements LibraryEntry {
   List<String> get tags => record.tags;
   Map<String, List<String>> get selectedModifiers => record.selectedModifiers;
   Map<String, RequisiteKind> get requisites => record.requisites;
+  Map<String, String> get chosenSlots => record.chosenSlots;
   List<LevelAdjustment> get adjustments => record.adjustments;
   RitualDeclaration get ritualDeclaration => record.ritualDeclaration;
 }

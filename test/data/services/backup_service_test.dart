@@ -105,7 +105,7 @@ void main() {
     final jsonString = await service.exportToJson();
     final data = jsonDecode(jsonString) as Map<String, dynamic>;
 
-    expect(data['version'], '3.0');
+    expect(data['version'], '4.0');
     expect(data['exportDate'], isNotNull);
     expect((data['spells'] as List).length, 1);
     expect((data['spells'] as List).first['name'], 'My Fireball');
@@ -125,7 +125,7 @@ void main() {
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final backup = {
-      'version': '3.0',
+      'version': '4.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [importedSpell.toMap()],
       'customEffects': [
@@ -162,7 +162,7 @@ void main() {
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final jsonString = jsonEncode({
-      'version': '3.0',
+      'version': '4.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [importedSpell.toMap()],
       'customEffects': [],
@@ -249,7 +249,7 @@ void main() {
     // on, so this spell used to be validated against a catalog missing its
     // own effect.
     final json = jsonEncode({
-      'version': '3.0',
+      'version': '4.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [spellOnCustomEffect('s1', 'custom-1').toMap()],
       'customEffects': [customEffect('custom-1').toMap()],
@@ -264,7 +264,7 @@ void main() {
 
   test('an invalid spell is skipped and reported, and the good ones still land', () async {
     final json = jsonEncode({
-      'version': '3.0',
+      'version': '4.0',
       'exportDate': DateTime.now().toIso8601String(),
       'spells': [
         validSpell('good-1').toMap(),

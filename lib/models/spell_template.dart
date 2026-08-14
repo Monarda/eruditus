@@ -1,3 +1,4 @@
+import 'package:eruditus/models/base_effect.dart' show chosenSlotsFromMap;
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -23,6 +24,13 @@ class SpellTemplate {
   final String targetId;
   final Map<String, List<String>> selectedModifiers;
   final Map<String, RequisiteKind> requisites;
+  /// Slots this template's guideline declared open, already filled in where
+  /// the published spell's own prose commits to a value — see
+  /// [Spell.chosenSlots]'s doc comment. May stay empty for a declared-open
+  /// kind when the corpus text genuinely doesn't commit to one; a template
+  /// carries no write-boundary validation, so this is tolerated (the caster
+  /// fills it via `OpenSlotChosen` when instantiating).
+  final Map<String, String> chosenSlots;
   final List<LevelAdjustment> adjustments;
   final String? summary;
   final String? description;
@@ -39,6 +47,7 @@ class SpellTemplate {
     required this.targetId,
     this.selectedModifiers = const {},
     this.requisites = const {},
+    this.chosenSlots = const {},
     this.adjustments = const [],
     this.summary,
     this.description,
@@ -65,6 +74,7 @@ class SpellTemplate {
         'targetId': targetId,
         'selectedModifiers': selectedModifiers,
         'requisites': requisitesToMap(requisites),
+        'chosenSlots': chosenSlots,
         'adjustments': adjustments.map((a) => a.toMap()).toList(),
         'summary': summary,
         'description': description,
@@ -85,6 +95,7 @@ class SpellTemplate {
             ) ??
             const {},
         requisites: requisitesFromMap(map['requisites'] as Map<String, dynamic>?, 'SpellTemplate'),
+        chosenSlots: chosenSlotsFromMap(map['chosenSlots'] as Map<String, dynamic>?),
         adjustments: (map['adjustments'] as List?)
                 ?.map((a) => LevelAdjustment.fromMap(a as Map<String, dynamic>))
                 .toList() ??

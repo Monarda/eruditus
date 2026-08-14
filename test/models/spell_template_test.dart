@@ -30,4 +30,23 @@ void main() {
     expect(build().toMap().containsKey('chosenBaseLevel'), isFalse);
     expect(build().toMap().containsKey('printedLevel'), isFalse);
   });
+
+  test('chosenSlots defaults to empty and round-trips', () {
+    final template = SpellTemplate(
+      id: 't-1', name: 'Test Template', baseEffectId: 'e1',
+      rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      summary: 'Test template summary',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    expect(template.chosenSlots, isEmpty);
+
+    final withSlot = SpellTemplate(
+      id: 't-2', name: 'Test Ward', baseEffectId: 'e1',
+      rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      summary: 'Test ward summary',
+      chosenSlots: const {'realm': 'Faerie'},
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    expect(SpellTemplate.fromMap(withSlot.toMap()).chosenSlots, {'realm': 'Faerie'});
+  });
 }

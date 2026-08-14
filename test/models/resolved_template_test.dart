@@ -98,4 +98,16 @@ void main() {
         ['crim-2', 'range-voice', 'target-individual']);
     expect(resolved.unresolvedReferences, isNot(contains('duration-momentary')));
   });
+
+  test('chosenSlots passes through from the record', () {
+    final template = SpellTemplate(
+      id: 't-1', name: 'Test Ward', baseEffectId: 'e1',
+      rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      summary: 'Test ward summary',
+      chosenSlots: const {'realm': 'Magic'},
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final resolved = ResolvedTemplate(record: template);
+    expect(resolved.chosenSlots, {'realm': 'Magic'});
+  });
 }
