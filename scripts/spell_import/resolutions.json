@@ -1330,14 +1330,6 @@
     ],
     "rationale": "'The target loses a Fatigue level' is peig-4c's guideline verbatim ('Chill a person so that they lose a Fatigue level'), not extinguishing a fire (peig-4a) or chilling an inanimate object (peig-4b)."
   },
-  "lib-peig-soothe-raging-flames": {
-    "baseEffectId": "peig-10a",
-    "candidates": [
-      "peig-10a",
-      "peig-10b"
-    ],
-    "rationale": "'Eradicates the heat of a bonfire' while it keeps burning matches peig-10a's example verbatim ('Destroy one aspect of a fire, for example, heat or light'), not the person-damaging peig-10b."
-  },
   "lib-peig-well-without-light": {
     "baseEffectId": "peig-3a",
     "candidates": [
