@@ -996,6 +996,56 @@ void main() {
       verify(() => bloc.add(const OpenSlotChosen('specificType', 'Hermetic Terram magic')))
           .called(1);
     });
+
+    testWidgets(
+        'a chosenSlots value set after the initial build reaches the field '
+        '(the didUpdateWidget resync path)', (tester) async {
+      useTallSurface(tester);
+      final stateController = StreamController<SpellCreationState>();
+      addTearDown(stateController.close);
+
+      final initial = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Perdo', form: 'Vim', baseEffect: specificTypeSlotEffect),
+      );
+      whenListen(bloc, stateController.stream, initialState: initial);
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, specificTypeSlotEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+
+      expect(find.text('Hermetic Terram magic'), findsNothing);
+
+      // What the real bloc would emit after OpenSlotChosen('specificType', ...)
+      // -- pushed onto the SAME widget tree, so this exercises
+      // _SpecificTypeFieldState.didUpdateWidget, not just the constructor's
+      // initial controller seed.
+      stateController.add(SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Perdo', form: 'Vim', baseEffect: specificTypeSlotEffect,
+          chosenSlots: const {'specificType': 'Hermetic Terram magic'},
+        ),
+      ));
+      await tester.pump();
+
+      expect(find.text('Hermetic Terram magic'), findsOneWidget);
+    });
   });
 
   group('either/or open slot (form or specificType)', () {
