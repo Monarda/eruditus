@@ -453,6 +453,25 @@ void main() {
       expect(spell.chosenBaseLevel, isNull);
       expect(spell.templateId, isNull);
     });
+
+    test('chosenSlots defaults to empty and round-trips', () {
+      final spell = Spell(
+        id: 's-1', baseEffectId: 'e1', rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+        requisites: const {},
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+      expect(spell.chosenSlots, isEmpty);
+
+      final withSlot = Spell(
+        id: 's-2', baseEffectId: 'e1', rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+        requisites: const {},
+        chosenSlots: const {'realm': 'Infernal'},
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+      );
+      expect(Spell.fromMap(withSlot.toMap()).chosenSlots, {'realm': 'Infernal'});
+    });
   });
 
   group('spell field invariants', () {
@@ -518,6 +537,21 @@ void main() {
           provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
         );
 
+    BaseEffect realmSlotEffect() => BaseEffect(
+          id: 'revi-G1-open', technique: 'Rego', form: 'Vim',
+          description: 'Ward against beings from one realm', baseLevel: null,
+          openSlots: const [OpenSlotKind.realm],
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+        );
+
+    BaseEffect eitherSlotEffect() => BaseEffect(
+          id: 'pevi-G10-open', technique: 'Perdo', form: 'Vim',
+          description: 'Dispel a particular Hermetic Form or a specific type of enchantment',
+          baseLevel: null,
+          openSlots: const [OpenSlotKind.form, OpenSlotKind.specificType],
+          provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+        );
+
     Modifier singleChoice() => Modifier(
           id: 'size-ignem', name: 'Size (Ignem)',
           selectionMode: ModifierSelectionMode.single,
@@ -534,6 +568,7 @@ void main() {
       int? chosenBaseLevel,
       Map<String, RequisiteKind> requisites = const {},
       Map<String, List<String>> selectedModifiers = const {},
+      Map<String, String> chosenSlots = const {},
       List<Modifier> modifiers = const [],
       bool isTemplate = false,
     }) =>
@@ -542,6 +577,7 @@ void main() {
           chosenBaseLevel: chosenBaseLevel,
           requisites: requisites,
           selectedModifiers: selectedModifiers,
+          chosenSlots: chosenSlots,
           modifiers: modifiers,
           isTemplate: isTemplate,
         );
@@ -652,6 +688,54 @@ void main() {
         requisites: {'Rego': RequisiteKind.free}, // matches own technique
       );
       expect(problems.length, 2); // check 1 (no chosen level) + check 3 (self-match)
+    });
+
+    test('check 6: a declared open realm slot with no chosen value is a problem', () {
+      expect(validate(effect: realmSlotEffect(), chosenBaseLevel: 20),
+          contains('Choose a realm for this guideline'));
+    });
+
+    test('check 6: a filled realm slot is fine', () {
+      expect(
+        validate(
+          effect: realmSlotEffect(),
+          chosenBaseLevel: 20,
+          chosenSlots: const {'realm': 'Infernal'},
+        ),
+        isEmpty,
+      );
+    });
+
+    test('check 6: an either/or slot is satisfied by just one of its declared kinds', () {
+      expect(
+        validate(
+          effect: eitherSlotEffect(),
+          chosenBaseLevel: 20,
+          chosenSlots: const {'specificType': 'Hermetic Terram magic'},
+        ),
+        isEmpty,
+      );
+    });
+
+    test('check 6: an either/or slot with neither kind filled is a problem', () {
+      expect(
+        validate(effect: eitherSlotEffect(), chosenBaseLevel: 20),
+        contains('Choose a Form or a specific type of enchantment for this guideline'),
+      );
+    });
+
+    test('check 7: a chosen realm on a guideline with no open realm slot is a problem', () {
+      expect(
+        validate(effect: fixedEffect(), chosenSlots: const {'realm': 'Infernal'}),
+        contains('A chosen realm applies only to a guideline with an open realm slot'),
+      );
+    });
+
+    test('isTemplate still runs checks 6 and 7', () {
+      expect(
+        validate(effect: realmSlotEffect(), isTemplate: true),
+        contains('Choose a realm for this guideline'),
+      );
     });
   });
 }

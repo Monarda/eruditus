@@ -207,6 +207,57 @@ void main() {
       );
     });
 
+    test('openSlots defaults to empty and round-trips every combination', () {
+      final plain = BaseEffect(
+        id: 'e-5', technique: 'Creo', form: 'Ignem',
+        description: 'Create flame', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      expect(plain.openSlots, isEmpty);
+
+      final withSlots = BaseEffect(
+        id: 'e-6', technique: 'Perdo', form: 'Vim',
+        description: 'Dispel a specific type of enchantment', baseLevel: null,
+        openSlots: const [OpenSlotKind.form, OpenSlotKind.specificType],
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      expect(BaseEffect.fromMap(withSlots.toMap()).openSlots,
+          [OpenSlotKind.form, OpenSlotKind.specificType]);
+    });
+
+    test('fromMap treats an absent openSlots key as empty', () {
+      final restored = BaseEffect.fromMap({
+        'id': 'e-7',
+        'technique': 'Creo',
+        'form': 'Ignem',
+        'description': 'Create flame',
+        'baseLevel': 10,
+        'source': 'user-created',
+      });
+      expect(restored.openSlots, isEmpty);
+    });
+
+    test('fromMap throws a clear FormatException on an unknown openSlots entry', () {
+      expect(
+        () => BaseEffect.fromMap({
+          'id': 'e-8',
+          'technique': 'Creo',
+          'form': 'Ignem',
+          'description': 'Create flame',
+          'baseLevel': 10,
+          'openSlots': ['alignment'],
+          'source': 'user-created',
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains('alignment'), contains('BaseEffect'), contains('realm')),
+          ),
+        ),
+      );
+    });
+
     test('a non-standard reference and populated effectFormula round-trip', () {
       final effect = BaseEffect(
         id: 'rego-vim-g1',

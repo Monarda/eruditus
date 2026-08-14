@@ -36,6 +36,20 @@ List<String> validateSpellProse({
   return const [];
 }
 
+/// Human-readable phrasing for an [OpenSlotKind] in a check-6 message.
+/// [OpenSlotKind.specificType] reads as "a specific type of enchantment" to
+/// match the rulebook's own phrasing rather than the bare enum name.
+String _openSlotDescription(OpenSlotKind kind) {
+  switch (kind) {
+    case OpenSlotKind.realm:
+      return 'realm';
+    case OpenSlotKind.form:
+      return 'Form';
+    case OpenSlotKind.specificType:
+      return 'specific type of enchantment';
+  }
+}
+
 /// The catalog-dependent invariants every spell must satisfy, stated once and
 /// shared by every path that can produce or hold one — the same contract
 /// [validateSpellProse] provides for prose.
@@ -60,6 +74,7 @@ List<String> validateSpellAgainstCatalog({
   required int? chosenBaseLevel,
   required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
+  Map<String, String> chosenSlots = const {},
   required List<Modifier> modifiers,
   bool isTemplate = false,
 }) {
@@ -107,6 +122,34 @@ List<String> validateSpellAgainstCatalog({
     }
   });
 
+  // 6. An open slot (realm, Form, "a specific type") is the caster's to fill,
+  //    the same completeness requirement chosenBaseLevel already enforces for
+  //    a General guideline's level -- a ward with no realm chosen is not yet
+  //    a spell. "At least one" (not "every") declared kind, because pevi-G10
+  //    declares two alternatives (Form OR a specific type of enchantment) and
+  //    either satisfies it; every other entry declares exactly one kind, so
+  //    this collapses to "mandatory" for them.
+  if (effect.openSlots.isNotEmpty) {
+    final filled = effect.openSlots
+        .any((kind) => (chosenSlots[kind.name] ?? '').isNotEmpty);
+    if (!filled) {
+      final kindNames = effect.openSlots.length == 1
+          ? _openSlotDescription(effect.openSlots.single)
+          : effect.openSlots.map(_openSlotDescription).join(' or a ');
+      problems.add('Choose a $kindNames for this guideline');
+    }
+  }
+
+  // 7. The converse of check 6: stray chosen-slot data for a kind this
+  //    guideline never declared open is silently meaningless, the same
+  //    class of bug check 2 closes for a stray chosenBaseLevel.
+  final openKindNames = effect.openSlots.map((k) => k.name).toSet();
+  for (final kind in chosenSlots.keys) {
+    if (!openKindNames.contains(kind)) {
+      problems.add('A chosen $kind applies only to a guideline with an open $kind slot');
+    }
+  }
+
   return problems;
 }
 
@@ -143,6 +186,13 @@ class Spell {
   /// it in place of `BaseEffect.baseLevel`.
   final int? chosenBaseLevel;
 
+  /// Slots this spell's guideline declared open, filled in — realm, Form, or
+  /// "a specific type", keyed by [OpenSlotKind.name]. Filled by the importer
+  /// for a published spell whose prose commits to a value, or by the caster
+  /// via [SpellCreationBloc]'s `OpenSlotChosen` otherwise. Empty when the
+  /// guideline declares nothing open.
+  final Map<String, String> chosenSlots;
+
   /// The [SpellTemplate] this spell was instantiated from, when it was.
   ///
   /// **Provenance only — nothing dereferences it.** A spell shared between
@@ -170,6 +220,7 @@ class Spell {
     required this.createdAt,
     required this.updatedAt,
     this.chosenBaseLevel,
+    this.chosenSlots = const {},
     this.templateId,
   }) {
     final problems = validateSpellProse(
@@ -201,6 +252,7 @@ class Spell {
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         'chosenBaseLevel': chosenBaseLevel,
+        'chosenSlots': chosenSlots,
         'templateId': templateId,
       };
 
@@ -232,6 +284,7 @@ class Spell {
         createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
         updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
         chosenBaseLevel: map['chosenBaseLevel'] as int?,
+        chosenSlots: chosenSlotsFromMap(map['chosenSlots'] as Map<String, dynamic>?),
         templateId: map['templateId'] as String?,
       );
 }
@@ -252,6 +305,7 @@ class SpellDraft {
   int? printedLevel;
   RitualDeclaration ritualDeclaration;
   int? chosenBaseLevel;
+  Map<String, String> chosenSlots;
   String? templateId;
 
   SpellDraft({
@@ -270,11 +324,13 @@ class SpellDraft {
     this.printedLevel,
     this.ritualDeclaration = RitualDeclaration.none,
     this.chosenBaseLevel,
+    Map<String, String>? chosenSlots,
     this.templateId,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
         requisites = requisites ?? {},
-        adjustments = adjustments ?? [];
+        adjustments = adjustments ?? [],
+        chosenSlots = chosenSlots ?? {};
 
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -321,6 +377,7 @@ class SpellDraft {
       printedLevel: printedLevel,
       ritualDeclaration: ritualDeclaration,
       chosenBaseLevel: chosenBaseLevel,
+      chosenSlots: chosenSlots,
       templateId: templateId,
       provenance: Provenance(source: source),
       createdAt: DateTime.now(),
@@ -343,6 +400,7 @@ class SpellDraft {
     int? printedLevel,
     RitualDeclaration? ritualDeclaration,
     Object? chosenBaseLevel = _unset,
+    Map<String, String>? chosenSlots,
     Object? templateId = _unset,
   }) {
     return SpellDraft(
@@ -363,6 +421,7 @@ class SpellDraft {
       chosenBaseLevel: identical(chosenBaseLevel, _unset)
           ? this.chosenBaseLevel
           : chosenBaseLevel as int?,
+      chosenSlots: chosenSlots ?? this.chosenSlots,
       templateId: identical(templateId, _unset) ? this.templateId : templateId as String?,
     );
   }
