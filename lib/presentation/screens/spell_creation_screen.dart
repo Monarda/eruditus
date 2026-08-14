@@ -179,6 +179,31 @@ class SpellCreationScreen extends StatelessWidget {
                     },
                   ),
                 ],
+                if (draft.baseEffect?.openSlots.contains(OpenSlotKind.form) ?? false) ...[
+                  const SizedBox(height: 8),
+                  // Same ValueKey rationale as the realm dropdown above --
+                  // forces a fresh initialValue read on external change
+                  // (template instantiation) without needing a StatefulWidget.
+                  DropdownButtonFormField<String>(
+                    key: ValueKey('chosen-form-field-${draft.chosenSlots['form']}'),
+                    decoration: const InputDecoration(labelText: 'Form'),
+                    initialValue: draft.chosenSlots['form'],
+                    items: ArsForms.all
+                        .map((form) => DropdownMenuItem(value: form, child: Text(form)))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) bloc.add(OpenSlotChosen('form', value));
+                    },
+                  ),
+                ],
+                if (draft.baseEffect?.openSlots.contains(OpenSlotKind.specificType) ?? false) ...[
+                  const SizedBox(height: 8),
+                  _SpecificTypeField(
+                    key: const Key('chosen-specific-type-field'),
+                    value: draft.chosenSlots['specificType'],
+                    onChanged: (value) => bloc.add(OpenSlotChosen('specificType', value)),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
@@ -620,6 +645,54 @@ class _GuidelineLevelFieldState extends State<_GuidelineLevelField> {
         helperText: 'General guidelines have no fixed level — you choose it.',
       ),
       onChanged: (value) => widget.onChanged(int.tryParse(value)),
+    );
+  }
+}
+
+/// The free-text field for [OpenSlotKind.specificType] -- "a specific type
+/// of enchantment" per the rulebook's own illustrative-not-exhaustive
+/// examples (design spec Decision 4), so this is text input, not a dropdown
+/// like realm/Form.
+///
+/// A real [StatefulWidget], not a bare [TextFormField], for the same reason
+/// as [_GuidelineLevelField]: an uncontrolled field seeds itself from
+/// `initialValue` exactly once and never resyncs on a later external change
+/// (e.g. `TemplateInstantiated` setting a new `chosenSlots` while this
+/// screen's widget state survives underneath `main.dart`'s `IndexedStack`).
+class _SpecificTypeField extends StatefulWidget {
+  final String? value;
+  final ValueChanged<String> onChanged;
+
+  const _SpecificTypeField({super.key, required this.value, required this.onChanged});
+
+  @override
+  State<_SpecificTypeField> createState() => _SpecificTypeFieldState();
+}
+
+class _SpecificTypeFieldState extends State<_SpecificTypeField> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.value ?? '');
+
+  @override
+  void didUpdateWidget(covariant _SpecificTypeField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_controller.text != (widget.value ?? '')) {
+      _controller.text = widget.value ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: _controller,
+      decoration: const InputDecoration(labelText: 'Specific type'),
+      onChanged: widget.onChanged,
     );
   }
 }

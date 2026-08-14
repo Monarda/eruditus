@@ -77,6 +77,27 @@ void main() {
     provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
     effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
   );
+  final formSlotEffect = BaseEffect(
+    id: 'muvi-G3', technique: 'Muto', form: 'Vim',
+    description: 'Totally change spell', baseLevel: null,
+    openSlots: const [OpenSlotKind.form],
+    provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+  );
+  final specificTypeSlotEffect = BaseEffect(
+    id: 'pevi-G2', technique: 'Perdo', form: 'Vim',
+    description: 'Dispel effects of a specific type', baseLevel: null,
+    openSlots: const [OpenSlotKind.specificType],
+    provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+  );
+  final eitherSlotEffect = BaseEffect(
+    id: 'pevi-G10', technique: 'Perdo', form: 'Vim',
+    description: 'Dispel specific enchantment type', baseLevel: null,
+    openSlots: const [OpenSlotKind.form, OpenSlotKind.specificType],
+    provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    effectFormula: const GeneralEffectFormula(kind: GeneralEffectKind.mightThreshold),
+  );
 
   late Parameter range;
   late Parameter duration;
@@ -859,6 +880,145 @@ void main() {
       );
 
       expect(find.text('Faerie'), findsOneWidget);
+    });
+  });
+
+  group('chosen form field (open form slot)', () {
+    // Same ValueKey-suffix rationale as the realm dropdown's findRealmField
+    // helper above -- the widget's key is a ValueKey suffixed with the
+    // current chosen form, not a plain Key, so match structurally on the
+    // key's string value instead.
+    Finder findFormField() => find.byWidgetPredicate((w) =>
+        w is DropdownButtonFormField<String> &&
+        (w.key as ValueKey).value.toString().startsWith('chosen-form-field'));
+
+    testWidgets('is absent when the selected base effect declares no open slot', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      );
+      await pumpScreen(tester, state);
+
+      expect(findFormField(), findsNothing);
+    });
+
+    testWidgets('is present when the selected base effect declares an open form slot',
+        (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Muto', form: 'Vim', baseEffect: formSlotEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, formSlotEffect],
+          parameters: const [],
+        ),
+      );
+
+      expect(findFormField(), findsOneWidget);
+    });
+
+    testWidgets('picking a Form dispatches OpenSlotChosen', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Muto', form: 'Vim', baseEffect: formSlotEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, formSlotEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.tap(findFormField());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ignem').last);
+      await tester.pumpAndSettle();
+
+      verify(() => bloc.add(const OpenSlotChosen('form', 'Ignem'))).called(1);
+    });
+  });
+
+  group('chosen specific type field (open specificType slot)', () {
+    testWidgets('is absent when the selected base effect declares no open slot', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect),
+      );
+      await pumpScreen(tester, state);
+
+      expect(find.byKey(const Key('chosen-specific-type-field')), findsNothing);
+    });
+
+    testWidgets('is present when the selected base effect declares an open specificType slot',
+        (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Perdo', form: 'Vim', baseEffect: specificTypeSlotEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, specificTypeSlotEffect],
+          parameters: const [],
+        ),
+      );
+
+      expect(find.byKey(const Key('chosen-specific-type-field')), findsOneWidget);
+    });
+
+    testWidgets('typing a value dispatches OpenSlotChosen', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Perdo', form: 'Vim', baseEffect: specificTypeSlotEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, specificTypeSlotEffect],
+          parameters: const [],
+        ),
+      );
+
+      await tester.enterText(
+          find.byKey(const Key('chosen-specific-type-field')), 'Hermetic Terram magic');
+
+      verify(() => bloc.add(const OpenSlotChosen('specificType', 'Hermetic Terram magic')))
+          .called(1);
+    });
+  });
+
+  group('either/or open slot (form or specificType)', () {
+    testWidgets('both controls render when the effect declares both kinds', (tester) async {
+      final state = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(technique: 'Perdo', form: 'Vim', baseEffect: eitherSlotEffect),
+      );
+      await pumpScreen(
+        tester,
+        state,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect, eitherSlotEffect],
+          parameters: const [],
+        ),
+      );
+
+      expect(find.byWidgetPredicate((w) =>
+          w is DropdownButtonFormField<String> &&
+          (w.key as ValueKey).value.toString().startsWith('chosen-form-field')),
+          findsOneWidget);
+      expect(find.byKey(const Key('chosen-specific-type-field')), findsOneWidget);
     });
   });
 
