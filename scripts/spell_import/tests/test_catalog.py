@@ -134,6 +134,19 @@ class CandidatesTest(unittest.TestCase):
         catalog_inst = catalog.Catalog.load()
         self.assertEqual(catalog_inst.open_slots("muvi-G1"), [])
 
+    def test_crvi_ladder_is_collapsed_to_one_row(self):
+        catalog_inst = catalog.Catalog.load()
+        ids = {e["id"] for e in catalog_inst.base_effects}
+        self.assertIn("crvi-5a", ids)
+        self.assertNotIn("crvi-10a", ids)
+        self.assertNotIn("crvi-15a", ids)
+
+    def test_peig_ladder_is_collapsed_to_one_row(self):
+        catalog_inst = catalog.Catalog.load()
+        ids = {e["id"] for e in catalog_inst.base_effects}
+        self.assertIn("peig-5b", ids)
+        self.assertNotIn("peig-10b", ids)
+
 
 class ExistingIdsTest(unittest.TestCase):
     def test_slugger_reproduces_every_committed_library_id(self):

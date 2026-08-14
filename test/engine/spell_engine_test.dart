@@ -215,6 +215,150 @@ void main() {
     });
   });
 
+  group('guideline level ladders (item 28)', () {
+    test('the Warping Point ladder reaches level 20 at its 4th rung', () {
+      final warping = Modifier(
+        id: 'warping-point-burst',
+        name: 'Warping Points',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Creo', form: 'Vim', effectIds: ['crvi-5a']),
+        options: [
+          ModifierOption(id: 'warping-point-burst-1', label: 'One Warping Point', magnitude: 0),
+          ModifierOption(id: 'warping-point-burst-2', label: 'Two Warping Points', magnitude: 1),
+          ModifierOption(id: 'warping-point-burst-3', label: 'Three Warping Points', magnitude: 2),
+          ModifierOption(id: 'warping-point-burst-4', label: 'Four Warping Points', magnitude: 3),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [warping]);
+      final baseEffect = BaseEffect(
+        id: 'crvi-5a', technique: 'Creo', form: 'Vim',
+        description: 'Create a burst of magic that gives the target Warping Points',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'warping-point-burst': ['warping-point-burst-4']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 20);
+    });
+
+    test('the chill-damage ladder reaches level 20 at +20 damage', () {
+      final chill = Modifier(
+        id: 'chill-damage',
+        name: 'Chill Damage',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Perdo', form: 'Ignem', effectIds: ['peig-5b']),
+        options: [
+          ModifierOption(id: 'chill-damage-5', label: '+5 damage', magnitude: 0),
+          ModifierOption(id: 'chill-damage-10', label: '+10 damage', magnitude: 1),
+          ModifierOption(id: 'chill-damage-15', label: '+15 damage', magnitude: 2),
+          ModifierOption(id: 'chill-damage-20', label: '+20 damage', magnitude: 3),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [chill]);
+      final baseEffect = BaseEffect(
+        id: 'peig-5b', technique: 'Perdo', form: 'Ignem',
+        description: 'Chill a person, taking damage that scales with the spell\'s level',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'chill-damage': ['chill-damage-20']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 20);
+    });
+
+    test('the single-property discount lowers level by one magnitude below the additive tier', () {
+      final discount = Modifier(
+        id: 'single-property-transformation',
+        name: 'Single Property',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Muto', form: 'Auram'),
+        options: [
+          ModifierOption(
+              id: 'single-property-transformation-yes',
+              label: 'Transforms only one property', magnitude: -1),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [discount]);
+      final baseEffect = BaseEffect(
+        id: 'muau-3', technique: 'Muto', form: 'Auram',
+        description: 'Transform an amount of air into another form of air',
+        baseLevel: 3,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {
+          'single-property-transformation': ['single-property-transformation-yes']
+        },
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 2);
+    });
+
+    test('a negative-magnitude modifier that drives the level below 1 throws, same as any other contribution', () {
+      final discount = Modifier(
+        id: 'single-property-transformation',
+        name: 'Single Property',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Muto', form: 'Auram'),
+        options: [
+          ModifierOption(
+              id: 'single-property-transformation-yes',
+              label: 'Transforms only one property', magnitude: -1),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [discount]);
+      final baseEffect = BaseEffect(
+        id: 'muau-test-1', technique: 'Muto', form: 'Auram',
+        description: 'Test effect at the floor', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      expect(
+        () => engine.calculateBreakdown(
+          baseEffect: baseEffect,
+          range: _range, duration: _duration, target: _target,
+          selectedModifiers: const {
+            'single-property-transformation': ['single-property-transformation-yes']
+          },
+          requisites: const {},
+        ),
+        throwsArgumentError,
+      );
+    });
+  });
+
   group('SpellEngine.pruneModifierSelections', () {
     final material = Modifier(
       id: 'terram-material',

@@ -532,5 +532,47 @@
       { "id": "elaborate-effect-extensive", "label": "Extensively more elaborate", "magnitude": 3 }
     ],
     "citations": [ { "bookId": "arm5-core" } ]
+  },
+  {
+    "id": "warping-point-burst",
+    "name": "Warping Points",
+    "description": "Each magnitude gives the target one more Warping Point",
+    "selectionMode": "single",
+    "scope": { "technique": "Creo", "form": "Vim", "effectIds": ["crvi-5a"], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "warping-point-burst-1", "label": "One Warping Point", "magnitude": 0 },
+      { "id": "warping-point-burst-2", "label": "Two Warping Points", "magnitude": 1 },
+      { "id": "warping-point-burst-3", "label": "Three Warping Points", "magnitude": 2 },
+      { "id": "warping-point-burst-4", "label": "Four Warping Points", "magnitude": 3 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "chill-damage",
+    "name": "Chill Damage",
+    "description": "Every 5 points the damage exceeds +5 adds one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": "Perdo", "form": "Ignem", "effectIds": ["peig-5b"], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "chill-damage-5", "label": "+5 damage", "magnitude": 0 },
+      { "id": "chill-damage-10", "label": "+10 damage", "magnitude": 1 },
+      { "id": "chill-damage-15", "label": "+15 damage", "magnitude": 2 },
+      { "id": "chill-damage-20", "label": "+20 damage", "magnitude": 3 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "single-property-transformation",
+    "name": "Single Property",
+    "description": "Transforming only one property of air lowers the level by one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": "Muto", "form": "Auram", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "single-property-transformation-yes", "label": "Transforms only one property", "magnitude": -1 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
   }
 ]
