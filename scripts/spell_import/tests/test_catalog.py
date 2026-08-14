@@ -99,6 +99,41 @@ class CandidatesTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             catalog_inst.open_slots("does-not-exist")
 
+    def test_pevi_g2_declares_specificType_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("pevi-G2"), ["specificType"])
+
+    def test_pevi_g7_declares_specificType_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("pevi-G7"), ["specificType"])
+
+    def test_pevi_g10_declares_form_and_specificType_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("pevi-G10"), ["form", "specificType"])
+
+    def test_pevi_g11_declares_form_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("pevi-G11"), ["form"])
+
+    def test_revi_g5_declares_specificType_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("revi-G5"), ["specificType"])
+
+    def test_muvi_g2_declares_form_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("muvi-G2"), ["form"])
+
+    def test_muvi_g3_declares_form_open(self):
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("muvi-G3"), ["form"])
+
+    def test_muvi_g1_declares_nothing_open(self):
+        # Deliberately not annotated -- its only corpus user (Shroud Magic)
+        # never mentions Form in its own prose (design spec Decision 12's
+        # context; muvi-G1 itself carries no rough edge, muvi-G2 does).
+        catalog_inst = catalog.Catalog.load()
+        self.assertEqual(catalog_inst.open_slots("muvi-G1"), [])
+
 
 class ExistingIdsTest(unittest.TestCase):
     def test_slugger_reproduces_every_committed_library_id(self):
