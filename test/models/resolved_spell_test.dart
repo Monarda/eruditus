@@ -177,4 +177,23 @@ void main() {
     final resolved = ResolvedSpell(record: spell, baseEffect: effect);
     expect(resolved.problems, contains('Choose a realm for this guideline'));
   });
+
+  test('problems does not report check 6 when chosenSlots is actually wired through', () {
+    final effect = BaseEffect(
+      id: 'revi-G1', technique: 'Rego', form: 'Vim',
+      description: 'Ward against beings from one realm', baseLevel: null,
+      openSlots: const [OpenSlotKind.realm],
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final spell = Spell(
+      id: 's-3', baseEffectId: effect.id, rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      requisites: const {},
+      chosenBaseLevel: 20,
+      chosenSlots: const {'realm': 'Divine'},
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final resolved = ResolvedSpell(record: spell, baseEffect: effect);
+    expect(resolved.problems, isNot(contains('Choose a realm for this guideline')));
+  });
 }
