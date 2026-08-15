@@ -3,10 +3,12 @@ import json
 import unittest
 
 from scripts.spell_import import extract_spells
+from scripts.spell_import import exceptions as exceptions_module
 from scripts.spell_import import ledger as ledger_module
 from scripts.spell_import.sources import REPO_ROOT
 
 LIBRARY = REPO_ROOT / "assets" / "data" / "spell_library.json"
+EXCEPTIONS = REPO_ROOT / "assets" / "data" / "spell_exceptions.json"
 
 
 class RunTest(unittest.TestCase):
@@ -74,28 +76,28 @@ class RegenerationTest(unittest.TestCase):
         second = extract_spells.serialize(extract_spells.run(write=False).spells)
         self.assertEqual(first, second)
 
+    def test_committed_exceptions_match_a_fresh_run(self):
+        report = extract_spells.run(write=False)
+        committed = json.loads(EXCEPTIONS.read_text(encoding="utf-8"))
+        self.assertEqual(
+            extract_spells.serialize(report.exceptions),
+            extract_spells.serialize(committed),
+        )
+
 
 class HandDerivedTest(unittest.TestCase):
-    """Of the 3 spells with no printed design line, only 2 have a legitimate
-    hand-derivation. The other 1 was investigated, not skipped: its own
-    prose explicitly disclaims normal Hermetic guideline arithmetic
-    ("does not conform to the normal InAq guidelines", "fits poorly into
-    the normal framework of Hermetic magic", Mercurian Ritual), and no
-    combination of real base level + real magnitude tokens reproduces their
-    printed level without inventing a requisite or an unimplemented
-    modifier the text doesn't support. See HAND_DERIVED's module docstring
-    in extract_spells.py for the full per-spell reasoning.
+    """Of the 3 spells with no printed design line, 2 have a legitimate
+    hand-derivation. The third, Whispering Winds, was investigated and found
+    genuinely non-derivable -- see git history for that reasoning -- and now
+    imports as an exception spell instead (ExceptionSpellsTest in this file),
+    not as a blocked spell. See HAND_DERIVED's module docstring in
+    extract_spells.py for the two derivable spells' per-spell reasoning.
     """
 
     def test_the_derivable_spell_is_imported(self):
         report = extract_spells.run(write=False)
         names = {s["name"] for s in report.spells}
         self.assertIn("Enchantment of the Scrying Pool", names)
-
-    def test_the_one_remaining_non_derivable_spell_stays_correctly_blocked(self):
-        report = extract_spells.run(write=False)
-        blocked_names = {name for name, _ in report.blocked}
-        self.assertIn("Whispering Winds", blocked_names)
 
     def test_hermes_portal_is_now_derivable(self):
         # Item 45: the tokenizer gap that made this permanently blocked is
@@ -162,9 +164,99 @@ class KnownUnresolvableStalenessTest(unittest.TestCase):
         ) + str(stale))
 
 
+class ExceptionSpellsTest(unittest.TestCase):
+    """The six spells the rulebook itself says guideline arithmetic doesn't
+    apply to -- see docs/superpowers/specs/2026-08-15-exception-spells-design.md.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.report = extract_spells.run(write=False)
+
+    def test_all_six_spells_import_as_exceptions_not_blocked(self):
+        names = {e["name"] for e in self.report.exceptions}
+        blocked_names = {name for name, _ in self.report.blocked}
+        for name in exceptions_module.EXCEPTION_SPELLS:
+            self.assertIn(name, names, msg=name)
+            self.assertNotIn(name, blocked_names, msg=name)
+
+    def test_the_four_general_kind_exceptions_have_no_printed_level(self):
+        by_name = {e["name"]: e for e in self.report.exceptions}
+        for name in ("Wizard's Communion", "Wizard's Vigil",
+                     "Aegis of the Hearth", "Watching Ward"):
+            self.assertNotIn("printedLevel", by_name[name], msg=name)
+
+    def test_the_two_fixed_level_exceptions_carry_their_printed_level(self):
+        by_name = {e["name"]: e for e in self.report.exceptions}
+        self.assertEqual(by_name["Whispering Winds"]["printedLevel"], 15)
+        self.assertEqual(by_name["Mists of Change"]["printedLevel"], 60)
+
+    def test_every_exception_carries_a_rationale(self):
+        for exception in self.report.exceptions:
+            self.assertTrue(exception["rationale"], msg=exception["name"])
+
+    def test_ids_use_the_exc_prefix(self):
+        by_name = {e["name"]: e for e in self.report.exceptions}
+        self.assertEqual(by_name["Whispering Winds"]["id"], "exc-inau-whispering-winds")
+        self.assertEqual(by_name["Wizard's Communion"]["id"], "exc-muvi-wizards-communion")
+
+
+class ExceptionSpellsStalenessTest(unittest.TestCase):
+    """Guards EXCEPTION_SPELLS against a name that stops existing in the
+    corpus. Mirrors KnownUnresolvableStalenessTest's shape.
+    """
+
+    def test_every_exception_name_is_still_a_real_parsed_spell(self):
+        from scripts.spell_import import blocks, sources
+
+        lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
+        parsed, _ = blocks.parse_de(lines)
+        parsed_names = {b.name for b in parsed}
+        stale = [name for name in exceptions_module.EXCEPTION_SPELLS
+                 if name not in parsed_names]
+        self.assertEqual(stale, [], msg=f"no longer a parsed spell at all: {stale}")
+
+
+class ExceptionSpellsDisjointnessTest(unittest.TestCase):
+    """Each blocked/excepted spell has exactly one home. A name in
+    EXCEPTION_SPELLS that also appears in another closed table would be
+    ambiguous about which mechanism actually handles it.
+    """
+
+    def test_no_exception_spell_appears_in_another_name_keyed_table(self):
+        exception_names = set(exceptions_module.EXCEPTION_SPELLS)
+        other_tables = {
+            "HAND_DERIVED": set(extract_spells.HAND_DERIVED),
+            "DESIGN_LINE_TYPOS": set(extract_spells.DESIGN_LINE_TYPOS),
+            "HAND_DERIVED_ADJUSTMENT": set(extract_spells.HAND_DERIVED_ADJUSTMENT),
+        }
+        for table_name, names in other_tables.items():
+            overlap = exception_names & names
+            self.assertEqual(overlap, set(), msg=f"also in {table_name}: {overlap}")
+
+    def test_no_exception_spell_appears_in_another_slug_keyed_table(self):
+        # DESIGN_LINE_INCOMPLETE, KNOWN_UNRESOLVABLE and
+        # LEVEL_NEEDS_RULES_DECISION are keyed by spell_id (technique+form+
+        # name slug), not bare name -- compare against the slug form instead.
+        from scripts.spell_import import blocks, catalog as catalog_module, sources
+
+        lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
+        parsed, _ = blocks.parse_de(lines)
+        by_name = {b.name: b for b in parsed}
+        exception_ids = {
+            catalog_module.slug_id(by_name[name].technique, by_name[name].form, name)
+            for name in exceptions_module.EXCEPTION_SPELLS if name in by_name
+        }
+        for table_name, ids in {
+            "DESIGN_LINE_INCOMPLETE": set(extract_spells.DESIGN_LINE_INCOMPLETE),
+            "KNOWN_UNRESOLVABLE": set(extract_spells.KNOWN_UNRESOLVABLE),
+            "LEVEL_NEEDS_RULES_DECISION": set(extract_spells.LEVEL_NEEDS_RULES_DECISION),
+        }.items():
+            overlap = exception_ids & ids
+            self.assertEqual(overlap, set(), msg=f"also in {table_name}: {overlap}")
+
+
 GENERAL_BLOCKED = {
-    "Aegis of the Hearth": "no design line; a Major Breakthrough outside the guidelines",
-    "Wizard's Vigil": "no design line",
     "Sight of the True Form": "no design line",
     # Ward against Faeries of the Mountain: WAS here ("no design line; a prose
     # cross-reference to another spell") until 2026-08-15, when that same
@@ -173,12 +265,16 @@ GENERAL_BLOCKED = {
     # see extract_spells.HAND_DERIVED's comment. It now imports as a
     # template. This is exactly the staleness this test class exists to
     # catch, and it caught it.
+    #
+    # Aegis of the Hearth, Wizard's Vigil, Watching Ward and Wizard's
+    # Communion: WERE here until 2026-08-16, when they moved to
+    # ExceptionSpellsTest instead -- each now imports as an exception spell
+    # (scripts/spell_import/exceptions.py), not blocked at all. This is the
+    # same staleness this test class exists to catch.
     "Dispel the Phantom Image": "no Perdo Imaginem General row in the rulebook",
     "Lay to Rest the Haunting Spirit": "no Perdo Mentem General row in the rulebook",
-    "Watching Ward": "design line token 'Duration is non-standard' — todo item 26",
     "Restore the Moved Image": "design line does not account for the stat line",
     "The Invisible Eye Revealed": "design line does not account for the stat line",
-    "Wizard's Communion": "prose disclaims guideline arithmetic",
 }
 
 
@@ -395,9 +491,10 @@ class HandDerivedAdjustmentTest(unittest.TestCase):
         self.assertIn("for a very elaborate effect", printed)
         self.assertNotIn("+5 for a very elaborate effect", printed)
 
-    def test_mists_of_change_stays_blocked_on_its_two_durations(self):
-        # D: Sun & Year -- two durations, which no adjustment can express.
-        # (It blocks one token earlier, on the numberless "slightly nonstandard
-        # effect"; both blockers are real and neither is derivable, so no
-        # hand-derived magnitude is offered for it.)
-        self.assertIn("Mists of Change", {name for name, _ in self.report.blocked})
+    def test_mists_of_change_is_an_exception_not_blocked(self):
+        # D: Sun & Year -- two durations, which no adjustment or ledger fix
+        # can express; it now imports as an exception spell instead of
+        # staying blocked. See ExceptionSpellsTest for the full shape.
+        exception_names = {e["name"] for e in extract_spells.run(write=False).exceptions}
+        self.assertIn("Mists of Change", exception_names)
+        self.assertNotIn("Mists of Change", {name for name, _ in self.report.blocked})

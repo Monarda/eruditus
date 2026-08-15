@@ -13,10 +13,11 @@ import json
 import sys
 
 from . import blocks, catalog as catalog_module, designline, ledger as ledger_module
-from . import emit, provenance, report as report_module, sources
+from . import emit, exceptions as exceptions_module, provenance, report as report_module, sources
 
 LIBRARY_PATH = catalog_module.DATA_DIR / "spell_library.json"
 TEMPLATES_PATH = catalog_module.DATA_DIR / "spell_templates.json"
+EXCEPTIONS_PATH = catalog_module.DATA_DIR / "spell_exceptions.json"
 PROPOSALS_PATH = ledger_module.LEDGER_PATH.with_name("resolutions.proposed.json")
 REPORT_PATH = ledger_module.LEDGER_PATH.with_name("import_report.md")
 
@@ -89,8 +90,9 @@ DESIGN_LINE_INCOMPLETE = {
         "prints (Base effect) but the stat line costs 2 magnitudes",
     "lib-invi-invisible-eye-revealed":
         "prints (Base effect) but the stat line costs 2 magnitudes",
-    "lib-muvi-wizards-communion":
-        "prose disclaims guideline arithmetic: a remnant of Mercurian rituals",
+    # Wizard's Communion used to be here. It now imports as an exception
+    # spell (scripts/spell_import/exceptions.py) -- see
+    # docs/superpowers/specs/2026-08-15-exception-spells-design.md.
 }
 
 
@@ -100,19 +102,14 @@ DESIGN_LINE_INCOMPLETE = {
 # will not equal the printed one. Hand-derivation under a test is a different
 # thing from hand-derivation on trust.
 #
-# Three further spells also lack a design line and are General-level, so
-# belong to todo item 25, not here (a General guideline has no numeric level
-# for assertion 1 to check a derivation against, which is why they are not
-# folded into this dict): Aegis of the Hearth, Wizard's Vigil, Sight of the
-# True Form. A fourth, Ward against Faeries of the Mountain, used to be in
-# that list too -- see its own entry below for why it moved out.
-#
-# Only one of the three actually resolves this way. All three spells' own
-# prose explicitly disclaims normal Hermetic guideline arithmetic
-# ("does not conform to the normal InAq guidelines" / "old Mercurian ritual",
-# "fits poorly into the normal framework of Hermetic magic", "Mercurian
-# Ritual"), so each was checked, not assumed, against the real InAq/InAu/ReTe
-# guideline tables:
+# One further no-design-line spell, Sight of the True Form, is General-level
+# and belongs to todo item 25, not here (a General guideline has no numeric
+# level for assertion 1 to check a derivation against). Aegis of the Hearth
+# and Wizard's Vigil used to be listed alongside it here too -- both now
+# import as exception spells instead (scripts/spell_import/exceptions.py),
+# since their own prose disclaims guideline arithmetic entirely rather than
+# merely lacking a printed derivation. See
+# docs/superpowers/specs/2026-08-15-exception-spells-design.md.
 #
 # - Enchantment of the Scrying Pool (R: Touch, D: Year, T: Ind, level 30):
 #   Base 5 (inaq-5, "Learn the magical properties of a liquid" — the sole
@@ -125,19 +122,13 @@ DESIGN_LINE_INCOMPLETE = {
 #   not the base-effect arithmetic itself, which lines up exactly once the
 #   stat line's actual Range (Touch, to the pool touched when cast) is used.
 #
-# - Whispering Winds (R: Sight, D: Conc, T: Ind, level 15) has no working
-#   derivation. InAu's only base levels are 1, 2, 4, 15 (checked against
-#   the printed Intellego Auram Guidelines table); with Sight(3) + Conc(1) +
-#   Ind(0) fixed by the stat line, base 2 computes to 10 and base 4 to 20 —
-#   15 sits exactly one magnitude short/over either way, with no legitimate
-#   token to bridge it: the stat line carries no Req: art, the prose
-#   names none, and size-auram's scope explicitly excludes Intellego. The
-#   only numeric fits (base 2 + a fabricated +1 requisite, or base 1 + a
-#   fabricated +2) require inventing a requisite the text does not support —
-#   exactly the "picking a candidate because the math works, not because the
-#   text forces it" mistake this file's KNOWN_UNRESOLVABLE comment already
-#   warns against. Left blocked; its own prose ("fits poorly into the normal
-#   framework of Hermetic magic") is the rulebook's own explanation for why.
+# Whispering Winds (R: Sight, D: Conc, T: Ind, level 15) used to be
+# investigated here as a hand-derivation candidate and left blocked -- see
+# git history for that reasoning. It now imports as an exception spell
+# instead: its design line is printed as the literal marker "(Unique
+# spell)", and its own prose says "fits poorly into the normal framework of
+# Hermetic magic". See scripts/spell_import/exceptions.py and
+# docs/superpowers/specs/2026-08-15-exception-spells-design.md.
 #
 # - Hermes' Portal (R: Arc, D: Year, T: Ind, level 75) has no working
 #   derivation within this importer's current modelling. The only
@@ -156,14 +147,11 @@ DESIGN_LINE_INCOMPLETE = {
 #   unrelated candidate whose math happens to work: rete-15b (+4 size) lands
 #   on exactly 75, but describes hurling a projectile, not a travel portal.
 #
-# - Aegis of the Hearth (R: Touch, D: Year, T: Boundary, level 30) prints no
-#   design line at all. Touch(1) + Year(4) + Boundary(4) is nine magnitudes,
-#   so a level-30 spell needs base -15 -- there is no General base effect
-#   that low, and none is meant to exist here: the rulebook itself calls
-#   Aegis of the Hearth a Major Breakthrough that is "more powerful than it
-#   ought to be", i.e. explicitly outside the guidelines. Permanently
-#   blocked, not pending -- there is no future ledger entry or catalog fix
-#   that resolves this one.
+# Aegis of the Hearth used to be investigated here and left permanently
+# blocked -- see git history. It now imports as an exception spell instead:
+# no design-line marker of any kind is printed, and the rulebook's own text
+# explains why (a Major Breakthrough, "more powerful than it ought to be").
+# See scripts/spell_import/exceptions.py.
 #
 # - Ward against Faeries of the Mountain (Rego Terram, General, R: Touch, D:
 #   Ring, T: Circle) prints no design-line marker at all -- but its full
@@ -178,9 +166,10 @@ DESIGN_LINE_INCOMPLETE = {
 #   Ward against Faeries of the Air, Ward against Faeries of the Wood -- both
 #   print "(Base effect)" and already import via REALM_BY_SPELL_ID; the text
 #   here supplies exactly the marker those two print literally, not new
-#   information. Checked 2026-08-15; the other three no-design-line General
-#   spells above (Aegis of the Hearth, Wizard's Vigil, Sight of the True
-#   Form) have no comparable sibling reference and stay blocked under item 25.
+#   information. Checked 2026-08-15. Of the other no-design-line General
+#   spells, Sight of the True Form has no comparable sibling reference and
+#   stays blocked under item 25; Aegis of the Hearth and Wizard's Vigil import
+#   as exception spells instead (scripts/spell_import/exceptions.py).
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
     "Ward against Faeries of the Mountain": "(Base effect)",
@@ -337,6 +326,7 @@ LEVEL_NEEDS_RULES_DECISION: dict[str, str] = {
 class Report:
     spells: list[dict]
     templates: list[dict]
+    exceptions: list[dict]
     blocked: list[tuple[str, str]]
     unresolved: list[str]
     problems: list[str]
@@ -379,11 +369,18 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
 
     spells: list[dict] = []
     templates: list[dict] = []
+    exception_spells: list[dict] = []
     blocked: list[tuple[str, str]] = []
     unresolved: list[str] = []
     proposals: dict[str, dict] = {}
 
     for block in parsed:
+        if block.name in exceptions_module.EXCEPTION_SPELLS:
+            exception_spells.append(emit.build_exception_spell(
+                block, exceptions_module.EXCEPTION_SPELLS[block.name]
+            ))
+            continue
+
         # HAND_DERIVED is checked before block.design_line, not as a
         # fallback to it. This is defensive, not load-bearing today: all
         # three current entries actually have block.design_line is None --
@@ -576,6 +573,14 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         if fresh_templates != committed_templates:
             TEMPLATES_PATH.write_text(fresh_templates, encoding="utf-8")
 
+        fresh_exceptions = serialize(exception_spells)
+        if EXCEPTIONS_PATH.is_file():
+            committed_exceptions = EXCEPTIONS_PATH.read_text(encoding="utf-8")
+        else:
+            committed_exceptions = ""
+        if fresh_exceptions != committed_exceptions:
+            EXCEPTIONS_PATH.write_text(fresh_exceptions, encoding="utf-8")
+
         if accept_source:
             if would_change:
                 old = json.loads(committed) if committed else []
@@ -596,7 +601,8 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             provenance.write(identity)
 
     return Report(
-        spells=spells, templates=templates, blocked=blocked, unresolved=unresolved,
+        spells=spells, templates=templates, exceptions=exception_spells,
+        blocked=blocked, unresolved=unresolved,
         problems=problems, identity=identity, design_lines=design_lines,
     )
 
@@ -625,6 +631,7 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"imported : {len(report.spells)}")
     print(f"templates: {len(report.templates)}")
+    print(f"exceptions: {len(report.exceptions)}")
     print(f"blocked  : {len(report.blocked)}")
     print(f"unresolved: {len(report.unresolved)}")
 
@@ -656,6 +663,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.write:
         print(f"wrote {LIBRARY_PATH}")
         print(f"wrote {TEMPLATES_PATH}")
+        print(f"wrote {EXCEPTIONS_PATH}")
     return 0
 
 
