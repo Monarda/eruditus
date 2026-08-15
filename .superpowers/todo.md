@@ -1560,9 +1560,11 @@ immediately.
     normal framework of Hermetic magic."
   - *Hermes' Portal* (ReTe 75, line 15638) — ❌ blocked on infrastructure, not rules.
     `rete-4` ("Transport a non-living object…") needs `rego-transport-distance` at its
-    top rung plus 2 magnitudes of size to reach 75, and `emit.build_spell` maps only
-    `size`-kind tokens today. **See item 29's extension bullet** — that would resolve
-    this spell. Its printed `(Mercurian Ritual)` marker corroborates it is
+    top rung plus 2 magnitudes of size to reach 75. **Corrected 2026-08-15:**
+    `emit.build_spell`'s mapping was fixed by item 43, but `designline.py`'s
+    tokenizer still can't produce a distance-kind token to feed it — **see item
+    45**, which would resolve this spell (pending confirmation it's the only
+    remaining gap). Its printed `(Mercurian Ritual)` marker corroborates it is
     non-standard.
   - (At the time this item closed, five further spells lacked a design line and were
     General-level, belonging to item 25: *Ward against the Beasts of Legend*, *Sight
