@@ -595,7 +595,7 @@
     "name": "Fire Intensity",
     "description": "Every 5 points the fire's damage exceeds +5 adds one magnitude",
     "selectionMode": "single",
-    "scope": { "technique": "Rego", "form": "Ignem", "effectIds": [], "excludeTechniques": [] },
+    "scope": { "technique": "Rego", "form": "Ignem", "effectIds": ["reig-3a", "reig-3b", "reig-4", "reig-5b", "reig-10"], "excludeTechniques": [] },
     "source": "published",
     "options": [
       { "id": "rego-ignem-fire-intensity-5", "label": "+5 damage", "magnitude": 0 },

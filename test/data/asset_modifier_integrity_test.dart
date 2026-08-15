@@ -127,4 +127,56 @@ void main() {
 
     expect(applicable, containsAll(['size-terram', 'rego-terram-material', 'rego-transport-distance']));
   });
+
+  test('the fire-intensity modifiers mirror chill-damage\'s 4-rung progression', () async {
+    final modifiers = await loader.loadModifiers();
+
+    for (final id in ['muto-ignem-fire-intensity', 'rego-ignem-fire-intensity']) {
+      final ladder = modifiers.firstWhere((m) => m.id == id);
+      expect(ladder.options.map((o) => o.magnitude).toList(), [0, 1, 2, 3],
+          reason: '$id should mirror chill-damage\'s +5/+10/+15/+20 rungs');
+    }
+  });
+
+  test('the Rego Ignem fire-intensity modifier is scoped to controlling rows, not the ward table', () async {
+    final modifiers = await loader.loadModifiers();
+    final fireIntensity = modifiers.firstWhere((m) => m.id == 'rego-ignem-fire-intensity');
+
+    expect(fireIntensity.scope.effectIds..sort(),
+        ['reig-10', 'reig-3a', 'reig-3b', 'reig-4', 'reig-5b']);
+
+    for (final wardRow in ['reig-15b', 'reig-20', 'reig-25', 'reig-30', 'reig-35', 'reig-40']) {
+      expect(
+        fireIntensity.scope.appliesTo(technique: 'Rego', form: 'Ignem', baseEffectId: wardRow),
+        isFalse,
+        reason: '$wardRow already bakes fire damage into its base level; offering '
+            'the intensity modifier there would double-count',
+      );
+    }
+  });
+
+  test('every new additive modifier loads with its stated Technique and Form', () async {
+    final modifiers = await loader.loadModifiers();
+    final expectedScopes = {
+      'muto-ignem-fire-intensity': ('Muto', 'Ignem'),
+      'rego-ignem-fire-intensity': ('Rego', 'Ignem'),
+      'creo-animal-treated-product': ('Creo', 'Animal'),
+      'muto-herbam-treated-material': ('Muto', 'Herbam'),
+      'perdo-herbam-live-wood': ('Perdo', 'Herbam'),
+      'perdo-auram-precision': ('Perdo', 'Auram'),
+      'rego-auram-precision': ('Rego', 'Auram'),
+    };
+
+    for (final entry in expectedScopes.entries) {
+      final modifier = modifiers.firstWhere((m) => m.id == entry.key);
+      expect(modifier.scope.technique, entry.value.$1, reason: '${entry.key} technique');
+      expect(modifier.scope.form, entry.value.$2, reason: '${entry.key} form');
+    }
+
+    expect(modifiers.firstWhere((m) => m.id == 'creo-animal-treated-product').options.map((o) => o.magnitude).toList(), [1, 2]);
+    expect(modifiers.firstWhere((m) => m.id == 'muto-herbam-treated-material').options.map((o) => o.magnitude).toList(), [1]);
+    expect(modifiers.firstWhere((m) => m.id == 'perdo-herbam-live-wood').options.map((o) => o.magnitude).toList(), [1]);
+    expect(modifiers.firstWhere((m) => m.id == 'perdo-auram-precision').options.map((o) => o.magnitude).toList(), [1]);
+    expect(modifiers.firstWhere((m) => m.id == 'rego-auram-precision').options.map((o) => o.magnitude).toList(), [1]);
+  });
 }
