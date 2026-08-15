@@ -19,41 +19,56 @@ text, says the guideline-arithmetic system does not apply to it. No amount of
 tokenizer widening or ledger work closes these — there is no arithmetic to
 recover, because the spell was never designed that way.
 
-Two shapes, confirmed against the pipeline's own `--show-blocked` output and
-the rulebook text it's blocking on, not inferred from prose alone:
+Two independent axes, confirmed against the pipeline's own `--show-blocked`
+output, the actual parsed `printed_level` for each block, and the rulebook
+text each is blocking on — not inferred from prose alone. Whether a spell has
+a printed level at all (General-kind or not) is a separate fact from *why* it
+doesn't compute; they don't line up in a neat 3-and-3 split. **Four are
+General-kind** (no printed level — confirmed against the parsed blocks, not
+assumed from prose tone): *Wizard's Communion*, *Wizard's Vigil*, *Aegis of
+the Hearth*, and *Watching Ward* — the last confirmed independently by
+another spell's own cross-reference, *Suppressing the Wizard's Handiwork*
+(line 15981), which calls it *"a Watching Ward [ReVi Gen]"* in passing.
+**Two have a real printed level:** *Whispering Winds* (15), *Mists of Change*
+(60).
 
-**Rulebook-disclaimed (General-kind — no printed level at all):**
+Sorted instead by *why* the guidelines don't apply:
 
-- ***Wizard's Communion*** (line 15862). Design line is `(Base effect)`, but
-  the prose (15864) says outright: *"Communion is a remnant of Mercurian
-  rituals, so it does not perfectly fit into the guidelines of Hermetic
-  theory."*
-- ***Wizard's Vigil*** (line 15872). No design line at all — its prose (15874)
-  defines it purely in relation to Communion: *"treat it as a Wizard's
-  Communion of two magnitudes lower."* An exception defined relative to
-  another exception.
-- ***Aegis of the Hearth*** (line 15936). No design-line marker of any kind —
-  not `(Base effect)`, nothing. Its prose explains why: a Major Breakthrough
-  combining Mercurian ritual with Hermetic theory, *"more powerful than it
-  ought to be, and has no Perdo requisite."* The general-base-effects design
-  (2026-08-05) already flagged this spell as permanently unblockable for the
-  identical reason, alongside *Whispering Winds*.
+**Rulebook-disclaimed** — the spell's own prose says arithmetic doesn't apply:
 
-**Schema-mismatched (fixed printed level, but the shape doesn't fit R/D/T):**
+- ***Wizard's Communion*** (line 15862, General). Design line is `(Base
+  effect)`, but the prose (15864) says outright: *"Communion is a remnant of
+  Mercurian rituals, so it does not perfectly fit into the guidelines of
+  Hermetic theory."*
+- ***Wizard's Vigil*** (line 15872, General). No design line at all — its
+  prose (15874) defines it purely in relation to Communion: *"treat it as a
+  Wizard's Communion of two magnitudes lower."* An exception defined relative
+  to another exception.
+- ***Aegis of the Hearth*** (line 15936, General). No design-line marker of
+  any kind — not `(Base effect)`, nothing. Its prose explains why: a Major
+  Breakthrough combining Mercurian ritual with Hermetic theory, *"more
+  powerful than it ought to be, and has no Perdo requisite."* The
+  general-base-effects design (2026-08-05) already flagged this spell as
+  permanently unblockable for the identical reason, alongside *Whispering
+  Winds*.
+- ***Whispering Winds*** (line 13251, printed level 15). Design line is
+  literally `(Unique spell)` — a distinct marker, not a variant of `(Base
+  effect)`. Prose: *"This spell is an adaptation of an effect known to
+  Bjornaer the Founder, and fits poorly into the normal framework of
+  Hermetic magic."*
 
-- ***Whispering Winds*** (line 13251). Design line is literally `(Unique
-  spell)` — a distinct marker, not a variant of `(Base effect)`. Prose:
-  *"This spell is an adaptation of an effect known to Bjornaer the Founder,
-  and fits poorly into the normal framework of Hermetic magic."*
-- ***Watching Ward*** (line 15984). Prints `D: Spec` with no basis a reader
-  could resolve to a real Duration — because the duration genuinely isn't one
-  of the catalog's values. It lasts *"until the conditions you specify come
-  to pass"* — event-triggered, not a missing catalog entry but a missing
-  concept.
-- ***Mists of Change*** (line 13694). Prints `D: Sun & Year` — two Durations
-  for one spell — plus its own design-line clause, *"slightly nonstandard
-  effect, mist and wind are cosmetic only."* The R/D/T model has exactly one
-  Duration slot; this spell genuinely needs two.
+**Schema-mismatched** — the spell's real shape doesn't fit the R/D/T model,
+disclaimer or not:
+
+- ***Watching Ward*** (line 15984, General). Prints `D: Spec` with no basis a
+  reader could resolve to a real Duration — because the duration genuinely
+  isn't one of the catalog's values. It lasts *"until the conditions you
+  specify come to pass"* — event-triggered, not a missing catalog entry but a
+  missing concept.
+- ***Mists of Change*** (line 13694, printed level 60). Prints `D: Sun &
+  Year` — two Durations for one spell — plus its own design-line clause,
+  *"slightly nonstandard effect, mist and wind are cosmetic only."* The R/D/T
+  model has exactly one Duration slot; this spell genuinely needs two.
 
 `Spell` and `SpellTemplate` require `baseEffectId`/`rangeId`/`durationId`/
 `targetId` as non-nullable references into the catalog. There is no way to
@@ -100,7 +115,7 @@ class ExceptionSpell {
                              // nuance needed -- nothing here is computed, so
                              // lastingCreation/storyguideRuling's "why did this
                              // become a Ritual" question never arises
-  final int? printedLevel;  // null for the three General-kind entries
+  final int? printedLevel;  // null for the four General-kind entries
   final String? summary;
   final String? description;
   final String rationale;   // required (not optional, unlike Spell's citations)
@@ -266,7 +281,7 @@ these — that chip specifically signals "instantiate via Learn at level…,"
 which does not apply here. `level` is passed straight from
 `ResolvedException.printedLevel` (nullable): the existing `level != null`
 branch in `SpellCard` already renders `"Technique Form"` with no level number
-when it's null, so the three General-kind exceptions need no special-casing
+when it's null, so the four General-kind exceptions need no special-casing
 there. No `actions` — there is nothing to instantiate, edit, or learn.
 
 `rationale` renders as a second subtitle line, below the summary/description
