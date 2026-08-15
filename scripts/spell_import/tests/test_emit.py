@@ -123,6 +123,45 @@ class SpecialParameterResolutionTest(unittest.TestCase):
         with self.assertRaises(designline.UnknownToken):
             emit.build_spell(block, "reau-2", self.catalog, design)
 
+    def test_special_parameter_adjustment_magnitude_is_reduced_by_resolved_parameter_magnitude(self):
+        # The adjustment token's magnitude must be reduced by the resolved
+        # parameter's own catalog magnitude. For "Special (based on
+        # Concentration)" with magnitude 2, and duration-concentration's
+        # magnitude 1, the emitted adjustment should carry magnitude 1, not 2.
+        # This prevents double-counting: the resolved duration contributes its
+        # 1, the adjustment contributes its reduced 1, total 2 = the printed
+        # token's magnitude.
+        design = designline.parse_design(
+            "(Base 2, +1 Touch, +2 Special (based on Concentration))"
+        )
+        block = self._block_with_stat("Rego", "Auram", 5, duration_name="Spec")
+        spell = emit.build_spell(block, "reau-2", self.catalog, design)
+        # The spell should have an adjustments entry for the Special token.
+        self.assertIn("adjustments", spell)
+        self.assertEqual(len(spell["adjustments"]), 1)
+        # Its magnitude should be reduced: 2 (token magnitude) - 1
+        # (duration-concentration catalog magnitude) = 1.
+        self.assertEqual(spell["adjustments"][0]["magnitude"], 1)
+        self.assertEqual(spell["adjustments"][0]["note"], "Special (based on Concentration)")
+
+    def test_special_parameter_with_zero_magnitude_resolved_parameter_keeps_full_adjustment(self):
+        # When the resolved parameter has magnitude 0 (like duration-momentary),
+        # the adjustment should keep its full magnitude: token magnitude 1 -
+        # parameter magnitude 0 = 1.
+        design = designline.parse_design(
+            "(Base 3, +2 Voice, +1 Special based on Mom, +1 Part, +2 size, +1 fancy effect)"
+        )
+        block = self._block_with_stat("Rego", "Terram", 30, duration_name="Spec")
+        spell = emit.build_spell(block, "rete-3", self.catalog, design)
+        # Find the Special-based-on-Mom adjustment among potentially other adjustments
+        special_adjustment = next(
+            (a for a in spell.get("adjustments", []) if a["note"] == "Special based on Mom"),
+            None
+        )
+        self.assertIsNotNone(special_adjustment)
+        # Its magnitude should be 1 - 0 = 1 (unchanged)
+        self.assertEqual(special_adjustment["magnitude"], 1)
+
 
 class ElaborateEffectEmissionTest(unittest.TestCase):
     @classmethod

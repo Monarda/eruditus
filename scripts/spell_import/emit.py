@@ -174,11 +174,33 @@ def build_spell(
 
     spell["citations"] = [{"bookId": CORE_BOOK_ID}]
 
-    adjustments = [
-        {"magnitude": token.magnitude, "note": token.note}
-        for token in design.tokens
-        if token.kind == "adjustment"
-    ]
+    # Build parameter magnitude lookup table for adjustment reduction
+    parameter_magnitudes = {p["id"]: p["magnitude"] for p in catalog.parameters}
+
+    adjustments = []
+    for token in design.tokens:
+        if token.kind == "adjustment":
+            magnitude = token.magnitude
+            # If this adjustment token's note is one that resolved a Special
+            # Range/Duration/Target parameter, reduce the adjustment magnitude
+            # by that parameter's own catalog magnitude, so the combined
+            # contribution (parameter magnitude + adjustment magnitude) equals
+            # the token's original design-line magnitude.
+            if token.note in SPECIAL_PARAMETER_BASIS:
+                parameter_name = SPECIAL_PARAMETER_BASIS[token.note]
+                # Determine which slot (range/duration/target) contains "Spec"/"Special"
+                for slot in ["range", "duration", "target"]:
+                    raw = {"range": block.stat.range_name, "duration": block.stat.duration_name,
+                           "target": block.stat.target_name}[slot]
+                    if raw in _SPECIAL_STAT_MARKERS:
+                        # This is the slot that was resolved -- get its parameter id
+                        parameter_id = catalog.parameter_id(
+                            {"range": "Range", "duration": "Duration", "target": "Target"}[slot],
+                            parameter_name
+                        )
+                        magnitude = token.magnitude - parameter_magnitudes.get(parameter_id, 0)
+                        break
+            adjustments.append({"magnitude": magnitude, "note": token.note})
     if adjustments:
         spell["adjustments"] = adjustments
 
