@@ -42,6 +42,35 @@ class ParseDesignTest(unittest.TestCase):
         self.assertEqual(design.tokens[-1].kind, "requisite")
         self.assertEqual(design.tokens[-1].magnitude, 0)
 
+    def test_bare_requisite_token_has_an_empty_label(self):
+        # The Eye of the Sage: "+1 requisite" restates no art -- the Req:
+        # line already does. designline.py can't see that line, so it
+        # records an empty label; emit.py resolves it against the stat line.
+        design = designline.parse_design("(Base 4, +4 Arc, +1 Conc, +1 requisite)")
+        requisite = design.tokens[-1]
+        self.assertEqual(requisite.kind, "requisite")
+        self.assertEqual(requisite.magnitude, 1)
+        self.assertEqual(requisite.label, "")
+
+    def test_requisite_label_arts_allow_list(self):
+        # Obliteration of the Metallic Barrier and Phantasmal Fire: the
+        # requisite's art is present but not in _REQUISITE's shape.
+        design = designline.parse_design(
+            "(Base 3, +2 metal, +1 Touch, +1 size, +1 Rego to fling the fragments away)"
+        )
+        requisite = design.tokens[-1]
+        self.assertEqual(requisite.kind, "requisite")
+        self.assertEqual(requisite.label, "Rego")
+        self.assertEqual(requisite.magnitude, 1)
+
+        design = designline.parse_design(
+            "(Base 3, +2 Voice, +2 Sun, +1 for light from Ignem requisite)"
+        )
+        requisite = design.tokens[-1]
+        self.assertEqual(requisite.kind, "requisite")
+        self.assertEqual(requisite.label, "Ignem")
+        self.assertEqual(requisite.magnitude, 1)
+
     def test_size_token_is_a_modifier(self):
         design = designline.parse_design("(Base 3, +2 Voice, +2 Sun, +1 size)")
         self.assertEqual(design.tokens[-1].kind, "modifier")
@@ -54,12 +83,16 @@ class ParseDesignTest(unittest.TestCase):
         self.assertEqual(design.tokens, [])
 
     def test_unknown_token_raises(self):
-        # "+2 metal/gems" is a real, unmodelled mechanism (Stone to Falling
-        # Dust). It must fail loudly so the spell is reported blocked, not
+        # "+2 Techniques and Forms" (Sight of the Active Magics) is a real,
+        # unmodelled mechanism -- item 24's allow-list deliberately excludes
+        # it. It must fail loudly so the spell is reported blocked, not
         # imported with a silently dropped magnitude. This example used to be
-        # "+1 fancy effect", which ElaborateEffectTest below now recognises.
+        # "+1 fancy effect", which ElaborateEffectTest below now recognises,
+        # then "+2 metal/gems", which is now recognised too (see
+        # SplittingTest/MaterialTokenTest -- Perdo Terram's material modifier
+        # already covers it, once emit.py maps the label to an option).
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 10, +1 Touch, +2 metal/gems)")
+            designline.parse_design("(Base 5, +1 Conc, +4 Vision, +2 Techniques and Forms)")
 
 
 class VocabularyAdditionsTest(unittest.TestCase):
@@ -171,6 +204,16 @@ class VocabularyAdditionsTest(unittest.TestCase):
         self.assertEqual(token.label, "moving image")
         self.assertEqual(token.magnitude, 1)
 
+    def test_metal_gems_is_a_modifier_token(self):
+        # Stone to Falling Dust (Perdo Terram). Which perdo-terram-material
+        # option this resolves to is emit.py's job, not the tokenizer's --
+        # here it only has to stop being an UnknownToken.
+        design = designline.parse_design("(Base 3, +2 metal/gems, +3 Sight)")
+        token = design.tokens[0]
+        self.assertEqual(token.kind, "modifier")
+        self.assertEqual(token.label, "metal/gems")
+        self.assertEqual(token.magnitude, 2)
+
 
 class SplittingTest(unittest.TestCase):
     def test_a_comma_inside_parentheses_does_not_split_a_token(self):
@@ -212,6 +255,79 @@ class SplittingTest(unittest.TestCase):
             designline.parse_design(
                 "(Base 5, +1 Size (a total of (x) +4 Size, including the +3), +1 Touch)"
             )
+
+    def test_a_comma_between_magnitude_and_label_still_forms_one_token(self):
+        # Wings of the Soaring Wind: "+2, highly unnatural" -- the rulebook's
+        # own comma, not a splitter bug to work around so much as a real
+        # corpus spelling to tolerate.
+        design = designline.parse_design(
+            "(Base 5, +1 Touch, +1 Conc, +2, highly unnatural, +1 Rego requisite)"
+        )
+        modifier_tokens = [t for t in design.tokens if t.kind == "modifier"]
+        self.assertEqual(len(modifier_tokens), 1)
+        self.assertEqual(modifier_tokens[0].label, "highly unnatural")
+        self.assertEqual(modifier_tokens[0].magnitude, 2)
+        requisite_tokens = [t for t in design.tokens if t.kind == "requisite"]
+        self.assertEqual(requisite_tokens[0].label, "Rego")
+
+    def test_a_bare_magnitude_with_no_following_label_still_raises(self):
+        # The merge only fires when the next part has no sign of its own --
+        # it must not paper over a genuinely malformed "+2" followed by
+        # another signed token.
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 5, +1 Touch, +2, +1 Conc)")
+
+
+class TrailingContinuationTest(unittest.TestCase):
+    """The real corpus lines TRAILING_CONTINUATION_LABELS unblocks."""
+
+    def test_break_the_oncoming_wave(self):
+        # Three trailing clauses in a row, not one -- each must be allow-
+        # listed separately (see TRAILING_CONTINUATION_LABELS's own comment).
+        design = designline.parse_design(
+            "(Base 5, +1 Conc, ward, so the target is the warded Individual, "
+            "not the water)"
+        )
+        self.assertEqual(design.base_level, 5)
+        self.assertEqual(len(design.tokens), 1)
+        self.assertEqual(design.tokens[0].label, "Concentration")
+
+    def test_ice_of_drowning(self):
+        design = designline.parse_design(
+            "(Base 5 (for the violent pounding), +2 Voice, +1 Concentration, "
+            "+1 Part, +1 size, +1 additional effect, changing the water to ice)"
+        )
+        self.assertEqual(design.base_level, 5)
+        elaborate = [t for t in design.tokens if t.kind == "elaborate"]
+        self.assertEqual(len(elaborate), 1)
+
+    def test_frosty_breath_of_the_spoken_lie(self):
+        design = designline.parse_design(
+            "(Base 10, +1 Eye, +1 Conc, "
+            "mist is a purely cosmetic effect and thus is free)"
+        )
+        self.assertEqual(design.base_level, 10)
+        self.assertEqual(len(design.tokens), 2)
+
+    def test_deluge_of_rushing_and_dashing(self):
+        design = designline.parse_design(
+            "(Base 10, +2 Voice, +1 Concentration, +3 size, "
+            "so that the whole stream floods)"
+        )
+        self.assertEqual(design.base_level, 10)
+        self.assertEqual(len(design.tokens), 3)
+
+    def test_an_unlisted_trailing_clause_still_raises(self):
+        # The allow-list is closed: an unsigned clause the list does not name
+        # must keep blocking its spell rather than silently resolve to zero.
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 5, +1 Touch, some other clause)")
+
+    def test_a_leading_trailing_clause_with_no_prior_token_still_raises(self):
+        # TRAILING_CONTINUATION_LABELS only fires as a continuation of an
+        # already-accepted token -- not as the first thing after Base.
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 5, so that the whole stream floods)")
 
 
 class ElaborateEffectTest(unittest.TestCase):
@@ -268,11 +384,13 @@ class AdjustmentTest(unittest.TestCase):
     def test_an_unlisted_token_still_raises(self):
         # The allow-list is closed on purpose: absorbing unknown tokens would
         # import real mechanisms as free text, with a correct level and wrong
-        # modelling. See the spec's "an allow-list, never a catch-all".
+        # modelling. See the spec's "an allow-list, never a catch-all". Item
+        # 24's two remaining unmodelled per-spell mechanisms: no casting
+        # requirement (words/gestures) axis exists on the model at all.
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 4, +2 for up to +15 damage)")
+            designline.parse_design("(Base 30, +1 Touch, +2 for no words)")
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 5, +2 metal/gems)")
+            designline.parse_design("(Base 15, +1 Touch, +3 Moon, +1 for not needing to gesture)")
 
 
 class VocabularyCoverageTest(unittest.TestCase):

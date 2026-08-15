@@ -1777,5 +1777,66 @@
       "peig-5b"
     ],
     "rationale": "Chills a person and deals damage that scales with the spell's level, matching peig-5b 'chill a person, taking damage that scales with the spell's level' verbatim, not peig-5a which strongly chills an object (e.g. freezing water) rather than harming a person."
+  },
+  "lib-craq-deluge-rushing-and-dashing": {
+    "baseEffectId": "craq-10a",
+    "candidates": [
+      "craq-10a",
+      "craq-10b"
+    ],
+    "rationale": "Causes a stream to overflow into a raging, damaging torrent, matching craq-10a 'create a geyser with a very high rate of flow' -- a forceful creation of moving water. craq-10b creates a poison causing a Medium Wound; the spell's own text never mentions poison."
+  },
+  "lib-reaq-ice-drowning": {
+    "baseEffectId": "reaq-5b",
+    "candidates": [
+      "reaq-5a",
+      "reaq-5b",
+      "reaq-5c",
+      "reaq-5d"
+    ],
+    "rationale": "Drives ice chunks to pound against anything on the water's surface, matching reaq-5b 'control a liquid in a violent way'. Not reaq-5a (warding against mundane water -- this spell attacks, not wards), reaq-5c (no disembodied spirit involved) or reaq-5d (no water elemental involved)."
+  },
+  "lib-inme-frosty-breath-spoken-lie": {
+    "baseEffectId": "inme-10b",
+    "candidates": [
+      "inme-10a",
+      "inme-10b"
+    ],
+    "rationale": "Determines whether a spoken statement is a lie, matching inme-10b 'discover the truth of a statement' verbatim. Not inme-10a (sensing emotions) -- the spell's own text is about truthfulness, not emotional state."
+  },
+  "lib-reaq-break-oncoming-wave": {
+    "baseEffectId": "reaq-5a",
+    "candidates": [
+      "reaq-5a",
+      "reaq-5b",
+      "reaq-5c",
+      "reaq-5d"
+    ],
+    "rationale": "The spell's own design line says 'ward, so the target is the warded Individual, not the water', matching reaq-5a 'ward against mundane water' by name -- the only warding candidate of the four. Not reaq-5b (control a liquid violently -- this spell blocks water, it doesn't move it), reaq-5c (no disembodied spirit involved) or reaq-5d (no water elemental involved). The 'mundane' qualifier is looser than the spell's own 'including magical ones', the same tolerated description-vs-spell mismatch as elsewhere in this ledger (see item 32)."
+  },
+  "lib-inte-tracks-faerie-glow": {
+    "baseEffectId": "inte-4a",
+    "candidates": [
+      "inte-4a",
+      "inte-4b"
+    ],
+    "rationale": "Makes tracks glow so they stand out to normal eyesight and boosts a Tracking roll -- it reveals a fact about the terrain (something specific passed this way, recently, related to it thus-and-so) rather than granting sight of anything. No seeing is involved, the same discriminator already used for lib-inte-eyes-eons. It also continues this corpus's own R:Per/D:Conc/T:Vision + 'Learn X property' pattern one level up from Eyes of the Treacherous Terrain and The Miner's Keen Eye (both base 2, inte-2 'learn one visible property'): those learn a *visible* property; this one needs magic to perceive at all, matching inte-4a's 'mundane' (i.e. not visible-by-looking) tier exactly. Not inte-4b, whose guideline is about seeing an object and its surroundings."
+  },
+  "lib-inte-sense-feet-that-thread-earth": {
+    "baseEffectId": "inte-4a",
+    "candidates": [
+      "inte-4a",
+      "inte-4b"
+    ],
+    "rationale": "The spell's own verb is 'feel', not 'see' -- you touch the earth and feel what moves on it within a mile, entirely tactile/proprioceptive, no vision or line of sight of any kind. No seeing is involved, the same discriminator already used for lib-inte-eyes-eons. The learned facts (direction, distance, weight, number, manner of movement) are all properties of the moving things, matching inte-4a's 'learn one mundane property of an object' read as one themed cluster of facts, not inte-4b's sight-based guideline."
+  },
+  "lib-mute-crystal-dart": {
+    "baseEffectId": "mute-3c",
+    "candidates": [
+      "mute-3a",
+      "mute-3b",
+      "mute-3c"
+    ],
+    "rationale": "'Transforms a stone into a 10-inch crystal dart' is a solid-to-solid change within the earth/mineral family -- the only one of the level-3 guidelines built for that axis at all. Not mute-3a (slightly unnatural dirt: a state-of-being change, not a change of material) or mute-3b (dirt into liquid or gas: wrong state of matter entirely, and this dart is solid). The design line's own material-adjustment note ('to change to or from stone or glass, add one magnitude; to change to or from metal or gemstone, add two magnitudes') has no such extra magnitude in the design line (Base 3, +2 Voice, +1 Rego requisite sums to exactly the printed level 10 with nothing to spare) -- so the transformation must be one the guideline already prices at base 3 without surcharge, which is mute-3c's own named 'dirt to stone, or vice versa' pair. The Rego requisite is for the dart's flight and strike (Req: Rego, matching 'floats into the air, and speeds off like an arrow'), not for the material change, so it does not bear on this choice."
   }
 }

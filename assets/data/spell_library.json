@@ -110,6 +110,31 @@
     ]
   },
   {
+    "id": "lib-craq-deluge-rushing-and-dashing",
+    "name": "Deluge of Rushing and Dashing",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-aquam": [
+        "size-aquam-3"
+      ]
+    },
+    "baseEffectId": "craq-10a",
+    "rangeId": "range-voice",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Causes a stream to flood, starting at the stream's nearest point to you and continuing downstream. The results of this spell are generally quite impressive. As the stream overflows its original bed, it becomes a raging torrent, sucking in everything near it. Damage from the spell can last for many years. As long as you concentrate, the stream remains at flood levels. Anyone caught near the stre... Level 40.",
+    "description": "Causes a stream to flood, starting at the stream's nearest point to you and continuing downstream. The results of this spell are generally quite impressive. As the stream overflows its original bed, it becomes a raging torrent, sucking in everything near it. Damage from the spell can last for many years. As long as you concentrate, the stream remains at flood levels. Anyone caught near the stream when it floods is struck by the rush of water (+10 damage), caught up in the flood, and dragged along. Every round, a victim makes a Strength + Swim stress roll against an Ease Factor of 9. Success means the character escapes the flood. Otherwise, the character loses one Fatigue level and takes +5 damage. Any who fall unconscious drown. This roll is repeated until the character either escapes the flood or dies.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-craq-footsteps-slippery-oil",
     "name": "Footsteps of Slippery Oil",
     "requisites": {},
@@ -414,6 +439,33 @@
     "summary": "Creates a horrible stench of rotting corpses. All those within fifty paces of the target point must make Stamina stress rolls against an Ease Factor of 6 or act with a -3 penalty on all rolls. Anyone who botches the roll vomits and is incapacitated for (10 - Stamina) rounds. Level 10.",
     "description": "Creates a horrible stench of rotting corpses. All those within fifty paces of the target point must make Stamina stress rolls against an Ease Factor of 6 or act with a -3 penalty on all rolls. Anyone who botches the roll vomits and is incapacitated for (10 - Stamina) rounds.",
     "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crau-wings-soaring-wind",
+    "name": "Wings of the Soaring Wind",
+    "requisites": {
+      "Rego": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-very"
+      ]
+    },
+    "baseEffectId": "crau-5",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Generates a massive gust of air around you that supports and pushes you along through the air at speeds up to 40 miles per hour. Hovering in place is difficult, and requires a Finesse roll against an Ease Factor of 9 per round. It is dangerous for extended travel, because if you lose concentration, you are likely to sustain serious injuries (+15 damage, on average, although it may be more if th... Level 30.",
+    "description": "Generates a massive gust of air around you that supports and pushes you along through the air at speeds up to 40 miles per hour. Hovering in place is difficult, and requires a Finesse roll against an Ease Factor of 9 per round. It is dangerous for extended travel, because if you lose concentration, you are likely to sustain serious injuries (+15 damage, on average, although it may be more if the magus was very high up).",
+    "printedLevel": 30,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -1101,6 +1153,29 @@
     ]
   },
   {
+    "id": "lib-crim-phantasmal-fire",
+    "name": "Phantasmal Fire",
+    "requisites": {
+      "Ignem": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crim-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Makes an image of a fire (up to the size of a large campfire) that dances, illuminates, crackles, and (apparently) warms. It does not spread, burn, or protect against cold. Makes a great joke at gatherings of House Flambeau, although creating a real fire is even more popular. Level 20.",
+    "description": "Makes an image of a fire (up to the size of a large campfire) that dances, illuminates, crackles, and (apparently) warms. It does not spread, burn, or protect against cold. Makes a great joke at gatherings of House Flambeau, although creating a real fire is even more popular.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crim-shadow-human-life",
     "name": "The Shadow of Human Life",
     "requisites": {
@@ -1736,6 +1811,29 @@
     ]
   },
   {
+    "id": "lib-inco-eye-sage",
+    "name": "The Eye of the Sage",
+    "requisites": {
+      "Imaginem": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "inco-4",
+    "rangeId": "range-arcane-connection",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Lets you see a specific person and what is within one pace of that person. The image is clear enough to allow reading. Level 30.",
+    "description": "Lets you see a specific person and what is within one pace of that person. The image is clear enough to allow reading.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-inco-inexorable-search",
     "name": "The Inexorable Search",
     "requisites": {},
@@ -2137,6 +2235,27 @@
     ]
   },
   {
+    "id": "lib-inme-frosty-breath-spoken-lie",
+    "name": "Frosty Breath of the Spoken Lie",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "inme-10b",
+    "rangeId": "range-eye",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "For as long as you maintain this spell, the target exhales a misty breath with each spoken lie. Small bits of ice form on the person's lips if the lie is particularly severe. In winter, when breath is visible anyway, lies produce a greater than normal amount of mist (the mist actually billows out). A target who makes a Communication + Guile stress roll against an Ease Factor of 15 can determine... Level 20.",
+    "description": "For as long as you maintain this spell, the target exhales a misty breath with each spoken lie. Small bits of ice form on the person's lips if the lie is particularly severe. In winter, when breath is visible anyway, lies produce a greater than normal amount of mist (the mist actually billows out). A target who makes a Communication + Guile stress roll against an Ease Factor of 15 can determine whether any given statement will be taken by the spell as a lie. The spell can be defeated through extensive and judicious application of Creo Auram and Perdo Auram spells, and a demon is able to manipulate it in any way it wishes, as demons are the embodiment of deception and are never caught in a lie if they do not wish to be. House Guernicus brought the Order this spell, and it is a very poor Quaesitor who is without it.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-inme-peering-into-mortal-mind",
     "name": "Peering into the Mortal Mind",
     "requisites": {},
@@ -2355,6 +2474,31 @@
     ]
   },
   {
+    "id": "lib-inte-sense-feet-that-thread-earth",
+    "name": "Sense the Feet That Thread the Earth",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-terram": [
+        "size-terram-3"
+      ]
+    },
+    "baseEffectId": "inte-4a",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-part",
+    "summary": "You touch the earth and feel what is moving along the ground within a mile of where you stand. You can tell the direction, distance, weight, number, and manner of movement of moving things. For instance, you might sense \"a single 50-stone creature slithering toward us, a hundred rods in that direction.\" This spell is derived from the Terram tradition from which Guernicus the Founder came, and d... Level 30.",
+    "description": "You touch the earth and feel what is moving along the ground within a mile of where you stand. You can tell the direction, distance, weight, number, and manner of movement of moving things. For instance, you might sense \"a single 50-stone creature slithering toward us, a hundred rods in that direction.\" This spell is derived from the Terram tradition from which Guernicus the Founder came, and does not fit well into Hermetic theory.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-inte-stone-tell-mind-that-sits",
     "name": "Stone Tell of the Mind That Sits",
     "requisites": {},
@@ -2369,6 +2513,27 @@
     "summary": "Allows you to talk with natural stone. A stone's answers feel slow and ponderous, but do not actually take any longer than a normal conversation. Though a stone is usually willing to talk, its direction sense and awareness of quickly moving things (such as people) are limited. Level 30.",
     "description": "Allows you to talk with natural stone. A stone's answers feel slow and ponderous, but do not actually take any longer than a normal conversation. Though a stone is usually willing to talk, its direction sense and awareness of quickly moving things (such as people) are limited.",
     "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-inte-tracks-faerie-glow",
+    "name": "Tracks of the Faerie Glow",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "inte-4a",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-vision",
+    "summary": "Causes even faintly perceptible tracks of a specific being to glow with a faint magic light, making them stand out when you are within 30 paces of them. The glow provides a bonus to Tracking rolls, which depends on the relationship between the target being tracked and the terrain. If the target is magically related to the terrain, +2; native to the terrain, +4; neutral to the terrain, +6; inimi... Level 25.",
+    "description": "Causes even faintly perceptible tracks of a specific being to glow with a faint magic light, making them stand out when you are within 30 paces of them. The glow provides a bonus to Tracking rolls, which depends on the relationship between the target being tracked and the terrain. If the target is magically related to the terrain, +2; native to the terrain, +4; neutral to the terrain, +6; inimical to the terrain, +8. Tracking at night without a light source doubles the bonus. The more faint the tracks are, the more dimly they glow, so the storyguide may also modify the bonus based on the length of time since the target passed.",
+    "printedLevel": 25,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -3609,6 +3774,29 @@
     "summary": "All spirits within the target area become visible, although they might remain unseen if hiding behind something. This includes the spirits of living people, which appear as the person normally does. If the person is invisible or otherwise changed from his normal shape, his normal appearance is superimposed on his current appearance. Level 40.",
     "description": "All spirits within the target area become visible, although they might remain unseen if hiding behind something. This includes the spirits of living people, which appear as the person normally does. If the person is invisible or otherwise changed from his normal shape, his normal appearance is superimposed on his current appearance.",
     "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mute-crystal-dart",
+    "name": "The Crystal Dart",
+    "requisites": {
+      "Rego": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "mute-3c",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "The spell transforms a stone into a 10-inch crystal dart that rises from the ground at your feet, floats into the air, and speeds off like an arrow at a target that is within Voice range. It does +5 damage (because of the sharp edges of the crystal as much as its speed), and always hits its target, although it must Penetrate Magic Resistance to have any real effect. Level 10.",
+    "description": "The spell transforms a stone into a 10-inch crystal dart that rises from the ground at your feet, floats into the air, and speeds off like an arrow at a target that is within Voice range. It does +5 damage (because of the sharp edges of the crystal as much as its speed), and always hits its target, although it must Penetrate Magic Resistance to have any real effect.",
+    "printedLevel": 10,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -4946,6 +5134,36 @@
     ]
   },
   {
+    "id": "lib-pete-obliteration-metallic-barrier",
+    "name": "Obliteration of the Metallic Barrier",
+    "requisites": {
+      "Rego": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-base-metal"
+      ],
+      "size-terram": [
+        "size-terram-1"
+      ]
+    },
+    "baseEffectId": "pete-3",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "Shatters a barrier of metal or stone up to one foot thick. Those within one pace of the barrier, on the opposite side from you, take +10 Damage. Alchemically refined and magical metals may be able to withstand this spell. Level 20.",
+    "description": "Shatters a barrier of metal or stone up to one foot thick. Those within one pace of the barrier, on the opposite side from you, take +10 Damage. Alchemically refined and magical metals may be able to withstand this spell.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-pete-pit-gaping-earth",
     "name": "Pit of the Gaping Earth",
     "requisites": {},
@@ -4989,6 +5207,31 @@
     "summary": "After the spell is cast, the metal of the target becomes so thoroughly rusted that it breaks if used in any demanding way (for example, used to strike a blow in combat or to pry open a door). It also loses any sharpness it might once have had. Level 10.",
     "description": "After the spell is cast, the metal of the target becomes so thoroughly rusted that it breaks if used in any demanding way (for example, used to strike a blow in combat or to pry open a door). It also loses any sharpness it might once have had.",
     "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-pete-stone-to-falling-dust",
+    "name": "Stone to Falling Dust",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "perdo-terram-material": [
+        "perdo-terram-material-base-metal"
+      ]
+    },
+    "baseEffectId": "pete-3",
+    "rangeId": "range-sight",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "One solid non-living object turns to a pile of dust. The object must be a base Individual or smaller, so a stone item can be a pace across while a metal item can only be one tenth that size in total. A casting requisite may be required, of the Form appropriate to the target. Level 20.",
+    "description": "One solid non-living object turns to a pile of dust. The object must be a base Individual or smaller, so a stone item can be a pace across while a metal item can only be one tenth that size in total. A casting requisite may be required, of the Form appropriate to the target.",
+    "printedLevel": 20,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -5168,6 +5411,27 @@
     ]
   },
   {
+    "id": "lib-reaq-break-oncoming-wave",
+    "name": "Break the Oncoming Wave",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "reaq-5a",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Breaks all waves and torrents of water (including magical ones) just before they touch you. The water either crashes to the ground or flows around you in a truly impressive display. In Ferramentum of Verditius's version of this spell, the water breaks precisely one inch from the target, leaving a very clean line showing where the waves stopped. All of his spells may be recognized by their order... Level 10.",
+    "description": "Breaks all waves and torrents of water (including magical ones) just before they touch you. The water either crashes to the ground or flows around you in a truly impressive display. In Ferramentum of Verditius's version of this spell, the water breaks precisely one inch from the target, leaving a very clean line showing where the waves stopped. All of his spells may be recognized by their orderliness.",
+    "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-reaq-breath-winter",
     "name": "Breath of Winter",
     "requisites": {},
@@ -5268,6 +5532,34 @@
       {
         "magnitude": 1,
         "note": "for slightly unnatural control"
+      }
+    ]
+  },
+  {
+    "id": "lib-reaq-ice-drowning",
+    "name": "Ice of Drowning",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-aquam": [
+        "size-aquam-1"
+      ],
+      "elaborate-effect": [
+        "elaborate-effect-minor"
+      ]
+    },
+    "baseEffectId": "reaq-5b",
+    "rangeId": "range-voice",
+    "durationId": "duration-concentration",
+    "targetId": "target-part",
+    "summary": "Turns part of the water in a circle 10 paces across into large, jagged chunks of ice and drives them to pound against anything on the water's surface. The ice can punch holes in small boats but does not damage ships. Any swimmers in the area take +15 damage, and suffer -6 and two extra botch checks on Swim rolls. Level 35.",
+    "description": "Turns part of the water in a circle 10 paces across into large, jagged chunks of ice and drives them to pound against anything on the water's surface. The ice can punch holes in small boats but does not damage ships. Any swimmers in the area take +15 damage, and suffer -6 and two extra botch checks on Swim rolls.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-core"
       }
     ]
   },
@@ -6055,6 +6347,31 @@
     "summary": "Causes a fire to guiver a few seconds and then make a leap of up to 10 feet in any direction. A Targeting roll is required to hit a specific target. The flame stays at the spot it hits if it can burn there (see rules for fire damage on page 407). Otherwise, it simply scorches the spot and goes out (doing +5 damage). Level 5.",
     "description": "Causes a fire to guiver a few seconds and then make a leap of up to 10 feet in any direction. A Targeting roll is required to hit a specific target. The flame stays at the spot it hits if it can burn there (see rules for fire damage on page 407). Otherwise, it simply scorches the spot and goes out (doing +5 damage).",
     "printedLevel": 5,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-reig-ward-against-heat-and-flames",
+    "name": "Ward against Heat and Flames",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "rego-ignem-fire-intensity": [
+        "rego-ignem-fire-intensity-15"
+      ]
+    },
+    "baseEffectId": "reig-4",
+    "rangeId": "range-touch",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "Keeps heat and fire at bay, unable to approach within a couple of inches of the target. This renders the target immune to damage from flames or heat of intensity less than that of molten iron. The target gets a +15 Soak against all fire-related damage. Any fire doing less than +15 damage per round doesn't penetrate the ward. Such fires simply dim at the protected person's passing and flare back... Level 25.",
+    "description": "Keeps heat and fire at bay, unable to approach within a couple of inches of the target. This renders the target immune to damage from flames or heat of intensity less than that of molten iron. The target gets a +15 Soak against all fire-related damage. Any fire doing less than +15 damage per round doesn't penetrate the ward. Such fires simply dim at the protected person's passing and flare back up after he or she is gone.",
+    "printedLevel": 25,
     "citations": [
       {
         "bookId": "arm5-core"

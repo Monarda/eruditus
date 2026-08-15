@@ -33,11 +33,26 @@ class SourceMoved(Exception):
 # here rather than left as `unresolved` because "unresolved" means "add a
 # ledger entry" — these don't have one to add. See .superpowers/todo.md
 # item 27. Remove an entry once a rules decision actually resolves it.
+#
+# 2026-08-15 (item 39): re-read all 4 against the discipline above. Three
+# had a forced discriminator after all and moved to resolutions.json —
+# *Tracks of the Faerie Glow* and *Sense the Feet that Thread the Earth*
+# both use "no seeing is involved" (the same test already governing
+# lib-inte-eyes-eons's inte-4a pick: one makes tracks glow for normal
+# eyesight, the other is explicitly "feel", neither is sight-based); *The
+# Crystal Dart* turns solid stone into a solid crystal dart, the only
+# level-3 Muto Terram guideline built for a solid-to-solid earth-family
+# change, and the design line's arithmetic has no room for the material
+# surcharge a *different* material pair would need. *Conjuration of the
+# Indubitable Cold* does not have a forced reading — its own text matches
+# peig-4b and peig-4c close to verbatim simultaneously ("all nonliving
+# things are chilled thoroughly" / "all living things ... lose one Fatigue
+# level"), with peig-4a's "extinguish" contradicted by its own text for
+# anything bigger than a campfire (it only shrinks those, per the *level 3*
+# guideline, not the *level 4* one). Left here, genuinely undecided between
+# two candidates rather than three now.
 KNOWN_UNRESOLVABLE = {
-    "lib-inte-tracks-faerie-glow": "ambiguous between inte-4a/4b, no textual discriminator",
-    "lib-inte-sense-feet-that-thread-earth": "ambiguous between inte-4a/4b, no textual discriminator",
-    "lib-mute-crystal-dart": "ambiguous between mute-3a/3b/3c, stone-vs-crystal boundary",
-    "lib-peig-conjuration-indubitable-cold": "ambiguous between peig-4a/4b/4c, three co-equal readings",
+    "lib-peig-conjuration-indubitable-cold": "ambiguous between peig-4b/4c, both matched near-verbatim",
 }
 
 
@@ -57,6 +72,7 @@ REALM_BY_SPELL_ID = {
     "lib-reaq-ward-against-faeries-waters": "Faerie",
     "lib-reau-ward-against-faeries-air": "Faerie",
     "lib-rehe-ward-against-faeries-wood": "Faerie",
+    "lib-rete-ward-against-faeries-mountain": "Faerie",
     "lib-reme-ring-warding-against-spirits": "Magic",
 }
 
@@ -84,8 +100,12 @@ DESIGN_LINE_INCOMPLETE = {
 # will not equal the printed one. Hand-derivation under a test is a different
 # thing from hand-derivation on trust.
 #
-# Five further spells also lack a design line but are General-level and so
-# belong to todo item 25, not here.
+# Three further spells also lack a design line and are General-level, so
+# belong to todo item 25, not here (a General guideline has no numeric level
+# for assertion 1 to check a derivation against, which is why they are not
+# folded into this dict): Aegis of the Hearth, Wizard's Vigil, Sight of the
+# True Form. A fourth, Ward against Faeries of the Mountain, used to be in
+# that list too -- see its own entry below for why it moved out.
 #
 # Only one of the three actually resolves this way. All three spells' own
 # prose explicitly disclaims normal Hermetic guideline arithmetic
@@ -144,8 +164,26 @@ DESIGN_LINE_INCOMPLETE = {
 #   ought to be", i.e. explicitly outside the guidelines. Permanently
 #   blocked, not pending -- there is no future ledger entry or catalog fix
 #   that resolves this one.
+#
+# - Ward against Faeries of the Mountain (Rego Terram, General, R: Touch, D:
+#   Ring, T: Circle) prints no design-line marker at all -- but its full
+#   prose is a complete specification once followed: "As Ward Against
+#   Faeries of the Waters (ReAq Gen), but for faeries of earth and stone."
+#   That sentence names both the guideline to use (the analogous Rego Terram
+#   General ward, rete-G -- "Ward against beings associated with Terram from
+#   one supernatural realm... with Might less than the level", the only
+#   General candidate at Rego+Terram, so no ledger entry is needed) and the
+#   realm (Faerie, same as the spell it points to). Two siblings that use the
+#   identical "As Ward Against Faeries of the Waters..." phrasing --
+#   Ward against Faeries of the Air, Ward against Faeries of the Wood -- both
+#   print "(Base effect)" and already import via REALM_BY_SPELL_ID; the text
+#   here supplies exactly the marker those two print literally, not new
+#   information. Checked 2026-08-15; the other three no-design-line General
+#   spells above (Aegis of the Hearth, Wizard's Vigil, Sight of the True
+#   Form) have no comparable sibling reference and stay blocked under item 25.
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
+    "Ward against Faeries of the Mountain": "(Base effect)",
 }
 
 
@@ -193,6 +231,21 @@ HAND_DERIVED: dict[str, str] = {
 # Keyed by spell name -> (magnitude, the printed phrase to attach it to).
 HAND_DERIVED_ADJUSTMENT: dict[str, tuple[int, str]] = {
     "The Shadow of Human Life": (5, "for a very elaborate effect"),
+}
+
+
+# A published design line missing the whitespace between a magnitude and its
+# label -- a rulebook typo, not a mechanism. `designline._TOKEN` requires at
+# least one space (`\d+\s+`), so "+1Touch" fails to match at all, before any
+# label is even looked at. Fixed by exact substitution, keyed by spell name,
+# rather than loosening `_TOKEN` globally -- a global `\s*` would also accept
+# "+1Touch" as a typo for something it might not be; this table only ever
+# fixes a specific, verified corpus line.
+#
+# Ward against Heat and Flames (Rego Ignem): "(Base 4, +2 for up to +15
+# damage, +1Touch, +2 Sun)".
+DESIGN_LINE_TYPOS: dict[str, tuple[str, str]] = {
+    "Ward against Heat and Flames": ("+1Touch", "+1 Touch"),
 }
 
 
@@ -320,9 +373,19 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             continue
 
         # The printed line is what the report records; only the parsed copy
-        # gains the hand-derived magnitude, so import_report.md keeps showing
-        # the rulebook's own words.
+        # gains the hand-derived magnitude or typo fix, so import_report.md
+        # keeps showing the rulebook's own words.
         parsed_text = design_text
+        typo = DESIGN_LINE_TYPOS.get(block.name)
+        if typo is not None:
+            broken, fixed = typo
+            if broken not in parsed_text:
+                blocked.append(
+                    (block.name, f"design-line typo fix {broken!r} is not in the design line")
+                )
+                continue
+            parsed_text = parsed_text.replace(broken, fixed, 1)
+
         derived = HAND_DERIVED_ADJUSTMENT.get(block.name)
         if derived is not None:
             magnitude, phrase = derived

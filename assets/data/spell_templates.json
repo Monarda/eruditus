@@ -360,6 +360,27 @@
     }
   },
   {
+    "id": "tpl-rete-ward-against-faeries-mountain",
+    "name": "Ward against Faeries of the Mountain",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "rete-G",
+    "rangeId": "range-touch",
+    "durationId": "duration-ring",
+    "targetId": "target-circle",
+    "summary": "As Ward Against Faeries of the Waters (ReAq Gen), but for faeries of earth and stone. At some angles at night, the ring may be seen as a dark brown dome.",
+    "description": "As Ward Against Faeries of the Waters (ReAq Gen), but for faeries of earth and stone. At some angles at night, the ring may be seen as a dark brown dome.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "chosenSlots": {
+      "realm": "Faerie"
+    }
+  },
+  {
     "id": "tpl-revi-circular-ward-against-demons",
     "name": "Circular Ward against Demons",
     "requisites": {},

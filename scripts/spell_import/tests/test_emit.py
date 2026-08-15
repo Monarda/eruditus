@@ -244,6 +244,59 @@ class ModifierOptionTableTest(unittest.TestCase):
             )
 
 
+class TransportDistanceEmissionTest(unittest.TestCase):
+    """Regression coverage for backlog item 43: emit.py's rego-transport-distance
+    table used the wrong option-id prefix (rego-transport-distance-* instead of
+    the catalog's actual rego-distance-*), so _option_exists always failed and
+    any spell selecting a transport-distance token would raise UnknownToken.
+
+    Built from Token/Design objects directly rather than designline.parse_design:
+    the design-line tokenizer's MODIFIER_LABELS allow-list does not yet
+    recognize these labels ("distance", "50 paces", etc.) as modifier-kind
+    tokens at all -- a separate, larger gap (see backlog item 45) that this
+    fix does not attempt to close. This test exercises emit.py's mapping
+    table directly, independent of that gap.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    DISTANCE_LABELS = [
+        ("5 paces", "rego-distance-5-paces", 0),
+        ("50 paces", "rego-distance-50-paces", 1),
+        ("500 paces", "rego-distance-500-paces", 2),
+        ("1 league", "rego-distance-1-league", 3),
+        ("7 leagues", "rego-distance-7-leagues", 4),
+        ("arcane connection", "rego-distance-arcane", 5),
+    ]
+
+    def test_each_distance_label_selects_its_option_at_its_printed_magnitude(self):
+        for label, option_id, magnitude in self.DISTANCE_LABELS:
+            with self.subTest(label=label):
+                design = designline.Design(
+                    base_level=3,
+                    tokens=[designline.Token(magnitude=magnitude, label=label, kind="modifier")],
+                )
+                spell = emit.build_spell(
+                    _block("Test Spell", "Rego", "Herbam", 10), "rehe-10b", self.catalog, design
+                )
+                self.assertEqual(spell["selectedModifiers"]["rego-transport-distance"], [option_id])
+
+    def test_an_unmapped_distance_label_still_raises(self):
+        # "distance" is in the emit.py block's label-matching tuple (so it
+        # enters this code path) but was never given a real table entry --
+        # it should still raise, not silently pick a default rung.
+        design = designline.Design(
+            base_level=3,
+            tokens=[designline.Token(magnitude=1, label="distance", kind="modifier")],
+        )
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(
+                _block("Test Spell", "Rego", "Herbam", 10), "rehe-10b", self.catalog, design
+            )
+
+
 class DescriptionEmissionTest(unittest.TestCase):
     """`description` is the full verbatim prose; `summary` stays untouched.
 
@@ -508,6 +561,50 @@ class RequisiteEmissionTest(unittest.TestCase):
         )
         spell = emit.build_spell(block, "test-effect", self.catalog, design)
         self.assertEqual(spell["requisites"], {"Rego": "adding"})
+
+    def test_a_bare_requisite_token_resolves_against_the_sole_stat_line_art(self):
+        # The Eye of the Sage: "+1 requisite" (no art in the design line) +
+        # "Req: Imaginem" (one art in the stat line) -> resolves to Imaginem.
+        design = designline.parse_design("(Base 4, +4 Arc, +1 Conc, +1 requisite)")
+        block = blocks.SpellBlock(
+            name="Test Spell", technique="Intellego", form="Imaginem", printed_level=10,
+            stat=statline.StatLine(
+                range_name="Arcane Connection", duration_name="Concentration",
+                target_name="Ind", is_ritual=False, requisite_arts=["Imaginem"],
+                trailing="",
+            ),
+            prose="Test prose.", design_line=None, line_no=1,
+        )
+        spell = emit.build_spell(block, "test-effect", self.catalog, design)
+        self.assertEqual(spell["requisites"], {"Imaginem": "adding"})
+
+    def test_a_bare_requisite_token_with_no_stat_line_art_raises(self):
+        design = designline.parse_design("(Base 4, +4 Arc, +1 Conc, +1 requisite)")
+        block = blocks.SpellBlock(
+            name="Test Spell", technique="Intellego", form="Imaginem", printed_level=10,
+            stat=statline.StatLine(
+                range_name="Arcane Connection", duration_name="Concentration",
+                target_name="Ind", is_ritual=False, requisite_arts=[], trailing="",
+            ),
+            prose="Test prose.", design_line=None, line_no=1,
+        )
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(block, "test-effect", self.catalog, design)
+
+    def test_a_bare_requisite_token_with_two_stat_line_arts_raises(self):
+        # Ambiguous which art the magnitude belongs to -- must not guess.
+        design = designline.parse_design("(Base 4, +4 Arc, +1 Conc, +1 requisite)")
+        block = blocks.SpellBlock(
+            name="Test Spell", technique="Intellego", form="Imaginem", printed_level=10,
+            stat=statline.StatLine(
+                range_name="Arcane Connection", duration_name="Concentration",
+                target_name="Ind", is_ritual=False,
+                requisite_arts=["Imaginem", "Mentem"], trailing="",
+            ),
+            prose="Test prose.", design_line=None, line_no=1,
+        )
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(block, "test-effect", self.catalog, design)
 
     def test_a_design_line_requisite_is_not_overwritten_by_the_stat_lines_free_default(self):
         """setdefault, not assignment: the design line is more specific than

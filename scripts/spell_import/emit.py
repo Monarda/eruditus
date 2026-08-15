@@ -79,6 +79,29 @@ _MODIFIER_OPTIONS = {
 }
 
 
+def _resolve_requisite_label(token, block) -> str:
+    """The art a `kind="requisite"` token belongs to.
+
+    Usually just `token.label` -- designline.py already resolved it from the
+    design line's own text. The one exception is a bare "+N requisite" token
+    (designline._BARE_REQUISITE), which carries an empty label because
+    designline.py never sees the Req: line and so cannot know which art the
+    magnitude belongs to. Resolving it here, against `block.stat`, is safe
+    only when the spell declares exactly one requisite art -- more than one
+    would be a genuine ambiguity this importer must not guess at, the same
+    discipline as every other closed-allow-list decision in this pipeline.
+    """
+    if token.label:
+        return token.label
+    arts = block.stat.requisite_arts
+    if len(arts) != 1:
+        raise designline.UnknownToken(
+            f"{block.name}: a bare requisite token needs exactly one Req: art, "
+            f"found {arts!r}"
+        )
+    return arts[0]
+
+
 def build_spell(
     block,
     base_effect_id: str,
@@ -95,7 +118,8 @@ def build_spell(
     requisites: dict[str, str] = {}
     for token in design.tokens:
         if token.kind == "requisite" and token.label != "free":
-            requisites.setdefault(token.label, "adding" if token.magnitude else "free")
+            art = _resolve_requisite_label(token, block)
+            requisites.setdefault(art, "adding" if token.magnitude else "free")
     for art in block.stat.requisite_arts:
         requisites.setdefault(art, "free")
 
@@ -190,7 +214,8 @@ def build_template(
     requisites: dict[str, str] = {}
     for token in design.tokens:
         if token.kind == "requisite" and token.label != "free":
-            requisites.setdefault(token.label, "adding" if token.magnitude else "free")
+            art = _resolve_requisite_label(token, block)
+            requisites.setdefault(art, "adding" if token.magnitude else "free")
     for art in block.stat.requisite_arts:
         requisites.setdefault(art, "free")
 
@@ -250,7 +275,12 @@ def _handle_magnitude_dependent_modifier(
     Returns True if the token was handled, False otherwise (caller should
     continue checking other modifiers).
     """
-    # Creo Auram "unnatural" modifiers: magnitude determines which option
+    # Creo Auram "unnatural" modifiers: magnitude determines which option.
+    # "highly unnatural" (Wings of the Soaring Wind) is the design lines'
+    # one alternate wording for the magnitude-2 tier the guideline's own
+    # Notes row calls "very unnatural" -- the lookup below is keyed on
+    # magnitude, not label text, so recognising the extra wording here is
+    # enough to route it to the same option.
     if (
         block.technique == "Creo"
         and block.form == "Auram"
@@ -259,6 +289,7 @@ def _handle_magnitude_dependent_modifier(
             "unnatural",
             "slightly unnatural",
             "very unnatural",
+            "highly unnatural",
             "wholly divorced",
         )
     ):
@@ -316,7 +347,7 @@ def _handle_magnitude_dependent_modifier(
         block.form == "Terram"
         and block.technique in ("Muto", "Perdo")
         and token.label.lower()
-        in ("material", "stone", "glass", "metal", "gemstone")
+        in ("material", "stone", "glass", "metal", "gemstone", "metal/gems")
     ):
         modifier_id = f"{block.technique.lower()}-terram-material"
         technique_prefix = block.technique.lower()
@@ -329,9 +360,17 @@ def _handle_magnitude_dependent_modifier(
             (1, "glass"): f"{technique_prefix}-terram-material-stone",
             (2, "metal"): f"{technique_prefix}-terram-material-base-metal",
             (2, "gemstone"): f"{technique_prefix}-terram-material-gemstone",
+            # "metal/gems" (Stone to Falling Dust) names both magnitude-2
+            # options at once, cost-equal, rather than choosing between
+            # them -- not itself in the table above, so it falls through to
+            # the by_magnitude default below like bare "metal" already does.
         }
         option_id = material_options.get((token.magnitude, token.label.lower()))
         if option_id is None:
+            # Also the default for a bare, technique-ambiguous "metal" -- see
+            # this function's docstring. Level correctness never depends on
+            # the choice (every magnitude-2 option costs the same); this only
+            # picks which one gets displayed.
             by_magnitude = {
                 0: f"{technique_prefix}-terram-material-dirt",
                 1: f"{technique_prefix}-terram-material-stone",
@@ -351,8 +390,31 @@ def _handle_magnitude_dependent_modifier(
         selected.setdefault(modifier_id, []).append(option_id)
         return True
 
+    # Rego Ignem fire-intensity ward: how much fire damage the ward stops.
+    # Ward against Heat and Flames is the only corpus spell that prints this
+    # shape ("+2 for up to +15 damage"); the exact magnitude/threshold pair
+    # already matches rego-ignem-fire-intensity-15 (magnitude 2) in
+    # modifiers.json -- that modifier's scope already includes reig-4 (this
+    # spell's sole base-4 candidate), it was simply never wired to this
+    # phrasing. A closed check on the exact printed text, not a general
+    # "for up to +N damage" parser: only one spell needs this today.
+    if (
+        block.technique == "Rego"
+        and block.form == "Ignem"
+        and token.label.lower() == "for up to +15 damage"
+    ):
+        modifier_id = "rego-ignem-fire-intensity"
+        option_id = f"{modifier_id}-15"
+        if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
+            raise designline.UnknownToken(
+                f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                f"{option_id!r} at magnitude {token.magnitude}"
+            )
+        selected.setdefault(modifier_id, []).append(option_id)
+        return True
+
     # Rego transport distance: magnitude ladder for moving things at distance
-    # Applies to base effects: rehe-10b, reig-3c, rete-4, reaq-5, rean-5
+    # Applies to base effects: rehe-10b, reig-3c, rete-4, rean-10b, reaq-4b
     if (
         block.technique == "Rego"
         and token.label.lower()
@@ -361,12 +423,12 @@ def _handle_magnitude_dependent_modifier(
     ):
         modifier_id = "rego-transport-distance"
         distance_options = {
-            "5 paces": "rego-transport-distance-5-paces",
-            "50 paces": "rego-transport-distance-50-paces",
-            "500 paces": "rego-transport-distance-500-paces",
-            "1 league": "rego-transport-distance-1-league",
-            "7 leagues": "rego-transport-distance-7-leagues",
-            "arcane connection": "rego-transport-distance-arcane",
+            "5 paces": "rego-distance-5-paces",
+            "50 paces": "rego-distance-50-paces",
+            "500 paces": "rego-distance-500-paces",
+            "1 league": "rego-distance-1-league",
+            "7 leagues": "rego-distance-7-leagues",
+            "arcane connection": "rego-distance-arcane",
         }
         option_id = distance_options.get(token.label.lower())
         if option_id is None:

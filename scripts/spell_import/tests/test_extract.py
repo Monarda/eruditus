@@ -142,7 +142,13 @@ GENERAL_BLOCKED = {
     "Aegis of the Hearth": "no design line; a Major Breakthrough outside the guidelines",
     "Wizard's Vigil": "no design line",
     "Sight of the True Form": "no design line",
-    "Ward against Faeries of the Mountain": "no design line; a prose cross-reference to another spell",
+    # Ward against Faeries of the Mountain: WAS here ("no design line; a prose
+    # cross-reference to another spell") until 2026-08-15, when that same
+    # cross-reference ("As Ward Against Faeries of the Waters (ReAq Gen)...")
+    # turned out to be a complete specification, not just a description --
+    # see extract_spells.HAND_DERIVED's comment. It now imports as a
+    # template. This is exactly the staleness this test class exists to
+    # catch, and it caught it.
     "Dispel the Phantom Image": "no Perdo Imaginem General row in the rulebook",
     "Lay to Rest the Haunting Spirit": "no Perdo Mentem General row in the rulebook",
     "Watching Ward": "design line token 'Duration is non-standard' — todo item 26",

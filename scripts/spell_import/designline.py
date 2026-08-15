@@ -33,6 +33,27 @@ _FREE_REQUISITE = re.compile(
     re.IGNORECASE,
 )
 
+# A couple of design lines cost a requisite's magnitude in prose that names
+# the Req: art but not in _REQUISITE's "<Art> requisite(s)" shape -- a
+# trailing justification after the art name (Obliteration of the Metallic
+# Barrier: "Rego to fling the fragments away") or the art name buried
+# mid-phrase (Phantasmal Fire: "for light from Ignem requisite"). A closed
+# allow-list on purpose, the same discipline as ADJUSTMENT_LABELS: a loose
+# "contains an Art name" match would misread ordinary prose that happens to
+# mention an Art in passing as a requisite cost.
+REQUISITE_LABEL_ARTS: dict[str, str] = {
+    "Rego to fling the fragments away": "Rego",
+    "for light from Ignem requisite": "Ignem",
+}
+
+# A design line that restates no art at all -- "+1 requisite" (The Eye of
+# the Sage) -- because the Req: line already names it. This module sees only
+# the design-line text, never the Req: line, so it cannot resolve which art
+# the magnitude belongs to; it records an empty label and leaves the
+# resolution to emit.py, which has the stat line and can safely resolve a
+# bare requisite only when the spell declares exactly one.
+_BARE_REQUISITE = re.compile(r"^requisites?$")
+
 # Range, Duration and Target names as the design lines spell them, mapped to
 # the `name` field in assets/data/parameters.json.
 PARAMETER_LABELS = {
@@ -59,7 +80,21 @@ PARAMETER_LABELS = {
 # resolved to a modifier option in catalog.py, not here.
 MODIFIER_LABELS = {
     "size", "Size", "unnatural", "stone", "metal",
+    # Ward against Heat and Flames (Rego Ignem) -- see emit.py's
+    # rego-ignem-fire-intensity handling for the mapping.
+    "for up to +15 damage",
+    # "metal/gems" (Stone to Falling Dust, Perdo Terram) is the design lines'
+    # combined phrasing for perdo-terram-material's two magnitude-2 options,
+    # Base metal and Gemstone -- the spell costs +2 either way, which is why
+    # the rulebook didn't bother distinguishing them. See emit.py's Terram
+    # material handling for which option this resolves to and why.
+    "metal/gems",
     "changing image", "intricacy", "complexity",
+    # Creo Auram's own guideline table (Definitive Edition, Creo Auram
+    # Guidelines, Notes row) spells the same +2 tier "very unnatural";
+    # "highly unnatural" (Wings of the Soaring Wind) is the one design line
+    # that uses the alternate wording. See emit.py's unnatural-label handling.
+    "highly unnatural",
     # Creo Imaginem complexity factors (assets/data/modifiers.json id
     # "crim-complexity"): "move at/under your command" is the design lines'
     # phrasing of crim-directed-image ("Image moves ... at your direction as
@@ -177,6 +212,68 @@ ADJUSTMENT_LABELS = frozenset({
     "for a very elaborate effect",
 })
 
+# A handful of design lines tack on a bare explanatory clause after a costed
+# token -- no leading sign, no magnitude of its own -- continuing what the
+# previous token already paid for rather than declaring a new mechanism:
+# "+1 additional effect, changing the water to ice" (Ice of Drowning), "+1
+# Conc, mist is a purely cosmetic effect and thus is free" (Frosty Breath of
+# the Spoken Lie), "+3 size, so that the whole stream floods" (Deluge of
+# Rushing and Dashing). A closed allow-list on purpose, the same discipline as
+# ADJUSTMENT_LABELS/ELABORATE_LABELS: a blanket "any unsigned clause is free"
+# rule would also swallow the ritual-justification clauses ("ritual for large
+# effect", "ritual because of spectacular effect") that print in the same
+# shape on other spells but are not verified to cost nothing -- those must
+# keep blocking their spells rather than silently resolve.
+#
+# Break the Oncoming Wave prints its continuation as three comma-separated
+# clauses, not one -- "+1 Conc, ward, so the target is the warded Individual,
+# not the water" -- each entered separately below, since this tokenizer
+# checks one comma-split segment at a time and has no notion of "the rest of
+# the sentence".
+TRAILING_CONTINUATION_LABELS = frozenset({
+    "changing the water to ice",
+    "mist is a purely cosmetic effect and thus is free",
+    "so that the whole stream floods",
+    "ward",
+    "so the target is the warded Individual",
+    "not the water",
+})
+
+_BARE_MAGNITUDE = re.compile(r"^(?P<sign>[+-])\s*(?P<magnitude>\d+)$")
+
+
+def _merge_comma_split_magnitudes(
+    parts: list[tuple[str, str]],
+) -> list[tuple[str, str]]:
+    """Rejoin a magnitude that `_split_parts` separated from its own label.
+
+    "+2, highly unnatural, +1 Rego requisite" (Wings of the Soaring Wind)
+    prints a comma between the magnitude and the label it belongs to, where
+    every other design line in the corpus uses a space. `_split_parts`
+    correctly treats that comma as a top-level boundary, producing a bare
+    "+2" that can never match `_TOKEN` on its own (it requires a label) and a
+    label-only "highly unnatural" that can never match it either (it requires
+    a sign). Neither shape can otherwise succeed, so merging an unlabelled
+    magnitude with the very next part -- when that part carries no sign of
+    its own -- can never turn a token that should fail into one that wrongly
+    succeeds; it only lets this punctuation quirk reach the same
+    label-recognition check every other token goes through.
+    """
+    merged: list[tuple[str, str]] = []
+    index = 0
+    while index < len(parts):
+        raw, stripped = parts[index]
+        has_next = index + 1 < len(parts)
+        if has_next and _BARE_MAGNITUDE.match(stripped):
+            next_raw, next_stripped = parts[index + 1]
+            if next_stripped[:1] not in "+-":
+                merged.append((f"{raw} {next_raw}", f"{stripped} {next_stripped}"))
+                index += 2
+                continue
+        merged.append((raw, stripped))
+        index += 1
+    return merged
+
 
 def _split_parts(text: str) -> list[tuple[str, str]]:
     """Split on top-level commas and periods, keeping raw and stripped forms.
@@ -241,13 +338,17 @@ def parse_design(text: str) -> Design:
         raise UnknownToken(f"unrecognised base term {head!r} in {text!r}")
 
     tokens: list[Token] = []
-    for raw, part in parts[1:]:
+    for raw, part in _merge_comma_split_magnitudes(parts[1:]):
         if _FREE_REQUISITE.match(part):
             tokens.append(Token(magnitude=0, label="free", kind="requisite"))
             continue
 
         token_match = _TOKEN.match(part)
         if not token_match:
+            if part in TRAILING_CONTINUATION_LABELS and tokens:
+                # No magnitude of its own -- it continues whatever token
+                # came before it, so it contributes nothing further.
+                continue
             raise UnknownToken(f"unrecognised token {part!r} in {text!r}")
 
         magnitude = int(token_match.group("magnitude"))
@@ -274,6 +375,10 @@ def parse_design(text: str) -> Design:
         requisite_match = _REQUISITE.match(label) or _REQUISITE_EFFECT.match(label)
         if requisite_match:
             tokens.append(Token(magnitude, requisite_match.group("art"), "requisite"))
+        elif label in REQUISITE_LABEL_ARTS:
+            tokens.append(Token(magnitude, REQUISITE_LABEL_ARTS[label], "requisite"))
+        elif _BARE_REQUISITE.match(label):
+            tokens.append(Token(magnitude, "", "requisite"))
         elif label in PARAMETER_LABELS:
             tokens.append(Token(magnitude, PARAMETER_LABELS[label], "parameter"))
         elif label in MODIFIER_LABELS:
