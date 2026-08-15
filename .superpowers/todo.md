@@ -219,36 +219,63 @@ correctness resting elsewhere.
 
 ## A. Blocks the Library Import
 
-### 28. Guideline Levels Absent from the Rulebook's Own Table
+### 28. Guideline Levels Absent from the Rulebook's Own Table — ✅ DONE 2026-08-15
 
-- [ ] Decide how to handle spells citing a base-effect level the table does not
-      list, but which is **recoverable from documented prose rules**
+**Correction to the original framing below: not all 5 turned out recoverable.**
+4 of 5 were derived from documented prose rules and now import; the 5th
+(*Sense of the Lingering Magic*) was investigated and found **genuinely not
+derivable** from InVi's numbered table or General row without an unstated
+combination rule — it stays blocked, now with a specific reason instead of the
+generic "no base effect" message. Design/plan:
+`docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md`,
+`docs/superpowers/plans/2026-08-15-guideline-level-derivation.md`.
 
-**5 published spells.** All recoverable; none genuinely missing:
-
-- *Infernal Smoke of Death* (MuAu 40) — MuAu General "Transform air into a gas
-  doing +**level** damage" at +25 damage; base = 25
-- *Fog of Confusion* (MuAu 45) — MuAu base 3 plus the Muto Auram prose rule
-  "Transforming only one property of air generally lowers the level by one
-  magnitude"; base = 3 − 1 = 2
-- *Wizard's Icy Grip* (PeIg 30) — Perdo Ignem damage-scaling rule (prose above the
-  table); base derived from +20 damage
-- *The Enigma's Gift* (CrVi 30) — base 20 (prose rule TBD)
-- *Sense of the Lingering Magic* (InVi 30) — base 10 (prose rule TBD)
-
-**Options:**
-1. Add the 5 derived rows to the catalog with notes recording their prose rules
-   (simplest and most maintainable; the catalog is already extracted, not printed,
-   data)
-2. Model the prose rules in the modifier system (generalises; needs real design)
-3. Let item 24's ad-hoc adjustments absorb the difference from the nearest printed
-   rung (works, but less transparent about the rule)
-
-Options 1 and 3 unblock all 5; option 2 also documents the rules for reuse.
-
-**This is not item 22.** Item 22 is rows genuinely absent from the Definitive
-Edition. These 5 are derivable from stated prose. These are exactly the 5 "zero
-base-effect candidates" spells the harness reports.
+- [x] Chose **option 2** (model the prose rules in the modifier system), not
+      option 1 (derived catalog rows) or option 3 (ad-hoc adjustments) — the CrVi
+      Warping Point and PeIg chill-damage ladders now live as `size-animal`-style
+      `selectionMode: single` modifiers scoped to their base effect
+      (`crvi-5a`/`peig-5b`, collapsing what were separate numbered rows
+      `crvi-10a`/`crvi-15a`/`peig-10b`), and MuAu's single-property discount as a
+      new broadly-scoped modifier (`technique`/`form`, no `effectIds`)
+- [x] Unified what the design first drafted as two separate resolution
+      mechanisms (a ladder-rung table for Group A, a `GENERAL_LEVEL_BY_SPELL_ID`
+      table for Group B) into **one** `NUMBERED_OVERRIDES` table in
+      `extract_spells.py`, once grounding against the real code found both
+      groups hit the identical `catalog.candidates(...)` empty-result path
+- [x] *Infernal Smoke of Death* (MuAu 40) — MuAu General "+**level** damage" at
+      +25 damage; base = 25. First library spell built on a General guideline
+      with a baked-in `chosenBaseLevel` rather than routed to an open template —
+      surfaced two latent Dart test-oracle gaps (`asset_data_loader_test.dart`,
+      `published_spell_import_test.dart`) that had never seen this case before
+- [x] *Fog of Confusion* (MuAu 45) — MuAu base 3 minus the Muto Auram prose rule
+      "Transforming only one property of air generally lowers the level by one
+      magnitude"; base = 3 − 1 = 2
+- [x] *Wizard's Icy Grip* (PeIg 30, not 25 as first guessed while writing the
+      plan — corrected against the rulebook's own `#### LEVEL 30` heading) —
+      Perdo Ignem's "every 5 points the damage exceeds +5 adds one magnitude"
+      rule; the chill-damage ladder's 4th rung (+20 damage)
+- [x] *The Enigma's Gift* (CrVi 30) — the Warping Point ladder's 4th rung (the
+      spell's own prose says "four Warping Points"); base 20 (ladder prints
+      5/10/15 for 1/2/3 points, refactored into one row + a 4-rung modifier)
+- [x] *Sense of the Lingering Magic* (InVi 30) — **left blocked, deliberately**:
+      base 10 does not derive from InVi's numbered table (tops at 5) or its
+      General row without an unstated combination rule. A negative-magnitude
+      safety concern was raised for the ladders during design and closed with
+      zero new code — `SpellEngine.calculateBreakdown` already throws below
+      level 1 regardless of contribution source (verified by reading the code,
+      not assumed)
+- **What was caught in review.** Task 1's per-task review found deleting
+  `peig-10b` would have silently dropped a real corpus spell ("Soothe the
+  Raging Flames") on regeneration — its ledger entry in `resolutions.json`
+  still recorded the now-deleted row as a candidate. The final whole-branch
+  review added a lasting guard against a similar future drift: a test
+  asserting the ledger and `NUMBERED_OVERRIDES` never silently disagree.
+- **This was not item 22.** Item 22 is rows genuinely absent from the
+  Definitive Edition. 4 of these 5 turned out derivable from stated prose; the
+  investigation is what settled which one wasn't.
+- **Files:** `assets/data/base_effects.json`, `assets/data/modifiers.json`,
+  `scripts/spell_import/emit.py`, `scripts/spell_import/extract_spells.py`,
+  `scripts/spell_import/resolutions.json`, `assets/data/spell_library.json`
 
 ### 39. Ambiguous Ledger Resolutions Needing a Rules Decision
 
