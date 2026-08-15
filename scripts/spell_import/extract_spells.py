@@ -384,12 +384,19 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
     proposals: dict[str, dict] = {}
 
     for block in parsed:
-        # HAND_DERIVED checked first, not as a fallback: two of its entries
-        # (Hermes' Portal) have a real but non-numeric printed line
-        # ("(Mercurian Ritual)") that would otherwise win the `or` and never
-        # let the derived text through. For every other spell -- i.e. not a
-        # HAND_DERIVED key at all -- this is a no-op, `.get()` returns None
-        # and the real printed line is used exactly as before.
+        # HAND_DERIVED is checked before block.design_line, not as a
+        # fallback to it. This is defensive, not load-bearing today: all
+        # three current entries actually have block.design_line is None --
+        # e.g. Hermes' Portal's printed "(Mercurian Ritual)" doesn't match
+        # blocks.py's `_DESIGN` regex, so it lands in block.prose, not
+        # block.design_line -- and `None or X == X`, so the old
+        # `block.design_line or HAND_DERIVED.get(...)` ordering would have
+        # worked identically for all three. The reorder guards against a
+        # *future* HAND_DERIVED entry for a spell whose printed line is real
+        # but wrong (e.g. a stat-block typo) -- for that case, checking the
+        # derived value first is the right call. For every spell that is not
+        # a HAND_DERIVED key at all, this is a no-op either way: `.get()`
+        # returns None and the real printed line is used exactly as before.
         design_text = HAND_DERIVED.get(block.name) or block.design_line
         if design_text is None:
             blocked.append((block.name, "no design line printed"))
