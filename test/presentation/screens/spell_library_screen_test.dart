@@ -13,8 +13,10 @@ import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
@@ -98,6 +100,22 @@ void main() {
       duration: durationParam,
       target: targetParam,
     );
+  }
+
+  ResolvedException buildException(String id, String name) {
+    final record = ExceptionSpell(
+      id: id,
+      name: name,
+      technique: 'Muto',
+      form: 'Vim',
+      range: 'Voice',
+      duration: 'Mom',
+      target: 'Group',
+      description: 'A test exception.',
+      rationale: 'Test rationale.',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    return ResolvedException(record: record);
   }
 
   setUpAll(() {
@@ -277,6 +295,54 @@ void main() {
       );
 
       expect(find.text('General spells — learn at any level'), findsNothing);
+    });
+  });
+
+  group('Exceptions section', () {
+    testWidgets('renders exceptions below the spells, under a heading', (tester) async {
+      final template = buildTemplate('tpl-1', 'Ward against Faeries of the Waters');
+      final exception = buildException('exc-1', "Wizard's Communion");
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(
+          status: SpellLibraryStatus.loaded,
+          allSpells: [builtInSpell],
+          templates: [template],
+          exceptions: [exception],
+        ),
+      );
+
+      expect(find.text('Exceptions — recorded from the rulebook directly, not derived from the guidelines'),
+          findsOneWidget);
+      expect(find.text("Wizard's Communion"), findsOneWidget);
+      expect(find.byKey(const Key('exception-chip')), findsOneWidget);
+
+      final spellY = tester.getTopLeft(find.text('Phantasm of the Talking Head')).dy;
+      final exceptionY = tester.getTopLeft(find.text("Wizard's Communion")).dy;
+      expect(spellY, lessThan(exceptionY));
+    });
+
+    testWidgets('an exception card offers no instantiation action', (tester) async {
+      final exception = buildException('exc-1', "Wizard's Communion");
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(status: SpellLibraryStatus.loaded, exceptions: [exception]),
+      );
+
+      expect(find.text('Learn at level…'), findsNothing);
+      expect(find.byKey(const Key('general-chip')), findsNothing);
+    });
+
+    testWidgets('a state with no exceptions renders no heading and no empty section',
+        (tester) async {
+      await pumpScreenWithCreationBloc(
+        tester,
+        SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell]),
+      );
+
+      expect(
+          find.text('Exceptions — recorded from the rulebook directly, not derived from the guidelines'),
+          findsNothing);
     });
   });
 }

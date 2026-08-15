@@ -6,6 +6,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
@@ -93,6 +94,21 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                           level: state.spellLevels[s.id],
                           isRitual: state.ritualSpellIds.contains(s.id),
                         )),
+                    // Exceptions get their own section below the leveled
+                    // spells, the same reasoning as the Templates section
+                    // above them: these six are curiosities the rulebook
+                    // itself says don't follow guideline design, not the
+                    // primary actionable content this screen exists for.
+                    // Omitted entirely when empty, matching the Templates
+                    // section's own convention.
+                    if (state.visibleExceptions.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text(
+                            'Exceptions — recorded from the rulebook directly, not derived from the guidelines'),
+                      ),
+                      ...state.visibleExceptions.map((e) => _ExceptionCard(entry: e)),
+                    ],
                   ],
                 ),
               ),
@@ -142,5 +158,21 @@ class _TemplateCard extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+/// One exception spell's card. No `isGeneral` chip and no action — an
+/// exception spell is never instantiable, whether or not it happens to
+/// print a level (SpellCard already renders a null [level] as plain
+/// "Technique Form" with no level suffix, so the four General-kind
+/// exceptions need no special-casing here).
+class _ExceptionCard extends StatelessWidget {
+  final ResolvedException entry;
+
+  const _ExceptionCard({required this.entry});
+
+  @override
+  Widget build(BuildContext context) {
+    return SpellCard(entry: entry, level: entry.printedLevel, isException: true);
   }
 }
