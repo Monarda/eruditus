@@ -1,5 +1,33 @@
 [
   {
+    "id": "lib-cran-curse-ravenous-swarm",
+    "name": "Curse of the Ravenous Swarm",
+    "requisites": {
+      "Rego": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-animal": [
+        "size-animal-2"
+      ]
+    },
+    "baseEffectId": "cran-5b",
+    "rangeId": "range-touch",
+    "durationId": "duration-moon",
+    "targetId": "target-group",
+    "summary": "Calls a swarm of locusts or other destructive insects upon an area, which destroys wild plant life and fields. When the spell's duration ends, all the insects disappear, leaving nothing but the damage. The Rego requisite ensures that the insects only devastate the area desired by the caster. Level 50.",
+    "description": "Calls a swarm of locusts or other destructive insects upon an area, which destroys wild plant life and fields. When the spell's duration ends, all the insects disappear, leaving nothing but the damage. The Rego requisite ensures that the insects only devastate the area desired by the caster.",
+    "printedLevel": 50,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-cran-soothe-pains-beast",
     "name": "Soothe Pains of the Beast",
     "requisites": {},
@@ -200,6 +228,35 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "lib-crau-breath-open-sky",
+    "name": "Breath of the Open Sky",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-auram": [
+        "size-auram-4"
+      ],
+      "creo-auram-unnatural": [
+        "creo-auram-unnatural-slight"
+      ]
+    },
+    "baseEffectId": "crau-5",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "You can call up a wind capable of devastating the countryside. You must stand under the open sky to cast this spell. While you cast the spell, a breeze picks up, blowing from you in the direction you are facing. When the ritual is completed, the wind strengthens to a gale roaring over the visible countryside and beyond, strong enough to topple wooden structures and knock down trees. The wind do... Level 40.",
+    "description": "You can call up a wind capable of devastating the countryside. You must stand under the open sky to cast this spell. While you cast the spell, a breeze picks up, blowing from you in the direction you are facing. When the ritual is completed, the wind strengthens to a gale roaring over the visible countryside and beyond, strong enough to topple wooden structures and knock down trees. The wind does not weaken while it is within your sight, but loses its force naturally where you cannot see it. If you turn away from your original facing for more than a few seconds, you have to make a Concentration roll against an Ease Factor of 12 to maintain the spell. If you turn away for a minute or more, the spell ends. The air behind you is still.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
   },
   {
     "id": "lib-crau-broom-winds",
@@ -876,6 +933,27 @@
     "summary": "A dozen multi-hued ribbons of flame leap from your hands and fly out as far as your voice carries, covering a 60-degree arc. All those in the arc take +10 damage. Level 25.",
     "description": "A dozen multi-hued ribbons of flame leap from your hands and fly out as far as your voice carries, covering a 60-degree arc. All those in the arc take +10 damage.",
     "printedLevel": 25,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crig-ball-abysmal-flame",
+    "name": "Ball of Abysmal Flame",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crig-25a",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "A ball of flame shoots from your hand to strike a single target, doing +30 damage. Marius of Tremere's version of the spell causes the ball to make a loud bang when it hits the target. His sigil is a gaudiness in his spells. Level 35.",
+    "description": "A ball of flame shoots from your hand to strike a single target, doing +30 damage. Marius of Tremere's version of the spell causes the ball to make a loud bang when it hits the target. His sigil is a gaudiness in his spells.",
+    "printedLevel": 35,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -5562,6 +5640,32 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "lib-reaq-neptunes-wrath",
+    "name": "Neptune's Wrath",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-aquam": [
+        "size-aquam-3"
+      ]
+    },
+    "baseEffectId": "reaq-10",
+    "rangeId": "range-sight",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "A gigantic wave is created in a very large body of water. The wave, which is only 20 feet high but up to a mile wide, is capable of capsizing ships at sea, smashing and drowning people near shore, and seriously damaging coastline communities. The tidal wave needs 5 miles of water surface to build itself up to proper proportions. The magus cannot control the wave without casting another spell. Level 40.",
+    "description": "A gigantic wave is created in a very large body of water. The wave, which is only 20 feet high but up to a mile wide, is capable of capsizing ships at sea, smashing and drowning people near shore, and seriously damaging coastline communities. The tidal wave needs 5 miles of water surface to build itself up to proper proportions. The magus cannot control the wave without casting another spell.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
   },
   {
     "id": "lib-reaq-parting-waves",

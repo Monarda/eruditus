@@ -46,13 +46,21 @@ REQUISITE_LABEL_ARTS: dict[str, str] = {
     "for light from Ignem requisite": "Ignem",
 }
 
-# A design line that restates no art at all -- "+1 requisite" (The Eye of
-# the Sage) -- because the Req: line already names it. This module sees only
-# the design-line text, never the Req: line, so it cannot resolve which art
-# the magnitude belongs to; it records an empty label and leaves the
-# resolution to emit.py, which has the stat line and can safely resolve a
-# bare requisite only when the spell declares exactly one.
-_BARE_REQUISITE = re.compile(r"^requisites?$")
+# Design lines that restate no art at all -- "+1 requisite" (The Eye of the
+# Sage), "+1 extra effect from requisite" (Curse of the Ravenous Swarm) --
+# because the Req: line already names it. This module sees only the
+# design-line text, never the Req: line, so it cannot resolve which art the
+# magnitude belongs to; it records an empty label and leaves the resolution
+# to emit.py, which has the stat line and can safely resolve a bare
+# requisite only when the spell declares exactly one. A closed set rather
+# than a looser pattern, same discipline as REQUISITE_LABEL_ARTS: "extra
+# effect from requisite" is a verified corpus wording, not a guess at a
+# general "mentions requisite" shape.
+_BARE_REQUISITE_LABELS = frozenset({
+    "requisite",
+    "requisites",
+    "extra effect from requisite",
+})
 
 # Range, Duration and Target names as the design lines spell them, mapped to
 # the `name` field in assets/data/parameters.json.
@@ -220,16 +228,33 @@ ADJUSTMENT_LABELS = frozenset({
 # the Spoken Lie), "+3 size, so that the whole stream floods" (Deluge of
 # Rushing and Dashing). A closed allow-list on purpose, the same discipline as
 # ADJUSTMENT_LABELS/ELABORATE_LABELS: a blanket "any unsigned clause is free"
-# rule would also swallow the ritual-justification clauses ("ritual for large
-# effect", "ritual because of spectacular effect") that print in the same
-# shape on other spells but are not verified to cost nothing -- those must
-# keep blocking their spells rather than silently resolve.
+# rule would silently absorb an unverified, genuinely-costed mechanism worded
+# the same way -- each entry here is checked against its own spell's printed
+# level before being added, same as every other allow-list in this module.
 #
 # Break the Oncoming Wave prints its continuation as three comma-separated
 # clauses, not one -- "+1 Conc, ward, so the target is the warded Individual,
 # not the water" -- each entered separately below, since this tokenizer
 # checks one comma-split segment at a time and has no notion of "the rest of
 # the sentence".
+#
+# Ball of Abysmal Flame's continuation follows a semicolon rather than a
+# comma ("+2 Voice; the ball appearing to shoot from your hand is a cosmetic
+# effect") -- `_split_parts` treats `;` as an equivalent top-level boundary
+# (see its docstring), so by the time this allow-list is checked the clause
+# is just another unsigned, no-label part like the others here.
+#
+# Three ritual-justification clauses (item 18): "ritual because it has a
+# really major effect" (Curse of the Ravenous Swarm), "ritual for large
+# effect" (Neptune's Wrath), "ritual because of spectacular effect" (Breath
+# of the Open Sky). Each is the storyguide's stated reason the spell is a
+# Ritual, printed with no number of its own; nothing in extract_spells.py
+# gates on Ritual correctness (see item 18), and each spell's `Ritual` marker
+# in its own stat line -- not this clause -- is what the importer reads for
+# that. Curse of the Ravenous Swarm's design line also carries its own
+# swarm-size clause upstream of the ritual one, "for a swarm weighing as much
+# as one thousand pigs" -- likewise no magnitude of its own, continuing the
+# "+2 size" token just before it.
 TRAILING_CONTINUATION_LABELS = frozenset({
     "changing the water to ice",
     "mist is a purely cosmetic effect and thus is free",
@@ -237,6 +262,11 @@ TRAILING_CONTINUATION_LABELS = frozenset({
     "ward",
     "so the target is the warded Individual",
     "not the water",
+    "the ball appearing to shoot from your hand is a cosmetic effect",
+    "for a swarm weighing as much as one thousand pigs",
+    "ritual because it has a really major effect",
+    "ritual for large effect",
+    "ritual because of spectacular effect",
 })
 
 _BARE_MAGNITUDE = re.compile(r"^(?P<sign>[+-])\s*(?P<magnitude>\d+)$")
@@ -276,13 +306,25 @@ def _merge_comma_split_magnitudes(
 
 
 def _split_parts(text: str) -> list[tuple[str, str]]:
-    """Split on top-level commas and periods, keeping raw and stripped forms.
+    """Split on top-level commas, periods and semicolons, keeping raw and
+    stripped forms.
 
     Parentheticals must survive splitting for two reasons: a bracketed aside
     can itself contain a comma ("+1 Size (for a total of +4 Size, including
     ...)"), which the old blanket strip-then-split turned into two bogus
     tokens; and for adjustment tokens the aside IS the content -- "+2 Special
     (based on Concentration)" carries all its meaning in the bracket.
+
+    Semicolon joins `,`/`.` as a boundary character for the same reason: one
+    design line in the whole corpus uses it as the magnitude/prose separator
+    where every other spell uses a comma -- "(Base 25, +2 Voice; the ball
+    appearing to shoot from your hand is a cosmetic effect)" (Ball of
+    Abysmal Flame). Checked against every design line in Chapter 9: it is the
+    only one containing a semicolon at all, so there is no other corpus usage
+    this split could misinterpret. (The rulebook's `**Range: X; Duration:
+    Y;**`-style guideline headers also use `;`, but those never reach
+    `_split_parts` -- it parses only text captured by blocks.py's `_DESIGN`
+    line match, not the guideline preamble.)
 
     Returns (raw, stripped) pairs. Tokenising reads `stripped`; adjustment
     notes read `raw`.
@@ -297,7 +339,7 @@ def _split_parts(text: str) -> list[tuple[str, str]]:
         elif char == ")":
             depth = max(0, depth - 1)
 
-        at_boundary = char in ",." and depth == 0 and (
+        at_boundary = char in ",.;" and depth == 0 and (
             index + 1 >= len(text) or text[index + 1].isspace()
         )
         if at_boundary:
@@ -377,7 +419,7 @@ def parse_design(text: str) -> Design:
             tokens.append(Token(magnitude, requisite_match.group("art"), "requisite"))
         elif label in REQUISITE_LABEL_ARTS:
             tokens.append(Token(magnitude, REQUISITE_LABEL_ARTS[label], "requisite"))
-        elif _BARE_REQUISITE.match(label):
+        elif label in _BARE_REQUISITE_LABELS:
             tokens.append(Token(magnitude, "", "requisite"))
         elif label in PARAMETER_LABELS:
             tokens.append(Token(magnitude, PARAMETER_LABELS[label], "parameter"))

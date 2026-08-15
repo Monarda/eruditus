@@ -1838,5 +1838,13 @@
       "mute-3c"
     ],
     "rationale": "'Transforms a stone into a 10-inch crystal dart' is a solid-to-solid change within the earth/mineral family -- the only one of the level-3 guidelines built for that axis at all. Not mute-3a (slightly unnatural dirt: a state-of-being change, not a change of material) or mute-3b (dirt into liquid or gas: wrong state of matter entirely, and this dart is solid). The design line's own material-adjustment note ('to change to or from stone or glass, add one magnitude; to change to or from metal or gemstone, add two magnitudes') has no such extra magnitude in the design line (Base 3, +2 Voice, +1 Rego requisite sums to exactly the printed level 10 with nothing to spare) -- so the transformation must be one the guideline already prices at base 3 without surcharge, which is mute-3c's own named 'dirt to stone, or vice versa' pair. The Rego requisite is for the dart's flight and strike (Req: Rego, matching 'floats into the air, and speeds off like an arrow'), not for the material change, so it does not bear on this choice."
+  },
+  "lib-crig-ball-abysmal-flame": {
+    "baseEffectId": "crig-25a",
+    "candidates": [
+      "crig-25a",
+      "crig-25b"
+    ],
+    "rationale": "New ambiguity surfaced by item 29's semicolon fix (the design line was previously unparseable). The spell's own text states the effect in the guideline's own words: 'A ball of flame shoots from your hand to strike a single target, doing +30 damage' matches crig-25a ('Create a fire doing +30 damage') on the exact damage figure. crig-25b ('Create a fire elemental from a base amount of elemental matter') is a different effect entirely -- an elemental, not a damaging bolt -- and is independently ruled out: its own catalog entry is Ritual-only (ritualRequirement: required), but Ball of Abysmal Flame's stat line (R: Voice, D: Mom, T: Ind) carries no Ritual marker at all. Both the description and the Ritual constraint force crig-25a; nothing about the spell supports crig-25b."
   }
 }

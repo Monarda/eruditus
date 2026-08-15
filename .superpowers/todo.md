@@ -26,24 +26,26 @@ in the spell library, with its computed level matching its printed level.
 
 Last extractor run, 2026-08-15 (`python -m scripts.spell_import.extract_spells`):
 
-> **311 imported · 24 emitted as templates · 25 blocked · 0 unresolved**
+> **315 imported · 24 emitted as templates · 21 blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
 **Verified against a live `--show-blocked` run, not carried forward by
 arithmetic** — the table below was re-derived spell-by-spell against that
-output, after five rounds of 2026-08-15 fixes: item 28's Group A/B guideline
-derivations; item 29's splitter fixes (5 spells: *Wings of the Soaring Wind*,
+output, after seven rounds of 2026-08-15 fixes: item 28's Group A/B guideline
+derivations; item 29's splitter fixes (6 spells: *Wings of the Soaring Wind*,
 *Stone to Falling Dust*, *Deluge of Rushing and Dashing*, *Ice of Drowning*,
-*Frosty Breath of the Spoken Lie*); *Ward against Faeries of the Mountain*
-(its own text names both its guideline and its realm via a cross-reference to
-*Ward against Faeries of the Waters* — see item 27's correction); item 44
-plus two more verified-low-risk fixes done alongside it (5 spells:
-*Obliteration of the Metallic Barrier*, *Phantasmal Fire*, *The Eye of the
-Sage*, *Ward against Heat and Flames*, *Break the Oncoming Wave* — see items
-44, 4b, 4); and item 39's close reading (3 of 4 spells: *Tracks of the Faerie
-Glow*, *Sense the Feet that Thread the Earth*, *The Crystal Dart*). Every one
-of the 25 currently-blocked spells now maps to exactly one row below; none
-are unaccounted for.
+*Frosty Breath of the Spoken Lie*, *Ball of Abysmal Flame*); *Ward against
+Faeries of the Mountain* (its own text names both its guideline and its
+realm via a cross-reference to *Ward against Faeries of the Waters* — see
+item 27's correction); item 44 plus two more verified-low-risk fixes done
+alongside it (5 spells: *Obliteration of the Metallic Barrier*, *Phantasmal
+Fire*, *The Eye of the Sage*, *Ward against Heat and Flames*, *Break the
+Oncoming Wave* — see items 44, 4b, 4); item 39's close reading (3 of 4
+spells: *Tracks of the Faerie Glow*, *Sense the Feet that Thread the Earth*,
+*The Crystal Dart*); and item 18's three ritual-justification clauses (3
+spells: *Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open
+Sky*). Every one of the 21 currently-blocked spells now maps to exactly one
+row below; none are unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
@@ -54,12 +56,12 @@ are unaccounted for.
 | General-level, each blocked for an unrelated reason | 8 | see item **25** (was stated as 10 including *Watching Ward*, counted under item 26 above instead, and *Ward against Faeries of the Mountain*, unblocked 2026-08-15 — same starting 10 spells, no double-count) |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
 | No printed design line and no legitimate derivation | 2 | permanent — see item **27** |
-| `_split_parts`/`_TOKEN` punctuation edge cases | 1 | see item **29** — corrected from an unlisted family: was 5 (semicolon, unbalanced brackets, and 3 more punctuation shapes) until 2026-08-15 fixed 4 of them; *Ball of Abysmal Flame*'s semicolon case remains |
+| `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets is a different bug in the same function (item 26's family above), deliberately untouched by this fix |
 | Non-standard requisite-magnitude phrasing | 0 | **44** — done 2026-08-15, all 3 import |
-| Ritual-justification clause not yet allow-listed | 3 | **18**'s "7 non-derivable Ritual spells" claims these 3 already import; they do not — see item 18's correction |
+| Ritual-justification clause not yet allow-listed | 0 | **18** — corrected from 3: all 3 (*Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open Sky*) now allow-listed and import, done 2026-08-15 |
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 
-**Table total: 25, reconciled to the live count.** The previous version of this
+**Table total: 21, reconciled to the live count.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
 
@@ -445,14 +447,31 @@ time; what remains needs design judgement or more time.
       the impossible; the decision — implement the override, or drop the promise
       from the spec — is open.
 - [ ] **Fix `designline._split_parts` for both malformed design lines in one pass.**
-      - *Ball of Abysmal Flame* prints `(Base 25, +2 Voice; the ball appearing to
-        shoot from your hand is a cosmetic effect)` — a semicolon where every other
-        spell uses a comma, so the magnitude is never separated from the trailing
-        prose and the whole thing fails `_TOKEN`. Splitting on `;` at depth 0
-        alongside `,` and `.` is the obvious fix; **check the corpus for a `;` that
-        is not a token boundary before making it unconditional.** **Still open.**
+      - **✅ DONE 2026-08-15 — the semicolon case.** *Ball of Abysmal Flame* prints
+        `(Base 25, +2 Voice; the ball appearing to shoot from your hand is a
+        cosmetic effect)` — a semicolon where every other spell uses a comma, so
+        the magnitude was never separated from the trailing prose and the whole
+        thing failed `_TOKEN`. `_split_parts` now splits on `;` at depth 0
+        alongside `,` and `.`. **Checked the corpus first, as required:** every
+        design line in Chapter 9 was scanned for a `;`, and this is the *only*
+        one in the whole chapter that contains one — so an unconditional split
+        was safe, no conditional logic needed. (The rulebook's own
+        `**Range: X; Duration: Y;**`-style guideline headers also use `;`, but
+        those never reach `_split_parts` — it only ever sees text captured by
+        blocks.py's `_DESIGN` line match, i.e. the `(Base ...)` line itself, not
+        the guideline preamble.) The trailing clause itself needed its own entry
+        in `designline.TRAILING_CONTINUATION_LABELS` (below the same discipline
+        as the four fixes already there). **Surfaced one new base-effect
+        ambiguity**, once the line could finally be tokenized: `crig-25a`
+        ("Create a fire doing +30 damage") vs. `crig-25b` ("Create a fire
+        elemental..."). Forced, not guessed — the spell's own text states "+30
+        damage" verbatim against `crig-25a`'s description, and `crig-25b` is
+        independently ruled out by being Ritual-only where the spell's stat line
+        carries no Ritual marker at all. Recorded in `resolutions.json`. Blocked
+        count 25 → 24.
       - *The Bountiful Feast*'s unbalanced brackets (item 26). Same function, same
-        shape, one spell each. **Still open.**
+        shape, one spell each. **Still open — deliberately untouched by the
+        semicolon fix above**, per this item's own scoping.
       - **✅ DONE 2026-08-15 — 4 more real corpus instances of this same family,
         fixed in one pass, all against a comma rather than `;` or brackets:**
         *Wings of the Soaring Wind* (`+2, highly unnatural` — the magnitude and
@@ -886,21 +905,31 @@ charms (9 for using all three together):
   ("Deferred Work")
 
 ### 18. Storyguide-Ruling UI for Rituals
-Fidelity work on already-imported spells — **but not all 7 are already-imported.**
-Checked 2026-08-15 against a live extractor run: *Rain of Oil*, *Incantation of
-Summoning the Dead* and *Disenchant* do import/template with an incomplete
-`RitualDeclaration`, as this item originally claimed for all 7. **The other 3 —
-*Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open Sky* — are
-currently blocked**, and for the exact reason the bullet below already names: the
-"three carry the reason in their own design line" clause (`ritual for large
-effect`, `ritual because of spectacular effect`, and Curse of the Ravenous Swarm's
-own unlisted `for a swarm weighing as much as one thousand pigs` upstream of it)
-is an unrecognised design-line token, not merely a UI gap. Nothing in
-`extract_spells.py` gates on Ritual correctness *specifically*, but these 3 spells
-never reach that stage at all — they fail tokenizing first. Fixing them is
-`designline.py`/`emit.py` work (allow-listing the ritual-justification clauses,
-same shape as item 29), not this item's `storyguideRuling` UI work — filed here
-only as a correction, not claimed by this item.
+Fidelity work on already-imported spells, **now true of all 7** — the three that
+were blocked at time of writing are fixed; what remains is genuinely just the UI
+work below.
+
+**✅ DONE 2026-08-15 — the tokenizing half of the correction below.**
+*Curse of the Ravenous Swarm*, *Neptune's Wrath* and *Breath of the Open Sky* now
+import/template with an incomplete `RitualDeclaration`, same as the other 4. Fixed
+in `designline.py`, not `emit.py`: their ritual-justification clauses (`ritual
+because it has a really major effect`, `ritual for large effect`, `ritual because
+of spectacular effect`) and Curse of the Ravenous Swarm's own upstream `for a
+swarm weighing as much as one thousand pigs` are now in
+`designline.TRAILING_CONTINUATION_LABELS`, same shape as item 29's fixes and the
+same discipline — a closed allow-list, checked against each spell's own printed
+level, not a blanket "unsigned clause = free" rule. Curse of the Ravenous Swarm
+also needed a second fix: its `+1 extra effect from requisite` (Req: Rego on the
+stat line) is a bare-requisite phrasing `_BARE_REQUISITE` didn't recognise, now
+folded into `_BARE_REQUISITE_LABELS` alongside "+1 requisite" (item 44's bare
+case) — same resolve-against-the-sole-Req:-art mechanism in `emit.py`. All three
+computed levels match their printed levels (CrAn 50, ReAq 40, CrAu 40); no new
+base-effect ambiguity. **Nothing in `extract_spells.py` gates on Ritual
+correctness specifically** — this fix only got the 3 spells as far as importing
+with the same incomplete `RitualDeclaration` the other 4 already had; it did not
+touch `storyguideRuling`, which is still what the checklist below is about.
+Files: `scripts/spell_import/designline.py`, `scripts/spell_import/emit.py`,
+`scripts/spell_import/tests/test_designline.py`, `assets/data/spell_library.json`.
 
 - [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
       three built-in spells already use, but no control sets
