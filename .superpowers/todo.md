@@ -1,6 +1,6 @@
 # Eruditus Todo List
 
-**Status:** Active development · **Last updated:** 2026-08-09
+**Status:** Active development · **Last updated:** 2026-08-15
 
 **Standing goal:** every published spell in the Definitive Edition core rules is
 in the spell library, with its computed level matching its printed level.
@@ -24,25 +24,44 @@ in the spell library, with its computed level matching its printed level.
 
 ## Where the import stands
 
-Last extractor run, 2026-08-07 (`python -m scripts.spell_import.extract_spells`):
+Last extractor run, 2026-08-15 (`python -m scripts.spell_import.extract_spells`):
 
-> **285 imported · 23 emitted as templates · 52 blocked · 0 unresolved**
+> **311 imported · 24 emitted as templates · 25 blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
-**Before prioritising among items 19/26/28/35/37/39, re-run with
-`--show-blocked`.** The per-family breakdown below dates from the 2026-07-28
-manual audit and has been partially overtaken; `--show-blocked` prints the
-current per-spell reasons and is the authority.
+**Verified against a live `--show-blocked` run, not carried forward by
+arithmetic** — the table below was re-derived spell-by-spell against that
+output, after five rounds of 2026-08-15 fixes: item 28's Group A/B guideline
+derivations; item 29's splitter fixes (5 spells: *Wings of the Soaring Wind*,
+*Stone to Falling Dust*, *Deluge of Rushing and Dashing*, *Ice of Drowning*,
+*Frosty Breath of the Spoken Lie*); *Ward against Faeries of the Mountain*
+(its own text names both its guideline and its realm via a cross-reference to
+*Ward against Faeries of the Waters* — see item 27's correction); item 44
+plus two more verified-low-risk fixes done alongside it (5 spells:
+*Obliteration of the Metallic Barrier*, *Phantasmal Fire*, *The Eye of the
+Sage*, *Ward against Heat and Flames*, *Break the Oncoming Wave* — see items
+44, 4b, 4); and item 39's close reading (3 of 4 spells: *Tracks of the Faerie
+Glow*, *Sense the Feet that Thread the Earth*, *The Crystal Dart*). Every one
+of the 25 currently-blocked spells now maps to exactly one row below; none
+are unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
-| Guideline level absent from the rulebook's own table | 5 | **28** |
-| Genuinely ambiguous ledger resolution | 4 | **39** |
-| Size ladder above +4 | 4 | **19** |
+| Guideline level absent from the rulebook's own table | 1 | **28** — corrected from 5: item 28's own body always said 4 of 5 were fixed 2026-08-15, this table just hadn't caught up |
+| Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, now a genuine two-way tie instead of three |
+| Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 6 | **26** |
-| General-level, each blocked for an unrelated reason | 10 | see item **25** |
+| General-level, each blocked for an unrelated reason | 8 | see item **25** (was stated as 10 including *Watching Ward*, counted under item 26 above instead, and *Ward against Faeries of the Mountain*, unblocked 2026-08-15 — same starting 10 spells, no double-count) |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
 | No printed design line and no legitimate derivation | 2 | permanent — see item **27** |
+| `_split_parts`/`_TOKEN` punctuation edge cases | 1 | see item **29** — corrected from an unlisted family: was 5 (semicolon, unbalanced brackets, and 3 more punctuation shapes) until 2026-08-15 fixed 4 of them; *Ball of Abysmal Flame*'s semicolon case remains |
+| Non-standard requisite-magnitude phrasing | 0 | **44** — done 2026-08-15, all 3 import |
+| Ritual-justification clause not yet allow-listed | 3 | **18**'s "7 non-derivable Ritual spells" claims these 3 already import; they do not — see item 18's correction |
+| Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
+
+**Table total: 25, reconciled to the live count.** The previous version of this
+table summed to 34 out of a then-52 while implying full coverage; every row
+above now maps to specific, named spells, not just a count.
 
 **What the goal does and does not cover.** The goal is *computed level matches
 printed level*, and the rulebook prints `#### GENERAL` instead of a number for
@@ -277,34 +296,54 @@ generic "no base effect" message. Design/plan:
   `scripts/spell_import/emit.py`, `scripts/spell_import/extract_spells.py`,
   `scripts/spell_import/resolutions.json`, `assets/data/spell_library.json`
 
-### 39. Ambiguous Ledger Resolutions Needing a Rules Decision
+### 39. Ambiguous Ledger Resolutions Needing a Rules Decision — 3 of 4 ✅ DONE 2026-08-15
 
-- [ ] Decide each of the 4 spells below against a reading its own candidate
-      guidelines textually **force** — not "the most general-sounding" one — and
-      record the rationale in `resolutions.json`
+**3 of the original 4 turned out to have a forced discriminator after all.**
+Re-read each against its candidates' exact wording, not the most
+general-sounding one — same discipline item 27's pulled first pass violated.
 
-**4 published spells** have 2-3 candidates at their computed level, with no catalog
-gap and no missing data; the ambiguity is in the rulebook prose. Each was resolved
-once during item 27, then pulled when review found the rationale was picking the
-most general-sounding candidate rather than a forced one:
-
-- *Tracks of the Faerie Glow* (`lib-inte-tracks-faerie-glow`) — `inte-4a` vs `inte-4b`
-- *Sense the Feet that Thread the Earth* (`lib-inte-sense-feet-that-thread-earth`)
-  — same pair, same shape
-- *Crystal Dart* (`lib-mute-crystal-dart`) — `mute-3a`/`3b`/`3c`, stone-vs-crystal
-  boundary
-- *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
-  — `peig-4a`/`4b`/`4c`, three co-equally-supported readings
+- [x] *Tracks of the Faerie Glow* (`lib-inte-tracks-faerie-glow`) → **`inte-4a`**.
+      It makes tracks glow for normal eyesight to boost a Tracking roll — no
+      seeing is involved, the same discriminator already governing
+      `lib-inte-eyes-eons`'s inte-4a pick. It also continues this corpus's own
+      R:Per/D:Conc/T:Vision + "Learn X property" pattern one level up from *Eyes
+      of the Treacherous Terrain* and *The Miner's Keen Eye* (both base 2,
+      "learn one visible property"): those learn a visible property, this one
+      needs magic, matching inte-4a's "mundane" tier. Not `inte-4b` (seeing an
+      object and its surroundings).
+- [x] *Sense the Feet that Thread the Earth* (`lib-inte-sense-feet-that-thread-earth`)
+      → **`inte-4a`**, same pair, same discriminator: the spell's own verb is
+      "feel", not "see" — entirely tactile, no vision of any kind.
+- [x] *Crystal Dart* (`lib-mute-crystal-dart`) → **`mute-3c`**. Turns solid
+      stone into a solid crystal dart — the only level-3 Muto Terram guideline
+      built for a solid-to-solid earth-family change (not `mute-3a`'s
+      state-of-being change or `mute-3b`'s wrong state of matter). The design
+      line's own arithmetic (`Base 3, +2 Voice, +1 Rego requisite` = exactly the
+      printed level 10) has no room for the "+1/+2 magnitude for a different
+      material" surcharge the guidelines' own note requires for any *other*
+      material pair, so the transformation must be the one `mute-3c` already
+      prices at base 3 without surcharge: "dirt to stone, or vice versa". The
+      `Req: Rego` is for the dart's flight and strike, not the material change,
+      and doesn't bear on this pick.
+- [ ] *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
+      — **still genuinely ambiguous**, now `peig-4b` vs `peig-4c` (down from
+      three): its own text matches both close to verbatim simultaneously ("all
+      nonliving things are chilled thoroughly" / "all living things ... lose
+      one Fatigue level"), and `peig-4a`'s "extinguish" is contradicted by the
+      spell's own text for anything bigger than a campfire (those only shrink,
+      which is the *level 3* guideline, not level 4). Left in
+      `extract_spells.KNOWN_UNRESOLVABLE`.
 
 **Different from item 28**, not a duplicate: there the correct row is missing and
 needs adding; here every candidate already exists and is individually plausible,
 and the work is close reading. **Not a harness blocker** — `KNOWN_UNRESOLVABLE` in
-`extract_spells.py` routes all 4 to `blocked` rather than `unresolved`.
+`extract_spells.py` routes the one remaining spell to `blocked` rather than
+`unresolved`.
 
 **See also item 32**, which applies the same discipline to entries that *did* make
 it into the ledger.
 
-- **Files:** `scripts/spell_import/resolutions.json`
+- **Files:** `scripts/spell_import/resolutions.json`, `scripts/spell_import/extract_spells.py`
 
 ### 26. Non-standard Ranges, Durations and Targets — mechanism DECIDED, spells still blocked
 
@@ -349,18 +388,28 @@ importer work, with `spell.dart` untouched.
 is model work on `modifier.dart`, the same foundation as item 40. The +5 rung is
 ordinary data work and does not need to travel with it.
 
-- [ ] Every Size ladder in `modifiers.json` stops at +4 (×10,000); 4 published
-      spells need +5
-- [ ] Decide: add one rung, or make the ladder open-ended? The rulebook's rule is
-      `+1 magnitude = ×10 size` with **no stated ceiling**, so the ceiling is an
-      artifact of the MVP, not of the rules
+**Data half done, architecture half still open.** Checked 2026-08-15: every
+`size-<form>` ladder in `modifiers.json` (all 9 Forms, Mentem included) now
+carries a `+5` (×100,000) option, and all 4 originally-blocked spells import
+using it — nobody had ticked the checkbox, but the data already reflects the
+"add one rung" answer. What's still open is purely the architectural gap below.
+
+- [x] Every Size ladder in `modifiers.json` stops at +4 (×10,000); 4 published
+      spells need +5 — **done, undated**: a `+5` rung exists on every ladder as
+      of the 2026-08-15 check; no spell needs it blocked
+- [x] Decide: add one rung, or make the ladder open-ended? — **answered by the
+      data: one rung was added**, not an open-ended scheme
 - [ ] Add a Target restriction to `ModifierScope` (`excludeTargets` or
       `allowedTargets`) and check it in `appliesTo()` alongside the existing
-      technique/form/effectIds checks
+      technique/form/effectIds checks — **still open**, verified 2026-08-15
+      against `lib/models/modifier.dart`: `ModifierScope.appliesTo()` still
+      takes only `technique`/`form`/`baseEffectId`, no target parameter
 
-**The 4 blocked spells:** *Wrath of Whirling Winds and Water* (CrAu 40), *Rain of
-Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe 40), *Poisoning the Will*
-(PeMe 40).
+**No spell is blocked by this item anymore.** *Wrath of Whirling Winds and
+Water* (CrAu 40), *Rain of Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe
+40) and *Poisoning the Will* (PeMe 40) all import today, each selecting its
+Form's `-5` option. What remains is the correctness gap below, not an import
+blocker.
 
 **⚠️ Mentem's Size exemption is narrower than the code enforces.** Definitive
 Edition line 14900: "Minds do not have a size, so size modifiers do not apply to
@@ -401,9 +450,35 @@ time; what remains needs design judgement or more time.
         spell uses a comma, so the magnitude is never separated from the trailing
         prose and the whole thing fails `_TOKEN`. Splitting on `;` at depth 0
         alongside `,` and `.` is the obvious fix; **check the corpus for a `;` that
-        is not a token boundary before making it unconditional.**
+        is not a token boundary before making it unconditional.** **Still open.**
       - *The Bountiful Feast*'s unbalanced brackets (item 26). Same function, same
-        shape, one spell each.
+        shape, one spell each. **Still open.**
+      - **✅ DONE 2026-08-15 — 4 more real corpus instances of this same family,
+        fixed in one pass, all against a comma rather than `;` or brackets:**
+        *Wings of the Soaring Wind* (`+2, highly unnatural` — the magnitude and
+        its label separated by a comma, fixed by
+        `designline._merge_comma_split_magnitudes`, plus recognising "highly
+        unnatural" as the Creo Auram guideline's own "very unnatural" tier in
+        `emit.py`); *Ice of Drowning*, *Frosty Breath of the Spoken Lie*, *Deluge
+        of Rushing and Dashing* (each ends in a bare, comma-separated
+        explanatory clause with no magnitude of its own — "changing the water to
+        ice", "mist is a purely cosmetic effect and thus is free", "so that the
+        whole stream floods" — fixed via a new closed allow-list,
+        `designline.TRAILING_CONTINUATION_LABELS`, deliberately not a blanket
+        "unsigned clause = free" rule because that would also have silently
+        swallowed the *ritual*-justification clauses on other still-blocked
+        spells — see item 18's correction). *Stone to Falling Dust*'s `+2
+        metal/gems` was fixed alongside these (not a splitter bug — the token
+        parsed fine, it just wasn't a recognised label — but it was pinned by
+        the same two tests). All 5 now import; `resolutions.json` gained 3 new
+        entries for the ones that then hit a genuine base-effect ambiguity once
+        parsing succeeded (`lib-craq-deluge-rushing-and-dashing`,
+        `lib-reaq-ice-drowning`, `lib-inme-frosty-breath-spoken-lie`). Blocked
+        count 39 → 34. Files: `scripts/spell_import/designline.py`,
+        `scripts/spell_import/emit.py`,
+        `scripts/spell_import/tests/test_designline.py`,
+        `scripts/spell_import/resolutions.json`,
+        `assets/data/spell_library.json`.
 - [ ] **Add the 3 missing modifiers to `modifiers.json`** — Creo Aquam unnatural
       liquids, Creo Herbam treatment, Perdo Herbam live wood. Found by a
       preamble-vs-catalog-vs-`emit.py` audit on 2026-08-07 (full report in
@@ -411,13 +486,17 @@ time; what remains needs design judgement or more time.
       wired that session (Creo Auram unnatural, Terram materials), and 2 wired but
       not yet unblocking any spell (`aquam-base-individual`,
       `rego-transport-distance`).
-- [ ] **Extend `emit.build_spell`'s modifier mapping to `rego-transport-distance`.**
-      `_selected_modifiers` maps only `size`-kind tokens to `modifiers.json` today.
-      `rego-transport-distance` is already scoped in `modifiers.json` to exactly
-      `rete-4` / `rehe-10b` / `reig-3c`. This is what would unblock *Hermes' Portal*
-      (see item 27). **Expect
-      `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked` to
-      start failing on purpose, and update it** — do not be surprised by it.
+- [x] **Extend `emit.build_spell`'s modifier mapping to `rego-transport-distance`.**
+      **Superseded 2026-08-15 by items 43/45**, not by this bullet's original
+      plan: `_handle_magnitude_dependent_modifier` already had a mapping block
+      for `rego-transport-distance` (this bullet's premise that no mapping
+      existed was stale by the time anyone looked), it just used the wrong
+      option-id prefix — item 43 fixed that. What actually still blocks
+      *Hermes' Portal* (see item 27) is one layer earlier: `designline.py`'s
+      tokenizer doesn't recognize the distance labels at all, so `parse_design`
+      never gets far enough to reach `emit.py`'s mapping — tracked as item
+      **45**. `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
+      is still green; nothing changed that test's outcome yet.
 - [ ] **Collapse the duplicated level sum in `asset_data_loader_test.dart`.** Its
       "every loaded spell calculates to the level stated in its description" builds
       its own magnitude list rather than calling `SpellEngine.calculateBreakdown`,
@@ -457,6 +536,51 @@ time; what remains needs design judgement or more time.
   and the only non-first-party action in the repo. Pin it to a SHA if that trade is
   unacceptable.
 
+### 44. Bare/Non-standard Requisite-Magnitude Phrasing — ✅ DONE 2026-08-15
+
+Raised 2026-08-15, from an audit of the "uncategorised" third of the blocked
+list. Three published spells cost a requisite's magnitude in prose `_REQUISITE`
+(`designline.py`) didn't recognise — a parser gap, not a modelling gap: the
+underlying mechanism (`Requisite`/`RequisiteKind.adding`, item 2) already
+supported a costed requisite fully.
+
+- [x] Two of the three (a trailing justification, an art name mid-phrase) got a
+      closed allow-list, `designline.REQUISITE_LABEL_ARTS`, keyed by exact label
+      text — the same discipline as `ADJUSTMENT_LABELS`
+- [x] The third (a bare `+1 requisite`, no art at all) needed a different
+      mechanism: `designline.py` never sees the `Req:` line, so it can't resolve
+      which art the magnitude belongs to. It now emits a `Token` with an empty
+      label (`_BARE_REQUISITE`), resolved in `emit.py`'s new
+      `_resolve_requisite_label`, which reads `block.stat.requisite_arts` and
+      raises rather than guesses if that list doesn't have exactly one entry
+- [x] Re-ran `--show-blocked` and confirmed all 3 spells import with the
+      printed level matching the computed one (assertion 1) — no ledger entry
+      was needed for any of the three (each had a unique base-level candidate)
+
+**The 3 spells**, corrected against the real rulebook headings (the table below
+originally guessed The Eye of the Sage's Technique+Form from its `Req:` line,
+which was wrong — the requisite art is not the base art):
+
+| Spell | Base Technique+Form | `Req:` | Failing label |
+|---|---|---|---|
+| *Obliteration of the Metallic Barrier* (PeTe 20) | Perdo Terram | Rego | `Rego to fling the fragments away` |
+| *Phantasmal Fire* (CrIm 20) | Creo Imaginem | Ignem | `for light from Ignem requisite` |
+| *The Eye of the Sage* (InCo 30) | Intellego Corpus | Imaginem | `requisite` (bare) |
+
+**Why this was its own item, not item 24's.** Item 24 is per-spell prose the
+importer deliberately never models (no words, no gestures, Techniques and
+Forms) because there is no printed magnitude to derive from and guessing would
+be wrong. These 3 were the opposite case: the magnitude *was* printed
+(`+1 Rego`, `+1 for light...`, `+1 requisite`), the mechanism was fully modelled
+already, and only the label's wording was unrecognised — the same shape as item
+29's punctuation fixes, not item 24's judgement calls.
+
+- **Files:** `scripts/spell_import/designline.py`,
+  `scripts/spell_import/emit.py`,
+  `scripts/spell_import/tests/test_designline.py`,
+  `scripts/spell_import/tests/test_emit.py`,
+  `assets/data/spell_library.json`
+
 ---
 
 ## B. Deferred by Design — Derived Outputs
@@ -469,8 +593,21 @@ code seam earns its place.
 
 ### 4b. Intensity/Damage Modifiers
 - [ ] Muto/Perdo Ignem: add 1 magnitude per 5 points fire damage exceeds +5
-- **Only 1 published spell touches this in a design line** — *Ward against Heat and
-  Flames* (`+2 for up to +15 damage`), which item 24 already expresses.
+- **The one published spell that motivated this item is no longer blocked, and
+  wasn't Muto/Perdo Ignem to begin with.** *Ward against Heat and Flames* is
+  **Rego** Ignem, `+2 for up to +15 damage`, and it turned out to already have a
+  real catalog mechanism — `rego-ignem-fire-intensity` (`assets/data/
+  modifiers.json`), scoped to `reig-4` among others, magnitude 2 = the
+  `-15` option. **Fixed 2026-08-15**: `emit.py`'s
+  `_handle_magnitude_dependent_modifier` now maps this exact label to that
+  option; `designline.MODIFIER_LABELS` recognises the token. The spell imports.
+  (The earlier "item 24 already expresses [it]" note was wrong — item 24 is
+  per-spell adjustments with no catalog mechanism; this is a real, reusable,
+  already-catalogued modifier that just wasn't wired up.)
+- **What's still open, and now genuinely scoped to Muto/Perdo Ignem**: no
+  published spell currently needs it (the one that did is fixed above), so this
+  remains real but not import-blocking — a display/derivation question in the
+  same shape as item 42.
 - **Item 25 retired the General-row half.** `GeneralEffectKind.damage` covers the
   General catalog entries whose output depends on the chosen level; what remains is
   non-General, fixed-base fire damage.
@@ -749,9 +886,21 @@ charms (9 for using all three together):
   ("Deferred Work")
 
 ### 18. Storyguide-Ruling UI for Rituals
-Fidelity work on already-imported spells, **not an import blocker** — nothing in
-`extract_spells.py` gates on Ritual correctness, so these 7 spells import or
-template today, just with an incomplete `RitualDeclaration`.
+Fidelity work on already-imported spells — **but not all 7 are already-imported.**
+Checked 2026-08-15 against a live extractor run: *Rain of Oil*, *Incantation of
+Summoning the Dead* and *Disenchant* do import/template with an incomplete
+`RitualDeclaration`, as this item originally claimed for all 7. **The other 3 —
+*Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open Sky* — are
+currently blocked**, and for the exact reason the bullet below already names: the
+"three carry the reason in their own design line" clause (`ritual for large
+effect`, `ritual because of spectacular effect`, and Curse of the Ravenous Swarm's
+own unlisted `for a swarm weighing as much as one thousand pigs` upstream of it)
+is an unrecognised design-line token, not merely a UI gap. Nothing in
+`extract_spells.py` gates on Ritual correctness *specifically*, but these 3 spells
+never reach that stage at all — they fail tokenizing first. Fixing them is
+`designline.py`/`emit.py` work (allow-listing the ritual-justification clauses,
+same shape as item 29), not this item's `storyguideRuling` UI work — filed here
+only as a correction, not claimed by this item.
 
 - [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
       three built-in spells already use, but no control sets
@@ -1020,8 +1169,14 @@ correctly via item 25's General mechanism.
   (`GeneralEffectKind.mightThreshold`). What remains is the ward-type field and its
   display, not the threshold math.
 - **Only 1 spell has ward mechanics in its design line** — *Break the Oncoming Wave*
-  (`ward, so the target is the warded Individual, not the water`). The other 12 need
-  nothing beyond item 25.
+  (`ward, so the target is the warded Individual, not the water`). **Its import
+  blocker is fixed (2026-08-15)**: those three trailing comma-clauses are now in
+  `designline.TRAILING_CONTINUATION_LABELS`, and its own base-effect ambiguity
+  (Rego Aquam, base 5, 4 candidates) resolved to `reaq-5a` ("ward against mundane
+  water" — the only warding candidate of the four, matching the design line's own
+  word "ward"; see `resolutions.json`). It imports today. The other 12 need nothing
+  beyond item 25. What's left of this item is purely the ward-type display field
+  above, still open.
 
 ### 33. Write-Only Columns on the `spells` Table — MAYBE, revisit when relevant
 Filed as a *maybe*: nothing is wrong today. Pick this up only when a task lands in
@@ -1242,32 +1397,63 @@ selected) than to anything in the modifier system.
   is currently rendered/derived, `assets/data/base_effects.json` (adding the
   formula rate to `peco-20b` and the Aquam poison rows)
 
-### 43. `emit.py`'s `rego-transport-distance` Option-Id Mapping Is Stale
+### 43. `emit.py`'s `rego-transport-distance` Option-Id Mapping Is Stale — ✅ DONE 2026-08-15
 
 Found 2026-08-15 during the additive-guideline-modifiers final review — a
 pre-existing bug, unrelated to that branch's own changes, spotted only
 because the review re-checked every consumer of the modifier whose scope it
-widened. `scripts/spell_import/emit.py` (~lines 354-383) maps
-`rego-transport-distance`'s distance choice to option ids
+widened. `scripts/spell_import/emit.py`'s `_handle_magnitude_dependent_modifier`
+mapped `rego-transport-distance`'s distance choice to option ids
 `rego-transport-distance-5-paces` … `-arcane`, but the modifier's actual
 option ids in `assets/data/modifiers.json` are `rego-distance-5-paces` …
-`rego-distance-arcane`. `_option_exists` therefore always fails for this
-modifier, and any Rego spell whose design line selects a transport-distance
-token would raise `designline.UnknownToken` on import. **Currently
-unreachable** — no spell in `assets/data/spell_library.json` selects this
-modifier today (confirmed both before and after the additive-track branch),
-so nothing is broken in practice yet, but the additive-track's own
-`rego-transport-distance` scope widen (adding `rean-10b`/`reaq-4b`) does
-**not** unblock an end-to-end Rego Animal/Aquam transport import as it might
-appear to — the Python test added for that widen only pins the modifier's
-`scope`, not this mapping. The mapping's inline comment is also stale on a
-second axis: it lists the scoped rows as "reaq-5, rean-5", ids that were
-never real (should read `rean-10b, reaq-4b`).
+`rego-distance-arcane`. `_option_exists` therefore always failed for this
+modifier. Fixed the id prefix (6 dict values) and the comment's stale
+`reaq-5, rean-5` (never-real ids) to `rean-10b, reaq-4b`.
 
-- **Files:** `scripts/spell_import/emit.py` (fix the id prefix mismatch and
-  the stale comment), `scripts/spell_import/tests/test_extract.py` or
-  wherever `emit.py`'s modifier-token mapping is tested (add a case proving
-  a `rego-transport-distance` token round-trips)
+**Reachability caveat found while fixing, not closed by this fix:**
+`designline.py`'s `MODIFIER_LABELS` allow-list does not recognize the
+distance-ladder labels ("distance", "50 paces", etc.) as modifier-kind
+tokens at all, so `designline.parse_design` rejects them with
+`UnknownToken` before `emit.py`'s (now-correct) mapping is ever reached.
+This is a separate, larger, pre-existing gap — independently documented in
+`extract_spells.py`'s `HAND_DERIVED` comment on *Hermes' Portal*, which
+calls wiring it up "a real fix, just a different and larger one than
+'correct this string'". Tracked separately as item **45**. The regression
+test added here (`TransportDistanceEmissionTest` in
+`scripts/spell_import/tests/test_emit.py`) proves the id-mapping table
+itself is now correct by constructing `designline.Design`/`Token` objects
+directly, bypassing the tokenizer gap rather than depending on it closing.
+Confirmed no import counts moved (`311/24/25/0` before and after) — this
+modifier is genuinely still unreachable end-to-end until item 45 lands.
+
+- **Files:** `scripts/spell_import/emit.py`, `scripts/spell_import/tests/test_emit.py`
+
+### 45. Design-Line Tokenizer Doesn't Recognize Transport-Distance Labels
+
+Found 2026-08-15 while fixing item 43. `designline.MODIFIER_LABELS` (a
+closed allow-list deciding which printed design-line labels tokenize as
+`kind="modifier"` at all) has no entries for `"distance"`, `"arcane
+connection"`, `"5 paces"`, `"50 paces"`, `"500 paces"`, `"1 league"`, or
+`"7 leagues"` — so even with item 43's id-prefix fix landed, no real design
+line can reach `rego-transport-distance` yet; `parse_design` itself raises
+`UnknownToken` first. `extract_spells.py`'s `HAND_DERIVED` comment on
+*Hermes' Portal* (R: Arc, D: Year, T: Ind, level 75) already names this as
+the reason that spell is left permanently blocked rather than derived via
+`rete-4`'s distance ladder at its top rung.
+
+Unlike item 43, this needs a real design decision, not a mechanical string
+fix: which of the 7 labels to accept, whether "distance" (bare, no
+qualifier) should map to anything or always raise, and whether adding
+these labels is enough on its own to unblock *Hermes' Portal* end-to-end
+or whether its 35-level gap (see item 27) needs something else besides.
+
+- [ ] Decide which labels to accept into `MODIFIER_LABELS` and whether a
+      bare `"distance"` should raise or resolve
+- [ ] Wire the accepted labels through `designline.parse_design` as
+      `kind="modifier"` tokens
+- [ ] Re-check *Hermes' Portal* against the widened tokenizer — confirm
+      whether it now derives end-to-end or still needs item 27's other gap
+- **Files:** `scripts/spell_import/designline.py`, `scripts/spell_import/extract_spells.py`
 
 ---
 
@@ -1378,9 +1564,15 @@ immediately.
     `size`-kind tokens today. **See item 29's extension bullet** — that would resolve
     this spell. Its printed `(Mercurian Ritual)` marker corroborates it is
     non-standard.
-  - (Five further spells lack a design line but are General-level and belong to item
-    25: *Ward against the Beasts of Legend*, *Sight of the True Form*, *Ward against
-    Faeries of the Mountain*, *Wizard's Vigil*, *Aegis of the Hearth*.)
+  - (At the time this item closed, five further spells lacked a design line and were
+    General-level, belonging to item 25: *Ward against the Beasts of Legend*, *Sight
+    of the True Form*, *Ward against Faeries of the Mountain*, *Wizard's Vigil*,
+    *Aegis of the Hearth*. Two have since been recovered and import today: *Ward
+    against the Beasts of Legend* (item 35/37's realm-slot work) and *Ward against
+    Faeries of the Mountain* (2026-08-15 — its own text names both its guideline and
+    its realm by cross-referencing *Ward against Faeries of the Waters*; see item
+    27's correction and `extract_spells.HAND_DERIVED`). *Sight of the True Form*,
+    *Wizard's Vigil* and *Aegis of the Hearth* remain blocked under item 25.)
 - **The one open checklist line was split out on 2026-08-07** into **item 28** (zero
   candidates — a catalog/prose-rule gap) and **item 39** (genuine ambiguity — a
   reading decision), because the two need different kinds of decision and were getting
@@ -1413,9 +1605,13 @@ ward**.
   (`spell_engine.dart:422-431`).
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
-**Ten of the 33 remain blocked, each for a reason unrelated to this item:**
-- **No design line printed (4):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of
-  the True Form*, *Ward against Faeries of the Mountain*.
+**Nine of the 33 remain blocked, each for a reason unrelated to this item.**
+(Was ten: *Ward against Faeries of the Mountain* moved out 2026-08-15 — its
+"no design line" turned out to be a complete specification once its own
+cross-reference to *Ward against Faeries of the Waters* was followed. See
+`extract_spells.HAND_DERIVED`'s comment and item 27's correction below.)
+- **No design line printed (3):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of
+  the True Form*.
 - **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
   *Restore the Moved Image*, *The Invisible Eye Revealed*.
 - **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
