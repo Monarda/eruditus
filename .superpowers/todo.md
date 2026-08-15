@@ -327,7 +327,7 @@ general-sounding one — same discipline item 27's pulled first pass violated.
       prices at base 3 without surcharge: "dirt to stone, or vice versa". The
       `Req: Rego` is for the dart's flight and strike, not the material change,
       and doesn't bear on this pick.
-- [ ] *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
+- [x] *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
       — **still genuinely ambiguous**, now `peig-4b` vs `peig-4c` (down from
       three): its own text matches both close to verbatim simultaneously ("all
       nonliving things are chilled thoroughly" / "all living things ... lose
@@ -335,6 +335,11 @@ general-sounding one — same discipline item 27's pulled first pass violated.
       spell's own text for anything bigger than a campfire (those only shrink,
       which is the *level 3* guideline, not level 4). Left in
       `extract_spells.KNOWN_UNRESOLVABLE`.
+      
+      Re-checked once more during Bucket-B planning (2026-08-15) and the same
+      conclusion holds — genuinely undecidable from the text, staying in
+      `KNOWN_UNRESOLVABLE` permanently unless a future rules source (errata,
+      FAQ) settles it.
 
 **Different from item 28**, not a duplicate: there the correct row is missing and
 needs adding; here every candidate already exists and is individually plausible,
