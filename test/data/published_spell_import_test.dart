@@ -50,6 +50,7 @@ void main() {
         requisites: spell.requisites,
         adjustments: spell.adjustments,
         ritualDeclaration: spell.ritualDeclaration,
+        chosenBaseLevel: spell.chosenBaseLevel,
       );
       final want = printedLevelOf(spell);
       if (breakdown.level != want) {
@@ -91,6 +92,7 @@ void main() {
             requisites: spell.requisites,
             adjustments: spell.adjustments,
             ritualDeclaration: spell.ritualDeclaration,
+            chosenBaseLevel: spell.chosenBaseLevel,
           )
           .ritualStatus
           .isRitual;

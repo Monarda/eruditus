@@ -258,10 +258,10 @@ void main() {
         ...spell.adjustments.map((a) => a.magnitude),
       ];
 
-      // TASK 12 lands the first library spell that references a General base
-      // effect; until then baseLevel! never dereferences null here, so this
-      // assertion is never actually reached with a General guideline.
-      expect(SpellLevelCalculator.calculate(baseEffect.baseLevel!, magnitudes), statedLevel,
+      // A General base effect carries no baseLevel of its own — the spell's
+      // own chosenBaseLevel supplies it instead (see SpellEngine.calculateBreakdown).
+      final baseLevel = baseEffect.isGeneral ? spell.chosenBaseLevel! : baseEffect.baseLevel!;
+      expect(SpellLevelCalculator.calculate(baseLevel, magnitudes), statedLevel,
           reason: '${spell.name}: calculated level does not match the stated level');
     }
   });

@@ -1753,5 +1753,29 @@
       "revi-G5"
     ],
     "rationale": "Its prose reads 'Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return ... The level of the spell to be suppressed must be less than or equal to the level of this spell.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (... a suppressed spell still ends when its original duration expires)'; with (Base, +1 Touch, +1 Conc) the guideline + 2 magnitudes is the spell's own level, matching the printed cap, and 'a spell you have cast' matches 'one spell that you have cast'. revi-G4 is the near miss and is excluded by 'cast by another' plus its halved cap; revi-G5 is excluded because it is also 'cast by another' and further requires spells 'of a specific type', where this spell suppresses any one of your own."
+  },
+  "lib-muau-infernal-smoke-death": {
+    "baseEffectId": "muau-gen",
+    "candidates": [
+      "muau-gen",
+      "muau-gen-2"
+    ],
+    "rationale": "Turns normal smoke into a corrosive cloud that inflicts +25 damage on anyone immersed in it, matching muau-gen 'transform air into a gas doing +level damage' verbatim (base 25 = +25 damage), not muau-gen-2 which drains an air elemental's Might pool and has nothing to do with smoke or damage to bystanders."
+  },
+  "lib-crvi-enigmas-gift": {
+    "baseEffectId": "crvi-5a",
+    "candidates": [
+      "crvi-5a",
+      "crvi-5b"
+    ],
+    "rationale": "Gives the target Warping Points from a burst of magic, matching crvi-5a 'create a burst of magic that gives the target Warping Points' verbatim, not crvi-5b which slows the decay rate of an Arcane Connection and has nothing to do with granting Warping."
+  },
+  "lib-peig-wizards-icy-grip": {
+    "baseEffectId": "peig-5b",
+    "candidates": [
+      "peig-5a",
+      "peig-5b"
+    ],
+    "rationale": "Chills a person and deals damage that scales with the spell's level, matching peig-5b 'chill a person, taking damage that scales with the spell's level' verbatim, not peig-5a which strongly chills an object (e.g. freezing water) rather than harming a person."
   }
 }
