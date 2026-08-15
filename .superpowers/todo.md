@@ -26,12 +26,12 @@ in the spell library, with its computed level matching its printed level.
 
 Last extractor run, 2026-08-15 (`python -m scripts.spell_import.extract_spells`):
 
-> **315 imported · 24 emitted as templates · 21 blocked · 0 unresolved**
+> **320 imported · 24 emitted as templates · 16 blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
 **Verified against a live `--show-blocked` run, not carried forward by
 arithmetic** — the table below was re-derived spell-by-spell against that
-output, after seven rounds of 2026-08-15 fixes: item 28's Group A/B guideline
+output, after eight rounds of 2026-08-15 fixes: item 28's Group A/B guideline
 derivations; item 29's splitter fixes (6 spells: *Wings of the Soaring Wind*,
 *Stone to Falling Dust*, *Deluge of Rushing and Dashing*, *Ice of Drowning*,
 *Frosty Breath of the Spoken Lie*, *Ball of Abysmal Flame*); *Ward against
@@ -42,26 +42,31 @@ alongside it (5 spells: *Obliteration of the Metallic Barrier*, *Phantasmal
 Fire*, *The Eye of the Sage*, *Ward against Heat and Flames*, *Break the
 Oncoming Wave* — see items 44, 4b, 4); item 39's close reading (3 of 4
 spells: *Tracks of the Faerie Glow*, *Sense the Feet that Thread the Earth*,
-*The Crystal Dart*); and item 18's three ritual-justification clauses (3
+*The Crystal Dart*); item 18's three ritual-justification clauses (3
 spells: *Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open
-Sky*). Every one of the 21 currently-blocked spells now maps to exactly one
-row below; none are unaccounted for.
+Sky*); and Bucket B's 5 import-blocker fixes (*Wind at the Back*, *Trackless
+Step* and *The Earth Split Asunder* via item 26's `SPECIAL_PARAMETER_BASIS`
+resolution of `Special` Duration/Target; *The Bountiful Feast* via item 26's
+`DESIGN_LINE_TYPOS` fix for its missing closing paren; and *Hermes' Portal*
+via item 45's transport-distance tokenizer fix). Every one of the 16
+currently-blocked spells now maps to exactly one row below; none are
+unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
 | Guideline level absent from the rulebook's own table | 1 | **28** — corrected from 5: item 28's own body always said 4 of 5 were fixed 2026-08-15, this table just hadn't caught up |
-| Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, now a genuine two-way tie instead of three |
+| Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, re-checked once more during Bucket-B planning and re-confirmed as a genuine two-way tie — this is the item's final decision, not a case still pending resolution |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
-| Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 6 | **26** |
+| Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 2 | **26** — corrected from 6: *Wind at the Back*, *Trackless Step* and *The Earth Split Asunder* resolve their `Special` Duration/Target via `SPECIAL_PARAMETER_BASIS`, and *The Bountiful Feast* imports via a `DESIGN_LINE_TYPOS` entry for its missing closing paren, all fixed 2026-08-15; two of the six remain — *Watching Ward* (its `Duration is non-standard` clause names no basis to resolve to, so there is nothing for this mechanism to resolve) and *Mists of Change* (deliberately left blocked, see item 26's own section: two Durations in one stat line, `D: Sun & Year`) |
 | General-level, each blocked for an unrelated reason | 8 | see item **25** (was stated as 10 including *Watching Ward*, counted under item 26 above instead, and *Ward against Faeries of the Mountain*, unblocked 2026-08-15 — same starting 10 spells, no double-count) |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
-| No printed design line and no legitimate derivation | 2 | permanent — see item **27** |
-| `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets is a different bug in the same function (item 26's family above), deliberately untouched by this fix |
+| No printed design line and no legitimate derivation | 1 | permanent — see item **27**: corrected from 2, *Hermes' Portal* now has a legitimate derivation (item 45, fixed 2026-08-15); only *Whispering Winds* remains, permanently blocked — no real base level plus real magnitude token reproduces its printed level without inventing a requisite the text doesn't support |
+| `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
 | Non-standard requisite-magnitude phrasing | 0 | **44** — done 2026-08-15, all 3 import |
 | Ritual-justification clause not yet allow-listed | 0 | **18** — corrected from 3: all 3 (*Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open Sky*) now allow-listed and import, done 2026-08-15 |
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 
-**Table total: 21, reconciled to the live count.** The previous version of this
+**Table total: 16, reconciled to the live count.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
 
