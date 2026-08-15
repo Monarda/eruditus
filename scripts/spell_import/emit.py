@@ -83,8 +83,9 @@ def _resolve_requisite_label(token, block) -> str:
     """The art a `kind="requisite"` token belongs to.
 
     Usually just `token.label` -- designline.py already resolved it from the
-    design line's own text. The one exception is a bare "+N requisite" token
-    (designline._BARE_REQUISITE), which carries an empty label because
+    design line's own text. The one exception is a bare requisite token, e.g.
+    "+N requisite" or "+N extra effect from requisite"
+    (designline._BARE_REQUISITE_LABELS), which carries an empty label because
     designline.py never sees the Req: line and so cannot know which art the
     magnitude belongs to. Resolving it here, against `block.stat`, is safe
     only when the spell declares exactly one requisite art -- more than one

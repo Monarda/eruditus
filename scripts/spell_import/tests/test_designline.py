@@ -52,6 +52,18 @@ class ParseDesignTest(unittest.TestCase):
         self.assertEqual(requisite.magnitude, 1)
         self.assertEqual(requisite.label, "")
 
+    def test_bare_requisite_extra_effect_phrasing_has_an_empty_label(self):
+        # Curse of the Ravenous Swarm: "+1 extra effect from requisite" is
+        # another bare-requisite wording (Req: Rego on its stat line) -- same
+        # empty-label/resolve-in-emit.py treatment as "+1 requisite" above.
+        design = designline.parse_design(
+            "(Base 5, +1 Touch, +1 extra effect from requisite)"
+        )
+        requisite = design.tokens[-1]
+        self.assertEqual(requisite.kind, "requisite")
+        self.assertEqual(requisite.magnitude, 1)
+        self.assertEqual(requisite.label, "")
+
     def test_requisite_label_arts_allow_list(self):
         # Obliteration of the Metallic Barrier and Phantasmal Fire: the
         # requisite's art is present but not in _REQUISITE's shape.
@@ -357,6 +369,43 @@ class TrailingContinuationTest(unittest.TestCase):
         self.assertEqual(len(design.tokens), 1)
         self.assertEqual(design.tokens[0].label, "Voice")
         self.assertEqual(design.tokens[0].magnitude, 2)
+
+    def test_curse_of_the_ravenous_swarm(self):
+        # Item 18: two trailing continuations (the swarm-weight clause and
+        # the ritual-justification clause) bracket a bare-requisite token
+        # ("+1 extra effect from requisite", Req: Rego on the stat line).
+        design = designline.parse_design(
+            "(Base 5, +1 Touch, +3 Moon, +2 Group, +2 size, for a swarm "
+            "weighing as much as one thousand pigs, +1 extra effect from "
+            "requisite, ritual because it has a really major effect)"
+        )
+        self.assertEqual(design.base_level, 5)
+        kinds = [t.kind for t in design.tokens]
+        self.assertEqual(
+            kinds,
+            ["parameter", "parameter", "parameter", "modifier", "requisite"],
+        )
+        requisite = design.tokens[-1]
+        self.assertEqual(requisite.magnitude, 1)
+        self.assertEqual(requisite.label, "")
+
+    def test_neptunes_wrath(self):
+        # Item 18: "ritual for large effect" is the storyguide's stated
+        # reason the spell is a Ritual, printed with no magnitude of its own.
+        design = designline.parse_design(
+            "(Base 10, +3 Sight, +3 size, ritual for large effect)"
+        )
+        self.assertEqual(design.base_level, 10)
+        self.assertEqual(len(design.tokens), 2)
+
+    def test_breath_of_the_open_sky(self):
+        # Item 18: "ritual because of spectacular effect", same shape.
+        design = designline.parse_design(
+            "(Base 5, +1 Touch, +1 Conc, +4 size, +1 unnatural, "
+            "ritual because of spectacular effect)"
+        )
+        self.assertEqual(design.base_level, 5)
+        self.assertEqual(len(design.tokens), 4)
 
     def test_an_unlisted_trailing_clause_still_raises(self):
         # The allow-list is closed: an unsigned clause the list does not name
