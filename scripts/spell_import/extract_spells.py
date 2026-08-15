@@ -221,10 +221,12 @@ HAND_DERIVED: dict[str, str] = {
 # option to fit one spell would be fitting the catalog to the arithmetic. A
 # per-spell LevelAdjustment is what the rulebook's phrasing actually is.
 #
-# Mists of Change is the other numberless case and stays blocked. It prints
-# "slightly nonstandard effect" (no magnitude) and its stat line carries
-# "D: Sun & Year" -- two durations, which no adjustment can express. A
-# hand-derived magnitude could paper over the first but not the second.
+# Mists of Change used to be the other numberless case here and stayed
+# blocked -- see git history. It now imports as an exception spell instead
+# (scripts/spell_import/exceptions.py): its "slightly nonstandard effect"
+# clause has no magnitude to derive, and its stat line's "D: Sun & Year"
+# (two durations) can't be expressed by any adjustment regardless. See
+# docs/superpowers/specs/2026-08-15-exception-spells-design.md.
 #
 # Keyed by spell name -> (magnitude, the printed phrase to attach it to).
 HAND_DERIVED_ADJUSTMENT: dict[str, tuple[int, str]] = {
