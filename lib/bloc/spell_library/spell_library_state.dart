@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -13,6 +14,10 @@ class SpellLibraryState extends Equatable {
   // calculateBreakdown/spellLevels path a Spell does (see
   // SpellLibraryBloc._onEvent) -- it is instantiated into a draft first.
   final List<ResolvedTemplate> templates;
+  // Published exception spells -- alongside allSpells/templates rather than
+  // merged into either: an ExceptionSpell has no level to sort by and is
+  // never instantiable, the same reason templates get their own list.
+  final List<ResolvedException> exceptions;
   final String query;
   final String filter;
   // Precomputed spell levels keyed by spell id (via SpellEngine.
@@ -28,6 +33,7 @@ class SpellLibraryState extends Equatable {
     required this.status,
     this.allSpells = const [],
     this.templates = const [],
+    this.exceptions = const [],
     this.query = '',
     this.filter = 'All',
     this.spellLevels = const {},
@@ -68,10 +74,28 @@ class SpellLibraryState extends Equatable {
     return result;
   }
 
+  // Same three rules as visibleSpells/visibleTemplates: an exception spell
+  // is published catalog data and can never be one of the user's own
+  // spells, so it is always empty under "My Spells".
+  List<ResolvedException> get visibleExceptions {
+    var result = exceptions;
+    if (filter == 'Published') {
+      result = result.where((e) => e.source == PublicationSource.published).toList();
+    } else if (filter == 'My Spells') {
+      result = result.where((e) => e.source == PublicationSource.userCreated).toList();
+    }
+    if (query.isNotEmpty) {
+      final lowerQuery = query.toLowerCase();
+      result = result.where((e) => (e.name ?? '').toLowerCase().contains(lowerQuery)).toList();
+    }
+    return result;
+  }
+
   SpellLibraryState copyWith({
     SpellLibraryStatus? status,
     List<ResolvedSpell>? allSpells,
     List<ResolvedTemplate>? templates,
+    List<ResolvedException>? exceptions,
     String? query,
     String? filter,
     Map<String, int>? spellLevels,
@@ -82,6 +106,7 @@ class SpellLibraryState extends Equatable {
       status: status ?? this.status,
       allSpells: allSpells ?? this.allSpells,
       templates: templates ?? this.templates,
+      exceptions: exceptions ?? this.exceptions,
       query: query ?? this.query,
       filter: filter ?? this.filter,
       spellLevels: spellLevels ?? this.spellLevels,
@@ -95,6 +120,7 @@ class SpellLibraryState extends Equatable {
         status,
         allSpells,
         templates,
+        exceptions,
         query,
         filter,
         spellLevels,

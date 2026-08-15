@@ -16,9 +16,11 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
@@ -288,6 +290,7 @@ void main() {
       // swallows it, and the bloc lands in `error` instead of `loaded` — see
       // Correction 3.
       when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -310,6 +313,7 @@ void main() {
       when(() => mockLibraryRepository.getAllSpells())
           .thenAnswer((_) async => [ritualSpell, uncomputableSpell, ordinarySpell]);
       when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -408,12 +412,43 @@ void main() {
       duration: durationParam,
       target: targetParam);
 
+  final exceptionRecordA = ExceptionSpell(
+    id: 'exc-a',
+    name: 'Exception Alpha',
+    technique: 'Muto',
+    form: 'Vim',
+    range: 'Voice',
+    duration: 'Mom',
+    target: 'Group',
+    description: 'Alpha exception spell.',
+    rationale: 'Test rationale A.',
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+  final exceptionRecordB = ExceptionSpell(
+    id: 'exc-b',
+    name: 'Exception Beta',
+    technique: 'Rego',
+    form: 'Vim',
+    range: 'Touch',
+    duration: 'Year',
+    target: 'Bound',
+    printedLevel: 60,
+    description: 'Beta exception spell.',
+    rationale: 'Test rationale B.',
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+  final exceptionA = ResolvedException(record: exceptionRecordA);
+  final exceptionB = ResolvedException(record: exceptionRecordB);
+
   blocTest<SpellLibraryBloc, SpellLibraryState>(
     'LibraryRequested populates templates with every template the repository returns',
     setUp: () {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates())
           .thenAnswer((_) async => [templateA, templateB]);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -430,6 +465,7 @@ void main() {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates())
           .thenAnswer((_) async => [templateA, templateB]);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -452,6 +488,7 @@ void main() {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates())
           .thenAnswer((_) async => [templateA, templateB]);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -465,6 +502,7 @@ void main() {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates())
           .thenAnswer((_) async => [templateA, templateB]);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -484,6 +522,7 @@ void main() {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates())
           .thenAnswer((_) async => [templateA, templateB]);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -501,6 +540,7 @@ void main() {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates())
           .thenAnswer((_) async => [templateA, templateB]);
+      when(() => mockLibraryRepository.getExceptions()).thenAnswer((_) async => []);
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
@@ -520,6 +560,80 @@ void main() {
     setUp: () {
       when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
       when(() => mockLibraryRepository.getTemplates()).thenThrow(Exception('boom'));
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    expect: () => [
+      isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.loading),
+      isA<SpellLibraryState>().having((s) => s.status, 'status', SpellLibraryStatus.error),
+    ],
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'LibraryRequested populates exceptions with every exception the repository returns',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getExceptions())
+          .thenAnswer((_) async => [exceptionA, exceptionB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) => bloc.add(const LibraryRequested()),
+    verify: (bloc) {
+      expect(bloc.state.status, SpellLibraryStatus.loaded);
+      expect(bloc.state.exceptions, [exceptionA, exceptionB]);
+    },
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'visibleExceptions narrows by name under a query, case-insensitively',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getExceptions())
+          .thenAnswer((_) async => [exceptionA, exceptionB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) {
+      bloc.add(const LibraryRequested());
+      bloc.add(const SearchQueryChanged('alpha'));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) {
+      expect(bloc.state.visibleExceptions.length, 1);
+      expect(bloc.state.visibleExceptions.single.id, 'exc-a');
+    },
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'exceptions is empty under the "My Spells" filter',
+    // An exception spell is published catalog data and can never be one of
+    // the user's own spells -- same rule visibleTemplates already follows.
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getExceptions())
+          .thenAnswer((_) async => [exceptionA, exceptionB]);
+    },
+    build: () => SpellLibraryBloc(
+        libraryRepository: mockLibraryRepository, spellEngine: spellEngine),
+    act: (bloc) {
+      bloc.add(const LibraryRequested());
+      bloc.add(const FilterChanged('My Spells'));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) => expect(bloc.state.visibleExceptions, isEmpty),
+  );
+
+  blocTest<SpellLibraryBloc, SpellLibraryState>(
+    'a repository that throws from getExceptions puts the bloc in error, like any other load failure',
+    setUp: () {
+      when(() => mockLibraryRepository.getAllSpells()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getTemplates()).thenAnswer((_) async => []);
+      when(() => mockLibraryRepository.getExceptions()).thenThrow(Exception('boom'));
     },
     build: () => SpellLibraryBloc(
         libraryRepository: mockLibraryRepository, spellEngine: spellEngine),

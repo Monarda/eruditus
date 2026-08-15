@@ -35,6 +35,7 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
       try {
         final spells = await libraryRepository.getAllSpells();
         final templates = await libraryRepository.getTemplates();
+        final exceptions = await libraryRepository.getExceptions();
         final levels = <String, int>{};
         final ritualIds = <String>{};
         for (final s in spells) {
@@ -69,6 +70,7 @@ class SpellLibraryBloc extends Bloc<SpellLibraryEvent, SpellLibraryState> {
           status: SpellLibraryStatus.loaded,
           allSpells: spells,
           templates: templates,
+          exceptions: exceptions,
           spellLevels: levels,
           ritualSpellIds: ritualIds,
         ));
