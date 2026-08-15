@@ -697,3 +697,37 @@ def _description(block) -> str:
     the same way it omits "adjustments" when there are none.
     """
     return " ".join(block.prose.split())
+
+
+def build_exception_spell(block, rationale: str) -> dict:
+    """Build an `ExceptionSpell.fromMap`-shaped entry for a spell the
+    rulebook itself says guideline arithmetic doesn't apply to.
+
+    No design-line tokenization is attempted -- there is nothing in
+    exceptions.EXCEPTION_SPELLS this function could tokenize correctly, by
+    construction (that's what routes a spell here instead of build_spell/
+    build_template). Reuses SpellBlock's already-parsed prose/stat-line
+    fields untouched. See
+    docs/superpowers/specs/2026-08-15-exception-spells-design.md.
+    """
+    slug = catalog_module.slug_id(block.technique, block.form, block.name)
+    exception = {
+        "id": "exc-" + slug.removeprefix("lib-"),
+        "name": block.name,
+        "technique": block.technique,
+        "form": block.form,
+        "range": block.stat.range_name,
+        "duration": block.stat.duration_name,
+        "target": block.stat.target_name,
+        "isRitual": block.stat.is_ritual,
+        "source": "published",
+        "summary": _template_summary(block),
+        "rationale": rationale,
+        "citations": [{"bookId": CORE_BOOK_ID}],
+    }
+    if block.printed_level is not None:
+        exception["printedLevel"] = block.printed_level
+    description = _description(block)
+    if description:
+        exception["description"] = description
+    return exception

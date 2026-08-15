@@ -73,6 +73,90 @@ class AdjustmentEmissionTest(unittest.TestCase):
         self.assertNotIn("adjustments", spell)
 
 
+class ExceptionSpellEmissionTest(unittest.TestCase):
+    """Direct pins for emit.build_exception_spell, independent of whether any
+    real spell is currently routed to it -- ExceptionSpellsTest in
+    test_extract.py covers the real six against the live corpus.
+    """
+
+    def _exception_block(
+        self, name, technique, form, level,
+        range_name="Touch", duration_name="Sun", target_name="Ind",
+        is_ritual=False, prose="Test prose.",
+    ) -> blocks.SpellBlock:
+        return blocks.SpellBlock(
+            name=name, technique=technique, form=form, printed_level=level,
+            stat=statline.StatLine(
+                range_name=range_name, duration_name=duration_name,
+                target_name=target_name, is_ritual=is_ritual,
+                requisite_arts=[], trailing="",
+            ),
+            prose=prose, design_line=None, line_no=1,
+        )
+
+    def test_a_general_kind_exception_has_no_printed_level(self):
+        block = self._exception_block("Test Exception", "Muto", "Vim", None)
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertNotIn("printedLevel", exception)
+
+    def test_a_fixed_level_exception_carries_its_printed_level(self):
+        block = self._exception_block("Test Exception", "Intellego", "Auram", 15)
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertEqual(exception["printedLevel"], 15)
+
+    def test_range_duration_target_are_the_raw_stat_line_strings(self):
+        block = self._exception_block(
+            "Test Exception", "Muto", "Corpus", 60,
+            range_name="Voice", duration_name="Sun & Year", target_name="Bound",
+        )
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertEqual(exception["range"], "Voice")
+        self.assertEqual(exception["duration"], "Sun & Year")
+        self.assertEqual(exception["target"], "Bound")
+
+    def test_the_rationale_is_carried_verbatim(self):
+        block = self._exception_block("Test Exception", "Muto", "Vim", None)
+        exception = emit.build_exception_spell(block, "a specific citation")
+        self.assertEqual(exception["rationale"], "a specific citation")
+
+    def test_the_id_uses_the_exc_prefix_not_lib(self):
+        block = self._exception_block("Whispering Winds", "Intellego", "Auram", 15)
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertEqual(exception["id"], "exc-inau-whispering-winds")
+
+    def test_ritual_is_read_straight_off_the_stat_line(self):
+        block = self._exception_block("Test Exception", "Rego", "Vim", None, is_ritual=True)
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertTrue(exception["isRitual"])
+
+    def test_technique_and_form_are_carried(self):
+        block = self._exception_block("Test Exception", "Rego", "Vim", None)
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertEqual(exception["technique"], "Rego")
+        self.assertEqual(exception["form"], "Vim")
+
+    def test_source_and_citation_match_every_other_published_entry(self):
+        block = self._exception_block("Test Exception", "Muto", "Vim", None)
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertEqual(exception["source"], "published")
+        self.assertEqual(exception["citations"], [{"bookId": "arm5-core"}])
+
+    def test_summary_has_no_level_suffix(self):
+        # _template_summary, not _summary -- an exception spell may have no
+        # printed level at all, and "_summary" would emit the literal string
+        # "Level None." the same way it would for a General template.
+        block = self._exception_block(
+            "Test Exception", "Muto", "Vim", None, prose="Some test prose here."
+        )
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertEqual(exception["summary"], "Some test prose here.")
+
+    def test_empty_prose_omits_the_description_key(self):
+        block = self._exception_block("Test Exception", "Muto", "Vim", None, prose="")
+        exception = emit.build_exception_spell(block, "test rationale")
+        self.assertNotIn("description", exception)
+
+
 class SpecialParameterResolutionTest(unittest.TestCase):
     """A `D: Spec`/`T: Special` stat-line marker has no parameters.json entry
     of its own -- it's shorthand for whichever real parameter the spell's own
