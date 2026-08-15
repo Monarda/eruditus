@@ -1164,6 +1164,84 @@ finding re-verified against source before being recorded.
         modifier is `selectionMode: single`. Only matters for a design line printing
         two size tokens for one spell — none currently does.
 
+### 41. Row-Duplication Ladders Across the Catalog (item 28's shape, elsewhere)
+
+Raised 2026-08-15, after item 28 shipped, when the user asked whether other
+Technique+Form pairs have the same "separate numbered row per rung" shape that
+item 28 refactored for Creo Vim's Warping Point ladder and Perdo Ignem's
+chill-damage ladder. A systematic scan of `assets/data/base_effects.json`
+found 13 more families with the identical shape. **None currently block any
+corpus spell** — unlike item 28's original 5, every spell referencing these
+rows today lands on an exact existing row. The value here is item 28's *other*
+goal: decluttering the spell-creation UI (fewer near-duplicate base-effect rows
+to pick from) and future-proofing against a spell that eventually needs an
+in-between level. See [[35]]/[[37]] and item 28's own design/plan
+(`docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md`) for
+the refactor pattern to mirror: delete the redundant rows, add one
+`selectionMode: single` ladder modifier (like `warping-point-burst`/
+`chill-damage`), re-verify every corpus/ledger reference to the deleted rows
+(item 28's Task 1 caught a real near-miss doing exactly this for `peig-10b`).
+
+**13 families found:**
+
+| Technique+Form | Rows | 2nd axis? | Notes |
+|---|---|---|---|
+| Creo Ignem damage | `crig-4a/5a/10a/15/20a/25a` (6 rows, levels 4-25, +5 to +30 damage) | — | Irregular first step (4→5 is +1 level not +5, matches the book exactly) |
+| Creo Ignem "unnatural shape" | `crig-5b/10b/20b` (3 rows) | **Yes** — crossed with the damage axis above at the same levels | No level-15 rung exists (matches the book, not a gap) |
+| Rego Ignem wards-vs-fire | `reig-15b/20/25/30/35/40` (6 rows, +5 to +30 damage warded) | — | Perfectly regular. Distinct from the Rego Ignem fire-intensity modifier in the additive-track spec (item 3 there) — a different guideline entirely |
+| Rego Terram hurled projectile | `rete-5d/10/15b` (3 rows, +5/+10/+15 damage) | — | Perfectly regular, book's table stops at 15 |
+| Rego Corpus teleport distance | `reco-10d/15d/20a/25a/30/35` (6 rows) | — | Same underlying rule as the already-shipped `rego-transport-distance` modifier (see the additive-track spec's item 1 scope fix) — Corpus's version was digitized as rows instead of being added to that modifier's scope |
+| Creo Animal/Corpus/Mentem characteristic increase | `cran-30b..55`, `crco-30b..55`, `crme-30..55` (6 rows each, 3 Forms) | — | Same mechanic repeated per-form — one shared modifier pattern, not three parallel ladders |
+| Creo Animal/Corpus Recovery bonus | `cran-1..20b` (8 rows), `crco-1a..15b` (7 rows) | — | Two-phase irregular first step in both, matches each Form's own book table; Corpus stops at 15, Animal continues to 20 |
+| Muto Corpus Soak bonus | `muco-5a/10b/15/20b/25b` (5 rows) | — | Perfectly regular |
+| Intellego Vim detect-magnitude threshold | `invi-1a/2a/3a/4a` (4 rows) | — | Irregular steps (−2,−2,−3), matches the book |
+| Creo/Intellego/Muto Imaginem senses | `crim-1..5`, `inim-1a..5`, `muim-1..4` (+ `muim-5`, confirmed a **false positive** — a distinct top-end guideline, not "5 sensations") | — | Regular where genuine |
+| Perdo Vim AC-duration-steps | `pevi-5/10/15/20/25/30` (6 rows) | — | Perfectly regular, same style as the already-shipped Warping-Point-burst |
+| Creo Vim decay-steps | `crvi-5b/10b/15b` (3 rows) | Sits in the same table cells as the already-refactored Warping-Point-burst guideline | Item 28's own design spec explicitly considered and declined to touch this — a conscious prior decision worth revisiting or reaffirming, not an oversight |
+
+**Also found:** `rean-10b` (Rego Animal) and `reaq-4b` (Rego Aquam) state the
+*same* transport-distance formula as the already-shipped `rego-transport-distance`
+modifier but are missing from its `effectIds` — this specific one-line fix is
+small enough it was folded into the additive-track spec instead
+(`docs/superpowers/specs/2026-08-15-additive-guideline-modifiers-design.md`,
+item 1), not left here.
+
+**Confirmed false positives, not part of this list:** Wound-severity rows
+(Light/Medium/Heavy/Incapacitating) across every Form, Creo Ignem's
+light-equivalence rows (moonlight/candlelight/torchlight), Rego Auram's
+weather-intensity tiers, Muto Ignem's natural-vs-unnatural transformation rows
+— all read as near-duplicates under fuzzy text matching but are each a
+qualitatively distinct guideline in the book, not a hidden numeric ladder.
+
+- **Files:** `assets/data/base_effects.json`, `assets/data/modifiers.json`,
+  `assets/data/spell_library.json` (re-verify every corpus reference per
+  family before deleting its rows)
+
+### 42. Derived Ease Factor Display for Poison/Disease Guidelines
+
+Raised 2026-08-15, alongside item 41, then split out as a separate item because
+it isn't the same *kind* of gap. Perdo Corpus (disease) and Creo/Muto Aquam
+(poison) each state a rule like *"Each magnitude added to the level of the
+spell adds 3 to the Ease Factor"* — this is not a modifier a caster selects; it's
+a **passive consequence of the spell's final level**, however that level was
+reached (Size, Duration, any other modifier). Modeling it as a
+`selectionMode: single` modifier (the pattern items 28 and 41 use) would be
+modeling the wrong mechanism — it's closer to `craq-gen`'s `effectFormula`
+mechanism (a value derived from the chosen/final level and displayed, not
+selected) than to anything in the modifier system.
+
+- [ ] Decide the display mechanism: likely a read-only derived field shown
+      wherever a poison/disease guideline is used, computed as
+      `base Ease Factor + (rate) × (magnitudes above the guideline's own base
+      level)` — needs its own design, not a small addition to an existing one.
+- **Only one base effect touches disease today** (`peco-20b`, "Inflict a major
+  disease"); Creo/Muto Aquam's poison guidelines already have 5 rows each
+  (`craq-5a/10b/15/20/25a`, `muaq-2b/3a/4c/5c/10b`) encoding the wound-severity
+  table, separate from this formula.
+- **Files:** likely `lib/engine/spell_engine.dart` or wherever `effectFormula`
+  is currently rendered/derived, `assets/data/base_effects.json` (adding the
+  formula rate to `peco-20b` and the Aquam poison rows)
+
 ---
 
 ## D. Low Priority / Nice-to-Have
