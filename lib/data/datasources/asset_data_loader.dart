@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/book.dart';
+import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/spell.dart';
@@ -30,6 +31,7 @@ class AssetDataLoader {
   Future<List<Modifier>>? _modifiers;
   Future<List<Spell>>? _spellLibrary;
   Future<List<SpellTemplate>>? _spellTemplates;
+  Future<List<ExceptionSpell>>? _spellExceptions;
   Future<List<Book>>? _books;
 
   Future<List<BaseEffect>> loadBaseEffects() =>
@@ -47,6 +49,10 @@ class AssetDataLoader {
   Future<List<SpellTemplate>> loadSpellTemplates() =>
       _spellTemplates ??=
           _load('assets/data/spell_templates.json', SpellTemplate.fromMap);
+
+  Future<List<ExceptionSpell>> loadSpellExceptions() =>
+      _spellExceptions ??=
+          _load('assets/data/spell_exceptions.json', ExceptionSpell.fromMap);
 
   Future<List<Book>> loadBooks() =>
       _books ??= _load('assets/data/books.json', Book.fromMap);

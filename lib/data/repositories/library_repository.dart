@@ -2,6 +2,8 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/models/exception_spell.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -60,6 +62,11 @@ class LibraryRepository {
   Future<List<ResolvedTemplate>> getTemplates() async {
     await _refreshResolver();
     return resolver.resolveAllTemplates(await assetLoader.loadSpellTemplates());
+  }
+
+  Future<List<ResolvedException>> getExceptions() async {
+    final exceptions = await assetLoader.loadSpellExceptions();
+    return exceptions.map((record) => ResolvedException(record: record)).toList();
   }
 
   Future<List<ResolvedSpell>> getAllSpells() async {

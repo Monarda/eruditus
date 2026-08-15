@@ -410,6 +410,28 @@ void main() {
     }
   });
 
+  test('loads every exception in the asset', () async {
+    final raw = jsonDecode(
+        await File('assets/data/spell_exceptions.json').readAsString()) as List;
+
+    final exceptions = await AssetDataLoader().loadSpellExceptions();
+
+    expect(exceptions, hasLength(raw.length));
+    expect(exceptions, hasLength(6));
+  });
+
+  test('every exception carries a rationale', () async {
+    for (final exception in await AssetDataLoader().loadSpellExceptions()) {
+      expect(exception.rationale, isNotEmpty, reason: exception.name);
+    }
+  });
+
+  test('exactly four exceptions have no printed level', () async {
+    final exceptions = await AssetDataLoader().loadSpellExceptions();
+    final generalKind = exceptions.where((e) => e.printedLevel == null);
+    expect(generalKind.length, 4);
+  });
+
   test('the elaborate-effect modifier is globally scoped with a 0-3 ladder', () async {
     final modifiers = await loader.loadModifiers();
     final elaborate = modifiers.firstWhere((m) => m.id == 'elaborate-effect');

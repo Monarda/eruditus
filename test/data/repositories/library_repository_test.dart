@@ -59,6 +59,13 @@ void main() {
     expect(builtIn.every((s) => s.source == PublicationSource.published), isTrue);
   });
 
+  test('getExceptions returns every built-in exception spell', () async {
+    final exceptions = await repository.getExceptions();
+    final rawCount = (await AssetDataLoader().loadSpellExceptions()).length;
+    expect(exceptions.length, rawCount);
+    expect(exceptions.every((e) => e.isResolved), isTrue);
+  });
+
   test('getAllSpells combines built-in and user spells', () async {
     final builtInCount = (await AssetDataLoader().loadSpellLibrary()).length;
 
