@@ -1242,6 +1242,33 @@ selected) than to anything in the modifier system.
   is currently rendered/derived, `assets/data/base_effects.json` (adding the
   formula rate to `peco-20b` and the Aquam poison rows)
 
+### 43. `emit.py`'s `rego-transport-distance` Option-Id Mapping Is Stale
+
+Found 2026-08-15 during the additive-guideline-modifiers final review — a
+pre-existing bug, unrelated to that branch's own changes, spotted only
+because the review re-checked every consumer of the modifier whose scope it
+widened. `scripts/spell_import/emit.py` (~lines 354-383) maps
+`rego-transport-distance`'s distance choice to option ids
+`rego-transport-distance-5-paces` … `-arcane`, but the modifier's actual
+option ids in `assets/data/modifiers.json` are `rego-distance-5-paces` …
+`rego-distance-arcane`. `_option_exists` therefore always fails for this
+modifier, and any Rego spell whose design line selects a transport-distance
+token would raise `designline.UnknownToken` on import. **Currently
+unreachable** — no spell in `assets/data/spell_library.json` selects this
+modifier today (confirmed both before and after the additive-track branch),
+so nothing is broken in practice yet, but the additive-track's own
+`rego-transport-distance` scope widen (adding `rean-10b`/`reaq-4b`) does
+**not** unblock an end-to-end Rego Animal/Aquam transport import as it might
+appear to — the Python test added for that widen only pins the modifier's
+`scope`, not this mapping. The mapping's inline comment is also stale on a
+second axis: it lists the scoped rows as "reaq-5, rean-5", ids that were
+never real (should read `rean-10b, reaq-4b`).
+
+- **Files:** `scripts/spell_import/emit.py` (fix the id prefix mismatch and
+  the stale comment), `scripts/spell_import/tests/test_extract.py` or
+  wherever `emit.py`'s modifier-token mapping is tested (add a case proving
+  a `rego-transport-distance` token round-trips)
+
 ---
 
 ## D. Low Priority / Nice-to-Have
