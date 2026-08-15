@@ -231,4 +231,27 @@ void main() {
     ));
     expect(find.byKey(const Key('general-chip')), findsNothing);
   });
+
+  testWidgets('shows an Exception chip only when isException is true', (tester) async {
+    final template = buildTemplate(summary: 'Test summary.');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: template, isException: true)),
+    ));
+    expect(find.byKey(const Key('exception-chip')), findsOneWidget);
+    expect(find.text('Exception'), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: template)),
+    ));
+    expect(find.byKey(const Key('exception-chip')), findsNothing);
+  });
+
+  testWidgets('a null level renders the subtitle with no level suffix', (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: buildTemplate(summary: 'Test summary.'))),
+    ));
+    expect(find.textContaining('Creo Ignem'), findsOneWidget);
+    expect(find.textContaining('Level'), findsNothing);
+  });
 }

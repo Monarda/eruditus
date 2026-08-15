@@ -19,6 +19,12 @@ class SpellCard extends StatelessWidget {
   /// share, so both are supplied rather than derived here.
   final bool isGeneral;
 
+  /// True for an [ExceptionSpell] — a spell the rulebook itself says
+  /// guideline arithmetic doesn't apply to. Distinct from [isGeneral]:
+  /// an exception spell is never instantiable, whether or not it happens to
+  /// print a level.
+  final bool isException;
+
   /// Rendered inside the card below the ListTile, e.g. the Library screen's
   /// *Learn at level…* button for a template. Empty by default so ordinary
   /// spell cards (which have no actions) are unchanged.
@@ -31,6 +37,7 @@ class SpellCard extends StatelessWidget {
     this.onTap,
     this.isRitual = false,
     this.isGeneral = false,
+    this.isException = false,
     this.actions = const [],
   });
 
@@ -88,6 +95,15 @@ class SpellCard extends StatelessWidget {
                     child: Chip(
                       key: Key('general-chip'),
                       label: Text('Gen'),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                if (isException)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Chip(
+                      key: Key('exception-chip'),
+                      label: Text('Exception'),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
