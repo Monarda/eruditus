@@ -99,6 +99,20 @@ class HandDerivedTest(unittest.TestCase):
             self.assertIn(name, blocked_names)
 
 
+class BountifulFeastTypoTest(unittest.TestCase):
+    """The Bountiful Feast's printed design line is missing its outer closing
+    paren (a rulebook transcription defect, not a splitter bug -- see
+    DESIGN_LINE_TYPOS). Confirms the fix, not just that parsing succeeds.
+    """
+
+    def test_the_bountiful_feast_imports_at_its_printed_level(self):
+        report = extract_spells.run(write=False)
+        spell = next(s for s in report.spells if s["name"] == "The Bountiful Feast")
+        self.assertEqual(spell["printedLevel"], 35)
+        self.assertEqual(spell["baseEffectId"], "crhe-1a")
+        self.assertEqual(spell["targetId"], "target-boundary")
+
+
 class KnownUnresolvableStalenessTest(unittest.TestCase):
     """Guards extract_spells.KNOWN_UNRESOLVABLE against silent staleness.
 

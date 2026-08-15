@@ -246,6 +246,14 @@ HAND_DERIVED_ADJUSTMENT: dict[str, tuple[int, str]] = {
 # damage, +1Touch, +2 Sun)".
 DESIGN_LINE_TYPOS: dict[str, tuple[str, str]] = {
     "Ward against Heat and Flames": ("+1Touch", "+1 Touch"),
+    # Missing the outer closing paren entirely -- 3 opens, 2 closes in the
+    # printed line. A rulebook transcription defect (verified against the
+    # reviewed Definitive Edition markdown directly), not a _split_parts
+    # bug: the line is genuinely unbalanced, not oddly-but-validly nested.
+    "The Bountiful Feast": (
+        "so that the area affected is up to about 6 miles across)",
+        "so that the area affected is up to about 6 miles across))",
+    ),
 }
 
 

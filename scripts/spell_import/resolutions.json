@@ -1846,5 +1846,16 @@
       "crig-25b"
     ],
     "rationale": "New ambiguity surfaced by item 29's semicolon fix (the design line was previously unparseable). The spell's own text states the effect in the guideline's own words: 'A ball of flame shoots from your hand to strike a single target, doing +30 damage' matches crig-25a ('Create a fire doing +30 damage') on the exact damage figure. crig-25b ('Create a fire elemental from a base amount of elemental matter') is a different effect entirely -- an elemental, not a damaging bolt -- and is independently ruled out: its own catalog entry is Ritual-only (ritualRequirement: required), but Ball of Abysmal Flame's stat line (R: Voice, D: Mom, T: Ind) carries no Ritual marker at all. Both the description and the Ritual constraint force crig-25a; nothing about the spell supports crig-25b."
+  },
+  "lib-crhe-bountiful-feast": {
+    "baseEffectId": "crhe-1a",
+    "candidates": [
+      "crhe-1a",
+      "crhe-1b",
+      "crhe-1c",
+      "crhe-1d",
+      "crhe-1e"
+    ],
+    "rationale": "The design line's own parenthetical says the +1 Size token is 'for a total of +4 Size, including the +3 from the guideline' -- crhe-1a is the only one of the five candidates whose description states a baked-in Size enhancement at all ('includes a +3 Size enhancement'), so the design line's own arithmetic forces this pick, not just prose similarity. Not crhe-1b/1c (create a product/plant -- this spell doesn't create anything, it protects existing crops), 1d (prevent sickness -- narrower than the spell's own 'healthier, larger, and tastier') or 1e (heal a wound -- no wound involved)."
   }
 }

@@ -373,10 +373,14 @@ importer work, with `spell.dart` untouched.
       basis at all (no "based on X"), so there is nothing to resolve it to
       without guessing. It remains this item's sole open case, General-level
       (item 25 doesn't block it), blocked purely on this.
-- [ ] *The Bountiful Feast* (`+4 Special (equivalent to Boundary)`) — allow-listed,
-      but the same design line has unbalanced brackets so the later `+1 Size (for a
-      total of ...` token never closes. **A splitter fix — see item 29's
-      `_split_parts` bullet, which should fix this and the `;` case in one pass.**
+- [x] *The Bountiful Feast* — ✅ DONE 2026-08-15. **Correction: this was never a
+      `_split_parts` bug** — the printed line is genuinely missing its outer
+      closing paren (a rulebook transcription defect, verified directly against
+      the reviewed Definitive Edition markdown), not oddly-but-validly nested
+      brackets. Fixed via a `DESIGN_LINE_TYPOS` entry, the same mechanism as
+      *Ward against Heat and Flames*'s `"+1Touch"`, not a `_split_parts` change.
+      Base effect `crhe-1a`, forced by the design line's own "+3 from the
+      guideline" note (the only one of 5 candidates with a stated Size bonus).
 - **Deliberately left blocked:** *Mists of Change* prints `D: Sun & Year`. Two
   durations in one stat line contradicts item 1's rules-correct one-Duration
   invariant; it also prints a numberless "slightly nonstandard effect". **Do not
@@ -470,9 +474,14 @@ time; what remains needs design judgement or more time.
         independently ruled out by being Ritual-only where the spell's stat line
         carries no Ritual marker at all. Recorded in `resolutions.json`. Blocked
         count 25 → 24.
-      - *The Bountiful Feast*'s unbalanced brackets (item 26). Same function, same
-        shape, one spell each. **Still open — deliberately untouched by the
-        semicolon fix above**, per this item's own scoping.
+      - *The Bountiful Feast*'s unbalanced brackets (item 26). **✅ DONE
+        2026-08-15 — not via this function.** This was never a `_split_parts`
+        bug: the printed line is genuinely missing its outer closing paren (a
+        rulebook transcription defect), not oddly-but-validly nested brackets.
+        Fixed via a `DESIGN_LINE_TYPOS` entry, the same narrowly-scoped mechanism
+        as *Ward against Heat and Flames*'s `"+1Touch"` typo, not a change to
+        `_split_parts` itself (which could silently misparse a different,
+        genuinely-nested case elsewhere).
       - **✅ DONE 2026-08-15 — 4 more real corpus instances of this same family,
         fixed in one pass, all against a comma rather than `;` or brackets:**
         *Wings of the Soaring Wind* (`+2, highly unnatural` — the magnitude and

@@ -802,6 +802,38 @@
     "ritualDeclaration": "lastingCreation"
   },
   {
+    "id": "lib-crhe-bountiful-feast",
+    "name": "The Bountiful Feast",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-herbam": [
+        "size-herbam-1"
+      ]
+    },
+    "baseEffectId": "crhe-1a",
+    "rangeId": "range-touch",
+    "durationId": "duration-year",
+    "targetId": "target-boundary",
+    "summary": "This ritual, which must be cast at noon on the day after the winter solstice, attempts to ensure that all crops that grow within its target will be healthy and fruitful. The spell protects against non-magical blight and other diseases. It can't control the weather or prevent others from harming crops, but it does cause crops to be healthier, larger, and tastier than they otherwise would be. The... Level 35.",
+    "description": "This ritual, which must be cast at noon on the day after the winter solstice, attempts to ensure that all crops that grow within its target will be healthy and fruitful. The spell protects against non-magical blight and other diseases. It can't control the weather or prevent others from harming crops, but it does cause crops to be healthier, larger, and tastier than they otherwise would be. The target of this spell is the fields owned by those present at the ritual. The spell must be cast within the region affected by the spell, although that region need not be contiguous. Although food plants are affected most by this ritual, all plants are made healthier to some degree.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 0,
+        "note": "Special (equivalent to Boundary)"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
     "id": "lib-crhe-bridge-wood",
     "name": "Bridge of Wood",
     "requisites": {},
