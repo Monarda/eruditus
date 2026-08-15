@@ -147,6 +147,16 @@ class CandidatesTest(unittest.TestCase):
         self.assertIn("peig-5b", ids)
         self.assertNotIn("peig-10b", ids)
 
+    def test_rego_transport_distance_scope_covers_all_five_forms(self):
+        catalog_inst = catalog.Catalog.load()
+        modifier = next(
+            m for m in catalog_inst.modifiers if m["id"] == "rego-transport-distance"
+        )
+        self.assertEqual(
+            set(modifier["scope"]["effectIds"]),
+            {"rehe-10b", "reig-3c", "rete-4", "rean-10b", "reaq-4b"},
+        )
+
 
 class ExistingIdsTest(unittest.TestCase):
     def test_slugger_reproduces_every_committed_library_id(self):
