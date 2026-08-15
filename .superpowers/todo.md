@@ -526,6 +526,9 @@ time; what remains needs design judgement or more time.
       never gets far enough to reach `emit.py`'s mapping — tracked as item
       **45**. `HandDerivedTest.test_the_two_non_derivable_spells_stay_correctly_blocked`
       is still green; nothing changed that test's outcome yet.
+      **Update 2026-08-15: item 45 itself is now done, not just opened** — the
+      tokenizer gap is closed and *Hermes' Portal* imports as `rete-4`. See
+      item 45 and item 27's own entry for the full derivation.
 - [ ] **Collapse the duplicated level sum in `asset_data_loader_test.dart`.** Its
       "every loaded spell calculates to the level stated in its description" builds
       its own magnitude list rather than calling `SpellEngine.calculateBreakdown`,
@@ -1467,7 +1470,7 @@ modifier is genuinely still unreachable end-to-end until item 45 lands.
 
 - **Files:** `scripts/spell_import/emit.py`, `scripts/spell_import/tests/test_emit.py`
 
-### 45. Design-Line Tokenizer Doesn't Recognize Transport-Distance Labels
+### 45. Design-Line Tokenizer Doesn't Recognize Transport-Distance Labels — ✅ DONE 2026-08-15
 
 Found 2026-08-15 while fixing item 43. `designline.MODIFIER_LABELS` (a
 closed allow-list deciding which printed design-line labels tokenize as
@@ -1486,12 +1489,17 @@ qualifier) should map to anything or always raise, and whether adding
 these labels is enough on its own to unblock *Hermes' Portal* end-to-end
 or whether its 35-level gap (see item 27) needs something else besides.
 
-- [ ] Decide which labels to accept into `MODIFIER_LABELS` and whether a
-      bare `"distance"` should raise or resolve
-- [ ] Wire the accepted labels through `designline.parse_design` as
-      `kind="modifier"` tokens
-- [ ] Re-check *Hermes' Portal* against the widened tokenizer — confirm
-      whether it now derives end-to-end or still needs item 27's other gap
+- [x] **Decided:** the 6 concrete distance-ladder labels (5/50/500 paces, 1/7
+      leagues, arcane connection), checked against the whole corpus first.
+      Bare `"distance"` deliberately excluded — it names no real option in
+      `rego-transport-distance`'s own table, so it keeps failing at the
+      tokenizer rather than succeeding here and failing one layer deeper in
+      `emit.py` with a near-identical message.
+- [x] Wired via `designline.MODIFIER_LABELS`.
+- [x] **Confirmed: sufficient on its own, no other gap.** The magnitude
+      arithmetic (4 base + 4 Arc + 4 Year + 5 arcane-connection modifier + 2
+      size = 19 magnitudes) reaches level 75 exactly. *Hermes' Portal* now
+      imports as `rete-4`.
 - **Files:** `scripts/spell_import/designline.py`, `scripts/spell_import/extract_spells.py`
 
 ---
@@ -1589,7 +1597,7 @@ immediately.
 - **`Citation.page` cannot carry page numbers.** Its doc comment promised them "with
   the spell-parsing work", but the reviewed markdown has no page markers, only prose
   cross-references. Comment corrected; do not re-promise it.
-- **Three spells print no design line. Only one has a legitimate derivation:**
+- **Three spells print no design line. Two have a legitimate derivation:**
   - *Enchantment of the Scrying Pool* (InAq 30, line 12900) — ✅ derived
     `(Base 5, +1 Touch, +4 Year)`, base effect `inaq-5` (sole candidate). Imported.
   - *Whispering Winds* (InAu 15, line 13251) — ❌ **permanently blocked.** InAu's only
@@ -1597,14 +1605,15 @@ immediately.
     real base level + real magnitude token reproduces 15 without inventing a requisite
     the text does not support. The spell's own prose says why: "fits poorly into the
     normal framework of Hermetic magic."
-  - *Hermes' Portal* (ReTe 75, line 15638) — ❌ blocked on infrastructure, not rules.
+  - *Hermes' Portal* (ReTe 75, line 15638) — ✅ **derived, no longer blocked.**
     `rete-4` ("Transport a non-living object…") needs `rego-transport-distance` at its
     top rung plus 2 magnitudes of size to reach 75. **Corrected 2026-08-15:**
-    `emit.build_spell`'s mapping was fixed by item 43, but `designline.py`'s
-    tokenizer still can't produce a distance-kind token to feed it — **see item
-    45**, which would resolve this spell (pending confirmation it's the only
-    remaining gap). Its printed `(Mercurian Ritual)` marker corroborates it is
-    non-standard.
+    `emit.build_spell`'s mapping was fixed by item 43, and `designline.py`'s
+    tokenizer now produces the distance-kind token to feed it — **item 45 is
+    done**, and it was the only remaining gap: hand-derived design line
+    `(Base 4, +4 Arc, +4 Year, +5 arcane connection, +2 size)` computes to
+    level 75 exactly. Imported as `rete-4`. Its printed `(Mercurian Ritual)`
+    marker corroborates it is non-standard.
   - (At the time this item closed, five further spells lacked a design line and were
     General-level, belonging to item 25: *Ward against the Beasts of Legend*, *Sight
     of the True Form*, *Ward against Faeries of the Mountain*, *Wizard's Vigil*,

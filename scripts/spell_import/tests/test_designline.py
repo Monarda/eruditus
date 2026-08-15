@@ -226,6 +226,33 @@ class VocabularyAdditionsTest(unittest.TestCase):
         self.assertEqual(token.label, "metal/gems")
         self.assertEqual(token.magnitude, 2)
 
+    def test_arcane_connection_is_a_modifier_token(self):
+        design = designline.parse_design(
+            "(Base 4, +4 Arc, +4 Year, +5 arcane connection, +2 size)"
+        )
+        modifier_tokens = [t for t in design.tokens if t.kind == "modifier"]
+        self.assertIn(
+            ("arcane connection", 5),
+            [(t.label.lower(), t.magnitude) for t in modifier_tokens],
+        )
+
+    def test_the_distance_ladder_labels_are_modifier_tokens(self):
+        for label, magnitude in [
+            ("5 paces", 0), ("50 paces", 1), ("500 paces", 2),
+            ("1 league", 3), ("7 leagues", 4),
+        ]:
+            with self.subTest(label=label):
+                design = designline.parse_design(f"(Base 4, +{magnitude} {label})")
+                self.assertEqual(design.tokens[0].kind, "modifier")
+
+    def test_a_bare_distance_token_still_raises(self):
+        # Deliberately NOT added to MODIFIER_LABELS -- it names no real option
+        # (rego-transport-distance's own table has no bare "distance" entry),
+        # so it should keep failing at the tokenizer, not silently succeed and
+        # fail one layer deeper with a near-identical error.
+        with self.assertRaises(designline.UnknownToken):
+            designline.parse_design("(Base 4, +1 distance)")
+
 
 class SplittingTest(unittest.TestCase):
     def test_a_comma_inside_parentheses_does_not_split_a_token(self):

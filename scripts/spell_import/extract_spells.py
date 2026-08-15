@@ -184,6 +184,15 @@ DESIGN_LINE_INCOMPLETE = {
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
     "Ward against Faeries of the Mountain": "(Base effect)",
+    # Prints only "(Mercurian Ritual)", no arithmetic at all. Derived from
+    # rete-4's own guideline note ("add magnitudes for distance/Arcane
+    # Connection") plus the spell's own stat line (R: Arc, D: Year, T: Ind)
+    # and prose ("people, animals, and objects can travel" -> Size, not a
+    # single small item). Magnitude check: 4 (base) + 4 (Arc) + 4 (Year) +
+    # 5 (arcane connection, rego-transport-distance's top rung) + 2 (size)
+    # = 19 magnitudes -> level 75. Matches the printed level exactly. See
+    # todo item 45.
+    "Hermes' Portal": "(Base 4, +4 Arc, +4 Year, +5 arcane connection, +2 size)",
 }
 
 
@@ -375,7 +384,13 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
     proposals: dict[str, dict] = {}
 
     for block in parsed:
-        design_text = block.design_line or HAND_DERIVED.get(block.name)
+        # HAND_DERIVED checked first, not as a fallback: two of its entries
+        # (Hermes' Portal) have a real but non-numeric printed line
+        # ("(Mercurian Ritual)") that would otherwise win the `or` and never
+        # let the derived text through. For every other spell -- i.e. not a
+        # HAND_DERIVED key at all -- this is a no-op, `.get()` returns None
+        # and the real printed line is used exactly as before.
+        design_text = HAND_DERIVED.get(block.name) or block.design_line
         if design_text is None:
             blocked.append((block.name, "no design line printed"))
             continue

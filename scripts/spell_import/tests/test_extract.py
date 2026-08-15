@@ -76,8 +76,8 @@ class RegenerationTest(unittest.TestCase):
 
 
 class HandDerivedTest(unittest.TestCase):
-    """Of the 3 spells with no printed design line, only 1 has a legitimate
-    hand-derivation. The other 2 were investigated, not skipped: their own
+    """Of the 3 spells with no printed design line, only 2 have a legitimate
+    hand-derivation. The other 1 was investigated, not skipped: its own
     prose explicitly disclaims normal Hermetic guideline arithmetic
     ("does not conform to the normal InAq guidelines", "fits poorly into
     the normal framework of Hermetic magic", Mercurian Ritual), and no
@@ -92,11 +92,21 @@ class HandDerivedTest(unittest.TestCase):
         names = {s["name"] for s in report.spells}
         self.assertIn("Enchantment of the Scrying Pool", names)
 
-    def test_the_two_non_derivable_spells_stay_correctly_blocked(self):
+    def test_the_one_remaining_non_derivable_spell_stays_correctly_blocked(self):
         report = extract_spells.run(write=False)
         blocked_names = {name for name, _ in report.blocked}
-        for name in ["Whispering Winds", "Hermes' Portal"]:
-            self.assertIn(name, blocked_names)
+        self.assertIn("Whispering Winds", blocked_names)
+
+    def test_hermes_portal_is_now_derivable(self):
+        # Item 45: the tokenizer gap that made this permanently blocked is
+        # closed. rete-4's own guideline note ("add magnitudes for
+        # distance/Arcane Connection") plus the rego-transport-distance
+        # modifier's top rung is the derivation -- see HAND_DERIVED's
+        # comment for the full magnitude arithmetic.
+        report = extract_spells.run(write=False)
+        spell = next(s for s in report.spells if s["name"] == "Hermes' Portal")
+        self.assertEqual(spell["printedLevel"], 75)
+        self.assertEqual(spell["baseEffectId"], "rete-4")
 
 
 class BountifulFeastTypoTest(unittest.TestCase):

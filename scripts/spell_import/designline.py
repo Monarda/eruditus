@@ -130,6 +130,16 @@ MODIFIER_LABELS = {
     # affect changing images. Add one level of magnitude to spells that do
     # so" -> reim-changing-image, the same option "moving image" above
     # reaches (+1, The Captive Voice; Wizard's Sidestep).
+
+    # Rego transport-distance ladder (modifiers.json id
+    # "rego-transport-distance", scoped to rete-4/rehe-10b/reig-3c/rean-10b/
+    # reaq-4b). Bare "distance" is deliberately NOT here -- it names no real
+    # option (the modifier's own option table has no entry for it), so it
+    # should keep failing at the tokenizer rather than succeed here and fail
+    # one layer deeper in emit.py with a near-identical message. See todo
+    # item 45.
+    "5 paces", "50 paces", "500 paces", "1 league", "7 leagues",
+    "arcane connection",
 }
 
 
