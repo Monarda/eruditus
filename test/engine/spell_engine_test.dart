@@ -359,6 +359,243 @@ void main() {
     });
   });
 
+  group('additive guideline modifiers', () {
+    test('the Muto Ignem fire-intensity ladder reaches level 20 at +20 damage', () {
+      final fireIntensity = Modifier(
+        id: 'muto-ignem-fire-intensity',
+        name: 'Fire Intensity',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Muto', form: 'Ignem', effectIds: []),
+        options: [
+          ModifierOption(id: 'muto-ignem-fire-intensity-5', label: '+5 damage', magnitude: 0),
+          ModifierOption(id: 'muto-ignem-fire-intensity-10', label: '+10 damage', magnitude: 1),
+          ModifierOption(id: 'muto-ignem-fire-intensity-15', label: '+15 damage', magnitude: 2),
+          ModifierOption(id: 'muto-ignem-fire-intensity-20', label: '+20 damage', magnitude: 3),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [fireIntensity]);
+      final baseEffect = BaseEffect(
+        id: 'muig-test', technique: 'Muto', form: 'Ignem',
+        description: 'Change the intensity of an existing fire',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'muto-ignem-fire-intensity': ['muto-ignem-fire-intensity-20']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 20);
+    });
+
+    test('the Rego Ignem fire-intensity ladder reaches level 20 at +20 damage', () {
+      final fireIntensity = Modifier(
+        id: 'rego-ignem-fire-intensity',
+        name: 'Fire Intensity',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Rego', form: 'Ignem', effectIds: []),
+        options: [
+          ModifierOption(id: 'rego-ignem-fire-intensity-5', label: '+5 damage', magnitude: 0),
+          ModifierOption(id: 'rego-ignem-fire-intensity-10', label: '+10 damage', magnitude: 1),
+          ModifierOption(id: 'rego-ignem-fire-intensity-15', label: '+15 damage', magnitude: 2),
+          ModifierOption(id: 'rego-ignem-fire-intensity-20', label: '+20 damage', magnitude: 3),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [fireIntensity]);
+      final baseEffect = BaseEffect(
+        id: 'reig-test', technique: 'Rego', form: 'Ignem',
+        description: 'Control the intensity of an existing fire',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'rego-ignem-fire-intensity': ['rego-ignem-fire-intensity-20']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 20);
+    });
+
+    test('the Creo Animal treated-product modifier adds 2 magnitudes for "treated and processed"', () {
+      final treatedProduct = Modifier(
+        id: 'creo-animal-treated-product',
+        name: 'Treated Animal Product',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Creo', form: 'Animal', effectIds: []),
+        options: [
+          ModifierOption(id: 'creo-animal-treated-product-treated', label: 'Treated (e.g. leather, cloth)', magnitude: 1),
+          ModifierOption(id: 'creo-animal-treated-product-processed', label: 'Treated and processed (e.g. a leather jacket)', magnitude: 2),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [treatedProduct]);
+      final baseEffect = BaseEffect(
+        id: 'cran-test', technique: 'Creo', form: 'Animal',
+        description: 'Create a dead animal product',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {
+          'creo-animal-treated-product': ['creo-animal-treated-product-processed']
+        },
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 15);
+    });
+
+    test('the Muto Herbam treated-material modifier adds one magnitude', () {
+      final treatedMaterial = Modifier(
+        id: 'muto-herbam-treated-material',
+        name: 'Treated Material',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Muto', form: 'Herbam', effectIds: []),
+        options: [
+          ModifierOption(id: 'muto-herbam-treated-material-yes', label: 'Treated or finished material', magnitude: 1),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [treatedMaterial]);
+      final baseEffect = BaseEffect(
+        id: 'muhe-test', technique: 'Muto', form: 'Herbam',
+        description: 'Change a plant into an unworked, natural plant',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {
+          'muto-herbam-treated-material': ['muto-herbam-treated-material-yes']
+        },
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 10);
+    });
+
+    test('the Perdo Herbam live-wood modifier adds one magnitude', () {
+      final liveWood = Modifier(
+        id: 'perdo-herbam-live-wood',
+        name: 'Live Wood',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Perdo', form: 'Herbam', effectIds: []),
+        options: [
+          ModifierOption(id: 'perdo-herbam-live-wood-yes', label: 'Destroys live wood', magnitude: 1),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [liveWood]);
+      final baseEffect = BaseEffect(
+        id: 'pehe-test', technique: 'Perdo', form: 'Herbam',
+        description: 'Destroy an amount of dead wood',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'perdo-herbam-live-wood': ['perdo-herbam-live-wood-yes']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 10);
+    });
+
+    test('the Perdo Auram precision modifier adds one magnitude', () {
+      final precision = Modifier(
+        id: 'perdo-auram-precision',
+        name: 'Precise Destruction',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Perdo', form: 'Auram', effectIds: []),
+        options: [
+          ModifierOption(id: 'perdo-auram-precision-yes', label: 'Destroys air with great precision', magnitude: 1),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [precision]);
+      final baseEffect = BaseEffect(
+        id: 'peau-test', technique: 'Perdo', form: 'Auram',
+        description: 'Destroy an amount of air',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'perdo-auram-precision': ['perdo-auram-precision-yes']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 10);
+    });
+
+    test('the Rego Auram precision modifier adds one magnitude', () {
+      final precision = Modifier(
+        id: 'rego-auram-precision',
+        name: 'Precise Control',
+        selectionMode: ModifierSelectionMode.single,
+        scope: const ModifierScope(technique: 'Rego', form: 'Auram', effectIds: []),
+        options: [
+          ModifierOption(id: 'rego-auram-precision-yes', label: 'Controls air with great strength or precision', magnitude: 1),
+        ],
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      final engine = SpellEngine(allSpells: [], allModifiers: [precision]);
+      final baseEffect = BaseEffect(
+        id: 'reau-test', technique: 'Rego', form: 'Auram',
+        description: 'Control an amount of air',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: baseEffect,
+        range: _range, duration: _duration, target: _target,
+        selectedModifiers: const {'rego-auram-precision': ['rego-auram-precision-yes']},
+        requisites: const {},
+      );
+
+      expect(breakdown.level, 10);
+    });
+  });
+
   group('SpellEngine.pruneModifierSelections', () {
     final material = Modifier(
       id: 'terram-material',

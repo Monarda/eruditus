@@ -96,11 +96,11 @@ void main() {
     );
   });
 
-  test('the distance ladder is scoped to its three transport effects', () async {
+  test('the distance ladder is scoped to its transport effects', () async {
     final modifiers = await loader.loadModifiers();
     final distance = modifiers.firstWhere((m) => m.id == 'rego-transport-distance');
 
-    expect(distance.scope.effectIds..sort(), ['rehe-10b', 'reig-3c', 'rete-4']);
+    expect(distance.scope.effectIds..sort(), ['rean-10b', 'reaq-4b', 'rehe-10b', 'reig-3c', 'rete-4']);
     expect(distance.scope.technique, isNull);
     expect(distance.scope.form, isNull);
   });

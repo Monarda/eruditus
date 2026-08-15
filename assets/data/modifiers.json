@@ -479,7 +479,7 @@
     "name": "Transport distance",
     "description": "The base level covers 5 paces; greater distances cost magnitudes",
     "selectionMode": "single",
-    "scope": { "technique": null, "form": null, "effectIds": ["rehe-10b", "reig-3c", "rete-4"], "excludeTechniques": [] },
+    "scope": { "technique": null, "form": null, "effectIds": ["rehe-10b", "reig-3c", "rete-4", "rean-10b", "reaq-4b"], "excludeTechniques": [] },
     "source": "published",
     "options": [
       { "id": "rego-distance-5-paces", "label": "Up to 5 paces", "magnitude": 0 },
@@ -572,6 +572,97 @@
     "source": "published",
     "options": [
       { "id": "single-property-transformation-yes", "label": "Transforms only one property", "magnitude": -1 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "muto-ignem-fire-intensity",
+    "name": "Fire Intensity",
+    "description": "Every 5 points the fire's damage exceeds +5 adds one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": "Muto", "form": "Ignem", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "muto-ignem-fire-intensity-5", "label": "+5 damage", "magnitude": 0 },
+      { "id": "muto-ignem-fire-intensity-10", "label": "+10 damage", "magnitude": 1 },
+      { "id": "muto-ignem-fire-intensity-15", "label": "+15 damage", "magnitude": 2 },
+      { "id": "muto-ignem-fire-intensity-20", "label": "+20 damage", "magnitude": 3 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "rego-ignem-fire-intensity",
+    "name": "Fire Intensity",
+    "description": "Every 5 points the fire's damage exceeds +5 adds one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": "Rego", "form": "Ignem", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "rego-ignem-fire-intensity-5", "label": "+5 damage", "magnitude": 0 },
+      { "id": "rego-ignem-fire-intensity-10", "label": "+10 damage", "magnitude": 1 },
+      { "id": "rego-ignem-fire-intensity-15", "label": "+15 damage", "magnitude": 2 },
+      { "id": "rego-ignem-fire-intensity-20", "label": "+20 damage", "magnitude": 3 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "creo-animal-treated-product",
+    "name": "Treated Animal Product",
+    "description": "Creating a treated, or treated and processed, animal product adds magnitudes",
+    "selectionMode": "single",
+    "scope": { "technique": "Creo", "form": "Animal", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "creo-animal-treated-product-treated", "label": "Treated (e.g. leather, cloth)", "magnitude": 1 },
+      { "id": "creo-animal-treated-product-processed", "label": "Treated and processed (e.g. a leather jacket)", "magnitude": 2 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "muto-herbam-treated-material",
+    "name": "Treated Material",
+    "description": "Changing a plant into treated or finished material adds one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": "Muto", "form": "Herbam", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "muto-herbam-treated-material-yes", "label": "Treated or finished material", "magnitude": 1 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "perdo-herbam-live-wood",
+    "name": "Live Wood",
+    "description": "Destroying live wood instead of dead wood adds one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": "Perdo", "form": "Herbam", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "perdo-herbam-live-wood-yes", "label": "Destroys live wood", "magnitude": 1 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "perdo-auram-precision",
+    "name": "Precise Destruction",
+    "description": "Destroying air with great precision raises the magnitude by at least one level",
+    "selectionMode": "single",
+    "scope": { "technique": "Perdo", "form": "Auram", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "perdo-auram-precision-yes", "label": "Destroys air with great precision", "magnitude": 1 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "rego-auram-precision",
+    "name": "Precise Control",
+    "description": "Controlling air with great strength or precision raises the magnitude by one level",
+    "selectionMode": "single",
+    "scope": { "technique": "Rego", "form": "Auram", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "rego-auram-precision-yes", "label": "Controls air with great strength or precision", "magnitude": 1 }
     ],
     "citations": [{ "bookId": "arm5-core" }]
   }
