@@ -116,6 +116,15 @@ def build_spell(
     slug = spell["id"]
 
     if override_modifiers:
+        _validate_override_modifiers(override_modifiers, catalog, block)
+        # Replace whole key on collision, not merge lists: override_modifiers
+        # comes from NUMBERED_OVERRIDES, a hand-verified final answer for
+        # exactly which option(s) a modifier should carry. If a future
+        # override ever named a modifier _selected_modifiers also populated
+        # from the design line, the override is meant to *replace* that
+        # design-line guess outright -- not be appended to it -- which is
+        # exactly what dict-merge-by-key already does here. No corpus spell
+        # collides today; this is deliberate future-proofing, not dead code.
         spell["selectedModifiers"] = {**spell["selectedModifiers"], **override_modifiers}
 
     realm_by_spell_id = realm_by_spell_id or {}
@@ -472,6 +481,37 @@ def _selected_modifiers(
             )
         selected.setdefault(modifier_id, []).append(option["id"])
     return selected
+
+
+def _validate_override_modifiers(
+    override_modifiers: dict[str, list[str]], catalog: catalog_module.Catalog, block
+) -> None:
+    """Check every id in a NUMBERED_OVERRIDES `modifiers` value against the
+    real catalog, the same way every other modifier-selection path in this
+    file does via `_option_exists` -- an override is still a hand-typed id,
+    and a typo or a renamed modifiers.json option should block the spell
+    the same way an unmapped design-line token would, not write a dangling
+    id into the emitted asset silently.
+
+    Unlike `_option_exists`, there is no design-line token magnitude to
+    check an override's option against -- NUMBERED_OVERRIDES names the
+    option id directly, already having picked the right ladder rung by
+    hand -- so this checks only that `modifier_id` and each `option_id`
+    are real.
+    """
+    for modifier_id, option_ids in override_modifiers.items():
+        modifier = next((m for m in catalog.modifiers if m["id"] == modifier_id), None)
+        if modifier is None:
+            raise designline.UnknownToken(
+                f"{block.name}: modifiers.json has no {modifier_id!r} modifier"
+            )
+        known_option_ids = {o["id"] for o in modifier["options"]}
+        for option_id in option_ids:
+            if option_id not in known_option_ids:
+                raise designline.UnknownToken(
+                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
+                    f"{option_id!r}"
+                )
 
 
 def _option_exists(

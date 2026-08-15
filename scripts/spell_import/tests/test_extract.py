@@ -3,6 +3,7 @@ import json
 import unittest
 
 from scripts.spell_import import extract_spells
+from scripts.spell_import import ledger as ledger_module
 from scripts.spell_import.sources import REPO_ROOT
 
 LIBRARY = REPO_ROOT / "assets" / "data" / "spell_library.json"
@@ -277,10 +278,58 @@ class NumberedOverrideTest(unittest.TestCase):
         )
 
 
+class NumberedOverrideLedgerAgreementTest(unittest.TestCase):
+    """NUMBERED_OVERRIDES's resolution path `continue`s before `Ledger.resolve()`
+    is ever called, so nothing in the normal import path checks that a ledger
+    entry recorded for one of these spells (resolutions.json) still agrees
+    with what NUMBERED_OVERRIDES resolves it to. Not every NUMBERED_OVERRIDES
+    id has a ledger entry -- e.g. muau-3/Fog of Confusion genuinely has none,
+    since it isn't ambiguous -- so this only checks the ones that do.
+    """
+
+    def test_ledger_entries_agree_with_numbered_overrides(self):
+        ledger = ledger_module.Ledger.load()
+        for spell_id, override in extract_spells.NUMBERED_OVERRIDES.items():
+            entry = ledger.entries.get(spell_id)
+            if entry is None:
+                continue
+            self.assertEqual(
+                entry.base_effect_id, override["base_effect_id"],
+                msg=f"{spell_id}: ledger recorded {entry.base_effect_id!r} but "
+                    f"NUMBERED_OVERRIDES resolves it to {override['base_effect_id']!r}",
+            )
+
+    def test_the_check_above_actually_catches_a_disagreement(self):
+        """Prove test_ledger_entries_agree_with_numbered_overrides can fail:
+        mutate a loaded ledger's recorded base effect id in memory (never
+        touching resolutions.json on disk) and confirm the same comparison
+        it makes then fails, before reverting.
+        """
+        ledger = ledger_module.Ledger.load()
+        spell_id = next(
+            sid for sid in extract_spells.NUMBERED_OVERRIDES if sid in ledger.entries
+        )
+        original = ledger.entries[spell_id]
+        try:
+            ledger.entries[spell_id] = dataclasses.replace(
+                original, base_effect_id=original.base_effect_id + "-mutated"
+            )
+            with self.assertRaises(AssertionError):
+                self.assertEqual(
+                    ledger.entries[spell_id].base_effect_id,
+                    extract_spells.NUMBERED_OVERRIDES[spell_id]["base_effect_id"],
+                )
+        finally:
+            ledger.entries[spell_id] = original
+
+
 class LevelNeedsRulesDecisionTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.report = extract_spells.run(write=False)
+
     def test_sense_of_the_lingering_magic_blocks_with_a_specific_reason(self):
-        report = extract_spells.run(write=False)
-        reasons = dict(report.blocked)
+        reasons = dict(self.report.blocked)
         self.assertIn("Sense of the Lingering Magic", reasons)
         self.assertIn("needs a rules decision", reasons["Sense of the Lingering Magic"])
 

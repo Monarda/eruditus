@@ -472,6 +472,24 @@ class NumberedOverrideEmissionTest(unittest.TestCase):
         spell = emit.build_spell(block, "crvi-3", self.catalog, design)
         self.assertEqual(spell["selectedModifiers"], {})
 
+    def test_override_modifiers_with_an_unknown_option_id_raises(self):
+        design = designline.parse_design("(Base 20, +2 Voice)")
+        block = _block("The Enigma's Gift", "Creo", "Vim", 30)
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(
+                block, "crvi-5a", self.catalog, design,
+                override_modifiers={"warping-point-burst": ["warping-point-burst-does-not-exist"]},
+            )
+
+    def test_override_modifiers_with_an_unknown_modifier_id_raises(self):
+        design = designline.parse_design("(Base 20, +2 Voice)")
+        block = _block("The Enigma's Gift", "Creo", "Vim", 30)
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(
+                block, "crvi-5a", self.catalog, design,
+                override_modifiers={"no-such-modifier": ["whatever"]},
+            )
+
 
 class RequisiteEmissionTest(unittest.TestCase):
     @classmethod
