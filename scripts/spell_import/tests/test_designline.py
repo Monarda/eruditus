@@ -277,6 +277,33 @@ class SplittingTest(unittest.TestCase):
         with self.assertRaises(designline.UnknownToken):
             designline.parse_design("(Base 5, +1 Touch, +2, +1 Conc)")
 
+    def test_semicolon_at_depth_zero_splits_like_comma(self):
+        # Ball of Abysmal Flame is the one corpus design line using ";"
+        # instead of "," to separate the magnitude from trailing prose.
+        parts = designline._split_parts(
+            "Base 25, +2 Voice; the ball appearing to shoot from your hand "
+            "is a cosmetic effect"
+        )
+        self.assertEqual([raw for raw, _ in parts], [
+            "Base 25",
+            "+2 Voice",
+            "the ball appearing to shoot from your hand is a cosmetic effect",
+        ])
+
+    def test_semicolon_inside_parentheses_does_not_split_a_token(self):
+        # A bracketed aside containing ";" must survive splitting exactly as
+        # one containing "," already does (test_split_parts_keeps_a_nested_
+        # aside_whole above) -- ";" is just another depth-0 boundary
+        # character, not a special case.
+        parts = designline._split_parts(
+            "Base 5, +1 Size (a total of +4; including the +3), +1 Touch"
+        )
+        self.assertEqual([raw for raw, _ in parts], [
+            "Base 5",
+            "+1 Size (a total of +4; including the +3)",
+            "+1 Touch",
+        ])
+
 
 class TrailingContinuationTest(unittest.TestCase):
     """The real corpus lines TRAILING_CONTINUATION_LABELS unblocks."""
@@ -316,6 +343,20 @@ class TrailingContinuationTest(unittest.TestCase):
         )
         self.assertEqual(design.base_level, 10)
         self.assertEqual(len(design.tokens), 3)
+
+    def test_ball_of_abysmal_flame(self):
+        # Item 29: the trailing clause follows a ";" rather than a "," --
+        # _split_parts treats it as an equivalent depth-0 boundary, so by the
+        # time TRAILING_CONTINUATION_LABELS is checked it's just another
+        # unsigned, no-label part.
+        design = designline.parse_design(
+            "(Base 25, +2 Voice; the ball appearing to shoot from your hand "
+            "is a cosmetic effect)"
+        )
+        self.assertEqual(design.base_level, 25)
+        self.assertEqual(len(design.tokens), 1)
+        self.assertEqual(design.tokens[0].label, "Voice")
+        self.assertEqual(design.tokens[0].magnitude, 2)
 
     def test_an_unlisted_trailing_clause_still_raises(self):
         # The allow-list is closed: an unsigned clause the list does not name

@@ -230,6 +230,12 @@ ADJUSTMENT_LABELS = frozenset({
 # not the water" -- each entered separately below, since this tokenizer
 # checks one comma-split segment at a time and has no notion of "the rest of
 # the sentence".
+#
+# Ball of Abysmal Flame's continuation follows a semicolon rather than a
+# comma ("+2 Voice; the ball appearing to shoot from your hand is a cosmetic
+# effect") -- `_split_parts` treats `;` as an equivalent top-level boundary
+# (see its docstring), so by the time this allow-list is checked the clause
+# is just another unsigned, no-label part like the others here.
 TRAILING_CONTINUATION_LABELS = frozenset({
     "changing the water to ice",
     "mist is a purely cosmetic effect and thus is free",
@@ -237,6 +243,7 @@ TRAILING_CONTINUATION_LABELS = frozenset({
     "ward",
     "so the target is the warded Individual",
     "not the water",
+    "the ball appearing to shoot from your hand is a cosmetic effect",
 })
 
 _BARE_MAGNITUDE = re.compile(r"^(?P<sign>[+-])\s*(?P<magnitude>\d+)$")
@@ -276,13 +283,25 @@ def _merge_comma_split_magnitudes(
 
 
 def _split_parts(text: str) -> list[tuple[str, str]]:
-    """Split on top-level commas and periods, keeping raw and stripped forms.
+    """Split on top-level commas, periods and semicolons, keeping raw and
+    stripped forms.
 
     Parentheticals must survive splitting for two reasons: a bracketed aside
     can itself contain a comma ("+1 Size (for a total of +4 Size, including
     ...)"), which the old blanket strip-then-split turned into two bogus
     tokens; and for adjustment tokens the aside IS the content -- "+2 Special
     (based on Concentration)" carries all its meaning in the bracket.
+
+    Semicolon joins `,`/`.` as a boundary character for the same reason: one
+    design line in the whole corpus uses it as the magnitude/prose separator
+    where every other spell uses a comma -- "(Base 25, +2 Voice; the ball
+    appearing to shoot from your hand is a cosmetic effect)" (Ball of
+    Abysmal Flame). Checked against every design line in Chapter 9: it is the
+    only one containing a semicolon at all, so there is no other corpus usage
+    this split could misinterpret. (The rulebook's `**Range: X; Duration:
+    Y;**`-style guideline headers also use `;`, but those never reach
+    `_split_parts` -- it parses only text captured by blocks.py's `_DESIGN`
+    line match, not the guideline preamble.)
 
     Returns (raw, stripped) pairs. Tokenising reads `stripped`; adjustment
     notes read `raw`.
@@ -297,7 +316,7 @@ def _split_parts(text: str) -> list[tuple[str, str]]:
         elif char == ")":
             depth = max(0, depth - 1)
 
-        at_boundary = char in ",." and depth == 0 and (
+        at_boundary = char in ",.;" and depth == 0 and (
             index + 1 >= len(text) or text[index + 1].isspace()
         )
         if at_boundary:

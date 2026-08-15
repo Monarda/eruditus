@@ -883,6 +883,27 @@
     ]
   },
   {
+    "id": "lib-crig-ball-abysmal-flame",
+    "name": "Ball of Abysmal Flame",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crig-25a",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "A ball of flame shoots from your hand to strike a single target, doing +30 damage. Marius of Tremere's version of the spell causes the ball to make a loud bang when it hits the target. His sigil is a gaudiness in his spells. Level 35.",
+    "description": "A ball of flame shoots from your hand to strike a single target, doing +30 damage. Marius of Tremere's version of the spell causes the ball to make a loud bang when it hits the target. His sigil is a gaudiness in his spells.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crig-blade-virulent-flame",
     "name": "Blade of the Virulent Flame",
     "requisites": {},
