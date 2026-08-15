@@ -1408,6 +1408,31 @@
     ]
   },
   {
+    "id": "lib-crvi-enigmas-gift",
+    "name": "The Enigma's Gift",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "warping-point-burst": [
+        "warping-point-burst-4"
+      ]
+    },
+    "baseEffectId": "crvi-5a",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "The target of the spell gains four Warping Points (plus the normal one for being affected by a powerful supernatural effect, in most cases) and, if a Hermetic magus, must check to see whether he enters Twilight in the normal way. Although the burst of magic that causes the Warping lasts but a moment, the resulting Warping is permanent. Level 30.",
+    "description": "The target of the spell gains four Warping Points (plus the normal one for being affected by a powerful supernatural effect, in most cases) and, if a Hermetic magus, must check to see whether he enters Twilight in the normal way. Although the burst of magic that causes the Warping lasts but a moment, the resulting Warping is permanent.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-crvi-phantom-gift",
     "name": "The Phantom Gift",
     "requisites": {},
@@ -2656,6 +2681,60 @@
       }
     ],
     "ritualDeclaration": "lastingCreation"
+  },
+  {
+    "id": "lib-muau-fog-confusion",
+    "name": "Fog of Confusion",
+    "requisites": {
+      "Imaginem": "adding",
+      "Rego": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-auram": [
+        "size-auram-4"
+      ],
+      "single-property-transformation": [
+        "single-property-transformation-yes"
+      ]
+    },
+    "baseEffectId": "muau-3",
+    "rangeId": "range-touch",
+    "durationId": "duration-year",
+    "targetId": "target-individual",
+    "summary": "Turns a bank of fog up to six miles across into a silvery mist too thick to see through. Random screams, thumps, hisses, and other noises harass and confuse anyone within the fog, perhaps even leading them into danger. People have extreme difficulty navigating through the fog, especially through unknown territory. No more than seven people, who must be present at the ritual, can see normally th... Level 45.",
+    "description": "Turns a bank of fog up to six miles across into a silvery mist too thick to see through. Random screams, thumps, hisses, and other noises harass and confuse anyone within the fog, perhaps even leading them into danger. People have extreme difficulty navigating through the fog, especially through unknown territory. No more than seven people, who must be present at the ritual, can see normally through the fog. The fog does not dissipate until the spell expires.",
+    "printedLevel": 45,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
+    "id": "lib-muau-infernal-smoke-death",
+    "name": "Infernal Smoke of Death",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "muau-gen",
+    "rangeId": "range-voice",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "Turns normal smoke from a fire into a thick, corrosive cloud. Anyone immersed in the cloud of smoke takes +25 corrosion damage, against which armor provides only half its normal Protection value. Soft materials like cloth, fur, paper, and leather are charred and ruined by exposure to the noxious vapor. While you concentrate, any new smoke becomes corrosive. The smoke is heavier than air, so rol... Level 40.",
+    "description": "Turns normal smoke from a fire into a thick, corrosive cloud. Anyone immersed in the cloud of smoke takes +25 corrosion damage, against which armor provides only half its normal Protection value. Soft materials like cloth, fur, paper, and leather are charred and ruined by exposure to the noxious vapor. While you concentrate, any new smoke becomes corrosive. The smoke is heavier than air, so rolls along the ground, pooling in low spots. The damage represents normal exposure to the vapor, and may be modified if characters spend unusually short or long times within it.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "chosenBaseLevel": 25
   },
   {
     "id": "lib-muau-rain-oil",
@@ -4434,6 +4513,31 @@
       }
     ],
     "ritualDeclaration": "lastingCreation"
+  },
+  {
+    "id": "lib-peig-wizards-icy-grip",
+    "name": "Wizard's Icy Grip",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "chill-damage": [
+        "chill-damage-20"
+      ]
+    },
+    "baseEffectId": "peig-5b",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "Chills a single target so that it takes +20 damage. If this is enough to kill, the target is frozen solid. Armor does not add to Soak against this spell. Level 30.",
+    "description": "Chills a single target so that it takes +20 damage. If this is enough to kill, the target is frozen solid. Armor does not add to Soak against this spell.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
   },
   {
     "id": "lib-peim-chamber-invisibility",
