@@ -428,6 +428,51 @@ class PrintedLevelEmissionTest(unittest.TestCase):
             self._build(None)
 
 
+class NumberedOverrideEmissionTest(unittest.TestCase):
+    """`build_spell`'s chosen_base_level/override_modifiers parameters --
+    the wiring NUMBERED_OVERRIDES (extract_spells.py) uses to resolve a
+    design line whose numeric base has no exact catalog match. See this
+    file's own docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md
+    for why these are needed.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_chosen_base_level_is_emitted_only_when_provided(self):
+        design = designline.parse_design("(Base 25, +2 Voice, +1 Conc)")
+        block = _block("Infernal Smoke of Death", "Muto", "Auram", 40)
+        spell = emit.build_spell(
+            block, "muau-gen", self.catalog, design, chosen_base_level=25,
+        )
+        self.assertEqual(spell["chosenBaseLevel"], 25)
+
+    def test_chosen_base_level_is_omitted_when_not_provided(self):
+        design = designline.parse_design("(Base 3, +1 Touch, +1 Dia)")
+        block = _block("Taint Something", "Creo", "Vim", 3)
+        spell = emit.build_spell(block, "crvi-3", self.catalog, design)
+        self.assertNotIn("chosenBaseLevel", spell)
+
+    def test_override_modifiers_are_merged_into_selectedModifiers(self):
+        design = designline.parse_design("(Base 20, +2 Voice)")
+        block = _block("The Enigma's Gift", "Creo", "Vim", 30)
+        spell = emit.build_spell(
+            block, "crvi-5a", self.catalog, design,
+            override_modifiers={"warping-point-burst": ["warping-point-burst-4"]},
+        )
+        self.assertEqual(
+            spell["selectedModifiers"]["warping-point-burst"],
+            ["warping-point-burst-4"],
+        )
+
+    def test_override_modifiers_default_to_no_change_when_not_provided(self):
+        design = designline.parse_design("(Base 3, +1 Touch, +1 Dia)")
+        block = _block("Taint Something", "Creo", "Vim", 3)
+        spell = emit.build_spell(block, "crvi-3", self.catalog, design)
+        self.assertEqual(spell["selectedModifiers"], {})
+
+
 class RequisiteEmissionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

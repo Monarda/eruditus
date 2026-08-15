@@ -196,6 +196,73 @@ HAND_DERIVED_ADJUSTMENT: dict[str, tuple[int, str]] = {
 }
 
 
+# A published spell whose design line's numeric base has no exact catalog
+# match, but resolves to a real base effect once a human reads the
+# guideline text: either a General guideline this specific spell commits to
+# one level of (Core Rules line 12414 says the guideline itself stays
+# open-ended; this published spell already made the choice, in print,
+# once), or a numbered guideline's own ladder rung one step past what the
+# table prints. Verified once per entry against the rulebook, never
+# inferred -- "no numbered match" alone doesn't distinguish the two cases,
+# which is why this is a hand-verified table rather than an automatic
+# "no match -> assume General" heuristic. See
+# docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md.
+#
+# Infernal Smoke of Death (Muto Auram, printed LEVEL 40, "Base 25, +2 Voice,
+# +1 Conc"): built on muau-gen, the MuAu General row ("Transform air into a
+# gas doing +level damage") -- +25 corrosion damage matches base 25 exactly.
+#
+# The Enigma's Gift (Creo Vim, printed LEVEL 30, "Base 20, +2 Voice"): the
+# CrVi Warping Point ladder prints levels 5/10/15 (1/2/3 Warping Points);
+# the spell's own prose says "four Warping Points", the ladder's 4th rung.
+#
+# Wizard's Icy Grip (Perdo Ignem, printed LEVEL 30, "Base 20, +2 Voice"):
+# the PeIg preamble states "for every five points the damage exceeds +5,
+# add one magnitude" -- levels 5/10 already print +5/+10 damage; +20 damage
+# is the same rule three magnitudes past the +5 baseline.
+#
+# Fog of Confusion (Muto Auram, printed LEVEL 45, "Base 2, +1 Touch, +4
+# Year, +4 Size, +1 Imaginem requisite, +1 Rego requisite"): the MuAu
+# preamble states "transforming only one property of air generally lowers
+# the level by one magnitude" -- muau-3 (base 3) minus that one magnitude
+# is exactly 2.
+NUMBERED_OVERRIDES: dict[str, dict] = {
+    "lib-muau-infernal-smoke-death": {
+        "base_effect_id": "muau-gen",
+        "chosen_base_level": 25,
+        "modifiers": {},
+    },
+    "lib-crvi-enigmas-gift": {
+        "base_effect_id": "crvi-5a",
+        "chosen_base_level": None,
+        "modifiers": {"warping-point-burst": ["warping-point-burst-4"]},
+    },
+    "lib-peig-wizards-icy-grip": {
+        "base_effect_id": "peig-5b",
+        "chosen_base_level": None,
+        "modifiers": {"chill-damage": ["chill-damage-20"]},
+    },
+    "lib-muau-fog-confusion": {
+        "base_effect_id": "muau-3",
+        "chosen_base_level": None,
+        "modifiers": {"single-property-transformation": ["single-property-transformation-yes"]},
+    },
+}
+
+
+# Spells with a genuine catalog gap that isn't derivable from the
+# guideline text -- different from NUMBERED_OVERRIDES (resolved) and from
+# KNOWN_UNRESOLVABLE (candidates exist, the choice among them is
+# ambiguous). See this plan's design spec for why this one specifically
+# doesn't resolve.
+LEVEL_NEEDS_RULES_DECISION: dict[str, str] = {
+    "lib-invi-sense-lingering-magic": (
+        "base 10 does not derive from InVi's numbered table (tops at 5) or "
+        "General row without an unstated combination rule"
+    ),
+}
+
+
 @dataclasses.dataclass
 class Report:
     spells: list[dict]
@@ -323,6 +390,25 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
         design_lines[spell_id] = design_text
         candidates = catalog.candidates(block.technique, block.form, design.base_level)
+
+        if not candidates and spell_id in NUMBERED_OVERRIDES:
+            override = NUMBERED_OVERRIDES[spell_id]
+            try:
+                spells.append(emit.build_spell(
+                    block, override["base_effect_id"], catalog, design,
+                    realm_by_spell_id=REALM_BY_SPELL_ID,
+                    chosen_base_level=override["chosen_base_level"],
+                    override_modifiers=override["modifiers"],
+                ))
+            except (designline.UnknownToken, KeyError) as error:
+                blocked.append((block.name, str(error)))
+            continue
+
+        if not candidates and spell_id in LEVEL_NEEDS_RULES_DECISION:
+            blocked.append(
+                (block.name, f"needs a rules decision: {LEVEL_NEEDS_RULES_DECISION[spell_id]}")
+            )
+            continue
 
         if not candidates:
             blocked.append((block.name, "no base effect at that Technique/Form/level"))

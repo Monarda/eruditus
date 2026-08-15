@@ -85,6 +85,8 @@ def build_spell(
     catalog: catalog_module.Catalog,
     design: designline.Design,
     realm_by_spell_id: dict[str, str] | None = None,
+    chosen_base_level: int | None = None,
+    override_modifiers: dict[str, list[str]] | None = None,
 ) -> dict:
     range_id = catalog.parameter_id("Range", _parameter_name(design, "range", block))
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
@@ -112,6 +114,9 @@ def build_spell(
         "summary": _summary(block),
     }
     slug = spell["id"]
+
+    if override_modifiers:
+        spell["selectedModifiers"] = {**spell["selectedModifiers"], **override_modifiers}
 
     realm_by_spell_id = realm_by_spell_id or {}
     chosen_slots: dict[str, str] = {}
@@ -148,6 +153,9 @@ def build_spell(
 
     if chosen_slots:
         spell["chosenSlots"] = chosen_slots
+
+    if chosen_base_level is not None:
+        spell["chosenBaseLevel"] = chosen_base_level
 
     return spell
 

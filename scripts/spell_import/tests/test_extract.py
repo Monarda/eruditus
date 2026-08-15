@@ -231,6 +231,60 @@ class RegenerationMessageTest(unittest.TestCase):
         self.assertNotIn("rulebook source moved", message)
 
 
+class NumberedOverrideTest(unittest.TestCase):
+    """The 4 spells item 28's design spec resolves via NUMBERED_OVERRIDES --
+    see docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.report = extract_spells.run(write=False)
+
+    def test_all_four_spells_now_import(self):
+        names = {s["name"] for s in self.report.spells}
+        for name in [
+            "The Enigma's Gift",
+            "Wizard's Icy Grip",
+            "Fog of Confusion",
+            "Infernal Smoke of Death",
+        ]:
+            self.assertIn(name, names)
+
+    def test_infernal_smoke_of_death_carries_its_general_level(self):
+        spell = next(s for s in self.report.spells if s["name"] == "Infernal Smoke of Death")
+        self.assertEqual(spell["baseEffectId"], "muau-gen")
+        self.assertEqual(spell["chosenBaseLevel"], 25)
+
+    def test_the_enigmas_gift_carries_its_ladder_selection(self):
+        spell = next(s for s in self.report.spells if s["name"] == "The Enigma's Gift")
+        self.assertEqual(spell["baseEffectId"], "crvi-5a")
+        self.assertEqual(
+            spell["selectedModifiers"]["warping-point-burst"], ["warping-point-burst-4"]
+        )
+        self.assertNotIn("chosenBaseLevel", spell)
+
+    def test_wizards_icy_grip_carries_its_ladder_selection(self):
+        spell = next(s for s in self.report.spells if s["name"] == "Wizard's Icy Grip")
+        self.assertEqual(spell["baseEffectId"], "peig-5b")
+        self.assertEqual(spell["selectedModifiers"]["chill-damage"], ["chill-damage-20"])
+
+    def test_fog_of_confusion_carries_its_discount(self):
+        spell = next(s for s in self.report.spells if s["name"] == "Fog of Confusion")
+        self.assertEqual(spell["baseEffectId"], "muau-3")
+        self.assertEqual(
+            spell["selectedModifiers"]["single-property-transformation"],
+            ["single-property-transformation-yes"],
+        )
+
+
+class LevelNeedsRulesDecisionTest(unittest.TestCase):
+    def test_sense_of_the_lingering_magic_blocks_with_a_specific_reason(self):
+        report = extract_spells.run(write=False)
+        reasons = dict(report.blocked)
+        self.assertIn("Sense of the Lingering Magic", reasons)
+        self.assertIn("needs a rules decision", reasons["Sense of the Lingering Magic"])
+
+
 class HandDerivedAdjustmentTest(unittest.TestCase):
     """The one design line that names an adjustment but prints no magnitude.
 
