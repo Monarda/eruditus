@@ -596,6 +596,24 @@ def _option_exists(
     )
 
 
+# A "Spec"/"Special" Range, Duration or Target has no parameters.json entry
+# of its own -- todo item 26's decision was that this is shorthand for a
+# real parameter, not a fifth catalog value, resolved by reading what the
+# spell's own adjustment clause says it's "based on"/"equivalent to". A
+# closed table, not a parser: each key is a designline.ADJUSTMENT_LABELS
+# entry verified against the one spell that prints it. Watching Ward also
+# prints a Special Duration ("Duration is non-standard") but names no basis
+# for it at all -- deliberately absent here, see todo item 26's own note on
+# why it stays blocked rather than getting a guessed entry.
+SPECIAL_PARAMETER_BASIS: dict[str, str] = {
+    "Special (based on Concentration)": "Concentration",
+    "Special based on Mom": "Momentary",
+    "Special (equivalent to Boundary)": "Boundary",
+}
+
+_SPECIAL_STAT_MARKERS = frozenset({"Spec", "Special"})
+
+
 def _parameter_name(design: designline.Design, slot: str, block) -> str:
     """Resolve a slot from the stat line, expanded to its full catalog name."""
     raw = {
@@ -603,6 +621,14 @@ def _parameter_name(design: designline.Design, slot: str, block) -> str:
         "duration": block.stat.duration_name,
         "target": block.stat.target_name,
     }[slot]
+    if raw in _SPECIAL_STAT_MARKERS:
+        for token in design.tokens:
+            if token.kind == "adjustment" and token.note in SPECIAL_PARAMETER_BASIS:
+                return SPECIAL_PARAMETER_BASIS[token.note]
+        raise designline.UnknownToken(
+            f"{block.name}: {slot} is {raw!r} but no adjustment token names "
+            "what it's based on"
+        )
     if raw not in designline.PARAMETER_LABELS:
         raise designline.UnknownToken(f"{block.name}: unknown {slot} {raw!r}")
     return designline.PARAMETER_LABELS[raw]

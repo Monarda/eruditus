@@ -73,6 +73,57 @@ class AdjustmentEmissionTest(unittest.TestCase):
         self.assertNotIn("adjustments", spell)
 
 
+class SpecialParameterResolutionTest(unittest.TestCase):
+    """A `D: Spec`/`T: Special` stat-line marker has no parameters.json entry
+    of its own -- it's shorthand for whichever real parameter the spell's own
+    adjustment clause names ("based on Concentration", "based on Mom",
+    "equivalent to Boundary"). See todo item 26.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def _block_with_stat(self, technique, form, level, duration_name="Sun", target_name="Ind"):
+        return blocks.SpellBlock(
+            name="Test Spell",
+            technique=technique,
+            form=form,
+            printed_level=level,
+            stat=statline.StatLine(
+                range_name="Touch", duration_name=duration_name, target_name=target_name,
+                is_ritual=False, requisite_arts=[], trailing="",
+            ),
+            prose="Test prose.",
+            design_line=None,
+            line_no=1,
+        )
+
+    def test_special_duration_based_on_concentration_resolves_to_concentration(self):
+        design = designline.parse_design(
+            "(Base 2, +1 Touch, +2 Special (based on Concentration))"
+        )
+        block = self._block_with_stat("Rego", "Auram", 5, duration_name="Spec")
+        spell = emit.build_spell(block, "reau-2", self.catalog, design)
+        self.assertEqual(spell["durationId"], "duration-concentration")
+
+    def test_special_duration_based_on_mom_resolves_to_momentary(self):
+        design = designline.parse_design(
+            "(Base 3, +2 Voice, +1 Special based on Mom, +1 Part, +2 size, +1 fancy effect)"
+        )
+        block = self._block_with_stat("Rego", "Terram", 30, duration_name="Spec")
+        spell = emit.build_spell(block, "rete-3", self.catalog, design)
+        self.assertEqual(spell["durationId"], "duration-momentary")
+
+    def test_a_special_marker_with_no_named_basis_still_raises(self):
+        # No adjustment token at all in this design -- nothing names what the
+        # Special marker is shorthand for. Must still block, not guess.
+        design = designline.parse_design("(Base 2, +1 Touch)")
+        block = self._block_with_stat("Rego", "Auram", 5, duration_name="Spec")
+        with self.assertRaises(designline.UnknownToken):
+            emit.build_spell(block, "reau-2", self.catalog, design)
+
+
 class ElaborateEffectEmissionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

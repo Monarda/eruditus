@@ -364,14 +364,15 @@ importer work, with `spell.dart` untouched.
 
 **None of the six import yet, each for a second reason:**
 
-- [ ] **A `Special` Duration has nothing to resolve to.** `D: Spec` / `D: Special`
-      is not in `parameters.json`, so `emit._parameter_name` raises. Most likely
-      answer: the parameter the adjustment is "based on", read off the adjustment's
-      own note. Affects *Wind at the Back*, *Trackless Step*
-      (`+2 Special (based on Concentration)`), *The Earth Split Asunder*
-      (`+1 Special based on Mom`), and *Watching Ward* (`Duration is non-standard`,
-      numberless; General-level, so item 25 no longer blocks it — this item is its
-      sole blocker). *Trackless Step* has a ledger entry, `rete-2b`.
+- [x] **A `Special` Duration has nothing to resolve to — ✅ DONE 2026-08-15 for 3
+      of 4.** `emit._parameter_name` now resolves `D: Spec`/`D: Special` via a
+      closed table, `SPECIAL_PARAMETER_BASIS`, keyed on the spell's own "based on
+      X" adjustment clause. *Wind at the Back*, *Trackless Step* and *The Earth
+      Split Asunder* all import now. **`Watching Ward` does not and will not
+      via this mechanism** — its own clause, `Duration is non-standard`, names no
+      basis at all (no "based on X"), so there is nothing to resolve it to
+      without guessing. It remains this item's sole open case, General-level
+      (item 25 doesn't block it), blocked purely on this.
 - [ ] *The Bountiful Feast* (`+4 Special (equivalent to Boundary)`) — allow-listed,
       but the same design line has unbalanced brackets so the later `+1 Size (for a
       total of ...` token never closes. **A splitter fix — see item 29's

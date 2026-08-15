@@ -5848,6 +5848,33 @@
     ]
   },
   {
+    "id": "lib-reau-wind-at-back",
+    "name": "Wind at the Back",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "reau-2",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-individual",
+    "summary": "An existing breeze follows you until you stop traveling for more than ten minutes. It causes phenomena you pass through (fog, haze) to follow you. Level 5.",
+    "description": "An existing breeze follows you until you stop traveling for more than ten minutes. It causes phenomena you pass through (fog, haze) to follow you.",
+    "printedLevel": 5,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 2,
+        "note": "Special (based on Concentration)"
+      }
+    ]
+  },
+  {
     "id": "lib-reco-awaken-slumbering-corpse",
     "name": "Awaken the Slumbering Corpse",
     "requisites": {},
@@ -6942,6 +6969,40 @@
     ]
   },
   {
+    "id": "lib-rete-earth-split-asunder",
+    "name": "The Earth Split Asunder",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-terram": [
+        "size-terram-2"
+      ],
+      "elaborate-effect": [
+        "elaborate-effect-minor"
+      ]
+    },
+    "baseEffectId": "rete-3",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-part",
+    "summary": "Creates a 5-foot-wide, 60-foot-long, 10-footdeep crack in the ground. It opens on one round, stays open for another round, and closes at the start of a third round, crushing all within it for +25 damage. You must maintain concentration for all three rounds, or the pit slowly closes, over an hour's time, rather than shutting quickly and violently. To avoid the pit, those in its vicinity other th... Level 30.",
+    "description": "Creates a 5-foot-wide, 60-foot-long, 10-footdeep crack in the ground. It opens on one round, stays open for another round, and closes at the start of a third round, crushing all within it for +25 damage. You must maintain concentration for all three rounds, or the pit slowly closes, over an hour's time, rather than shutting quickly and violently. To avoid the pit, those in its vicinity other than the caster must make a Quickness stress roll against an Ease Factor of 9. Falling in incurs +5 damage. To escape, another such roll is made. Unless outside help is provided, people in the pit only get one chance to escape.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 1,
+        "note": "Special based on Mom"
+      }
+    ]
+  },
+  {
     "id": "lib-rete-earths-carbuncle",
     "name": "The Earth's Carbuncle",
     "requisites": {
@@ -7030,6 +7091,33 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-rete-trackless-step",
+    "name": "Trackless Step",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "rete-2b",
+    "rangeId": "range-touch",
+    "durationId": "duration-concentration",
+    "targetId": "target-part",
+    "summary": "You leave no tracks in the earth until you come to a stop, such as to rest or fight. This spell draws on pre-Hermetic traditions, and does not perfectly fit the categories of Hermetic magic. Level 10.",
+    "description": "You leave no tracks in the earth until you come to a stop, such as to rest or fight. This spell draws on pre-Hermetic traditions, and does not perfectly fit the categories of Hermetic magic.",
+    "printedLevel": 10,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 2,
+        "note": "Special (based on Concentration)"
       }
     ]
   },
