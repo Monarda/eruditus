@@ -151,9 +151,27 @@ REALM_BY_SPELL_ID = {
 # die but the same target-spell-level shape, and cross-Form -- it detects
 # Intellego spells of any Form, not just Vim), and Intellego Vim's own table
 # doesn't tabulate that either.
-# Reconstructing a Rego-Imaginem- or Intellego-Vim-scoped row "by analogy"
-# to the Vim guidelines would still be inventing content neither table
-# prints -- confirmed 2026-08-16, does not change the classification above.
+#
+# Lay to Rest the Haunting Spirit (see the `general_candidates` empty-branch
+# comment below) is a fourth instance, not a fifth unrelated one: "loses a
+# number of points from its Might equal to the level of this spell" is Perdo
+# Vim's own generic pevi-G3 ("Reduce target's Might Score by spell level +2
+# magnitudes"), Form-narrowed to ghosts/spirits and, as with the others,
+# without the Vim-level's magnitude offset. Checked 2026-08-16 against a
+# tempting but wrong analogy: most Perdo Forms *do* carry a "reduce an
+# elemental's Might Score by the level of the spell +2 magnitudes" General
+# row (peaq-gen, peau-gen, peig-gen, pete-G), but Elementals (Core Rules,
+# "Elementals") are a specific creature category restricted to exactly the
+# four physical Forms (Earth/Water/Air/Fire = Terram/Aquam/Auram/Ignem) --
+# there is no such thing as a Mentem elemental, so Perdo Mentem's table
+# lacking that specific row is expected, not a gap. Also checked against
+# `wip/Ars Magica 5e - Core Rules.md` (a pre-Definitive-Edition source,
+# distinct from the reviewed text): same table, same absence -- not an
+# editing drop either.
+# Reconstructing a Rego-Imaginem-, Intellego-Vim- or Perdo-Mentem-scoped row
+# "by analogy" to the Vim guidelines would still be inventing content none
+# of those three tables print -- confirmed 2026-08-16, does not change the
+# classification above.
 DESIGN_LINE_INCOMPLETE = {
     "lib-reim-restore-moved-image":
         "prints (Base effect) but the stat line costs 2 magnitudes",
@@ -543,9 +561,13 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 #
                 # Dispel the Phantom Image's own wording ("whose level you
                 # match or exceed on a stress die + the level of your
-                # spell") is the same recurring per-Form counter-magic
-                # phrasing DESIGN_LINE_INCOMPLETE's comment traces above --
-                # see there for why the pattern doesn't change this either.
+                # spell") and Lay to Rest the Haunting Spirit's ("loses a
+                # number of points from its Might equal to the level of this
+                # spell", Perdo Vim's pevi-G3 Might-reduction guideline,
+                # Form-narrowed to spirits) are the same recurring per-Form
+                # pattern DESIGN_LINE_INCOMPLETE's comment traces above --
+                # see there (and its elemental-Might-reduction digression)
+                # for why the pattern doesn't change this either.
                 blocked.append((block.name, "no General base effect for that Technique/Form"))
                 continue
 

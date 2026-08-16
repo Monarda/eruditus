@@ -1812,9 +1812,10 @@ four now import as exception spells instead, item 46. See
 - **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
   Spirit*, *Dispel the Phantom Image*. Perdo Mentem's and Perdo Imaginem's own
   guideline tables print no General row at all.
-- **Three of the five share a recognizable family, spotted 2026-08-16 — two
-  different Technique pairings sharing one mechanical shape, not the same
-  pattern three times:**
+- **Four of the five share a recognizable family, spotted 2026-08-16 — three
+  different Technique pairings sharing one mechanical shape (a Vim guideline
+  generalizes it with a magnitude offset; the Form-specific flavor text
+  never gets that offset or a table row), not the same pattern four times:**
   - *Dispel the Phantom Image* ("whose level you match or exceed on a
     stress die + the level of your spell") is Perdo Imaginem dispelling a
     *Creo* Imaginem spell — Perdo opposing Creo, scoped to one Form. The
@@ -1831,14 +1832,28 @@ four now import as exception spells instead, item 46. See
     fits the same broader family (match/exceed a target spell's level, no
     magnitude offset) without the stress die, and cross-Form — it detects
     Intellego spells of any Form, not just Vim.
+  - *Lay to Rest the Haunting Spirit* ("loses a number of points from its
+    Might equal to the level of this spell") is Perdo Mentem's own instance
+    of Perdo Vim's `pevi-G3` ("Reduce target's Might Score by spell level +2
+    magnitudes"), Form-narrowed to ghosts/spirits, again without the offset.
+    **Checked against a tempting but wrong analogy first:** most Perdo
+    Forms *do* carry a "reduce an elemental's Might Score by the level of
+    the spell +2 magnitudes" General row (`peaq-gen`, `peau-gen`, `peig-gen`,
+    `pete-G`) — but Elementals are a specific creature category restricted
+    to exactly the four physical Forms (Earth/Water/Air/Fire =
+    Terram/Aquam/Auram/Ignem); there is no such thing as a Mentem elemental,
+    so Perdo Mentem's table lacking that row is expected, not a gap. Also
+    checked against `wip/Ars Magica 5e - Core Rules.md` (a
+    pre-Definitive-Edition source in the same sibling repo) for an
+    editing-dropped row — same table, same absence there too.
 
-  All three are spell-level flavor text the Definitive Edition never
+  All four are spell-level flavor text the Definitive Edition never
   generalizes into that Form's own guideline table — only the Vim-level
   versions carry a magnitude offset the Form-level ones don't.
-  Reconstructing a row for Rego Imaginem/Intellego Vim "by analogy" to the
-  Vim guidelines is still inventing content neither table prints — same
-  policy as `peme-G`/`inco-gen` below, not a loophole around it. See
-  `extract_spells.DESIGN_LINE_INCOMPLETE`'s comment.
+  Reconstructing a row for Rego Imaginem, Intellego Vim or Perdo Mentem "by
+  analogy" to the Vim guidelines is still inventing content none of those
+  three tables print — same policy as `peme-G`/`inco-gen` below, not a
+  loophole around it. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s comment.
 - **Re-derived 2026-08-16, not a new finding — all five were already settled
   by `docs/superpowers/plans/2026-08-05-general-base-effects.md`,
   independently re-confirmed against the reviewed rulebook text while
