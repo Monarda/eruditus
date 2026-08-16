@@ -103,9 +103,22 @@ proven against real content rather than synthetic fixtures alone.
 
 ## Approach
 
-### 1. `Parameter.requiresVirtue` (informational Virtue-gating)
+### 1. `requiresVirtue` (informational Virtue-gating) — on both `Parameter` and `BaseEffect`
 
-Add a nullable field to `lib/models/parameter.dart`:
+*Faerie Chains of the Familiar Slave* gates two different things
+independently: its Duration (Until (Condition) — *"also requires a Ritual
+spell"*, and per the Faerie Magic section, usable only by Faerie Magic
+initiates) **and its base effect itself** (line 3373: *"it may be invented
+by anyone who has been Initiated into the Outer Mystery of Faerie Magic"*).
+A spell could in principle use an ordinary, unrestricted base effect with a
+Virtue-gated parameter, or a Virtue-gated base effect with only ordinary
+parameters — the two are independent facts the rulebook states separately,
+so both models need the field, not just `Parameter`.
+
+Add the identical nullable field to both `lib/models/parameter.dart` and
+`lib/models/base_effect.dart` (plain duplication, matching this codebase's
+existing style of composing small flags per-model rather than a shared
+mixin — e.g. `requiresRitual` has no equivalent base class either):
 
 ```dart
 /// The Mystery Virtue the rulebook requires to use this parameter (e.g.
@@ -115,8 +128,13 @@ Add a nullable field to `lib/models/parameter.dart`:
 final String? requiresVirtue;
 ```
 
-Round-trips through `toMap`/`fromMap` the same way `requiresRitual` does (key
-omitted or `null` when absent).
+On `Parameter`, this sits alongside the existing `requiresRitual`. On
+`BaseEffect`, it sits alongside the existing `ritualRequirement` enum — no
+"suggested" state is needed here, since the rulebook never hedges on Virtue
+requirements the way it does on Ritual ones, so a plain nullable `String` (not
+a 3-state enum) is the right shape for both models. Both round-trip through
+`toMap`/`fromMap` the same way `requiresRitual` does (key omitted or `null`
+when absent).
 
 ### 2. `ParameterScope` (Fire's Form restriction)
 
@@ -168,10 +186,15 @@ final categoryParameters = parameters
 Each parameter dropdown item's label gets a trailing note when
 `requiresVirtue` is set, e.g. `Until (Condition) (requires Faerie Magic)` —
 consistent with how the existing item text already appends other qualifiers.
-The Ritual banner (`RitualSection`) is unaffected; the Virtue note lives on
-the parameter picker itself, not the Ritual banner, since a parameter can
-require a Virtue without being Ritual (Road) and vice versa (Year, already
-Ritual, requires no Virtue).
+The base effect dropdown (`spell_creation_screen.dart`, the
+`base-effect-dropdown` item builder that already appends
+`(${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'})`) gets the identical
+trailing note for `BaseEffect.requiresVirtue`, e.g. *"Bind a supernatural
+creature as a temporary familiar (General, requires Faerie Magic)"*. The
+Ritual banner (`RitualSection`) is unaffected by either note; the Virtue
+information lives on the pickers themselves, not the Ritual banner, since a
+parameter or base effect can require a Virtue without being Ritual (Road) and
+vice versa (Year, already Ritual, requires no Virtue).
 
 ### 5. `RitualReason.ritualOnlyRange` (closing the engine gap)
 
@@ -229,6 +252,12 @@ Vim Guidelines table in the core rulebook directly; no row there covers this):
 - `ritualRequirement: RitualRequirement.required` (the text says *"This
   ritual binds..."* outright, independent of Until (Condition) also forcing
   it — same belt-and-suspenders pattern as other doubly-ritual entries)
+- `requiresVirtue: "Faerie Magic"` — the base effect's own gate, independent
+  of Until (Condition) also being Faerie-Magic-gated (line 3373: *"it may be
+  invented by anyone who has been Initiated into the Outer Mystery of Faerie
+  Magic"*). Same belt-and-suspenders relationship as the ritual requirement
+  above: two independent rulebook statements, both recorded, neither implying
+  the other.
 - `effectFormula: GeneralEffectFormula(kind: mightThreshold, offsetMagnitudes: -3)`
 - `description`: drawn from the rulebook's own summary of the effect.
 
@@ -263,7 +292,8 @@ identically to how every other General guideline already works in this app.
 ## Testing Strategy
 
 - **Model tests**: `Parameter.requiresVirtue` and `.scope` round-trip
-  (`test/models/parameter_test.dart`), `ParameterScope.appliesTo` unit tests.
+  (`test/models/parameter_test.dart`), `ParameterScope.appliesTo` unit tests,
+  `BaseEffect.requiresVirtue` round-trip (`test/models/base_effect_test.dart`).
 - **Engine tests**: `RitualStatus`/`RitualReason.ritualOnlyRange` derivation
   (`test/engine/ritual_status_test.dart`, `test/engine/spell_engine_test.dart`)
   — a Range with `requiresRitual: true` produces the new reason; existing
@@ -271,7 +301,8 @@ identically to how every other General guideline already works in this app.
 - **Widget tests**: parameter dropdown filters Fire out for non-Ignem/
   Imaginem Forms and back in when the Form changes
   (`test/presentation/screens/spell_creation_screen_test.dart`); the Virtue
-  note renders when `requiresVirtue` is set; `RitualSection` renders the new
+  note renders when `requiresVirtue` is set on a parameter *and* on a base
+  effect (two independent render sites); `RitualSection` renders the new
   `ritualOnlyRange` reason text.
 - **Data tests**: `test/data/datasources/asset_data_loader_test.dart`-style
   coverage that the 9 new parameters load with the expected flags; a
