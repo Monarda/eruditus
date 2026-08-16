@@ -500,7 +500,8 @@
       "technique": null,
       "form": "Mentem",
       "effectIds": [],
-      "excludeTechniques": ["Intellego"]
+      "excludeTechniques": ["Intellego"],
+      "excludeTargets": ["target-individual"]
     },
     "source": "published",
     "options": [

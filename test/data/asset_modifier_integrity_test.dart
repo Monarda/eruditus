@@ -45,6 +45,23 @@ void main() {
     }
   });
 
+  test('size-mentem excludes Individual targets, since minds have no size', () async {
+    final modifiers = await loader.loadModifiers();
+    final sizeMentem = modifiers.firstWhere((m) => m.id == 'size-mentem');
+
+    expect(sizeMentem.scope.excludeTargets, contains('target-individual'));
+    expect(
+      sizeMentem.scope.appliesTo(
+          technique: null, form: 'Mentem', baseEffectId: 'any', targetId: 'target-individual'),
+      isFalse,
+    );
+    expect(
+      sizeMentem.scope.appliesTo(
+          technique: null, form: 'Mentem', baseEffectId: 'any', targetId: 'target-group'),
+      isTrue,
+    );
+  });
+
   test('every Size ladder uses the universal x10 magnitude progression', () async {
     final modifiers = await loader.loadModifiers();
 
