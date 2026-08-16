@@ -28,13 +28,14 @@ reason the guidelines don't apply to it. See item 46.
 
 Last extractor run, 2026-08-16 (`python -m scripts.spell_import.extract_spells`):
 
-> **320 imported · 24 emitted as templates · 6 recorded as exceptions · 10
+> **323 imported · 24 emitted as templates · 6 recorded as exceptions · 7
 > blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
 **Verified against a live `--show-blocked` run, not carried forward by
 arithmetic** — the table below was re-derived spell-by-spell against that
-output, after eight rounds of 2026-08-15 fixes: item 28's Group A/B guideline
+output, after eight rounds of 2026-08-15 fixes plus item 24's closing fix
+(2026-08-16): item 28's Group A/B guideline
 derivations; item 29's splitter fixes (6 spells: *Wings of the Soaring Wind*,
 *Stone to Falling Dust*, *Deluge of Rushing and Dashing*, *Ice of Drowning*,
 *Frosty Breath of the Spoken Lie*, *Ball of Abysmal Flame*); *Ward against
@@ -51,12 +52,13 @@ Sky*); and Bucket B's 5 import-blocker fixes (*Wind at the Back*, *Trackless
 Step* and *The Earth Split Asunder* via item 26's `SPECIAL_PARAMETER_BASIS`
 resolution of `Special` Duration/Target; *The Bountiful Feast* via item 26's
 `DESIGN_LINE_TYPOS` fix for its missing closing paren; and *Hermes' Portal*
-via item 45's transport-distance tokenizer fix); and item 46's six exception
+via item 45's transport-distance tokenizer fix); item 46's six exception
 spells (*Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*,
 *Whispering Winds*, *Watching Ward*, *Mists of Change*), which have their
-own row in the table below rather than counting toward the blocked total.
-Every one of the 10 currently-blocked spells now maps to exactly one row
-below; none are unaccounted for.
+own row in the table below rather than counting toward the blocked total;
+and item 24's closing fix (*The Kiss of Death*, *Black Whisper*, *Sight of
+the Active Magics*, 2026-08-16). Every one of the 7 currently-blocked spells
+now maps to exactly one row below; none are unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
@@ -65,7 +67,7 @@ below; none are unaccounted for.
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
 | General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's Communion* now import as exception spells (item 46) |
-| Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
+| Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 0 | **24** — corrected from 3: all 3 now import as `no-words`/`no-gestures`/`invi-techniques-and-forms` catalog Modifiers, done 2026-08-16 |
 | No printed design line and no legitimate derivation | 0 | see item **27** — corrected from 1: *Whispering Winds* now imports as an exception spell (item 46) rather than staying permanently blocked |
 | `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
 | Non-standard requisite-magnitude phrasing | 0 | **44** — done 2026-08-15, all 3 import |
@@ -73,7 +75,7 @@ below; none are unaccounted for.
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 | Rulebook says guideline arithmetic doesn't apply at all | 6 | new — item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change* |
 
-**Table total: 10 blocked, plus the 6 exception spells in the final row (not
+**Table total: 7 blocked, plus the 6 exception spells in the final row (not
 blockers), reconciled to the live counts.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
@@ -1765,10 +1767,20 @@ per-guideline.
   choice* scoped to a technique/form/effect. Adjustments are unique to one spell and
   would pollute the catalog with 21 single-use entries.
 
-**Three spells stay deliberately blocked** — each is a real unmodelled mechanism, not
-a one-off note, so none is in the allow-list: *The Kiss of Death* (`+2 for no words`),
-*Black Whisper* (`+1 for not needing to gesture`), *Sight of the Active Magics*
-(`+2 Techniques and Forms`).
+**The last three, previously deliberately blocked, now import — 2026-08-16.** Each
+turned out to be a real, reusable mechanism rather than a one-off note, once checked
+against the rulebook's own citations: *The Kiss of Death* (`+2 for no words`) and
+*Black Whisper* (`+1 for not needing to gesture`) buy off the still/silent casting
+requirement the same way Quiet Casting/Still Casting Mastery do at the Mastery-ability
+layer, confirmed globally-scoped (not tied to either spell's own Technique/Form) —
+now catalog Modifiers `no-words`/`no-gestures`. *Sight of the Active Magics*
+(`+2 Techniques and Forms`) is unrelated: it reveals which Technique/Form is active in
+a detected magical aura, on top of the base detection effect *Sense of the Lingering
+Magic* already covers — now `invi-techniques-and-forms`, Intellego Vim-scoped. Wiring:
+`designline.MODIFIER_LABELS`, `emit._MODIFIER_OPTIONS`, `assets/data/modifiers.json`.
+Black Whisper also needed a `resolutions.json` entry (`lib-peme-black-whisper` →
+`peme-15c`, "Drive a person insane") once its design line stopped raising
+`UnknownToken` and reached base-effect resolution for the first time.
 
 - **Spec/Plan:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`,
   `docs/superpowers/plans/2026-08-04-level-adjustments.md`

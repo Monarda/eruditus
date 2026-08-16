@@ -95,16 +95,19 @@ class ParseDesignTest(unittest.TestCase):
         self.assertEqual(design.tokens, [])
 
     def test_unknown_token_raises(self):
-        # "+2 Techniques and Forms" (Sight of the Active Magics) is a real,
-        # unmodelled mechanism -- item 24's allow-list deliberately excludes
-        # it. It must fail loudly so the spell is reported blocked, not
-        # imported with a silently dropped magnitude. This example used to be
-        # "+1 fancy effect", which ElaborateEffectTest below now recognises,
-        # then "+2 metal/gems", which is now recognised too (see
-        # SplittingTest/MaterialTokenTest -- Perdo Terram's material modifier
-        # already covers it, once emit.py maps the label to an option).
+        # A design line must fail loudly on a genuinely unmodelled token, so
+        # the spell is reported blocked instead of imported with a silently
+        # dropped magnitude. This example used to be "+1 fancy effect", which
+        # ElaborateEffectTest below now recognises, then "+2 metal/gems",
+        # which is now recognised too (see SplittingTest/MaterialTokenTest --
+        # Perdo Terram's material modifier already covers it), then "+2
+        # Techniques and Forms" (Sight of the Active Magics), which item 24's
+        # allow-list now recognises as well (see emit.py's
+        # invi-techniques-and-forms mapping). As of that fix, no corpus spell
+        # exercises this path any more, so this uses a synthetic phrase to
+        # keep pinning the closed-allow-list mechanism itself.
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 5, +1 Conc, +4 Vision, +2 Techniques and Forms)")
+            designline.parse_design("(Base 5, +1 Conc, +4 Vision, +2 for an undefined reason)")
 
 
 class VocabularyAdditionsTest(unittest.TestCase):
@@ -502,12 +505,15 @@ class AdjustmentTest(unittest.TestCase):
         # The allow-list is closed on purpose: absorbing unknown tokens would
         # import real mechanisms as free text, with a correct level and wrong
         # modelling. See the spec's "an allow-list, never a catch-all". Item
-        # 24's two remaining unmodelled per-spell mechanisms: no casting
-        # requirement (words/gestures) axis exists on the model at all.
+        # 24's last two unmodelled per-spell mechanisms -- "+2 for no words"
+        # (The Kiss of Death) and "+1 for not needing to gesture" (Black
+        # Whisper) -- are now recognised (see emit.py's no-words/no-gestures
+        # mapping), so this pins the mechanism with synthetic phrases in the
+        # same shape instead.
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 30, +1 Touch, +2 for no words)")
+            designline.parse_design("(Base 30, +1 Touch, +2 for no reason)")
         with self.assertRaises(designline.UnknownToken):
-            designline.parse_design("(Base 15, +1 Touch, +3 Moon, +1 for not needing to gesture)")
+            designline.parse_design("(Base 15, +1 Touch, +3 Moon, +1 for not needing anything)")
 
 
 class VocabularyCoverageTest(unittest.TestCase):

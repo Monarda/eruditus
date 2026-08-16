@@ -76,6 +76,19 @@ _MODIFIER_OPTIONS = {
     # to spells that do so." The Captive Voice, Wizard's Sidestep (which also
     # prints "moved image matches changes", wired separately above).
     ("Rego", "Imaginem", "changing image"): ("reim-complexity", "reim-changing-image"),
+    # The still/silent-casting buyout (todo item 24's last two unmodelled
+    # mechanisms). Both modifiers are globally scoped in modifiers.json
+    # (technique/form both null) -- keyed here by their one corpus spell's
+    # own Technique/Form anyway, the same way every other entry in this
+    # table is, since nothing about the mechanism itself is Perdo/Corpus/
+    # Mentem-specific.
+    ("Perdo", "Corpus", "for no words"): ("no-words", "no-words-yes"),
+    ("Perdo", "Mentem", "for not needing to gesture"): ("no-gestures", "no-gestures-yes"),
+    # Reveals the Technique/Form of a detected magical effect -- Intellego
+    # Vim-scoped, unlike the two above. Sight of the Active Magics.
+    ("Intellego", "Vim", "Techniques and Forms"): (
+        "invi-techniques-and-forms", "invi-techniques-and-forms-yes"
+    ),
 }
 
 

@@ -361,6 +361,19 @@ class ModifierOptionTableTest(unittest.TestCase):
          "reim-complexity", "reim-changing-image", 1),
     ]
 
+    # Item 24's last three unmodelled per-spell mechanisms, cleared once the
+    # rulebook's own text confirmed each is a real, reusable mechanic rather
+    # than a one-off adjustment. "no-gestures"/"no-words" are globally scoped
+    # in modifiers.json (nothing ties the mechanism to Perdo/Corpus/Mentem),
+    # but this table still keys them on their one corpus spell's own
+    # Technique/Form, same as every other entry here.
+    CASTING_AND_SENSORY_LABELS = [
+        ("Perdo", "Corpus", "for no words", "no-words", "no-words-yes", 2),
+        ("Perdo", "Mentem", "for not needing to gesture", "no-gestures", "no-gestures-yes", 1),
+        ("Intellego", "Vim", "Techniques and Forms",
+         "invi-techniques-and-forms", "invi-techniques-and-forms-yes", 2),
+    ]
+
     def test_the_table_is_exactly_these_entries(self):
         # A new entry must be added here deliberately, with its verified
         # magnitude, rather than slipping in unpinned.
@@ -368,12 +381,16 @@ class ModifierOptionTableTest(unittest.TestCase):
             emit._MODIFIER_OPTIONS,
             {
                 (technique, form, label): (modifier_id, option_id)
-                for technique, form, label, modifier_id, option_id, _ in self.IMAGINEM_LABELS
+                for technique, form, label, modifier_id, option_id, _ in (
+                    self.IMAGINEM_LABELS + self.CASTING_AND_SENSORY_LABELS
+                )
             },
         )
 
     def test_each_label_selects_its_option_at_its_printed_magnitude(self):
-        for technique, form, label, modifier_id, option_id, magnitude in self.IMAGINEM_LABELS:
+        for technique, form, label, modifier_id, option_id, magnitude in (
+            self.IMAGINEM_LABELS + self.CASTING_AND_SENSORY_LABELS
+        ):
             with self.subTest(label=label):
                 design = designline.parse_design(
                     f"(Base 2, +1 Touch, +{magnitude} {label})"

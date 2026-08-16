@@ -2735,6 +2735,31 @@
     ]
   },
   {
+    "id": "lib-invi-sight-active-magics",
+    "name": "Sight of the Active Magics",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "invi-techniques-and-forms": [
+        "invi-techniques-and-forms-yes"
+      ]
+    },
+    "baseEffectId": "invi-5",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-vision",
+    "summary": "You can see spells as \"auras\" around things and people. The color of the aura indicates the Form of the spell working on a subject, the color matching the appropriate one described in Sense the Nature of Vis (page 367). The Technique of a spell working on the subject is recognized by the aura's shape, not color. Creo and Rego are both very orderly auras. Muto is constantly shifting, and Intelle... Level 40.",
+    "description": "You can see spells as \"auras\" around things and people. The color of the aura indicates the Form of the spell working on a subject, the color matching the appropriate one described in Sense the Nature of Vis (page 367). The Technique of a spell working on the subject is recognized by the aura's shape, not color. Creo and Rego are both very orderly auras. Muto is constantly shifting, and Intellego usually is as well, but more slowly. A Perdo aura is usually in fragments. Thus, a magus with both Endurance of the Berserkers and The Invisible Eye Revealed upon him has a very controlled, orderly aura of deep red around his or her entire body, and the magus's eyes are surrounded with slowly shifting auras of a silvery hue. You should be warned: Imaginem or Vim spells may be used to disguise auras. Also note that this spell will detect the residues of some spells.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-muan-beast-minuscule-proportions",
     "name": "Beast of Minuscule Proportions",
     "requisites": {},
@@ -4516,6 +4541,31 @@
     ]
   },
   {
+    "id": "lib-peco-kiss-death",
+    "name": "The Kiss of Death",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "no-words": [
+        "no-words-yes"
+      ]
+    },
+    "baseEffectId": "peco-30",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "The person you kiss dies a sudden death. The only mark on the corpse is the black imprint of your lips. You do not need to speak when casting this spell, and thus gain no penalty from silence. (This is why the spell is higher level than the guidelines would indicate.) Level 45.",
+    "description": "The person you kiss dies a sudden death. The only mark on the corpse is the black imprint of your lips. You do not need to speak when casting this spell, and thus gain no penalty from silence. (This is why the spell is higher level than the guidelines would indicate.)",
+    "printedLevel": 45,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
     "id": "lib-peco-touch-goose-feather",
     "name": "Touch of the Goose Feather",
     "requisites": {},
@@ -4986,6 +5036,31 @@
     "summary": "The target becomes completely undetectable to normal sight, regardless of what it does, but still casts a shadow. Level 20.",
     "description": "The target becomes completely undetectable to normal sight, regardless of what it does, but still casts a shadow.",
     "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-peme-black-whisper",
+    "name": "Black Whisper",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "no-gestures": [
+        "no-gestures-yes"
+      ]
+    },
+    "baseEffectId": "peme-15c",
+    "rangeId": "range-touch",
+    "durationId": "duration-moon",
+    "targetId": "target-individual",
+    "summary": "You whisper a magic sentence in the target's ear. It takes several seconds to speak the sentence, so an unwilling, able-bodied target can stop you. If you speak the whole sentence, the target must make a Stamina stress roll against an Ease Factor of 15 or go completely insane. You need not use your hands for this spell, but you must be able to speak. Level 40.",
+    "description": "You whisper a magic sentence in the target's ear. It takes several seconds to speak the sentence, so an unwilling, able-bodied target can stop you. If you speak the whole sentence, the target must make a Stamina stress roll against an Ease Factor of 15 or go completely insane. You need not use your hands for this spell, but you must be able to speak.",
+    "printedLevel": 40,
     "citations": [
       {
         "bookId": "arm5-core"

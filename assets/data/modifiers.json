@@ -665,5 +665,41 @@
       { "id": "rego-auram-precision-yes", "label": "Controls air with great strength or precision", "magnitude": 1 }
     ],
     "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "no-gestures",
+    "name": "No Gestures",
+    "description": "Casting the spell without needing to gesture adds one magnitude",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": null, "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "no-gestures-yes", "label": "Requires no gestures to cast", "magnitude": 1 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "no-words",
+    "name": "No Words",
+    "description": "Casting the spell without needing to speak adds two magnitudes",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": null, "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "no-words-yes", "label": "Requires no words to cast", "magnitude": 2 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "invi-techniques-and-forms",
+    "name": "Reveals Techniques and Forms",
+    "description": "Revealing the Technique and Form of a detected magical effect adds two magnitudes",
+    "selectionMode": "single",
+    "scope": { "technique": "Intellego", "form": "Vim", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "invi-techniques-and-forms-yes", "label": "Reveals the effect's Technique and Form", "magnitude": 2 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
   }
 ]

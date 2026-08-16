@@ -1472,6 +1472,15 @@
     ],
     "rationale": "Removes up to five continuous minutes from a target's memory - a short/minor memory, matching peme-10a 'Remove a minor or short memory from a person's mind', not peme-10b's reduction of all mental capabilities."
   },
+  "lib-peme-black-whisper": {
+    "baseEffectId": "peme-15c",
+    "candidates": [
+      "peme-15a",
+      "peme-15b",
+      "peme-15c"
+    ],
+    "rationale": "The target must resist or 'go completely insane', matching peme-15c 'Drive a person insane' verbatim, not peme-15a (a major memory) or peme-15b (removing all emotions)."
+  },
   "lib-peme-blessing-childlike-bliss": {
     "baseEffectId": "peme-10b",
     "candidates": [

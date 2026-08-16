@@ -140,6 +140,22 @@ MODIFIER_LABELS = {
     # item 45.
     "5 paces", "50 paces", "500 paces", "1 league", "7 leagues",
     "arcane connection",
+    # The three remaining unmodelled mechanisms from todo item 24's original
+    # 21, each a real Hermetic mechanic rather than a one-off adjustment.
+    # "for not needing to gesture" (Black Whisper, Perdo Mentem 40) and "for
+    # no words" (The Kiss of Death, Perdo Corpus 45) buy off the still/silent
+    # casting requirement the same way Quiet Casting/Still Casting Mastery
+    # do at the Mastery-ability layer, but built permanently into the
+    # spell's own level -- confirmed globally-scoped (not tied to either
+    # spell's own Technique/Form) since nothing in either citation ties the
+    # cost to Perdo, Mentem or Corpus. "Techniques and Forms" (Sight of the
+    # Active Magics, Intellego Vim 40) is unrelated: it reveals which
+    # Technique/Form is active in a detected magical aura, on top of the
+    # base detection effect Sense of the Lingering Magic already covers --
+    # scoped to Intellego Vim, not global. See emit.py's _MODIFIER_OPTIONS
+    # for the mapping to modifiers.json's "no-gestures"/"no-words"/
+    # "invi-techniques-and-forms" entries.
+    "for not needing to gesture", "for no words", "Techniques and Forms",
 }
 
 
