@@ -164,6 +164,21 @@ class _MainTabViewState extends State<_MainTabView> {
     return Scaffold(
       body: IndexedStack(index: _index, children: screens),
       bottomNavigationBar: BottomNavigationBar(
+        // With no `type` given, BottomNavigationBar defaults to `fixed`
+        // for 2-3 items and `shifting` for 4+ -- so these 4 items were
+        // silently landing in `shifting` mode. That mode ignores
+        // `backgroundColor` entirely (confirmed against the widget's own
+        // source) and hides unselected labels by default, despite every
+        // item below explicitly setting one. Pin `fixed` so behavior
+        // doesn't depend on how many tabs happen to exist.
+        type: BottomNavigationBarType.fixed,
+        // M3's own default item colors were also too close in tone to
+        // this app's pale surface to read as visible -- confirmed by
+        // temporarily forcing loud diagnostic colors and watching the
+        // bar actually appear. Pin them to theme-derived colors with
+        // guaranteed contrast against the surface instead.
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface,
         currentIndex: _index,
         onTap: (i) {
           setState(() => _index = i);

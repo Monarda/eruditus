@@ -866,6 +866,46 @@ Real work, none of it blocking the import.
   pointing here lives in `tool/setup_web.dart` so the next person (or CI)
   running web tests doesn't waste time rediscovering it.
 
+### 52. Bottom Navigation Bar Was Effectively Invisible — ✅ FIXED 2026-08-16
+- [x] Root cause found and fixed; regression test added and confirmed to
+      fail without the fix
+- **Symptom:** Library/Settings/Backup were unreachable in real use — the
+  app has always opened straight to Create with no visible way to navigate
+  elsewhere. Found only by chance while manually verifying the `file_picker`
+  upgrade, at which point it turned out to have been this way the whole
+  time, on every platform tried (Windows desktop, and per a quick check,
+  Chrome too).
+- **Root cause, confirmed against `BottomNavigationBar`'s own source:**
+  with no `type` given, it defaults to `BottomNavigationBarType.fixed` for
+  2-3 items and `shifting` for 4+ — this bar has exactly 4, so it silently
+  landed in `shifting` mode. That mode (a) ignores the bar's
+  `backgroundColor` entirely in favor of an internal animated color, and
+  (b) hides unselected labels by default, despite every
+  `BottomNavigationBarItem` here explicitly setting one. On top of that,
+  Material 3's default item colors were too low-contrast against this
+  app's pale surface to read as visible even when shown. Confirmed by
+  temporarily forcing loud diagnostic colors and watching the bar actually
+  appear — the background staying unchanged despite an explicit
+  `Colors.red` was the tell that `shifting` was in play, not just a color
+  problem.
+- **Fix (`lib/main.dart`):** `type: BottomNavigationBarType.fixed`, plus
+  `selectedItemColor`/`unselectedItemColor` pinned to
+  `Theme.of(context).colorScheme.primary`/`onSurface` instead of left to
+  the (here, too-subtle) M3 defaults.
+- **The coverage gap this exposed:** `test/widget_test.dart` already
+  asserted `find.text('Library')` etc. and passed — because `shifting`
+  mode fades unselected labels out rather than removing them from the
+  tree, so a presence check passes regardless of whether a label is
+  actually visible. No test anywhere taps through the real
+  `BottomNavigationBar` to reach another tab either — every other screen
+  is tested by pumping it directly as `MaterialApp.home`, bypassing
+  `EruditusApp`'s navigation shell entirely (same root cause as item 6's
+  coverage hole: a widget-tree check is not a reachability or visibility
+  check). Extended the existing test to assert on `BottomNavigationBar`'s
+  actual `type` and item colors instead of just label presence — verified
+  it fails without the fix.
+- **Files:** `lib/main.dart`, `test/widget_test.dart`
+
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to the one-Range/Duration/Target constraint
 - [ ] Add migration for legacy spell saves (if any)

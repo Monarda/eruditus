@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -110,5 +111,21 @@ void main() {
     expect(find.text('Library'), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Backup'), findsOneWidget);
+
+    // The find.text checks above pass even when a label is invisible --
+    // BottomNavigationBarType.shifting (Flutter's default once there are
+    // 4+ items) fades unselected labels out rather than removing them from
+    // the tree, and this bar's items were genuinely unreadable in the real
+    // app despite every one of these assertions already passing. Pin the
+    // properties that actually control visibility instead.
+    final navBar = tester.widget<BottomNavigationBar>(find.byType(BottomNavigationBar));
+    expect(
+      navBar.type,
+      BottomNavigationBarType.fixed,
+      reason: 'shifting (the default for 4+ items) hides unselected labels '
+          'and ignores backgroundColor -- see main.dart',
+    );
+    expect(navBar.selectedItemColor, isNotNull);
+    expect(navBar.unselectedItemColor, isNotNull);
   });
 }
