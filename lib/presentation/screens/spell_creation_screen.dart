@@ -307,6 +307,12 @@ class SpellCreationScreen extends StatelessWidget {
                         // Library screen's template cards -- the same badge
                         // should read the same way everywhere it appears.
                         isGeneral: s.baseEffect?.isGeneral ?? false,
+                        // Same reasoning as the Gen chip above: this is the
+                        // other ResolvedSpell -> SpellCard call site (see
+                        // SpellLibraryScreen's), and a flawed suggestion
+                        // should read as flawed here too, not just in the
+                        // Library.
+                        problems: s.problems,
                       ),
                     ),
                   if (state.status == SpellCreationStatus.error)

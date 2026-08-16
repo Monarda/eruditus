@@ -398,6 +398,46 @@ void main() {
     expect(find.byKey(const Key('general-chip')), findsOneWidget);
   });
 
+  testWidgets('a suggestion with catalog problems shows the Needs review chip', (tester) async {
+    final flawedSuggestionRecord = Spell(
+      id: 's-flawed',
+      name: 'Miscast Pillar',
+      baseEffectId: creoIgnemEffect.id,
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: voiceParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      // A requisite naming the spell's own Technique is exactly what
+      // validateSpellAgainstCatalog's check 3 rejects -- the simplest way to
+      // get a genuinely non-empty ResolvedSpell.problems for this fixture,
+      // the same fixture shape spell_library_screen_test.dart uses for the
+      // Library screen's equivalent test.
+      requisites: const {'Creo': RequisiteKind.adding},
+      description: 'A flawed pillar of flame.',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    final flawedSuggestion = ResolvedSpell(
+      record: flawedSuggestionRecord, baseEffect: creoIgnemEffect,
+      range: voiceParam, duration: durationParam, target: targetParam);
+    // Sanity check on the fixture itself, not the screen.
+    expect(flawedSuggestion.problems, isNotEmpty);
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
+      calculatedLevel: 10,
+      suggestions: [flawedSuggestion],
+      suggestionLevels: const {'s-flawed': 10},
+    );
+    await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.text('Miscast Pillar'), 200);
+
+    expect(find.byKey(const Key('needs-review-chip')), findsOneWidget);
+    expect(find.byKey(const Key('spell-card-invalid')), findsOneWidget);
+  });
+
   testWidgets('tapping discard dispatches SpellDiscarded', (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,

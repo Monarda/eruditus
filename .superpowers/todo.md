@@ -220,10 +220,13 @@ this table is the ordering, not a second home for them.
       `problems` parameter (mirroring how `isRitual`/`isGeneral`/`rationale`
       are already precomputed by the caller) and renders a "Needs review"
       chip, an `(unverified)` level suffix, and the joined problem text when
-      a resolved spell's `problems` is non-empty; `SpellLibraryScreen`'s
-      spell-mapping call site is the one place that threads it through, from
-      `ResolvedSpell.problems`. `ResolvedTemplate`/`ResolvedException` gaining
-      the same getter is explicitly out of scope, unchanged by this fix. See
+      a resolved spell's `problems` is non-empty; **both places that
+      construct a `SpellCard` from a `ResolvedSpell` thread it through** —
+      `SpellLibraryScreen`'s spell-mapping call, and (found during the final
+      whole-branch review, corrected same day) `SpellCreationScreen`'s
+      "Similar Spells" suggestions list. `ResolvedTemplate`/`ResolvedException`
+      gaining the same getter is explicitly out of scope, unchanged by this
+      fix. See
       `docs/superpowers/specs/2026-08-16-spell-card-problems-display-design.md`
       and `docs/superpowers/plans/2026-08-16-spell-card-problems-display.md`.
 

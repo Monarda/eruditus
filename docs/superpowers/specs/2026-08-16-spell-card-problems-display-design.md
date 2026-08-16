@@ -41,10 +41,18 @@ is computed correctly and has zero effect anywhere in the app.
   rather than derived from `entry` internally (`isRitual`, `isGeneral`,
   `isException`, `rationale`) — the established pattern for exactly this
   situation.
-- Only `SpellLibraryScreen`'s bare spell-mapping call constructs `SpellCard`
-  from a `ResolvedSpell` (`state.visibleSpells.map((s) => SpellCard(entry: s, …))`).
-  `_TemplateCard` and `_ExceptionCard` construct it from `ResolvedTemplate`/
-  `ResolvedException` and are unaffected.
+- **Correction (found during the final whole-branch review, 2026-08-16): there
+  are two call sites that construct `SpellCard` from a `ResolvedSpell`, not
+  one.** `SpellLibraryScreen`'s spell-mapping call
+  (`state.visibleSpells.map((s) => SpellCard(entry: s, …))`) is the one this
+  design originally scoped to. `SpellCreationScreen`'s "Similar Spells"
+  suggestions list (`state.suggestions.map((s) => SpellCard(entry: s, …))`)
+  is a second, independently discovered one — it already threads
+  `isGeneral: s.baseEffect?.isGeneral ?? false` through for the same "read
+  the same way everywhere" reason, and now threads `problems: s.problems`
+  too. `_TemplateCard` and `_ExceptionCard` construct `SpellCard` from
+  `ResolvedTemplate`/`ResolvedException`, which have no `problems` getter,
+  and remain unaffected.
 - Realistically this only fires for **user-created spells** — published
   spells are asset-validated at build time (assertion 7,
   `published_spell_import_test.dart`), so `problems` is provably empty for
