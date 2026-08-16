@@ -110,7 +110,7 @@ void main() {
   test('loadBooks includes the Houses of Hermes: Mystery Cults supplement', () async {
     final books = await loader.loadBooks();
     final supplement =
-        books.firstWhere((b) => b.id == 'arm5-houses-hermes-mystery-cults');
+        books.firstWhere((b) => b.id == 'arm5-hohmc');
     expect(supplement.title, 'Ars Magica 5e - Houses of Hermes: Mystery Cults');
     expect(supplement.abbreviation, 'HoH:MC');
     expect(supplement.edition, '5e');

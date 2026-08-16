@@ -1469,7 +1469,7 @@ void main() {
           kind: GeneralEffectKind.mightThreshold, offsetMagnitudes: -3),
       provenance: Provenance(
           source: PublicationSource.published,
-          citations: const [Citation(bookId: 'arm5-houses-hermes-mystery-cults')]),
+          citations: const [Citation(bookId: 'arm5-hohmc')]),
     );
     final draftState = SpellCreationState(
       status: SpellCreationStatus.editing,
