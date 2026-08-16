@@ -1709,13 +1709,13 @@ ward**.
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
 **Five of the 33 remain blocked, each for a reason unrelated to this item.**
-(Was ten, then nine, then six: *Ward against Faeries of the Mountain* moved
+(Was ten, then nine, then five: *Ward against Faeries of the Mountain* moved
 out 2026-08-15 — its "no design line" turned out to be a complete
 specification once its own cross-reference to *Ward against Faeries of the
-Waters* was followed; *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's
-Communion* moved out 2026-08-16 — all three now import as exception spells
-instead, item 46. See `extract_spells.HAND_DERIVED`'s comment, item 27's
-correction, and item 46.)
+Waters* was followed; *Aegis of the Hearth*, *Wizard's Vigil*, *Wizard's
+Communion* and *Watching Ward* moved out 2026-08-16 — all four now import as
+exception spells instead, item 46. See `extract_spells.HAND_DERIVED`'s
+comment, item 27's correction, and item 46.)
 - **No design line printed (1):** *Sight of the True Form*.
 - **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
   *Restore the Moved Image*, *The Invisible Eye Revealed*.

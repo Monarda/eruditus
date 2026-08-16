@@ -625,8 +625,10 @@ def _option_exists(
 # closed table, not a parser: each key is a designline.ADJUSTMENT_LABELS
 # entry verified against the one spell that prints it. Watching Ward also
 # prints a Special Duration ("Duration is non-standard") but names no basis
-# for it at all -- deliberately absent here, see todo item 26's own note on
-# why it stays blocked rather than getting a guessed entry.
+# for it at all -- deliberately absent here. It now imports as an exception
+# spell instead (scripts/spell_import/exceptions.py), not through this
+# table at all -- see todo item 26 and
+# docs/superpowers/specs/2026-08-15-exception-spells-design.md.
 SPECIAL_PARAMETER_BASIS: dict[str, str] = {
     "Special (based on Concentration)": "Concentration",
     "Special based on Mom": "Momentary",
