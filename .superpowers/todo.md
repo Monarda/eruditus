@@ -1080,6 +1080,26 @@ Files: `scripts/spell_import/designline.py`, `scripts/spell_import/emit.py`,
   `test/bloc/spell_creation_bloc_test.dart`. Spec:
   `docs/superpowers/specs/2026-08-16-storyguide-ruling-ui-design.md`. Plan:
   `docs/superpowers/plans/2026-08-16-storyguide-ruling-ui.md`.
+- **Correction to the checklist bullet above and to the design spec's own
+  premise:** the final whole-branch review checked `assets/data/spell_library.json`
+  directly and found **zero** spells carry `ritualDeclaration: storyguideRuling`
+  — *Curse of the Ravenous Swarm*, *Neptune's Wrath* and *Breath of the Open
+  Sky* all carry `lastingCreation` instead, which item 43's fix (2026-08-15)
+  never touched. "three built-in spells already use it" was wrong when
+  written; `storyguideRuling` has no catalog coverage at all as of this fix,
+  only the new UI path to set it by hand. The review also flagged that
+  *Curse of the Ravenous Swarm* (Creo Animal, Moon duration) plainly doesn't
+  "create something lasting", so its `lastingCreation` value looks like a
+  placeholder from whoever imported it. **Root-caused and reclassifying
+  deferred to [[49]]**, not this item — a Python-import-pipeline bug, not a
+  UI concern.
+- **Also found live by the same review:** `TemplateInstantiated` copies a
+  template's `ritualDeclaration` verbatim (deliberately, for cases like
+  Disenchant), so a draft can carry `lastingCreation` while ineligible for
+  that radio option (Disenchant is Perdo, not Creo). The UI now widens the
+  option's visibility to cover this case too, so the declaration is never
+  silently unselectable or a one-way clear. Fixed in the same branch, before
+  merge.
 - **Rationale:** Core Rules line 12352 lets the troupe declare any spell a Ritual.
   The Creo+Momentary-only checkbox cannot express that.
 - **The 7 non-derivable Ritual spells** (of 39 Ritual-flagged published spells, 32
@@ -1093,6 +1113,48 @@ Files: `scripts/spell_import/designline.py`, `scripts/spell_import/emit.py`,
   large effect`, `ritual because of spectacular effect`) — that is a storyguide
   ruling. The two Vim Generals may be guideline-level.
 - **Spec:** `docs/superpowers/specs/2026-07-27-ritual-spells-design.md`
+
+### 49. `emit.py` Mistags Ritual Declarations by Blanket-Assigning `lastingCreation`
+Found 2026-08-16 while closing [[18]]'s UI checklist (surfaced independently by
+a human read of *Curse of the Ravenous Swarm*'s own design line, and confirmed
+by the branch's final review reading `assets/data/spell_library.json` directly).
+
+- [ ] Stop `scripts/spell_import/emit.py` from unconditionally stamping
+      `ritualDeclaration: "lastingCreation"` onto every Ritual-flagged spell —
+      it does this in two places, `build_spell` and `build_template`
+      (`if block.stat.is_ritual: spell["ritualDeclaration"] = "lastingCreation"`,
+      and the identical line for `template[...]`), with no regard for *why*
+      the spell is a Ritual.
+- [ ] Correctly classify the spells whose Ritual status is **only**
+      derivable from the declaration — [[18]]'s "7 non-derivable Ritual
+      spells" list: *Curse of the Ravenous Swarm* (CrAn 50), *Neptune's
+      Wrath* (ReAq 40), *Breath of the Open Sky* (CrAu 40) should be
+      `storyguideRuling`, not `lastingCreation` — each spell's own design
+      line already carries the condition-6 justification verbatim (`ritual
+      because it has a really major effect`, `ritual for large effect`,
+      `ritual because of spectacular effect`; tokenized as trailing
+      continuations by `designline.TRAILING_CONTINUATION_LABELS`, but never
+      read for their *content*). *Rain of Oil* (MuAu 50), *Incantation of
+      Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen), and *Watching
+      Ward* (ReVi Gen) still need their own classification — [[18]]
+      speculated the two Vim Generals "may be guideline-level" rather than
+      either declared kind, which is a different fix (a `ritualRequirement`
+      on the base effect, not a per-spell declaration).
+- **Not a behavior bug for the other 32 Ritual-flagged spells.** Their
+  `isRitual` already derives independently (Year duration, Boundary target,
+  level > 50, or a guideline requirement), so a wrong stored declaration
+  never changes their computed level or `RitualStatus.isRitual` — only these
+  3 spells' in-app Ritual banners currently say something the rulebook's own
+  text contradicts.
+- **Shape of the fix:** likely a `HAND_DERIVED`/`EXCEPTION_SPELLS`-style
+  allow-list in `emit.py`, keyed by spell name or slug, distinct from the
+  blanket `is_ritual` check — mirrors how [[18]]'s own tokenizing fix
+  (2026-08-15) added these same 3 clauses to
+  `designline.TRAILING_CONTINUATION_LABELS` as a closed allow-list rather
+  than a blanket rule.
+- **After fixing:** regenerate `assets/data/spell_library.json` and
+  `assets/data/spell_templates.json`, and re-run the full Python test suite
+  plus `flutter test` (`ritualDeclaration` is Dart-side too).
 
 ### 20. Creo Creation `suggested` Ritual Sweep
 - [ ] Decide whether every "Create X" guideline should carry
