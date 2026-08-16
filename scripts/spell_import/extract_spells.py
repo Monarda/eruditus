@@ -85,6 +85,20 @@ REALM_BY_SPELL_ID = {
 # assertion-6 check: ReferenceOracleTest exists to catch a template that
 # violates assertion 6, and a filter that removes exactly what the test
 # looks for would make the test unable to fail.
+#
+# Both entries below have exactly one general_candidates() hit -- reim-G,
+# invi-G -- so without this table they would auto-resolve and silently import
+# against the wrong guideline. Confirmed 2026-08-16 (re-derived from
+# docs/superpowers/plans/2026-08-05-general-base-effects.md, which found this
+# first): reim-G/invi-G are each their art's *ward* guideline (Touch, Ring,
+# Circle), and neither Restore the Moved Image (cancels a moved-image spell)
+# nor The Invisible Eye Revealed (feels being magically spied on) is a ward.
+# The Rego Imaginem and Intellego Vim guideline tables print no second
+# General bullet that actually describes either spell's own effect -- the
+# same shape as `peme-G`/`inco-gen` below, and just as permanently
+# unresolvable without inventing rulebook content the table does not print.
+# See test_general_catalog.ReferenceOracleTest's docstring for the assertion
+# this table exists to keep out of reach.
 DESIGN_LINE_INCOMPLETE = {
     "lib-reim-restore-moved-image":
         "prints (Base effect) but the stat line costs 2 magnitudes",
@@ -437,6 +451,19 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             general_candidates = catalog.general_candidates(block.technique, block.form)
 
             if not general_candidates:
+                # Permanent, not a gap to fill: Perdo Imaginem's and Perdo
+                # Mentem's own guideline tables print no General row at all
+                # (verified directly against the reviewed Definitive Edition
+                # text, 2026-08-16), so Dispel the Phantom Image and Lay to
+                # Rest the Haunting Spirit have nothing to resolve to. A
+                # catalog row *could* be built from each spell's own prose --
+                # and one was, twice (`peme-G`, `inco-gen`) -- but
+                # test_general_catalog.GeneralCatalogTest.
+                # test_general_entries_match_the_rulebook_bullet_for_bullet
+                # (docs/superpowers/plans/2026-08-05-general-base-effects.md)
+                # settled that this counts as inventing rulebook content the
+                # table does not contain, and both were removed. Adding
+                # `peim-gen`/`peme-gen` here would revert that decision.
                 blocked.append((block.name, "no General base effect for that Technique/Form"))
                 continue
 

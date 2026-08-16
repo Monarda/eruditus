@@ -66,7 +66,7 @@ now maps to exactly one row below; none are unaccounted for.
 | Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, re-checked once more during Bucket-B planning and re-confirmed as a genuine two-way tie — this is the item's final decision, not a case still pending resolution |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
-| General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's Communion* now import as exception spells (item 46) |
+| General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's Communion* now import as exception spells (item 46). Re-confirmed 2026-08-16: all 5 permanent, see item 25's body |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 0 | **24** — corrected from 3: all 3 now import as `no-words`/`no-gestures`/`invi-techniques-and-forms` catalog Modifiers, done 2026-08-16 |
 | No printed design line and no legitimate derivation | 0 | see item **27** — corrected from 1: *Whispering Winds* now imports as an exception spell (item 46) rather than staying permanently blocked |
 | `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
@@ -1711,19 +1711,34 @@ ward**.
   (`spell_engine.dart:422-431`).
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
-**Five of the 33 remain blocked, each for a reason unrelated to this item.**
-(Was ten, then nine, then five: *Ward against Faeries of the Mountain* moved
-out 2026-08-15 — its "no design line" turned out to be a complete
-specification once its own cross-reference to *Ward against Faeries of the
-Waters* was followed; *Aegis of the Hearth*, *Wizard's Vigil*, *Wizard's
-Communion* and *Watching Ward* moved out 2026-08-16 — all four now import as
-exception spells instead, item 46. See `extract_spells.HAND_DERIVED`'s
-comment, item 27's correction, and item 46.)
+**Five of the 33 remain blocked, each for a reason unrelated to this item —
+and, re-confirmed 2026-08-16, all five are a settled, permanent decision, not
+an open investigation.** (Was ten, then nine, then five: *Ward against
+Faeries of the Mountain* moved out 2026-08-15 — its "no design line" turned
+out to be a complete specification once its own cross-reference to *Ward
+against Faeries of the Waters* was followed; *Aegis of the Hearth*, *Wizard's
+Vigil*, *Wizard's Communion* and *Watching Ward* moved out 2026-08-16 — all
+four now import as exception spells instead, item 46. See
+`extract_spells.HAND_DERIVED`'s comment, item 27's correction, and item 46.)
 - **No design line printed (1):** *Sight of the True Form*.
 - **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
-  *Restore the Moved Image*, *The Invisible Eye Revealed*.
+  *Restore the Moved Image*, *The Invisible Eye Revealed*. Their sole General
+  candidate (`reim-G`/`invi-G`) is each art's *ward* guideline — a real
+  candidate, just the wrong one; neither spell wards against anything.
 - **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
-  Spirit*, *Dispel the Phantom Image*.
+  Spirit*, *Dispel the Phantom Image*. Perdo Mentem's and Perdo Imaginem's own
+  guideline tables print no General row at all.
+- **Re-derived 2026-08-16, not a new finding — all five were already settled
+  by `docs/superpowers/plans/2026-08-05-general-base-effects.md`,
+  independently re-confirmed against the reviewed rulebook text while
+  investigating whether item 24's close cleared any of them too. A catalog
+  row built from a spell's own prose, to receive a spell whose art prints no
+  matching guideline bullet, was tried for two of these five (`peme-G`,
+  `inco-gen`) and deliberately removed —
+  `test_general_catalog.GeneralCatalogTest.test_general_entries_match_the_rulebook_bullet_for_bullet`
+  now holds the catalog to the rulebook's own General bullets art-by-art, in
+  both directions, permanently. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s
+  and the `general_candidates` branch's comments for the per-spell citations.**
 - **✅ Wizard's Communion moved to item 46, 2026-08-16** — it now imports as
   an exception spell rather than staying blocked on its disclaimed
   guideline arithmetic ("a remnant of Mercurian rituals").
