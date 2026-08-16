@@ -1,25 +1,34 @@
-# Unblock 3 of the 4 Remaining Blocked Spells via Base-Effect Analogy — Design
+# Unblock All 4 Remaining Blocked Spells — Design
 
-**Status:** Approved (decisions confirmed by the user 2026-08-16, see "Decisions" below)
+**Status:** Approved (decisions confirmed by the user 2026-08-16, see "Decisions"
+below; extended 2026-08-16 to cover the 4th spell as an exception spell
+rather than leaving it blocked)
 
 ## Goal
 
-Use the base-effect analogy capability (`Spell`/`SpellTemplate.technique`/`.form` +
-`analogyRationale`, merged to `main` 2026-08-16,
-`docs/superpowers/plans/2026-08-16-base-effect-analogy.md`) to unblock 3 of the
-4 spells `.superpowers/todo.md` item 25 documents as permanently blocked:
+Clear every spell left in `.superpowers/todo.md` item 25's "permanently
+blocked" list, using two different mechanisms for two genuinely different
+problems:
 
-- *Dispel the Phantom Image* (Perdo Imaginem)
-- *Restore the Moved Image* (Rego Imaginem)
-- *Lay to Rest the Haunting Spirit* (Perdo Mentem)
+- **3 spells unblocked via the base-effect analogy capability**
+  (`Spell`/`SpellTemplate.technique`/`.form` + `analogyRationale`, merged to
+  `main` 2026-08-16, `docs/superpowers/plans/2026-08-16-base-effect-analogy.md`):
+  - *Dispel the Phantom Image* (Perdo Imaginem)
+  - *Restore the Moved Image* (Rego Imaginem)
+  - *Lay to Rest the Haunting Spirit* (Perdo Mentem)
+- **1 spell recorded as an exception spell** (`scripts/spell_import/exceptions.py`,
+  the same closed-table mechanism already used for *Sight of the True Form*
+  and 6 others — `docs/superpowers/specs/2026-08-15-exception-spells-design.md`'s
+  third shape, "the guideline was never printed in that Technique/Form's own
+  table at all"):
+  - *The Invisible Eye Revealed* (Intellego Vim) — see "The 4th spell: exception,
+    not analogy" below for why it needs the other mechanism.
 
-*The Invisible Eye Revealed* (Intellego Vim) is explicitly **out of scope** —
-see "Why the 4th spell stays blocked" below.
-
-This is importer + data work only. No Dart model or engine change: the
-`GeneralEffectFormula` machinery (`targetSpellLevel`, `mightReduction`,
-`offsetMagnitudes`, `stressDie`) that renders each donor guideline's effect
-sentence already exists and needs nothing new.
+This is importer + data work only, for both mechanisms. No Dart model or
+engine change: the `GeneralEffectFormula` machinery (`targetSpellLevel`,
+`mightReduction`, `offsetMagnitudes`, `stressDie`) that renders each donor
+guideline's effect sentence, and `ExceptionSpell`/`build_exception_spell`,
+both already exist and need nothing new at the model/engine layer.
 
 ## Background: why these three are blocked today
 
@@ -77,23 +86,36 @@ Three judgment calls, confirmed by the user 2026-08-16:
    open template — the same reasoning `REALM_BY_SPELL_ID` already applies to
    wards whose text names a specific realm (e.g. *Circular Ward against
    Demons* → `"Infernal"`).
-3. **Scope stays at 3 of 4** — *The Invisible Eye Revealed* is not touched
-   this round.
+3. **The 4th spell is fixed too, but via the exception-spell mechanism, not
+   analogy** — see below.
 
-### Why the 4th spell stays blocked
+### The 4th spell: exception, not analogy
 
 *The Invisible Eye Revealed* is printed under **Intellego Vim → GENERAL** —
 it is *already* a Vim spell. The analogy mechanism unblocks a Form-specific
 spell by pointing it at a *more general* guideline one Technique/Form up the
 chain (Form → Vim). There is nothing more general than Vim to point to. Its
 own table's only General row, `invi-G` ("detect spell traces of negative
-magnitude"), is a real but different mechanic (residual traces of *past*
-magic, not detecting a *live* spying spell) — already excluded as the wrong
-candidate via `KNOWN_UNRESOLVABLE`-equivalent handling
-(`DESIGN_LINE_INCOMPLETE["lib-invi-invisible-eye-revealed"]`). Building a new
-InVi catalog row for its actual mechanic is exactly what
-`test_general_entries_match_the_rulebook_bullet_for_bullet` forbids. This
-spell's status in `.superpowers/todo.md` item 25 does not change.
+magnitude"), computes a genuinely different quantity — checked numerically,
+not just by wording: at level 20, `invi-G`'s formula produces a magnitude
+count of 2, while this spell needs a level threshold of 40 ("double the
+level of this spell"). Different `GeneralEffectKind` families
+(`spellTraceMagnitude` vs. `targetSpellLevel`), off by roughly an order of
+magnitude at every level — not a close-enough match. Building a new InVi
+catalog row for its actual mechanic is exactly what
+`test_general_entries_match_the_rulebook_bullet_for_bullet` forbids, the same
+constraint that already forced *Sight of the True Form* (a different spell,
+same shape: General-kind, no matching row in its own Form's table) to become
+an exception spell rather than getting a fabricated catalog row.
+
+*The Invisible Eye Revealed* fits the exact same shape *Sight of the True
+Form* already established: General-kind, no printed level, and its own
+Form's guideline table genuinely has no row for its mechanic (the one row
+that exists, `invi-G`, is confirmed the wrong guideline above, not merely
+unchecked). It is recorded as free-text `ExceptionSpell` data — no
+`baseEffectId` at all — with a citation-backed rationale, exactly like
+*Sight of the True Form*, *Watching Ward*, and the other five entries in
+`exceptions.EXCEPTION_SPELLS`.
 
 ## Implementation
 
@@ -225,63 +247,116 @@ def build_template(
 avoids a name collision with the new parameter — exact naming is an
 implementation detail for the plan.)
 
-### 4. Update the surrounding comment blocks
+### 4. Add *The Invisible Eye Revealed* to `exceptions.EXCEPTION_SPELLS`
+
+In `scripts/spell_import/exceptions.py`, one new entry, same table shape as
+the existing 7 — no new code, this dict is already checked first thing in
+`extract_spells.py`'s main loop (`extract_spells.py:493-497`,
+`if block.name in exceptions_module.EXCEPTION_SPELLS: ... continue`), before
+any of the `ANALOGY_BASE_EFFECTS`/`general_candidates`/`DESIGN_LINE_INCOMPLETE`
+handling above is ever reached:
+
+```python
+"The Invisible Eye Revealed": (
+    "Design line prints \"(Base effect)\", General-kind, no printed level. "
+    "Intellego Vim's own guideline table prints exactly one General row, "
+    "invi-G (\"detect the traces of magic of negative magnitude up to the "
+    "magnitude of the guideline used - 2\") -- a residual-trace-decay "
+    "formula, confirmed the wrong guideline by checking the arithmetic, not "
+    "just the wording: at level 20 invi-G computes a magnitude of 2, while "
+    "this spell's own text (\"detects the use of Intellego spells of up to "
+    "double the level of this spell\") needs a level threshold of 40 -- "
+    "different GeneralEffectKind families "
+    "(spellTraceMagnitude vs. targetSpellLevel), not a close-enough match. "
+    "No other Form's guideline can substitute by analogy either: this spell "
+    "is already Intellego Vim, the top of the analogy chain. Same shape as "
+    "Sight of the True Form (see that entry) -- a matching InVi row was not "
+    "attempted here for the identical reason: "
+    "test_general_entries_match_the_rulebook_bullet_for_bullet forbids it."
+),
+```
+
+**Remove `"lib-invi-invisible-eye-revealed"` from `DESIGN_LINE_INCOMPLETE`**
+(`extract_spells.py:178-179`) — the `EXCEPTION_SPELLS` check above now
+intercepts this spell before the loop ever reaches `DESIGN_LINE_INCOMPLETE`,
+so the entry is dead. Leave a one-line pointer comment, matching the existing
+"Wizard's Communion used to be here" precedent in the same dict's docstring.
+
+**Fix the stale cross-reference in *Sight of the True Form*'s own entry**
+(`exceptions.py`): its rationale currently reads "...the same policy that
+keeps Dispel the Phantom Image, Lay to Rest the Haunting Spirit, Restore the
+Moved Image and The Invisible Eye Revealed blocked rather than exceptions
+(see todo item 25 for why those four stay blocked and this one does not)."
+That sentence is now wrong on both halves — 3 of the 4 resolve via analogy,
+and the 4th becomes an exception spell too. Replace with a pointer to this
+spec instead of re-deriving the (now differentiated) status of each spell
+inline.
+
+### 5. Update the surrounding comment blocks
 
 `extract_spells.py:106-183` (the `REALM_BY_SPELL_ID`/`DESIGN_LINE_INCOMPLETE`
 preambles) currently describe all four spells as a single permanently-blocked
 family. Rewrite to state plainly: 3 of the 4 now resolve via
-`ANALOGY_BASE_EFFECTS` (with a pointer to this spec), and *The Invisible Eye
-Revealed* is the one that remains — because it's already Vim, not because
-the reasoning doesn't extend to it. Do the same for the `general_candidates`
-empty-branch comment (`extract_spells.py:552-577`), which currently names
-*Dispel the Phantom Image* and *Lay to Rest the Haunting Spirit* as
-permanently blocked.
+`ANALOGY_BASE_EFFECTS`, the 4th via `exceptions.EXCEPTION_SPELLS` — all with
+a pointer to this spec — and none remain blocked. Do the same for the
+`general_candidates` empty-branch comment (`extract_spells.py:552-577`),
+which currently names *Dispel the Phantom Image* and *Lay to Rest the
+Haunting Spirit* as permanently blocked.
 
-### 5. `.superpowers/todo.md` item 25
+### 6. `.superpowers/todo.md` item 25
 
-Once verified, update item 25's body: move the three from "remain blocked"
-into a new "✅ unblocked via base-effect analogy, 2026-08-16" note (mirroring
-how items 46/28/39 record their closures), citing this spec and the base
-effect analogy plan. *The Invisible Eye Revealed* keeps its existing
-"permanent, settled" documentation, trimmed to no longer imply the other
-three share its fate.
+Once verified, update item 25's body: **all four** move from "remain
+blocked" into a new "✅ unblocked, 2026-08-16" note (mirroring how items
+46/28/39 record their closures) — 3 via base-effect analogy, 1 as an
+exception spell — citing this spec. Item 25's "Four of the 33 remain
+blocked" framing and its permanence language no longer apply to any of the
+four; the "Where the import stands" table at the top of the file also needs
+its blocked-count row corrected (4 → 0) and the exception-spell count row
+incremented (7 → 8).
 
-### 6. Regenerate and verify
+### 7. Regenerate and verify
 
 `python -m scripts.spell_import.extract_spells --write`, then:
 
-- `--show-blocked` count drops from 4 to 1 (only *The Invisible Eye
-  Revealed* remains).
+- `--show-blocked` count drops from 4 to **0**.
 - The three new templates appear in `assets/data/spell_templates.json`, each
   with `technique`/`form` matching the spell's own printed Form (not the
   donor's), a non-null `analogyRationale`, and (for *Dispel the Phantom
   Image* only) `chosenSlots: {"specificType": "Creo Imaginem"}`.
+- *The Invisible Eye Revealed* appears in `assets/data/spell_exceptions.json`
+  (8 entries, was 7), with `technique: "Intellego"`, `form: "Vim"`, and the
+  rationale above.
 - Both test suites green: `python -m unittest discover`, `flutter test`.
 - `test_general_entries_match_the_rulebook_bullet_for_bullet` still passes
-  unmodified — no new catalog row is added, only new pointers to existing
-  rows.
+  unmodified — no new catalog row is added anywhere, only new pointers to
+  existing rows plus one new exception entry.
 
 ## Testing
 
 - Python: extend `scripts/spell_import/tests/test_extract.py` with one case
-  per newly-unblocked spell, asserting the produced template's
-  `baseEffectId`, `technique`/`form`, non-null `analogyRationale`, and (for
-  *Dispel the Phantom Image*) `chosenSlots`.
+  per newly-unblocked spell (the 3 analogy templates plus *The Invisible Eye
+  Revealed*'s exception entry), asserting the produced record's
+  `baseEffectId`/`technique`/`form`/`analogyRationale` (analogy templates) or
+  `technique`/`form`/`rationale` with no `baseEffectId` at all (the
+  exception spell), and (for *Dispel the Phantom Image*) `chosenSlots`.
 - A Python unit test for `emit.build_template`'s new `chosen_slots`
   parameter: the open-slot guard (unknown slot kind silently dropped),
   matching the existing `realm_by_spell_id` guard's test coverage.
+- No new test is needed for `build_exception_spell` itself — it is unchanged
+  code, already covered by the 7 existing exception spells' tests.
 - No new Dart tests are needed — `validateSpellAgainstCatalog`'s check 8
   (rationale required exactly when technique/form diverges) and the existing
   `published_spell_import_test.dart` assertions already cover the resulting
   templates once the asset is regenerated, the same way they cover every
-  other General template.
+  other General template and exception spell.
 
 ## Out of scope
 
-- *The Invisible Eye Revealed* (see above).
 - The 4 candidate spells this session's earlier base-effect-analogy plan
   scoped out (`.superpowers/todo.md` item 48's own "explicitly not done"
-  note) are unaffected — this spec's 3 spells are a *different* set from
-  that plan's originally-motivating 4.
+  note) are unaffected — this spec's spells are a *different* set from that
+  plan's originally-motivating 4.
 - Creation-screen UI for picking a cross-Form base effect — still deferred,
   unchanged from the merged plan's scope.
+- No change to `ExceptionSpell`'s model or `build_exception_spell` — the 4th
+  spell uses that mechanism exactly as it already exists.
