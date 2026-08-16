@@ -1092,47 +1092,84 @@ case is real, and a user designing their own spell has no way to do what
   that abbreviations are needed.
 - **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`
 
-### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic
-**Blocked on one model gap: there is no way to record that a parameter requires a
-specific Mystery Virtue** — which implies a character/Virtue model the app does not
-have at all (it models spells and catalog data, no characters). **Do not attempt
-this until the Virtue-gating mechanism exists.** The ritual-only half is already
-done (`Parameter.requiresRitual`, item 4).
+### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic — ✅ DONE 2026-08-16
+**Merinita: Faerie Magic** — Core Rules, "Mysteries" chapter. **Symbolic
+Magic** — *Houses of Hermes: Mystery Cults*, the first supplement book in the
+catalog (`arm5-hohmc`). All 9 parameters added to
+`assets/data/parameters.json`, gated by a new informational `requiresVirtue:
+String?` field on both `Parameter` and `BaseEffect`
+(`lib/models/parameter.dart`, `lib/models/base_effect.dart`) — selectable
+like any other entry, since the app has no character/Virtue model to enforce
+against; the field only names the requirement for the UI to display.
 
-**Not a blocker for the core-rules import** — no core spell uses these parameters,
-by definition. Relevant only when supplement spells are added.
+- **Fire** (Duration) needed real Form-scoping (Ignem/Imaginem only), closing
+  a gap `Parameter` never had before: a new `ParameterScope` class
+  (`forms: List<String>`, mirroring `ModifierScope` but far smaller),
+  filtered in `spell_creation_screen.dart`'s parameter dropdowns.
+- **Symbol (Range)** needed a ritual-only *Range* — the first the catalog has
+  ever had. `SpellEngine._deriveRitualStatus` only checked Duration/Target;
+  closed by adding `RitualReason.ritualOnlyRange` and a `range` parameter to
+  the derivation, plus a matching case and `rangeName` field in
+  `RitualSection`.
+- **Worked example**: *Faerie Chains of the Familiar Slave*
+  (`tpl-crvi-faerie-chains-familiar-slave`, *Houses of Hermes: Mystery
+  Cults* lines 3371–3387) landed as a `SpellTemplate` on a new General base
+  effect (`crvi-hohmc-G1`) using the existing `mightThreshold`
+  `GeneralEffectFormula` kind with `offsetMagnitudes: -3` — no new kind
+  needed. Both the base effect and its Until (Condition) duration carry
+  independent `requiresVirtue: "Faerie Magic"` gates, per the rulebook's own
+  two separate statements (base effect: line 3373; parameter: line 10030).
+- **Two gaps found and deliberately deferred, not solved here**: Bargain's
+  nested duration computation (item 53) and open/variable requisites
+  (item 54).
+- **Files:** `lib/models/parameter.dart`, `lib/models/base_effect.dart`,
+  `lib/engine/ritual_status.dart`, `lib/engine/spell_engine.dart`,
+  `lib/presentation/widgets/ritual_section.dart`,
+  `lib/presentation/screens/spell_creation_screen.dart`,
+  `assets/data/books.json`, `assets/data/parameters.json`,
+  `assets/data/base_effects.json`, `assets/data/spell_templates.json`.
+- **Spec:** `docs/superpowers/specs/2026-08-16-virtue-gated-parameters-design.md`.
+  Plan: `docs/superpowers/plans/2026-08-16-virtue-gated-parameters.md`.
 
-- [ ] Add a `requiresVirtue`-style field once a Virtue-gating mechanism is designed
-- [ ] Add the 6 Faerie Magic parameters below
-- [ ] Add the 3 Symbolic Magic parameters below
+### 53. Bargain Duration's Nested Level Computation
+Found 2026-08-16 while landing item 17. **Bargain** (Duration, Faerie Magic)
+does not fit `Parameter`'s flat `magnitude` model: its true level is
+*"calculate the level of the spell that takes effect when the bargain is
+broken, and add three magnitudes"* (Core Rules line 10038) — a second,
+nested spell-level computation `SpellEngine` has no mechanism for. The same
+shape of problem as *Mists of Change*'s two-Durations-at-once
+`ExceptionSpell` (item 46).
 
-**Merinita: Faerie Magic** — Core Rules, "Mysteries" chapter (not *Houses of Hermes:
-Mystery Cults*, where the rest of the House's content lives). Initiates of the
-Faerie Magic Outer Mystery only:
+- [ ] Decide whether `SpellEngine` needs a nested-computation capability, or
+      every real Bargain spell must be modeled as an `ExceptionSpell` instead
+- **Not urgent:** no published spell using Bargain has been found or
+  imported; `duration-bargain` is cataloged with `magnitude: 4` (Year's
+  value) as a documented simplification, informational only until a real
+  spell needs it.
+- **Files:** `lib/engine/spell_engine.dart`, `lib/models/exception_spell.dart`
+- **Spec:** `docs/superpowers/specs/2026-08-16-virtue-gated-parameters-design.md`
+  ("Out of Scope")
 
-| Name | Type | Level | Note |
-|---|---|---|---|
-| Road | Range | = Voice | affects anyone/anything on the same road or path |
-| Bargain | Duration | = Year + 3 magnitudes | ritual; enforces a bargain, max Year once triggered |
-| Fire | Duration | = Moon | Ignem/Imaginem only; lasts until the targeted fire goes out |
-| Until (Condition) | Duration | = Year | ritual; lasts until a specified condition is met |
-| Year + 1 | Duration | = Year | ritual; a year and a day, by elapsed time not season |
-| Bloodline | Target | = Structure | affects all blood descendants of the immediate target |
+### 54. Open/Variable Requisites (Per-Casting, Not Per-Catalog-Entry)
+Found 2026-08-16 while landing item 17's worked example, *Faerie Chains of
+the Familiar Slave*. Its own requisite — *"a Technique and Form appropriate
+to the creature's nature and physical form"* — is chosen at the time of
+casting, not fixed by the catalog entry, but
+`SpellTemplate.requisites`/`Spell.requisites` (`lib/models/requisite.dart`)
+only support fixed `{Art: kind}` pairs. Same shape of gap as item 50's
+`ModifierScope` granularity problem, but for requisites instead of modifier
+scope.
 
-**Symbolic Magic** — *Houses of Hermes: Mystery Cults*, House Merinita chapter.
-Initiates of the Symbolic Magic Major Folk Mystery. All three are always ritual and
-require a physical symbolic charm representing the target, built from at least 3
-charms (9 for using all three together):
-
-| Name | Type | Level | Note |
-|---|---|---|---|
-| Symbol | Range | = Arcane Connection | affects anything the symbol uniquely identifies |
-| Symbol | Duration | = Year | lasts as long as the physical symbol survives intact |
-| Symbol | Target | = Boundary | affects everything the symbol represents, within range |
-
-- **Files:** `lib/models/parameter.dart`, `assets/data/parameters.json`
-- **Spec:** `docs/superpowers/specs/2026-07-27-parameters-and-provenance-design.md`
-  ("Deferred Work")
+- [ ] Decide how to model a requisite whose Art is chosen per-casting rather
+      than fixed by the spell/template
+- **Not urgent:** `tpl-crvi-faerie-chains-familiar-slave` ships today with
+  `requisites: {}` and the gap noted in its own `description` text; no
+  arithmetic is wrong, the requisite is simply absent from the computed
+  breakdown.
+- **Files:** `lib/models/requisite.dart`, `lib/models/spell_template.dart`,
+  `lib/models/spell.dart`
+- **Spec:** `docs/superpowers/specs/2026-08-16-virtue-gated-parameters-design.md`
+  ("Out of Scope")
 
 ### 18. Storyguide-Ruling UI for Rituals
 Fidelity work on already-imported spells, **now true of all 7** — the three that
