@@ -173,6 +173,11 @@ class _ExceptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SpellCard(entry: entry, level: entry.printedLevel, isException: true);
+    return SpellCard(
+      entry: entry,
+      level: entry.printedLevel,
+      isException: true,
+      rationale: entry.rationale,
+    );
   }
 }

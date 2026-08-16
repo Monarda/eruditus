@@ -316,10 +316,13 @@ void main() {
           findsOneWidget);
       expect(find.text("Wizard's Communion"), findsOneWidget);
       expect(find.byKey(const Key('exception-chip')), findsOneWidget);
+      expect(find.text('Test rationale.'), findsOneWidget);
 
       final spellY = tester.getTopLeft(find.text('Phantasm of the Talking Head')).dy;
+      final templateY = tester.getTopLeft(find.text('Ward against Faeries of the Waters')).dy;
       final exceptionY = tester.getTopLeft(find.text("Wizard's Communion")).dy;
       expect(spellY, lessThan(exceptionY));
+      expect(templateY, lessThan(exceptionY));
     });
 
     testWidgets('an exception card offers no instantiation action', (tester) async {

@@ -973,6 +973,8 @@ void main() {
       expect(find.text("Wizard's Communion"), findsOneWidget);
       expect(find.byKey(const Key('exception-chip')), findsWidgets);
       expect(find.text('Learn at level…'), findsNothing);
+
+      await database.close();
     },
   );
 }

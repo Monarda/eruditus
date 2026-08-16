@@ -3,8 +3,9 @@ import 'package:eruditus/models/publication_source.dart';
 /// The surface a library row needs to render itself: everything
 /// [SpellCard] reads, and nothing else.
 ///
-/// Implemented by both ResolvedSpell and ResolvedTemplate so one card widget
-/// renders both, rather than a near-identical second widget that drifts.
+/// Implemented by ResolvedSpell, ResolvedTemplate, and ResolvedException so
+/// one card widget renders all three, rather than near-identical second and
+/// third widgets that drift.
 abstract interface class LibraryEntry {
   bool get isResolved;
   List<String> get unresolvedReferences;

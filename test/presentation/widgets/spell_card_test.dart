@@ -247,6 +247,22 @@ void main() {
     expect(find.byKey(const Key('exception-chip')), findsNothing);
   });
 
+  testWidgets('shows the rationale text only when provided', (tester) async {
+    final template = buildTemplate(summary: 'Test summary.');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SpellCard(entry: template, rationale: 'Rulebook says guideline arithmetic doesn\'t apply.'),
+      ),
+    ));
+    expect(find.text('Rulebook says guideline arithmetic doesn\'t apply.'), findsOneWidget);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: template)),
+    ));
+    expect(find.text('Rulebook says guideline arithmetic doesn\'t apply.'), findsNothing);
+  });
+
   testWidgets('a null level renders the subtitle with no level suffix', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(body: SpellCard(entry: buildTemplate(summary: 'Test summary.'))),

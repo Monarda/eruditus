@@ -8,6 +8,11 @@ class SpellCard extends StatelessWidget {
   final int? level;
   final VoidCallback? onTap;
 
+  /// A short "why this card exists outside the normal computed path" note
+  /// — currently only set by an exception-spell card. Rendered as an extra
+  /// line below the summary/description blurb, when present.
+  final String? rationale;
+
   /// Precomputed by the caller, which owns the SpellEngine. The card never
   /// derives it — same reason `level` is passed in rather than calculated here.
   final bool isRitual;
@@ -35,6 +40,7 @@ class SpellCard extends StatelessWidget {
     required this.entry,
     this.level,
     this.onTap,
+    this.rationale,
     this.isRitual = false,
     this.isGeneral = false,
     this.isException = false,
@@ -119,6 +125,14 @@ class SpellCard extends StatelessWidget {
                         : null),
                 if (hasBlurb)
                   Text(blurb, maxLines: 2, overflow: TextOverflow.ellipsis),
+                if (rationale != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      rationale!,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
               ],
             ),
             trailing: Chip(

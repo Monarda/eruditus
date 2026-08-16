@@ -1,6 +1,6 @@
 # Eruditus Todo List
 
-**Status:** Active development · **Last updated:** 2026-08-15
+**Status:** Active development · **Last updated:** 2026-08-16
 
 **Standing goal:** every published spell in the Definitive Edition core rules
 is either (a) in the spell library with its computed level matching its
@@ -26,7 +26,7 @@ reason the guidelines don't apply to it. See item 46.
 
 ## Where the import stands
 
-Last extractor run, 2026-08-15 (`python -m scripts.spell_import.extract_spells`):
+Last extractor run, 2026-08-16 (`python -m scripts.spell_import.extract_spells`):
 
 > **320 imported · 24 emitted as templates · 6 recorded as exceptions · 10
 > blocked · 0 unresolved**
@@ -73,7 +73,8 @@ below; none are unaccounted for.
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 | Rulebook says guideline arithmetic doesn't apply at all | 6 | new — item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change* |
 
-**Table total: 10, reconciled to the live count.** The previous version of this
+**Table total: 10 blocked, plus the 6 exception spells in the final row (not
+blockers), reconciled to the live counts.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
 
