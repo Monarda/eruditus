@@ -376,6 +376,7 @@ class SpellDraft {
   int? chosenBaseLevel;
   Map<String, String> chosenSlots;
   String? templateId;
+  String? analogyRationale;
 
   SpellDraft({
     String? id,
@@ -395,6 +396,7 @@ class SpellDraft {
     this.chosenBaseLevel,
     Map<String, String>? chosenSlots,
     this.templateId,
+    this.analogyRationale,
   })  : id = id ?? _generateId(),
         selectedModifiers = selectedModifiers ?? {},
         requisites = requisites ?? {},
@@ -452,7 +454,7 @@ class SpellDraft {
       chosenBaseLevel: chosenBaseLevel,
       chosenSlots: chosenSlots,
       templateId: templateId,
-      analogyRationale: null, // the creation screen cannot produce one yet
+      analogyRationale: analogyRationale,
       provenance: Provenance(source: source),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -476,6 +478,7 @@ class SpellDraft {
     Object? chosenBaseLevel = _unset,
     Map<String, String>? chosenSlots,
     Object? templateId = _unset,
+    Object? analogyRationale = _unset,
   }) {
     return SpellDraft(
       id: id,
@@ -497,6 +500,9 @@ class SpellDraft {
           : chosenBaseLevel as int?,
       chosenSlots: chosenSlots ?? this.chosenSlots,
       templateId: identical(templateId, _unset) ? this.templateId : templateId as String?,
+      analogyRationale: identical(analogyRationale, _unset)
+          ? this.analogyRationale
+          : analogyRationale as String?,
     );
   }
 }

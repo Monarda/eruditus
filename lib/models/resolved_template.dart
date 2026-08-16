@@ -52,6 +52,7 @@ class ResolvedTemplate implements LibraryEntry {
   String? get technique => record.technique;
   @override
   String? get form => record.form;
+  String? get analogyRationale => record.analogyRationale;
 
   String get id => record.id;
   @override

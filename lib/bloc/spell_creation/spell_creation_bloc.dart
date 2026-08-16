@@ -257,6 +257,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         ritualDeclaration: template.ritualDeclaration,
         templateId: template.id,
         chosenSlots: template.chosenSlots,
+        analogyRationale: template.analogyRationale,
       ));
 
       // From SpellCreationState.initial(), not state.copyWith(...): a stale

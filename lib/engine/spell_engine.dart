@@ -84,7 +84,7 @@ class SpellEngine {
         effect: draft.baseEffect!,
         technique: draft.technique ?? '',
         form: draft.form ?? '',
-        analogyRationale: null, // the creation screen cannot produce one yet
+        analogyRationale: draft.analogyRationale,
         chosenBaseLevel: draft.chosenBaseLevel,
         requisites: draft.requisites,
         selectedModifiers: draft.selectedModifiers,

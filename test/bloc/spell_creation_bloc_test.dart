@@ -1427,5 +1427,77 @@ void main() {
                 isNotNull),
       ],
     );
+
+    // Regression test for the by-analogy templates added alongside this
+    // capability (Dispel the Phantom Image, Restore the Moved Image, Lay to
+    // Rest the Haunting Spirit): the real tpl-peim-dispel-phantom-image
+    // template/pevi-G2 base effect, hand-built here per this group's own
+    // convention rather than loaded from the asset file. Its baseEffectId
+    // (pevi-G2, Perdo Vim) diverges from its own Technique/Form (Perdo
+    // Imaginem) -- exactly the analogy shape check 8 in
+    // validateSpellAgainstCatalog polices -- so this catches a regression of
+    // the analogyRationale field never reaching the instantiated draft.
+    final dispelPhantomImageBaseEffect = BaseEffect(
+      id: 'pevi-G2', technique: 'Perdo', form: 'Vim',
+      description:
+          'Dispel effects of a specific type (level <= Vim spell level +4 magnitudes + stress)',
+      baseLevel: null,
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+      effectFormula: const GeneralEffectFormula(
+          kind: GeneralEffectKind.targetSpellLevel, offsetMagnitudes: 4, stressDie: true),
+      openSlots: const [OpenSlotKind.specificType],
+    );
+    const dispelPhantomImageRationale =
+        "Perdo Imaginem's own guideline table prints no General row. This spell's own text "
+        '("Destroys the image from any one CrIm spell whose level you match or exceed on a '
+        'stress die + the level of your spell") is the Imaginem-scoped echo of Perdo Vim\'s '
+        'own general "dispel a specific type of effect" guideline (pevi-G2), narrowed to '
+        "Creo Imaginem and without pevi-G2's own +4 magnitude bonus -- the same shape Perdo "
+        "Vim's Wind of Mundane Silence generalizes for any type/realm.";
+    final dispelPhantomImageTemplateRecord = SpellTemplate(
+      id: 'tpl-peim-dispel-phantom-image',
+      name: 'Dispel the Phantom Image',
+      baseEffectId: 'pevi-G2',
+      technique: 'Perdo',
+      form: 'Imaginem',
+      rangeId: 'range-voice',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
+      summary: 'Destroys the image from any one CrIm spell whose level you match or exceed '
+          'on a stress die + the level of your spell.',
+      description: 'Destroys the image from any one CrIm spell whose level you match or '
+          'exceed on a stress die + the level of your spell.',
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+      chosenSlots: const {'specificType': 'Creo Imaginem'},
+      analogyRationale: dispelPhantomImageRationale,
+    );
+    final dispelPhantomImageTemplate = ResolvedTemplate(
+      record: dispelPhantomImageTemplateRecord,
+      baseEffect: dispelPhantomImageBaseEffect,
+      range: rangeParam,
+      duration: durationParam,
+      target: individualParam,
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an analogy template (technique/form diverging from its base effect) carries its '
+      "analogyRationale onto the new draft, and the draft calculates cleanly -- doesn't get "
+      "stuck with check 8's unexplained-divergence error",
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(TemplateInstantiated(dispelPhantomImageTemplate))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(const SpellCalculated()),
+      verify: (bloc) {
+        expect(bloc.state.draft.analogyRationale, dispelPhantomImageRationale);
+        expect(bloc.state.draft.technique, 'Perdo');
+        expect(bloc.state.draft.form, 'Imaginem');
+        expect(bloc.state.validationErrors, isEmpty);
+        expect(bloc.state.status, SpellCreationStatus.calculated);
+        expect(bloc.state.calculatedLevel, isNotNull);
+      },
+    );
   });
 }

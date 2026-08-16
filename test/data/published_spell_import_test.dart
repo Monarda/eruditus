@@ -237,14 +237,15 @@ void main() {
     final baseEffect = effects[template.baseEffectId]!;
 
     // Instantiate the template into a SpellDraft the same way
-    // SpellCreationBloc's TemplateInstantiated handler does: a fresh draft
-    // seeded from the template's fields, chosenSlots carried across
-    // verbatim. The guideline is General (revi-G1), so a caster also fills
-    // in the level -- the same as the real handler leaves for the level
-    // field.
+    // SpellCreationBloc's TemplateInstantiated handler does: technique/form/
+    // analogyRationale seeded from the *template's own* fields (not derived
+    // from the base effect -- they may legitimately diverge, see
+    // Spell.analogyRationale), chosenSlots carried across verbatim. The
+    // guideline is General (revi-G1), so a caster also fills in the level --
+    // the same as the real handler leaves for the level field.
     final draft = SpellDraft(
-      technique: baseEffect.technique,
-      form: baseEffect.form,
+      technique: template.technique,
+      form: template.form,
       baseEffect: baseEffect,
       range: parameters[template.rangeId],
       duration: parameters[template.durationId],
@@ -256,6 +257,7 @@ void main() {
       description: template.description,
       chosenSlots: template.chosenSlots,
       chosenBaseLevel: 20,
+      analogyRationale: template.analogyRationale,
     );
 
     final spell = draft.toSpell(name: template.name, source: PublicationSource.userCreated);
