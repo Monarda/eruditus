@@ -30,13 +30,32 @@
     "isRitual": false,
     "source": "published",
     "summary": "You see the true, original form of any person whose form has been changed or masked. This spell can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell. (Variable base)",
-    "rationale": "Design line prints \"(Variable base)\", a marker this importer does not tokenize -- the caster chooses the level, and Intellego Corpus's own guideline table prints no General row describing this spell's effect (\"can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell\"). A matching row was built from this exact prose once (`inco-gen`, a targetSpellLevel guideline) and deliberately removed -- reconstructing rulebook content the table never printed, the same policy that keeps Dispel the Phantom Image, Lay to Rest the Haunting Spirit, Restore the Moved Image and The Invisible Eye Revealed blocked rather than exceptions (see todo item 25 for why those four stay blocked and this one does not).",
+    "rationale": "Design line prints \"(Variable base)\", a marker this importer does not tokenize -- the caster chooses the level, and Intellego Corpus's own guideline table prints no General row describing this spell's effect (\"can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell\"). A matching row was built from this exact prose once (`inco-gen`, a targetSpellLevel guideline) and deliberately removed -- reconstructing rulebook content the table never printed, the same policy that also governs The Invisible Eye Revealed's own entry just above, and that routed Dispel the Phantom Image, Restore the Moved Image and Lay to Rest the Haunting Spirit to an existing Vim-level guideline instead (see docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md).",
     "citations": [
       {
         "bookId": "arm5-core"
       }
     ],
     "description": "You see the true, original form of any person whose form has been changed or masked. This spell can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell. (Variable base)"
+  },
+  {
+    "id": "exc-invi-invisible-eye-revealed",
+    "name": "The Invisible Eye Revealed",
+    "technique": "Intellego",
+    "form": "Vim",
+    "range": "Per",
+    "duration": "Conc",
+    "target": "Touch",
+    "isRitual": false,
+    "source": "published",
+    "summary": "The caster can feel any magical means currently being used to spy on him. The representation varies in a way that depends on the spell, but it often feels like something touching the magus's back. For example, a magus being spied upon with Enchantment of the Scrying Pool might feel wet fingers, while a magus who is being tracked by The Inexorable Search might feel a finger running over his skin...",
+    "rationale": "Design line prints \"(Base effect)\", General-kind, no printed level. Intellego Vim's own guideline table prints exactly one General row, invi-G (\"detect the traces of magic of negative magnitude up to the magnitude of the guideline used - 2\") -- a residual-trace-decay formula, confirmed the wrong guideline by checking the arithmetic, not just the wording: at level 20 invi-G computes a magnitude of 2, while this spell's own text (\"detects the use of Intellego spells of up to double the level of this spell\") needs a level threshold of 40 -- different GeneralEffectKind families (spellTraceMagnitude vs. targetSpellLevel), not a close-enough match. No other Form's guideline can substitute by analogy either: this spell is already Intellego Vim, the top of the analogy chain (see docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md). Same shape as Sight of the True Form: a matching InVi row was not attempted here for the identical reason -- test_general_entries_match_the_rulebook_bullet_for_bullet forbids it.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "description": "The caster can feel any magical means currently being used to spy on him. The representation varies in a way that depends on the spell, but it often feels like something touching the magus's back. For example, a magus being spied upon with Enchantment of the Scrying Pool might feel wet fingers, while a magus who is being tracked by The Inexorable Search might feel a finger running over his skin. This spell detects the use of Intellego spells of up to double the level of this spell. A special spell is required because most Intellego spells are designed to be subtle, and they are more subtle at higher levels."
   },
   {
     "id": "exc-muco-mists-change",

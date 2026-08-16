@@ -28,7 +28,7 @@ reason the guidelines don't apply to it. See item 46.
 
 Last extractor run, 2026-08-16 (`python -m scripts.spell_import.extract_spells`):
 
-> **325 imported · 24 emitted as templates · 7 recorded as exceptions · 4
+> **325 imported · 27 emitted as templates · 8 recorded as exceptions · 0
 > blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
@@ -1849,66 +1849,31 @@ ward**.
   (`spell_engine.dart:422-431`).
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
-**Four of the 33 remain blocked, each for a reason unrelated to this item —
-and, re-confirmed 2026-08-16, all four are a settled, permanent decision, not
-an open investigation.** (Was ten, then nine, then five, then four: *Ward
-against Faeries of the Mountain* moved out 2026-08-15 — its "no design line"
-turned out to be a complete specification once its own cross-reference to
-*Ward against Faeries of the Waters* was followed; *Aegis of the Hearth*,
-*Wizard's Vigil*, *Wizard's Communion* and *Watching Ward* moved out
-2026-08-16 as exception spells (item 46); *Sight of the True Form* moved out
-the same day, also as an exception spell, but for a different, third reason
-item 46's own designed shapes didn't cover — see item 46's body. See
-`extract_spells.HAND_DERIVED`'s comment, item 27's correction, and item 46.)
-- **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
-  *Restore the Moved Image*, *The Invisible Eye Revealed*. Their sole General
-  candidate (`reim-G`/`invi-G`) is each art's *ward* guideline — a real
-  candidate, just the wrong one; neither spell wards against anything.
-- **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
-  Spirit*, *Dispel the Phantom Image*. Perdo Mentem's and Perdo Imaginem's own
-  guideline tables print no General row at all.
-- **Four of the five share a recognizable family, spotted 2026-08-16 — three
-  different Technique pairings sharing one mechanical shape (a Vim guideline
-  generalizes it with a magnitude offset; the Form-specific flavor text
-  never gets that offset or a table row), not the same pattern four times:**
-  - *Dispel the Phantom Image* ("whose level you match or exceed on a
-    stress die + the level of your spell") is Perdo Imaginem dispelling a
-    *Creo* Imaginem spell — Perdo opposing Creo, scoped to one Form. The
-    Imaginem-scoped echo of Perdo Vim's own "dispel" guideline (Wind of
-    Mundane Silence's paradigm: "cancel the effects of any spell if... you
-    can double the level of the spell on a stress die + the level of your
-    spell") — same mechanic, one Form instead of "any realm/type", no
-    doubling.
-  - *Restore the Moved Image* ("match the spell's level on a stress die +
-    the level of your spell") is Rego Imaginem undoing a *Rego* Imaginem
-    spell — same Technique and Form, "control undoing control", matching
-    Rego Vim's "sustain or suppress" pattern instead.
-  - *The Invisible Eye Revealed* ("up to double the level of this spell")
-    fits the same broader family (match/exceed a target spell's level, no
-    magnitude offset) without the stress die, and cross-Form — it detects
-    Intellego spells of any Form, not just Vim.
-  - *Lay to Rest the Haunting Spirit* ("loses a number of points from its
-    Might equal to the level of this spell") is Perdo Mentem's own instance
-    of Perdo Vim's `pevi-G3` ("Reduce target's Might Score by spell level +2
-    magnitudes"), Form-narrowed to ghosts/spirits, again without the offset.
-    **Checked against a tempting but wrong analogy first:** most Perdo
-    Forms *do* carry a "reduce an elemental's Might Score by the level of
-    the spell +2 magnitudes" General row (`peaq-gen`, `peau-gen`, `peig-gen`,
-    `pete-G`) — but Elementals are a specific creature category restricted
-    to exactly the four physical Forms (Earth/Water/Air/Fire =
-    Terram/Aquam/Auram/Ignem); there is no such thing as a Mentem elemental,
-    so Perdo Mentem's table lacking that row is expected, not a gap. Also
-    checked against `wip/Ars Magica 5e - Core Rules.md` (a
-    pre-Definitive-Edition source in the same sibling repo) for an
-    editing-dropped row — same table, same absence there too.
+**All 33 now import — the last 4 unblocked 2026-08-16, via two different
+mechanisms.** (Was ten, then nine, then five, then four, per the earlier
+history below; the final four cleared together —
+see `docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md`.)
 
-  All four are spell-level flavor text the Definitive Edition never
-  generalizes into that Form's own guideline table — only the Vim-level
-  versions carry a magnitude offset the Form-level ones don't.
-  Reconstructing a row for Rego Imaginem, Intellego Vim or Perdo Mentem "by
-  analogy" to the Vim guidelines is still inventing content none of those
-  three tables print — same policy as `peme-G` below, not a loophole around
-  it. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s comment.
+- **3 unblocked via the base-effect analogy capability**
+  (`Spell`/`SpellTemplate.technique`/`.form` + `analogyRationale`,
+  `docs/superpowers/plans/2026-08-16-base-effect-analogy.md`): each is a
+  Form-specific spell whose own guideline table has no matching General
+  row, pointed instead at the existing Vim-level General row it's a
+  narrower, un-offset echo of.
+  - *Dispel the Phantom Image* (Perdo Imaginem) → `pevi-G2`
+    ("dispel a specific type of effect"), narrowed to Creo Imaginem.
+  - *Restore the Moved Image* (Rego Imaginem) → `revi-G2`
+    ("sustain or suppress a spell you cast").
+  - *Lay to Rest the Haunting Spirit* (Perdo Mentem) → `pevi-G3`
+    ("reduce target's Might Score").
+- **1 unblocked as an exception spell**
+  (`scripts/spell_import/exceptions.py`, the same mechanism as *Sight of
+  the True Form* and 6 others): *The Invisible Eye Revealed* (Intellego
+  Vim) is already a Vim spell itself, so there is no more-general
+  guideline to point it at by analogy — confirmed by checking the
+  arithmetic of its own Form's only General row (`invi-G`), which
+  computes a structurally different quantity (a small residual-magnitude
+  count, not a level threshold).
 - **Re-derived 2026-08-16, not a new finding — all four were already settled
   by `docs/superpowers/plans/2026-08-05-general-base-effects.md`,
   independently re-confirmed against the reviewed rulebook text while
@@ -1919,13 +1884,14 @@ item 46's own designed shapes didn't cover — see item 46's body. See
   the True Form*) and deliberately removed —
   `test_general_catalog.GeneralCatalogTest.test_general_entries_match_the_rulebook_bullet_for_bullet`
   now holds the catalog to the rulebook's own General bullets art-by-art, in
-  both directions, permanently. **Why these four stay blocked while Sight of
-  the True Form became an exception spell instead, 2026-08-16:** the user's
-  explicit choice was to convert only the spell actually raised, not extend
-  the same reasoning to its siblings by inference — these four remain
-  documented, permanent blockers on their merits, not because the reasoning
-  doesn't apply to them (it does, identically) but because nobody has yet
-  chosen to act on it for them. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s
+  both directions, permanently. **Why these four stayed blocked while Sight
+  of the True Form became an exception spell first, 2026-08-16:** the user's
+  earlier explicit choice was to convert only the spell actually raised, not
+  extend the same reasoning to its siblings by inference — until later the
+  same day, when the two mechanisms above (analogy for three, exception for
+  the fourth) closed all four on their own merits, not because the earlier
+  reasoning had been wrong (it wasn't, identically) but because nobody had
+  yet chosen to act on it for them. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s
   and the `general_candidates` branch's comments for the per-spell
   citations.**
 - **✅ Wizard's Communion moved to item 46, 2026-08-16** — it now imports as

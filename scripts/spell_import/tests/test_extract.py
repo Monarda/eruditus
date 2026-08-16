@@ -45,8 +45,13 @@ class RunTest(unittest.TestCase):
     def test_blocked_spells_are_reported_not_dropped_silently(self):
         # The audit found 74 blocked. Assert a range, not a number: each
         # blocker item that clears moves spells from blocked to imported, and
-        # this test should not need editing when that happens.
-        self.assertGreater(len(self.report.blocked), 0)
+        # this test should not need editing when that happens. The last 4
+        # cleared 2026-08-16 (see todo item 25), so the lower bound is now 0
+        # rather than a strictly-positive count -- this test still exists to
+        # catch blocked spells being silently dropped from the report
+        # instead of appearing in `report.blocked`, not to assert that some
+        # nonzero number must remain blocked forever.
+        self.assertGreaterEqual(len(self.report.blocked), 0)
         self.assertLess(len(self.report.blocked), 120)
 
 
@@ -215,11 +220,11 @@ class ExceptionSpellsTest(unittest.TestCase):
             self.assertIn(name, names, msg=name)
             self.assertNotIn(name, blocked_names, msg=name)
 
-    def test_the_five_general_kind_exceptions_have_no_printed_level(self):
+    def test_the_six_general_kind_exceptions_have_no_printed_level(self):
         by_name = {e["name"]: e for e in self.report.exceptions}
         for name in ("Wizard's Communion", "Wizard's Vigil",
                      "Aegis of the Hearth", "Watching Ward",
-                     "Sight of the True Form"):
+                     "Sight of the True Form", "The Invisible Eye Revealed"):
             self.assertNotIn("printedLevel", by_name[name], msg=name)
 
     def test_the_two_fixed_level_exceptions_carry_their_printed_level(self):
@@ -235,6 +240,9 @@ class ExceptionSpellsTest(unittest.TestCase):
         by_name = {e["name"]: e for e in self.report.exceptions}
         self.assertEqual(by_name["Whispering Winds"]["id"], "exc-inau-whispering-winds")
         self.assertEqual(by_name["Wizard's Communion"]["id"], "exc-muvi-wizards-communion")
+        self.assertEqual(
+            by_name["The Invisible Eye Revealed"]["id"], "exc-invi-invisible-eye-revealed"
+        )
 
 
 class ExceptionSpellsStalenessTest(unittest.TestCase):
@@ -292,32 +300,14 @@ class ExceptionSpellsDisjointnessTest(unittest.TestCase):
             self.assertEqual(overlap, set(), msg=f"also in {table_name}: {overlap}")
 
 
-GENERAL_BLOCKED = {
-    # Ward against Faeries of the Mountain: WAS here ("no design line; a prose
-    # cross-reference to another spell") until 2026-08-15, when that same
-    # cross-reference ("As Ward Against Faeries of the Waters (ReAq Gen)...")
-    # turned out to be a complete specification, not just a description --
-    # see extract_spells.HAND_DERIVED's comment. It now imports as a
-    # template. This is exactly the staleness this test class exists to
-    # catch, and it caught it.
-    #
-    # Aegis of the Hearth, Wizard's Vigil, Watching Ward and Wizard's
-    # Communion: WERE here until 2026-08-16, when they moved to
-    # ExceptionSpellsTest instead -- each now imports as an exception spell
-    # (scripts/spell_import/exceptions.py), not blocked at all. This is the
-    # same staleness this test class exists to catch.
-    #
-    # Sight of the True Form: WAS here ("no design line") until 2026-08-16,
-    # when it moved to ExceptionSpellsTest too -- see
-    # exceptions.EXCEPTION_SPELLS's entry.
-    # Dispel the Phantom Image, Lay to Rest the Haunting Spirit and Restore
-    # the Moved Image: WERE here until 2026-08-16, when they moved to
-    # AnalogyBaseEffectsTest instead -- each now imports as a template via
-    # ANALOGY_BASE_EFFECTS (scripts/spell_import/extract_spells.py), not
-    # blocked at all. See
-    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
-    "The Invisible Eye Revealed": "design line does not account for the stat line",
-}
+GENERAL_BLOCKED: dict[str, str] = {}
+# Ward against Faeries of the Mountain, Aegis of the Hearth, Wizard's Vigil,
+# Watching Ward, Wizard's Communion, Sight of the True Form, Dispel the
+# Phantom Image, Lay to Rest the Haunting Spirit, Restore the Moved Image,
+# and The Invisible Eye Revealed all WERE here at one point or another --
+# each now imports (as a template, an exception spell, or via
+# ANALOGY_BASE_EFFECTS). Currently empty; the mechanism stays for the next
+# spell that turns out to need it.
 
 
 class GeneralBlockedStalenessTest(unittest.TestCase):

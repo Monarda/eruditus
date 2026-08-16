@@ -172,17 +172,26 @@ REALM_BY_SPELL_ID = {
 # "by analogy" to the Vim guidelines would still be inventing content none
 # of those three tables print -- confirmed 2026-08-16, does not change the
 # classification above.
-DESIGN_LINE_INCOMPLETE = {
-    "lib-invi-invisible-eye-revealed":
-        "prints (Base effect) but the stat line costs 2 magnitudes",
-    # Restore the Moved Image: WAS here until 2026-08-16, when it moved to
-    # ANALOGY_BASE_EFFECTS instead -- it now imports as a template pointing
-    # at revi-G2, not blocked. See
-    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
-    # Wizard's Communion used to be here too. It now imports as an exception
-    # spell (scripts/spell_import/exceptions.py) -- see
-    # docs/superpowers/specs/2026-08-15-exception-spells-design.md.
-}
+#
+# ALL FOUR of the above resolved 2026-08-16, after this comment was
+# written -- 3 via ANALOGY_BASE_EFFECTS (below), pointing at the existing
+# Vim-level guideline each is a Form-specific echo of, and The Invisible
+# Eye Revealed via exceptions.EXCEPTION_SPELLS, since it is already Vim
+# itself and has nowhere more general to point to. The derivation above
+# (why no *new* catalog row is the right answer) still stands -- it's the
+# reason analogy/exception was the right mechanism, not a contradiction of
+# it. See docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
+#
+# Currently empty -- both former entries now resolve elsewhere. Restore the
+# Moved Image moved to ANALOGY_BASE_EFFECTS and The Invisible Eye Revealed
+# moved to exceptions.EXCEPTION_SPELLS, both 2026-08-16. See
+# docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
+# Wizard's Communion used to be here too, earlier -- it now imports as an
+# exception spell (scripts/spell_import/exceptions.py) -- see
+# docs/superpowers/specs/2026-08-15-exception-spells-design.md. The
+# mechanism stays for the next spell whose design line is real but
+# incomplete relative to its stat line.
+DESIGN_LINE_INCOMPLETE: dict[str, str] = {}
 
 
 # Spells whose own Technique/Form guideline table has no matching General
@@ -663,6 +672,12 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 # pattern DESIGN_LINE_INCOMPLETE's comment traces above --
                 # see there (and its elemental-Might-reduction digression)
                 # for why the pattern doesn't change this either.
+                # Both resolved 2026-08-16 via ANALOGY_BASE_EFFECTS, checked
+                # above before this branch is ever reached for their spell
+                # ids -- this empty-candidates branch itself is unchanged
+                # and still correct for any future spell with no analogy
+                # entry. See
+                # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
                 blocked.append((block.name, "no General base effect for that Technique/Form"))
                 continue
 
