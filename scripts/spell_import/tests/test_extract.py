@@ -197,25 +197,29 @@ class KnownUnresolvableStalenessTest(unittest.TestCase):
 
 
 class ExceptionSpellsTest(unittest.TestCase):
-    """The six spells the rulebook itself says guideline arithmetic doesn't
-    apply to -- see docs/superpowers/specs/2026-08-15-exception-spells-design.md.
+    """The spells the rulebook itself says guideline arithmetic doesn't apply
+    to -- see docs/superpowers/specs/2026-08-15-exception-spells-design.md
+    for the original six, and exceptions.EXCEPTION_SPELLS's module docstring
+    for the third shape (Sight of the True Form, added 2026-08-16) that spec
+    didn't anticipate.
     """
 
     @classmethod
     def setUpClass(cls):
         cls.report = extract_spells.run(write=False)
 
-    def test_all_six_spells_import_as_exceptions_not_blocked(self):
+    def test_every_listed_spell_imports_as_an_exception_not_blocked(self):
         names = {e["name"] for e in self.report.exceptions}
         blocked_names = {name for name, _ in self.report.blocked}
         for name in exceptions_module.EXCEPTION_SPELLS:
             self.assertIn(name, names, msg=name)
             self.assertNotIn(name, blocked_names, msg=name)
 
-    def test_the_four_general_kind_exceptions_have_no_printed_level(self):
+    def test_the_five_general_kind_exceptions_have_no_printed_level(self):
         by_name = {e["name"]: e for e in self.report.exceptions}
         for name in ("Wizard's Communion", "Wizard's Vigil",
-                     "Aegis of the Hearth", "Watching Ward"):
+                     "Aegis of the Hearth", "Watching Ward",
+                     "Sight of the True Form"):
             self.assertNotIn("printedLevel", by_name[name], msg=name)
 
     def test_the_two_fixed_level_exceptions_carry_their_printed_level(self):
@@ -289,7 +293,6 @@ class ExceptionSpellsDisjointnessTest(unittest.TestCase):
 
 
 GENERAL_BLOCKED = {
-    "Sight of the True Form": "no design line",
     # Ward against Faeries of the Mountain: WAS here ("no design line; a prose
     # cross-reference to another spell") until 2026-08-15, when that same
     # cross-reference ("As Ward Against Faeries of the Waters (ReAq Gen)...")
@@ -303,6 +306,10 @@ GENERAL_BLOCKED = {
     # ExceptionSpellsTest instead -- each now imports as an exception spell
     # (scripts/spell_import/exceptions.py), not blocked at all. This is the
     # same staleness this test class exists to catch.
+    #
+    # Sight of the True Form: WAS here ("no design line") until 2026-08-16,
+    # when it moved to ExceptionSpellsTest too -- see
+    # exceptions.EXCEPTION_SPELLS's entry.
     "Dispel the Phantom Image": "no Perdo Imaginem General row in the rulebook",
     "Lay to Rest the Haunting Spirit": "no Perdo Mentem General row in the rulebook",
     "Restore the Moved Image": "design line does not account for the stat line",

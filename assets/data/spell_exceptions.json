@@ -20,6 +20,25 @@
     "description": "The winds bear their tidings to your ears, allowing you to hear words spoken by any group of people within your line of sight, provided no solid barrier (including glass) intervenes. This spell is an adaptation of an effect known to Bjornaer the Founder, and fits poorly into the normal framework of Hermetic magic. (Unique spell)"
   },
   {
+    "id": "exc-inco-sight-true-form",
+    "name": "Sight of the True Form",
+    "technique": "Intellego",
+    "form": "Corpus",
+    "range": "Per",
+    "duration": "Mom",
+    "target": "Vision",
+    "isRitual": false,
+    "source": "published",
+    "summary": "You see the true, original form of any person whose form has been changed or masked. This spell can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell. (Variable base)",
+    "rationale": "Design line prints \"(Variable base)\", a marker this importer does not tokenize -- the caster chooses the level, and Intellego Corpus's own guideline table prints no General row describing this spell's effect (\"can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell\"). A matching row was built from this exact prose once (`inco-gen`, a targetSpellLevel guideline) and deliberately removed -- reconstructing rulebook content the table never printed, the same policy that keeps Dispel the Phantom Image, Lay to Rest the Haunting Spirit, Restore the Moved Image and The Invisible Eye Revealed blocked rather than exceptions (see todo item 25 for why those four stay blocked and this one does not).",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "description": "You see the true, original form of any person whose form has been changed or masked. This spell can see through mundane masks and disguises at level 10, and can see through the effects of other spells that are equal to or lower than the level of this spell. (Variable base)"
+  },
+  {
     "id": "exc-muco-mists-change",
     "name": "Mists of Change",
     "technique": "Muto",

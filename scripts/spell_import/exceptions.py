@@ -1,12 +1,26 @@
 """Spells the rulebook itself says guideline arithmetic doesn't apply to.
 
-Two shapes -- see docs/superpowers/specs/2026-08-15-exception-spells-design.md
-for the full investigation: the spell's own prose disclaims normal Hermetic
-design ("rulebook-disclaimed"), or the spell's real shape doesn't fit the
-Range/Duration/Target model at all regardless of what the prose says
+Three shapes -- see
+docs/superpowers/specs/2026-08-15-exception-spells-design.md for the
+original two-shape investigation: the spell's own prose disclaims normal
+Hermetic design ("rulebook-disclaimed"), or the spell's real shape doesn't
+fit the Range/Duration/Target model at all regardless of what the prose says
 ("schema-mismatched"). Either way there is no arithmetic to recover -- these
 spells never route through build_spell/build_template, and no future
 tokenizer or ledger change should try to make them.
+
+A third shape, added 2026-08-16: the guideline a General-kind spell's own
+effect needs was never printed in that Technique/Form's own table at all --
+confirmed by reading every printed row, not inferred from an absence alone --
+and reconstructing one from the spell's own prose was already tried once
+(base_effects.json's now-deleted `inco-gen`, this file's *Sight of the True
+Form* entry) and reverted as inventing rulebook content the table doesn't
+contain (test_general_catalog.GeneralCatalogTest.
+test_general_entries_match_the_rulebook_bullet_for_bullet). Standard R/D/T
+(unlike Watching Ward/Mists of Change's genuinely nonstandard shape) --
+recorded as free text here purely because there is no base effect to attach
+a resolved id to, the same reason `technique`/`form` are plain strings on
+`ExceptionSpell` rather than looked up through one.
 
 A closed, exact-name table, the same discipline as extract_spells.py's
 HAND_DERIVED/KNOWN_UNRESOLVABLE/DESIGN_LINE_INCOMPLETE. Each value is the
@@ -46,5 +60,20 @@ EXCEPTION_SPELLS: dict[str, str] = {
         'Prints two Durations in one stat line ("D: Sun & Year") plus its '
         'own "slightly nonstandard effect" clause -- the R/D/T model has '
         "exactly one Duration slot."
+    ),
+    "Sight of the True Form": (
+        'Design line prints "(Variable base)", a marker this importer does '
+        "not tokenize -- the caster chooses the level, and Intellego "
+        "Corpus's own guideline table prints no General row describing "
+        "this spell's effect (\"can see through mundane masks and "
+        'disguises at level 10, and can see through the effects of other '
+        'spells that are equal to or lower than the level of this spell"). '
+        "A matching row was built from this exact prose once (`inco-gen`, "
+        "a targetSpellLevel guideline) and deliberately removed -- "
+        "reconstructing rulebook content the table never printed, the same "
+        "policy that keeps Dispel the Phantom Image, Lay to Rest the "
+        "Haunting Spirit, Restore the Moved Image and The Invisible Eye "
+        "Revealed blocked rather than exceptions (see todo item 25 for why "
+        "those four stay blocked and this one does not)."
     ),
 }

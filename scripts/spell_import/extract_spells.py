@@ -189,14 +189,19 @@ DESIGN_LINE_INCOMPLETE = {
 # will not equal the printed one. Hand-derivation under a test is a different
 # thing from hand-derivation on trust.
 #
-# One further no-design-line spell, Sight of the True Form, is General-level
-# and belongs to todo item 25, not here (a General guideline has no numeric
-# level for assertion 1 to check a derivation against). Aegis of the Hearth
-# and Wizard's Vigil used to be listed alongside it here too -- both now
-# import as exception spells instead (scripts/spell_import/exceptions.py),
-# since their own prose disclaims guideline arithmetic entirely rather than
-# merely lacking a printed derivation. See
+# Aegis of the Hearth and Wizard's Vigil used to be listed here as
+# no-design-line General-level candidates too -- both now import as
+# exception spells instead (scripts/spell_import/exceptions.py), since their
+# own prose disclaims guideline arithmetic entirely rather than merely
+# lacking a printed derivation. See
 # docs/superpowers/specs/2026-08-15-exception-spells-design.md.
+#
+# Sight of the True Form, another no-design-line General-level spell, was
+# investigated here too and left blocked under item 25 -- until 2026-08-16,
+# when it moved to exceptions.EXCEPTION_SPELLS: its own design-line marker
+# is "(Variable base)", not merely absent, and Intellego Corpus's guideline
+# table genuinely prints no matching General row (see exceptions.py's
+# module docstring for the full derivation).
 #
 # - Enchantment of the Scrying Pool (R: Touch, D: Year, T: Ind, level 30):
 #   Base 5 (inaq-5, "Learn the magical properties of a liquid" — the sole
@@ -254,9 +259,9 @@ DESIGN_LINE_INCOMPLETE = {
 #   print "(Base effect)" and already import via REALM_BY_SPELL_ID; the text
 #   here supplies exactly the marker those two print literally, not new
 #   information. Checked 2026-08-15. Of the other no-design-line General
-#   spells, Sight of the True Form has no comparable sibling reference and
-#   stays blocked under item 25; Aegis of the Hearth and Wizard's Vigil import
-#   as exception spells instead (scripts/spell_import/exceptions.py).
+#   spells, Aegis of the Hearth, Wizard's Vigil and Sight of the True Form
+#   all import as exception spells instead
+#   (scripts/spell_import/exceptions.py).
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
     "Ward against Faeries of the Mountain": "(Base effect)",

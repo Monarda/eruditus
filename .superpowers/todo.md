@@ -28,7 +28,7 @@ reason the guidelines don't apply to it. See item 46.
 
 Last extractor run, 2026-08-16 (`python -m scripts.spell_import.extract_spells`):
 
-> **325 imported · 24 emitted as templates · 6 recorded as exceptions · 5
+> **325 imported · 24 emitted as templates · 7 recorded as exceptions · 4
 > blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
@@ -52,18 +52,18 @@ Sky*); and Bucket B's 5 import-blocker fixes (*Wind at the Back*, *Trackless
 Step* and *The Earth Split Asunder* via item 26's `SPECIAL_PARAMETER_BASIS`
 resolution of `Special` Duration/Target; *The Bountiful Feast* via item 26's
 `DESIGN_LINE_TYPOS` fix for its missing closing paren; and *Hermes' Portal*
-via item 45's transport-distance tokenizer fix); item 46's six exception
+via item 45's transport-distance tokenizer fix); item 46's seven exception
 spells (*Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*,
-*Whispering Winds*, *Watching Ward*, *Mists of Change*), which have their
-own row in the table below rather than counting toward the blocked total;
-item 24's closing fix (*The Kiss of Death*, *Black Whisper*, *Sight of the
-Active Magics*, 2026-08-16); item 39's closing fix (*Conjuration of the
-Indubitable Cold*, 2026-08-16 — see its corrected section: not actually a
-"which one is right" ambiguity, a model gap); and item 28's closing fix
-(*Sense of the Lingering Magic*, 2026-08-16 — three prior readings called it
-an unstated combination rule; a fourth found it was an ordinary
-`NUMBERED_OVERRIDES` case). Every one of the 5 currently-blocked spells now
-maps to exactly one row below; none are unaccounted for.
+*Whispering Winds*, *Watching Ward*, *Mists of Change*, *Sight of the True
+Form*), which have their own row in the table below rather than counting
+toward the blocked total; item 24's closing fix (*The Kiss of Death*, *Black
+Whisper*, *Sight of the Active Magics*, 2026-08-16); item 39's closing fix
+(*Conjuration of the Indubitable Cold*, 2026-08-16 — see its corrected
+section: not actually a "which one is right" ambiguity, a model gap); and
+item 28's closing fix (*Sense of the Lingering Magic*, 2026-08-16 — three
+prior readings called it an unstated combination rule; a fourth found it was
+an ordinary `NUMBERED_OVERRIDES` case). Every one of the 4 currently-blocked
+spells now maps to exactly one row below; none are unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
@@ -71,16 +71,16 @@ maps to exactly one row below; none are unaccounted for.
 | Genuinely ambiguous ledger resolution | 0 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* now imports too, 2026-08-16 — it was never a "which one is right" tie, both candidates share the same base level, so it's routed through the ledger like any other multi-candidate spell and the second guideline is recorded as a free (magnitude-0) adjustment. See item 39's corrected body |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
-| General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's Communion* now import as exception spells (item 46). Re-confirmed 2026-08-16: all 5 permanent, see item 25's body |
+| General-level, each blocked for an unrelated reason | 4 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil*, *Wizard's Communion* and *Sight of the True Form* now import as exception spells (item 46) — the last for a third reason item 46 didn't originally cover, see its body. Re-confirmed 2026-08-16: the remaining 4 are permanent, see item 25's body |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 0 | **24** — corrected from 3: all 3 now import as `no-words`/`no-gestures`/`invi-techniques-and-forms` catalog Modifiers, done 2026-08-16 |
 | No printed design line and no legitimate derivation | 0 | see item **27** — corrected from 1: *Whispering Winds* now imports as an exception spell (item 46) rather than staying permanently blocked |
 | `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
 | Non-standard requisite-magnitude phrasing | 0 | **44** — done 2026-08-15, all 3 import |
 | Ritual-justification clause not yet allow-listed | 0 | **18** — corrected from 3: all 3 (*Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open Sky*) now allow-listed and import, done 2026-08-15 |
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
-| Rulebook says guideline arithmetic doesn't apply at all | 6 | new — item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change* |
+| Rulebook says guideline arithmetic doesn't apply at all | 7 | item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change*, *Sight of the True Form* |
 
-**Table total: 5 blocked, plus the 6 exception spells in the final row (not
+**Table total: 4 blocked, plus the 7 exception spells in the final row (not
 blockers), reconciled to the live counts.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
@@ -1608,7 +1608,7 @@ or whether its 35-level gap (see item 27) needs something else besides.
       imports as `rete-4`.
 - **Files:** `scripts/spell_import/designline.py`, `scripts/spell_import/extract_spells.py`
 
-### 46. Exception Spells — ✅ DONE 2026-08-16
+### 46. Exception Spells — ✅ DONE 2026-08-16, extended to 7
 
 Six published spells share a failure mode distinct from every other blocked
 spell: the rulebook itself, in the spell's own printed text, says guideline
@@ -1617,6 +1617,17 @@ resolution, a genuine "this was never designed that way." *Wizard's
 Communion*, *Wizard's Vigil* and *Aegis of the Hearth* (General-kind, no
 printed level, moved out of item 25); *Whispering Winds* (moved out of item
 27); *Watching Ward* and *Mists of Change* (moved out of item 26).
+
+**A seventh, different in kind, moved in the same day:** *Sight of the True
+Form*, out of item 25. Not rulebook-disclaimed and not schema-mismatched —
+the original two shapes this item designed for — but a third: its General
+guideline genuinely isn't printed in Intellego Corpus's own table (verified,
+not assumed), and a catalog row reconstructed from its prose was already
+tried once (`inco-gen`) and reverted as fabrication. `exceptions.py`'s module
+docstring documents this third shape; item 25's body explains why the same
+reasoning does *not* extend to that item's remaining four (they were also
+checked, 2026-08-16, and the user's choice was exception-spell treatment for
+this one spell only, not a blanket extension).
 
 - [x] A new `ExceptionSpell`/`ResolvedException` model pair, parallel to how
       `SpellTemplate` sits alongside `Spell` — free-text Range/Duration/
@@ -1629,15 +1640,19 @@ printed level, moved out of item 25); *Whispering Winds* (moved out of item
 - [x] A closed, exact-name table, `scripts/spell_import/exceptions.py`'s
       `EXCEPTION_SPELLS`, intercepted as the very first check in
       `extract_spells.py`'s import loop, before any design-line
-      tokenization — these six spells never route through
+      tokenization — these seven spells never route through
       `build_spell`/`build_template`.
 - [x] A third `SpellLibraryScreen` section, below Templates and Spells,
       reusing `SpellCard`/`LibraryEntry` via one new chip. No instantiation
       action — these are read-only canon records.
 - [x] The standing goal statement amended to carve out this category
-      explicitly, rather than silently failing to cover six real spells.
+      explicitly, rather than silently failing to cover these real spells.
 
-**Spec/Plan:** `docs/superpowers/specs/2026-08-15-exception-spells-design.md`,
+**Spec/Plan:** `docs/superpowers/specs/2026-08-15-exception-spells-design.md`
+(the original six — its exclusion list for *Dispel the Phantom Image*, *Lay
+to Rest the Haunting Spirit*, *Restore the Moved Image*, *The Invisible Eye
+Revealed* and *Sight of the True Form* is now known to rest on a since-
+falsified assumption for the first four; see item 25),
 `docs/superpowers/plans/2026-08-16-exception-spells.md`
 
 ---
@@ -1795,16 +1810,17 @@ ward**.
   (`spell_engine.dart:422-431`).
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
-**Five of the 33 remain blocked, each for a reason unrelated to this item —
-and, re-confirmed 2026-08-16, all five are a settled, permanent decision, not
-an open investigation.** (Was ten, then nine, then five: *Ward against
-Faeries of the Mountain* moved out 2026-08-15 — its "no design line" turned
-out to be a complete specification once its own cross-reference to *Ward
-against Faeries of the Waters* was followed; *Aegis of the Hearth*, *Wizard's
-Vigil*, *Wizard's Communion* and *Watching Ward* moved out 2026-08-16 — all
-four now import as exception spells instead, item 46. See
+**Four of the 33 remain blocked, each for a reason unrelated to this item —
+and, re-confirmed 2026-08-16, all four are a settled, permanent decision, not
+an open investigation.** (Was ten, then nine, then five, then four: *Ward
+against Faeries of the Mountain* moved out 2026-08-15 — its "no design line"
+turned out to be a complete specification once its own cross-reference to
+*Ward against Faeries of the Waters* was followed; *Aegis of the Hearth*,
+*Wizard's Vigil*, *Wizard's Communion* and *Watching Ward* moved out
+2026-08-16 as exception spells (item 46); *Sight of the True Form* moved out
+the same day, also as an exception spell, but for a different, third reason
+item 46's own designed shapes didn't cover — see item 46's body. See
 `extract_spells.HAND_DERIVED`'s comment, item 27's correction, and item 46.)
-- **No design line printed (1):** *Sight of the True Form*.
 - **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
   *Restore the Moved Image*, *The Invisible Eye Revealed*. Their sole General
   candidate (`reim-G`/`invi-G`) is each art's *ward* guideline — a real
@@ -1852,25 +1868,38 @@ four now import as exception spells instead, item 46. See
   versions carry a magnitude offset the Form-level ones don't.
   Reconstructing a row for Rego Imaginem, Intellego Vim or Perdo Mentem "by
   analogy" to the Vim guidelines is still inventing content none of those
-  three tables print — same policy as `peme-G`/`inco-gen` below, not a
-  loophole around it. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s comment.
-- **Re-derived 2026-08-16, not a new finding — all five were already settled
+  three tables print — same policy as `peme-G` below, not a loophole around
+  it. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s comment.
+- **Re-derived 2026-08-16, not a new finding — all four were already settled
   by `docs/superpowers/plans/2026-08-05-general-base-effects.md`,
   independently re-confirmed against the reviewed rulebook text while
   investigating whether item 24's close cleared any of them too. A catalog
   row built from a spell's own prose, to receive a spell whose art prints no
-  matching guideline bullet, was tried for two of these five (`peme-G`,
-  `inco-gen`) and deliberately removed —
+  matching guideline bullet, was tried for two spells in this family
+  (`peme-G` for *Lay to Rest the Haunting Spirit*, `inco-gen` for *Sight of
+  the True Form*) and deliberately removed —
   `test_general_catalog.GeneralCatalogTest.test_general_entries_match_the_rulebook_bullet_for_bullet`
   now holds the catalog to the rulebook's own General bullets art-by-art, in
-  both directions, permanently. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s
-  and the `general_candidates` branch's comments for the per-spell citations.**
+  both directions, permanently. **Why these four stay blocked while Sight of
+  the True Form became an exception spell instead, 2026-08-16:** the user's
+  explicit choice was to convert only the spell actually raised, not extend
+  the same reasoning to its siblings by inference — these four remain
+  documented, permanent blockers on their merits, not because the reasoning
+  doesn't apply to them (it does, identically) but because nobody has yet
+  chosen to act on it for them. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s
+  and the `general_candidates` branch's comments for the per-spell
+  citations.**
 - **✅ Wizard's Communion moved to item 46, 2026-08-16** — it now imports as
   an exception spell rather than staying blocked on its disclaimed
   guideline arithmetic ("a remnant of Mercurian rituals").
 - **✅ Watching Ward moved to item 46, 2026-08-16** — it now imports as an
   exception spell rather than staying blocked on its `Special`-Duration
   problem.
+- **✅ Sight of the True Form moved to item 46, 2026-08-16** — it now imports
+  as an exception spell, for a third reason item 46's original two shapes
+  didn't cover: its General guideline is genuinely absent from Intellego
+  Corpus's own table (`inco-gen`, built from this exact spell's prose, was
+  already tried and reverted). See item 46's body.
 
 - **Spec/Plan:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`,
   `docs/superpowers/plans/2026-08-05-general-base-effects.md`

@@ -417,7 +417,7 @@ void main() {
     final exceptions = await AssetDataLoader().loadSpellExceptions();
 
     expect(exceptions, hasLength(raw.length));
-    expect(exceptions, hasLength(6));
+    expect(exceptions, hasLength(7));
   });
 
   test('every exception carries a rationale', () async {
@@ -426,10 +426,10 @@ void main() {
     }
   });
 
-  test('exactly four exceptions have no printed level', () async {
+  test('exactly five exceptions have no printed level', () async {
     final exceptions = await AssetDataLoader().loadSpellExceptions();
     final generalKind = exceptions.where((e) => e.printedLevel == null);
-    expect(generalKind.length, 4);
+    expect(generalKind.length, 5);
   });
 
   test('the elaborate-effect modifier is globally scoped with a 0-3 ladder', () async {
