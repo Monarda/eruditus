@@ -71,6 +71,7 @@ class SpellCreationScreen extends StatelessWidget {
                     technique: draft.technique,
                     form: draft.form,
                     baseEffectId: draft.baseEffect?.id,
+                    targetId: draft.target?.id,
                   ))
               .toList();
 

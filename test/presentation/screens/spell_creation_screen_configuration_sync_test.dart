@@ -68,6 +68,23 @@ void main() {
     provenance: Provenance(source: PublicationSource.userCreated),
   );
 
+  final sizeMentemModifier = Modifier(
+    id: 'size-mentem',
+    name: 'Mentem Size Ladder',
+    selectionMode: ModifierSelectionMode.single,
+    scope: const ModifierScope(form: 'Mentem', excludeTargets: ['target-individual']),
+    options: [ModifierOption(id: 'size-mentem-1', label: 'Up to 10x base', magnitude: 1)],
+    provenance: Provenance(source: PublicationSource.userCreated),
+  );
+  final individualTarget = Parameter(
+    id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 8,
+    provenance: Provenance(source: PublicationSource.userCreated),
+  );
+  final groupTarget = Parameter(
+    id: 'target-group', name: 'Group', category: 'Target', magnitude: 10,
+    provenance: Provenance(source: PublicationSource.userCreated),
+  );
+
   testWidgets(
     'a parameter added via ConfigurationBloc becomes selectable in SpellCreationScreen '
     'without reconstructing the widget',
@@ -225,6 +242,97 @@ void main() {
       // can resolve the new modifier's magnitude by id (rather than silently
       // contributing 0 the next time it's selected and calculated).
       verify(() => spellCreationBloc.add(AvailableModifiersSynced([customModifier]))).called(1);
+    },
+  );
+
+  testWidgets(
+    'a modifier excluding Individual is absent from the picker when Target is Individual',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 5000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final spellCreationBloc = MockSpellCreationBloc();
+      final configBloc = MockConfigurationBloc();
+
+      whenListen(
+        spellCreationBloc,
+        const Stream<SpellCreationState>.empty(),
+        initialState: SpellCreationState(
+          status: SpellCreationStatus.editing,
+          draft: SpellDraft(technique: 'Creo', form: 'Mentem', target: individualTarget),
+        ),
+      );
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          modifiers: [sizeMentemModifier],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+
+      // ModifiersSection renders nothing at all (not even the expand toggle)
+      // when its filtered modifier list is empty.
+      expect(find.byKey(const Key('modifiers-expand-toggle')), findsNothing);
+      expect(find.textContaining('Mentem Size Ladder'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'the same modifier is offered once Target is Group',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 5000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final spellCreationBloc = MockSpellCreationBloc();
+      final configBloc = MockConfigurationBloc();
+
+      whenListen(
+        spellCreationBloc,
+        const Stream<SpellCreationState>.empty(),
+        initialState: SpellCreationState(
+          status: SpellCreationStatus.editing,
+          draft: SpellDraft(technique: 'Creo', form: 'Mentem', target: groupTarget),
+        ),
+      );
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          modifiers: [sizeMentemModifier],
+        ),
+      );
+
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+
+      expect(find.byKey(const Key('modifiers-expand-toggle')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+      await tester.pump();
+
+      expect(find.textContaining('Mentem Size Ladder'), findsOneWidget);
     },
   );
 }
