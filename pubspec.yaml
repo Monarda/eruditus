@@ -42,7 +42,7 @@ dependencies:
   file_picker: ^11.0.2
   collection: ^1.19.1
   sqflite_common_ffi: ^2.4.2+1
-  sqflite_common_ffi_web: ^0.4.0
+  sqflite_common_ffi_web: ^1.1.2
 
 dev_dependencies:
   flutter_test:
