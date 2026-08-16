@@ -45,7 +45,7 @@ item 27's correction); item 44 plus two more verified-low-risk fixes done
 alongside it (5 spells: *Obliteration of the Metallic Barrier*, *Phantasmal
 Fire*, *The Eye of the Sage*, *Ward against Heat and Flames*, *Break the
 Oncoming Wave* — see items 44, 4b, 4); item 39's close reading (3 of 4
-spells: *Tracks of the Faerie Glow*, *Sense the Feet that Thread the Earth*,
+spells: *Tracks of the Faerie Glow*, *Sense the Feet that Tread the Earth*,
 *The Crystal Dart*); item 18's three ritual-justification clauses (3
 spells: *Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open
 Sky*); and Bucket B's 5 import-blocker fixes (*Wind at the Back*, *Trackless
@@ -348,7 +348,7 @@ general-sounding one — same discipline item 27's pulled first pass violated.
       "learn one visible property"): those learn a visible property, this one
       needs magic, matching inte-4a's "mundane" tier. Not `inte-4b` (seeing an
       object and its surroundings).
-- [x] *Sense the Feet that Thread the Earth* (`lib-inte-sense-feet-that-thread-earth`)
+- [x] *Sense the Feet that Tread the Earth* (`lib-inte-sense-feet-that-tread-earth`)
       → **`inte-4a`**, same pair, same discriminator: the spell's own verb is
       "feel", not "see" — entirely tactile, no vision of any kind.
 - [x] *Crystal Dart* (`lib-mute-crystal-dart`) → **`mute-3c`**. Turns solid
@@ -1182,6 +1182,107 @@ by the branch's final review reading `assets/data/spell_library.json` directly).
   never changed their computed level or `RitualStatus.isRitual` — only these
   3 spells' in-app Ritual banners previously said something the rulebook's
   own text contradicted.
+
+### 50. `size-terram` on an Intellego Spell — Rulebook-Printed Exception to the `excludeTechniques` Rule
+
+Found 2026-08-16 investigating item 19's final-review follow-up (a proposed
+corpus-level guard: every selected modifier should be in scope for its own
+spell/template). Writing that guard immediately failed on one spell,
+unrelated to item 19's own Target work.
+
+- [ ] Decide how to model *Sense the Feet that Tread the Earth* (InTe 30,
+      `lib-inte-sense-feet-that-tread-earth`), whose own printed design line —
+      "(Base 4, +1 Touch, +1 Conc, +1 Part, +3 size)" (rulebook line 15402) —
+      applies a Size magnitude despite being Intellego, contradicting the
+      general rule modeled as `excludeTechniques: ["Intellego"]` on every
+      `size-<form>` modifier (Core Rules line 12288/23232: "Intellego spells
+      are not affected by Target size").
+- **Verified the arithmetic is load-bearing, not incidental.** Base 4 +
+  Touch(1) + Conc(1) + Part(1) + size-terram-3(3) = 6 magnitude-units; the
+  first fills the additive tier (base 4→5), the remaining 5 apply at ×5:
+  4+1+25=30, exactly the printed level. Without the Size selection the spell
+  computes to 15, not 30.
+- **Confirmed narrow, not systemic.** The only other two spells built on the
+  same base effect (`inte-4a`) — *Eyes of the Eons*, *Tracks of the Faerie
+  Glow* — select no modifiers at all. Across the entire 325-spell/27-template
+  corpus, this is the *only* Intellego spell selecting any `size-<form>`
+  modifier — the corpus-level guard (below) reports exactly one failure.
+- **Considered and rejected: item 46's `ExceptionSpell` mechanism.** The
+  spell's own prose ("...does not fit well into Hermetic theory") closely
+  echoes *Wizard's Communion*'s exception rationale ("does not perfectly fit
+  into the guidelines of Hermetic theory") — a real, notable parallel. But
+  `ExceptionSpell` exists specifically for spells with **no computable
+  arithmetic** (no design line, or an R/D/T shape the model can't express).
+  This spell has neither problem: its design line is complete,
+  standard-shaped, and sums to the printed level exactly. Routing it through
+  `ExceptionSpell` would discard a correct computed breakdown for free-text
+  rationale — a worse representation of a spell that already works.
+- **The real gap: `ModifierScope` has no per-spell granularity.** Its axes
+  are technique/form/effectIds/excludeTechniques/excludeTargets (item 19) —
+  all catalog-level, none keyed to an individual spell or base effect id
+  alone (an `effectIds`-based override would open the door for *any* future
+  `inte-4a` spell, not just this one printed one — broader than the evidence
+  supports). Whatever mechanism is chosen needs to answer that precisely, not
+  approximately.
+- **A related discovery, already fixed separately:** the spell's name was
+  transcribed as "...Thread the Earth" in the reviewed Definitive Edition's
+  own heading (line 15399) — contradicted by that same file's own generated
+  index (line 24019, anchors to `...tread-the-earth`) and by two other
+  sourcebooks in the same checkout (*Against the Dark*, *Legends of Hermes*),
+  both consistently "Tread". Corrected via a new `SPELL_NAME_TYPOS` table in
+  `extract_spells.py` (same discipline as `DESIGN_LINE_TYPOS`), applied
+  before slug_id generation so the id changed too; `resolutions.json`'s
+  ledger key and `test_ledger.py`'s independent-reparse guard were updated to
+  match. Unrelated to the Size question above — noted here only because both
+  were found investigating the same spell in the same session.
+- **The guard test to add once this is resolved** — written, verified to
+  correctly catch exactly this one case, then reverted rather than committed
+  failing:
+  ```dart
+  test('assertion 8: every selected modifier is in scope for its own spell or template', () async {
+    final modifiers = {for (final m in await loader.loadModifiers()) m.id: m};
+    final failures = <String>[];
+
+    void checkScope({
+      required String label,
+      required String technique,
+      required String form,
+      required String baseEffectId,
+      required String targetId,
+      required Map<String, List<String>> selectedModifiers,
+    }) {
+      for (final modifierId in selectedModifiers.keys) {
+        final modifier = modifiers[modifierId];
+        if (modifier == null) continue; // assertion 4 already covers this
+        final inScope = modifier.scope.appliesTo(
+          technique: technique, form: form,
+          baseEffectId: baseEffectId, targetId: targetId,
+        );
+        if (!inScope) {
+          failures.add('$label: $modifierId is out of scope for '
+              '$technique $form / $baseEffectId / $targetId');
+        }
+      }
+    }
+
+    for (final spell in await loader.loadSpellLibrary()) {
+      checkScope(label: spell.name ?? spell.id, technique: spell.technique,
+          form: spell.form, baseEffectId: spell.baseEffectId,
+          targetId: spell.targetId, selectedModifiers: spell.selectedModifiers);
+    }
+    for (final template in await loader.loadSpellTemplates()) {
+      checkScope(label: template.name, technique: template.technique,
+          form: template.form, baseEffectId: template.baseEffectId,
+          targetId: template.targetId, selectedModifiers: template.selectedModifiers);
+    }
+
+    expect(failures, isEmpty, reason: failures.join('\n'));
+  });
+  ```
+- **Files:** `lib/models/modifier.dart` (`ModifierScope`, if a new axis is
+  needed), `assets/data/modifiers.json` (`size-terram`'s scope, if a
+  targeted override is chosen), `test/data/published_spell_import_test.dart`
+  (the guard above, once the model question is settled).
 
 ### 20. Creo Creation `suggested` Ritual Sweep
 - [ ] Decide whether every "Create X" guideline should carry

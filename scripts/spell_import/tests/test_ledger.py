@@ -104,11 +104,23 @@ class CommittedLedgerTest(unittest.TestCase):
         # that no longer exists under that name, would sit silently unused
         # rather than raising anything. This catches that directly, instead
         # of waiting for the spell's blocker to clear.
-        from scripts.spell_import import blocks, catalog as catalog_module, sources
+        from scripts.spell_import import (
+            blocks, catalog as catalog_module, extract_spells, sources,
+        )
 
         lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
         parsed, _ = blocks.parse_de(lines)
-        real_ids = {catalog_module.slug_id(b.technique, b.form, b.name) for b in parsed}
+        # SPELL_NAME_TYPOS corrects a name (and so its derived id) before
+        # extract_spells.run ever emits a spell -- mirror that here, or a
+        # corrected id reads as "no matching spell" against this test's own
+        # raw parse, exactly the false positive this test exists to avoid.
+        real_ids = {
+            catalog_module.slug_id(
+                b.technique, b.form,
+                extract_spells.SPELL_NAME_TYPOS.get(b.name, b.name),
+            )
+            for b in parsed
+        }
 
         book = ledger.Ledger.load()
         unknown = sorted(set(book.entries) - real_ids)

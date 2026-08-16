@@ -435,6 +435,28 @@ DESIGN_LINE_TYPOS: dict[str, tuple[str, str]] = {
 }
 
 
+# A published spell's heading in the reviewed Definitive Edition Core Rules
+# contains a transcription typo, contradicted by the book's own generated
+# index and by cross-references in other sourcebooks in the same corpus.
+# Corrected here, at the earliest point the name exists, so every downstream
+# consumer (design-line lookups, slug_id, the emitted name/id) sees the
+# corrected spelling -- never by editing the rulebook checkout itself, which
+# is licensed third-party material outside this repo.
+#
+# Sense the Feet That Thread the Earth -> ...Tread the Earth: the heading at
+# reviewed/Ars Magica - Definitive Edition (Core Rules).md:15399 reads
+# "Thread", but that same file's own generated index (line 24019) links to
+# "#sense-the-feet-that-tread-the-earth" and displays "Tread" -- the heading
+# contradicts its own anchor. Two other sourcebooks in the same checkout
+# (Against the Dark: The Transylvanian Tribunal; Legends of Hermes) spell it
+# "Tread" throughout. "Tread the earth" (footsteps) also fits the spell's
+# own effect -- sensing what moves along the ground -- where "Thread" does
+# not.
+SPELL_NAME_TYPOS: dict[str, str] = {
+    "Sense the Feet That Thread the Earth": "Sense the Feet That Tread the Earth",
+}
+
+
 # A published spell whose design line's numeric base has no exact catalog
 # match, but resolves to a real base effect once a human reads the
 # guideline text: either a General guideline this specific spell commits to
@@ -576,6 +598,10 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
     proposals: dict[str, dict] = {}
 
     for block in parsed:
+        corrected_name = SPELL_NAME_TYPOS.get(block.name)
+        if corrected_name is not None:
+            block = dataclasses.replace(block, name=corrected_name)
+
         if block.name in exceptions_module.EXCEPTION_SPELLS:
             exception_spells.append(emit.build_exception_spell(
                 block, exceptions_module.EXCEPTION_SPELLS[block.name]

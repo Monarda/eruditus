@@ -1840,7 +1840,7 @@
     ],
     "rationale": "Makes tracks glow so they stand out to normal eyesight and boosts a Tracking roll -- it reveals a fact about the terrain (something specific passed this way, recently, related to it thus-and-so) rather than granting sight of anything. No seeing is involved, the same discriminator already used for lib-inte-eyes-eons. It also continues this corpus's own R:Per/D:Conc/T:Vision + 'Learn X property' pattern one level up from Eyes of the Treacherous Terrain and The Miner's Keen Eye (both base 2, inte-2 'learn one visible property'): those learn a *visible* property; this one needs magic to perceive at all, matching inte-4a's 'mundane' (i.e. not visible-by-looking) tier exactly. Not inte-4b, whose guideline is about seeing an object and its surroundings."
   },
-  "lib-inte-sense-feet-that-thread-earth": {
+  "lib-inte-sense-feet-that-tread-earth": {
     "baseEffectId": "inte-4a",
     "candidates": [
       "inte-4a",
