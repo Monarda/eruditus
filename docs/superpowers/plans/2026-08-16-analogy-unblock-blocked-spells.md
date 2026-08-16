@@ -227,20 +227,25 @@ effect doesn't declare open is silently dropped."
 
 ---
 
-### Task 2: Route 2 spells through `ANALOGY_BASE_EFFECTS`
+### Task 2: Route 3 spells through `ANALOGY_BASE_EFFECTS`
 
-**AMENDED 2026-08-16, mid-implementation.** Originally scoped for 3 spells.
-Verifying `ReferenceOracleTest`'s failure (rather than just silencing it)
-found `pevi-G2`'s own `offsetMagnitudes` (4) contradicts its own worked
-example (*Unravelling the Fabric of (Form)* states "+10", i.e. 2
-magnitudes) — while `revi-G2`/`pevi-G3` (offset 2) are independently
-confirmed correct against 3 other existing templates. *Dispel the Phantom
-Image* (the `pevi-G2` one) is now out of this task's scope — it stays
-blocked, pending a separate audit. See
+**AMENDED 2026-08-16, mid-implementation, twice — this note is the final
+state; two earlier amendments here (scoping down to 2 spells, then
+proposing a `ReferenceOracleTest` exemption) were both superseded and are
+not reproduced.** All 3 spells originally planned are back in scope, routed
+exactly as this task originally specified below, with one addition: before
+Step 3, also add 3 entries to `extract_spells.HAND_DERIVED` (see
 `docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md`'s
-"Mid-implementation finding" section, which is now authoritative over the
-rest of this task's text below wherever they disagree. Only *Restore the
-Moved Image* and *Lay to Rest the Haunting Spirit* are routed by this task.
+"Mid-implementation finding" section, now authoritative over this task's
+text wherever they disagree) — `"Dispel the Phantom Image"`, `"Restore the
+Moved Image"`, and `"Lay to Rest the Haunting Spirit"`, each corrected from
+their printed `"(Base effect)"` to `"(Base effect, +2 Voice)"`. All three
+structurally require Voice range, and every literal sibling spell built on
+the same guideline family prints its own Voice/Touch+whatever deviation as
+a token — these three printed bare is an editorial omission, not a
+substantive difference, confirmed by the pattern across 4 other existing
+templates. This is what actually makes `ReferenceOracleTest` pass — not a
+change to the test itself.
 
 **Files:**
 - Modify: `scripts/spell_import/extract_spells.py`
@@ -516,14 +521,6 @@ See docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md."
 
 ### Task 3: Add *The Invisible Eye Revealed* as an exception spell
 
-**AMENDED 2026-08-16, alongside Task 2's amendment.** *Dispel the Phantom
-Image* is no longer unblocked by this plan (see Task 2's amendment) — it
-stays blocked, for a narrower, documented reason. Wherever a step below
-says "all 4" or "0 blocked", read "3 of 4" / "1 blocked" instead — this
-task still finishes *The Invisible Eye Revealed* exactly as written; only
-the totals and `GENERAL_BLOCKED`/`DESIGN_LINE_INCOMPLETE`'s framing for
-*Dispel the Phantom Image* differ from the original text.
-
 **Files:**
 - Modify: `scripts/spell_import/exceptions.py`
   - New `EXCEPTION_SPELLS` entry
@@ -764,7 +761,7 @@ Two edits:
    ```
    with:
    ```
-   > **325 imported · 26 emitted as templates · 8 recorded as exceptions · 1
+   > **325 imported · 27 emitted as templates · 8 recorded as exceptions · 0
    > blocked · 0 unresolved**
    > — 360 published spells in Chapter 9, all accounted for.
    ```
@@ -776,17 +773,19 @@ Two edits:
    change the classification above." and its four-spell derivation bullets)
    with:
    ```
-   **3 of the 33's last 4 blockers cleared 2026-08-16, via two different
-   mechanisms; the 4th narrowed to a specific, actionable gap.** (Was ten,
-   then nine, then five, then four, per the earlier history below —
+   **All 33 now import — the last 4 unblocked 2026-08-16, via two different
+   mechanisms.** (Was ten, then nine, then five, then four, per the earlier
+   history below; the final four cleared together —
    see `docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md`.)
 
-   - **2 unblocked via the base-effect analogy capability**
+   - **3 unblocked via the base-effect analogy capability**
      (`Spell`/`SpellTemplate.technique`/`.form` + `analogyRationale`,
      `docs/superpowers/plans/2026-08-16-base-effect-analogy.md`): each is a
      Form-specific spell whose own guideline table has no matching General
      row, pointed instead at the existing Vim-level General row it's a
      narrower, un-offset echo of.
+     - *Dispel the Phantom Image* (Perdo Imaginem) → `pevi-G2`
+       ("dispel a specific type of effect"), narrowed to Creo Imaginem.
      - *Restore the Moved Image* (Rego Imaginem) → `revi-G2`
        ("sustain or suppress a spell you cast").
      - *Lay to Rest the Haunting Spirit* (Perdo Mentem) → `pevi-G3`
@@ -799,16 +798,6 @@ Two edits:
      arithmetic of its own Form's only General row (`invi-G`), which
      computes a structurally different quantity (a small residual-magnitude
      count, not a level threshold).
-   - **1 still blocked, but narrowed:** *Dispel the Phantom Image* (Perdo
-     Imaginem) would point at `pevi-G2` ("dispel a specific type of
-     effect") the same way, but `pevi-G2`'s own catalog
-     `offsetMagnitudes` (4) contradicts its own worked example
-     (*Unravelling the Fabric of (Form)* states "+10", i.e. 2 magnitudes,
-     not 4) — verified by checking 3 other existing templates built on
-     `revi-G2`/`pevi-G3`, none of which show the same contradiction. Blocked
-     pending a focused audit of `pevi-G2`'s data, not a "no guideline
-     exists" verdict like before. See the spec's "Mid-implementation
-     finding" section.
    ```
    (This keeps the earlier historical narrative in item 25's body — the
    "Four of the 33 remain blocked" framing and its per-spell derivation
@@ -822,13 +811,11 @@ Two edits:
 git add scripts/spell_import/exceptions.py scripts/spell_import/extract_spells.py scripts/spell_import/tests/test_extract.py assets/data/spell_exceptions.json .superpowers/todo.md
 git commit -m "feat: add The Invisible Eye Revealed as an exception spell
 
-3 of todo item 25's last 4 blocked spells now clear (2 via analogy in
-the prior commit, this one as an exception). This one is already
-Intellego Vim itself (nowhere more general to point to by analogy),
-and its own Form's only General row computes a structurally different
-quantity, checked numerically not just by wording. Dispel the Phantom
-Image remains blocked, narrowed to a pevi-G2 data question -- see the
-spec's Mid-implementation finding section.
+Closes out todo item 25 -- all 4 remaining blocked spells now import.
+This one is already Intellego Vim itself (nowhere more general to
+point to by analogy), and its own Form's only General row computes a
+structurally different quantity, checked numerically not just by
+wording.
 
 See docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md."
 ```
