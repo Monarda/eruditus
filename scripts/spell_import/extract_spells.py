@@ -129,16 +129,28 @@ REALM_BY_SPELL_ID = {
 # spell's level on a stress die + the level of your spell") is close to
 # verbatim identical to Dispel the Phantom Image's ("whose level you match
 # or exceed on a stress die + the level of your spell", Perdo Imaginem, see
-# the `general_candidates` empty-branch comment below) -- not a coincidence.
-# This is a recurring per-Form counter-magic mechanic (match/exceed a target
-# spell's level, no magnitude offset) that the Definitive Edition uses as
-# spell-level flavor text without ever generalizing it into that Form's own
-# guideline table; it is only formalized at the Vim level, as Rego Vim's
-# "sustain or suppress" and Perdo Vim's "dispel" General rows -- both of
-# which *do* carry a magnitude offset the Form-level versions don't. The
-# Invisible Eye Revealed fits the same family too ("detects... up to double
-# the level of this spell", no stress die but the same target-spell-level
-# shape), and Intellego Vim's own table doesn't tabulate that either.
+# the `general_candidates` empty-branch comment below) -- not a coincidence,
+# but two different Technique pairings sharing one mechanical shape, not the
+# same pattern twice:
+#   - Dispel the Phantom Image is Perdo Imaginem dispelling a *Creo*
+#     Imaginem spell -- Perdo opposing Creo, scoped to one Form. This is the
+#     Imaginem-scoped echo of Perdo Vim's own "dispel" guideline (Wind of
+#     Mundane Silence's paradigm: "cancel the effects of any spell if...
+#     you can double the level of the spell on a stress die + the level of
+#     your spell") -- same mechanic, scoped to one Form instead of "any
+#     realm/type", and without the doubling.
+#   - Restore the Moved Image is Rego Imaginem undoing a *Rego* Imaginem
+#     spell -- same Technique and Form, "control undoing control", matching
+#     Rego Vim's "sustain or suppress" pattern instead.
+# Both are a recurring per-Form counter-magic mechanic (match/exceed a
+# target spell's level, no magnitude offset) that the Definitive Edition
+# uses as spell-level flavor text without ever generalizing it into that
+# Form's own guideline table; only the Vim-level versions carry a magnitude
+# offset the Form-level ones don't. The Invisible Eye Revealed fits the same
+# family too ("detects... up to double the level of this spell", no stress
+# die but the same target-spell-level shape, and cross-Form -- it detects
+# Intellego spells of any Form, not just Vim), and Intellego Vim's own table
+# doesn't tabulate that either.
 # Reconstructing a Rego-Imaginem- or Intellego-Vim-scoped row "by analogy"
 # to the Vim guidelines would still be inventing content neither table
 # prints -- confirmed 2026-08-16, does not change the classification above.
