@@ -62,8 +62,10 @@ Whisper*, *Sight of the Active Magics*, 2026-08-16); item 39's closing fix
 section: not actually a "which one is right" ambiguity, a model gap); and
 item 28's closing fix (*Sense of the Lingering Magic*, 2026-08-16 — three
 prior readings called it an unstated combination rule; a fourth found it was
-an ordinary `NUMBERED_OVERRIDES` case). Every one of the 4 currently-blocked
-spells now maps to exactly one row below; none are unaccounted for.
+an ordinary `NUMBERED_OVERRIDES` case); and item 25's 2026-08-16 closure of
+its last 4 General-level spells (see the table's General-level row below).
+Every one of the 360 published spells now maps to exactly one row below;
+none are unaccounted for, and none are currently blocked.
 
 | Blocker family | Spells | Item |
 |---|---|---|
@@ -71,7 +73,7 @@ spells now maps to exactly one row below; none are unaccounted for.
 | Genuinely ambiguous ledger resolution | 0 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* now imports too, 2026-08-16 — it was never a "which one is right" tie, both candidates share the same base level, so it's routed through the ledger like any other multi-candidate spell and the second guideline is recorded as a free (magnitude-0) adjustment. See item 39's corrected body |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
-| General-level, all 4 sharing one root cause: a mechanic only generalized at the Vim level, never tabulated per-Form | 4 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil*, *Wizard's Communion* and *Sight of the True Form* now import as exception spells (item 46) — the last for a third reason item 46 didn't originally cover, see its body. **The remaining 4 (*Dispel the Phantom Image*, *Restore the Moved Image*, *The Invisible Eye Revealed*, *Lay to Rest the Haunting Spirit*) are not four unrelated gaps — each is a Form-specific, un-tabulated echo of a guideline the rulebook only formalizes (with a magnitude offset) at the Vim level: Perdo Vim's "dispel"/"reduce Might" and Rego Vim's "sustain or suppress". Re-confirmed 2026-08-16, permanent — see item 25's body for the derivation of each** |
+| General-level, all 4 sharing one root cause: a mechanic only generalized at the Vim level, never tabulated per-Form | 0 | see item **25** — corrected from 8, then 4: *Aegis of the Hearth*, *Wizard's Vigil*, *Wizard's Communion* and *Sight of the True Form* import as exception spells (item 46). **The last 4 (*Dispel the Phantom Image*, *Restore the Moved Image*, *Lay to Rest the Haunting Spirit*, *The Invisible Eye Revealed*) resolved together 2026-08-16 via two mechanisms** — 3 via the base-effect analogy capability, each pointed at the existing Vim-level guideline it's a Form-specific, un-offset echo of (Perdo Vim's "dispel"/"reduce Might", Rego Vim's "sustain or suppress"); and 1 (*The Invisible Eye Revealed*, already Vim itself, nowhere more general to point to) as an exception spell — folded into the 8-exception count in the Table total below. See item 25's body for the derivation of each |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 0 | **24** — corrected from 3: all 3 now import as `no-words`/`no-gestures`/`invi-techniques-and-forms` catalog Modifiers, done 2026-08-16 |
 | No printed design line and no legitimate derivation | 0 | see item **27** — corrected from 1: *Whispering Winds* now imports as an exception spell (item 46) rather than staying permanently blocked |
 | `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
@@ -80,10 +82,12 @@ spells now maps to exactly one row below; none are unaccounted for.
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 | Rulebook says guideline arithmetic doesn't apply at all | 7 | item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change*, *Sight of the True Form* |
 
-**Table total: 4 blocked, plus the 7 exception spells in the final row (not
-blockers), reconciled to the live counts.** The previous version of this
-table summed to 34 out of a then-52 while implying full coverage; every row
-above now maps to specific, named spells, not just a count.
+**Table total: 0 blocked, plus 8 exception spells (not blockers) —
+7 in the item 46 row below and 1 (*The Invisible Eye Revealed*) folded into
+the General-level row above via item 25's 2026-08-16 closure — reconciled to
+the live counts.** The previous version of this table summed to 34 out of a
+then-52 while implying full coverage; every row above now maps to specific,
+named spells, not just a count.
 
 **What the goal does and does not cover.** The goal is *computed level matches
 printed level*, and the rulebook prints `#### GENERAL` instead of a number for
