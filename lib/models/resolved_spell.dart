@@ -81,12 +81,13 @@ class ResolvedSpell implements LibraryEntry {
     );
   }
 
-  // Derived from the resolved base effect rather than stored on the record, so
-  // a spell can never claim a technique its own base effect disagrees with.
+  // Stored on the record, not derived: a spell's own Technique/Form may
+  // legitimately differ from its base effect's (see Spell.analogyRationale)
+  // -- deriving from the base effect would silently display the wrong one.
   @override
-  String? get technique => baseEffect?.technique;
+  String? get technique => record.technique;
   @override
-  String? get form => baseEffect?.form;
+  String? get form => record.form;
 
   String get id => record.id;
   @override

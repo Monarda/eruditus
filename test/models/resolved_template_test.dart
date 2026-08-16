@@ -48,8 +48,8 @@ void main() {
     expect(resolved.name, 'Phantasm');
     expect(resolved.source, PublicationSource.published);
     expect(resolved.description, 'A face on a wall. Level 10.');
-    // Derived from the base effect, never stored separately, so they cannot
-    // disagree with it.
+    // Stored on the record -- happens to match the base effect here because
+    // this fixture isn't an analogy (see SpellTemplate.analogyRationale).
     expect(resolved.technique, 'Creo');
     expect(resolved.form, 'Imaginem');
   });
@@ -60,8 +60,10 @@ void main() {
 
     expect(resolved.isResolved, isFalse);
     expect(resolved.unresolvedReferences, ['crim-2']);
-    expect(resolved.technique, isNull);
-    expect(resolved.form, isNull);
+    // technique/form are stored on the record, not derived from the base
+    // effect, so they survive even when the base effect itself is missing.
+    expect(resolved.technique, 'Creo');
+    expect(resolved.form, 'Imaginem');
     // The record survives intact so the template can still be listed.
     expect(resolved.id, 'tpl-1');
     expect(resolved.name, 'Phantasm');
@@ -113,5 +115,34 @@ void main() {
     );
     final resolved = ResolvedTemplate(record: template);
     expect(resolved.chosenSlots, {'realm': 'Magic'});
+  });
+
+  test('technique/form come from the record even when the base effect disagrees', () {
+    // The Vim-analogy shape this plan exists for: a Rego Imaginem template
+    // built on a Rego Vim base effect "by analogy".
+    final vimEffect = BaseEffect(
+      id: 'revi-G2', technique: 'Rego', form: 'Vim',
+      description: 'Sustain or suppress a spell', baseLevel: null,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final analogyTemplate = SpellTemplate(
+      id: 'tpl-analogy', name: 'Restore the Moved Image',
+      baseEffectId: 'revi-G2',
+      technique: 'Rego',
+      form: 'Imaginem',
+      analogyRationale: 'By analogy to Rego Vim\'s sustain-or-suppress guideline.',
+      rangeId: 'range-voice', durationId: 'duration-momentary', targetId: 'target-individual',
+      description: 'Cancels a ReIm spell that moves an image.',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+
+    final resolved = ResolvedTemplate(
+        record: analogyTemplate, baseEffect: vimEffect, range: voice, duration: momentary, target: individual);
+
+    // The template is Rego Imaginem, not Rego Vim -- even though its base
+    // effect is a Vim guideline.
+    expect(resolved.technique, 'Rego');
+    expect(resolved.form, 'Imaginem');
+    expect(resolved.baseEffect?.form, 'Vim'); // the borrowed guideline, for contrast
   });
 }

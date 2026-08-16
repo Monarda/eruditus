@@ -93,8 +93,8 @@ void main() {
     expect(resolved.name, 'Phantasm');
     expect(resolved.source, PublicationSource.published);
     expect(resolved.description, 'A face on a wall. Level 10.');
-    // Derived from the base effect, never stored separately, so they cannot
-    // disagree with it.
+    // Stored on the record -- happens to match the base effect here because
+    // this fixture isn't an analogy (see Spell.analogyRationale).
     expect(resolved.technique, 'Creo');
     expect(resolved.form, 'Imaginem');
   });
@@ -105,8 +105,10 @@ void main() {
 
     expect(resolved.isResolved, isFalse);
     expect(resolved.unresolvedReferences, ['crim-2']);
-    expect(resolved.technique, isNull);
-    expect(resolved.form, isNull);
+    // technique/form are stored on the record, not derived from the base
+    // effect, so they survive even when the base effect itself is missing.
+    expect(resolved.technique, 'Creo');
+    expect(resolved.form, 'Imaginem');
     // The record survives intact so the spell can still be listed and re-saved.
     expect(resolved.id, 'spell-1');
     expect(resolved.name, 'Phantasm');
@@ -208,5 +210,37 @@ void main() {
     );
     final resolved = ResolvedSpell(record: spell, baseEffect: effect);
     expect(resolved.problems, isNot(contains('Choose a realm for this guideline')));
+  });
+
+  test('technique/form come from the record even when the base effect disagrees', () {
+    // The Vim-analogy shape this plan exists for: a Rego Imaginem spell
+    // built on a Rego Vim base effect "by analogy".
+    final vimEffect = BaseEffect(
+      id: 'revi-G2', technique: 'Rego', form: 'Vim',
+      description: 'Sustain or suppress a spell', baseLevel: null,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final analogySpell = Spell(
+      id: 'spell-analogy', name: 'Restore the Moved Image',
+      baseEffectId: 'revi-G2',
+      technique: 'Rego',
+      form: 'Imaginem',
+      analogyRationale: 'By analogy to Rego Vim\'s sustain-or-suppress guideline.',
+      rangeId: 'range-voice', durationId: 'duration-momentary', targetId: 'target-individual',
+      requisites: const {},
+      description: 'Cancels a ReIm spell that moves an image.',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+
+    final resolved = ResolvedSpell(
+        record: analogySpell, baseEffect: vimEffect, range: voice, duration: momentary, target: individual);
+
+    // The spell is Rego Imaginem, not Rego Vim -- even though its base
+    // effect is a Vim guideline.
+    expect(resolved.technique, 'Rego');
+    expect(resolved.form, 'Imaginem');
+    expect(resolved.baseEffect?.form, 'Vim'); // the borrowed guideline, for contrast
   });
 }
