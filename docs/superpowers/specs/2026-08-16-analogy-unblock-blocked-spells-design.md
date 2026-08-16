@@ -110,9 +110,23 @@ is real but wrong [or incomplete]." Add all three spells to
 `"(Base effect, +2 Voice)"` — matching exactly what every sibling in the
 same guideline family already prints. `ReferenceOracleTest` then computes
 `printed(2) == actual(2) − reference(0)` — genuinely equal, because the
-missing token is restored, not because the check was exempted. No test
-file changes at all; the fix lives entirely in `extract_spells.py`'s
-existing `HAND_DERIVED` table, within the plan's original file set.
+missing token is restored, not because the check was exempted.
+
+**One wiring gap found applying this** (verified empirically, not just
+architecturally — the fix produced byte-identical failures until this was
+found): `test_general_catalog.ReferenceOracleTest` does its own
+independent `blocks.parse_de()` call in its own `setUp()` and reads
+`block.design_line` straight from that fresh parse. `HAND_DERIVED` is a
+variable private to `extract_spells.run()`'s own loop — this test never
+imports or consults it, so the correction above doesn't reach it on its
+own. Fix: `test_general_catalog.py` also needs to import `HAND_DERIVED`
+from `extract_spells` and resolve each template's design text the same
+way `extract_spells.run()` does — `HAND_DERIVED.get(name) or
+block.design_line` — before parsing it, instead of using
+`block.design_line` directly. This is one small change to that test file,
+but it is not an exemption: it makes the test see the same corrected
+input the import pipeline already uses, rather than a stale duplicate
+parse that never received the correction.
 
 **Result: all 3 spells proceed together.** No spell needed to be parked,
 and no test needed modifying.
@@ -211,7 +225,9 @@ unchecked). It is recorded as free-text `ExceptionSpell` data — no
 All changes in `scripts/spell_import/extract_spells.py` and
 `scripts/spell_import/emit.py`; regenerate `assets/data/spell_templates.json`.
 Plus, per "Mid-implementation finding" above, 3 new `HAND_DERIVED` entries
-(same file) — no test file changes.
+(same file) and a small resolution-logic fix in
+`scripts/spell_import/tests/test_general_catalog.py` (`ReferenceOracleTest`
+needs to consult `HAND_DERIVED` too, not skip its check).
 
 ### 0. `HAND_DERIVED`: supply the missing Voice token
 
@@ -441,9 +457,10 @@ incremented (7 → 8).
 - Both test suites green: `python -m unittest discover`, `flutter test`.
 - `test_general_entries_match_the_rulebook_bullet_for_bullet` still passes
   unmodified — no new catalog row is added anywhere, only new pointers to
-  existing rows plus one new exception entry. `ReferenceOracleTest` also
-  passes unmodified — the 3 `HAND_DERIVED` entries fixed its inputs, not
-  its logic.
+  existing rows plus one new exception entry. `ReferenceOracleTest`'s own
+  assertion is unmodified — only how it resolves each template's design
+  text changed (consulting `HAND_DERIVED`, same as the import pipeline
+  does), so the 3 `HAND_DERIVED` entries fixed its inputs, not its logic.
 
 ## Testing
 
@@ -463,6 +480,12 @@ incremented (7 → 8).
   `published_spell_import_test.dart` assertions already cover the resulting
   templates once the asset is regenerated, the same way they cover every
   other General template and exception spell.
+- `ReferenceOracleTest` itself, once fixed to consult `HAND_DERIVED`, is the
+  regression test for this fix — its existing per-template `subTest` loop
+  already covers every template, including these 3 and every literal
+  PeVi/ReVi sibling that must keep passing unaffected (the fix only changes
+  which text 3 named spells resolve to; every other template's design-line
+  resolution is untouched).
 
 ## Out of scope
 
@@ -472,7 +495,8 @@ incremented (7 → 8).
   plan's originally-motivating 4.
 - Creation-screen UI for picking a cross-Form base effect — still deferred,
   unchanged from the merged plan's scope.
-- No change to `ReferenceOracleTest`'s own logic or to any `BaseEffect`
-  catalog row — the fix is entirely in `HAND_DERIVED`'s input data.
+- No change to `ReferenceOracleTest`'s own assertion or to any `BaseEffect`
+  catalog row — the fix is `HAND_DERIVED`'s input data, plus making that
+  test actually consult it (a resolution-order fix, not a weakened check).
 - No change to `ExceptionSpell`'s model or `build_exception_spell` — *The
   Invisible Eye Revealed* uses that mechanism exactly as it already exists.

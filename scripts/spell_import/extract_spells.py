@@ -173,13 +173,70 @@ REALM_BY_SPELL_ID = {
 # of those three tables print -- confirmed 2026-08-16, does not change the
 # classification above.
 DESIGN_LINE_INCOMPLETE = {
-    "lib-reim-restore-moved-image":
-        "prints (Base effect) but the stat line costs 2 magnitudes",
     "lib-invi-invisible-eye-revealed":
         "prints (Base effect) but the stat line costs 2 magnitudes",
-    # Wizard's Communion used to be here. It now imports as an exception
+    # Restore the Moved Image: WAS here until 2026-08-16, when it moved to
+    # ANALOGY_BASE_EFFECTS instead -- it now imports as a template pointing
+    # at revi-G2, not blocked. See
+    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
+    # Wizard's Communion used to be here too. It now imports as an exception
     # spell (scripts/spell_import/exceptions.py) -- see
     # docs/superpowers/specs/2026-08-15-exception-spells-design.md.
+}
+
+
+# Spells whose own Technique/Form guideline table has no matching General
+# row (or has one, but it's the wrong guideline) -- resolved by pointing at
+# an existing Vim-level General row that generalizes the same mechanic with
+# a magnitude offset, using the base-effect analogy capability
+# (Spell/SpellTemplate.technique/.form + analogyRationale). See
+# docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md
+# for the full derivation of each entry, including the arithmetic that rules
+# out The Invisible Eye Revealed from this same treatment (it's already a
+# Vim spell -- see exceptions.EXCEPTION_SPELLS instead).
+#
+# Checked in extract_spells.run()'s General-spell branch before both the
+# general_candidates-empty handling and DESIGN_LINE_INCOMPLETE, so it takes
+# precedence over each for the spell ids listed here.
+ANALOGY_BASE_EFFECTS: dict[str, dict] = {
+    "lib-peim-dispel-phantom-image": {
+        "base_effect_id": "pevi-G2",
+        "rationale": (
+            "Perdo Imaginem's own guideline table prints no General row. "
+            "This spell's own text (\"Destroys the image from any one CrIm "
+            "spell whose level you match or exceed on a stress die + the "
+            "level of your spell\") is the Imaginem-scoped echo of Perdo "
+            "Vim's own general \"dispel a specific type of effect\" "
+            "guideline (pevi-G2), narrowed to Creo Imaginem and without "
+            "pevi-G2's own +4 magnitude bonus -- the same shape Perdo Vim's "
+            "Wind of Mundane Silence generalizes for any type/realm."
+        ),
+        "chosen_slots": {"specificType": "Creo Imaginem"},
+    },
+    "lib-reim-restore-moved-image": {
+        "base_effect_id": "revi-G2",
+        "rationale": (
+            "Rego Imaginem's own General row (reim-G) is a ward -- this "
+            "spell isn't one. This spell's own text (\"Cancels a ReIm spell "
+            "... as long as you can match the spell's level on a stress die "
+            "+ the level of your spell\") is the Imaginem-scoped echo of "
+            "Rego Vim's general \"sustain or suppress a spell you cast\" "
+            "guideline (revi-G2), narrowed to Rego Imaginem, trading "
+            "revi-G2's +2 magnitude bonus for a stress-die factor revi-G2 "
+            "doesn't have."
+        ),
+    },
+    "lib-peme-lay-to-rest-haunting-spirit": {
+        "base_effect_id": "pevi-G3",
+        "rationale": (
+            "Perdo Mentem's own guideline table prints no General row. "
+            "This spell's own text (\"it loses a number of points from its "
+            "Might equal to the level of this spell\") is the Mentem-scoped "
+            "echo of Perdo Vim's general \"reduce target's Might Score\" "
+            "guideline (pevi-G3), narrowed to ghosts/spirits and without "
+            "pevi-G3's own +2 magnitude bonus."
+        ),
+    },
 }
 
 
@@ -274,6 +331,26 @@ HAND_DERIVED: dict[str, str] = {
     # = 19 magnitudes -> level 75. Matches the printed level exactly. See
     # todo item 45.
     "Hermes' Portal": "(Base 4, +4 Arc, +4 Year, +5 arcane connection, +2 size)",
+    # Dispel the Phantom Image, Restore the Moved Image and Lay to Rest the
+    # Haunting Spirit (the ANALOGY_BASE_EFFECTS trio) all structurally
+    # require Voice range -- you can't dispel someone else's spell, cancel
+    # someone else's spell, or reduce a spirit's Might at Personal range --
+    # yet all three print bare "(Base effect)". Every literal sibling spell
+    # built on the same guideline family always documents its own R/D/T
+    # deviation as an explicit token: Demon's Eternal Oblivion and
+    # Unravelling the Fabric of (Form) both print "(Base effect, +2 Voice)";
+    # Maintaining the Demanding Spell prints "(Base effect, +1 Touch, +1
+    # Diam)"; Suppressing the Wizard's Handiwork prints "(Base, +1 Touch, +1
+    # Conc)" -- each investing exactly 2 magnitudes, matching revi-G2's and
+    # pevi-G3's own +2-magnitude offset (and, per the derivation above,
+    # pevi-G2's as well). These three spells printing bare is a corpus
+    # editorial omission -- the same pattern every comparable spell
+    # documents explicitly -- not a substantive rules difference. See
+    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md's
+    # "Mid-implementation finding" section for the full cross-spell evidence.
+    "Dispel the Phantom Image": "(Base effect, +2 Voice)",
+    "Restore the Moved Image": "(Base effect, +2 Voice)",
+    "Lay to Rest the Haunting Spirit": "(Base effect, +2 Voice)",
 }
 
 
@@ -548,6 +625,19 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
             design_lines[spell_id] = design_text
             general_candidates = catalog.general_candidates(block.technique, block.form)
+
+            if spell_id in ANALOGY_BASE_EFFECTS:
+                analogy = ANALOGY_BASE_EFFECTS[spell_id]
+                try:
+                    templates.append(emit.build_template(
+                        block, analogy["base_effect_id"], catalog, design,
+                        realm_by_spell_id=REALM_BY_SPELL_ID,
+                        analogy_rationale=analogy["rationale"],
+                        chosen_slots=analogy.get("chosen_slots"),
+                    ))
+                except (designline.UnknownToken, KeyError) as error:
+                    blocked.append((block.name, str(error)))
+                continue
 
             if not general_candidates:
                 # Permanent, not a gap to fill: Perdo Imaginem's and Perdo

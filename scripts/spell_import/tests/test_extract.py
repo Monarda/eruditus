@@ -310,9 +310,12 @@ GENERAL_BLOCKED = {
     # Sight of the True Form: WAS here ("no design line") until 2026-08-16,
     # when it moved to ExceptionSpellsTest too -- see
     # exceptions.EXCEPTION_SPELLS's entry.
-    "Dispel the Phantom Image": "no Perdo Imaginem General row in the rulebook",
-    "Lay to Rest the Haunting Spirit": "no Perdo Mentem General row in the rulebook",
-    "Restore the Moved Image": "design line does not account for the stat line",
+    # Dispel the Phantom Image, Lay to Rest the Haunting Spirit and Restore
+    # the Moved Image: WERE here until 2026-08-16, when they moved to
+    # AnalogyBaseEffectsTest instead -- each now imports as a template via
+    # ANALOGY_BASE_EFFECTS (scripts/spell_import/extract_spells.py), not
+    # blocked at all. See
+    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
     "The Invisible Eye Revealed": "design line does not account for the stat line",
 }
 
@@ -488,6 +491,53 @@ class NumberedOverrideLedgerAgreementTest(unittest.TestCase):
             ledger.entries[spell_id] = original
 
 
+class AnalogyBaseEffectsTest(unittest.TestCase):
+    """3 of item 25's 4 permanently-blocked spells resolve by pointing at an
+    existing Vim-level General base effect instead of a (nonexistent or
+    wrong) row in their own Form's table -- see
+    docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.report = extract_spells.run(write=False)
+
+    def _template(self, name: str) -> dict:
+        return next(t for t in self.report.templates if t["name"] == name)
+
+    def test_all_three_now_import_as_templates_not_blocked(self):
+        names = {t["name"] for t in self.report.templates}
+        blocked_names = {name for name, _ in self.report.blocked}
+        for name in ("Dispel the Phantom Image", "Restore the Moved Image",
+                     "Lay to Rest the Haunting Spirit"):
+            self.assertIn(name, names, msg=name)
+            self.assertNotIn(name, blocked_names, msg=name)
+
+    def test_dispel_the_phantom_image_points_at_pevi_g2(self):
+        template = self._template("Dispel the Phantom Image")
+        self.assertEqual(template["baseEffectId"], "pevi-G2")
+        self.assertEqual(template["technique"], "Perdo")
+        self.assertEqual(template["form"], "Imaginem")
+        self.assertTrue(template["analogyRationale"])
+        self.assertEqual(template["chosenSlots"], {"specificType": "Creo Imaginem"})
+
+    def test_restore_the_moved_image_points_at_revi_g2(self):
+        template = self._template("Restore the Moved Image")
+        self.assertEqual(template["baseEffectId"], "revi-G2")
+        self.assertEqual(template["technique"], "Rego")
+        self.assertEqual(template["form"], "Imaginem")
+        self.assertTrue(template["analogyRationale"])
+        self.assertNotIn("chosenSlots", template)
+
+    def test_lay_to_rest_the_haunting_spirit_points_at_pevi_g3(self):
+        template = self._template("Lay to Rest the Haunting Spirit")
+        self.assertEqual(template["baseEffectId"], "pevi-G3")
+        self.assertEqual(template["technique"], "Perdo")
+        self.assertEqual(template["form"], "Mentem")
+        self.assertTrue(template["analogyRationale"])
+        self.assertNotIn("chosenSlots", template)
+
+
 class SenseOfTheLingeringMagicTest(unittest.TestCase):
     """Sense of the Lingering Magic: WAS in LEVEL_NEEDS_RULES_DECISION until
     2026-08-16, when it turned out to be an ordinary NUMBERED_OVERRIDES case
@@ -570,11 +620,9 @@ class TechniqueFormRegenerationTest(unittest.TestCase):
             self.assertIn("technique", template, msg=template["name"])
             self.assertIn("form", template, msg=template["name"])
 
-    def test_no_spell_carries_an_analogy_rationale_yet(self):
-        # Global Constraint: this plan wires the capability through but does
-        # not use it -- no published spell is analogous yet.
-        report = extract_spells.run(write=False)
-        for spell in report.spells:
-            self.assertNotIn("analogyRationale", spell, msg=spell["name"])
-        for template in report.templates:
-            self.assertNotIn("analogyRationale", template, msg=template["name"])
+    # test_no_spell_carries_an_analogy_rationale_yet: WAS here until
+    # 2026-08-16, pinning the base-effect-analogy plan's Global Constraint
+    # that the capability was wired through but unused. That constraint no
+    # longer holds -- ANALOGY_BASE_EFFECTS (extract_spells.py) now routes 3
+    # templates through it on purpose; see AnalogyBaseEffectsTest and
+    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.

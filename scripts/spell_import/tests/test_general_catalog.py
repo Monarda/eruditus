@@ -3,7 +3,7 @@ import json
 import re
 import unittest
 
-from .. import blocks, catalog as catalog_module, designline, sources
+from .. import blocks, catalog as catalog_module, designline, extract_spells, sources
 
 _TABLE_HEADER = re.compile(r"^\|\s*Level\s*\|\s*(\w+)\s+(\w+)\s+Guideline\s*\|")
 _GENERAL_ROW = re.compile(r"^\|\s*General\s*\|\s*(.+?)\s*\|\s*$")
@@ -184,15 +184,27 @@ class ReferenceOracleTest(unittest.TestCase):
     def test_design_line_tokens_equal_actual_cost_minus_reference_cost(self):
         for template in self.templates:
             block = self.blocks_by_name[template["name"]]
-            # `SpellBlock.design_line` is `str | None`. A spell with no design
-            # line prints no magnitudes to compare, so there is nothing for
-            # this oracle to say about it — skip rather than crash. Task 12's
-            # review confirms how many are skipped; if that number is not
-            # small, the ledger is importing spells this assertion cannot
-            # actually vouch for.
-            if block.design_line is None:
+            # `HAND_DERIVED` checked before `block.design_line`, exactly the
+            # precedence `extract_spells.run()` itself uses (see its own
+            # dispatch comment) -- a spell whose printed design line is real
+            # but incomplete (e.g. Dispel the Phantom Image's bare "(Base
+            # effect)", missing the "+2 Voice" token every literal sibling
+            # spell in the same guideline family prints) must be checked
+            # against the *corrected* text `extract_spells.run()` actually
+            # emitted the template from, not a second, independent parse of
+            # the raw rulebook string -- otherwise this oracle would be
+            # checking stale input, not a genuinely different calculation.
+            # `SpellBlock.design_line` is `str | None`. A spell with neither
+            # a `HAND_DERIVED` entry nor a printed design line has no
+            # magnitudes to compare, so there is nothing for this oracle to
+            # say about it — skip rather than crash. Task 12's review
+            # confirms how many are skipped; if that number is not small,
+            # the ledger is importing spells this assertion cannot actually
+            # vouch for.
+            design_text = extract_spells.HAND_DERIVED.get(template["name"]) or block.design_line
+            if design_text is None:
                 continue
-            design = designline.parse_design(block.design_line)
+            design = designline.parse_design(design_text)
 
             actual = sum(self.magnitudes[template[key]] for key in
                          ("rangeId", "durationId", "targetId"))

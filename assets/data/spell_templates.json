@@ -182,6 +182,51 @@
     ]
   },
   {
+    "id": "tpl-peim-dispel-phantom-image",
+    "name": "Dispel the Phantom Image",
+    "technique": "Perdo",
+    "form": "Imaginem",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "pevi-G2",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "Destroys the image from any one CrIm spell whose level you match or exceed on a stress die + the level of your spell.",
+    "description": "Destroys the image from any one CrIm spell whose level you match or exceed on a stress die + the level of your spell.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "chosenSlots": {
+      "specificType": "Creo Imaginem"
+    },
+    "analogyRationale": "Perdo Imaginem's own guideline table prints no General row. This spell's own text (\"Destroys the image from any one CrIm spell whose level you match or exceed on a stress die + the level of your spell\") is the Imaginem-scoped echo of Perdo Vim's own general \"dispel a specific type of effect\" guideline (pevi-G2), narrowed to Creo Imaginem and without pevi-G2's own +4 magnitude bonus -- the same shape Perdo Vim's Wind of Mundane Silence generalizes for any type/realm."
+  },
+  {
+    "id": "tpl-peme-lay-to-rest-haunting-spirit",
+    "name": "Lay to Rest the Haunting Spirit",
+    "technique": "Perdo",
+    "form": "Mentem",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "pevi-G3",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "If your spell Penetrates the resistance of a ghost or similar spirit, it loses a number of points from its Might equal to the level of this spell. If this reduces the spirit's Might to zero, it vanishes, apparently destroyed. Philosophers concur that the spirit goes to the afterlife, or is perhaps weakened to helplessness, but is not actually destroyed. Souls, after all, are immortal.",
+    "description": "If your spell Penetrates the resistance of a ghost or similar spirit, it loses a number of points from its Might equal to the level of this spell. If this reduces the spirit's Might to zero, it vanishes, apparently destroyed. Philosophers concur that the spirit goes to the afterlife, or is perhaps weakened to helplessness, but is not actually destroyed. Souls, after all, are immortal.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "analogyRationale": "Perdo Mentem's own guideline table prints no General row. This spell's own text (\"it loses a number of points from its Might equal to the level of this spell\") is the Mentem-scoped echo of Perdo Vim's general \"reduce target's Might Score\" guideline (pevi-G3), narrowed to ghosts/spirits and without pevi-G3's own +2 magnitude bonus."
+  },
+  {
     "id": "tpl-pevi-demons-eternal-oblivion",
     "name": "Demon's Eternal Oblivion",
     "technique": "Perdo",
@@ -373,6 +418,27 @@
     "chosenSlots": {
       "realm": "Faerie"
     }
+  },
+  {
+    "id": "tpl-reim-restore-moved-image",
+    "name": "Restore the Moved Image",
+    "technique": "Rego",
+    "form": "Imaginem",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "revi-G2",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "Cancels a ReIm spell that moves an image, putting the image back where it belongs, as long as you can match the spell's level on a stress die + the level of your spell. This spell targets the image.",
+    "description": "Cancels a ReIm spell that moves an image, putting the image back where it belongs, as long as you can match the spell's level on a stress die + the level of your spell. This spell targets the image.",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "analogyRationale": "Rego Imaginem's own General row (reim-G) is a ward -- this spell isn't one. This spell's own text (\"Cancels a ReIm spell ... as long as you can match the spell's level on a stress die + the level of your spell\") is the Imaginem-scoped echo of Rego Vim's general \"sustain or suppress a spell you cast\" guideline (revi-G2), narrowed to Rego Imaginem, trading revi-G2's +2 magnitude bonus for a stress-die factor revi-G2 doesn't have."
   },
   {
     "id": "tpl-reme-ring-warding-against-spirits",

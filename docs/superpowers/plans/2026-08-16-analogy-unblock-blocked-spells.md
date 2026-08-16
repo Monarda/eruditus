@@ -229,30 +229,42 @@ effect doesn't declare open is silently dropped."
 
 ### Task 2: Route 3 spells through `ANALOGY_BASE_EFFECTS`
 
-**AMENDED 2026-08-16, mid-implementation, twice — this note is the final
-state; two earlier amendments here (scoping down to 2 spells, then
-proposing a `ReferenceOracleTest` exemption) were both superseded and are
-not reproduced.** All 3 spells originally planned are back in scope, routed
-exactly as this task originally specified below, with one addition: before
-Step 3, also add 3 entries to `extract_spells.HAND_DERIVED` (see
+**AMENDED 2026-08-16, mid-implementation, three times — this note is the
+final state; earlier amendments here (scoping down to 2 spells, then a
+`ReferenceOracleTest` exemption proposal) were both superseded and are not
+reproduced.** All 3 spells originally planned are back in scope, routed
+exactly as this task originally specified below, with two additions — see
 `docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md`'s
 "Mid-implementation finding" section, now authoritative over this task's
-text wherever they disagree) — `"Dispel the Phantom Image"`, `"Restore the
-Moved Image"`, and `"Lay to Rest the Haunting Spirit"`, each corrected from
-their printed `"(Base effect)"` to `"(Base effect, +2 Voice)"`. All three
-structurally require Voice range, and every literal sibling spell built on
-the same guideline family prints its own Voice/Touch+whatever deviation as
-a token — these three printed bare is an editorial omission, not a
-substantive difference, confirmed by the pattern across 4 other existing
-templates. This is what actually makes `ReferenceOracleTest` pass — not a
-change to the test itself.
+text wherever they disagree:
+
+1. Before Step 3, add 3 entries to `extract_spells.HAND_DERIVED` —
+   `"Dispel the Phantom Image"`, `"Restore the Moved Image"`, and `"Lay to
+   Rest the Haunting Spirit"`, each corrected from their printed
+   `"(Base effect)"` to `"(Base effect, +2 Voice)"`. All three structurally
+   require Voice range, and every literal sibling spell built on the same
+   guideline family prints its own R/D/T deviation as a token — these
+   three printed bare is an editorial omission, confirmed by the pattern
+   across 4 other existing templates.
+2. `scripts/spell_import/tests/test_general_catalog.py`'s
+   `ReferenceOracleTest` does its own independent rulebook parse and never
+   consults `HAND_DERIVED` — so step 1 alone doesn't reach it (verified
+   empirically: identical failures before and after). Fix `setUp`/the test
+   method to resolve each template's design text via
+   `HAND_DERIVED.get(name) or block.design_line`, the same precedence
+   `extract_spells.run()` already uses, before parsing. Not an exemption —
+   the test's assertion is unchanged; only its input resolution now
+   matches the pipeline it's meant to be checking.
 
 **Files:**
 - Modify: `scripts/spell_import/extract_spells.py`
+  - 3 new entries in `HAND_DERIVED`
   - New table after `DESIGN_LINE_INCOMPLETE` (currently ends `extract_spells.py:183`)
   - New routing branch inside the General-spell handling (`extract_spells.py:547-577`)
   - Remove `"lib-reim-restore-moved-image"` from `DESIGN_LINE_INCOMPLETE`
   - Remove 3 entries from `GENERAL_BLOCKED` (test file, see below)
+- Modify: `scripts/spell_import/tests/test_general_catalog.py`
+  - `ReferenceOracleTest` resolves design text via `HAND_DERIVED` too
 - Modify: `assets/data/spell_templates.json` (regenerated, not hand-edited)
 - Test: `scripts/spell_import/tests/test_extract.py`
 
