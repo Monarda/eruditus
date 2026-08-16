@@ -30,6 +30,17 @@ class SpellCard extends StatelessWidget {
   /// print a level.
   final bool isException;
 
+  /// Catalog-validity problems on the underlying record -- a sibling of
+  /// [LibraryEntry.isResolved], not a substitute for it: [isResolved] means
+  /// "can a level even be computed", this means "the level computes but the
+  /// combination breaks a rule". Only `ResolvedSpell` exposes this today
+  /// (`ResolvedSpell.problems`), so it is precomputed by the caller rather
+  /// than read from [entry] directly -- the same way [isRitual]/[isGeneral]/
+  /// [rationale] already are. Rendered only when [LibraryEntry.isResolved]
+  /// is true; ignored otherwise, leaving the unresolved branch below
+  /// untouched.
+  final List<String> problems;
+
   /// Rendered inside the card below the ListTile, e.g. the Library screen's
   /// *Learn at level…* button for a template. Empty by default so ordinary
   /// spell cards (which have no actions) are unchanged.
@@ -44,12 +55,14 @@ class SpellCard extends StatelessWidget {
     this.isRitual = false,
     this.isGeneral = false,
     this.isException = false,
+    this.problems = const [],
     this.actions = const [],
   });
 
   @override
   Widget build(BuildContext context) {
     final isInvalid = !entry.isResolved;
+    final hasProblems = entry.isResolved && problems.isNotEmpty;
     // An unresolved spell (see below) has a null technique/form too, since
     // both are derived from the (possibly null) resolved baseEffect. Reachable
     // via BackupService.importFromJson, which calls Spell.fromMap directly on
@@ -65,8 +78,12 @@ class SpellCard extends StatelessWidget {
       // showing a half-empty card or hiding the spell.
       subtitle = 'Unavailable — missing ${entry.unresolvedReferences.join(', ')}';
     } else {
+      // hasProblems doesn't change *whether* a level renders, only whether
+      // it's flagged: the breakdown genuinely computed, so unlike the
+      // isInvalid branch above there is a real number to show.
+      final levelSuffix = hasProblems ? ' (unverified)' : '';
       subtitle = level != null
-          ? '${entry.technique} ${entry.form} • Level $level'
+          ? '${entry.technique} ${entry.form} • Level $level$levelSuffix'
           : '${entry.technique} ${entry.form}';
     }
     // Prefer the paraphrase; fall back to the verbatim rulebook text. A
@@ -76,7 +93,9 @@ class SpellCard extends StatelessWidget {
     final hasBlurb = blurb != null && blurb.isNotEmpty;
 
     return Card(
-      key: isInvalid ? const Key('spell-card-unresolved') : null,
+      key: isInvalid
+          ? const Key('spell-card-unresolved')
+          : (hasProblems ? const Key('spell-card-invalid') : null),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -113,6 +132,18 @@ class SpellCard extends StatelessWidget {
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
+                if (hasProblems)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Chip(
+                      key: const Key('needs-review-chip'),
+                      label: const Text('Needs review'),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                      labelStyle:
+                          TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                    ),
+                  ),
               ],
             ),
             subtitle: Column(
@@ -125,6 +156,14 @@ class SpellCard extends StatelessWidget {
                         : null),
                 if (hasBlurb)
                   Text(blurb, maxLines: 2, overflow: TextOverflow.ellipsis),
+                if (hasProblems)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      problems.join('; '),
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ),
                 if (rationale != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),

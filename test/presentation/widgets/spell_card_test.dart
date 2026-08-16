@@ -200,6 +200,92 @@ void main() {
     expect(find.byKey(const Key('ritual-chip')), findsNothing);
   });
 
+  testWidgets('shows a "Needs review" chip, unverified level suffix, and joined problem text',
+      (tester) async {
+    final spell = buildSpell(name: 'Miscast Aegis', summary: 'Test summary.');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SpellCard(
+          entry: spell,
+          level: 20,
+          problems: const [
+            'Choose a level for this General guideline',
+            'Only one option may be selected for Size',
+          ],
+        ),
+      ),
+    ));
+
+    expect(find.byKey(const Key('needs-review-chip')), findsOneWidget);
+    expect(find.text('Needs review'), findsOneWidget);
+    expect(find.textContaining('Level 20 (unverified)'), findsOneWidget);
+    expect(
+      find.text('Choose a level for this General guideline; Only one option may be selected for Size'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('spell-card-invalid')), findsOneWidget);
+  });
+
+  testWidgets('an empty problems list renders no chip, no suffix, and no invalid key',
+      (tester) async {
+    final spell = buildSpell(name: 'Ordinary Bolt', summary: 'Test summary.');
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(body: SpellCard(entry: spell, level: 20)),
+    ));
+
+    expect(find.byKey(const Key('needs-review-chip')), findsNothing);
+    expect(find.textContaining('(unverified)'), findsNothing);
+    expect(find.byKey(const Key('spell-card-invalid')), findsNothing);
+  });
+
+  testWidgets(
+      'an unresolved spell with a non-empty problems value still renders only the unavailable branch',
+      (tester) async {
+    final record = Spell(
+      id: 'orphan-2',
+      name: 'Half-Broken Spell',
+      baseEffectId: 'deleted-custom-effect',
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: 'range-personal',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
+      requisites: const {},
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    // Base effect missing, parameters present -- the same "deleted custom
+    // effect" shape as the existing unresolved fixture above. The explicit
+    // non-empty `problems` here exercises the widget's own gating (isResolved
+    // && problems.isNotEmpty), independent of whether ResolvedSpell.problems
+    // could ever actually produce this combination for a real record.
+    final unresolved = ResolvedSpell(
+      record: record,
+      baseEffect: null,
+      range: personalParam,
+      duration: momentaryParam,
+      target: individualParam,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SpellCard(
+          entry: unresolved,
+          problems: const ['Choose a level for this General guideline'],
+        ),
+      ),
+    ));
+
+    expect(find.byKey(const Key('spell-card-unresolved')), findsOneWidget);
+    expect(find.byKey(const Key('spell-card-invalid')), findsNothing);
+    expect(find.byKey(const Key('needs-review-chip')), findsNothing);
+    expect(find.textContaining('Unavailable'), findsOneWidget);
+    expect(find.text('Choose a level for this General guideline'), findsNothing);
+  });
+
   ResolvedTemplate buildTemplate({String? summary, String? description}) {
     final record = SpellTemplate(
       id: 'tpl-1',
