@@ -123,18 +123,18 @@ neighbours. It sits above section A because items 35 and 37 changed the
 to be rewritten after it. Deciding first was the cheaper order; it was not new
 scope.
 
-**Status as of 2026-08-16: 2 of 5 rows fully done, 1 confirmed with no model
-change needed, 2 still open.** Rows 2 and 4 (items 37/35 and 19) shipped; row 5's
-**26** half is confirmed (no model change needed); still open: row 1's last
-checkbox (item 40 — a UI consumer, not a model change), row 3 (item 13 — waits
-on creation-screen input) and row 5's **14** half (still needs a rulebook
-reading before its "no model change" question can even be answered).
+**Status as of 2026-08-16: 3 of 5 rows fully done, 1 confirmed with no model
+change needed, 1 still open.** Rows 1, 2 and 4 (items 40, 37/35 and 19)
+shipped; row 5's **26** half is confirmed (no model change needed); still
+open: row 3 (item 13 — waits on creation-screen input) and row 5's **14**
+half (still needs a rulebook reading before its "no model change" question
+can even be answered).
 
 Ordered. Each row says what it changes in the model.
 
 | # | Item | Model change | Status |
 |---|---|---|---|
-| 1 | **40** | Give the non-prose invariants an enforcement home both construction paths share | Model/validation work done 2026-08-09; **one checkbox still open** — surfacing `problems` in the Library card has no UI consumer yet (confirmed: nothing under `lib/presentation` references `ResolvedSpell`) |
+| 1 | **40** | Give the non-prose invariants an enforcement home both construction paths share | ✅ COMPLETE 2026-08-16 |
 | 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields — the decision, then the implementation | ✅ DONE — 35 decided 2026-08-14, both of 37's parts shipped 2026-08-14/15 |
 | 3 | **13** | Tighten `validateSpellProse` to user-created spells too (waits on the creation-screen input) | Not started — no summary/description input exists on the creation screen yet |
 | 4 | **19** | `ModifierScope` gains a Target restriction — `modifier.dart`, same foundation | ✅ COMPLETE 2026-08-16 |
@@ -143,7 +143,7 @@ Ordered. Each row says what it changes in the model.
 Items 13, 14, 19, 26, 35 and 37 keep their numbers and live in their own sections;
 this table is the ordering, not a second home for them.
 
-### 40. Model Invariants Have Only One Enforcement Path
+### 40. Model Invariants Have Only One Enforcement Path — ✅ COMPLETE (2026-08-16)
 
 - [x] **Decide what an invalid spell does — DECIDED 2026-08-09 by the user:
       it blocks.** Rejected at the boundary (save, restore, import) rather than
@@ -207,17 +207,25 @@ this table is the ordering, not a second home for them.
       `test/data/published_spell_import_test.dart`, asserting
       `validateSpellAgainstCatalog` reports zero problems across all 294
       published spells and 23 templates; green as predicted.
-- [ ] **Surface `ResolvedSpell.problems` in the Library card — the "degrading"
+- [x] **Surface `ResolvedSpell.problems` in the Library card — the "degrading"
       half of the blocking-vs-degrading decision has no UI yet.** Flagged by
       Part A's final whole-branch review (2026-08-09,
       `.superpowers/sdd/2026-08-09-spell-invariant-enforcement/final-review-report.md`,
       finding M4). The design doc named "Library renders an invalid card" as
       `problems`' consumer, but no task in the plan added that UI, so a spell
       that becomes invalid *after* being written (write-time blocking cannot
-      cover this — only a later catalog change can) is currently invisible:
-      `problems` is computed and correct but has no visible effect anywhere in
-      the app. Not a defect in what shipped — a plan-scope gap worth tracking
-      so it isn't silently dropped when Part B closes this item.
+      cover this — only a later catalog change can) was invisible: `problems`
+      was computed and correct but had no visible effect anywhere in the app.
+      **✅ DONE 2026-08-16** — `SpellCard` now takes a caller-supplied
+      `problems` parameter (mirroring how `isRitual`/`isGeneral`/`rationale`
+      are already precomputed by the caller) and renders a "Needs review"
+      chip, an `(unverified)` level suffix, and the joined problem text when
+      a resolved spell's `problems` is non-empty; `SpellLibraryScreen`'s
+      spell-mapping call site is the one place that threads it through, from
+      `ResolvedSpell.problems`. `ResolvedTemplate`/`ResolvedException` gaining
+      the same getter is explicitly out of scope, unchanged by this fix. See
+      `docs/superpowers/specs/2026-08-16-spell-card-problems-display-design.md`
+      and `docs/superpowers/plans/2026-08-16-spell-card-problems-display.md`.
 
 **What is true today.** `validateSpellProse` (`spell.dart:24-36`) exists precisely
 so the two construction paths cannot drift, and it is called from the `Spell`
