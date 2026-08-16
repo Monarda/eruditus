@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
@@ -10,7 +11,12 @@ class AppDatabase {
   AppDatabase._(this.db);
 
   static Future<AppDatabase> open({String? path}) async {
-    final dbPath = path ?? p.join(await getDatabasesPath(), _databaseName);
+    // getDatabasesPath() assumes a filesystem, which the web sqflite
+    // factory (backed by IndexedDB, not a directory) doesn't have — pass
+    // the bare database name there instead.
+    final dbPath =
+        path ??
+        (kIsWeb ? _databaseName : p.join(await getDatabasesPath(), _databaseName));
     final db = await databaseFactory.openDatabase(
       dbPath,
       options: OpenDatabaseOptions(
