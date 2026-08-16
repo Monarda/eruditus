@@ -130,7 +130,8 @@ class SpellCreationScreen extends StatelessWidget {
                                 // caster) -- printing the literal null would
                                 // read as "(Base null)". The numbered case is
                                 // untouched: existing tests pin its exact text.
-                                '${e.description} (${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'})',
+                                '${e.description} (${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'}'
+                                '${e.requiresVirtue == null ? '' : ', requires ${e.requiresVirtue}'})',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ))
@@ -217,6 +218,7 @@ class SpellCreationScreen extends StatelessWidget {
                   category: 'Range',
                   parameters: configState.parameters,
                   selectedParameter: draft.range,
+                  form: draft.form,
                   onChanged: (param) {
                     if (param != null) bloc.add(RangeSelected(param));
                   },
@@ -229,6 +231,7 @@ class SpellCreationScreen extends StatelessWidget {
                   category: 'Duration',
                   parameters: configState.parameters,
                   selectedParameter: draft.duration,
+                  form: draft.form,
                   onChanged: (param) {
                     if (param != null) bloc.add(DurationSelected(param));
                   },
@@ -241,6 +244,7 @@ class SpellCreationScreen extends StatelessWidget {
                   category: 'Target',
                   parameters: configState.parameters,
                   selectedParameter: draft.target,
+                  form: draft.form,
                   onChanged: (param) {
                     if (param != null) bloc.add(TargetSelected(param));
                   },
@@ -570,10 +574,12 @@ class SpellCreationScreen extends StatelessWidget {
     required String category,
     required List<Parameter> parameters,
     required Parameter? selectedParameter,
+    required String? form,
     required Function(Parameter?) onChanged,
   }) {
-    final categoryParameters =
-        parameters.where((p) => p.category == category).toList();
+    final categoryParameters = parameters
+        .where((p) => p.category == category && p.scope.appliesTo(form: form))
+        .toList();
 
     return DropdownButtonFormField<Parameter>(
       key: key,
@@ -582,7 +588,9 @@ class SpellCreationScreen extends StatelessWidget {
       items: categoryParameters
           .map((p) => DropdownMenuItem(
                 value: p,
-                child: Text('${p.name} (+${p.magnitude})'),
+                child: Text(p.requiresVirtue == null
+                    ? '${p.name} (+${p.magnitude})'
+                    : '${p.name} (+${p.magnitude}, requires ${p.requiresVirtue})'),
               ))
           .toList(),
       onChanged: onChanged,

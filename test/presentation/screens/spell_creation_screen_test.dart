@@ -1394,4 +1394,104 @@ void main() {
               'removed row’s text against a surviving row');
     });
   });
+
+  testWidgets('a Form-scoped parameter is hidden from the dropdown on a non-matching Form',
+      (tester) async {
+    final fireParam = Parameter(
+      id: 'duration-fire', name: 'Fire', category: 'Duration', magnitude: 3,
+      requiresRitual: true,
+      requiresVirtue: 'Faerie Magic',
+      scope: const ParameterScope(forms: ['Ignem', 'Imaginem']),
+      provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final draftState = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(technique: 'Creo', form: 'Terram'),
+    );
+    await pumpScreen(
+      tester,
+      draftState,
+      configState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect],
+        parameters: [durationParam, fireParam],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('duration-dropdown')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fire (+3, requires Faerie Magic)'), findsNothing);
+  });
+
+  testWidgets('a Form-scoped parameter appears in the dropdown on a matching Form',
+      (tester) async {
+    final fireParam = Parameter(
+      id: 'duration-fire', name: 'Fire', category: 'Duration', magnitude: 3,
+      requiresRitual: true,
+      requiresVirtue: 'Faerie Magic',
+      scope: const ParameterScope(forms: ['Ignem', 'Imaginem']),
+      provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final draftState = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem'),
+    );
+    await pumpScreen(
+      tester,
+      draftState,
+      configState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect],
+        parameters: [durationParam, fireParam],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('duration-dropdown')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fire (+3, requires Faerie Magic)'), findsOneWidget);
+  });
+
+  testWidgets('a Virtue-gated base effect shows a requirement note in the dropdown',
+      (tester) async {
+    final gatedEffect = BaseEffect(
+      id: 'crvi-hohmc-G1', technique: 'Creo', form: 'Vim',
+      description: 'Bind a supernatural creature as a temporary familiar',
+      baseLevel: null,
+      requiresVirtue: 'Faerie Magic',
+      ritualRequirement: RitualRequirement.required,
+      effectFormula: const GeneralEffectFormula(
+          kind: GeneralEffectKind.mightThreshold, offsetMagnitudes: -3),
+      provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-houses-hermes-mystery-cults')]),
+    );
+    final draftState = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(technique: 'Creo', form: 'Vim'),
+    );
+    await pumpScreen(
+      tester,
+      draftState,
+      configState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [gatedEffect],
+        parameters: [voiceParam],
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('base-effect-dropdown')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+          'Bind a supernatural creature as a temporary familiar (General, requires Faerie Magic)'),
+      findsOneWidget,
+    );
+  });
 }
