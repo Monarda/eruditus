@@ -110,5 +110,106 @@ void main() {
       });
       expect(restored.requiresRitual, isFalse);
     });
+
+    test('requiresVirtue defaults to null and round-trips when set', () {
+      final plain = Parameter(
+        id: 'p-4', name: 'Touch', category: 'Range', magnitude: 1,
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(plain.requiresVirtue, isNull);
+
+      final gated = Parameter(
+        id: 'p-5', name: 'Road', category: 'Range', magnitude: 2,
+        requiresVirtue: 'Faerie Magic',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(Parameter.fromMap(gated.toMap()).requiresVirtue, 'Faerie Magic');
+      expect(Parameter.fromMap(plain.toMap()).requiresVirtue, isNull);
+    });
+
+    test('fromMap treats an absent requiresVirtue key as null', () {
+      final restored = Parameter.fromMap({
+        'id': 'p-6',
+        'name': 'Touch',
+        'category': 'Range',
+        'magnitude': 1,
+        'source': 'published',
+        'citations': [
+          {'bookId': 'arm5-core'},
+        ],
+      });
+      expect(restored.requiresVirtue, isNull);
+    });
+
+    test('scope defaults to unrestricted and round-trips a Form restriction', () {
+      final plain = Parameter(
+        id: 'p-7', name: 'Voice', category: 'Range', magnitude: 2,
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(plain.scope.forms, isEmpty);
+
+      final scoped = Parameter(
+        id: 'p-8', name: 'Fire', category: 'Duration', magnitude: 3,
+        scope: const ParameterScope(forms: ['Ignem', 'Imaginem']),
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(
+        Parameter.fromMap(scoped.toMap()).scope.forms,
+        ['Ignem', 'Imaginem'],
+      );
+    });
+
+    test('fromMap treats an absent scope key as unrestricted', () {
+      final restored = Parameter.fromMap({
+        'id': 'p-9',
+        'name': 'Touch',
+        'category': 'Range',
+        'magnitude': 1,
+        'source': 'published',
+        'citations': [
+          {'bookId': 'arm5-core'},
+        ],
+      });
+      expect(restored.scope.forms, isEmpty);
+    });
+  });
+
+  group('ParameterScope', () {
+    test('an unrestricted scope (default) applies to every Form, including null', () {
+      const scope = ParameterScope();
+      expect(scope.appliesTo(form: 'Ignem'), isTrue);
+      expect(scope.appliesTo(form: 'Terram'), isTrue);
+      expect(scope.appliesTo(form: null), isTrue);
+    });
+
+    test('a restricted scope applies only to a listed Form', () {
+      const scope = ParameterScope(forms: ['Ignem', 'Imaginem']);
+      expect(scope.appliesTo(form: 'Ignem'), isTrue);
+      expect(scope.appliesTo(form: 'Imaginem'), isTrue);
+      expect(scope.appliesTo(form: 'Terram'), isFalse);
+      expect(scope.appliesTo(form: null), isFalse);
+    });
+
+    test('toMap/fromMap round-trips forms', () {
+      const scope = ParameterScope(forms: ['Ignem', 'Imaginem']);
+      final restored = ParameterScope.fromMap(scope.toMap());
+      expect(restored.forms, ['Ignem', 'Imaginem']);
+    });
+
+    test('fromMap treats a null map as unrestricted', () {
+      expect(ParameterScope.fromMap(null).forms, isEmpty);
+    });
   });
 }
