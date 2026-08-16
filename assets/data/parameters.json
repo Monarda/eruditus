@@ -319,7 +319,6 @@
     "name": "Bargain",
     "category": "Duration",
     "magnitude": 4,
-    "requiresRitual": true,
     "requiresVirtue": "Faerie Magic",
     "source": "published",
     "citations": [
@@ -333,7 +332,6 @@
     "name": "Fire",
     "category": "Duration",
     "magnitude": 3,
-    "requiresRitual": true,
     "requiresVirtue": "Faerie Magic",
     "scope": {
       "forms": ["Ignem", "Imaginem"]

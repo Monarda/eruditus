@@ -8,7 +8,6 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
-import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -62,12 +61,15 @@ void main() {
 
     // Hardcoded, unlike the base-effect counts: parameters.json is the small
     // hand-curated list todo item 5 deliberately left as literals. Grew from
-    // {duration-year, target-boundary} to include item 17's 7 new
-    // ritual-only entries (Bargain/Fire/Until (Condition)/Year + 1, all
-    // three Symbol parameters).
+    // {duration-year, target-boundary} to include item 17's 5 new
+    // ritual-only entries (Until (Condition)/Year + 1, all three Symbol
+    // parameters). Bargain and Fire are NOT ritual-only: neither one's own
+    // rulebook paragraph (Core Rules, reviewed/ copy) states a Ritual
+    // requirement -- unlike Until (Condition) and Year + 1, which explicitly
+    // say so (post-final-review fix, item 17).
     expect(flagged, {
       'duration-year', 'target-boundary',
-      'duration-bargain', 'duration-fire', 'duration-until-condition',
+      'duration-until-condition',
       'duration-year-plus-one', 'range-symbol', 'duration-symbol', 'target-symbol',
     });
 
@@ -254,8 +256,16 @@ void main() {
     expect(effect.isGeneral, isTrue);
     expect(effect.ritualRequirement, RitualRequirement.required);
     expect(effect.requiresVirtue, 'Faerie Magic');
-    expect(effect.effectFormula?.kind, GeneralEffectKind.mightThreshold);
-    expect(effect.effectFormula?.offsetMagnitudes, -3);
+    // No effectFormula (post-final-review fix, item 17): this guideline has
+    // no reference override, so its own template charges the FULL magnitude
+    // for both Touch and Until (Condition) -- the actual total spell level
+    // is 25 levels above chosenBaseLevel. deriveGeneralEffect computes a
+    // General guideline's displayed strength from chosenBaseLevel alone
+    // (correct and load-bearing for every OTHER mightThreshold guideline,
+    // all of which have a reference), so it cannot express this guideline's
+    // effect strength without either misrepresenting the design line or
+    // baking in a fragile magic-number assumption about today's template.
+    expect(effect.effectFormula, isNull);
     expect(effect.provenance.citations, [
       const Citation(bookId: 'arm5-hohmc'),
     ]);
