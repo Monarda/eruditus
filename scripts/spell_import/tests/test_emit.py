@@ -843,3 +843,43 @@ class RequisiteEmissionTest(unittest.TestCase):
         )
         spell = emit.build_spell(block, "test-effect", self.catalog, design)
         self.assertEqual(spell["requisites"], {"Rego": "adding"})
+
+
+class TechniqueFormEmissionTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_build_spell_emits_technique_and_form(self):
+        design = designline.parse_design("(Base 2, +1 Touch, +2 Sun)")
+        spell = emit.build_spell(
+            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design
+        )
+        self.assertEqual(spell["technique"], "Rego")
+        self.assertEqual(spell["form"], "Aquam")
+        self.assertNotIn("analogyRationale", spell)
+
+    def test_build_spell_emits_analogy_rationale_when_given(self):
+        design = designline.parse_design("(Base 2, +1 Touch, +2 Sun)")
+        spell = emit.build_spell(
+            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
+            analogy_rationale="By analogy to a Vim guideline.",
+        )
+        self.assertEqual(spell["analogyRationale"], "By analogy to a Vim guideline.")
+
+    def test_build_template_emits_technique_and_form(self):
+        design = designline.parse_design("(Base effect)")
+        template = emit.build_template(
+            _block("Test Template", "Rego", "Vim", None), "revi-G1", self.catalog, design
+        )
+        self.assertEqual(template["technique"], "Rego")
+        self.assertEqual(template["form"], "Vim")
+        self.assertNotIn("analogyRationale", template)
+
+    def test_build_template_emits_analogy_rationale_when_given(self):
+        design = designline.parse_design("(Base effect)")
+        template = emit.build_template(
+            _block("Test Template", "Rego", "Vim", None), "revi-G1", self.catalog, design,
+            analogy_rationale="By analogy to a Vim guideline.",
+        )
+        self.assertEqual(template["analogyRationale"], "By analogy to a Vim guideline.")

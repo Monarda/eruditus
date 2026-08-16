@@ -125,6 +125,7 @@ def build_spell(
     chosen_base_level: int | None = None,
     override_modifiers: dict[str, list[str]] | None = None,
     extra_adjustment: tuple[int, str] | None = None,
+    analogy_rationale: str | None = None,
 ) -> dict:
     range_id = catalog.parameter_id("Range", _parameter_name(design, "range", block))
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
@@ -141,6 +142,8 @@ def build_spell(
     spell = {
         "id": catalog_module.slug_id(block.technique, block.form, block.name),
         "name": block.name,
+        "technique": block.technique,
+        "form": block.form,
         "requisites": requisites,
         "source": "published",
         "createdAt": FIXED_TIMESTAMP,
@@ -240,6 +243,9 @@ def build_spell(
     if chosen_base_level is not None:
         spell["chosenBaseLevel"] = chosen_base_level
 
+    if analogy_rationale is not None:
+        spell["analogyRationale"] = analogy_rationale
+
     return spell
 
 
@@ -249,6 +255,7 @@ def build_template(
     catalog: catalog_module.Catalog,
     design: designline.Design,
     realm_by_spell_id: dict[str, str] | None = None,
+    analogy_rationale: str | None = None,
 ) -> dict:
     """Build a `SpellTemplate.fromMap`-shaped entry for a General spell.
 
@@ -284,6 +291,8 @@ def build_template(
     template = {
         "id": template_id,
         "name": block.name,
+        "technique": block.technique,
+        "form": block.form,
         "requisites": requisites,
         "source": "published",
         "selectedModifiers": _selected_modifiers(design, block, catalog),
@@ -313,6 +322,9 @@ def build_template(
 
     if chosen_slots:
         template["chosenSlots"] = chosen_slots
+
+    if analogy_rationale is not None:
+        template["analogyRationale"] = analogy_rationale
 
     return template
 
