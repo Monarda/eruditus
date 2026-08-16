@@ -24,6 +24,7 @@ class RitualSection extends StatelessWidget {
 
   /// The selected parameters' own names, so the banner can say "Year duration"
   /// without RitualReason having to hardcode which parameters are ritual-only.
+  final String rangeName;
   final String durationName;
   final String targetName;
 
@@ -38,6 +39,7 @@ class RitualSection extends StatelessWidget {
     required this.ritualStatus,
     required this.declaration,
     required this.showLastingCreationOption,
+    required this.rangeName,
     required this.durationName,
     required this.targetName,
     required this.guidelineIsSuggested,
@@ -45,6 +47,7 @@ class RitualSection extends StatelessWidget {
   });
 
   String _describe(RitualReason reason) => switch (reason) {
+        RitualReason.ritualOnlyRange => '$rangeName range',
         RitualReason.ritualOnlyDuration => '$durationName duration',
         RitualReason.ritualOnlyTarget => '$targetName target',
         RitualReason.exceedsMaxFormulaicLevel =>

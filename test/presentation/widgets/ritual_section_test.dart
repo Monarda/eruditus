@@ -16,6 +16,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: false,
+      rangeName: 'Touch',
       durationName: 'Sun',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -35,6 +36,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: true,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -53,6 +55,7 @@ void main() {
       ]),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: false,
+      rangeName: 'Touch',
       durationName: 'Year',
       targetName: 'Boundary',
       guidelineIsSuggested: false,
@@ -67,12 +70,32 @@ void main() {
     expect(banner.data, contains('Boundary target'));
   });
 
+  testWidgets('names the range reason in the banner', (tester) async {
+    await tester.pumpWidget(_host(RitualSection(
+      ritualStatus: const RitualStatus([RitualReason.ritualOnlyRange]),
+      declaration: RitualDeclaration.none,
+      showLastingCreationOption: false,
+      rangeName: 'Symbol',
+      durationName: 'Momentary',
+      targetName: 'Individual',
+      guidelineIsSuggested: false,
+      onDeclarationChanged: (_) {},
+    )));
+
+    final banner = tester.widget<Text>(find
+        .descendant(
+            of: find.byKey(const Key('ritual-banner')), matching: find.byType(Text))
+        .first);
+    expect(banner.data, contains('Symbol range'));
+  });
+
   testWidgets('explains the healing case when the guideline is suggested',
       (tester) async {
     await tester.pumpWidget(_host(RitualSection(
       ritualStatus: const RitualStatus([RitualReason.lastingCreation]),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: true,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: true,
@@ -90,6 +113,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: true,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -108,6 +132,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: true,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -125,6 +150,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.storyguideRuling,
       showLastingCreationOption: false,
+      rangeName: 'Touch',
       durationName: 'Sun',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -141,6 +167,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: true,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -161,6 +188,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: true,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -182,6 +210,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.storyguideRuling,
       showLastingCreationOption: false,
+      rangeName: 'Touch',
       durationName: 'Sun',
       targetName: 'Individual',
       guidelineIsSuggested: false,
@@ -209,6 +238,7 @@ void main() {
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: false,
+      rangeName: 'Touch',
       durationName: 'Momentary',
       targetName: 'Individual',
       guidelineIsSuggested: false,
