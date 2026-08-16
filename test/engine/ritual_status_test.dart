@@ -33,6 +33,7 @@ final _momentary = _param('duration-momentary', 'Momentary', 'Duration', 0);
 final _year = _param('duration-year', 'Year', 'Duration', 4, requiresRitual: true);
 final _individual = _param('target-individual', 'Individual', 'Target', 0);
 final _boundary = _param('target-boundary', 'Boundary', 'Target', 4, requiresRitual: true);
+final _symbolRange = _param('range-symbol', 'Symbol', 'Range', 4, requiresRitual: true);
 
 void main() {
   final engine = SpellEngine(allSpells: []);
@@ -72,6 +73,12 @@ void main() {
       final result = run(target: _boundary);
       expect(result.isRitual, isTrue);
       expect(result.reasons, [RitualReason.ritualOnlyTarget]);
+    });
+
+    test('a ritual-only Range forces a Ritual', () {
+      final result = run(range: _symbolRange);
+      expect(result.isRitual, isTrue);
+      expect(result.reasons, [RitualReason.ritualOnlyRange]);
     });
 
     test('a required guideline forces a Ritual', () {
@@ -141,6 +148,21 @@ void main() {
         RitualReason.ritualOnlyTarget,
       ]));
       expect(result.reasons.length, 2);
+    });
+
+    test('a ritual-only Range accumulates alongside Duration and Target', () {
+      final result = run(
+        effect: _effect(1),
+        range: _symbolRange,
+        duration: _year,
+        target: _boundary,
+      );
+      expect(result.reasons, containsAll([
+        RitualReason.ritualOnlyRange,
+        RitualReason.ritualOnlyDuration,
+        RitualReason.ritualOnlyTarget,
+      ]));
+      expect(result.reasons.length, 3);
     });
   });
 

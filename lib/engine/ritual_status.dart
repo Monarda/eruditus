@@ -1,11 +1,13 @@
 /// Why a spell is a Ritual. See Core Rules "Ritual Spells", line 12340.
 ///
-/// [ritualOnlyDuration] and [ritualOnlyTarget] are named for the generic
-/// `Parameter.requiresRitual` flag rather than for Year and Boundary, because
-/// todo item 17 adds three more ritual-only Durations and a reason called
-/// `yearDuration` would become a lie. Callers that want to name the parameter
-/// read its `name` directly.
+/// [ritualOnlyRange], [ritualOnlyDuration] and [ritualOnlyTarget] are named
+/// for the generic `Parameter.requiresRitual` flag rather than for specific
+/// parameters, because todo item 17 adds three more ritual-only Durations
+/// and the first-ever ritual-only Range (Symbol) -- a reason called
+/// `yearDuration` would become a lie, and Range needed a reason at all.
+/// Callers that want to name the parameter read its `name` directly.
 enum RitualReason {
+  ritualOnlyRange,
   ritualOnlyDuration,
   ritualOnlyTarget,
   exceedsMaxFormulaicLevel,

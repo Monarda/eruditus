@@ -191,6 +191,7 @@ class SpellEngine {
 
     final ritualStatus = _deriveRitualStatus(
       baseEffect: baseEffect,
+      range: range,
       duration: duration,
       target: target,
       ritualDeclaration: ritualDeclaration,
@@ -244,6 +245,7 @@ class SpellEngine {
   /// declaration meaningful is the bloc's job, not the engine's.
   RitualStatus _deriveRitualStatus({
     required BaseEffect baseEffect,
+    required Parameter range,
     required Parameter duration,
     required Parameter target,
     required RitualDeclaration ritualDeclaration,
@@ -251,6 +253,7 @@ class SpellEngine {
   }) {
     final reasons = <RitualReason>[];
 
+    if (range.requiresRitual) reasons.add(RitualReason.ritualOnlyRange);
     if (duration.requiresRitual) reasons.add(RitualReason.ritualOnlyDuration);
     if (target.requiresRitual) reasons.add(RitualReason.ritualOnlyTarget);
     if (baseEffect.ritualRequirement == RitualRequirement.required) {
