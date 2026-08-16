@@ -2,8 +2,10 @@
 
 **Status:** Active development · **Last updated:** 2026-08-15
 
-**Standing goal:** every published spell in the Definitive Edition core rules is
-in the spell library, with its computed level matching its printed level.
+**Standing goal:** every published spell in the Definitive Edition core rules
+is either (a) in the spell library with its computed level matching its
+printed level, or (b) recorded as an exception spell with a citation-backed
+reason the guidelines don't apply to it. See item 46.
 
 ## How to read this file
 
@@ -26,7 +28,8 @@ in the spell library, with its computed level matching its printed level.
 
 Last extractor run, 2026-08-15 (`python -m scripts.spell_import.extract_spells`):
 
-> **320 imported · 24 emitted as templates · 16 blocked · 0 unresolved**
+> **320 imported · 24 emitted as templates · 6 recorded as exceptions · 10
+> blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
 **Verified against a live `--show-blocked` run, not carried forward by
@@ -57,16 +60,17 @@ unaccounted for.
 | Guideline level absent from the rulebook's own table | 1 | **28** — corrected from 5: item 28's own body always said 4 of 5 were fixed 2026-08-15, this table just hadn't caught up |
 | Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, re-checked once more during Bucket-B planning and re-confirmed as a genuine two-way tie — this is the item's final decision, not a case still pending resolution |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
-| Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 2 | **26** — corrected from 6: *Wind at the Back*, *Trackless Step* and *The Earth Split Asunder* resolve their `Special` Duration/Target via `SPECIAL_PARAMETER_BASIS`, and *The Bountiful Feast* imports via a `DESIGN_LINE_TYPOS` entry for its missing closing paren, all fixed 2026-08-15; two of the six remain — *Watching Ward* (its `Duration is non-standard` clause names no basis to resolve to, so there is nothing for this mechanism to resolve) and *Mists of Change* (deliberately left blocked, see item 26's own section: two Durations in one stat line, `D: Sun & Year`) |
-| General-level, each blocked for an unrelated reason | 8 | see item **25** (was stated as 10 including *Watching Ward*, counted under item 26 above instead, and *Ward against Faeries of the Mountain*, unblocked 2026-08-15 — same starting 10 spells, no double-count) |
+| Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
+| General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth* and *Wizard's Vigil* now import as exception spells (item 46) |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
-| No printed design line and no legitimate derivation | 1 | permanent — see item **27**: corrected from 2, *Hermes' Portal* now has a legitimate derivation (item 45, fixed 2026-08-15); only *Whispering Winds* remains, permanently blocked — no real base level plus real magnitude token reproduces its printed level without inventing a requisite the text doesn't support |
+| No printed design line and no legitimate derivation | 0 | see item **27** — corrected from 1: *Whispering Winds* now imports as an exception spell (item 46) rather than staying permanently blocked |
 | `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
 | Non-standard requisite-magnitude phrasing | 0 | **44** — done 2026-08-15, all 3 import |
 | Ritual-justification clause not yet allow-listed | 0 | **18** — corrected from 3: all 3 (*Curse of the Ravenous Swarm*, *Neptune's Wrath*, *Breath of the Open Sky*) now allow-listed and import, done 2026-08-15 |
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
+| Rulebook says guideline arithmetic doesn't apply at all | 6 | new — item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change* |
 
-**Table total: 16, reconciled to the live count.** The previous version of this
+**Table total: 10, reconciled to the live count.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
 
@@ -381,8 +385,8 @@ importer work, with `spell.dart` untouched.
       Split Asunder* all import now. **`Watching Ward` does not and will not
       via this mechanism** — its own clause, `Duration is non-standard`, names no
       basis at all (no "based on X"), so there is nothing to resolve it to
-      without guessing. It remains this item's sole open case, General-level
-      (item 25 doesn't block it), blocked purely on this.
+      without guessing. **✅ It now imports as an exception spell instead,
+      2026-08-16 — see item 46.**
 - [x] *The Bountiful Feast* — ✅ DONE 2026-08-15. **Correction: this was never a
       `_split_parts` bug** — the printed line is genuinely missing its outer
       closing paren (a rulebook transcription defect, verified directly against
@@ -391,10 +395,12 @@ importer work, with `spell.dart` untouched.
       *Ward against Heat and Flames*'s `"+1Touch"`, not a `_split_parts` change.
       Base effect `crhe-1a`, forced by the design line's own "+3 from the
       guideline" note (the only one of 5 candidates with a stated Size bonus).
-- **Deliberately left blocked:** *Mists of Change* prints `D: Sun & Year`. Two
-  durations in one stat line contradicts item 1's rules-correct one-Duration
-  invariant; it also prints a numberless "slightly nonstandard effect". **Do not
-  weaken the model for one spell.**
+- **✅ Now an exception spell, 2026-08-16 — see item 46.** *Mists of Change*
+  prints `D: Sun & Year`. Two durations in one stat line contradicts item 1's
+  rules-correct one-Duration invariant; it also prints a numberless "slightly
+  nonstandard effect". The model was correctly never weakened for this one
+  spell — it is recorded outside the model instead, via ExceptionSpell's
+  free-text Range/Duration/Target.
 
 - **Spec/Plan:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`,
   `docs/superpowers/plans/2026-08-04-level-adjustments.md`
@@ -1512,6 +1518,38 @@ or whether its 35-level gap (see item 27) needs something else besides.
       imports as `rete-4`.
 - **Files:** `scripts/spell_import/designline.py`, `scripts/spell_import/extract_spells.py`
 
+### 46. Exception Spells — ✅ DONE 2026-08-16
+
+Six published spells share a failure mode distinct from every other blocked
+spell: the rulebook itself, in the spell's own printed text, says guideline
+arithmetic doesn't apply — not a missing catalog row, not an ambiguous
+resolution, a genuine "this was never designed that way." *Wizard's
+Communion*, *Wizard's Vigil* and *Aegis of the Hearth* (General-kind, no
+printed level, moved out of item 25); *Whispering Winds* (moved out of item
+27); *Watching Ward* and *Mists of Change* (moved out of item 26).
+
+- [x] A new `ExceptionSpell`/`ResolvedException` model pair, parallel to how
+      `SpellTemplate` sits alongside `Spell` — free-text Range/Duration/
+      Target instead of catalog references, a required `rationale` citation
+      instead of computed arithmetic, no `SpellLevelCalculator` involvement.
+      No common parent class with `Spell`/`SpellTemplate` — `lib/models` has
+      zero `extends` relationships, and the one field most worth sharing
+      (R/D/T) is exactly the field that can't be identical between typed and
+      free-text shapes.
+- [x] A closed, exact-name table, `scripts/spell_import/exceptions.py`'s
+      `EXCEPTION_SPELLS`, intercepted as the very first check in
+      `extract_spells.py`'s import loop, before any design-line
+      tokenization — these six spells never route through
+      `build_spell`/`build_template`.
+- [x] A third `SpellLibraryScreen` section, below Templates and Spells,
+      reusing `SpellCard`/`LibraryEntry` via one new chip. No instantiation
+      action — these are read-only canon records.
+- [x] The standing goal statement amended to carve out this category
+      explicitly, rather than silently failing to cover six real spells.
+
+**Spec/Plan:** `docs/superpowers/specs/2026-08-15-exception-spells-design.md`,
+`docs/superpowers/plans/2026-08-16-exception-spells.md`
+
 ---
 
 ## D. Low Priority / Nice-to-Have
@@ -1610,11 +1648,12 @@ immediately.
 - **Three spells print no design line. Two have a legitimate derivation:**
   - *Enchantment of the Scrying Pool* (InAq 30, line 12900) — ✅ derived
     `(Base 5, +1 Touch, +4 Year)`, base effect `inaq-5` (sole candidate). Imported.
-  - *Whispering Winds* (InAu 15, line 13251) — ❌ **permanently blocked.** InAu's only
-    base levels are 1/2/4/15; with Sight(3)/Conc(1)/Ind(0) fixed by the stat line, no
-    real base level + real magnitude token reproduces 15 without inventing a requisite
-    the text does not support. The spell's own prose says why: "fits poorly into the
-    normal framework of Hermetic magic."
+  - *Whispering Winds* (InAu 15, line 13251) — ✅ **now imports as an exception
+    spell, 2026-08-16 — see item 46.** InAu's only base levels are 1/2/4/15;
+    with Sight(3)/Conc(1)/Ind(0) fixed by the stat line, no real base level +
+    real magnitude token reproduces 15 without inventing a requisite the
+    text does not support. The spell's own prose says why, and its design
+    line prints the literal marker `(Unique spell)`.
   - *Hermes' Portal* (ReTe 75, line 15638) — ✅ **derived, no longer blocked.**
     `rete-4` ("Transport a non-living object…") needs `rego-transport-distance` at its
     top rung plus 2 magnitudes of size to reach 75. **Corrected 2026-08-15:**
@@ -1631,8 +1670,9 @@ immediately.
     against the Beasts of Legend* (item 35/37's realm-slot work) and *Ward against
     Faeries of the Mountain* (2026-08-15 — its own text names both its guideline and
     its realm by cross-referencing *Ward against Faeries of the Waters*; see item
-    27's correction and `extract_spells.HAND_DERIVED`). *Sight of the True Form*,
-    *Wizard's Vigil* and *Aegis of the Hearth* remain blocked under item 25.)
+    27's correction and `extract_spells.HAND_DERIVED`). *Sight of the True Form*
+    remains blocked under item 25; *Wizard's Vigil* and *Aegis of the Hearth*
+    moved out 2026-08-16, now importing as exception spells instead — item 46.)
 - **The one open checklist line was split out on 2026-08-07** into **item 28** (zero
   candidates — a catalog/prose-rule gap) and **item 39** (genuine ambiguity — a
   reading decision), because the two need different kinds of decision and were getting
@@ -1665,21 +1705,23 @@ ward**.
   (`spell_engine.dart:422-431`).
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
-**Nine of the 33 remain blocked, each for a reason unrelated to this item.**
-(Was ten: *Ward against Faeries of the Mountain* moved out 2026-08-15 — its
-"no design line" turned out to be a complete specification once its own
-cross-reference to *Ward against Faeries of the Waters* was followed. See
-`extract_spells.HAND_DERIVED`'s comment and item 27's correction below.)
-- **No design line printed (3):** *Aegis of the Hearth*, *Wizard's Vigil*, *Sight of
-  the True Form*.
+**Six of the 33 remain blocked, each for a reason unrelated to this item.**
+(Was ten, then nine: *Ward against Faeries of the Mountain* moved out
+2026-08-15 — its "no design line" turned out to be a complete specification
+once its own cross-reference to *Ward against Faeries of the Waters* was
+followed; *Aegis of the Hearth* and *Wizard's Vigil* moved out 2026-08-16 —
+both now import as exception spells instead, item 46. See
+`extract_spells.HAND_DERIVED`'s comment, item 27's correction, and item 46.)
+- **No design line printed (1):** *Sight of the True Form*.
 - **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
   *Restore the Moved Image*, *The Invisible Eye Revealed*.
 - **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
   Spirit*, *Dispel the Phantom Image*.
 - **Design line disclaims guideline arithmetic (1):** *Wizard's Communion* — "a
   remnant of Mercurian rituals."
-- **Unrecognised token (1):** *Watching Ward* — a `Special`-Duration problem, **item
-  26's**.
+- **✅ Watching Ward moved to item 46, 2026-08-16** — it now imports as an
+  exception spell rather than staying blocked on its `Special`-Duration
+  problem.
 
 - **Spec/Plan:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`,
   `docs/superpowers/plans/2026-08-05-general-base-effects.md`
@@ -1816,7 +1858,8 @@ Exactly one Range, one Duration, one Target. **Ars Magica rule: spells have a si
 Range/Duration/Target; modifiers scale the level instead.** Three dedicated dropdowns;
 `SpellCreationBloc` enforces one-per-category in `ParameterAdded`;
 `SpellEngine.validateSpellDraft` requires all three. *(Item 26's *Mists of Change* is
-the one published spell that contradicts this — it stays blocked.)*
+the one published spell that contradicts this — recorded as an exception spell
+instead of weakening the model, item 46.)*
 
 ### 5. Asset Data Loader Test Failures — ✅ COMPLETE
 - Fixed 19 built-in spells whose embedded `baseEffect` referenced ids not in
