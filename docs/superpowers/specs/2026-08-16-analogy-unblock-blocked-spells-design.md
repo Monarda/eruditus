@@ -2,18 +2,21 @@
 
 **Status:** Approved (decisions confirmed by the user 2026-08-16, see "Decisions"
 below; extended 2026-08-16 to cover the 4th spell as an exception spell
-rather than leaving it blocked)
+rather than leaving it blocked); **scope reduced 2026-08-16 during
+implementation** — see "Mid-implementation finding: `pevi-G2`'s offset is
+suspect" below. This round now unblocks 3 of the 4 (2 via analogy, 1 via
+exception); *Dispel the Phantom Image* is parked, still blocked, pending a
+separate audit.
 
 ## Goal
 
-Clear every spell left in `.superpowers/todo.md` item 25's "permanently
-blocked" list, using two different mechanisms for two genuinely different
-problems:
+Clear as much of `.superpowers/todo.md` item 25's "permanently blocked" list
+as can be resolved with confidence, using two different mechanisms for two
+genuinely different problems:
 
-- **3 spells unblocked via the base-effect analogy capability**
+- **2 spells unblocked via the base-effect analogy capability**
   (`Spell`/`SpellTemplate.technique`/`.form` + `analogyRationale`, merged to
   `main` 2026-08-16, `docs/superpowers/plans/2026-08-16-base-effect-analogy.md`):
-  - *Dispel the Phantom Image* (Perdo Imaginem)
   - *Restore the Moved Image* (Rego Imaginem)
   - *Lay to Rest the Haunting Spirit* (Perdo Mentem)
 - **1 spell recorded as an exception spell** (`scripts/spell_import/exceptions.py`,
@@ -23,12 +26,73 @@ problems:
   table at all"):
   - *The Invisible Eye Revealed* (Intellego Vim) — see "The 4th spell: exception,
     not analogy" below for why it needs the other mechanism.
+- **1 spell parked, still blocked:** *Dispel the Phantom Image* (Perdo
+  Imaginem) — its analogy donor's own catalog data (`pevi-G2`) doesn't hold
+  up under verification. See "Mid-implementation finding" below. Not a new
+  permanent blocker verdict — item 25's existing "permanently blocked"
+  framing for this one spell is now superseded by "blocked pending a
+  `pevi-G2` data audit," a narrower, actionable gap.
 
 This is importer + data work only, for both mechanisms. No Dart model or
 engine change: the `GeneralEffectFormula` machinery (`targetSpellLevel`,
 `mightReduction`, `offsetMagnitudes`, `stressDie`) that renders each donor
 guideline's effect sentence, and `ExceptionSpell`/`build_exception_spell`,
 both already exist and need nothing new at the model/engine layer.
+
+## Mid-implementation finding: `pevi-G2`'s offset is suspect
+
+Found while implementing Task 2, verifying `ReferenceOracleTest`'s failure
+against all three planned analogy spells rather than just silencing it.
+
+**`revi-G2` and `pevi-G3` (offset 2) check out.** Every existing template
+built on either — *Demon's Eternal Oblivion* (`pevi-G3`, Voice = 2
+magnitudes), *Maintaining the Demanding Spell* (`revi-G2`, Touch + Diameter
+= 1+1 = 2 magnitudes), *Suppressing the Wizard's Handiwork* (`revi-G2`,
+Touch + Concentration = 1+1 = 2 magnitudes) — invests exactly 2 magnitudes
+of Range/Duration/Target, no matter which parameters it spends them on. That
+isn't a coincidence repeating three times; it confirms the "+2 magnitudes"
+these guidelines grant is calibrated against real spells that always spend
+exactly that much reaching their target. *Restore the Moved Image* and *Lay
+to Rest the Haunting Spirit* fit the same shape (both printed at Voice, 2
+magnitudes) and are confirmed correct to route through `ANALOGY_BASE_EFFECTS`
+using `revi-G2`/`pevi-G3` unmodified, per Decision 1.
+
+**`pevi-G2` (offset 4) does not.** Its own worked example, *Unravelling the
+Fabric of (Form)*, is built at Voice (2 magnitudes, matching its design
+line's explicit "+2 Voice") — but its own prose states its dispel threshold
+as *"spell level + 10 + stress die"*, and 10 is 2 magnitudes, not 4.
+`pevi-G2`'s guideline-table row says "+4 magnitudes"; the one real spell
+built on it behaves like +2. These can't both be right. Candidate
+explanations, neither confirmed:
+- `base_effects.json`'s `pevi-G2.effectFormula.offsetMagnitudes` is a
+  pre-existing data error (should be `2`, not `4`) — from the earlier
+  2026-08-05 general-base-effects plan, unrelated to this one.
+- Something about how "+4 magnitudes" in the guideline table's abstract
+  formula relates to "+10" in a concrete worked example isn't understood
+  correctly yet — needs its own investigation before trusting either number.
+
+**Decision (user, 2026-08-16): proceed with the 2 confirmed spells now,
+park *Dispel the Phantom Image*.** It stays blocked — not as a new
+permanent verdict, but pending a focused audit of `pevi-G2`'s
+`offsetMagnitudes` (and, once that's resolved, of every other
+`GeneralEffectFormula` entry the same 2026-08-05 plan produced, since this
+was found by spot-checking, not an exhaustive pass). That audit is
+out of scope for this plan. Task 1's `chosen_slots` parameter on
+`emit.build_template` (built for this spell's `specificType` slot) stays
+landed and independently tested — it just goes unused by this plan's data
+for now, the same "wire the capability, don't exercise it yet" shape the
+codebase already carries elsewhere (e.g. `TechniqueFormRegenerationTest`
+before this plan's own Task 2 landed).
+
+**A hypothesis for the future audit, recorded but not pursued here (user,
+2026-08-16):** the "+4 magnitudes" vs. "+10" gap may be a simplification
+specific to spells at level ≥5 — `SpellLevelCalculator`'s own additive-vs-
+multiplicative split treats the 1-5 tier differently from everything above
+it (see its comment at `spell_engine.dart` and the "Global Constraints"
+note in the base-effect-analogy plan). Whether that tier boundary is what
+produced the "+10" figure in *Unravelling the Fabric*'s prose — as opposed
+to a plain data-entry error in `offsetMagnitudes` — is exactly what the
+future audit needs to check first.
 
 ## Background: why these three are blocked today
 
@@ -68,24 +132,26 @@ recording the derivation.
 
 ## Decisions
 
-Three judgment calls, confirmed by the user 2026-08-16:
+Three judgment calls, confirmed by the user 2026-08-16 — **the first is now
+verified, not just asserted, for the 2 spells this round actually uses it
+for** (see "Mid-implementation finding" above; item 2 is deferred along with
+*Dispel the Phantom Image*, unused by this round's data):
 
 1. **Formula fidelity: use each Vim donor's formula unmodified**, including
-   its `offsetMagnitudes`/`stressDie`. None of the three published spells'
-   own text matches the donor bullet-for-bullet (each is a slightly narrower,
-   one-off version), and the shipped schema has no per-spell formula-override
-   field — building one is out of scope for this fix. The resulting template
-   expresses the *generalized* Vim-analogy rule (available to a caster
-   inventing a *new* spell from it), not a literal reproduction of the one
-   canonical spell's abbreviated numbers. This matches how every other
-   General template in the corpus already works: the template carries the
-   guideline's formula, not one example spell's specific wording.
+   its `offsetMagnitudes`/`stressDie`. Originally framed as "the schema has
+   no override field, so accept the generalized rule even where it doesn't
+   match the one canonical spell's numbers" — implementation-time
+   verification found something stronger for `revi-G2`/`pevi-G3`: their
+   offsets are not just an accepted approximation, they're independently
+   confirmed correct against every existing spell built on them (see above).
+   `pevi-G2` is the one where "accept it unmodified" would have been
+   actually wrong, not just imprecise — which is why it's parked rather than
+   shipped this round.
 2. **Pre-fill `chosenSlots.specificType = "Creo Imaginem"`** for *Dispel the
-   Phantom Image* (`pevi-G2` has an open `specificType` slot). Its own text
-   unambiguously commits to it ("any one CrIm spell"), unlike a genuinely
-   open template — the same reasoning `REALM_BY_SPELL_ID` already applies to
-   wards whose text names a specific realm (e.g. *Circular Ward against
-   Demons* → `"Infernal"`).
+   Phantom Image* (`pevi-G2` has an open `specificType` slot) — **deferred
+   along with the spell itself.** Task 1's `chosen_slots` parameter on
+   `emit.build_template` still exists and is tested standalone; this
+   specific data usage of it waits for the `pevi-G2` audit.
 3. **The 4th spell is fixed too, but via the exception-spell mechanism, not
    analogy** — see below.
 
@@ -133,21 +199,14 @@ In `extract_spells.py`, alongside `NUMBERED_OVERRIDES`/`HAND_DERIVED`:
 # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
 # Checked before the general_candidates empty/DESIGN_LINE_INCOMPLETE
 # handling below, so it takes precedence over both.
+#
+# Dispel the Phantom Image (Perdo Imaginem, would point at pevi-G2) is
+# deliberately NOT here. pevi-G2's own offsetMagnitudes (4) doesn't survive
+# verification against its own worked example (Unravelling the Fabric of
+# (Form) states "+10", i.e. 2 magnitudes, not 4) -- see the spec's
+# "Mid-implementation finding" section. It stays blocked pending a
+# pevi-G2/offsetMagnitudes audit, not shipped on an unverified number.
 ANALOGY_BASE_EFFECTS: dict[str, dict] = {
-    "lib-peim-dispel-phantom-image": {
-        "base_effect_id": "pevi-G2",
-        "rationale": (
-            "Perdo Imaginem's own guideline table prints no General row. "
-            "This spell's own text (\"Destroys the image from any one CrIm "
-            "spell whose level you match or exceed on a stress die + the "
-            "level of your spell\") is the Imaginem-scoped echo of Perdo "
-            "Vim's own general \"dispel a specific type of effect\" "
-            "guideline (pevi-G2), narrowed to Creo Imaginem and without "
-            "pevi-G2's own +4 magnitude bonus -- the same shape Perdo Vim's "
-            "Wind of Mundane Silence generalizes for any type/realm."
-        ),
-        "chosen_slots": {"specificType": "Creo Imaginem"},
-    },
     "lib-reim-restore-moved-image": {
         "base_effect_id": "revi-G2",
         "rationale": (
@@ -178,7 +237,7 @@ ANALOGY_BASE_EFFECTS: dict[str, dict] = {
 (All three `lib-` slugs above are confirmed exact — verified directly via
 `catalog_module.slug_id(technique, form, name)` for each spell, 2026-08-16.)
 
-### 2. Route the three spells through it
+### 2. Route the two spells through it
 
 In `extract_spells.py`'s General-spell branch, immediately after computing
 `general_candidates` (`extract_spells.py:550`) and before the `if not
@@ -200,13 +259,16 @@ if spell_id in ANALOGY_BASE_EFFECTS:
 ```
 
 This takes precedence over both the empty-`general_candidates` block (which
-currently blocks *Dispel the Phantom Image* / *Lay to Rest the Haunting
-Spirit* unconditionally) and `DESIGN_LINE_INCOMPLETE` (which currently blocks
-*Restore the Moved Image*). Remove
-`"lib-reim-restore-moved-image"` from `DESIGN_LINE_INCOMPLETE`
+still unconditionally blocks *Lay to Rest the Haunting Spirit* — it's in
+`ANALOGY_BASE_EFFECTS` now, so it's caught before ever reaching that block;
+*Dispel the Phantom Image* is deliberately absent from
+`ANALOGY_BASE_EFFECTS`, so it still falls through to and is still blocked by
+that same empty-`general_candidates` check, unchanged) and
+`DESIGN_LINE_INCOMPLETE` (which currently blocks *Restore the Moved Image*).
+Remove `"lib-reim-restore-moved-image"` from `DESIGN_LINE_INCOMPLETE`
 (`extract_spells.py:176-177`) — it's now handled here instead, and a stale
 entry would be dead code. **Leave `"lib-invi-invisible-eye-revealed"` in
-`DESIGN_LINE_INCOMPLETE` untouched.**
+`DESIGN_LINE_INCOMPLETE` untouched** (Task 3 removes it).
 
 ### 3. `emit.build_template` gains a `chosen_slots` parameter
 
@@ -287,42 +349,50 @@ so the entry is dead. Leave a one-line pointer comment, matching the existing
 keeps Dispel the Phantom Image, Lay to Rest the Haunting Spirit, Restore the
 Moved Image and The Invisible Eye Revealed blocked rather than exceptions
 (see todo item 25 for why those four stay blocked and this one does not)."
-That sentence is now wrong on both halves — 3 of the 4 resolve via analogy,
-and the 4th becomes an exception spell too. Replace with a pointer to this
-spec instead of re-deriving the (now differentiated) status of each spell
-inline.
+That sentence needs correcting, not just retiring — 2 of the 4 (*Restore the
+Moved Image*, *Lay to Rest the Haunting Spirit*) resolve via analogy this
+round, *The Invisible Eye Revealed* becomes an exception spell alongside it,
+and *Dispel the Phantom Image* is the one still genuinely blocked (now for a
+narrower, documented reason — a suspect catalog value, not "no guideline
+exists"). Replace with a pointer to this spec instead of re-deriving the
+(now differentiated) status of each spell inline.
 
 ### 5. Update the surrounding comment blocks
 
 `extract_spells.py:106-183` (the `REALM_BY_SPELL_ID`/`DESIGN_LINE_INCOMPLETE`
 preambles) currently describe all four spells as a single permanently-blocked
-family. Rewrite to state plainly: 3 of the 4 now resolve via
-`ANALOGY_BASE_EFFECTS`, the 4th via `exceptions.EXCEPTION_SPELLS` — all with
-a pointer to this spec — and none remain blocked. Do the same for the
-`general_candidates` empty-branch comment (`extract_spells.py:552-577`),
-which currently names *Dispel the Phantom Image* and *Lay to Rest the
-Haunting Spirit* as permanently blocked.
+family. Rewrite to state plainly: 2 of the 4 now resolve via
+`ANALOGY_BASE_EFFECTS`, a 3rd via `exceptions.EXCEPTION_SPELLS` — all with a
+pointer to this spec — and *Dispel the Phantom Image* remains blocked, but
+now for the specific, narrower `pevi-G2` reason recorded in this spec's
+"Mid-implementation finding" section, not the original "no guideline
+exists" framing. Do the same for the `general_candidates` empty-branch
+comment (`extract_spells.py:552-577`), which currently names *Dispel the
+Phantom Image* and *Lay to Rest the Haunting Spirit* together as
+permanently blocked — only the latter's mention needs updating now.
 
 ### 6. `.superpowers/todo.md` item 25
 
-Once verified, update item 25's body: **all four** move from "remain
+Once verified, update item 25's body: **3 of the 4** move from "remain
 blocked" into a new "✅ unblocked, 2026-08-16" note (mirroring how items
-46/28/39 record their closures) — 3 via base-effect analogy, 1 as an
-exception spell — citing this spec. Item 25's "Four of the 33 remain
-blocked" framing and its permanence language no longer apply to any of the
-four; the "Where the import stands" table at the top of the file also needs
-its blocked-count row corrected (4 → 0) and the exception-spell count row
-incremented (7 → 8).
+46/28/39 record their closures) — 2 via base-effect analogy, 1 as an
+exception spell — citing this spec. *Dispel the Phantom Image* gets its own
+updated note: still blocked, but reason narrowed from "no Perdo Imaginem
+General row" to "pevi-G2's own offsetMagnitudes doesn't survive
+verification against its worked example — see this spec's
+Mid-implementation finding for the audit this needs." The "Where the import
+stands" table at the top of the file also needs its blocked-count row
+corrected (4 → 1) and the exception-spell count row incremented (7 → 8).
 
 ### 7. Regenerate and verify
 
 `python -m scripts.spell_import.extract_spells --write`, then:
 
-- `--show-blocked` count drops from 4 to **0**.
-- The three new templates appear in `assets/data/spell_templates.json`, each
+- `--show-blocked` count drops from 4 to **1** (*Dispel the Phantom Image*
+  only).
+- The two new templates appear in `assets/data/spell_templates.json`, each
   with `technique`/`form` matching the spell's own printed Form (not the
-  donor's), a non-null `analogyRationale`, and (for *Dispel the Phantom
-  Image* only) `chosenSlots: {"specificType": "Creo Imaginem"}`.
+  donor's) and a non-null `analogyRationale`.
 - *The Invisible Eye Revealed* appears in `assets/data/spell_exceptions.json`
   (8 entries, was 7), with `technique: "Intellego"`, `form: "Vim"`, and the
   rationale above.
@@ -334,14 +404,19 @@ incremented (7 → 8).
 ## Testing
 
 - Python: extend `scripts/spell_import/tests/test_extract.py` with one case
-  per newly-unblocked spell (the 3 analogy templates plus *The Invisible Eye
+  per newly-unblocked spell (the 2 analogy templates plus *The Invisible Eye
   Revealed*'s exception entry), asserting the produced record's
   `baseEffectId`/`technique`/`form`/`analogyRationale` (analogy templates) or
   `technique`/`form`/`rationale` with no `baseEffectId` at all (the
-  exception spell), and (for *Dispel the Phantom Image*) `chosenSlots`.
+  exception spell). Also assert *Dispel the Phantom Image* is still reported
+  blocked (a staleness guard, same shape as `GeneralBlockedStalenessTest`) —
+  it must fail loudly, not silently pass, if the `pevi-G2` audit later
+  unblocks it without this test being updated.
 - A Python unit test for `emit.build_template`'s new `chosen_slots`
-  parameter: the open-slot guard (unknown slot kind silently dropped),
-  matching the existing `realm_by_spell_id` guard's test coverage.
+  parameter, exercised standalone (not through `ANALOGY_BASE_EFFECTS`, which
+  doesn't use it this round): the open-slot guard (unknown slot kind
+  silently dropped), matching the existing `realm_by_spell_id` guard's test
+  coverage.
 - No new test is needed for `build_exception_spell` itself — it is unchanged
   code, already covered by the 7 existing exception spells' tests.
 - No new Dart tests are needed — `validateSpellAgainstCatalog`'s check 8
@@ -352,11 +427,14 @@ incremented (7 → 8).
 
 ## Out of scope
 
+- *Dispel the Phantom Image* and the `pevi-G2`/`offsetMagnitudes` audit it
+  needs — see "Mid-implementation finding" above. Deliberately parked, not
+  forgotten: a follow-up item, not a silent drop.
 - The 4 candidate spells this session's earlier base-effect-analogy plan
   scoped out (`.superpowers/todo.md` item 48's own "explicitly not done"
   note) are unaffected — this spec's spells are a *different* set from that
   plan's originally-motivating 4.
 - Creation-screen UI for picking a cross-Form base effect — still deferred,
   unchanged from the merged plan's scope.
-- No change to `ExceptionSpell`'s model or `build_exception_spell` — the 4th
-  spell uses that mechanism exactly as it already exists.
+- No change to `ExceptionSpell`'s model or `build_exception_spell` — *The
+  Invisible Eye Revealed* uses that mechanism exactly as it already exists.
