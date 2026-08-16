@@ -1459,7 +1459,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 ---
 
-### Task 9: Close out todo item 17, file items 51 and 52
+### Task 9: Close out todo item 17, file items 53 and 54
 
 **Files:**
 - Modify: `.superpowers/todo.md`
@@ -1502,8 +1502,8 @@ against; the field only names the requirement for the UI to display.
   independent `requiresVirtue: "Faerie Magic"` gates, per the rulebook's own
   two separate statements (base effect: line 3373; parameter: line 10030).
 - **Two gaps found and deliberately deferred, not solved here**: Bargain's
-  nested duration computation (item 51) and open/variable requisites
-  (item 52).
+  nested duration computation (item 53) and open/variable requisites
+  (item 54).
 - **Files:** `lib/models/parameter.dart`, `lib/models/base_effect.dart`,
   `lib/engine/ritual_status.dart`, `lib/engine/spell_engine.dart`,
   `lib/presentation/widgets/ritual_section.dart`,
@@ -1514,13 +1514,13 @@ against; the field only names the requirement for the UI to display.
   Plan: `docs/superpowers/plans/2026-08-16-virtue-gated-parameters.md`.
 ```
 
-- [ ] **Step 2: File items 51 and 52**
+- [ ] **Step 2: File items 53 and 54**
 
 Immediately after the item 17 block you just replaced (still before item
 18's heading), insert:
 
 ```markdown
-### 51. Bargain Duration's Nested Level Computation
+### 53. Bargain Duration's Nested Level Computation
 Found 2026-08-16 while landing item 17. **Bargain** (Duration, Faerie Magic)
 does not fit `Parameter`'s flat `magnitude` model: its true level is
 *"calculate the level of the spell that takes effect when the bargain is
@@ -1539,7 +1539,7 @@ shape of problem as *Mists of Change*'s two-Durations-at-once
 - **Spec:** `docs/superpowers/specs/2026-08-16-virtue-gated-parameters-design.md`
   ("Out of Scope")
 
-### 52. Open/Variable Requisites (Per-Casting, Not Per-Catalog-Entry)
+### 54. Open/Variable Requisites (Per-Casting, Not Per-Catalog-Entry)
 Found 2026-08-16 while landing item 17's worked example, *Faerie Chains of
 the Familiar Slave*. Its own requisite — *"a Technique and Form appropriate
 to the creature's nature and physical form"* — is chosen at the time of
@@ -1572,7 +1572,7 @@ match.
 
 ```bash
 git add .superpowers/todo.md
-git commit -m "docs: close todo item 17, file items 51 and 52
+git commit -m "docs: close todo item 17, file items 53 and 54
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 ```

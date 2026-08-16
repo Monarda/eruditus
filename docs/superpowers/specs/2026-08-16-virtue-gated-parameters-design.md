@@ -151,8 +151,9 @@ class ParameterScope {
   final List<String> forms;
   const ParameterScope({this.forms = const []});
 
-  bool appliesTo({required String form}) =>
-      forms.isEmpty || forms.contains(form);
+  // form is nullable, not required, matching ModifierScope.appliesTo --
+  // draft.form is String? (unset until the user picks one).
+  bool appliesTo({String? form}) => forms.isEmpty || forms.contains(form);
 
   Map<String, dynamic> toMap() => {'forms': forms};
   factory ParameterScope.fromMap(Map<String, dynamic>? map) => ParameterScope(
@@ -235,8 +236,8 @@ existing `durationName`/`targetName`, wired the same way from
 | id | name | category | magnitude | requiresRitual | requiresVirtue | scope |
 |---|---|---|---|---|---|---|
 | `range-road` | Road | Range | 2 (= Voice) | false | Faerie Magic | — |
-| `duration-bargain` | Bargain | Duration | 4 (= Year; see Out of Scope) | true | Faerie Magic | — |
-| `duration-fire` | Fire | Duration | 3 (= Moon) | true | Faerie Magic | forms: [Ignem, Imaginem] |
+| `duration-bargain` | Bargain | Duration | 4 (= Year; see Out of Scope) | false | Faerie Magic | — |
+| `duration-fire` | Fire | Duration | 3 (= Moon) | false | Faerie Magic | forms: [Ignem, Imaginem] |
 | `duration-until-condition` | Until (Condition) | Duration | 4 (= Year) | true | Faerie Magic | — |
 | `duration-year-plus-one` | Year + 1 | Duration | 4 (= Year) | true | Faerie Magic | — |
 | `target-bloodline` | Bloodline | Target | 3 (= Structure) | false | Faerie Magic | — |
