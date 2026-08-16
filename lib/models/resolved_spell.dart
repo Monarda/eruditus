@@ -73,6 +73,9 @@ class ResolvedSpell implements LibraryEntry {
     if (effect == null) return const [];
     return validateSpellAgainstCatalog(
       effect: effect,
+      technique: record.technique,
+      form: record.form,
+      analogyRationale: record.analogyRationale,
       chosenBaseLevel: record.chosenBaseLevel,
       requisites: record.requisites,
       selectedModifiers: record.selectedModifiers,

@@ -176,6 +176,9 @@ void main() {
       if (effect == null) continue;
       final problems = validateSpellAgainstCatalog(
         effect: effect,
+        technique: spell.technique,
+        form: spell.form,
+        analogyRationale: spell.analogyRationale,
         chosenBaseLevel: spell.chosenBaseLevel,
         requisites: spell.requisites,
         selectedModifiers: spell.selectedModifiers,
@@ -191,10 +194,13 @@ void main() {
       final effect = effects[template.baseEffectId];
       if (effect == null) continue;
       // isTemplate: a General template legitimately has no chosen level --
-      // supplying one is what instantiating it means. Checks 3, 4 and 5 do
+      // supplying one is what instantiating it means. Checks 3, 4, 5 and 8
       // still apply.
       final problems = validateSpellAgainstCatalog(
         effect: effect,
+        technique: template.technique,
+        form: template.form,
+        analogyRationale: template.analogyRationale,
         chosenBaseLevel: null,
         requisites: template.requisites,
         selectedModifiers: template.selectedModifiers,
@@ -257,6 +263,9 @@ void main() {
 
     final problems = validateSpellAgainstCatalog(
       effect: baseEffect,
+      technique: spell.technique,
+      form: spell.form,
+      analogyRationale: spell.analogyRationale,
       chosenBaseLevel: spell.chosenBaseLevel,
       requisites: spell.requisites,
       selectedModifiers: spell.selectedModifiers,
@@ -308,6 +317,9 @@ void main() {
     final unfilled = instantiate(chosenSlots: const {});
     final unfilledProblems = validateSpellAgainstCatalog(
       effect: baseEffect,
+      technique: unfilled.technique,
+      form: unfilled.form,
+      analogyRationale: unfilled.analogyRationale,
       chosenBaseLevel: unfilled.chosenBaseLevel,
       requisites: unfilled.requisites,
       selectedModifiers: unfilled.selectedModifiers,
@@ -320,6 +332,9 @@ void main() {
     final filled = instantiate(chosenSlots: const {'form': 'Ignem'});
     final filledProblems = validateSpellAgainstCatalog(
       effect: baseEffect,
+      technique: filled.technique,
+      form: filled.form,
+      analogyRationale: filled.analogyRationale,
       chosenBaseLevel: filled.chosenBaseLevel,
       requisites: filled.requisites,
       selectedModifiers: filled.selectedModifiers,

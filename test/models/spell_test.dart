@@ -610,6 +610,9 @@ void main() {
 
     List<String> validate({
       required BaseEffect effect,
+      String? technique,
+      String? form,
+      String? analogyRationale,
       int? chosenBaseLevel,
       Map<String, RequisiteKind> requisites = const {},
       Map<String, List<String>> selectedModifiers = const {},
@@ -619,6 +622,9 @@ void main() {
     }) =>
         validateSpellAgainstCatalog(
           effect: effect,
+          technique: technique ?? effect.technique,
+          form: form ?? effect.form,
+          analogyRationale: analogyRationale,
           chosenBaseLevel: chosenBaseLevel,
           requisites: requisites,
           selectedModifiers: selectedModifiers,
@@ -797,6 +803,86 @@ void main() {
         ),
         contains('A chosen realm applies only to a guideline with an open realm slot'),
       );
+    });
+
+    test('check 8: matching technique/form with no analogyRationale is valid', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Creo', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Creo',
+        form: 'Ignem',
+        analogyRationale: null,
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        modifiers: const [],
+      );
+      expect(problems, isEmpty);
+    });
+
+    test('check 8: mismatched technique/form with a rationale is valid', () {
+      final effect = BaseEffect(
+        id: 'revi-G2', technique: 'Rego', form: 'Vim',
+        description: 'test', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Rego',
+        form: 'Imaginem',
+        analogyRationale: 'By analogy to Rego Vim.',
+        chosenBaseLevel: 20,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        modifiers: const [],
+      );
+      expect(problems, isEmpty);
+    });
+
+    test('check 8: mismatched technique/form with no rationale is invalid', () {
+      final effect = BaseEffect(
+        id: 'revi-G2', technique: 'Rego', form: 'Vim',
+        description: 'test', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Rego',
+        form: 'Imaginem',
+        analogyRationale: null,
+        chosenBaseLevel: 20,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        modifiers: const [],
+      );
+      expect(problems, ['Technique/Form differs from the base effect\'s own -- an analogyRationale is required to explain why']);
+    });
+
+    test('check 8: matching technique/form with a stray rationale is invalid', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Creo', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Creo',
+        form: 'Ignem',
+        analogyRationale: 'This should not be here.',
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        modifiers: const [],
+      );
+      expect(problems, ["analogyRationale is set but Technique/Form already matches the base effect's own -- remove it"]);
     });
   });
 }

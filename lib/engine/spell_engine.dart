@@ -82,6 +82,9 @@ class SpellEngine {
     if (draft.baseEffect != null) {
       errors.addAll(validateSpellAgainstCatalog(
         effect: draft.baseEffect!,
+        technique: draft.technique ?? '',
+        form: draft.form ?? '',
+        analogyRationale: null, // the creation screen cannot produce one yet
         chosenBaseLevel: draft.chosenBaseLevel,
         requisites: draft.requisites,
         selectedModifiers: draft.selectedModifiers,

@@ -87,6 +87,9 @@ String _openSlotDescription(OpenSlotKind kind) {
 /// declared open is just as much a bug there as on a `Spell`.
 List<String> validateSpellAgainstCatalog({
   required BaseEffect effect,
+  required String technique,
+  required String form,
+  required String? analogyRationale,
   required int? chosenBaseLevel,
   required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
@@ -173,6 +176,28 @@ List<String> validateSpellAgainstCatalog({
           : kind;
       problems.add('A chosen $description applies only to a guideline with an open $description slot');
     }
+  }
+
+  // 8. A spell's own Technique/Form is now stored, not derived, so it can
+  //    legitimately differ from its base effect's -- but only when that
+  //    difference is explained. Symmetric: an unexplained mismatch is a data
+  //    bug (the record and its guideline silently disagree); an explanation
+  //    attached to a spell that doesn't actually differ is meaningless
+  //    decoration, the same class of bug check 2 catches for a stray
+  //    chosenBaseLevel. Runs unconditionally -- unlike checks 1, 2 and 6, not
+  //    wrapped in `if (!isTemplate)`: a template needs its own
+  //    correctly-recorded Technique/Form exactly as much as a spell does.
+  final isAnalogy = technique != effect.technique || form != effect.form;
+  if (isAnalogy && (analogyRationale == null || analogyRationale.trim().isEmpty)) {
+    problems.add(
+      "Technique/Form differs from the base effect's own -- "
+      'an analogyRationale is required to explain why',
+    );
+  } else if (!isAnalogy && analogyRationale != null) {
+    problems.add(
+      'analogyRationale is set but Technique/Form already matches the base '
+      "effect's own -- remove it",
+    );
   }
 
   return problems;
