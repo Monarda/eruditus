@@ -147,11 +147,14 @@ class _MainTabViewState extends State<_MainTabView> {
           );
         },
         importJson: () async {
-          final result = await FilePicker.pickFiles(
+          // file_picker 12 added pickFile() for exactly this single-file
+          // case; pickFiles(allowMultiple: false) still works but is now
+          // deprecated in favor of it.
+          final result = await FilePicker.pickFile(
             type: FileType.custom,
             allowedExtensions: ['json'],
           );
-          final path = result?.files.single.path;
+          final path = result?.path;
           if (path == null) return null;
           return File(path).readAsString();
         },
