@@ -326,6 +326,24 @@ DESIGN_LINE_TYPOS: dict[str, tuple[str, str]] = {
 # preamble states "transforming only one property of air generally lowers
 # the level by one magnitude" -- muau-3 (base 3) minus that one magnitude
 # is exactly 2.
+#
+# Sense of the Lingering Magic (Intellego Vim, printed LEVEL 30, "Base 10,
+# +1 Conc, +3 Hearing") -- ✅ RESOLVED 2026-08-16, was
+# LEVEL_NEEDS_RULES_DECISION. Built on invi-G, the InVi General row ("Detect
+# the traces of magic of negative magnitude up to the magnitude of the
+# guideline used -2"), chosen at level 10: (10 + -2*5)/5 = 0, exactly the
+# spell's own "the residue must be of at least zero magnitude" -- not a
+# loose paraphrase, the printed threshold. "Even from weak spells" /
+# "the presence and power of active spells... It does not grant any
+# information apart from the power" both restate the intro paragraph's
+# base-detection capability (strength "within a magnitude", no Hermetic-ID/
+# Technique-Form/detail bonus bought) rather than needing InVi's numbered
+# 1-5 table (which tops out at "detect any active magic" and has no level-10
+# row) or an extra "+1 magnitude for Hermetic identification" spend, which
+# the spell's own "does not grant any information apart from the power"
+# clause explicitly rules out. Verified end-to-end: assertion 1 (Dart,
+# `published_spell_import_test.dart`) recomputes 10 -> 30 via
+# GeneralEffectFormula and the printed +1 Conc/+3 Hearing tokens and passes.
 NUMBERED_OVERRIDES: dict[str, dict] = {
     "lib-muau-infernal-smoke-death": {
         "base_effect_id": "muau-gen",
@@ -347,6 +365,11 @@ NUMBERED_OVERRIDES: dict[str, dict] = {
         "chosen_base_level": None,
         "modifiers": {"single-property-transformation": ["single-property-transformation-yes"]},
     },
+    "lib-invi-sense-lingering-magic": {
+        "base_effect_id": "invi-G",
+        "chosen_base_level": 10,
+        "modifiers": {},
+    },
 }
 
 
@@ -354,13 +377,11 @@ NUMBERED_OVERRIDES: dict[str, dict] = {
 # guideline text -- different from NUMBERED_OVERRIDES (resolved) and from
 # KNOWN_UNRESOLVABLE (candidates exist, the choice among them is
 # ambiguous). See this plan's design spec for why this one specifically
-# doesn't resolve.
-LEVEL_NEEDS_RULES_DECISION: dict[str, str] = {
-    "lib-invi-sense-lingering-magic": (
-        "base 10 does not derive from InVi's numbered table (tops at 5) or "
-        "General row without an unstated combination rule"
-    ),
-}
+# doesn't resolve. Currently empty: Sense of the Lingering Magic (the only
+# entry that ever lived here) moved to NUMBERED_OVERRIDES 2026-08-16 -- see
+# that table's comment. The mechanism stays for a future spell that turns
+# out to be a genuine rules gap rather than an unspotted derivation.
+LEVEL_NEEDS_RULES_DECISION: dict[str, str] = {}
 
 
 @dataclasses.dataclass

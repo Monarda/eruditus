@@ -2693,6 +2693,28 @@
     ]
   },
   {
+    "id": "lib-invi-sense-lingering-magic",
+    "name": "Sense of the Lingering Magic",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "invi-G",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-hearing",
+    "summary": "This spell can detect the presence of many magical residues, even from weak spells, as well as giving the presence and power of active spells. It does not grant any information apart from the power, however. The residue must be of at least zero magnitude. Level 30.",
+    "description": "This spell can detect the presence of many magical residues, even from weak spells, as well as giving the presence and power of active spells. It does not grant any information apart from the power, however. The residue must be of at least zero magnitude.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "chosenBaseLevel": 10
+  },
+  {
     "id": "lib-invi-sense-magical-power",
     "name": "Sense of Magical Power",
     "requisites": {},

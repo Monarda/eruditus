@@ -481,15 +481,30 @@ class NumberedOverrideLedgerAgreementTest(unittest.TestCase):
             ledger.entries[spell_id] = original
 
 
-class LevelNeedsRulesDecisionTest(unittest.TestCase):
+class SenseOfTheLingeringMagicTest(unittest.TestCase):
+    """Sense of the Lingering Magic: WAS in LEVEL_NEEDS_RULES_DECISION until
+    2026-08-16, when it turned out to be an ordinary NUMBERED_OVERRIDES case
+    (built on invi-G at chosen level 10) rather than a genuine rules gap --
+    see NUMBERED_OVERRIDES's comment for the derivation. LEVEL_NEEDS_RULES_
+    DECISION is now empty; this class replaces the old blocked-reason pin.
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.report = extract_spells.run(write=False)
 
-    def test_sense_of_the_lingering_magic_blocks_with_a_specific_reason(self):
-        reasons = dict(self.report.blocked)
-        self.assertIn("Sense of the Lingering Magic", reasons)
-        self.assertIn("needs a rules decision", reasons["Sense of the Lingering Magic"])
+    def test_imports_at_its_printed_level(self):
+        spell = next(
+            s for s in self.report.spells if s["name"] == "Sense of the Lingering Magic"
+        )
+        self.assertEqual(spell["printedLevel"], 30)
+        self.assertEqual(spell["baseEffectId"], "invi-G")
+        self.assertEqual(spell["chosenBaseLevel"], 10)
+
+    def test_no_longer_needs_a_rules_decision(self):
+        self.assertNotIn(
+            "lib-invi-sense-lingering-magic", extract_spells.LEVEL_NEEDS_RULES_DECISION
+        )
 
 
 class HandDerivedAdjustmentTest(unittest.TestCase):

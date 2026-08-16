@@ -28,14 +28,14 @@ reason the guidelines don't apply to it. See item 46.
 
 Last extractor run, 2026-08-16 (`python -m scripts.spell_import.extract_spells`):
 
-> **324 imported · 24 emitted as templates · 6 recorded as exceptions · 6
+> **325 imported · 24 emitted as templates · 6 recorded as exceptions · 5
 > blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
 **Verified against a live `--show-blocked` run, not carried forward by
 arithmetic** — the table below was re-derived spell-by-spell against that
-output, after eight rounds of 2026-08-15 fixes plus item 24's closing fix and
-item 39's closing fix (both 2026-08-16): item 28's Group A/B guideline
+output, after eight rounds of 2026-08-15 fixes plus item 24's, item 39's and
+item 28's closing fixes (all 2026-08-16): item 28's Group A/B guideline
 derivations; item 29's splitter fixes (6 spells: *Wings of the Soaring Wind*,
 *Stone to Falling Dust*, *Deluge of Rushing and Dashing*, *Ice of Drowning*,
 *Frosty Breath of the Spoken Lie*, *Ball of Abysmal Flame*); *Ward against
@@ -57,15 +57,17 @@ spells (*Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*,
 *Whispering Winds*, *Watching Ward*, *Mists of Change*), which have their
 own row in the table below rather than counting toward the blocked total;
 item 24's closing fix (*The Kiss of Death*, *Black Whisper*, *Sight of the
-Active Magics*, 2026-08-16); and item 39's closing fix (*Conjuration of the
+Active Magics*, 2026-08-16); item 39's closing fix (*Conjuration of the
 Indubitable Cold*, 2026-08-16 — see its corrected section: not actually a
-"which one is right" ambiguity, a model gap). Every one of the 6
-currently-blocked spells now maps to exactly one row below; none are
-unaccounted for.
+"which one is right" ambiguity, a model gap); and item 28's closing fix
+(*Sense of the Lingering Magic*, 2026-08-16 — three prior readings called it
+an unstated combination rule; a fourth found it was an ordinary
+`NUMBERED_OVERRIDES` case). Every one of the 5 currently-blocked spells now
+maps to exactly one row below; none are unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
-| Guideline level absent from the rulebook's own table | 1 | **28** — corrected from 5: item 28's own body always said 4 of 5 were fixed 2026-08-15, this table just hadn't caught up |
+| Guideline level absent from the rulebook's own table | 0 | **28** — corrected from 5: all 5 now import, the last (*Sense of the Lingering Magic*) 2026-08-16 |
 | Genuinely ambiguous ledger resolution | 0 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* now imports too, 2026-08-16 — it was never a "which one is right" tie, both candidates share the same base level, so it's routed through the ledger like any other multi-candidate spell and the second guideline is recorded as a free (magnitude-0) adjustment. See item 39's corrected body |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
@@ -78,7 +80,7 @@ unaccounted for.
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 | Rulebook says guideline arithmetic doesn't apply at all | 6 | new — item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change* |
 
-**Table total: 6 blocked, plus the 6 exception spells in the final row (not
+**Table total: 5 blocked, plus the 6 exception spells in the final row (not
 blockers), reconciled to the live counts.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
@@ -258,14 +260,14 @@ correctness resting elsewhere.
 
 ## A. Blocks the Library Import
 
-### 28. Guideline Levels Absent from the Rulebook's Own Table — ✅ DONE 2026-08-15
+### 28. Guideline Levels Absent from the Rulebook's Own Table — ✅ COMPLETE, 5 of 5 (2026-08-16)
 
-**Correction to the original framing below: not all 5 turned out recoverable.**
-4 of 5 were derived from documented prose rules and now import; the 5th
-(*Sense of the Lingering Magic*) was investigated and found **genuinely not
-derivable** from InVi's numbered table or General row without an unstated
-combination rule — it stays blocked, now with a specific reason instead of the
-generic "no base effect" message. Design/plan:
+**Correction to the original framing below: all 5 turned out recoverable.**
+4 of 5 were derived from documented prose rules and imported 2026-08-15; the
+5th (*Sense of the Lingering Magic*) was investigated three separate times
+and left blocked as "genuinely not derivable... without an unstated
+combination rule" each time — until a fourth, closer read found the rule was
+never a combination at all. Design/plan:
 `docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md`,
 `docs/superpowers/plans/2026-08-15-guideline-level-derivation.md`.
 
@@ -296,13 +298,24 @@ generic "no base effect" message. Design/plan:
 - [x] *The Enigma's Gift* (CrVi 30) — the Warping Point ladder's 4th rung (the
       spell's own prose says "four Warping Points"); base 20 (ladder prints
       5/10/15 for 1/2/3 points, refactored into one row + a 4-rung modifier)
-- [x] *Sense of the Lingering Magic* (InVi 30) — **left blocked, deliberately**:
-      base 10 does not derive from InVi's numbered table (tops at 5) or its
-      General row without an unstated combination rule. A negative-magnitude
-      safety concern was raised for the ladders during design and closed with
-      zero new code — `SpellEngine.calculateBreakdown` already throws below
-      level 1 regardless of contribution source (verified by reading the code,
-      not assumed)
+- [x] *Sense of the Lingering Magic* (InVi 30) — **✅ RESOLVED 2026-08-16,
+      not a combination rule after all.** Built on `invi-G`, the InVi General
+      row ("Detect the traces of magic of negative magnitude up to the
+      magnitude of the guideline used −2"), chosen at level 10:
+      `(10 + -2×5)/5 = 0`, exactly the spell's own "the residue must be of
+      at least zero magnitude" — the printed threshold, not a paraphrase.
+      "Even from weak spells" and "presence and power of active
+      spells... does not grant any information apart from the power" both
+      restate the intro paragraph's base-detection capability, not an extra
+      "+1 magnitude for Hermetic identification" spend (which the spell's
+      own "does not grant... apart from the power" clause rules out
+      explicitly). Now a `NUMBERED_OVERRIDES` entry, same shape as *Infernal
+      Smoke of Death* two rows above — see that table's comment in
+      `extract_spells.py`. A negative-magnitude safety concern was raised for
+      the ladders during design and closed with zero new code —
+      `SpellEngine.calculateBreakdown` already throws below level 1
+      regardless of contribution source (verified by reading the code, not
+      assumed)
 - **What was caught in review.** Task 1's per-task review found deleting
   `peig-10b` would have silently dropped a real corpus spell ("Soothe the
   Raging Flames") on regeneration — its ledger entry in `resolutions.json`
