@@ -375,6 +375,9 @@ general-sounding one — same discipline item 27's pulled first pass violated.
       the mechanism stays for a future spell that turns out to be a genuine,
       no-forced-discriminator tie.
 
+      **This fix is one-off, importer-only — a user designing their own
+      spell has no way to combine base effects this way. See item 47.**
+
 **Different from item 28**, not a duplicate: there the correct row is missing and
 needs adding; here every candidate already exists and is individually plausible,
 and the work is close reading. **Not a harness blocker** — `KNOWN_UNRESOLVABLE` in
@@ -888,6 +891,53 @@ needed.**
 - **Files:** `lib/models/spell.dart`, `assets/data/parameters.json`,
   `lib/presentation/screens/spell_creation_screen.dart`,
   `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart` (if stored)
+
+### 47. Multiple Base Effects in Spell Creation — Combined Guidelines
+
+**Not on the critical path — item 39 already handled its one published
+case with a narrow, one-off mechanism, not a general feature.** But that
+case is real, and a user designing their own spell has no way to do what
+*Conjuration of the Indubitable Cold* does.
+
+- [ ] Let a spell draft record more than one base effect, restricted to
+      guidelines matching the spell's own Technique/Form **or** the
+      Technique/Form of one of its requisites (mirroring how the Requisites
+      section already treats requisite Arts as legitimately contributing an
+      effect, not just a cost)
+- [ ] The **highest-level** base effect among those chosen is recorded as
+      `baseEffectId` and drives the calculation, per the rulebook's own
+      stated rule for combining effects across Arts: *"the base Arts and
+      level for the spell are those for the highest-level effect it
+      has"* (Requisites, Core Rules) — the closest the rulebook comes to a
+      general rule for this, though it's written for an added Art, not a
+      second guideline under the same Technique/Form
+    - **Open question:** is "free" (item 39's answer) actually general, or
+      only true when both guidelines share a level? The Requisites section's
+      own rule for *unequal*-level combinations charges extra ("each
+      requisite adds at least one magnitude" when it "would do significantly
+      less" without it) — a general feature likely needs that branch too,
+      not just the same-level case item 39 hard-coded
+- [ ] The other chosen base effect(s) are recorded as **structured data**,
+      not just a hand-typed note — a `List<String>` of base-effect ids reads
+      better than free text, since the UI can render each one's own
+      `description` straight from `base_effects.json` instead of a
+      paraphrase the user has to keep in sync by hand
+- **Decide first: extend `adjustments` (`List<LevelAdjustment>`,
+  `lib/models/spell.dart`), or add a dedicated field?** Item 39's importer
+  fix reused a magnitude-0 `LevelAdjustment` because it only had to solve one
+  spell with no UI; overloading that field for a real, repeatable UI feature
+  would leave "achieves another guideline for free" indistinguishable from
+  "storyguide subtracts a magnitude for narrative reasons" — two different
+  concepts sharing one shape by accident.
+- **No published spell is currently blocked by lacking this** — item 39's
+  one known case already imports via
+  `extract_spells.COMBINED_BASE_EFFECTS`/`emit.build_spell`'s
+  `extra_adjustment` parameter. This item is about the creation screen, not
+  the importer.
+- **Files:** `lib/models/spell.dart` (`Spell`, `SpellDraft`),
+  `lib/engine/spell_engine.dart`, `lib/bloc/spell_creation/`,
+  `lib/presentation/screens/spell_creation_screen.dart`
+- **See also:** item 39 (the one published spell that motivated this)
 
 ### 16. Short Forms for Parameter Names
 - [ ] Decide whether parameters need a short display form at all — **confirm a real
