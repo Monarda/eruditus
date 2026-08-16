@@ -9,6 +9,45 @@ FIXED_TIMESTAMP = "2026-01-01T00:00:00.000"
 
 CORE_BOOK_ID = "arm5-core"
 
+# Ritual-flagged spells whose own design line already carries a condition-6
+# (storyguide-ruling, Core Rules line 12352 -- "too spectacular to be freely
+# available") justification, rather than being a Momentary Creo spell
+# creating a lasting thing (condition 5, `lastingCreation`). A closed,
+# exact-name table, the same discipline as extract_spells.HAND_DERIVED and
+# exceptions.EXCEPTION_SPELLS: every entry here is a citation-backed reading
+# of the spell's own printed clause, not inferred from a shape or heuristic.
+# See docs/superpowers/specs/2026-08-16-storyguide-ruling-ui-design.md and
+# .superpowers/todo.md item 49.
+STORYGUIDE_RULING_SPELLS: dict[str, str] = {
+    "Curse of the Ravenous Swarm": (
+        'Design line\'s trailing continuation reads "ritual because it has '
+        'a really major effect" -- condition 6 verbatim, not a lasting '
+        "creation (CrAn, Sun duration)."
+    ),
+    "Neptune's Wrath": (
+        'Design line\'s trailing continuation reads "ritual for large '
+        'effect" -- condition 6 verbatim, not a lasting creation (ReAq, '
+        "Diameter duration)."
+    ),
+    "Breath of the Open Sky": (
+        'Design line\'s trailing continuation reads "ritual because of '
+        'spectacular effect" -- condition 6 verbatim, not a lasting '
+        "creation (CrAu, Diameter duration)."
+    ),
+}
+
+
+def _ritual_declaration(block) -> str:
+    """The `RitualDeclaration` a Ritual-flagged block should carry.
+
+    Defaults to `lastingCreation` (condition 5), the common case; a spell in
+    STORYGUIDE_RULING_SPELLS overrides to `storyguideRuling` (condition 6).
+    Only called when `block.stat.is_ritual` is already true.
+    """
+    if block.name in STORYGUIDE_RULING_SPELLS:
+        return "storyguideRuling"
+    return "lastingCreation"
+
 # designline's `elaborate` tokens carry the printed magnitude; this maps it to
 # the modifiers.json option that already encodes that magnitude. A magnitude
 # outside this map raises rather than defaulting, so an unexpected value
@@ -235,7 +274,7 @@ def build_spell(
         spell["adjustments"] = adjustments
 
     if block.stat.is_ritual:
-        spell["ritualDeclaration"] = "lastingCreation"
+        spell["ritualDeclaration"] = _ritual_declaration(block)
 
     if chosen_slots:
         spell["chosenSlots"] = chosen_slots
@@ -329,7 +368,7 @@ def build_template(
         template["adjustments"] = adjustments
 
     if block.stat.is_ritual:
-        template["ritualDeclaration"] = "lastingCreation"
+        template["ritualDeclaration"] = _ritual_declaration(block)
 
     if resolved_slots:
         template["chosenSlots"] = resolved_slots

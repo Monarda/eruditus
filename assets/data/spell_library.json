@@ -27,7 +27,7 @@
         "bookId": "arm5-core"
       }
     ],
-    "ritualDeclaration": "lastingCreation"
+    "ritualDeclaration": "storyguideRuling"
   },
   {
     "id": "lib-cran-soothe-pains-beast",
@@ -278,7 +278,7 @@
         "bookId": "arm5-core"
       }
     ],
-    "ritualDeclaration": "lastingCreation"
+    "ritualDeclaration": "storyguideRuling"
   },
   {
     "id": "lib-crau-broom-winds",
@@ -6335,7 +6335,7 @@
         "bookId": "arm5-core"
       }
     ],
-    "ritualDeclaration": "lastingCreation"
+    "ritualDeclaration": "storyguideRuling"
   },
   {
     "id": "lib-reaq-parting-waves",

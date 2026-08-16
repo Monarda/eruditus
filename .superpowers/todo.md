@@ -1119,42 +1119,55 @@ Found 2026-08-16 while closing [[18]]'s UI checklist (surfaced independently by
 a human read of *Curse of the Ravenous Swarm*'s own design line, and confirmed
 by the branch's final review reading `assets/data/spell_library.json` directly).
 
-- [ ] Stop `scripts/spell_import/emit.py` from unconditionally stamping
+- [x] Stop `scripts/spell_import/emit.py` from unconditionally stamping
       `ritualDeclaration: "lastingCreation"` onto every Ritual-flagged spell —
-      it does this in two places, `build_spell` and `build_template`
+      it did this in two places, `build_spell` and `build_template`
       (`if block.stat.is_ritual: spell["ritualDeclaration"] = "lastingCreation"`,
       and the identical line for `template[...]`), with no regard for *why*
       the spell is a Ritual.
-- [ ] Correctly classify the spells whose Ritual status is **only**
+- [x] Correctly classify the spells whose Ritual status is **only**
       derivable from the declaration — [[18]]'s "7 non-derivable Ritual
       spells" list: *Curse of the Ravenous Swarm* (CrAn 50), *Neptune's
-      Wrath* (ReAq 40), *Breath of the Open Sky* (CrAu 40) should be
+      Wrath* (ReAq 40), *Breath of the Open Sky* (CrAu 40) are now
       `storyguideRuling`, not `lastingCreation` — each spell's own design
-      line already carries the condition-6 justification verbatim (`ritual
+      line already carried the condition-6 justification verbatim (`ritual
       because it has a really major effect`, `ritual for large effect`,
       `ritual because of spectacular effect`; tokenized as trailing
       continuations by `designline.TRAILING_CONTINUATION_LABELS`, but never
-      read for their *content*). *Rain of Oil* (MuAu 50), *Incantation of
-      Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen), and *Watching
-      Ward* (ReVi Gen) still need their own classification — [[18]]
-      speculated the two Vim Generals "may be guideline-level" rather than
-      either declared kind, which is a different fix (a `ritualRequirement`
-      on the base effect, not a per-spell declaration).
+      read for their *content*, until now). *Rain of Oil* (MuAu 50),
+      *Incantation of Summoning the Dead* (ReMe 40), *Disenchant* (PeVi Gen),
+      and *Watching Ward* (ReVi Gen) are **not** covered by this fix — those
+      four never carried either declaration to begin with, so there was
+      nothing to reclassify; [[18]] speculated the two Vim Generals "may be
+      guideline-level" rather than either declared kind, which is a
+      different, still-open fix (a `ritualRequirement` on the base effect,
+      not a per-spell declaration).
+- ✅ **DONE 2026-08-16.** `emit.py` now carries a closed, exact-name
+  `STORYGUIDE_RULING_SPELLS` table (same discipline as `HAND_DERIVED`/
+  `EXCEPTION_SPELLS`) and a `_ritual_declaration(block)` helper that both
+  `build_spell` and `build_template` call instead of the blanket assignment.
+  8 new tests in `scripts/spell_import/tests/test_emit.py`
+  (`RitualDeclarationEmissionTest`) pin the default, the override, and the
+  table's exact membership. `assets/data/spell_library.json` regenerated via
+  `python -m scripts.spell_import.extract_spells --write` — same counts
+  (imported 325, templates 27, exceptions 8, blocked 0) and a 3-line diff,
+  exactly the 3 spells' `ritualDeclaration` field
+  (`spell_templates.json`/`spell_exceptions.json` unchanged). Python suite
+  (288 tests, run as module rather than via `discover` — see note below) and
+  `flutter test` (571 tests) both green.
+- **Note on running the Python suite:** `python -m unittest discover -s
+  scripts/spell_import/tests` fails to import `test_general_catalog.py` with
+  `ImportError: attempted relative import with no known parent package` —
+  a pre-existing discovery-mode quirk unrelated to this fix (the module
+  passes standalone: `python -m unittest
+  scripts.spell_import.tests.test_general_catalog`). Not investigated
+  further here; flag if it recurs.
 - **Not a behavior bug for the other 32 Ritual-flagged spells.** Their
   `isRitual` already derives independently (Year duration, Boundary target,
   level > 50, or a guideline requirement), so a wrong stored declaration
-  never changes their computed level or `RitualStatus.isRitual` — only these
-  3 spells' in-app Ritual banners currently say something the rulebook's own
-  text contradicts.
-- **Shape of the fix:** likely a `HAND_DERIVED`/`EXCEPTION_SPELLS`-style
-  allow-list in `emit.py`, keyed by spell name or slug, distinct from the
-  blanket `is_ritual` check — mirrors how [[18]]'s own tokenizing fix
-  (2026-08-15) added these same 3 clauses to
-  `designline.TRAILING_CONTINUATION_LABELS` as a closed allow-list rather
-  than a blanket rule.
-- **After fixing:** regenerate `assets/data/spell_library.json` and
-  `assets/data/spell_templates.json`, and re-run the full Python test suite
-  plus `flutter test` (`ritualDeclaration` is Dart-side too).
+  never changed their computed level or `RitualStatus.isRitual` — only these
+  3 spells' in-app Ritual banners previously said something the rulebook's
+  own text contradicted.
 
 ### 20. Creo Creation `suggested` Ritual Sweep
 - [ ] Decide whether every "Create X" guideline should carry

@@ -186,6 +186,78 @@ class ExceptionSpellEmissionTest(unittest.TestCase):
         self.assertNotIn("description", exception)
 
 
+class RitualDeclarationEmissionTest(unittest.TestCase):
+    """`ritualDeclaration` defaults to `lastingCreation` for any Ritual-flagged
+    block, except the closed set of spells in emit.STORYGUIDE_RULING_SPELLS,
+    whose own design line carries a condition-6 justification instead. See
+    .superpowers/todo.md item 49.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def _ritual_block(self, name: str, is_ritual: bool) -> blocks.SpellBlock:
+        return blocks.SpellBlock(
+            name=name, technique="Rego", form="Aquam", printed_level=10,
+            stat=statline.StatLine(
+                range_name="Touch", duration_name="Sun", target_name="Ind",
+                is_ritual=is_ritual, requisite_arts=[], trailing="",
+            ),
+            prose="Test prose.", design_line=None, line_no=1,
+        )
+
+    def test_a_non_ritual_spell_has_no_declaration_key(self):
+        design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
+        spell = emit.build_spell(
+            self._ritual_block("Test Spell", is_ritual=False), "reaq-3", self.catalog, design,
+        )
+        self.assertNotIn("ritualDeclaration", spell)
+
+    def test_an_ordinary_ritual_spell_defaults_to_lasting_creation(self):
+        design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
+        spell = emit.build_spell(
+            self._ritual_block("Test Spell", is_ritual=True), "reaq-3", self.catalog, design,
+        )
+        self.assertEqual(spell["ritualDeclaration"], "lastingCreation")
+
+    def test_curse_of_the_ravenous_swarm_gets_storyguide_ruling(self):
+        # Its own design line's trailing continuation reads "ritual because
+        # it has a really major effect" -- condition 6, not condition 5.
+        design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
+        spell = emit.build_spell(
+            self._ritual_block("Curse of the Ravenous Swarm", is_ritual=True),
+            "reaq-3", self.catalog, design,
+        )
+        self.assertEqual(spell["ritualDeclaration"], "storyguideRuling")
+
+    def test_the_storyguide_ruling_table_is_exactly_the_three_known_spells(self):
+        # A closed, exact-name table -- growing it silently would be a bug,
+        # not a feature. See emit.STORYGUIDE_RULING_SPELLS's own docstring.
+        self.assertEqual(
+            set(emit.STORYGUIDE_RULING_SPELLS),
+            {"Curse of the Ravenous Swarm", "Neptune's Wrath", "Breath of the Open Sky"},
+        )
+
+    def test_build_template_defaults_to_lasting_creation(self):
+        design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
+        block = self._ritual_block("Test Template", is_ritual=True)
+        template = emit.build_template(block, "pevi-G3", self.catalog, design)
+        self.assertEqual(template["ritualDeclaration"], "lastingCreation")
+
+    def test_build_template_uses_storyguide_ruling_for_a_listed_spell(self):
+        design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
+        block = self._ritual_block("Neptune's Wrath", is_ritual=True)
+        template = emit.build_template(block, "pevi-G3", self.catalog, design)
+        self.assertEqual(template["ritualDeclaration"], "storyguideRuling")
+
+    def test_build_template_omits_the_key_for_a_non_ritual_block(self):
+        design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
+        block = self._ritual_block("Test Template", is_ritual=False)
+        template = emit.build_template(block, "pevi-G3", self.catalog, design)
+        self.assertNotIn("ritualDeclaration", template)
+
+
 class SpecialParameterResolutionTest(unittest.TestCase):
     """A `D: Spec`/`T: Special` stat-line marker has no parameters.json entry
     of its own -- it's shorthand for whichever real parameter the spell's own
