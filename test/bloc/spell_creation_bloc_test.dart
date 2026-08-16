@@ -1499,5 +1499,55 @@ void main() {
         expect(bloc.state.calculatedLevel, isNotNull);
       },
     );
+
+    // Regression test for the bug this fix closes: analogyRationale is set
+    // by TemplateInstantiated (above), but nothing cleared it again once the
+    // divergence it explains stops existing. A base effect whose own
+    // Technique/Form is Perdo/Imaginem -- matching the draft's own
+    // Technique/Form left over from the by-analogy template -- makes
+    // check 8's *other* branch fire (analogyRationale set, but Technique/
+    // Form no longer diverges) unless BaseEffectSelected clears it too.
+    final peimMatchingBaseEffect = BaseEffect(
+      id: 'peim-fixed', technique: 'Perdo', form: 'Imaginem',
+      description: 'Destroy an image', baseLevel: 5,
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'BaseEffectSelected clears a stale analogyRationale once the newly-selected '
+      "effect's own Technique/Form matches the draft's -- otherwise the draft is stuck "
+      "with check 8's unexplained-decoration error, with no UI path to clear it",
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(TemplateInstantiated(dispelPhantomImageTemplate))
+        ..add(BaseEffectSelected(peimMatchingBaseEffect)),
+      verify: (bloc) {
+        expect(bloc.state.draft.analogyRationale, isNull);
+        final errors = spellEngine.validateSpellDraft(bloc.state.draft);
+        expect(
+          errors.any((e) => e.contains('analogyRationale is set but')),
+          isFalse,
+        );
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'TechniqueSelected clears a stale analogyRationale along with baseEffect/templateId',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(TemplateInstantiated(dispelPhantomImageTemplate))
+        ..add(const TechniqueSelected('Rego')),
+      verify: (bloc) => expect(bloc.state.draft.analogyRationale, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'FormSelected clears a stale analogyRationale along with baseEffect/templateId',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(TemplateInstantiated(dispelPhantomImageTemplate))
+        ..add(const FormSelected('Aquam')),
+      verify: (bloc) => expect(bloc.state.draft.analogyRationale, isNull),
+    );
   });
 }

@@ -46,10 +46,16 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           // A chosen level or template link both point at the base effect
           // that just disappeared -- neither can survive it, for the same
           // reason pruneModifierSelections drops a stranded modifier rather
-          // than let it keep affecting the level invisibly.
+          // than let it keep affecting the level invisibly. analogyRationale
+          // is the same shape as templateId here: it explains why *this*
+          // draft's Technique/Form diverged from the base effect that just
+          // disappeared, so it cannot survive either -- left in place, a
+          // stale rationale can permanently trip check 8's "matches, but a
+          // rationale is still set" branch with no UI path to clear it.
           chosenBaseLevel: null,
           templateId: null,
           chosenSlots: const {},
+          analogyRationale: null,
         )),
         reapplyDefault: false,
       );
@@ -66,6 +72,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           chosenBaseLevel: null,
           templateId: null,
           chosenSlots: const {},
+          // See TechniqueSelected above: analogyRationale cannot outlive the
+          // base effect it was explaining a divergence from.
+          analogyRationale: null,
         )),
         reapplyDefault: false,
       );
@@ -81,6 +90,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           // A template link asserts lineage to the *previous* base effect;
           // it cannot survive a change to a new one, General or not.
           templateId: null,
+          // Same reasoning as templateId, unconditionally: analogyRationale
+          // explains why the draft's Technique/Form diverged from the
+          // *previous* base effect specifically. That explanation cannot be
+          // assumed to describe a divergence from the newly-selected effect
+          // too -- even when the new effect's Technique/Form still happens
+          // to differ from the draft's own, the stored prose was written
+          // about the old guideline, not this one. Instantiating a fresh
+          // by-analogy template (TemplateInstantiated) is the only path that
+          // sets it again, with a rationale actually about the effect it
+          // names.
+          analogyRationale: null,
           // Deliberate: unlike Technique/Form, a chosen level isn't tied to
           // one specific General guideline -- it's "spell level N", equally
           // meaningful against whichever General guideline is selected. Only
