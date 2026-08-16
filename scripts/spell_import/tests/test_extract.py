@@ -552,3 +552,29 @@ class HandDerivedAdjustmentTest(unittest.TestCase):
         exception_names = {e["name"] for e in extract_spells.run(write=False).exceptions}
         self.assertIn("Mists of Change", exception_names)
         self.assertNotIn("Mists of Change", {name for name, _ in self.report.blocked})
+
+
+class TechniqueFormRegenerationTest(unittest.TestCase):
+    """Every emitted spell and template must carry its own technique/form --
+    the whole reason this plan exists. No spell should ever emit without
+    them (a missing key here would mean a code path in extract_spells.py
+    forgot to thread block.technique/block.form through).
+    """
+
+    def test_every_spell_and_template_has_technique_and_form(self):
+        report = extract_spells.run(write=False)
+        for spell in report.spells:
+            self.assertIn("technique", spell, msg=spell["name"])
+            self.assertIn("form", spell, msg=spell["name"])
+        for template in report.templates:
+            self.assertIn("technique", template, msg=template["name"])
+            self.assertIn("form", template, msg=template["name"])
+
+    def test_no_spell_carries_an_analogy_rationale_yet(self):
+        # Global Constraint: this plan wires the capability through but does
+        # not use it -- no published spell is analogous yet.
+        report = extract_spells.run(write=False)
+        for spell in report.spells:
+            self.assertNotIn("analogyRationale", spell, msg=spell["name"])
+        for template in report.templates:
+            self.assertNotIn("analogyRationale", template, msg=template["name"])

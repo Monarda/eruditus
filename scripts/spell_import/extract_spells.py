@@ -610,6 +610,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 templates.append(emit.build_template(
                     block, base_effect_id, catalog, design,
                     realm_by_spell_id=REALM_BY_SPELL_ID,
+                    analogy_rationale=None,
                 ))
             except (designline.UnknownToken, KeyError) as error:
                 blocked.append((block.name, str(error)))
@@ -627,6 +628,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                     realm_by_spell_id=REALM_BY_SPELL_ID,
                     chosen_base_level=override["chosen_base_level"],
                     override_modifiers=override["modifiers"],
+                    analogy_rationale=None,
                 ))
             except (designline.UnknownToken, KeyError) as error:
                 blocked.append((block.name, str(error)))
@@ -670,6 +672,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 block, base_effect_id, catalog, design,
                 realm_by_spell_id=REALM_BY_SPELL_ID,
                 extra_adjustment=COMBINED_BASE_EFFECTS.get(spell_id),
+                analogy_rationale=None,
             ))
         except (designline.UnknownToken, KeyError) as error:
             blocked.append((block.name, str(error)))

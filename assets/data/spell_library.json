@@ -2,6 +2,8 @@
   {
     "id": "lib-cran-curse-ravenous-swarm",
     "name": "Curse of the Ravenous Swarm",
+    "technique": "Creo",
+    "form": "Animal",
     "requisites": {
       "Rego": "adding"
     },
@@ -30,6 +32,8 @@
   {
     "id": "lib-cran-soothe-pains-beast",
     "name": "Soothe Pains of the Beast",
+    "technique": "Creo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -52,6 +56,8 @@
   {
     "id": "lib-cran-true-rest-injured-brute",
     "name": "True Rest of the Injured Brute",
+    "technique": "Creo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -73,6 +79,8 @@
   {
     "id": "lib-cran-weavers-trap-webs",
     "name": "Weaver's Trap of Webs",
+    "technique": "Creo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -94,6 +102,8 @@
   {
     "id": "lib-cran-wizards-mount",
     "name": "The Wizard's Mount",
+    "technique": "Creo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -119,6 +129,8 @@
   {
     "id": "lib-craq-creeping-oil",
     "name": "Creeping Oil",
+    "technique": "Creo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -140,6 +152,8 @@
   {
     "id": "lib-craq-deluge-rushing-and-dashing",
     "name": "Deluge of Rushing and Dashing",
+    "technique": "Creo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -165,6 +179,8 @@
   {
     "id": "lib-craq-footsteps-slippery-oil",
     "name": "Footsteps of Slippery Oil",
+    "technique": "Creo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -186,6 +202,8 @@
   {
     "id": "lib-craq-mighty-torrent-water",
     "name": "Mighty Torrent of Water",
+    "technique": "Creo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -207,6 +225,8 @@
   {
     "id": "lib-crau-airs-ghostly-form",
     "name": "Air's Ghostly Form",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -232,6 +252,8 @@
   {
     "id": "lib-crau-breath-open-sky",
     "name": "Breath of the Open Sky",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -261,6 +283,8 @@
   {
     "id": "lib-crau-broom-winds",
     "name": "Broom of the Winds",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -286,6 +310,8 @@
   {
     "id": "lib-crau-chamber-spring-breezes",
     "name": "Chamber of Spring Breezes",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -311,6 +337,8 @@
   {
     "id": "lib-crau-charge-angry-winds",
     "name": "Charge of the Angry Winds",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -336,6 +364,8 @@
   {
     "id": "lib-crau-circling-winds-protection",
     "name": "Circling Winds of Protection",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {
       "Rego": "adding"
     },
@@ -363,6 +393,8 @@
   {
     "id": "lib-crau-clouds-rain-and-thunder",
     "name": "Clouds of Rain and Thunder",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -384,6 +416,8 @@
   {
     "id": "lib-crau-clouds-summer-snow",
     "name": "Clouds of Summer Snow",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -409,6 +443,8 @@
   {
     "id": "lib-crau-incantation-lightning",
     "name": "The Incantation of Lightning",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -434,6 +470,8 @@
   {
     "id": "lib-crau-jupiters-resounding-blow",
     "name": "Jupiter's Resounding Blow",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -459,6 +497,8 @@
   {
     "id": "lib-crau-pull-skybound-winds",
     "name": "Pull of the Skybound Winds",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -484,6 +524,8 @@
   {
     "id": "lib-crau-stench-twenty-corpses",
     "name": "Stench of the Twenty Corpses",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -505,6 +547,8 @@
   {
     "id": "lib-crau-wings-soaring-wind",
     "name": "Wings of the Soaring Wind",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {
       "Rego": "adding"
     },
@@ -532,6 +576,8 @@
   {
     "id": "lib-crau-wrath-whirling-winds-and-water",
     "name": "Wrath of Whirling Winds and Water",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -558,6 +604,8 @@
   {
     "id": "lib-crau-wreaths-foul-smoke",
     "name": "Wreaths of Foul Smoke",
+    "technique": "Creo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -579,6 +627,8 @@
   {
     "id": "lib-crco-bind-wound",
     "name": "Bind Wound",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -600,6 +650,8 @@
   {
     "id": "lib-crco-charm-against-putrefaction",
     "name": "Charm against Putrefaction",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -621,6 +673,8 @@
   {
     "id": "lib-crco-cheating-reaper",
     "name": "Cheating the Reaper",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -643,6 +697,8 @@
   {
     "id": "lib-crco-chirurgeons-healing-touch",
     "name": "The Chirurgeon's Healing Touch",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -665,6 +721,8 @@
   {
     "id": "lib-crco-gentle-touch-purified-body",
     "name": "Gentle Touch of the Purified Body",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -687,6 +745,8 @@
   {
     "id": "lib-crco-incantation-body-made-whole",
     "name": "Incantation of the Body Made Whole",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -709,6 +769,8 @@
   {
     "id": "lib-crco-purification-festering-wounds",
     "name": "Purification of the Festering Wounds",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -730,6 +792,8 @@
   {
     "id": "lib-crco-restoration-defiled-body",
     "name": "Restoration of the Defiled Body",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -752,6 +816,8 @@
   {
     "id": "lib-crco-severed-limb-made-whole",
     "name": "The Severed Limb Made Whole",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -780,6 +846,8 @@
   {
     "id": "lib-crco-shadow-life-renewed",
     "name": "The Shadow of Life Renewed",
+    "technique": "Creo",
+    "form": "Corpus",
     "requisites": {
       "Mentem": "free"
     },
@@ -804,6 +872,8 @@
   {
     "id": "lib-crhe-bountiful-feast",
     "name": "The Bountiful Feast",
+    "technique": "Creo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -836,6 +906,8 @@
   {
     "id": "lib-crhe-bridge-wood",
     "name": "Bridge of Wood",
+    "technique": "Creo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -861,6 +933,8 @@
   {
     "id": "lib-crhe-conjure-sturdy-vine",
     "name": "Conjure the Sturdy Vine",
+    "technique": "Creo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -882,6 +956,8 @@
   {
     "id": "lib-crhe-trap-entwining-vines",
     "name": "Trap of the Entwining Vines",
+    "technique": "Creo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -903,6 +979,8 @@
   {
     "id": "lib-crhe-wall-living-wood",
     "name": "Wall of Living Wood",
+    "technique": "Creo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -928,6 +1006,8 @@
   {
     "id": "lib-crhe-wall-thorns",
     "name": "Wall of Thorns",
+    "technique": "Creo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -953,6 +1033,8 @@
   {
     "id": "lib-crig-arc-fiery-ribbons",
     "name": "Arc of Fiery Ribbons",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -974,6 +1056,8 @@
   {
     "id": "lib-crig-ball-abysmal-flame",
     "name": "Ball of Abysmal Flame",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -995,6 +1079,8 @@
   {
     "id": "lib-crig-blade-virulent-flame",
     "name": "Blade of the Virulent Flame",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1016,6 +1102,8 @@
   {
     "id": "lib-crig-circle-encompassing-flames",
     "name": "Circle of Encompassing Flames",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1037,6 +1125,8 @@
   {
     "id": "lib-crig-coat-flame",
     "name": "Coat of Flame",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {
       "Rego": "adding"
     },
@@ -1060,6 +1150,8 @@
   {
     "id": "lib-crig-flash-scarlet-flames",
     "name": "Flash of the Scarlet Flames",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1081,6 +1173,8 @@
   {
     "id": "lib-crig-heat-searing-forge",
     "name": "Heat of the Searing Forge",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1102,6 +1196,8 @@
   {
     "id": "lib-crig-lamp-without-flame",
     "name": "Lamp without Flame",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1123,6 +1219,8 @@
   {
     "id": "lib-crig-moonbeam",
     "name": "Moonbeam",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1144,6 +1242,8 @@
   {
     "id": "lib-crig-palm-flame",
     "name": "Palm of Flame",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1165,6 +1265,8 @@
   {
     "id": "lib-crig-pilum-fire",
     "name": "Pilum of Fire",
+    "technique": "Creo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1186,6 +1288,8 @@
   {
     "id": "lib-crim-haunt-living-ghost",
     "name": "Haunt of the Living Ghost",
+    "technique": "Creo",
+    "form": "Imaginem",
     "requisites": {
       "Intellego": "adding"
     },
@@ -1214,6 +1318,8 @@
   {
     "id": "lib-crim-human-form",
     "name": "Phantasm of the Human Form",
+    "technique": "Creo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1240,6 +1346,8 @@
   {
     "id": "lib-crim-phantasmal-animal",
     "name": "Phantasmal Animal",
+    "technique": "Creo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1265,6 +1373,8 @@
   {
     "id": "lib-crim-phantasmal-fire",
     "name": "Phantasmal Fire",
+    "technique": "Creo",
+    "form": "Imaginem",
     "requisites": {
       "Ignem": "adding"
     },
@@ -1288,6 +1398,8 @@
   {
     "id": "lib-crim-shadow-human-life",
     "name": "The Shadow of Human Life",
+    "technique": "Creo",
+    "form": "Imaginem",
     "requisites": {
       "Mentem": "adding"
     },
@@ -1321,6 +1433,8 @@
   {
     "id": "lib-crim-talking-head",
     "name": "Phantasm of the Talking Head",
+    "technique": "Creo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1346,6 +1460,8 @@
   {
     "id": "lib-crme-gift-reason",
     "name": "Gift of Reason",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1368,6 +1484,8 @@
   {
     "id": "lib-crme-memory-distant-dream",
     "name": "Memory of the Distant Dream",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1389,6 +1507,8 @@
   {
     "id": "lib-crme-pains-perpetual-worry",
     "name": "Pains of the Perpetual Worry",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1410,6 +1530,8 @@
   {
     "id": "lib-crme-panic-trembling-heart",
     "name": "Panic of the Trembling Heart",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1431,6 +1553,8 @@
   {
     "id": "lib-crme-rising-ire",
     "name": "Rising Ire",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1452,6 +1576,8 @@
   {
     "id": "lib-crme-weight-thousand-hells",
     "name": "Weight of a Thousand Hells",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1477,6 +1603,8 @@
   {
     "id": "lib-crme-words-unbroken-silence",
     "name": "Words of the Unbroken Silence",
+    "technique": "Creo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1498,6 +1626,8 @@
   {
     "id": "lib-crte-conjuring-mystic-tower",
     "name": "Conjuring the Mystic Tower",
+    "technique": "Creo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1527,6 +1657,8 @@
   {
     "id": "lib-crte-seal-earth",
     "name": "Seal the Earth",
+    "technique": "Creo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1548,6 +1680,8 @@
   {
     "id": "lib-crte-touch-midas",
     "name": "Touch of Midas",
+    "technique": "Creo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1570,6 +1704,8 @@
   {
     "id": "lib-crte-wall-protecting-stone",
     "name": "Wall of Protecting Stone",
+    "technique": "Creo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1595,6 +1731,8 @@
   {
     "id": "lib-crvi-enigmas-gift",
     "name": "The Enigma's Gift",
+    "technique": "Creo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1620,6 +1758,8 @@
   {
     "id": "lib-crvi-phantom-gift",
     "name": "The Phantom Gift",
+    "technique": "Creo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1641,6 +1781,8 @@
   {
     "id": "lib-inan-hunters-sense",
     "name": "Hunter's Sense",
+    "technique": "Intellego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1668,6 +1810,8 @@
   {
     "id": "lib-inan-image-beast",
     "name": "Image of the Beast",
+    "technique": "Intellego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1689,6 +1833,8 @@
   {
     "id": "lib-inan-opening-tome-animals-mind",
     "name": "Opening the Tome of the Animal's Mind",
+    "technique": "Intellego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1710,6 +1856,8 @@
   {
     "id": "lib-inan-shiver-lycanthrope",
     "name": "Shiver of the Lycanthrope",
+    "technique": "Intellego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1731,6 +1879,8 @@
   {
     "id": "lib-inaq-call-rushing-waters",
     "name": "Call of the Rushing Waters",
+    "technique": "Intellego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1752,6 +1902,8 @@
   {
     "id": "lib-inaq-clear-sight-naiad",
     "name": "Clear Sight of the Naiad",
+    "technique": "Intellego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1773,6 +1925,8 @@
   {
     "id": "lib-inaq-enchantment-scrying-pool",
     "name": "Enchantment of the Scrying Pool",
+    "technique": "Intellego",
+    "form": "Aquam",
     "requisites": {
       "Imaginem": "free"
     },
@@ -1797,6 +1951,8 @@
   {
     "id": "lib-inaq-subtle-taste-poison-and-purity",
     "name": "Subtle Taste of Poison and Purity",
+    "technique": "Intellego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1818,6 +1974,8 @@
   {
     "id": "lib-inaq-touch-pearls",
     "name": "Touch of the Pearls",
+    "technique": "Intellego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1839,6 +1997,8 @@
   {
     "id": "lib-inaq-voice-lake",
     "name": "Voice of the Lake",
+    "technique": "Intellego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1860,6 +2020,8 @@
   {
     "id": "lib-inau-eyes-bat",
     "name": "Eyes of the Bat",
+    "technique": "Intellego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1881,6 +2043,8 @@
   {
     "id": "lib-inau-sailors-foretaste-morrow",
     "name": "Sailor's Foretaste of the Morrow",
+    "technique": "Intellego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1902,6 +2066,8 @@
   {
     "id": "lib-inau-true-sight-air",
     "name": "True Sight of the Air",
+    "technique": "Intellego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1923,6 +2089,8 @@
   {
     "id": "lib-inco-eye-sage",
     "name": "The Eye of the Sage",
+    "technique": "Intellego",
+    "form": "Corpus",
     "requisites": {
       "Imaginem": "adding"
     },
@@ -1946,6 +2114,8 @@
   {
     "id": "lib-inco-inexorable-search",
     "name": "The Inexorable Search",
+    "technique": "Intellego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1967,6 +2137,8 @@
   {
     "id": "lib-inco-physicians-eye",
     "name": "Physician's Eye",
+    "technique": "Intellego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -1988,6 +2160,8 @@
   {
     "id": "lib-inco-revealed-flaws-mortal-flesh",
     "name": "Revealed Flaws of Mortal Flesh",
+    "technique": "Intellego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2009,6 +2183,8 @@
   {
     "id": "lib-inco-whispers-through-black-gate",
     "name": "Whispers through the Black Gate",
+    "technique": "Intellego",
+    "form": "Corpus",
     "requisites": {
       "Mentem": "free"
     },
@@ -2032,6 +2208,8 @@
   {
     "id": "lib-inhe-converse-with-plant-and-tree",
     "name": "Converse with Plant and Tree",
+    "technique": "Intellego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2053,6 +2231,8 @@
   {
     "id": "lib-inhe-hunt-for-wild-herb",
     "name": "Hunt for the Wild Herb",
+    "technique": "Intellego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2074,6 +2254,8 @@
   {
     "id": "lib-inhe-intuition-forest",
     "name": "Intuition of the Forest",
+    "technique": "Intellego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2095,6 +2277,8 @@
   {
     "id": "lib-inhe-probe-natures-hidden-lore",
     "name": "Probe Nature's Hidden Lore",
+    "technique": "Intellego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2116,6 +2300,8 @@
   {
     "id": "lib-inhe-shriek-impending-shafts",
     "name": "Shriek of the Impending Shafts",
+    "technique": "Intellego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2137,6 +2323,8 @@
   {
     "id": "lib-inig-eyes-flame",
     "name": "Eyes of the Flame",
+    "technique": "Intellego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2158,6 +2346,8 @@
   {
     "id": "lib-inig-shadows-fires-past",
     "name": "Shadows of the Fires Past",
+    "technique": "Intellego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2179,6 +2369,8 @@
   {
     "id": "lib-inig-tales-ashes",
     "name": "Tales of the Ashes",
+    "technique": "Intellego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2200,6 +2392,8 @@
   {
     "id": "lib-inig-vision-heats-light",
     "name": "Vision of Heat's Light",
+    "technique": "Intellego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2221,6 +2415,8 @@
   {
     "id": "lib-inig-words-flickering-flame",
     "name": "Words of the Flickering Flame",
+    "technique": "Intellego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2242,6 +2438,8 @@
   {
     "id": "lib-inim-discern-own-illusions",
     "name": "Discern Own Illusions",
+    "technique": "Intellego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2263,6 +2461,8 @@
   {
     "id": "lib-inim-ear-for-distant-voices",
     "name": "The Ear for Distant Voices",
+    "technique": "Intellego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2284,6 +2484,8 @@
   {
     "id": "lib-inim-eyes-eagle",
     "name": "Eyes of the Eagle",
+    "technique": "Intellego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2305,6 +2507,8 @@
   {
     "id": "lib-inim-prying-eyes",
     "name": "Prying Eyes",
+    "technique": "Intellego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2326,6 +2530,8 @@
   {
     "id": "lib-inim-summoning-distant-image",
     "name": "Summoning the Distant Image",
+    "technique": "Intellego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2347,6 +2553,8 @@
   {
     "id": "lib-inme-frosty-breath-spoken-lie",
     "name": "Frosty Breath of the Spoken Lie",
+    "technique": "Intellego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2368,6 +2576,8 @@
   {
     "id": "lib-inme-peering-into-mortal-mind",
     "name": "Peering into the Mortal Mind",
+    "technique": "Intellego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2389,6 +2599,8 @@
   {
     "id": "lib-inme-perception-conflicting-motives",
     "name": "Perception of the Conflicting Motives",
+    "technique": "Intellego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2410,6 +2622,8 @@
   {
     "id": "lib-inme-posing-silent-question",
     "name": "Posing the Silent Question",
+    "technique": "Intellego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2431,6 +2645,8 @@
   {
     "id": "lib-inme-sight-transparent-motive",
     "name": "Sight of the Transparent Motive",
+    "technique": "Intellego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2452,6 +2668,8 @@
   {
     "id": "lib-inme-thoughts-within-babble",
     "name": "Thoughts within Babble",
+    "technique": "Intellego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2473,6 +2691,8 @@
   {
     "id": "lib-inte-dream-mind-that-sits",
     "name": "Dream of the Mind That Sits",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {
       "Creo": "adding"
     },
@@ -2496,6 +2716,8 @@
   {
     "id": "lib-inte-eyes-eons",
     "name": "Eyes of the Eons",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2517,6 +2739,8 @@
   {
     "id": "lib-inte-eyes-treacherous-terrain",
     "name": "Eyes of the Treacherous Terrain",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2538,6 +2762,8 @@
   {
     "id": "lib-inte-miners-keen-eye",
     "name": "The Miner's Keen Eye",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2565,6 +2791,8 @@
   {
     "id": "lib-inte-probe-for-pure-silver",
     "name": "Probe for Pure Silver",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2586,6 +2814,8 @@
   {
     "id": "lib-inte-sense-feet-that-thread-earth",
     "name": "Sense the Feet That Thread the Earth",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2611,6 +2841,8 @@
   {
     "id": "lib-inte-stone-tell-mind-that-sits",
     "name": "Stone Tell of the Mind That Sits",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2632,6 +2864,8 @@
   {
     "id": "lib-inte-tracks-faerie-glow",
     "name": "Tracks of the Faerie Glow",
+    "technique": "Intellego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2653,6 +2887,8 @@
   {
     "id": "lib-invi-piercing-faerie-veil",
     "name": "Piercing the Faerie Veil",
+    "technique": "Intellego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2674,6 +2910,8 @@
   {
     "id": "lib-invi-scales-magical-weight",
     "name": "Scales of the Magical Weight",
+    "technique": "Intellego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2695,6 +2933,8 @@
   {
     "id": "lib-invi-sense-lingering-magic",
     "name": "Sense of the Lingering Magic",
+    "technique": "Intellego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2717,6 +2957,8 @@
   {
     "id": "lib-invi-sense-magical-power",
     "name": "Sense of Magical Power",
+    "technique": "Intellego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2738,6 +2980,8 @@
   {
     "id": "lib-invi-sense-nature-vis",
     "name": "Sense the Nature of Vis",
+    "technique": "Intellego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2759,6 +3003,8 @@
   {
     "id": "lib-invi-sight-active-magics",
     "name": "Sight of the Active Magics",
+    "technique": "Intellego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2784,6 +3030,8 @@
   {
     "id": "lib-muan-beast-minuscule-proportions",
     "name": "Beast of Minuscule Proportions",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2805,6 +3053,8 @@
   {
     "id": "lib-muan-beast-outlandish-size",
     "name": "Beast of Outlandish Size",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2826,6 +3076,8 @@
   {
     "id": "lib-muan-beast-remade",
     "name": "The Beast Remade",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {
       "Corpus": "free"
     },
@@ -2849,6 +3101,8 @@
   {
     "id": "lib-muan-doublet-impenetrable-silk",
     "name": "Doublet of Impenetrable Silk",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2870,6 +3124,8 @@
   {
     "id": "lib-muan-growth-creeping-things",
     "name": "Growth of the Creeping Things",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2891,6 +3147,8 @@
   {
     "id": "lib-muan-steed-vengeance",
     "name": "Steed of Vengeance",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2916,6 +3174,8 @@
   {
     "id": "lib-muan-transformation-ravenous-beast-to-torpid-toad",
     "name": "Transformation of the Ravenous Beast to the Torpid Toad",
+    "technique": "Muto",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2937,6 +3197,8 @@
   {
     "id": "lib-muaq-incantation-putrid-wine",
     "name": "Incantation of Putrid Wine",
+    "technique": "Muto",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -2958,6 +3220,8 @@
   {
     "id": "lib-muaq-lungs-fish",
     "name": "Lungs of the Fish",
+    "technique": "Muto",
+    "form": "Aquam",
     "requisites": {
       "Auram": "free"
     },
@@ -2981,6 +3245,8 @@
   {
     "id": "lib-muaq-vile-water-sterility",
     "name": "Vile Water of Sterility",
+    "technique": "Muto",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3007,6 +3273,8 @@
   {
     "id": "lib-muau-fog-confusion",
     "name": "Fog of Confusion",
+    "technique": "Muto",
+    "form": "Auram",
     "requisites": {
       "Imaginem": "adding",
       "Rego": "adding"
@@ -3039,6 +3307,8 @@
   {
     "id": "lib-muau-infernal-smoke-death",
     "name": "Infernal Smoke of Death",
+    "technique": "Muto",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3061,6 +3331,8 @@
   {
     "id": "lib-muau-rain-oil",
     "name": "Rain of Oil",
+    "technique": "Muto",
+    "form": "Auram",
     "requisites": {
       "Aquam": "free"
     },
@@ -3089,6 +3361,8 @@
   {
     "id": "lib-muau-rain-stones",
     "name": "Rain of Stones",
+    "technique": "Muto",
+    "form": "Auram",
     "requisites": {
       "Terram": "free"
     },
@@ -3112,6 +3386,8 @@
   {
     "id": "lib-muau-talons-winds",
     "name": "Talons of the Winds",
+    "technique": "Muto",
+    "form": "Auram",
     "requisites": {
       "Rego": "adding"
     },
@@ -3135,6 +3411,8 @@
   {
     "id": "lib-muco-arm-infant",
     "name": "Arm of the Infant",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3156,6 +3434,8 @@
   {
     "id": "lib-muco-cloak-black-feathers",
     "name": "Cloak of Black Feathers",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Animal": "free"
     },
@@ -3179,6 +3459,8 @@
   {
     "id": "lib-muco-cloak-mist",
     "name": "Cloak of Mist",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Auram": "free"
     },
@@ -3202,6 +3484,8 @@
   {
     "id": "lib-muco-curse-circe",
     "name": "Curse of Circe",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Animal": "free"
     },
@@ -3225,6 +3509,8 @@
   {
     "id": "lib-muco-disguise-new-visage",
     "name": "Disguise of the New Visage",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3246,6 +3532,8 @@
   {
     "id": "lib-muco-eyes-cat",
     "name": "Eyes of the Cat",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Animal": "free"
     },
@@ -3269,6 +3557,8 @@
   {
     "id": "lib-muco-gift-bears-fortitude",
     "name": "Gift of the Bear's Fortitude",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3290,6 +3580,8 @@
   {
     "id": "lib-muco-preternatural-growth-and-shrinking",
     "name": "Preternatural Growth and Shrinking",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3317,6 +3609,8 @@
   {
     "id": "lib-muco-shape-woodland-prowler",
     "name": "Shape of the Woodland Prowler",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Animal": "free"
     },
@@ -3340,6 +3634,8 @@
   {
     "id": "lib-muco-silent-vigil",
     "name": "The Silent Vigil",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Terram": "free"
     },
@@ -3367,6 +3663,8 @@
   {
     "id": "lib-muco-stance-patient-tree",
     "name": "Stance of the Patient Tree",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Herbam": "free"
     },
@@ -3390,6 +3688,8 @@
   {
     "id": "lib-muco-transform-to-water",
     "name": "Transform to Water",
+    "technique": "Muto",
+    "form": "Corpus",
     "requisites": {
       "Aquam": "free"
     },
@@ -3413,6 +3713,8 @@
   {
     "id": "lib-muhe-curse-haunted-forest",
     "name": "Curse of the Haunted Forest",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {
       "Perdo": "free"
     },
@@ -3441,6 +3743,8 @@
   {
     "id": "lib-muhe-pass-unyielding-portal",
     "name": "Pass the Unyielding Portal",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3462,6 +3766,8 @@
   {
     "id": "lib-muhe-piercing-shaft-wood",
     "name": "Piercing Shaft of Wood",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {
       "Rego": "adding"
     },
@@ -3485,6 +3791,8 @@
   {
     "id": "lib-muhe-rope-bronze",
     "name": "Rope of Bronze",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {
       "Terram": "free"
     },
@@ -3508,6 +3816,8 @@
   {
     "id": "lib-muhe-stir-slumbering-tree",
     "name": "Stir the Slumbering Tree",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {
       "Mentem": "free"
     },
@@ -3535,6 +3845,8 @@
   {
     "id": "lib-muhe-thaumaturgical-transformation-plants-to-iron",
     "name": "Thaumaturgical Transformation of Plants to Iron",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {
       "Terram": "free"
     },
@@ -3562,6 +3874,8 @@
   {
     "id": "lib-muhe-transformation-thorny-staff",
     "name": "Transformation of the Thorny Staff",
+    "technique": "Muto",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3583,6 +3897,8 @@
   {
     "id": "lib-muig-flames-sculpted-ice",
     "name": "Flames of Sculpted Ice",
+    "technique": "Muto",
+    "form": "Ignem",
     "requisites": {
       "Aquam": "free"
     },
@@ -3610,6 +3926,8 @@
   {
     "id": "lib-muig-hornet-fire",
     "name": "Hornet Fire",
+    "technique": "Muto",
+    "form": "Ignem",
     "requisites": {
       "Rego": "adding"
     },
@@ -3633,6 +3951,8 @@
   {
     "id": "lib-muig-many-hued-conflagration",
     "name": "The Many-hued Conflagration",
+    "technique": "Muto",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3654,6 +3974,8 @@
   {
     "id": "lib-muig-prison-flames",
     "name": "Prison of Flames",
+    "technique": "Muto",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3679,6 +4001,8 @@
   {
     "id": "lib-muig-show-flames-and-smoke",
     "name": "Show of the Flames and Smoke",
+    "technique": "Muto",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3700,6 +4024,8 @@
   {
     "id": "lib-muig-trapping-fire",
     "name": "Trapping the Fire",
+    "technique": "Muto",
+    "form": "Ignem",
     "requisites": {
       "Terram": "free"
     },
@@ -3723,6 +4049,8 @@
   {
     "id": "lib-muim-aura-ennobled-presence",
     "name": "Aura of Ennobled Presence",
+    "technique": "Muto",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3744,6 +4072,8 @@
   {
     "id": "lib-muim-disguise-transformed-image",
     "name": "Disguise of the Transformed Image",
+    "technique": "Muto",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3765,6 +4095,8 @@
   {
     "id": "lib-muim-image-phantom",
     "name": "Image Phantom",
+    "technique": "Muto",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3786,6 +4118,8 @@
   {
     "id": "lib-muim-notes-delightful-sound",
     "name": "Notes of a Delightful Sound",
+    "technique": "Muto",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3807,6 +4141,8 @@
   {
     "id": "lib-muim-taste-spices-and-herbs",
     "name": "Taste of the Spices and Herbs",
+    "technique": "Muto",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3828,6 +4164,8 @@
   {
     "id": "lib-mume-inmost-companion",
     "name": "Inmost Companion",
+    "technique": "Muto",
+    "form": "Mentem",
     "requisites": {
       "Animal": "free"
     },
@@ -3851,6 +4189,8 @@
   {
     "id": "lib-mume-mind-beast",
     "name": "Mind of the Beast",
+    "technique": "Muto",
+    "form": "Mentem",
     "requisites": {
       "Animal": "free"
     },
@@ -3874,6 +4214,8 @@
   {
     "id": "lib-mume-past-another",
     "name": "Past of Another",
+    "technique": "Muto",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3896,6 +4238,8 @@
   {
     "id": "lib-mume-recollection-memories-never-quite-lived",
     "name": "Recollection of Memories Never Quite Lived",
+    "technique": "Muto",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3917,6 +4261,8 @@
   {
     "id": "lib-mume-vision-haunting-spirits",
     "name": "Vision of the Haunting Spirits",
+    "technique": "Muto",
+    "form": "Mentem",
     "requisites": {
       "Imaginem": "free"
     },
@@ -3940,6 +4286,8 @@
   {
     "id": "lib-mute-crystal-dart",
     "name": "The Crystal Dart",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {
       "Rego": "adding"
     },
@@ -3963,6 +4311,8 @@
   {
     "id": "lib-mute-earth-that-breaks-no-more",
     "name": "Earth That Breaks No More",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -3991,6 +4341,8 @@
   {
     "id": "lib-mute-edge-razor",
     "name": "Edge of the Razor",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4016,6 +4368,8 @@
   {
     "id": "lib-mute-object-increased-size",
     "name": "Object of Increased Size",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4041,6 +4395,8 @@
   {
     "id": "lib-mute-rock-viscid-clay",
     "name": "Rock of Viscid Clay",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4066,6 +4422,8 @@
   {
     "id": "lib-mute-supple-iron-and-rigid-rope",
     "name": "Supple Iron and Rigid Rope",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4087,6 +4445,8 @@
   {
     "id": "lib-mute-teeth-earth-mother",
     "name": "Teeth of the Earth Mother",
+    "technique": "Muto",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4112,6 +4472,8 @@
   {
     "id": "lib-pean-agony-beast",
     "name": "Agony of the Beast",
+    "technique": "Perdo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4133,6 +4495,8 @@
   {
     "id": "lib-pean-blunt-vipers-fangs",
     "name": "Blunt the Viper's Fangs",
+    "technique": "Perdo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4158,6 +4522,8 @@
   {
     "id": "lib-pean-cripple-howling-wolf",
     "name": "Cripple the Howling Wolf",
+    "technique": "Perdo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4179,6 +4545,8 @@
   {
     "id": "lib-pean-decay-fur-and-hide",
     "name": "Decay Fur and Hide",
+    "technique": "Perdo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4200,6 +4568,8 @@
   {
     "id": "lib-pean-falcons-hood",
     "name": "The Falcon's Hood",
+    "technique": "Perdo",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4221,6 +4591,8 @@
   {
     "id": "lib-peaq-calling-odious-drought",
     "name": "Calling the Odious Drought",
+    "technique": "Perdo",
+    "form": "Aquam",
     "requisites": {
       "Auram": "free"
     },
@@ -4245,6 +4617,8 @@
   {
     "id": "lib-peaq-closing-earths-gate",
     "name": "Closing the Earth's Gate",
+    "technique": "Perdo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4266,6 +4640,8 @@
   {
     "id": "lib-peaq-comfort-drenched-traveler",
     "name": "Comfort of the Drenched Traveler",
+    "technique": "Perdo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4287,6 +4663,8 @@
   {
     "id": "lib-peaq-curse-desert",
     "name": "Curse of the Desert",
+    "technique": "Perdo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4308,6 +4686,8 @@
   {
     "id": "lib-peaq-parching-wind",
     "name": "Parching Wind",
+    "technique": "Perdo",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4329,6 +4709,8 @@
   {
     "id": "lib-peau-cloudless-sky-returned",
     "name": "The Cloudless Sky Returned",
+    "technique": "Perdo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4354,6 +4736,8 @@
   {
     "id": "lib-peau-quiet-raging-winds",
     "name": "Quiet the Raging Winds",
+    "technique": "Perdo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4375,6 +4759,8 @@
   {
     "id": "lib-peau-room-stale-air",
     "name": "Room of Stale Air",
+    "technique": "Perdo",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4396,6 +4782,8 @@
   {
     "id": "lib-peco-bane-decrepit-body",
     "name": "Bane of the Decrepit Body",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4417,6 +4805,8 @@
   {
     "id": "lib-peco-clenching-grasp-crushed-heart",
     "name": "Clenching Grasp of the Crushed Heart",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4438,6 +4828,8 @@
   {
     "id": "lib-peco-curse-leprous-flesh",
     "name": "Curse of the Leprous Flesh",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4459,6 +4851,8 @@
   {
     "id": "lib-peco-curse-unportended-plague",
     "name": "Curse of the Unportended Plague",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4481,6 +4875,8 @@
   {
     "id": "lib-peco-dust-to-dust",
     "name": "Dust to Dust",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4502,6 +4898,8 @@
   {
     "id": "lib-peco-grip-choking-hand",
     "name": "Grip of the Choking Hand",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4523,6 +4921,8 @@
   {
     "id": "lib-peco-incantation-milky-eyes",
     "name": "Incantation of the Milky Eyes",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4544,6 +4944,8 @@
   {
     "id": "lib-peco-invocation-weariness",
     "name": "Invocation of Weariness",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4565,6 +4967,8 @@
   {
     "id": "lib-peco-kiss-death",
     "name": "The Kiss of Death",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4590,6 +4994,8 @@
   {
     "id": "lib-peco-touch-goose-feather",
     "name": "Touch of the Goose Feather",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4611,6 +5017,8 @@
   {
     "id": "lib-peco-twist-tongue",
     "name": "Twist of the Tongue",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4632,6 +5040,8 @@
   {
     "id": "lib-peco-wound-that-weeps",
     "name": "The Wound That Weeps",
+    "technique": "Perdo",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4653,6 +5063,8 @@
   {
     "id": "lib-pehe-curse-rotted-wood",
     "name": "Curse of the Rotted Wood",
+    "technique": "Perdo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4674,6 +5086,8 @@
   {
     "id": "lib-pehe-great-rot",
     "name": "The Great Rot",
+    "technique": "Perdo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4699,6 +5113,8 @@
   {
     "id": "lib-pehe-plants-withering-bane",
     "name": "Plant's Withering Bane",
+    "technique": "Perdo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4724,6 +5140,8 @@
   {
     "id": "lib-pehe-treading-ashen-path",
     "name": "Treading the Ashen Path",
+    "technique": "Perdo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4752,6 +5170,8 @@
   {
     "id": "lib-pehe-wizards-autumn",
     "name": "Wizard's Autumn",
+    "technique": "Perdo",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4777,6 +5197,8 @@
   {
     "id": "lib-peig-conjuration-indubitable-cold",
     "name": "Conjuration of the Indubitable Cold",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4808,6 +5230,8 @@
   {
     "id": "lib-peig-gloom-evening",
     "name": "Gloom of Evening",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4829,6 +5253,8 @@
   {
     "id": "lib-peig-soothe-raging-flames",
     "name": "Soothe the Raging Flames",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4850,6 +5276,8 @@
   {
     "id": "lib-peig-well-without-light",
     "name": "Well without Light",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4871,6 +5299,8 @@
   {
     "id": "lib-peig-winters-icy-touch",
     "name": "Winter's Icy Touch",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4892,6 +5322,8 @@
   {
     "id": "lib-peig-wizards-eclipse",
     "name": "Wizard's Eclipse",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4918,6 +5350,8 @@
   {
     "id": "lib-peig-wizards-icy-grip",
     "name": "Wizard's Icy Grip",
+    "technique": "Perdo",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4943,6 +5377,8 @@
   {
     "id": "lib-peim-chamber-invisibility",
     "name": "Chamber of Invisibility",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4964,6 +5400,8 @@
   {
     "id": "lib-peim-illusion-cool-flames",
     "name": "Illusion of Cool Flames",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -4985,6 +5423,8 @@
   {
     "id": "lib-peim-invisibility-standing-wizard",
     "name": "Invisibility of the Standing Wizard",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5006,6 +5446,8 @@
   {
     "id": "lib-peim-removal-conspicuous-sigil",
     "name": "Removal of the Conspicuous Sigil",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5027,6 +5469,8 @@
   {
     "id": "lib-peim-silence-smothered-sound",
     "name": "Silence of the Smothered Sound",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5052,6 +5496,8 @@
   {
     "id": "lib-peim-taste-dulled-tongue",
     "name": "Taste of the Dulled Tongue",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5073,6 +5519,8 @@
   {
     "id": "lib-peim-veil-invisibility",
     "name": "Veil of Invisibility",
+    "technique": "Perdo",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5098,6 +5546,8 @@
   {
     "id": "lib-peme-black-whisper",
     "name": "Black Whisper",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5123,6 +5573,8 @@
   {
     "id": "lib-peme-blessing-childlike-bliss",
     "name": "Blessing of Childlike Bliss",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5144,6 +5596,8 @@
   {
     "id": "lib-peme-calm-motion-heart",
     "name": "Calm the Motion of the Heart",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5165,6 +5619,8 @@
   {
     "id": "lib-peme-enchantment-detachment",
     "name": "Enchantment of Detachment",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5186,6 +5642,8 @@
   {
     "id": "lib-peme-loss-but-moments-memory",
     "name": "Loss of But a Moment's Memory",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5207,6 +5665,8 @@
   {
     "id": "lib-peme-passions-lost-feeling",
     "name": "Passion's Lost Feeling",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5228,6 +5688,8 @@
   {
     "id": "lib-peme-poisoning-will",
     "name": "Poisoning the Will",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5254,6 +5716,8 @@
   {
     "id": "lib-peme-tip-tongue",
     "name": "Tip of the Tongue",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5275,6 +5739,8 @@
   {
     "id": "lib-peme-trust-childlike-faith",
     "name": "Trust of Childlike Faith",
+    "technique": "Perdo",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5296,6 +5762,8 @@
   {
     "id": "lib-pete-cascade-rocks",
     "name": "Cascade of Rocks",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5324,6 +5792,8 @@
   {
     "id": "lib-pete-end-mighty-castle",
     "name": "End of the Mighty Castle",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5349,6 +5819,8 @@
   {
     "id": "lib-pete-fist-shattering",
     "name": "Fist of Shattering",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5374,6 +5846,8 @@
   {
     "id": "lib-pete-obliteration-metallic-barrier",
     "name": "Obliteration of the Metallic Barrier",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {
       "Rego": "adding"
     },
@@ -5404,6 +5878,8 @@
   {
     "id": "lib-pete-pit-gaping-earth",
     "name": "Pit of the Gaping Earth",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5429,6 +5905,8 @@
   {
     "id": "lib-pete-rusted-decay-ten-score-years",
     "name": "Rusted Decay of Ten-score Years",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5454,6 +5932,8 @@
   {
     "id": "lib-pete-stone-to-falling-dust",
     "name": "Stone to Falling Dust",
+    "technique": "Perdo",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5479,6 +5959,8 @@
   {
     "id": "lib-rean-circle-beast-warding",
     "name": "Circle of Beast Warding",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5500,6 +5982,8 @@
   {
     "id": "lib-rean-commanding-harnessed-beast",
     "name": "Commanding the Harnessed Beast",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5521,6 +6005,8 @@
   {
     "id": "lib-rean-disguise-putrid-aroma",
     "name": "Disguise of the Putrid Aroma",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5542,6 +6028,8 @@
   {
     "id": "lib-rean-gentle-beast",
     "name": "The Gentle Beast",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5567,6 +6055,8 @@
   {
     "id": "lib-rean-mastering-unruly-beast",
     "name": "Mastering the Unruly Beast",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5588,6 +6078,8 @@
   {
     "id": "lib-rean-panic-elephants-mouse",
     "name": "Panic of the Elephant's Mouse",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5609,6 +6101,8 @@
   {
     "id": "lib-rean-soothe-ferocious-bear",
     "name": "Soothe the Ferocious Bear",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5630,6 +6124,8 @@
   {
     "id": "lib-rean-vipers-gaze",
     "name": "Viper's Gaze",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5651,6 +6147,8 @@
   {
     "id": "lib-reaq-break-oncoming-wave",
     "name": "Break the Oncoming Wave",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5672,6 +6170,8 @@
   {
     "id": "lib-reaq-breath-winter",
     "name": "Breath of Winter",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5693,6 +6193,8 @@
   {
     "id": "lib-reaq-bridge-frost",
     "name": "Bridge of Frost",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5724,6 +6226,8 @@
   {
     "id": "lib-reaq-chaos-angry-waves",
     "name": "Chaos of the Angry Waves",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5749,6 +6253,8 @@
   {
     "id": "lib-reaq-cloak-ducks-feathers",
     "name": "Cloak of the Duck's Feathers",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5776,6 +6282,8 @@
   {
     "id": "lib-reaq-ice-drowning",
     "name": "Ice of Drowning",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5804,6 +6312,8 @@
   {
     "id": "lib-reaq-neptunes-wrath",
     "name": "Neptune's Wrath",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5830,6 +6340,8 @@
   {
     "id": "lib-reaq-parting-waves",
     "name": "Parting the Waves",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5851,6 +6363,8 @@
   {
     "id": "lib-reaq-pull-watery-grave",
     "name": "Pull of the Watery Grave",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5876,6 +6390,8 @@
   {
     "id": "lib-reaq-push-gentle-wave",
     "name": "Push of the Gentle Wave",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5897,6 +6413,8 @@
   {
     "id": "lib-reaq-tower-whirling-water",
     "name": "Tower of Whirling Water",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5918,6 +6436,8 @@
   {
     "id": "lib-reaq-waves-drowning-and-smashing",
     "name": "Waves of Drowning and Smashing",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5943,6 +6463,8 @@
   {
     "id": "lib-reau-clouds-thunderous-might",
     "name": "Clouds of Thunderous Might",
+    "technique": "Rego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5964,6 +6486,8 @@
   {
     "id": "lib-reau-gathering-stormy-might",
     "name": "Gathering of the Stormy Might",
+    "technique": "Rego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -5989,6 +6513,8 @@
   {
     "id": "lib-reau-ward-against-rain",
     "name": "Ward against Rain",
+    "technique": "Rego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6010,6 +6536,8 @@
   {
     "id": "lib-reau-wind-at-back",
     "name": "Wind at the Back",
+    "technique": "Rego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6037,6 +6565,8 @@
   {
     "id": "lib-reco-awaken-slumbering-corpse",
     "name": "Awaken the Slumbering Corpse",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6058,6 +6588,8 @@
   {
     "id": "lib-reco-curse-unruly-tongue",
     "name": "Curse of the Unruly Tongue",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6079,6 +6611,8 @@
   {
     "id": "lib-reco-despair-quivering-manacles",
     "name": "Despair of the Quivering Manacles",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6100,6 +6634,8 @@
   {
     "id": "lib-reco-endurance-berserkers",
     "name": "Endurance of the Berserkers",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6121,6 +6657,8 @@
   {
     "id": "lib-reco-gift-frogs-legs",
     "name": "Gift of the Frog's Legs",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6142,6 +6680,8 @@
   {
     "id": "lib-reco-gift-vigor",
     "name": "The Gift of Vigor",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6163,6 +6703,8 @@
   {
     "id": "lib-reco-leap-homecoming",
     "name": "The Leap of Homecoming",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6184,6 +6726,8 @@
   {
     "id": "lib-reco-lifting-dangling-puppet",
     "name": "Lifting the Dangling Puppet",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6205,6 +6749,8 @@
   {
     "id": "lib-reco-rise-feathery-body",
     "name": "Rise of the Feathery Body",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6226,6 +6772,8 @@
   {
     "id": "lib-reco-seven-league-stride",
     "name": "Seven-league Stride",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6247,6 +6795,8 @@
   {
     "id": "lib-reco-spasms-uncontrolled-hand",
     "name": "Spasms of the Uncontrolled Hand",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6268,6 +6818,8 @@
   {
     "id": "lib-reco-strings-unwilling-marionette",
     "name": "Strings of the Unwilling Marionette",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6289,6 +6841,8 @@
   {
     "id": "lib-reco-walking-corpse",
     "name": "The Walking Corpse",
+    "technique": "Rego",
+    "form": "Corpus",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6311,6 +6865,8 @@
   {
     "id": "lib-rehe-calling-council-trees",
     "name": "Calling the Council of the Trees",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {
       "Intellego": "free"
     },
@@ -6335,6 +6891,8 @@
   {
     "id": "lib-rehe-coils-entangling-plants",
     "name": "Coils of the Entangling Plants",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6356,6 +6914,8 @@
   {
     "id": "lib-rehe-dance-staves",
     "name": "Dance of the Staves",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6377,6 +6937,8 @@
   {
     "id": "lib-rehe-freeing-striding-tree",
     "name": "Freeing the Striding Tree",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6402,6 +6964,8 @@
   {
     "id": "lib-rehe-lord-trees",
     "name": "Lord of the Trees",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6427,6 +6991,8 @@
   {
     "id": "lib-rehe-repel-wooden-shafts",
     "name": "Repel the Wooden Shafts",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6448,6 +7014,8 @@
   {
     "id": "lib-rehe-strike-angered-branch",
     "name": "Strike of the Angered Branch",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6469,6 +7037,8 @@
   {
     "id": "lib-rehe-tangle-wood-and-thorns",
     "name": "Tangle of Wood and Thorns",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {
       "Muto": "adding"
     },
@@ -6492,6 +7062,8 @@
   {
     "id": "lib-rehe-treacherous-spear",
     "name": "The Treacherous Spear",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6513,6 +7085,8 @@
   {
     "id": "lib-rehe-twist-living-tree",
     "name": "Twist the Living Tree",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6538,6 +7112,8 @@
   {
     "id": "lib-rehe-ward-against-wood",
     "name": "Ward against Wood",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6559,6 +7135,8 @@
   {
     "id": "lib-reig-burst-sweeping-flames",
     "name": "Burst of the Sweeping Flames",
+    "technique": "Rego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6580,6 +7158,8 @@
   {
     "id": "lib-reig-leap-fire",
     "name": "Leap of the Fire",
+    "technique": "Rego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6605,6 +7185,8 @@
   {
     "id": "lib-reig-light-shaft-night",
     "name": "Light Shaft of the Night",
+    "technique": "Rego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6626,6 +7208,8 @@
   {
     "id": "lib-reig-tremulous-vault-torchs-flame",
     "name": "Tremulous Vault of the Torch's Flame",
+    "technique": "Rego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6647,6 +7231,8 @@
   {
     "id": "lib-reig-ward-against-heat-and-flames",
     "name": "Ward against Heat and Flames",
+    "technique": "Rego",
+    "form": "Ignem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6672,6 +7258,8 @@
   {
     "id": "lib-reim-captive-voice",
     "name": "The Captive Voice",
+    "technique": "Rego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6697,6 +7285,8 @@
   {
     "id": "lib-reim-confusion-insane-vibrations",
     "name": "Confusion of the Insane Vibrations",
+    "technique": "Rego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6722,6 +7312,8 @@
   {
     "id": "lib-reim-illusion-misplaced-castle",
     "name": "Illusion of the Misplaced Castle",
+    "technique": "Rego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6744,6 +7336,8 @@
   {
     "id": "lib-reim-illusion-shifted-image",
     "name": "Illusion of the Shifted Image",
+    "technique": "Rego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6765,6 +7359,8 @@
   {
     "id": "lib-reim-image-from-wizard-torn",
     "name": "Image from the Wizard Torn",
+    "technique": "Rego",
+    "form": "Imaginem",
     "requisites": {
       "Intellego": "adding"
     },
@@ -6793,6 +7389,8 @@
   {
     "id": "lib-reim-wizards-sidestep",
     "name": "Wizard's Sidestep",
+    "technique": "Rego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6819,6 +7417,8 @@
   {
     "id": "lib-reme-aura-rightful-authority",
     "name": "Aura of Rightful Authority",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6840,6 +7440,8 @@
   {
     "id": "lib-reme-call-to-slumber",
     "name": "The Call to Slumber",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6861,6 +7463,8 @@
   {
     "id": "lib-reme-coerce-spirits-night",
     "name": "Coerce the Spirits of the Night",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6882,6 +7486,8 @@
   {
     "id": "lib-reme-confusion-numbed-will",
     "name": "Confusion of the Numbed Will",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6903,6 +7509,8 @@
   {
     "id": "lib-reme-enslave-mortal-mind",
     "name": "Enslave the Mortal Mind",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6924,6 +7532,8 @@
   {
     "id": "lib-reme-exchange-two-minds",
     "name": "Exchange of the Two Minds",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6946,6 +7556,8 @@
   {
     "id": "lib-reme-incantation-summoning-dead",
     "name": "Incantation of Summoning the Dead",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6968,6 +7580,8 @@
   {
     "id": "lib-reme-scent-peaceful-slumber",
     "name": "Scent of Peaceful Slumber",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -6989,6 +7603,8 @@
   {
     "id": "lib-reme-shrouded-glen",
     "name": "The Shrouded Glen",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7011,6 +7627,8 @@
   {
     "id": "lib-reme-snap-awakening",
     "name": "Snap of Awakening",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7032,6 +7650,8 @@
   {
     "id": "lib-reme-visions-infernal-terrors",
     "name": "Visions of the Infernal Terrors",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7053,6 +7673,8 @@
   {
     "id": "lib-rete-creeping-chasm",
     "name": "Creeping Chasm",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7081,6 +7703,8 @@
   {
     "id": "lib-rete-crest-earth-wave",
     "name": "Crest of the Earth Wave",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7106,6 +7730,8 @@
   {
     "id": "lib-rete-earth-shock",
     "name": "Earth Shock",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7131,6 +7757,8 @@
   {
     "id": "lib-rete-earth-split-asunder",
     "name": "The Earth Split Asunder",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7165,6 +7793,8 @@
   {
     "id": "lib-rete-earths-carbuncle",
     "name": "The Earth's Carbuncle",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {
       "Muto": "adding"
     },
@@ -7188,6 +7818,8 @@
   {
     "id": "lib-rete-forgiving-earth",
     "name": "The Forgiving Earth",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7213,6 +7845,8 @@
   {
     "id": "lib-rete-hands-grasping-earth",
     "name": "Hands of the Grasping Earth",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {
       "Muto": "free"
     },
@@ -7236,6 +7870,8 @@
   {
     "id": "lib-rete-hermes-portal",
     "name": "Hermes' Portal",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7265,6 +7901,8 @@
   {
     "id": "lib-rete-invisible-sling-vilano",
     "name": "Invisible Sling of Vilano",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7286,6 +7924,8 @@
   {
     "id": "lib-rete-trackless-step",
     "name": "Trackless Step",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7313,6 +7953,8 @@
   {
     "id": "lib-rete-unseen-arm",
     "name": "Unseen Arm",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7334,6 +7976,8 @@
   {
     "id": "lib-rete-unseen-porter",
     "name": "The Unseen Porter",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7355,6 +7999,8 @@
   {
     "id": "lib-rete-unyielding-earth",
     "name": "Unyielding Earth",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7380,6 +8026,8 @@
   {
     "id": "lib-rete-wielding-invisible-sling",
     "name": "Wielding the Invisible Sling",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",
@@ -7401,6 +8049,8 @@
   {
     "id": "lib-revi-gather-essence-beast",
     "name": "Gather the Essence of the Beast",
+    "technique": "Rego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "createdAt": "2026-01-01T00:00:00.000",

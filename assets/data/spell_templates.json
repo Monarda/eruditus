@@ -2,6 +2,8 @@
   {
     "id": "tpl-crvi-restore-faded-threads",
     "name": "Restore the Faded Threads",
+    "technique": "Creo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -20,6 +22,8 @@
   {
     "id": "tpl-crvi-shell-false-determinations",
     "name": "Shell of False Determinations",
+    "technique": "Creo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -39,6 +43,8 @@
   {
     "id": "tpl-crvi-shell-opaque-mysteries",
     "name": "Shell of Opaque Mysteries",
+    "technique": "Creo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -58,6 +64,8 @@
   {
     "id": "tpl-inim-discern-images-truth-and-falsehood",
     "name": "Discern the Images of Truth and Falsehood",
+    "technique": "Intellego",
+    "form": "Imaginem",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -76,6 +84,8 @@
   {
     "id": "tpl-muvi-mirror-opposition-form",
     "name": "Mirror of Opposition (form)",
+    "technique": "Muto",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -94,6 +104,8 @@
   {
     "id": "tpl-muvi-shroud-magic",
     "name": "Shroud Magic",
+    "technique": "Muto",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -112,6 +124,8 @@
   {
     "id": "tpl-muvi-sorcerers-fork",
     "name": "The Sorcerer's Fork",
+    "technique": "Muto",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -130,6 +144,8 @@
   {
     "id": "tpl-muvi-wizards-boost-form",
     "name": "Wizard's Boost (Form)",
+    "technique": "Muto",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -148,6 +164,8 @@
   {
     "id": "tpl-muvi-wizards-reach-form",
     "name": "Wizard's Reach (Form)",
+    "technique": "Muto",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -166,6 +184,8 @@
   {
     "id": "tpl-pevi-demons-eternal-oblivion",
     "name": "Demon's Eternal Oblivion",
+    "technique": "Perdo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -184,6 +204,8 @@
   {
     "id": "tpl-pevi-disenchant",
     "name": "Disenchant",
+    "technique": "Perdo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -203,6 +225,8 @@
   {
     "id": "tpl-pevi-masking-odor-magic",
     "name": "Masking the Odor of Magic",
+    "technique": "Perdo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -221,6 +245,8 @@
   {
     "id": "tpl-pevi-unravelling-fabric-form",
     "name": "Unravelling the Fabric of (Form)",
+    "technique": "Perdo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -239,6 +265,8 @@
   {
     "id": "tpl-pevi-wind-mundane-silence",
     "name": "Wind of Mundane Silence",
+    "technique": "Perdo",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -257,6 +285,8 @@
   {
     "id": "tpl-rean-ward-against-beasts-legend",
     "name": "Ward against the Beasts of Legend",
+    "technique": "Rego",
+    "form": "Animal",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -278,6 +308,8 @@
   {
     "id": "tpl-reaq-ward-against-faeries-waters",
     "name": "Ward against Faeries of the Waters",
+    "technique": "Rego",
+    "form": "Aquam",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -299,6 +331,8 @@
   {
     "id": "tpl-reau-ward-against-faeries-air",
     "name": "Ward against Faeries of the Air",
+    "technique": "Rego",
+    "form": "Auram",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -320,6 +354,8 @@
   {
     "id": "tpl-rehe-ward-against-faeries-wood",
     "name": "Ward against Faeries of the Wood",
+    "technique": "Rego",
+    "form": "Herbam",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -341,6 +377,8 @@
   {
     "id": "tpl-reme-ring-warding-against-spirits",
     "name": "Ring of Warding against Spirits",
+    "technique": "Rego",
+    "form": "Mentem",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -362,6 +400,8 @@
   {
     "id": "tpl-rete-ward-against-faeries-mountain",
     "name": "Ward against Faeries of the Mountain",
+    "technique": "Rego",
+    "form": "Terram",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -383,6 +423,8 @@
   {
     "id": "tpl-revi-circular-ward-against-demons",
     "name": "Circular Ward against Demons",
+    "technique": "Rego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -404,6 +446,8 @@
   {
     "id": "tpl-revi-maintaining-demanding-spell",
     "name": "Maintaining the Demanding Spell",
+    "technique": "Rego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -422,6 +466,8 @@
   {
     "id": "tpl-revi-opening-intangible-tunnel",
     "name": "Opening the Intangible Tunnel",
+    "technique": "Rego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
@@ -440,6 +486,8 @@
   {
     "id": "tpl-revi-suppressing-wizards-handiwork",
     "name": "Suppressing the Wizard's Handiwork",
+    "technique": "Rego",
+    "form": "Vim",
     "requisites": {},
     "source": "published",
     "selectedModifiers": {},
