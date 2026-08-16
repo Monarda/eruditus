@@ -830,6 +830,42 @@ Real work, none of it blocking the import.
   change broke something, which is how it rotted twice.
 - **Files:** test helpers, widget test templates, `integration_test/`
 
+### 51. `flutter test --platform chrome` Hangs Forever on Windows — Use `-d chrome` Instead — ✅ RESOLVED 2026-08-16
+- [x] Root cause found and fix confirmed: full suite green, `585/585`, under
+      real Chrome
+- **Symptom:** `flutter test --platform chrome` compiles cleanly, launches
+  headless Chrome, connects the DevTools/CDP channel — then sits at 0% CPU
+  forever with zero further output, on *any* test file, including a
+  dependency-free model test with no Bloc/DB/FFI involved. Looks like a
+  networking/permission block (raw TCP shows `Established`, nothing fails at
+  the socket layer) but isn't one. Three hypotheses were chased and falsified
+  before finding the real cause: not the "Real Bloc Hang" above (that's
+  `flutter_tester`-specific and this reproduces on a file that never touches
+  a Bloc), not `sqfliteFfiInit()` throwing on web (the package's own source
+  shows it fails fast and loud, not silently), and not Chrome's Local Network
+  Access policy blocking the page's report-back WebSocket (allowlisting
+  `localhost` in `chrome://policy` changed nothing).
+- **Actual root cause (confirmed by attaching to Chrome's DevTools Protocol
+  directly and reading the page's own console/network events):**
+  `--platform chrome` is a deprecated `package:test` browser-platform code
+  path whose local dev server fails to serve CanvasKit's WASM/JS binaries on
+  Windows — `canvaskit/chromium/canvaskit.wasm` 404s even though the file
+  exists on disk in the SDK cache
+  (`<flutter-sdk>/bin/cache/flutter_web_sdk/canvaskit/chromium/`). Every
+  widget test needs a working renderer to initialize; the promise waiting on
+  that fetch never resolves, so nothing ever runs. Exact match — same 404'd
+  path, same red-herring "Null check operator" console warning traced to
+  unrelated 2019-era code — to
+  [flutter/flutter#162798](https://github.com/flutter/flutter/issues/162798),
+  closed 2026-07-14 (days before this project's SDK build) by deprecating
+  the flag rather than fixing the server.
+- **Fix: use `flutter test -d chrome` instead of `--platform chrome`.** Same
+  device-targeting mechanism `flutter run -d chrome` already uses (which is
+  why that path always worked fine) — correctly serves CanvasKit.
+- **Files:** none — command-line/tooling gotcha, not a code change. A note
+  pointing here lives in `tool/setup_web.dart` so the next person (or CI)
+  running web tests doesn't waste time rediscovering it.
+
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to the one-Range/Duration/Target constraint
 - [ ] Add migration for legacy spell saves (if any)

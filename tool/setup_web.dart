@@ -16,6 +16,11 @@
 // missing (they're gitignored — generated, not checked in).
 //
 //   dart run tool/setup_web.dart
+//
+// Running the test suite against this target: use `flutter test -d chrome`,
+// not `flutter test --platform chrome`. The latter is deprecated and hangs
+// forever on Windows (CanvasKit 404s from its dev server, upstream bug —
+// see `.superpowers/todo.md` item 51 for the full trace and confirmation).
 import 'dart:io';
 import 'dart:typed_data';
 
