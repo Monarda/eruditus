@@ -339,8 +339,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// stranded modifier rather than let it keep affecting the level invisibly.
   ///
   /// A `storyguideRuling` is never touched. It is not invalidated by changing
-  /// Duration, and no UI sets it yet — silently wiping one would make the
-  /// deferred storyguide-ruling UI a second migration.
+  /// Duration, Technique, Form, or base effect — the declaration is a
+  /// judgement call independent of the spell's configuration, and the
+  /// three-way RitualSection control now lets a user set it directly.
   SpellDraft _withRitualDeclaration(SpellDraft draft, {required bool reapplyDefault}) {
     if (draft.ritualDeclaration == RitualDeclaration.storyguideRuling) return draft;
 

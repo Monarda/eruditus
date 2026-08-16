@@ -134,4 +134,92 @@ void main() {
     await tester.tap(find.byKey(const Key('ritual-radio-none')));
     expect(reported, [RitualDeclaration.none]);
   });
+
+  testWidgets('the "not declared" radio is selected when declaration is none',
+      (tester) async {
+    await tester.pumpWidget(_host(RitualSection(
+      ritualStatus: const RitualStatus.notRitual(),
+      declaration: RitualDeclaration.none,
+      showLastingCreationOption: true,
+      durationName: 'Momentary',
+      targetName: 'Individual',
+      guidelineIsSuggested: false,
+      onDeclarationChanged: (_) {},
+    )));
+
+    final context = tester.element(find.byKey(const Key('ritual-radio-none')));
+    expect(
+      RadioGroup.maybeOf<RitualDeclaration>(context)?.groupValue,
+      RitualDeclaration.none,
+    );
+  });
+
+  testWidgets(
+      'the "creates something lasting" radio is selected when declaration is lastingCreation',
+      (tester) async {
+    await tester.pumpWidget(_host(RitualSection(
+      ritualStatus: const RitualStatus.notRitual(),
+      declaration: RitualDeclaration.lastingCreation,
+      showLastingCreationOption: true,
+      durationName: 'Momentary',
+      targetName: 'Individual',
+      guidelineIsSuggested: false,
+      onDeclarationChanged: (_) {},
+    )));
+
+    final context =
+        tester.element(find.byKey(const Key('ritual-radio-lastingCreation')));
+    expect(
+      RadioGroup.maybeOf<RitualDeclaration>(context)?.groupValue,
+      RitualDeclaration.lastingCreation,
+    );
+  });
+
+  testWidgets(
+      'the "storyguide ruling" radio is selected when declaration is storyguideRuling',
+      (tester) async {
+    await tester.pumpWidget(_host(RitualSection(
+      ritualStatus: const RitualStatus.notRitual(),
+      declaration: RitualDeclaration.storyguideRuling,
+      showLastingCreationOption: false,
+      durationName: 'Sun',
+      targetName: 'Individual',
+      guidelineIsSuggested: false,
+      onDeclarationChanged: (_) {},
+    )));
+
+    final context =
+        tester.element(find.byKey(const Key('ritual-radio-storyguideRuling')));
+    expect(
+      RadioGroup.maybeOf<RitualDeclaration>(context)?.groupValue,
+      RitualDeclaration.storyguideRuling,
+    );
+  });
+
+  testWidgets(
+      'renders and selects the "creates something lasting" radio for an ineligible draft that already carries the declaration',
+      (tester) async {
+    // Regression for Finding 1: a template-instantiated draft (e.g.
+    // Disenchant, Perdo Vim) can carry declaration: lastingCreation while
+    // showLastingCreationOption is false, because TemplateInstantiated
+    // copies the catalog's declaration verbatim. The tile must still
+    // render and show as selected, or the declaration becomes
+    // unrecoverable the instant the user touches this control.
+    await tester.pumpWidget(_host(RitualSection(
+      ritualStatus: const RitualStatus.notRitual(),
+      declaration: RitualDeclaration.lastingCreation,
+      showLastingCreationOption: false,
+      durationName: 'Momentary',
+      targetName: 'Individual',
+      guidelineIsSuggested: false,
+      onDeclarationChanged: (_) {},
+    )));
+
+    final tile = find.byKey(const Key('ritual-radio-lastingCreation'));
+    expect(tile, findsOneWidget);
+    expect(
+      RadioGroup.maybeOf<RitualDeclaration>(tester.element(tile))?.groupValue,
+      RitualDeclaration.lastingCreation,
+    );
+  });
 }

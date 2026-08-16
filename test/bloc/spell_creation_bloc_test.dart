@@ -984,6 +984,9 @@ void main() {
         bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
     );
 
+    // The first two events establish the lastingCreation default -- see
+    // 'defaults to lastingCreation for any Creo + Momentary draft' above,
+    // which proves that premise directly.
     blocTest<SpellCreationBloc, SpellCreationState>(
       'switching from lastingCreation to storyguideRuling replaces the declaration',
       build: () => SpellCreationBloc(
@@ -996,6 +999,9 @@ void main() {
         bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
     );
 
+    // The first two events establish the lastingCreation default -- see
+    // 'defaults to lastingCreation for any Creo + Momentary draft' above,
+    // which proves that premise directly.
     blocTest<SpellCreationBloc, SpellCreationState>(
       'an explicit clear from storyguideRuling reports none, not the lastingCreation default',
       build: () => SpellCreationBloc(

@@ -84,7 +84,8 @@ class RitualSection extends StatelessWidget {
                 title: Text('Not declared'),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
-              if (showLastingCreationOption)
+              if (showLastingCreationOption ||
+                  declaration == RitualDeclaration.lastingCreation)
                 RadioListTile<RitualDeclaration>(
                   key: const Key('ritual-radio-lastingCreation'),
                   value: RitualDeclaration.lastingCreation,
@@ -105,7 +106,7 @@ class RitualSection extends StatelessWidget {
                 title:
                     Text('Storyguide ruling: too spectacular to be freely available'),
                 subtitle: Text(
-                  "At the troupe's discretion -- not something the guideline "
+                  "At the troupe's discretion — not something the guideline "
                   'determines (Core Rules line 12352).',
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
