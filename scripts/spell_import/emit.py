@@ -256,6 +256,7 @@ def build_template(
     design: designline.Design,
     realm_by_spell_id: dict[str, str] | None = None,
     analogy_rationale: str | None = None,
+    chosen_slots: dict[str, str] | None = None,
 ) -> dict:
     """Build a `SpellTemplate.fromMap`-shaped entry for a General spell.
 
@@ -283,10 +284,20 @@ def build_template(
     template_id = "tpl-" + slug.removeprefix("lib-")
 
     realm_by_spell_id = realm_by_spell_id or {}
-    chosen_slots: dict[str, str] = {}
+    resolved_slots: dict[str, str] = {}
     realm = realm_by_spell_id.get(slug)
     if realm is not None and "realm" in catalog.open_slots(base_effect_id):
-        chosen_slots["realm"] = realm
+        resolved_slots["realm"] = realm
+    # A caller-supplied override (e.g. extract_spells.ANALOGY_BASE_EFFECTS's
+    # own "chosen_slots" entries) for a slot kind other than realm --
+    # guarded the same way, against this base effect's own declared open
+    # slots, so a stray kind is silently dropped rather than producing a
+    # chosenSlots key validateSpellAgainstCatalog's check 7 would reject.
+    if chosen_slots:
+        open_kinds = catalog.open_slots(base_effect_id)
+        for kind, value in chosen_slots.items():
+            if kind in open_kinds:
+                resolved_slots[kind] = value
 
     template = {
         "id": template_id,
@@ -320,8 +331,8 @@ def build_template(
     if block.stat.is_ritual:
         template["ritualDeclaration"] = "lastingCreation"
 
-    if chosen_slots:
-        template["chosenSlots"] = chosen_slots
+    if resolved_slots:
+        template["chosenSlots"] = resolved_slots
 
     if analogy_rationale is not None:
         template["analogyRationale"] = analogy_rationale

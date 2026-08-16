@@ -666,6 +666,28 @@ class OpenSlotEmissionTest(unittest.TestCase):
         template = emit.build_template(block, "revi-G1", self.catalog, design)
         self.assertNotIn("chosenSlots", template)
 
+    def test_build_template_merges_caller_supplied_chosen_slots(self):
+        design = designline.parse_design("(Base effect, +2 Voice)")
+        block = _block("Test Spell", "Perdo", "Imaginem", None)
+        template = emit.build_template(
+            block, "pevi-G2", self.catalog, design,
+            chosen_slots={"specificType": "Creo Imaginem"},
+        )
+        self.assertEqual(template["chosenSlots"], {"specificType": "Creo Imaginem"})
+
+    def test_build_template_drops_a_chosen_slot_kind_the_effect_does_not_declare_open(self):
+        # pevi-G3 has no openSlots at all -- a caller-supplied kind, if
+        # passed, must not leak onto a guideline that never declared
+        # anything open. Mirrors test_build_template_omits_chosenSlots_
+        # when_the_effect_declares_no_open_slot above, for the new parameter.
+        design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
+        block = _block("Demon's Eternal Oblivion", "Perdo", "Vim", None)
+        template = emit.build_template(
+            block, "pevi-G3", self.catalog, design,
+            chosen_slots={"specificType": "something"},
+        )
+        self.assertNotIn("chosenSlots", template)
+
 
 class PrintedLevelEmissionTest(unittest.TestCase):
     """`printedLevel` is the rulebook's printed level, emitted as its own field.
