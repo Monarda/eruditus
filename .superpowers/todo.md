@@ -53,8 +53,8 @@ resolution of `Special` Duration/Target; *The Bountiful Feast* via item 26's
 `DESIGN_LINE_TYPOS` fix for its missing closing paren; and *Hermes' Portal*
 via item 45's transport-distance tokenizer fix); and item 46's six exception
 spells (*Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*,
-*Whispering Winds*, *Watching Ward*, *Mists of Change*), recorded outside
-this table entirely since they aren't blocked at all — see the row above.
+*Whispering Winds*, *Watching Ward*, *Mists of Change*), which have their
+own row in the table below rather than counting toward the blocked total.
 Every one of the 10 currently-blocked spells now maps to exactly one row
 below; none are unaccounted for.
 
