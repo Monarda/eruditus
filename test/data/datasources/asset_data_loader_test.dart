@@ -7,6 +7,8 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -131,6 +133,7 @@ void main() {
     expect(idsWith(RitualRequirement.required), {
       'craq-25b', 'crau-25', 'crig-25b', 'crte-25b',
       'pevi-G9', 'pevi-G10',
+      'crvi-hohmc-G1',
     });
 
     expect(idsWith(RitualRequirement.suggested), {
@@ -239,6 +242,22 @@ void main() {
     // Ritual-status correctness is assertion 2 in
     // test/data/published_spell_import_test.dart, which checks every spell,
     // not just a named few.
+  });
+
+  test('the Faerie Chains familiar-binding base effect loads with its Virtue gate', () async {
+    final effects = await loader.loadBaseEffects();
+    final effect = effects.firstWhere((e) => e.id == 'crvi-hohmc-G1');
+
+    expect(effect.technique, 'Creo');
+    expect(effect.form, 'Vim');
+    expect(effect.isGeneral, isTrue);
+    expect(effect.ritualRequirement, RitualRequirement.required);
+    expect(effect.requiresVirtue, 'Faerie Magic');
+    expect(effect.effectFormula?.kind, GeneralEffectKind.mightThreshold);
+    expect(effect.effectFormula?.offsetMagnitudes, -3);
+    expect(effect.provenance.citations, [
+      const Citation(bookId: 'arm5-hohmc'),
+    ]);
   });
 
   test("every spell's referenced ids exist in the built-in catalogs", () async {
