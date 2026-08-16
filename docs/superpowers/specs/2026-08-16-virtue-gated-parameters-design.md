@@ -196,6 +196,26 @@ information lives on the pickers themselves, not the Ritual banner, since a
 parameter or base effect can require a Virtue without being Ritual (Road) and
 vice versa (Year, already Ritual, requires no Virtue).
 
+`DropdownButtonFormField` reuses each item's widget for the closed-field
+display, not just the open menu, so this note stays visible once a
+Virtue-gated entry is selected — no separate persistent banner is needed for
+that reason alone.
+
+**Two known limitations, accepted rather than solved here:**
+
+- Fire's Form restriction is explained nowhere — an out-of-scope Form simply
+  never shows the item, so nobody learns *why* Fire is missing from a
+  Creo Corpus draft, for instance.
+- The base-effect dropdown's description text can be long enough that
+  `TextOverflow.ellipsis` clips the trailing note — an existing risk for the
+  `(General)`/`(Base N)` suffix today, marginally worse with
+  `, requires Faerie Magic` appended.
+
+Both were weighed against adding a caption line (`InputDecoration.helperText`)
+or a single grouped requirements banner near `RitualSection`; kept as
+trailing dropdown-item text for consistency with the existing
+`(+magnitude)`/`(General)` pattern and to avoid a new widget for this item.
+
 ### 5. `RitualReason.ritualOnlyRange` (closing the engine gap)
 
 `RitualReason` gains a fourth generically-named member,
