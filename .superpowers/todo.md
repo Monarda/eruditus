@@ -452,7 +452,7 @@ importer work, with `spell.dart` untouched.
 - **Spec/Plan:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`,
   `docs/superpowers/plans/2026-08-04-level-adjustments.md`
 
-### 19. Size-Ladder Ceiling
+### 19. Size-Ladder Ceiling — ✅ COMPLETE (2026-08-16)
 
 **Its architecture half is in section 0** — the `ModifierScope` Target restriction
 is model work on `modifier.dart`, the same foundation as item 40. The +5 rung is
@@ -469,11 +469,20 @@ using it — nobody had ticked the checkbox, but the data already reflects the
       of the 2026-08-15 check; no spell needs it blocked
 - [x] Decide: add one rung, or make the ladder open-ended? — **answered by the
       data: one rung was added**, not an open-ended scheme
-- [ ] Add a Target restriction to `ModifierScope` (`excludeTargets` or
-      `allowedTargets`) and check it in `appliesTo()` alongside the existing
-      technique/form/effectIds checks — **still open**, verified 2026-08-15
-      against `lib/models/modifier.dart`: `ModifierScope.appliesTo()` still
-      takes only `technique`/`form`/`baseEffectId`, no target parameter
+- [x] Add a Target restriction to `ModifierScope` (`excludeTargets`, not an
+      allow-list — mirrors the existing `excludeTechniques` carve-out) and
+      check it in `appliesTo()` alongside the existing
+      technique/form/effectIds checks — **✅ DONE 2026-08-16.**
+      `ModifierScope` gained `excludeTargets` and `appliesTo()` a `targetId`
+      parameter; `size-mentem` now carries
+      `excludeTargets: ["target-individual"]`. Wired all the way through:
+      the creation screen's picker filters by `draft.target?.id`, and
+      `SpellCreationBloc`'s `TargetSelected` handler now prunes stale
+      selections via `_withPrunedModifiers` — previously the only
+      Technique/Form/BaseEffect/Target handler that didn't prune, which was
+      the actual bug (switching Target to Individual left a stale
+      `size-mentem` selection silently contributing magnitude). See
+      `docs/superpowers/specs/2026-08-16-modifier-target-scope-design.md`.
 
 **No spell is blocked by this item anymore.** *Wrath of Whirling Winds and
 Water* (CrAu 40), *Rain of Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe
@@ -481,7 +490,7 @@ Water* (CrAu 40), *Rain of Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe
 Form's `-5` option. What remains is the correctness gap below, not an import
 blocker.
 
-**⚠️ Mentem's Size exemption is narrower than the code enforces.** Definitive
+**✅ Mentem's Size exemption is now enforced, not just documented.** Definitive
 Edition line 14900: "Minds do not have a size, so size modifiers do not apply to
 Mentem effects with **Individual targets**. However, minds can be counted, so for
 Groups you still need to boost the size to affect more people."
@@ -489,13 +498,13 @@ Groups you still need to boost the size to affect more people."
 - **Verified 2026-08-09:** the `size-mentem` modifier correctly exists in the data
   and the test, because Mentem *can* take Size for Group/Room/Structure/Boundary
   targets. The published spell import test expects it.
-- **The gap is architectural:** `ModifierScope` has no Target field, so
-  `size-mentem` applies to all Mentem spells. Its description says "Applies when
-  targeting multiple minds via area targets", but nothing enforces that — a user
-  could apply it to an Individual Mentem spell.
-- **For now:** item 24's adjustments can absorb any difference on *Poisoning the
-  Will*; its Boundary target makes it ineligible for scoped sizing under the
-  current architecture anyway.
+- **The architectural gap is closed 2026-08-16:** `ModifierScope.excludeTargets`
+  plus `appliesTo()`'s new `targetId` parameter enforce the exemption —
+  `size-mentem` is unselectable, and pruned if already selected, once Target is
+  Individual, rather than relying on its description text alone.
+- *Poisoning the Will*'s Boundary target remains outside scoped sizing for a
+  separate, still-deferred reason — see *Related deferred work* below,
+  unchanged by this fix.
 
 **Related deferred work:** the Spell Modifiers spec deferred sizing for Part,
 Group, Room, Structure and Boundary targets entirely (its ladders assume
