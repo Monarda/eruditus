@@ -1676,11 +1676,23 @@ the committed assets was regenerated to carry them.
   derivation, independent of this capability (see item 25's body for the
   complication found while designing this).
 - Creation-screen UI for picking a cross-Form base effect interactively.
+- `SpellDraft` has no `analogyRationale` field, so instantiating a
+  by-analogy `SpellTemplate` (once one exists) will always seed `null`
+  and trip check 8 — the picker-path reasoning in the design spec's §4
+  doesn't cover template instantiation, which seeds `technique`/`form`
+  from a source that can already diverge from the base effect. Latent
+  today (no by-analogy template exists yet, and
+  `test_no_spell_carries_an_analogy_rationale_yet` pins that it stays
+  that way until a real one is built) — but the next person adding an
+  analogy template needs `SpellDraft` to gain the field and thread it
+  through `toSpell()`/`validateSpellDraft` first.
 
 - **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
   `lib/models/resolved_spell.dart`, `lib/models/resolved_template.dart`,
   `lib/engine/spell_engine.dart`, `scripts/spell_import/emit.py`,
-  `scripts/spell_import/extract_spells.py`
+  `scripts/spell_import/extract_spells.py`,
+  `test/data/published_spell_import_test.dart`,
+  `assets/data/spell_library.json`, `assets/data/spell_templates.json`
 
 ---
 

@@ -175,6 +175,13 @@ void main() {
     expect(find.textContaining('Unavailable'), findsOneWidget);
     expect(find.textContaining('deleted-custom-effect'), findsOneWidget);
     expect(find.textContaining('Level'), findsNothing);
+    // This branch changed ResolvedSpell.technique/.form to read from the
+    // record even when baseEffect is null (previously they went null). The
+    // unresolved card's subtitle replaces technique/form with the
+    // "Unavailable -- missing ..." message, so that survival isn't visible
+    // in rendered text here; pin it directly on the entry instead.
+    expect(unresolved.technique, 'Creo');
+    expect(unresolved.form, 'Ignem');
   });
 
   testWidgets('shows a Ritual chip only when the spell is a Ritual',

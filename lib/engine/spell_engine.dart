@@ -79,7 +79,7 @@ class SpellEngine {
     // The catalog-dependent invariants live in one place, shared with
     // SpellRepository's write-time block and ResolvedSpell.problems, so the
     // draft path and the record path cannot drift.
-    if (draft.baseEffect != null) {
+    if (draft.baseEffect != null && draft.technique != null && draft.form != null) {
       errors.addAll(validateSpellAgainstCatalog(
         effect: draft.baseEffect!,
         technique: draft.technique ?? '',

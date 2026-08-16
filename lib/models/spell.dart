@@ -122,7 +122,7 @@ List<String> validateSpellAgainstCatalog({
   //    it is deleted, not merely unreachable, because the shape now makes it
   //    impossible rather than checked.
   for (final art in requisites.keys) {
-    if (art == effect.technique || art == effect.form) {
+    if (art == technique || art == form) {
       problems.add("Requisite art cannot be the spell's own technique or form");
     }
   }
@@ -258,7 +258,7 @@ class Spell {
   /// Non-null only when [technique]/[form] differ from the resolved base
   /// effect's own technique/form -- the citation-backed reason a human
   /// chose to apply that guideline outside its own Form. Null whenever they
-  /// match; enforced by `validateSpellAgainstCatalog`'s check 8 (Task 3).
+  /// match; enforced by `validateSpellAgainstCatalog`'s check 8.
   final String? analogyRationale;
 
   Spell({

@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 7;
+  static const int _databaseVersion = 8;
 
   final Database db;
 
@@ -47,6 +47,19 @@ class AppDatabase {
         // for free. Bumped and dropped anyway, for the same reason as v5/v6 —
         // old rows don't have the new keys and a silent per-field default is
         // one more implicit behavior to maintain forever.
+        // The v8 bump adds `technique`/`form` (required) and
+        // `analogyRationale` (optional) to the `spells` blob. `SpellTemplate`
+        // gained the same fields, but templates are asset-only (loaded from
+        // `assets/data/spell_templates.json` by `AssetDataLoader`, never
+        // persisted through this database), so there is nothing to migrate
+        // there. Unlike v5/v6/v7, this one cannot be translated by a silent
+        // per-field default even in principle: `technique`/`form` are
+        // `requireField`-checked in `Spell.fromMap` with no fallback, so an
+        // old row without them throws `FormatException` on read rather than
+        // parsing with a wrong-but-plausible value. Bumped and dropped for
+        // the same policy as v4 through v7 -- backward compatibility is not
+        // a goal for this prototype -- but here the drop is load-bearing, not
+        // just consistent: without it, every read of an old row fails.
         onUpgrade: (db, oldVersion, newVersion) async {
           for (final table in const ['spells', 'custom_factors']) {
             await db.execute('DROP TABLE IF EXISTS $table');

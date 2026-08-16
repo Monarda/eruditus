@@ -29,7 +29,7 @@ class BackupImportResult {
 }
 
 class BackupService {
-  static const String _supportedVersion = '4.0';
+  static const String _supportedVersion = '5.0';
 
   final SpellRepository spellRepository;
   final ConfigurationRepository configRepository;
