@@ -300,5 +300,132 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "range-road",
+    "name": "Road",
+    "category": "Range",
+    "magnitude": 2,
+    "requiresVirtue": "Faerie Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-bargain",
+    "name": "Bargain",
+    "category": "Duration",
+    "magnitude": 4,
+    "requiresRitual": true,
+    "requiresVirtue": "Faerie Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-fire",
+    "name": "Fire",
+    "category": "Duration",
+    "magnitude": 3,
+    "requiresRitual": true,
+    "requiresVirtue": "Faerie Magic",
+    "scope": {
+      "forms": ["Ignem", "Imaginem"]
+    },
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-until-condition",
+    "name": "Until (Condition)",
+    "category": "Duration",
+    "magnitude": 4,
+    "requiresRitual": true,
+    "requiresVirtue": "Faerie Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "duration-year-plus-one",
+    "name": "Year + 1",
+    "category": "Duration",
+    "magnitude": 4,
+    "requiresRitual": true,
+    "requiresVirtue": "Faerie Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "target-bloodline",
+    "name": "Bloodline",
+    "category": "Target",
+    "magnitude": 3,
+    "requiresVirtue": "Faerie Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "range-symbol",
+    "name": "Symbol",
+    "category": "Range",
+    "magnitude": 4,
+    "requiresRitual": true,
+    "requiresVirtue": "Symbolic Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-houses-hermes-mystery-cults"
+      }
+    ]
+  },
+  {
+    "id": "duration-symbol",
+    "name": "Symbol",
+    "category": "Duration",
+    "magnitude": 4,
+    "requiresRitual": true,
+    "requiresVirtue": "Symbolic Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-houses-hermes-mystery-cults"
+      }
+    ]
+  },
+  {
+    "id": "target-symbol",
+    "name": "Symbol",
+    "category": "Target",
+    "magnitude": 4,
+    "requiresRitual": true,
+    "requiresVirtue": "Symbolic Magic",
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-houses-hermes-mystery-cults"
+      }
+    ]
   }
 ]

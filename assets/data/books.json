@@ -4,5 +4,11 @@
     "title": "Ars Magica Fifth Edition",
     "abbreviation": "ArM5",
     "edition": "5e"
+  },
+  {
+    "id": "arm5-houses-hermes-mystery-cults",
+    "title": "Ars Magica 5e - Houses of Hermes: Mystery Cults",
+    "abbreviation": "HoH:MC",
+    "edition": "5e"
   }
 ]

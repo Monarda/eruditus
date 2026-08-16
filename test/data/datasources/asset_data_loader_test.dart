@@ -35,10 +35,10 @@ void main() {
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });
 
-  test('loadParameters loads all 25 built-in parameters', () async {
+  test('loadParameters loads all 34 built-in parameters', () async {
     final parameters = await loader.loadParameters();
 
-    expect(parameters.length, 25);
+    expect(parameters.length, 34);
     expect(parameters.every((p) => p.provenance.source == PublicationSource.published), isTrue);
     expect(
       parameters.any((p) => p.name == 'Eye' && p.category == 'Range' && p.magnitude == 1),
@@ -52,14 +52,21 @@ void main() {
         reason: 'Bound was a data error; the rulebook name is Boundary');
   });
 
-  test('exactly Year and Boundary are flagged ritual-only', () async {
+  test('every ritual-only parameter is flagged, including item 17\'s additions', () async {
     final parameters = await loader.loadParameters();
 
     final flagged = parameters.where((p) => p.requiresRitual).map((p) => p.id).toSet();
 
     // Hardcoded, unlike the base-effect counts: parameters.json is the small
-    // hand-curated list todo item 5 deliberately left as literals.
-    expect(flagged, {'duration-year', 'target-boundary'});
+    // hand-curated list todo item 5 deliberately left as literals. Grew from
+    // {duration-year, target-boundary} to include item 17's 7 new
+    // ritual-only entries (Bargain/Fire/Until (Condition)/Year + 1, all
+    // three Symbol parameters).
+    expect(flagged, {
+      'duration-year', 'target-boundary',
+      'duration-bargain', 'duration-fire', 'duration-until-condition',
+      'duration-year-plus-one', 'range-symbol', 'duration-symbol', 'target-symbol',
+    });
 
     // Vision shares Boundary's +4 magnitude but is explicitly not ritual-only
     // (Core Rules line 12345: Formulaic spells "may have Vision target, if
@@ -68,6 +75,45 @@ void main() {
       parameters.firstWhere((p) => p.id == 'target-vision').requiresRitual,
       isFalse,
     );
+  });
+
+  test('exactly the Faerie Magic and Symbolic Magic parameters are flagged requiresVirtue', () async {
+    final parameters = await loader.loadParameters();
+
+    final byVirtue = <String, Set<String>>{};
+    for (final parameter in parameters) {
+      if (parameter.requiresVirtue == null) continue;
+      byVirtue.putIfAbsent(parameter.requiresVirtue!, () => {}).add(parameter.id);
+    }
+
+    expect(byVirtue['Faerie Magic'], {
+      'range-road', 'duration-bargain', 'duration-fire',
+      'duration-until-condition', 'duration-year-plus-one', 'target-bloodline',
+    });
+    expect(byVirtue['Symbolic Magic'], {
+      'range-symbol', 'duration-symbol', 'target-symbol',
+    });
+  });
+
+  test('Fire is scoped to Ignem and Imaginem; every other parameter is unrestricted', () async {
+    final parameters = await loader.loadParameters();
+
+    for (final parameter in parameters) {
+      if (parameter.id == 'duration-fire') {
+        expect(parameter.scope.forms, ['Ignem', 'Imaginem']);
+      } else {
+        expect(parameter.scope.forms, isEmpty, reason: parameter.id);
+      }
+    }
+  });
+
+  test('loadBooks includes the Houses of Hermes: Mystery Cults supplement', () async {
+    final books = await loader.loadBooks();
+    final supplement =
+        books.firstWhere((b) => b.id == 'arm5-houses-hermes-mystery-cults');
+    expect(supplement.title, 'Ars Magica 5e - Houses of Hermes: Mystery Cults');
+    expect(supplement.abbreviation, 'HoH:MC');
+    expect(supplement.edition, '5e');
   });
 
   test('the ritual-flagged base effects are exactly the reviewed sets', () async {

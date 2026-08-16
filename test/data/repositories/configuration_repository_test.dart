@@ -67,7 +67,7 @@ void main() {
 
     final all = await repository.getAllParameters();
 
-    expect(all.length, 26); // 25 built-in + 1 custom
+    expect(all.length, 35); // 34 built-in + 1 custom
   });
 
   test('getAllModifiers combines built-in and custom modifiers', () async {
