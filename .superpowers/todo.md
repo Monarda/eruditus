@@ -51,9 +51,12 @@ Sky*); and Bucket B's 5 import-blocker fixes (*Wind at the Back*, *Trackless
 Step* and *The Earth Split Asunder* via item 26's `SPECIAL_PARAMETER_BASIS`
 resolution of `Special` Duration/Target; *The Bountiful Feast* via item 26's
 `DESIGN_LINE_TYPOS` fix for its missing closing paren; and *Hermes' Portal*
-via item 45's transport-distance tokenizer fix). Every one of the 16
-currently-blocked spells now maps to exactly one row below; none are
-unaccounted for.
+via item 45's transport-distance tokenizer fix); and item 46's six exception
+spells (*Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*,
+*Whispering Winds*, *Watching Ward*, *Mists of Change*), recorded outside
+this table entirely since they aren't blocked at all — see the row above.
+Every one of the 10 currently-blocked spells now maps to exactly one row
+below; none are unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
@@ -61,7 +64,7 @@ unaccounted for.
 | Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, re-checked once more during Bucket-B planning and re-confirmed as a genuine two-way tie — this is the item's final decision, not a case still pending resolution |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
-| General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth* and *Wizard's Vigil* now import as exception spells (item 46) |
+| General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's Communion* now import as exception spells (item 46) |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 3 | see item **24** |
 | No printed design line and no legitimate derivation | 0 | see item **27** — corrected from 1: *Whispering Winds* now imports as an exception spell (item 46) rather than staying permanently blocked |
 | `_split_parts`/`_TOKEN` punctuation edge cases | 0 | **29** — corrected from 1: *Ball of Abysmal Flame*'s semicolon now splits, done 2026-08-15. *The Bountiful Feast*'s unbalanced brackets turned out to be a different bug (a genuine rulebook typo, item 26's family above), fixed separately and not via this function |
@@ -1705,20 +1708,22 @@ ward**.
   (`spell_engine.dart:422-431`).
 - Published General spells emit to `spell_templates.json`, not `spell_library.json`.
 
-**Six of the 33 remain blocked, each for a reason unrelated to this item.**
-(Was ten, then nine: *Ward against Faeries of the Mountain* moved out
-2026-08-15 — its "no design line" turned out to be a complete specification
-once its own cross-reference to *Ward against Faeries of the Waters* was
-followed; *Aegis of the Hearth* and *Wizard's Vigil* moved out 2026-08-16 —
-both now import as exception spells instead, item 46. See
-`extract_spells.HAND_DERIVED`'s comment, item 27's correction, and item 46.)
+**Five of the 33 remain blocked, each for a reason unrelated to this item.**
+(Was ten, then nine, then six: *Ward against Faeries of the Mountain* moved
+out 2026-08-15 — its "no design line" turned out to be a complete
+specification once its own cross-reference to *Ward against Faeries of the
+Waters* was followed; *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's
+Communion* moved out 2026-08-16 — all three now import as exception spells
+instead, item 46. See `extract_spells.HAND_DERIVED`'s comment, item 27's
+correction, and item 46.)
 - **No design line printed (1):** *Sight of the True Form*.
 - **Design line prints `(Base effect)` but the stat line costs magnitudes (2):**
   *Restore the Moved Image*, *The Invisible Eye Revealed*.
 - **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
   Spirit*, *Dispel the Phantom Image*.
-- **Design line disclaims guideline arithmetic (1):** *Wizard's Communion* — "a
-  remnant of Mercurian rituals."
+- **✅ Wizard's Communion moved to item 46, 2026-08-16** — it now imports as
+  an exception spell rather than staying blocked on its disclaimed
+  guideline arithmetic ("a remnant of Mercurian rituals").
 - **✅ Watching Ward moved to item 46, 2026-08-16** — it now imports as an
   exception spell rather than staying blocked on its `Special`-Duration
   problem.
