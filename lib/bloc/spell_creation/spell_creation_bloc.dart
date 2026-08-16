@@ -144,9 +144,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         ),
       ));
     } else if (event is TargetSelected) {
+      // The only Technique/Form/BaseEffect/Target handler that didn't prune
+      // stale modifier selections — size-mentem's Target exclusion made that
+      // a live bug rather than a theoretical gap. See todo item 19.
+      final draft = _withPrunedModifiers(state.draft.copyWith(target: event.parameter));
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(target: event.parameter),
+        draft: draft,
       ));
     } else if (event is RequisiteAdded) {
       final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
@@ -327,6 +331,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           technique: draft.technique,
           form: draft.form,
           baseEffectId: draft.baseEffect?.id,
+          targetId: draft.target?.id,
         ),
       );
 

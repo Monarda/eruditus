@@ -703,6 +703,24 @@ void main() {
     provenance: Provenance(source: PublicationSource.userCreated),
   );
 
+  final sizeMentemModifier = Modifier(
+    id: 'size-mentem',
+    name: 'Size',
+    selectionMode: ModifierSelectionMode.single,
+    scope: const ModifierScope(form: 'Mentem', excludeTargets: ['target-individual']),
+    options: [ModifierOption(id: 'size-mentem-1', label: 'Up to 10x base', magnitude: 1)],
+    provenance: Provenance(
+      source: PublicationSource.published,
+      citations: const [Citation(bookId: 'arm5-core')],
+    ),
+  );
+  final individualTarget = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 8,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+  final groupTarget = Parameter(
+      id: 'target-group', name: 'Group', category: 'Target', magnitude: 10,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
   blocTest<SpellCreationBloc, SpellCreationState>(
     'ModifierOptionSelected on a single-select modifier replaces the previous option',
     build: () => SpellCreationBloc(
@@ -803,6 +821,49 @@ void main() {
     expect: () => [
       isA<SpellCreationState>()
           .having((s) => s.draft.selectedModifiers, 'selectedModifiers (pruned)', isEmpty),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Target to one excluded by scope prunes a selection that depended on it',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+          allSpells: const [], allModifiers: [sizeMentemModifier]),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Mentem'));
+      bloc.add(const ModifierOptionSelected('size-mentem', 'size-mentem-1'));
+      bloc.add(TargetSelected(individualTarget));
+    },
+    skip: 3,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.selectedModifiers, 'selectedModifiers (pruned)', isEmpty),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Target to one still allowed by scope keeps the selection',
+    build: () => SpellCreationBloc(
+      spellEngine: SpellEngine(
+          allSpells: const [], allModifiers: [sizeMentemModifier]),
+      spellRepository: spellRepository,
+    ),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Mentem'));
+      bloc.add(const ModifierOptionSelected('size-mentem', 'size-mentem-1'));
+      bloc.add(TargetSelected(groupTarget));
+    },
+    skip: 3,
+    expect: () => [
+      isA<SpellCreationState>().having(
+        (s) => s.draft.selectedModifiers['size-mentem'],
+        'selectedModifiers',
+        ['size-mentem-1'],
+      ),
     ],
   );
 
