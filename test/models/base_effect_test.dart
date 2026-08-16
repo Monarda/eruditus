@@ -207,6 +207,40 @@ void main() {
       );
     });
 
+    test('requiresVirtue defaults to null and round-trips when set', () {
+      final plain = BaseEffect(
+        id: 'e-9', technique: 'Creo', form: 'Ignem',
+        description: 'Create flame', baseLevel: 10,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      expect(plain.requiresVirtue, isNull);
+
+      final gated = BaseEffect(
+        id: 'e-10', technique: 'Creo', form: 'Vim',
+        description: 'Bind a supernatural creature as a temporary familiar',
+        baseLevel: null,
+        requiresVirtue: 'Faerie Magic',
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')],
+        ),
+      );
+      expect(BaseEffect.fromMap(gated.toMap()).requiresVirtue, 'Faerie Magic');
+      expect(BaseEffect.fromMap(plain.toMap()).requiresVirtue, isNull);
+    });
+
+    test('fromMap treats an absent requiresVirtue key as null', () {
+      final restored = BaseEffect.fromMap({
+        'id': 'e-11',
+        'technique': 'Creo',
+        'form': 'Ignem',
+        'description': 'Create flame',
+        'baseLevel': 10,
+        'source': 'user-created',
+      });
+      expect(restored.requiresVirtue, isNull);
+    });
+
     test('openSlots defaults to empty and round-trips every combination', () {
       final plain = BaseEffect(
         id: 'e-5', technique: 'Creo', form: 'Ignem',

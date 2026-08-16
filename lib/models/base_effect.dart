@@ -87,6 +87,13 @@ class BaseEffect {
   bool get isGeneral => baseLevel == null;
 
   final RitualRequirement ritualRequirement;
+
+  /// The Mystery Virtue the rulebook requires to invent/use this guideline
+  /// (e.g. "Faerie Magic"), or null for a guideline anyone can use.
+  /// Informational only -- see Parameter.requiresVirtue's identical doc
+  /// comment; this app has no character/Virtue model to enforce it against.
+  final String? requiresVirtue;
+
   final Provenance provenance;
 
   /// What this guideline is priced against. Absent in JSON means
@@ -110,6 +117,7 @@ class BaseEffect {
     required this.description,
     required this.baseLevel,
     this.ritualRequirement = RitualRequirement.none,
+    this.requiresVirtue,
     required this.provenance,
     this.reference = const ParameterTriple.standard(),
     this.effectFormula,
@@ -123,6 +131,7 @@ class BaseEffect {
     'description': description,
     'baseLevel': baseLevel,
     'ritualRequirement': ritualRequirement.name,
+    if (requiresVirtue != null) 'requiresVirtue': requiresVirtue,
     ...provenance.toMap(),
     'reference': reference.toMap(),
     if (effectFormula != null) 'effectFormula': effectFormula!.toMap(),
@@ -139,6 +148,7 @@ class BaseEffect {
         ? RitualRequirement.none
         : _ritualRequirementFromName(
             requireField<String>(map, 'ritualRequirement', 'BaseEffect')),
+    requiresVirtue: map['requiresVirtue'] as String?,
     provenance: Provenance.fromMap(map),
     reference: map['reference'] == null
         ? const ParameterTriple.standard()
