@@ -1054,10 +1054,32 @@ touch `storyguideRuling`, which is still what the checklist below is about.
 Files: `scripts/spell_import/designline.py`, `scripts/spell_import/emit.py`,
 `scripts/spell_import/tests/test_designline.py`, `assets/data/spell_library.json`.
 
-- [ ] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
+- [x] Expose `RitualDeclaration.storyguideRuling`, which the model supports and
       three built-in spells already use, but no control sets
-- [ ] Revisit `SpellCreationBloc._withRitualDeclaration` so the two declaration
+- [x] Revisit `SpellCreationBloc._withRitualDeclaration` so the two declaration
       kinds stay distinguishable once both are user-settable
+- **✅ DONE 2026-08-16.** `RitualSection`'s single lasting-creation checkbox is
+  now a three-way `RadioGroup<RitualDeclaration>` (Not declared / Creates
+  something lasting / Storyguide ruling: too spectacular to be freely
+  available), wired through the existing `RitualDeclarationChanged` event —
+  no new event type needed. The "Creates something lasting" option is still
+  gated to Creo + Momentary (`showLastingCreationOption`, renamed from
+  `showDeclarationCheckbox`); the storyguide-ruling option is always shown,
+  since line 12352 lets the troupe declare *any* spell a Ritual. Exploration
+  found `_withRitualDeclaration` already special-cased `storyguideRuling`
+  correctly (returns the draft untouched before checking lasting-creation
+  eligibility at all) — that path was previously only reachable via template
+  data, never live user input. 5 new bloc regression tests exercise it under
+  real events (`TechniqueSelected`/`FormSelected`/`BaseEffectSelected`
+  survival, direct `lastingCreation`→`storyguideRuling` replacement, explicit
+  clear to `none`) and all passed immediately, confirming no bloc logic
+  change was needed. Files: `lib/presentation/widgets/ritual_section.dart`,
+  `lib/presentation/screens/spell_creation_screen.dart`,
+  `test/presentation/widgets/ritual_section_test.dart`,
+  `integration_test/spell_creation_flow_test.dart`,
+  `test/bloc/spell_creation_bloc_test.dart`. Spec:
+  `docs/superpowers/specs/2026-08-16-storyguide-ruling-ui-design.md`. Plan:
+  `docs/superpowers/plans/2026-08-16-storyguide-ruling-ui.md`.
 - **Rationale:** Core Rules line 12352 lets the troupe declare any spell a Ritual.
   The Creo+Momentary-only checkbox cannot express that.
 - **The 7 non-derivable Ritual spells** (of 39 Ritual-flagged published spells, 32
