@@ -335,18 +335,22 @@ class SpellEngine {
 
   /// Drops any selection whose modifier no longer applies to the draft. A
   /// stranded selection would otherwise keep contributing magnitude invisibly
-  /// after the caster changes Technique, Form or base effect.
+  /// after the caster changes Technique, Form, base effect or Target.
   Map<String, List<String>> pruneModifierSelections({
     required Map<String, List<String>> selectedModifiers,
     String? technique,
     String? form,
     String? baseEffectId,
+    String? targetId,
   }) {
     final kept = <String, List<String>>{};
     selectedModifiers.forEach((modifierId, optionIds) {
       for (final modifier in allModifiers.where((m) => m.id == modifierId).take(1)) {
         if (modifier.scope.appliesTo(
-            technique: technique, form: form, baseEffectId: baseEffectId)) {
+            technique: technique,
+            form: form,
+            baseEffectId: baseEffectId,
+            targetId: targetId)) {
           kept[modifierId] = optionIds;
         }
       }

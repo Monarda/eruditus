@@ -619,8 +619,19 @@ void main() {
         citations: const [Citation(bookId: 'arm5-core')],
       ),
     );
+    final sizeMentem = Modifier(
+      id: 'size-mentem',
+      name: 'Size',
+      selectionMode: ModifierSelectionMode.single,
+      scope: const ModifierScope(form: 'Mentem', excludeTargets: ['target-individual']),
+      options: [ModifierOption(id: 'size-mentem-1', label: 'Up to 10x base', magnitude: 1)],
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-core')],
+      ),
+    );
     final engine = SpellEngine(
-        allSpells: [], allModifiers: [material, distance]);
+        allSpells: [], allModifiers: [material, distance, sizeMentem]);
 
     test('keeps selections whose modifier still applies', () {
       final pruned = engine.pruneModifierSelections(
@@ -653,6 +664,26 @@ void main() {
       final pruned = engine.pruneModifierSelections(
         selectedModifiers: const {'deleted-modifier': ['x']},
         technique: 'Rego', form: 'Terram', baseEffectId: 'rete-4',
+      );
+
+      expect(pruned, isEmpty);
+    });
+
+    test('keeps a Target-scoped selection when the target is not excluded', () {
+      final pruned = engine.pruneModifierSelections(
+        selectedModifiers: const {'size-mentem': ['size-mentem-1']},
+        technique: 'Creo', form: 'Mentem', baseEffectId: null,
+        targetId: 'target-group',
+      );
+
+      expect(pruned, {'size-mentem': ['size-mentem-1']});
+    });
+
+    test('drops a selection stranded by a Target change to an excluded target', () {
+      final pruned = engine.pruneModifierSelections(
+        selectedModifiers: const {'size-mentem': ['size-mentem-1']},
+        technique: 'Creo', form: 'Mentem', baseEffectId: null,
+        targetId: 'target-individual',
       );
 
       expect(pruned, isEmpty);
