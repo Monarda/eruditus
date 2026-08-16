@@ -124,6 +124,24 @@ REALM_BY_SPELL_ID = {
 # unresolvable without inventing rulebook content the table does not print.
 # See test_general_catalog.ReferenceOracleTest's docstring for the assertion
 # this table exists to keep out of reach.
+#
+# Restore the Moved Image's own wording ("as long as you can match the
+# spell's level on a stress die + the level of your spell") is close to
+# verbatim identical to Dispel the Phantom Image's ("whose level you match
+# or exceed on a stress die + the level of your spell", Perdo Imaginem, see
+# the `general_candidates` empty-branch comment below) -- not a coincidence.
+# This is a recurring per-Form counter-magic mechanic (match/exceed a target
+# spell's level, no magnitude offset) that the Definitive Edition uses as
+# spell-level flavor text without ever generalizing it into that Form's own
+# guideline table; it is only formalized at the Vim level, as Rego Vim's
+# "sustain or suppress" and Perdo Vim's "dispel" General rows -- both of
+# which *do* carry a magnitude offset the Form-level versions don't. The
+# Invisible Eye Revealed fits the same family too ("detects... up to double
+# the level of this spell", no stress die but the same target-spell-level
+# shape), and Intellego Vim's own table doesn't tabulate that either.
+# Reconstructing a Rego-Imaginem- or Intellego-Vim-scoped row "by analogy"
+# to the Vim guidelines would still be inventing content neither table
+# prints -- confirmed 2026-08-16, does not change the classification above.
 DESIGN_LINE_INCOMPLETE = {
     "lib-reim-restore-moved-image":
         "prints (Base effect) but the stat line costs 2 magnitudes",
@@ -510,6 +528,12 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 # settled that this counts as inventing rulebook content the
                 # table does not contain, and both were removed. Adding
                 # `peim-gen`/`peme-gen` here would revert that decision.
+                #
+                # Dispel the Phantom Image's own wording ("whose level you
+                # match or exceed on a stress die + the level of your
+                # spell") is the same recurring per-Form counter-magic
+                # phrasing DESIGN_LINE_INCOMPLETE's comment traces above --
+                # see there for why the pattern doesn't change this either.
                 blocked.append((block.name, "no General base effect for that Technique/Form"))
                 continue
 

@@ -1812,6 +1812,20 @@ four now import as exception spells instead, item 46. See
 - **No General base effect for that Technique/Form (2):** *Lay to Rest the Haunting
   Spirit*, *Dispel the Phantom Image*. Perdo Mentem's and Perdo Imaginem's own
   guideline tables print no General row at all.
+- **Three of the five share a recognizable family, spotted 2026-08-16:**
+  *Restore the Moved Image* ("match the spell's level on a stress die + the
+  level of your spell"), *Dispel the Phantom Image* ("match or exceed on a
+  stress die + the level of your spell") and *The Invisible Eye Revealed*
+  ("up to double the level of this spell") are all a recurring per-Form
+  counter-magic mechanic (match/exceed a target spell's level, no magnitude
+  offset) that the Definitive Edition writes as spell-level flavor text
+  without ever generalizing into that Form's own guideline table — it's
+  only formalized at the Vim level (Rego Vim's "sustain or suppress", Perdo
+  Vim's "dispel", both *with* a magnitude offset the Form-level versions
+  don't carry). Reconstructing a row for Rego Imaginem/Intellego Vim "by
+  analogy" to the Vim guidelines is still inventing content neither table
+  prints — same policy as `peme-G`/`inco-gen` below, not a loophole around
+  it. See `extract_spells.DESIGN_LINE_INCOMPLETE`'s comment.
 - **Re-derived 2026-08-16, not a new finding — all five were already settled
   by `docs/superpowers/plans/2026-08-05-general-base-effects.md`,
   independently re-confirmed against the reviewed rulebook text while
