@@ -950,6 +950,64 @@ void main() {
       verify: (bloc) => expect(
         bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
     );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'never prunes a storyguideRuling on TechniqueSelected',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const RitualDeclarationChanged(RitualDeclaration.storyguideRuling))
+        ..add(const TechniqueSelected('Creo')),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'never prunes a storyguideRuling on FormSelected',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const RitualDeclarationChanged(RitualDeclaration.storyguideRuling))
+        ..add(const FormSelected('Terram')),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'never prunes a storyguideRuling on BaseEffectSelected',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const RitualDeclarationChanged(RitualDeclaration.storyguideRuling))
+        ..add(BaseEffectSelected(plainCreo)),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'switching from lastingCreation to storyguideRuling replaces the declaration',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(const RitualDeclarationChanged(RitualDeclaration.storyguideRuling)),
+      verify: (bloc) => expect(
+        bloc.state.draft.ritualDeclaration, RitualDeclaration.storyguideRuling),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an explicit clear from storyguideRuling reports none, not the lastingCreation default',
+      build: () => SpellCreationBloc(
+          spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(DurationSelected(momentary))
+        ..add(const RitualDeclarationChanged(RitualDeclaration.storyguideRuling))
+        ..add(const RitualDeclarationChanged(RitualDeclaration.none)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.ritualDeclaration, RitualDeclaration.none),
+    );
   });
 
   blocTest<SpellCreationBloc, SpellCreationState>(
