@@ -804,7 +804,7 @@ three tests near the end of the `main()` body (alongside the other
           kind: GeneralEffectKind.mightThreshold, offsetMagnitudes: -3),
       provenance: Provenance(
           source: PublicationSource.published,
-          citations: const [Citation(bookId: 'arm5-houses-hermes-mystery-cults')]),
+          citations: const [Citation(bookId: 'arm5-hohmc')]),
     );
     final draftState = SpellCreationState(
       status: SpellCreationStatus.editing,
@@ -936,7 +936,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `Parameter.requiresVirtue`/`.scope` (Task 1).
-- Produces: book id `arm5-houses-hermes-mystery-cults`; parameter ids
+- Produces: book id `arm5-hohmc`; parameter ids
   `range-road`, `duration-bargain`, `duration-fire`, `duration-until-condition`,
   `duration-year-plus-one`, `target-bloodline`, `range-symbol`,
   `duration-symbol`, `target-symbol` — all later tasks that cite these ids
@@ -1036,7 +1036,7 @@ Add two new tests, after the block above:
   test('loadBooks includes the Houses of Hermes: Mystery Cults supplement', () async {
     final books = await loader.loadBooks();
     final supplement =
-        books.firstWhere((b) => b.id == 'arm5-houses-hermes-mystery-cults');
+        books.firstWhere((b) => b.id == 'arm5-hohmc');
     expect(supplement.title, 'Ars Magica 5e - Houses of Hermes: Mystery Cults');
     expect(supplement.abbreviation, 'HoH:MC');
     expect(supplement.edition, '5e');
@@ -1076,7 +1076,7 @@ to:
     "edition": "5e"
   },
   {
-    "id": "arm5-houses-hermes-mystery-cults",
+    "id": "arm5-hohmc",
     "title": "Ars Magica 5e - Houses of Hermes: Mystery Cults",
     "abbreviation": "HoH:MC",
     "edition": "5e"
@@ -1203,7 +1203,7 @@ to:
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-houses-hermes-mystery-cults"
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -1217,7 +1217,7 @@ to:
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-houses-hermes-mystery-cults"
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -1231,7 +1231,7 @@ to:
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-houses-hermes-mystery-cults"
+        "bookId": "arm5-hohmc"
       }
     ]
   }
@@ -1242,7 +1242,7 @@ to:
 
 Run: `flutter test test/data/datasources/asset_data_loader_test.dart`
 Expected: PASS, all tests including the pre-existing ones (in particular the
-citation-consistency tests, which now find `arm5-houses-hermes-mystery-cults`
+citation-consistency tests, which now find `arm5-hohmc`
 in `books.json`).
 
 - [ ] **Step 6: Commit**
@@ -1264,7 +1264,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `BaseEffect.requiresVirtue` (Task 2), book
-  `arm5-houses-hermes-mystery-cults` (Task 6).
+  `arm5-hohmc` (Task 6).
 - Produces: base effect id `crvi-hohmc-G1` — Task 8's `SpellTemplate` depends
   on this landing first.
 
@@ -1294,7 +1294,7 @@ Add this test, near the other `loadBaseEffects` tests:
     expect(effect.effectFormula?.kind, GeneralEffectKind.mightThreshold);
     expect(effect.effectFormula?.offsetMagnitudes, -3);
     expect(effect.provenance.citations, [
-      const Citation(bookId: 'arm5-houses-hermes-mystery-cults'),
+      const Citation(bookId: 'arm5-hohmc'),
     ]);
   });
 ```
@@ -1312,7 +1312,7 @@ file's closing `]` (change the final entry's trailing `}` to `},` and add
 the new line after it):
 
 ```json
-{"id": "crvi-hohmc-G1", "technique": "Creo", "form": "Vim", "description": "Bind a supernatural creature as a temporary familiar (level >= creature's Might + 15)", "baseLevel": null, "source": "published", "citations": [{"bookId": "arm5-houses-hermes-mystery-cults"}], "notes": "General entry; must be Ritual; requires Faerie Magic (Outer Mystery); hand-authored, not part of the core-rules extraction -- see todo item 17", "ritualRequirement": "required", "requiresVirtue": "Faerie Magic", "effectFormula": {"kind": "mightThreshold", "offsetMagnitudes": -3}}
+{"id": "crvi-hohmc-G1", "technique": "Creo", "form": "Vim", "description": "Bind a supernatural creature as a temporary familiar (level >= creature's Might + 15)", "baseLevel": null, "source": "published", "citations": [{"bookId": "arm5-hohmc"}], "notes": "General entry; must be Ritual; requires Faerie Magic (Outer Mystery); hand-authored, not part of the core-rules extraction -- see todo item 17", "ritualRequirement": "required", "requiresVirtue": "Faerie Magic", "effectFormula": {"kind": "mightThreshold", "offsetMagnitudes": -3}}
 ```
 
 - [ ] **Step 4: Run the test to verify it passes**
@@ -1342,7 +1342,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 **Interfaces:**
 - Consumes: base effect `crvi-hohmc-G1` (Task 7), parameters `range-touch`
   (pre-existing), `duration-until-condition` (Task 6), `target-individual`
-  (pre-existing), book `arm5-houses-hermes-mystery-cults` (Task 6).
+  (pre-existing), book `arm5-hohmc` (Task 6).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1426,7 +1426,7 @@ closing `}` to `},`, then add):
     "description": "This ritual binds a supernatural creature to the caster as her familiar, until a condition incorporated into the spell comes to pass. The level of the ritual must be no less than (the creature's Might + 15), though she may also need to penetrate its Magic Resistance if casting on an unwilling target. It has no effect if the target is already bound as a familiar to another. Casting requisites of a Technique and Form appropriate to the creature's nature and physical form may be included; this app has no way to model a per-casting, creature-dependent requisite, so none is recorded here (see todo item 52). It may be invented by anyone who has been Initiated into the Outer Mystery of Faerie Magic.",
     "citations": [
       {
-        "bookId": "arm5-houses-hermes-mystery-cults"
+        "bookId": "arm5-hohmc"
       }
     ]
   }
@@ -1473,7 +1473,7 @@ heading — with:
 ### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic — ✅ DONE 2026-08-16
 **Merinita: Faerie Magic** — Core Rules, "Mysteries" chapter. **Symbolic
 Magic** — *Houses of Hermes: Mystery Cults*, the first supplement book in the
-catalog (`arm5-houses-hermes-mystery-cults`). All 9 parameters added to
+catalog (`arm5-hohmc`). All 9 parameters added to
 `assets/data/parameters.json`, gated by a new informational `requiresVirtue:
 String?` field on both `Parameter` and `BaseEffect`
 (`lib/models/parameter.dart`, `lib/models/base_effect.dart`) — selectable

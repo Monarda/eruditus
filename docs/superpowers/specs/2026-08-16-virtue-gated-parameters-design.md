@@ -253,7 +253,7 @@ Add to `assets/data/books.json`:
 
 ```json
 {
-  "id": "arm5-houses-hermes-mystery-cults",
+  "id": "arm5-hohmc",
   "title": "Ars Magica 5e - Houses of Hermes: Mystery Cults",
   "abbreviation": "HoH:MC",
   "edition": "5e"
@@ -291,7 +291,7 @@ New entry in `assets/data/spell_templates.json`:
 - `baseEffectId`: the new base effect from step 8
 - `requisites: {}` — the gap noted in Out of Scope, documented in the
   template's `description`
-- `provenance`: `published`, citing `arm5-houses-hermes-mystery-cults`
+- `provenance`: `published`, citing `arm5-hohmc`
 
 This is left level-open (as every `SpellTemplate` is) — the caster fills in
 `chosenBaseLevel` based on the target creature's Might at instantiation time,
