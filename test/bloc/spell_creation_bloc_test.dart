@@ -1675,4 +1675,61 @@ void main() {
       verify: (bloc) => expect(bloc.state.draft.analogyRationale, isNull),
     );
   });
+
+  group('Form-scoped parameters (FormSelected)', () {
+    // A test-local Fire-like Duration parameter, scoped to Ignem/Imaginem
+    // only -- mirrors the real duration-fire entry in parameters.json.
+    final fireLikeDuration = Parameter(
+      id: 'p2-fire', name: 'Fire', category: 'Duration', magnitude: 3,
+      scope: const ParameterScope(forms: ['Ignem', 'Imaginem']),
+      provenance: Provenance(source: PublicationSource.published,
+          citations: const [Citation(bookId: 'arm5-core')]),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'FormSelected clears a Form-scoped Duration that is out of scope for the new Form',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem',
+          range: rangeParam, duration: fireLikeDuration, target: targetParam,
+        ),
+      ),
+      // Fire is only offered for Ignem/Imaginem; Terram is neither, so the
+      // stranded selection must be cleared rather than left dangling for a
+      // dropdown whose items no longer include it.
+      act: (bloc) => bloc.add(const FormSelected('Terram')),
+      verify: (bloc) => expect(bloc.state.draft.duration, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'FormSelected leaves an unscoped Duration (e.g. Momentary) untouched across a Form change',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem',
+          range: rangeParam, duration: durationParam, target: targetParam,
+        ),
+      ),
+      act: (bloc) => bloc.add(const FormSelected('Terram')),
+      verify: (bloc) => expect(bloc.state.draft.duration, durationParam),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'FormSelected keeps a Form-scoped Duration that is still in scope for the new Form',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem',
+          range: rangeParam, duration: fireLikeDuration, target: targetParam,
+        ),
+      ),
+      // Imaginem is still in Fire's scope, so the selection must survive.
+      act: (bloc) => bloc.add(const FormSelected('Imaginem')),
+      verify: (bloc) => expect(bloc.state.draft.duration, fireLikeDuration),
+    );
+  });
 }

@@ -8,6 +8,7 @@ import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
+import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart' show RequisiteKind;
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
@@ -66,7 +67,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       ));
     } else if (event is FormSelected) {
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(state.draft.copyWith(
+        _withPrunedModifiers(_withPrunedFormScopedParameters(state.draft.copyWith(
           form: event.form,
           baseEffect: null,
           chosenBaseLevel: null,
@@ -75,7 +76,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           // See TechniqueSelected above: analogyRationale cannot outlive the
           // base effect it was explaining a divergence from.
           analogyRationale: null,
-        )),
+        ))),
         reapplyDefault: false,
       );
       emit(state.copyWith(
@@ -334,6 +335,29 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
           targetId: draft.target?.id,
         ),
       );
+
+  /// Nulls out any of [SpellDraft.range]/[SpellDraft.duration]/[SpellDraft.target]
+  /// that are no longer valid for [draft]'s (already-updated) Form.
+  ///
+  /// A Form-scoped parameter (e.g. Fire, Ignem/Imaginem only) selected under
+  /// one Form must not survive a change to a Form it isn't offered for --
+  /// exactly the same principle as pruneModifierSelections dropping a
+  /// stranded modifier rather than let it keep affecting the level
+  /// invisibly. Left in place, DropdownButtonFormField's own assertion that
+  /// its value be present in `items` would fail, since the dropdown filters
+  /// its items by the new Form's scope. Only the parameters that actually go
+  /// out of scope are cleared; one still valid for the new Form is left
+  /// untouched.
+  SpellDraft _withPrunedFormScopedParameters(SpellDraft draft) {
+    Parameter? pruneIfOutOfScope(Parameter? parameter) =>
+        parameter != null && !parameter.scope.appliesTo(form: draft.form) ? null : parameter;
+
+    return draft.copyWith(
+      range: pruneIfOutOfScope(draft.range),
+      duration: pruneIfOutOfScope(draft.duration),
+      target: pruneIfOutOfScope(draft.target),
+    );
+  }
 
   /// Re-derives [SpellDraft.ritualDeclaration] after a change to Technique,
   /// Form, base effect or Duration.
