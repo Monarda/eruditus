@@ -180,9 +180,11 @@ List<String> validateSpellAgainstCatalog({
 
 /// A saved spell, stored as references into the effect/parameter catalogs.
 ///
-/// This record deliberately holds no copy of any catalog data — no base level,
-/// magnitude, technique or form. Those are looked up through [SpellResolver] on
-/// read, so there is exactly one source of truth.
+/// This record deliberately holds no copy of any catalog data -- no base
+/// level, magnitude. [technique]/[form] are the one exception: they are the
+/// spell's own, which may legitimately differ from [baseEffectId]'s own
+/// technique/form (see [analogyRationale]) -- so unlike everything else
+/// here, they cannot be safely derived and must be stored.
 ///
 /// [summary] is a short paraphrase; [description] is verbatim text from the
 /// rulebook. Both are optional individually, and a published spell needs at
@@ -191,6 +193,8 @@ class Spell {
   final String id;
   final String? name;
   final String baseEffectId;
+  final String technique;
+  final String form;
   final String rangeId;
   final String durationId;
   final String targetId;
@@ -226,10 +230,18 @@ class Spell {
   /// an unresolvable modifier id as contributing 0.
   final String? templateId;
 
+  /// Non-null only when [technique]/[form] differ from the resolved base
+  /// effect's own technique/form -- the citation-backed reason a human
+  /// chose to apply that guideline outside its own Form. Null whenever they
+  /// match; enforced by `validateSpellAgainstCatalog`'s check 8 (Task 3).
+  final String? analogyRationale;
+
   Spell({
     required this.id,
     this.name,
     required this.baseEffectId,
+    required this.technique,
+    required this.form,
     required this.rangeId,
     required this.durationId,
     required this.targetId,
@@ -247,6 +259,7 @@ class Spell {
     this.chosenBaseLevel,
     this.chosenSlots = const {},
     this.templateId,
+    this.analogyRationale,
   }) {
     final problems = validateSpellProse(
       source: provenance.source,
@@ -262,6 +275,8 @@ class Spell {
         'id': id,
         'name': name,
         'baseEffectId': baseEffectId,
+        'technique': technique,
+        'form': form,
         'rangeId': rangeId,
         'durationId': durationId,
         'targetId': targetId,
@@ -279,12 +294,15 @@ class Spell {
         'chosenBaseLevel': chosenBaseLevel,
         'chosenSlots': chosenSlots,
         'templateId': templateId,
+        'analogyRationale': analogyRationale,
       };
 
   factory Spell.fromMap(Map<String, dynamic> map) => Spell(
         id: requireField<String>(map, 'id', 'Spell'),
         name: map['name'] as String?,
         baseEffectId: requireField<String>(map, 'baseEffectId', 'Spell'),
+        technique: requireField<String>(map, 'technique', 'Spell'),
+        form: requireField<String>(map, 'form', 'Spell'),
         rangeId: requireField<String>(map, 'rangeId', 'Spell'),
         durationId: requireField<String>(map, 'durationId', 'Spell'),
         targetId: requireField<String>(map, 'targetId', 'Spell'),
@@ -311,6 +329,7 @@ class Spell {
         chosenBaseLevel: map['chosenBaseLevel'] as int?,
         chosenSlots: chosenSlotsFromMap(map['chosenSlots'] as Map<String, dynamic>?),
         templateId: map['templateId'] as String?,
+        analogyRationale: map['analogyRationale'] as String?,
       );
 }
 
@@ -371,6 +390,8 @@ class SpellDraft {
   Spell toSpell({required String name, required PublicationSource source}) {
     final missingFields = <String>[
       if (baseEffect == null) 'baseEffect',
+      if (technique == null) 'technique',
+      if (form == null) 'form',
       if (range == null) 'range',
       if (duration == null) 'duration',
       if (target == null) 'target',
@@ -391,6 +412,8 @@ class SpellDraft {
       id: id,
       name: name,
       baseEffectId: baseEffect!.id,
+      technique: technique!,
+      form: form!,
       rangeId: range!.id,
       durationId: duration!.id,
       targetId: target!.id,
@@ -404,6 +427,7 @@ class SpellDraft {
       chosenBaseLevel: chosenBaseLevel,
       chosenSlots: chosenSlots,
       templateId: templateId,
+      analogyRationale: null, // the creation screen cannot produce one yet
       provenance: Provenance(source: source),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),

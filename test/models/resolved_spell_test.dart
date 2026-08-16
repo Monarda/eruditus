@@ -49,6 +49,8 @@ void main() {
         id: 'spell-1',
         name: 'Phantasm',
         baseEffectId: baseEffectId ?? 'crig-10a',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
@@ -66,6 +68,8 @@ void main() {
         id: 'spell-1',
         name: 'Phantasm',
         baseEffectId: 'crim-2',
+        technique: 'Creo',
+        form: 'Imaginem',
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
@@ -150,7 +154,10 @@ void main() {
 
   test('chosenSlots passes through from the record', () {
     final spell = Spell(
-      id: 's-1', baseEffectId: 'e1', rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      id: 's-1', baseEffectId: 'e1',
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       requisites: const {},
       chosenSlots: const {'realm': 'Divine'},
       provenance: Provenance(source: PublicationSource.userCreated),
@@ -168,7 +175,10 @@ void main() {
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
     );
     final spell = Spell(
-      id: 's-2', baseEffectId: effect.id, rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      id: 's-2', baseEffectId: effect.id,
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       requisites: const {},
       chosenBaseLevel: 20,
       provenance: Provenance(source: PublicationSource.userCreated),
@@ -186,7 +196,10 @@ void main() {
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
     );
     final spell = Spell(
-      id: 's-3', baseEffectId: effect.id, rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+      id: 's-3', baseEffectId: effect.id,
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       requisites: const {},
       chosenBaseLevel: 20,
       chosenSlots: const {'realm': 'Divine'},

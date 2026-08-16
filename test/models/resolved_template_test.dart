@@ -26,6 +26,8 @@ void main() {
         id: 'tpl-1',
         name: 'Phantasm',
         baseEffectId: 'crim-2',
+        technique: 'Creo',
+        form: 'Imaginem',
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
@@ -102,6 +104,8 @@ void main() {
   test('chosenSlots passes through from the record', () {
     final template = SpellTemplate(
       id: 't-1', name: 'Test Ward', baseEffectId: 'e1',
+      technique: 'Creo',
+      form: 'Ignem',
       rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       summary: 'Test ward summary',
       chosenSlots: const {'realm': 'Magic'},

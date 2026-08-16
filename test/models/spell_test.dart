@@ -17,6 +17,8 @@ void main() {
         id: 'spell-1',
         name: 'Test Spell',
         baseEffectId: '1',
+        technique: 'Perdo',
+        form: 'Corpus',
         rangeId: 'param-voice',
         durationId: 'param-sun',
         targetId: 'param-individual',
@@ -38,6 +40,9 @@ void main() {
       expect(restored.id, spell.id);
       expect(restored.name, spell.name);
       expect(restored.baseEffectId, spell.baseEffectId);
+      expect(restored.technique, 'Perdo');
+      expect(restored.form, 'Corpus');
+      expect(restored.analogyRationale, isNull);
       expect(restored.rangeId, spell.rangeId);
       expect(restored.durationId, spell.durationId);
       expect(restored.targetId, spell.targetId);
@@ -57,7 +62,10 @@ void main() {
 
     test('fromMap throws a clear FormatException when a requisite kind is unknown', () {
       final map = Spell(
-        id: 'spell-bad-kind', baseEffectId: '1', rangeId: 'param-voice',
+        id: 'spell-bad-kind', baseEffectId: '1',
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: 'param-voice',
         durationId: 'param-sun', targetId: 'param-individual',
         requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
@@ -79,7 +87,10 @@ void main() {
 
     test('fromMap throws a clear FormatException when a requisite kind is not a string', () {
       final map = Spell(
-        id: 'spell-null-kind', baseEffectId: '1', rangeId: 'param-voice',
+        id: 'spell-null-kind', baseEffectId: '1',
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: 'param-voice',
         durationId: 'param-sun', targetId: 'param-individual',
         requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
@@ -100,6 +111,8 @@ void main() {
         'id': 'spell-1',
         // 'rangeId' missing
         'baseEffectId': '1',
+        'technique': 'Creo',
+        'form': 'Ignem',
         'durationId': 'p1',
         'targetId': 'p2',
         'source': 'user-created',
@@ -219,6 +232,8 @@ void main() {
         id: 'spell-1',
         name: 'Test Spell',
         baseEffectId: 'rete-4',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
@@ -242,6 +257,8 @@ void main() {
       final map = Spell(
         id: 'spell-2',
         baseEffectId: 'e1',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
@@ -259,6 +276,8 @@ void main() {
       final spell = Spell(
         id: 'x',
         baseEffectId: 'e1',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
@@ -272,6 +291,8 @@ void main() {
       final tagged = Spell(
         id: 'y',
         baseEffectId: 'e1',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'p1',
         durationId: 'p2',
         targetId: 'p3',
@@ -303,6 +324,8 @@ void main() {
         final spell = Spell(
           id: 's-1', name: 'Touch of Midas',
           baseEffectId: 'crte-15a',
+          technique: 'Creo',
+          form: 'Ignem',
           rangeId: 'range-touch',
           durationId: 'duration-momentary',
           targetId: 'target-individual',
@@ -319,6 +342,8 @@ void main() {
       final restored = Spell.fromMap({
         'id': 's-2',
         'baseEffectId': 'crte-15a',
+        'technique': 'Creo',
+        'form': 'Ignem',
         'rangeId': 'range-touch',
         'durationId': 'duration-momentary',
         'targetId': 'target-individual',
@@ -335,6 +360,8 @@ void main() {
         () => Spell.fromMap({
           'id': 's-3',
           'baseEffectId': 'crte-15a',
+          'technique': 'Creo',
+          'form': 'Ignem',
           'rangeId': 'range-touch',
           'durationId': 'duration-momentary',
           'targetId': 'target-individual',
@@ -388,6 +415,8 @@ void main() {
         id: 'spell-adj',
         name: 'Test Spell',
         baseEffectId: '1',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'param-voice',
         durationId: 'param-sun',
         targetId: 'param-individual',
@@ -410,6 +439,8 @@ void main() {
         id: 'spell-none',
         name: 'Test Spell',
         baseEffectId: '1',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'param-voice',
         durationId: 'param-sun',
         targetId: 'param-individual',
@@ -427,7 +458,10 @@ void main() {
     test('chosenBaseLevel and templateId round-trip', () {
       final spell = Spell(
         id: 's-1', name: 'Circular Ward against Demons 20',
-        baseEffectId: 'revi-G1', rangeId: 'range-touch',
+        baseEffectId: 'revi-G1',
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: 'range-touch',
         durationId: 'duration-ring', targetId: 'target-circle',
         chosenBaseLevel: 20, templateId: 'tpl-revi-circular-ward-against-demons',
         requisites: const {},
@@ -443,7 +477,10 @@ void main() {
 
     test('both fields default to null', () {
       final spell = Spell(
-        id: 's-2', baseEffectId: 'crig-10', rangeId: 'range-voice',
+        id: 's-2', baseEffectId: 'crig-10',
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: 'range-voice',
         durationId: 'duration-momentary', targetId: 'target-individual',
         requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
@@ -456,7 +493,10 @@ void main() {
 
     test('chosenSlots defaults to empty and round-trips', () {
       final spell = Spell(
-        id: 's-1', baseEffectId: 'e1', rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+        id: 's-1', baseEffectId: 'e1',
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: 'p1', durationId: 'p2', targetId: 'p3',
         requisites: const {},
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
@@ -464,7 +504,10 @@ void main() {
       expect(spell.chosenSlots, isEmpty);
 
       final withSlot = Spell(
-        id: 's-2', baseEffectId: 'e1', rangeId: 'p1', durationId: 'p2', targetId: 'p3',
+        id: 's-2', baseEffectId: 'e1',
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: 'p1', durationId: 'p2', targetId: 'p3',
         requisites: const {},
         chosenSlots: const {'realm': 'Infernal'},
         provenance: Provenance(source: PublicationSource.userCreated),
@@ -485,6 +528,8 @@ void main() {
           'id': 'x',
           'name': 'X',
           'baseEffectId': 'e1',
+          'technique': 'Creo',
+          'form': 'Ignem',
           'rangeId': 'p1',
           'durationId': 'p2',
           'targetId': 'p3',

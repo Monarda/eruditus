@@ -19,6 +19,8 @@ class SpellTemplate {
   final String id;
   final String name;
   final String baseEffectId;
+  final String technique;
+  final String form;
   final String rangeId;
   final String durationId;
   final String targetId;
@@ -38,10 +40,15 @@ class SpellTemplate {
   final List<String> tags;
   final RitualDeclaration ritualDeclaration;
 
+  /// See [Spell.analogyRationale] -- identical contract.
+  final String? analogyRationale;
+
   SpellTemplate({
     required this.id,
     required this.name,
     required this.baseEffectId,
+    required this.technique,
+    required this.form,
     required this.rangeId,
     required this.durationId,
     required this.targetId,
@@ -54,6 +61,7 @@ class SpellTemplate {
     required this.provenance,
     this.tags = const [],
     this.ritualDeclaration = RitualDeclaration.none,
+    this.analogyRationale,
   }) {
     final problems = validateSpellProse(
       source: provenance.source,
@@ -69,6 +77,8 @@ class SpellTemplate {
         'id': id,
         'name': name,
         'baseEffectId': baseEffectId,
+        'technique': technique,
+        'form': form,
         'rangeId': rangeId,
         'durationId': durationId,
         'targetId': targetId,
@@ -81,12 +91,15 @@ class SpellTemplate {
         ...provenance.toMap(),
         'tags': tags,
         'ritualDeclaration': ritualDeclaration.name,
+        'analogyRationale': analogyRationale,
       };
 
   factory SpellTemplate.fromMap(Map<String, dynamic> map) => SpellTemplate(
         id: requireField<String>(map, 'id', 'SpellTemplate'),
         name: requireField<String>(map, 'name', 'SpellTemplate'),
         baseEffectId: requireField<String>(map, 'baseEffectId', 'SpellTemplate'),
+        technique: requireField<String>(map, 'technique', 'SpellTemplate'),
+        form: requireField<String>(map, 'form', 'SpellTemplate'),
         rangeId: requireField<String>(map, 'rangeId', 'SpellTemplate'),
         durationId: requireField<String>(map, 'durationId', 'SpellTemplate'),
         targetId: requireField<String>(map, 'targetId', 'SpellTemplate'),
@@ -108,5 +121,6 @@ class SpellTemplate {
             ? RitualDeclaration.none
             : ritualDeclarationFromName(
                 requireField<String>(map, 'ritualDeclaration', 'SpellTemplate'), 'SpellTemplate'),
+        analogyRationale: map['analogyRationale'] as String?,
       );
 }

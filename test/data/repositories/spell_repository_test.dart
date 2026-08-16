@@ -58,6 +58,8 @@ void main() {
         id: id,
         name: name,
         baseEffectId: baseEffectId,
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'range-touch',
         durationId: 'duration-momentary',
         targetId: 'target-individual',

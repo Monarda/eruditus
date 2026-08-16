@@ -9,6 +9,8 @@ void main() {
         id: 'tpl-pevi-demons-eternal-oblivion',
         name: "Demon's Eternal Oblivion",
         baseEffectId: 'pevi-G3',
+        technique: 'Perdo',
+        form: 'Vim',
         rangeId: 'range-voice',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
@@ -23,6 +25,9 @@ void main() {
 
     expect(restored.id, 'tpl-pevi-demons-eternal-oblivion');
     expect(restored.baseEffectId, 'pevi-G3');
+    expect(restored.technique, 'Perdo');
+    expect(restored.form, 'Vim');
+    expect(restored.analogyRationale, isNull);
     expect(restored.rangeId, 'range-voice');
   });
 
@@ -34,6 +39,8 @@ void main() {
   test('chosenSlots defaults to empty and round-trips', () {
     final template = SpellTemplate(
       id: 't-1', name: 'Test Template', baseEffectId: 'e1',
+      technique: 'Creo',
+      form: 'Ignem',
       rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       summary: 'Test template summary',
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
@@ -42,6 +49,8 @@ void main() {
 
     final withSlot = SpellTemplate(
       id: 't-2', name: 'Test Ward', baseEffectId: 'e1',
+      technique: 'Creo',
+      form: 'Ignem',
       rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       summary: 'Test ward summary',
       chosenSlots: const {'realm': 'Faerie'},

@@ -28,6 +28,8 @@ void main() {
         id: id,
         name: name,
         baseEffectId: 'e1',
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'range-personal',
         durationId: 'duration-momentary',
         targetId: 'target-individual',

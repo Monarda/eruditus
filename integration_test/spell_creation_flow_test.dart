@@ -577,6 +577,8 @@ void main() {
         id: 'spell-on-custom-effect',
         name: 'Spell On Custom Effect',
         baseEffectId: customEffect.id,
+        technique: 'Creo',
+        form: 'Ignem',
         rangeId: 'range-personal',
         durationId: 'duration-momentary',
         targetId: 'target-individual',
