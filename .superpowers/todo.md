@@ -71,7 +71,7 @@ none are unaccounted for, and none are currently blocked.
 |---|---|---|
 | Guideline level absent from the rulebook's own table | 0 | **28** — corrected from 5: all 5 now import, the last (*Sense of the Lingering Magic*) 2026-08-16 |
 | Genuinely ambiguous ledger resolution | 0 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* now imports too, 2026-08-16 — it was never a "which one is right" tie, both candidates share the same base level, so it's routed through the ledger like any other multi-candidate spell and the second guideline is recorded as a free (magnitude-0) adjustment. See item 39's corrected body |
-| Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
+| Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and now closed too, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
 | General-level, all 4 sharing one root cause: a mechanic only generalized at the Vim level, never tabulated per-Form | 0 | see item **25** — corrected from 8, then 4: *Aegis of the Hearth*, *Wizard's Vigil*, *Wizard's Communion* and *Sight of the True Form* import as exception spells (item 46). **The last 4 (*Dispel the Phantom Image*, *Restore the Moved Image*, *Lay to Rest the Haunting Spirit*, *The Invisible Eye Revealed*) resolved together 2026-08-16 via two mechanisms** — 3 via the base-effect analogy capability, each pointed at the existing Vim-level guideline it's a Form-specific, un-offset echo of (Perdo Vim's "dispel"/"reduce Might", Rego Vim's "sustain or suppress"); and 1 (*The Invisible Eye Revealed*, already Vim itself, nowhere more general to point to) as an exception spell — folded into the 8-exception count in the Table total below. See item 25's body for the derivation of each |
 | Unmodelled per-spell mechanisms (no words / no gestures / Techniques and Forms) | 0 | **24** — corrected from 3: all 3 now import as `no-words`/`no-gestures`/`invi-techniques-and-forms` catalog Modifiers, done 2026-08-16 |
@@ -458,11 +458,12 @@ importer work, with `spell.dart` untouched.
 is model work on `modifier.dart`, the same foundation as item 40. The +5 rung is
 ordinary data work and does not need to travel with it.
 
-**Data half done, architecture half still open.** Checked 2026-08-15: every
+**Both halves are now done.** Checked 2026-08-15: every
 `size-<form>` ladder in `modifiers.json` (all 9 Forms, Mentem included) now
 carries a `+5` (×100,000) option, and all 4 originally-blocked spells import
 using it — nobody had ticked the checkbox, but the data already reflects the
-"add one rung" answer. What's still open is purely the architectural gap below.
+"add one rung" answer. The architectural gap below is closed too, 2026-08-16 —
+see the third checkbox.
 
 - [x] Every Size ladder in `modifiers.json` stops at +4 (×10,000); 4 published
       spells need +5 — **done, undated**: a `+5` rung exists on every ladder as
@@ -487,8 +488,8 @@ using it — nobody had ticked the checkbox, but the data already reflects the
 **No spell is blocked by this item anymore.** *Wrath of Whirling Winds and
 Water* (CrAu 40), *Rain of Oil* (MuAu 50), *Curse of the Haunted Forest* (MuHe
 40) and *Poisoning the Will* (PeMe 40) all import today, each selecting its
-Form's `-5` option. What remains is the correctness gap below, not an import
-blocker.
+Form's `-5` option. The correctness gap below (Mentem's Size exemption) is
+closed too, 2026-08-16 — never an import blocker to begin with.
 
 **✅ Mentem's Size exemption is now enforced, not just documented.** Definitive
 Edition line 14900: "Minds do not have a size, so size modifiers do not apply to
@@ -502,9 +503,12 @@ Groups you still need to boost the size to affect more people."
   plus `appliesTo()`'s new `targetId` parameter enforce the exemption —
   `size-mentem` is unselectable, and pruned if already selected, once Target is
   Individual, rather than relying on its description text alone.
-- *Poisoning the Will*'s Boundary target remains outside scoped sizing for a
-  separate, still-deferred reason — see *Related deferred work* below,
-  unchanged by this fix.
+- *Poisoning the Will* already selects `size-mentem-5` at a Boundary target and
+  computes correctly to its printed level — this fix doesn't touch it. What's
+  still deferred is a separate, broader question: whether Group/Room/Structure/
+  Boundary should cost differently from each other under the Size ladder (today
+  they're priced identically); see *Related deferred work* below, unchanged by
+  this fix.
 
 **Related deferred work:** the Spell Modifiers spec deferred sizing for Part,
 Group, Room, Structure and Boundary targets entirely (its ladders assume
