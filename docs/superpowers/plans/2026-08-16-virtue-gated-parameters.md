@@ -1391,9 +1391,13 @@ Add this test, near the other `loadSpellTemplates` tests:
       RitualReason.ritualOnlyDuration,
       RitualReason.guideline,
     ]));
-    // 20 (chosen base, already above the level-5 additive tier) + Touch's
-    // magnitude 1, above the additive tier so worth *5 = 25.
-    expect(breakdown.level, 25);
+    // crvi-hohmc-G1 has no reference override -- its printed design line
+    // ("Base effect, +1 Touch, +4 Until") charges the full magnitude for
+    // both Touch and Until, same as any other non-ward General guideline
+    // (nothing in the rulebook text assumes Until is free). Base 20
+    // (already above the level-5 additive tier) + Touch(1)*5 + Until(4)*5
+    // = 20 + 5 + 20 = 45.
+    expect(breakdown.level, 45);
   });
 ```
 
