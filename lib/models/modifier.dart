@@ -63,21 +63,29 @@ class ModifierOption {
 /// [excludeTechniques] carves out Techniques the modifier never applies to,
 /// which a positive [technique] match cannot express. The Size ladders use it
 /// for Intellego, which the rules exempt from Target size across every Form.
+///
+/// [excludeTargets] is the same shape for Target ids: the Mentem Size ladder
+/// excludes `target-individual`, since minds have no size for an Individual
+/// target but can still be counted for Group/Room/Structure/Boundary.
 class ModifierScope {
   final String? technique;
   final String? form;
   final List<String> effectIds;
   final List<String> excludeTechniques;
+  final List<String> excludeTargets;
 
   const ModifierScope({
     this.technique,
     this.form,
     this.effectIds = const [],
     this.excludeTechniques = const [],
+    this.excludeTargets = const [],
   });
 
-  bool appliesTo({String? technique, String? form, String? baseEffectId}) {
+  bool appliesTo(
+      {String? technique, String? form, String? baseEffectId, String? targetId}) {
     if (technique != null && excludeTechniques.contains(technique)) return false;
+    if (targetId != null && excludeTargets.contains(targetId)) return false;
     if (this.technique != null && this.technique != technique) return false;
     if (this.form != null && this.form != form) return false;
     if (effectIds.isNotEmpty &&
@@ -92,6 +100,7 @@ class ModifierScope {
         'form': form,
         'effectIds': effectIds,
         'excludeTechniques': excludeTechniques,
+        'excludeTargets': excludeTargets,
       };
 
   factory ModifierScope.fromMap(Map<String, dynamic> map) => ModifierScope(
@@ -100,6 +109,8 @@ class ModifierScope {
         effectIds: List<String>.from(map['effectIds'] as List? ?? const []),
         excludeTechniques:
             List<String>.from(map['excludeTechniques'] as List? ?? const []),
+        excludeTargets:
+            List<String>.from(map['excludeTargets'] as List? ?? const []),
       );
 }
 

@@ -92,6 +92,20 @@ void main() {
       expect(scope.appliesTo(technique: 'Creo', form: 'Corpus', baseEffectId: 'e1'), isTrue);
       expect(scope.appliesTo(technique: 'Intellego', form: 'Corpus', baseEffectId: 'e1'), isFalse);
     });
+
+    test('excludeTargets rejects a listed target even when technique/form match', () {
+      // "Size modifiers do not apply to Mentem effects with Individual
+      // targets" — core rules line 14900.
+      const scope = ModifierScope(form: 'Mentem', excludeTargets: ['target-individual']);
+
+      expect(scope.appliesTo(technique: 'Creo', form: 'Mentem', targetId: 'target-group'), isTrue);
+      expect(scope.appliesTo(technique: 'Creo', form: 'Mentem', targetId: 'target-individual'), isFalse);
+    });
+
+    test('a null targetId does not trigger excludeTargets', () {
+      const scope = ModifierScope(form: 'Mentem', excludeTargets: ['target-individual']);
+      expect(scope.appliesTo(technique: 'Creo', form: 'Mentem', targetId: null), isTrue);
+    });
   });
 
   group('Modifier', () {
@@ -115,13 +129,15 @@ void main() {
           technique: 'Rego',
           form: 'Terram',
           effectIds: ['rete-4'],
-          excludeTechniques: ['Intellego']);
+          excludeTechniques: ['Intellego'],
+          excludeTargets: ['target-individual']);
       final restored = Modifier.fromMap(_mod(scope: scope).toMap());
 
       expect(restored.scope.technique, 'Rego');
       expect(restored.scope.form, 'Terram');
       expect(restored.scope.effectIds, ['rete-4']);
       expect(restored.scope.excludeTechniques, ['Intellego']);
+      expect(restored.scope.excludeTargets, ['target-individual']);
     });
 
     test('toMap/fromMap round-trip preserves an option baseIndividual', () {
