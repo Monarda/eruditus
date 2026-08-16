@@ -269,7 +269,7 @@ class SpellCreationScreen extends StatelessWidget {
                       ? (state.breakdown?.ritualStatus ?? const RitualStatus.notRitual())
                       : const RitualStatus.notRitual(),
                   declaration: draft.ritualDeclaration,
-                  showDeclarationCheckbox: draft.isEligibleForLastingCreationDeclaration,
+                  showLastingCreationOption: draft.isEligibleForLastingCreationDeclaration,
                   durationName: draft.duration?.name ?? '',
                   targetName: draft.target?.name ?? '',
                   guidelineIsSuggested: draft.baseEffect?.ritualRequirement ==

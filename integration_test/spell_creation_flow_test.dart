@@ -21,6 +21,7 @@ import 'package:eruditus/main.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
@@ -719,16 +720,20 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // The checkbox appears for Creo + Momentary and defaults to ticked.
+      // The "creates something lasting" radio option appears for Creo +
+      // Momentary and is selected by default.
+      final lastingCreationRadio =
+          find.byKey(const Key('ritual-radio-lastingCreation'));
       await tester.scrollUntilVisible(
-        find.byKey(const Key('ritual-checkbox')),
+        lastingCreationRadio,
         200.0,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
       expect(
-        tester.widget<CheckboxListTile>(find.byKey(const Key('ritual-checkbox'))).value,
-        isTrue,
+        RadioGroup.maybeOf<RitualDeclaration>(tester.element(lastingCreationRadio))
+            ?.groupValue,
+        RitualDeclaration.lastingCreation,
       );
 
       await tester.scrollUntilVisible(
