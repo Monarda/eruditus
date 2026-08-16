@@ -2,7 +2,6 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
-import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
