@@ -1670,26 +1670,24 @@ own technique/form). `ResolvedSpell`/`ResolvedTemplate` now read the stored
 fields, so a by-analogy spell displays under its own real Technique/Form
 instead of the borrowed one. `validateSpellAgainstCatalog` gained an 8th
 check enforcing the invariant. The Python importer emits both new fields on
-every spell and template; every one of the 325 spells and 24 templates in
+every spell and template; every one of the 325 spells and 27 templates in
 the committed assets was regenerated to carry them.
 
 **Explicitly not done in this item — separate follow-ups:**
-- Actually unblocking *Restore the Moved Image*, *Dispel the Phantom Image*,
-  *The Invisible Eye Revealed*, *Lay to Rest the Haunting Spirit* with a real
-  analogy reference — each needs its own per-spell reference-R/D/T
-  derivation, independent of this capability (see item 25's body for the
-  complication found while designing this).
+- ✅ done 2026-08-16, see item 25 — Actually unblocking *Restore the Moved
+  Image*, *Dispel the Phantom Image*, *The Invisible Eye Revealed*, *Lay to
+  Rest the Haunting Spirit* with a real analogy reference (3 via base-effect
+  analogy, 1 — *The Invisible Eye Revealed* — via the exception spell
+  mechanism instead).
 - Creation-screen UI for picking a cross-Form base effect interactively.
-- `SpellDraft` has no `analogyRationale` field, so instantiating a
-  by-analogy `SpellTemplate` (once one exists) will always seed `null`
-  and trip check 8 — the picker-path reasoning in the design spec's §4
-  doesn't cover template instantiation, which seeds `technique`/`form`
-  from a source that can already diverge from the base effect. Latent
-  today (no by-analogy template exists yet, and
-  `test_no_spell_carries_an_analogy_rationale_yet` pins that it stays
-  that way until a real one is built) — but the next person adding an
-  analogy template needs `SpellDraft` to gain the field and thread it
-  through `toSpell()`/`validateSpellDraft` first.
+- ✅ fixed 2026-08-16 — `SpellDraft` now carries `analogyRationale`,
+  threaded through `toSpell()`, `SpellEngine.validateSpellDraft`, and
+  `SpellCreationBloc`'s `TemplateInstantiated` handler (seeded from
+  `template.analogyRationale`), so instantiating a by-analogy
+  `SpellTemplate` from the Library now validates and calculates cleanly.
+  Regression test in `test/bloc/spell_creation_bloc_test.dart`'s
+  `TemplateInstantiated` group, built on the real
+  `tpl-peim-dispel-phantom-image` template.
 
 - **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
   `lib/models/resolved_spell.dart`, `lib/models/resolved_template.dart`,

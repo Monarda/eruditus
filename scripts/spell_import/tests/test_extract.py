@@ -42,17 +42,19 @@ class RunTest(unittest.TestCase):
             for citation in spell["citations"]:
                 self.assertNotIn("page", citation)
 
-    def test_blocked_spells_are_reported_not_dropped_silently(self):
-        # The audit found 74 blocked. Assert a range, not a number: each
-        # blocker item that clears moves spells from blocked to imported, and
-        # this test should not need editing when that happens. The last 4
-        # cleared 2026-08-16 (see todo item 25), so the lower bound is now 0
-        # rather than a strictly-positive count -- this test still exists to
-        # catch blocked spells being silently dropped from the report
-        # instead of appearing in `report.blocked`, not to assert that some
-        # nonzero number must remain blocked forever.
-        self.assertGreaterEqual(len(self.report.blocked), 0)
-        self.assertLess(len(self.report.blocked), 120)
+    def test_every_parsed_block_lands_in_exactly_one_bucket(self):
+        # A bucket-conservation invariant: every design-line block the parser
+        # finds must land in exactly one of these buckets. If a spell fell out
+        # of the report entirely -- silently dropped rather than appearing in
+        # report.blocked -- this sum would fall short of spells_parsed and
+        # catch it. (Verified today: 325+27+8+0+0 = 360 = spells_parsed.)
+        r = self.report
+        self.assertEqual(
+            len(r.spells) + len(r.templates) + len(r.exceptions)
+            + len(r.blocked) + len(r.unresolved),
+            r.identity.spells_parsed,
+            "a spell fell out of the report entirely -- it must appear in "
+            "exactly one bucket, blocked included")
 
 
 class RegenerationTest(unittest.TestCase):
@@ -295,6 +297,7 @@ class ExceptionSpellsDisjointnessTest(unittest.TestCase):
             "DESIGN_LINE_INCOMPLETE": set(extract_spells.DESIGN_LINE_INCOMPLETE),
             "KNOWN_UNRESOLVABLE": set(extract_spells.KNOWN_UNRESOLVABLE),
             "LEVEL_NEEDS_RULES_DECISION": set(extract_spells.LEVEL_NEEDS_RULES_DECISION),
+            "ANALOGY_BASE_EFFECTS": set(extract_spells.ANALOGY_BASE_EFFECTS),
         }.items():
             overlap = exception_ids & ids
             self.assertEqual(overlap, set(), msg=f"also in {table_name}: {overlap}")

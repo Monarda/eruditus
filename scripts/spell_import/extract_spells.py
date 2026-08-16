@@ -347,14 +347,14 @@ HAND_DERIVED: dict[str, str] = {
     # yet all three print bare "(Base effect)". Every literal sibling spell
     # built on the same guideline family always documents its own R/D/T
     # deviation as an explicit token: Demon's Eternal Oblivion and
-    # Unravelling the Fabric of (Form) both print "(Base effect, +2 Voice)";
-    # Maintaining the Demanding Spell prints "(Base effect, +1 Touch, +1
-    # Diam)"; Suppressing the Wizard's Handiwork prints "(Base, +1 Touch, +1
-    # Conc)" -- each investing exactly 2 magnitudes, matching revi-G2's and
-    # pevi-G3's own +2-magnitude offset (and, per the derivation above,
-    # pevi-G2's as well). These three spells printing bare is a corpus
-    # editorial omission -- the same pattern every comparable spell
-    # documents explicitly -- not a substantive rules difference. See
+    # Unravelling the Fabric of (Form) have stat lines identical to all
+    # three of these (R: Voice, D: Mom, T: Ind) and print exactly this
+    # token, "(Base effect, +2 Voice)"; Maintaining the Demanding Spell
+    # prints "(Base effect, +1 Touch, +1 Diam)"; Suppressing the Wizard's
+    # Handiwork prints "(Base, +1 Touch, +1 Conc)". These three spells
+    # printing bare is a corpus editorial omission -- the same pattern every
+    # comparable spell documents explicitly -- not a substantive rules
+    # difference. See
     # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md's
     # "Mid-implementation finding" section for the full cross-spell evidence.
     "Dispel the Phantom Image": "(Base effect, +2 Voice)",
@@ -633,7 +633,6 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         if design.base_level is None or block.printed_level is None:
             spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
             design_lines[spell_id] = design_text
-            general_candidates = catalog.general_candidates(block.technique, block.form)
 
             if spell_id in ANALOGY_BASE_EFFECTS:
                 analogy = ANALOGY_BASE_EFFECTS[spell_id]
@@ -648,6 +647,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                     blocked.append((block.name, str(error)))
                 continue
 
+            general_candidates = catalog.general_candidates(block.technique, block.form)
             if not general_candidates:
                 # Permanent, not a gap to fill: Perdo Imaginem's and Perdo
                 # Mentem's own guideline tables print no General row at all
