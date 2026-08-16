@@ -1655,6 +1655,33 @@ Revealed* and *Sight of the True Form* is now known to rest on a since-
 falsified assumption for the first four; see item 25),
 `docs/superpowers/plans/2026-08-16-exception-spells.md`
 
+### 48. Base Effect Analogy — model + pipeline capability — ✅ DONE 2026-08-16
+
+**Spec:** `docs/superpowers/specs/2026-08-16-base-effect-analogy-design.md`
+
+`Spell` and `SpellTemplate` gained their own `technique`/`form` (stored, no
+longer derived from the base effect) and an optional `analogyRationale`
+(required non-null exactly when they differ from the resolved base effect's
+own technique/form). `ResolvedSpell`/`ResolvedTemplate` now read the stored
+fields, so a by-analogy spell displays under its own real Technique/Form
+instead of the borrowed one. `validateSpellAgainstCatalog` gained an 8th
+check enforcing the invariant. The Python importer emits both new fields on
+every spell and template; every one of the 325 spells and 24 templates in
+the committed assets was regenerated to carry them.
+
+**Explicitly not done in this item — separate follow-ups:**
+- Actually unblocking *Restore the Moved Image*, *Dispel the Phantom Image*,
+  *The Invisible Eye Revealed*, *Lay to Rest the Haunting Spirit* with a real
+  analogy reference — each needs its own per-spell reference-R/D/T
+  derivation, independent of this capability (see item 25's body for the
+  complication found while designing this).
+- Creation-screen UI for picking a cross-Form base effect interactively.
+
+- **Files:** `lib/models/spell.dart`, `lib/models/spell_template.dart`,
+  `lib/models/resolved_spell.dart`, `lib/models/resolved_template.dart`,
+  `lib/engine/spell_engine.dart`, `scripts/spell_import/emit.py`,
+  `scripts/spell_import/extract_spells.py`
+
 ---
 
 ## D. Low Priority / Nice-to-Have
