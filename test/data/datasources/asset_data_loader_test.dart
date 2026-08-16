@@ -13,6 +13,7 @@ import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
+import 'package:eruditus/engine/ritual_status.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -473,6 +474,50 @@ void main() {
       expect(effects[template.baseEffectId]?.isGeneral, isTrue,
           reason: '${template.id} points at a non-General base effect');
     }
+  });
+
+  test('the Faerie Chains template computes its Ritual status from Until (Condition)', () async {
+    final templates = await loader.loadSpellTemplates();
+    final effects = await loader.loadBaseEffects();
+    final parameters = await loader.loadParameters();
+
+    final template =
+        templates.firstWhere((t) => t.id == 'tpl-crvi-faerie-chains-familiar-slave');
+    final baseEffect = effects.firstWhere((e) => e.id == template.baseEffectId);
+    final range = parameters.firstWhere((p) => p.id == template.rangeId);
+    final duration = parameters.firstWhere((p) => p.id == template.durationId);
+    final target = parameters.firstWhere((p) => p.id == template.targetId);
+
+    expect(range.id, 'range-touch');
+    expect(duration.id, 'duration-until-condition');
+    expect(duration.requiresRitual, isTrue);
+    expect(duration.requiresVirtue, 'Faerie Magic');
+    expect(baseEffect.requiresVirtue, 'Faerie Magic');
+    expect(baseEffect.isGeneral, isTrue);
+
+    final engine = SpellEngine(allSpells: const [], allParameters: parameters);
+    // Binding a creature with Might 5: level must be >= 20 (Might + 15).
+    final breakdown = engine.calculateBreakdown(
+      baseEffect: baseEffect,
+      chosenBaseLevel: 20,
+      range: range,
+      duration: duration,
+      target: target,
+      selectedModifiers: template.selectedModifiers,
+      requisites: template.requisites,
+    );
+
+    expect(breakdown.ritualStatus.isRitual, isTrue);
+    expect(breakdown.ritualStatus.reasons, containsAll([
+      RitualReason.ritualOnlyDuration,
+      RitualReason.guideline,
+    ]));
+    // 20 (chosen base, already above the level-5 additive tier) + Touch(1)*5
+    // + Until (Condition)(4)*5 = 20 + 5 + 20 = 45. The base effect has no
+    // reference override, so both parameters charge their full magnitude
+    // (unlike a ward guideline, whose own text states it already assumes a
+    // non-standard Range/Duration/Target for free).
+    expect(breakdown.level, 45);
   });
 
   test('loads every exception in the asset', () async {
