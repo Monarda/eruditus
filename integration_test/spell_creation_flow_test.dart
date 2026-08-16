@@ -911,4 +911,68 @@ void main() {
       await database.close();
     },
   );
+
+  testWidgets(
+    'end-to-end: the Exceptions section lists a real exception spell and offers no action',
+    (tester) async {
+      final database = await AppDatabase.open(path: inMemoryDatabasePath);
+      final assetLoader = AssetDataLoader();
+      final configRepository = ConfigurationRepository(
+        assetLoader: assetLoader,
+        configDatasource: LocalConfigurationDatasource(database: database),
+      );
+      final resolver = SpellResolver(
+        effects: await configRepository.getAllEffects(),
+        parameters: await configRepository.getAllParameters(),
+        modifiers: await configRepository.getAllModifiers(),
+      );
+      final spellRepository = SpellRepository(
+        datasource: LocalSpellDatasource(database: database),
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+      final libraryRepository = LibraryRepository(
+        assetLoader: assetLoader,
+        spellRepository: spellRepository,
+        resolver: resolver,
+        configRepository: configRepository,
+      );
+      final backupService = BackupService(spellRepository: spellRepository, configRepository: configRepository);
+
+      final allSpells = await libraryRepository.getAllSpells();
+      final spellEngine = SpellEngine(allSpells: allSpells);
+
+      final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      final spellLibraryBloc = SpellLibraryBloc(libraryRepository: libraryRepository, spellEngine: spellEngine);
+      final configurationBloc = ConfigurationBloc(configRepository: configRepository);
+
+      await tester.pumpWidget(EruditusApp(
+        spellCreationBloc: spellCreationBloc,
+        spellLibraryBloc: spellLibraryBloc,
+        configurationBloc: configurationBloc,
+        backupService: backupService,
+      ));
+      await tester.pumpAndSettle();
+
+      await openLibraryTab(tester);
+
+      // Wizard's Communion is one of the six real exception spells written
+      // to assets/data/spell_exceptions.json. Exceptions render as the last
+      // section of the Library list, below ~23 templates and ~294 spells
+      // (the same seed-library size the other tests in this file scroll
+      // past -- see the maxScrolls comments above), so the default
+      // maxIteration (50 drags * 200px = 10,000px) falls well short; bumped
+      // to match the maxScrolls: 500 budget those other tests already
+      // needed for the same reason.
+      await tester.dragUntilVisible(
+        find.text("Wizard's Communion"),
+        find.byType(ListView),
+        const Offset(0, -200),
+        maxIteration: 500,
+      );
+      expect(find.text("Wizard's Communion"), findsOneWidget);
+      expect(find.byKey(const Key('exception-chip')), findsWidgets);
+      expect(find.text('Learn at level…'), findsNothing);
+    },
+  );
 }
