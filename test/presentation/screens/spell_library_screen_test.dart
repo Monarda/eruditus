@@ -16,6 +16,7 @@ import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
@@ -188,6 +189,41 @@ void main() {
 
     expect(find.textContaining('Level 5'), findsOneWidget);
     expect(find.textContaining('Level 15'), findsOneWidget);
+  });
+
+  testWidgets('threads ResolvedSpell.problems onto the rendered card', (tester) async {
+    final record = Spell(
+      id: 'flawed-1',
+      name: 'Flawed Ward',
+      baseEffectId: effect.id,
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      // A requisite naming the spell's own Technique is exactly what
+      // validateSpellAgainstCatalog's check 3 rejects -- the simplest way to
+      // get a genuinely non-empty ResolvedSpell.problems for this fixture.
+      requisites: const {'Creo': RequisiteKind.adding},
+      description: 'A test spell.',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+    final flawed = ResolvedSpell(
+        record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
+    // Sanity check on the fixture itself, not the screen -- if this ever
+    // fails, the fixture stopped producing a real problem and the test below
+    // would pass for the wrong reason.
+    expect(flawed.problems, isNotEmpty);
+
+    await pumpScreen(
+      tester,
+      SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [flawed]),
+    );
+
+    expect(find.byKey(const Key('spell-card-invalid')), findsOneWidget);
+    expect(find.byKey(const Key('needs-review-chip')), findsOneWidget);
   });
 
   testWidgets('shows a loading indicator while status is loading', (tester) async {

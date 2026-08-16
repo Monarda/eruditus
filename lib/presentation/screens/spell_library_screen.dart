@@ -93,6 +93,7 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                           entry: s,
                           level: state.spellLevels[s.id],
                           isRitual: state.ritualSpellIds.contains(s.id),
+                          problems: s.problems,
                         )),
                     // Exceptions get their own section below the leveled
                     // spells, the same reasoning as the Templates section
