@@ -118,20 +118,27 @@ discipline in items 32 and 39.
 ## 0. Immediate Program of Work — the `spell.dart` Foundation
 
 **Opened 2026-08-09.** Model work on `lib/models/spell.dart` and its immediate
-neighbours. It sits above section A because items 35 and 37 will change the
-*serialized shape* of a spell, and every spell imported before that decision has
-to be rewritten after it. Deciding first is the cheaper order; it is not new
+neighbours. It sits above section A because items 35 and 37 changed the
+*serialized shape* of a spell, and every spell imported before that decision had
+to be rewritten after it. Deciding first was the cheaper order; it was not new
 scope.
+
+**Status as of 2026-08-16: 2 of 5 rows fully done, 1 confirmed with no model
+change needed, 2 still open.** Rows 2 and 4 (items 37/35 and 19) shipped; row 5's
+**26** half is confirmed (no model change needed); still open: row 1's last
+checkbox (item 40 — a UI consumer, not a model change), row 3 (item 13 — waits
+on creation-screen input) and row 5's **14** half (still needs a rulebook
+reading before its "no model change" question can even be answered).
 
 Ordered. Each row says what it changes in the model.
 
-| # | Item | Model change |
-|---|---|---|
-| 1 | **40** | Give the non-prose invariants an enforcement home both construction paths share |
-| 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields — the decision, then the implementation |
-| 3 | **13** | Tighten `validateSpellProse` to user-created spells too (waits on the creation-screen input) |
-| 4 | **19** | `ModifierScope` gains a Target restriction — `modifier.dart`, same foundation |
-| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption |
+| # | Item | Model change | Status |
+|---|---|---|---|
+| 1 | **40** | Give the non-prose invariants an enforcement home both construction paths share | Model/validation work done 2026-08-09; **one checkbox still open** — surfacing `problems` in the Library card has no UI consumer yet (confirmed: nothing under `lib/presentation` references `ResolvedSpell`) |
+| 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields — the decision, then the implementation | ✅ DONE — 35 decided 2026-08-14, both of 37's parts shipped 2026-08-14/15 |
+| 3 | **13** | Tighten `validateSpellProse` to user-created spells too (waits on the creation-screen input) | Not started — no summary/description input exists on the creation screen yet |
+| 4 | **19** | `ModifierScope` gains a Target restriction — `modifier.dart`, same foundation | ✅ COMPLETE 2026-08-16 |
+| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed, no model change needed (covered by item 24's adjustments instead). **14**: still open — the rulebook reading that would settle it hasn't been done |
 
 Items 13, 14, 19, 26, 35 and 37 keep their numbers and live in their own sections;
 this table is the ordering, not a second home for them.
