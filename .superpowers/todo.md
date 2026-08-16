@@ -1155,13 +1155,14 @@ by the branch's final review reading `assets/data/spell_library.json` directly).
   (`spell_templates.json`/`spell_exceptions.json` unchanged). Python suite
   (288 tests, run as module rather than via `discover` — see note below) and
   `flutter test` (571 tests) both green.
-- **Note on running the Python suite:** `python -m unittest discover -s
-  scripts/spell_import/tests` fails to import `test_general_catalog.py` with
-  `ImportError: attempted relative import with no known parent package` —
-  a pre-existing discovery-mode quirk unrelated to this fix (the module
-  passes standalone: `python -m unittest
-  scripts.spell_import.tests.test_general_catalog`). Not investigated
-  further here; flag if it recurs.
+- ~~**Note on running the Python suite:** `python -m unittest discover -s
+  scripts/spell_import/tests` fails to import `test_general_catalog.py`...~~
+  **Fixed 2026-08-16.** Root cause: `test_general_catalog.py` was the only
+  file under `scripts/spell_import/tests/` importing via `from .. import
+  ...`; all 13 siblings use `from scripts.spell_import import ...`, which is
+  what survives `unittest discover`'s module loading. Switched the one
+  outlier to match — `python -m unittest discover -s
+  scripts/spell_import/tests -p "test_*.py"` now runs all 296 tests clean.
 - **Not a behavior bug for the other 32 Ritual-flagged spells.** Their
   `isRitual` already derives independently (Year duration, Boundary target,
   level > 50, or a guideline requirement), so a wrong stored declaration

@@ -3,7 +3,7 @@ import json
 import re
 import unittest
 
-from .. import blocks, catalog as catalog_module, designline, extract_spells, sources
+from scripts.spell_import import blocks, catalog as catalog_module, designline, extract_spells, sources
 
 _TABLE_HEADER = re.compile(r"^\|\s*Level\s*\|\s*(\w+)\s+(\w+)\s+Guideline\s*\|")
 _GENERAL_ROW = re.compile(r"^\|\s*General\s*\|\s*(.+?)\s*\|\s*$")
