@@ -1321,6 +1321,15 @@
     ],
     "rationale": "Lets you see the heat of any object at body temperature or hotter (not specifically 'a fire'), matching inig-2d's 'Sense levels of heat,' unlike inig-2a/2b/2c which are all scoped to detecting fires specifically."
   },
+  "lib-peig-conjuration-indubitable-cold": {
+    "baseEffectId": "peig-4b",
+    "candidates": [
+      "peig-4a",
+      "peig-4b",
+      "peig-4c"
+    ],
+    "rationale": "The spell's own text matches peig-4b ('Chill an object', 'all nonliving things are chilled thoroughly') and peig-4c ('Chill a person so that they lose a Fatigue level', 'all living things ... lose one Fatigue level') simultaneously, not peig-4a ('Extinguish a fire') -- its 'campfires and smaller fires go out' only shrinks bigger fires, the level 3 guideline, not level 4's full extinguish. peig-4b is recorded as the primary baseEffectId; peig-4c is recorded separately as a magnitude-0 adjustment (extract_spells.COMBINED_BASE_EFFECTS) since both guidelines are level 4 and combining them is free -- the choice of which one is 'primary' is cosmetic, not load-bearing."
+  },
   "lib-peig-winters-icy-touch": {
     "baseEffectId": "peig-4c",
     "candidates": [

@@ -125,6 +125,38 @@ class BountifulFeastTypoTest(unittest.TestCase):
         self.assertEqual(spell["targetId"], "target-boundary")
 
 
+class CombinedBaseEffectsTest(unittest.TestCase):
+    """Conjuration of the Indubitable Cold: genuinely achieves two base-4
+    Perdo Ignem guidelines at once (chills an object, chills a person for a
+    lost Fatigue level). `Spell.baseEffectId` can only record one -- see
+    extract_spells.COMBINED_BASE_EFFECTS -- so the other is recorded as a
+    magnitude-0 LevelAdjustment instead of silently dropped.
+    """
+
+    def test_imports_at_its_printed_level_with_the_chosen_base_effect(self):
+        report = extract_spells.run(write=False)
+        spell = next(
+            s for s in report.spells if s["name"] == "Conjuration of the Indubitable Cold"
+        )
+        self.assertEqual(spell["printedLevel"], 25)
+        self.assertEqual(spell["baseEffectId"], "peig-4b")
+
+    def test_the_second_effect_is_recorded_as_a_zero_magnitude_adjustment(self):
+        report = extract_spells.run(write=False)
+        spell = next(
+            s for s in report.spells if s["name"] == "Conjuration of the Indubitable Cold"
+        )
+        self.assertIn("adjustments", spell)
+        self.assertEqual(len(spell["adjustments"]), 1)
+        self.assertEqual(spell["adjustments"][0]["magnitude"], 0)
+        self.assertIn("peig-4c", spell["adjustments"][0]["note"])
+
+    def test_no_longer_appears_in_known_unresolvable(self):
+        self.assertNotIn(
+            "lib-peig-conjuration-indubitable-cold", extract_spells.KNOWN_UNRESOLVABLE
+        )
+
+
 class KnownUnresolvableStalenessTest(unittest.TestCase):
     """Guards extract_spells.KNOWN_UNRESOLVABLE against silent staleness.
 

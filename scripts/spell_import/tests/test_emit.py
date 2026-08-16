@@ -72,6 +72,35 @@ class AdjustmentEmissionTest(unittest.TestCase):
         spell = self._build("(Base 1, +1 Touch, +2 Sun)")
         self.assertNotIn("adjustments", spell)
 
+    def test_extra_adjustment_is_appended_with_no_design_line_token(self):
+        # Conjuration of the Indubitable Cold's shape: a hand-authored,
+        # magnitude-0 adjustment with no corresponding printed token, used to
+        # record a second base effect the spell achieves for free at the
+        # same level. See extract_spells.COMBINED_BASE_EFFECTS.
+        design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
+        spell = emit.build_spell(
+            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
+            extra_adjustment=(0, "Also achieves a second guideline for free."),
+        )
+        self.assertEqual(
+            spell["adjustments"],
+            [{"magnitude": 0, "note": "Also achieves a second guideline for free."}],
+        )
+
+    def test_extra_adjustment_is_appended_after_design_line_tokens(self):
+        design = designline.parse_design("(Base 1, +1 Touch, +2 Sun, +1 for slightly unnatural control)")
+        spell = emit.build_spell(
+            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
+            extra_adjustment=(0, "Combined effect note."),
+        )
+        self.assertEqual(
+            spell["adjustments"],
+            [
+                {"magnitude": 1, "note": "for slightly unnatural control"},
+                {"magnitude": 0, "note": "Combined effect note."},
+            ],
+        )
+
 
 class ExceptionSpellEmissionTest(unittest.TestCase):
     """Direct pins for emit.build_exception_spell, independent of whether any

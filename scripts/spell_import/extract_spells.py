@@ -44,16 +44,41 @@ class SourceMoved(Exception):
 # Crystal Dart* turns solid stone into a solid crystal dart, the only
 # level-3 Muto Terram guideline built for a solid-to-solid earth-family
 # change, and the design line's arithmetic has no room for the material
-# surcharge a *different* material pair would need. *Conjuration of the
-# Indubitable Cold* does not have a forced reading — its own text matches
-# peig-4b and peig-4c close to verbatim simultaneously ("all nonliving
-# things are chilled thoroughly" / "all living things ... lose one Fatigue
-# level"), with peig-4a's "extinguish" contradicted by its own text for
-# anything bigger than a campfire (it only shrinks those, per the *level 3*
-# guideline, not the *level 4* one). Left here, genuinely undecided between
-# two candidates rather than three now.
-KNOWN_UNRESOLVABLE = {
-    "lib-peig-conjuration-indubitable-cold": "ambiguous between peig-4b/4c, both matched near-verbatim",
+# surcharge a *different* material pair would need.
+#
+# *Conjuration of the Indubitable Cold* moved out too, 2026-08-16 — see
+# COMBINED_BASE_EFFECTS below. It was never actually a "which one is right"
+# ambiguity: peig-4b and peig-4c are both level 4, so either pick computes
+# the identical printed level. What made it look unresolvable was a model
+# gap, not a rules one -- the spell's own text matches both guidelines at
+# once ("all nonliving things are chilled thoroughly" / "all living things
+# ... lose one Fatigue level"), and `Spell.baseEffectId` can only record one
+# ("peig-4a"'s "extinguish" is still excluded, contradicted by the spell's
+# own text for anything bigger than a campfire -- that's the *level 3*
+# guideline, not level 4). Currently empty; the mechanism stays for the next
+# spell that turns out to be a genuine, no-forced-discriminator tie.
+KNOWN_UNRESOLVABLE: dict[str, str] = {}
+
+
+# Spells that legitimately achieve more than one same-level base-effect
+# guideline at once, where `Spell.baseEffectId` (a single required field)
+# can only record one. The chosen id goes through the normal ledger
+# (resolutions.json) like any other multi-candidate spell; the *other*
+# effect is recorded here as a magnitude-0 LevelAdjustment, so it is real,
+# UI-visible data (a breakdown line with a note) instead of silently
+# dropped. Magnitude 0 because both guidelines share the same base level --
+# see the Requisites section's "base Arts and level ... are those for the
+# highest-level effect" for the closest the rulebook comes to stating this
+# principle outright (written for an added Art, not a same-Technique/Form
+# guideline, but the same "does not raise the cost" logic applies).
+COMBINED_BASE_EFFECTS: dict[str, tuple[int, str]] = {
+    "lib-peig-conjuration-indubitable-cold": (
+        0,
+        "Also chills a person, causing a lost Fatigue level (peig-4c), at "
+        "the same base level as the chosen guideline (peig-4b, chilling an "
+        "object) -- both are printed at level 4, so combining them adds "
+        "nothing to the spell's cost.",
+    ),
 }
 
 
@@ -560,6 +585,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             spells.append(emit.build_spell(
                 block, base_effect_id, catalog, design,
                 realm_by_spell_id=REALM_BY_SPELL_ID,
+                extra_adjustment=COMBINED_BASE_EFFECTS.get(spell_id),
             ))
         except (designline.UnknownToken, KeyError) as error:
             blocked.append((block.name, str(error)))

@@ -28,14 +28,14 @@ reason the guidelines don't apply to it. See item 46.
 
 Last extractor run, 2026-08-16 (`python -m scripts.spell_import.extract_spells`):
 
-> **323 imported · 24 emitted as templates · 6 recorded as exceptions · 7
+> **324 imported · 24 emitted as templates · 6 recorded as exceptions · 6
 > blocked · 0 unresolved**
 > — 360 published spells in Chapter 9, all accounted for.
 
 **Verified against a live `--show-blocked` run, not carried forward by
 arithmetic** — the table below was re-derived spell-by-spell against that
-output, after eight rounds of 2026-08-15 fixes plus item 24's closing fix
-(2026-08-16): item 28's Group A/B guideline
+output, after eight rounds of 2026-08-15 fixes plus item 24's closing fix and
+item 39's closing fix (both 2026-08-16): item 28's Group A/B guideline
 derivations; item 29's splitter fixes (6 spells: *Wings of the Soaring Wind*,
 *Stone to Falling Dust*, *Deluge of Rushing and Dashing*, *Ice of Drowning*,
 *Frosty Breath of the Spoken Lie*, *Ball of Abysmal Flame*); *Ward against
@@ -56,14 +56,17 @@ via item 45's transport-distance tokenizer fix); item 46's six exception
 spells (*Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*,
 *Whispering Winds*, *Watching Ward*, *Mists of Change*), which have their
 own row in the table below rather than counting toward the blocked total;
-and item 24's closing fix (*The Kiss of Death*, *Black Whisper*, *Sight of
-the Active Magics*, 2026-08-16). Every one of the 7 currently-blocked spells
-now maps to exactly one row below; none are unaccounted for.
+item 24's closing fix (*The Kiss of Death*, *Black Whisper*, *Sight of the
+Active Magics*, 2026-08-16); and item 39's closing fix (*Conjuration of the
+Indubitable Cold*, 2026-08-16 — see its corrected section: not actually a
+"which one is right" ambiguity, a model gap). Every one of the 6
+currently-blocked spells now maps to exactly one row below; none are
+unaccounted for.
 
 | Blocker family | Spells | Item |
 |---|---|---|
 | Guideline level absent from the rulebook's own table | 1 | **28** — corrected from 5: item 28's own body always said 4 of 5 were fixed 2026-08-15, this table just hadn't caught up |
-| Genuinely ambiguous ledger resolution | 1 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* remains, re-checked once more during Bucket-B planning and re-confirmed as a genuine two-way tie — this is the item's final decision, not a case still pending resolution |
+| Genuinely ambiguous ledger resolution | 0 | **39** — corrected from 4: 3 of 4 had a forced discriminator after all, fixed 2026-08-15; *Conjuration of the Indubitable Cold* now imports too, 2026-08-16 — it was never a "which one is right" tie, both candidates share the same base level, so it's routed through the ledger like any other multi-candidate spell and the second guideline is recorded as a free (magnitude-0) adjustment. See item 39's corrected body |
 | Size ladder above +4 | 0 | **19** — corrected from 4: a +5 rung now exists on every `size-<form>` ladder and all 4 spells import; the architectural gap (no Target restriction on `ModifierScope`) is unrelated and still open, see item 19 |
 | Non-standard Range/Duration/Target (mechanism done, spells still blocked) | 0 | **26** — corrected from 2: *Watching Ward* and *Mists of Change* both now import as exception spells (item 46) rather than staying blocked |
 | General-level, each blocked for an unrelated reason | 5 | see item **25** — corrected from 8: *Aegis of the Hearth*, *Wizard's Vigil* and *Wizard's Communion* now import as exception spells (item 46). Re-confirmed 2026-08-16: all 5 permanent, see item 25's body |
@@ -75,7 +78,7 @@ now maps to exactly one row below; none are unaccounted for.
 | Genuinely unwired mechanisms with no owning item | 0 | *Break the Oncoming Wave* (item **4**) and *Ward against Heat and Flames* (item **4b**) both fixed 2026-08-15 |
 | Rulebook says guideline arithmetic doesn't apply at all | 6 | new — item **46**: *Wizard's Communion*, *Wizard's Vigil*, *Aegis of the Hearth*, *Whispering Winds*, *Watching Ward*, *Mists of Change* |
 
-**Table total: 7 blocked, plus the 6 exception spells in the final row (not
+**Table total: 6 blocked, plus the 6 exception spells in the final row (not
 blockers), reconciled to the live counts.** The previous version of this
 table summed to 34 out of a then-52 while implying full coverage; every row
 above now maps to specific, named spells, not just a count.
@@ -313,9 +316,9 @@ generic "no base effect" message. Design/plan:
   `scripts/spell_import/emit.py`, `scripts/spell_import/extract_spells.py`,
   `scripts/spell_import/resolutions.json`, `assets/data/spell_library.json`
 
-### 39. Ambiguous Ledger Resolutions Needing a Rules Decision — 3 of 4 ✅ DONE 2026-08-15
+### 39. Ambiguous Ledger Resolutions Needing a Rules Decision — ✅ COMPLETE, 4 of 4 (2026-08-16)
 
-**3 of the original 4 turned out to have a forced discriminator after all.**
+**All 4 of the original 4 turned out to have a resolution after all.**
 Re-read each against its candidates' exact wording, not the most
 general-sounding one — same discipline item 27's pulled first pass violated.
 
@@ -343,29 +346,47 @@ general-sounding one — same discipline item 27's pulled first pass violated.
       `Req: Rego` is for the dart's flight and strike, not the material change,
       and doesn't bear on this pick.
 - [x] *Conjuration of the Indubitable Cold* (`lib-peig-conjuration-indubitable-cold`)
-      — **still genuinely ambiguous**, now `peig-4b` vs `peig-4c` (down from
-      three): its own text matches both close to verbatim simultaneously ("all
-      nonliving things are chilled thoroughly" / "all living things ... lose
-      one Fatigue level"), and `peig-4a`'s "extinguish" is contradicted by the
-      spell's own text for anything bigger than a campfire (those only shrink,
-      which is the *level 3* guideline, not level 4). Left in
-      `extract_spells.KNOWN_UNRESOLVABLE`.
-      
-      Re-checked once more during Bucket-B planning (2026-08-15) and the same
-      conclusion holds — genuinely undecidable from the text, staying in
-      `KNOWN_UNRESOLVABLE` permanently unless a future rules source (errata,
-      FAQ) settles it.
+      → **`peig-4b`, plus `peig-4c` recorded separately — ✅ RECLASSIFIED
+      2026-08-16, was "still genuinely ambiguous" through three prior
+      readings.** The user's own rules instinct broke this open: `peig-4b`
+      and `peig-4c` were never a "which one is right" tie — the spell's own
+      text matches both close to verbatim simultaneously ("all nonliving
+      things are chilled thoroughly" / "all living things ... lose one
+      Fatigue level"), and both are printed at the *same base level* (4). A
+      pick between them changes nothing about the computed level, which is
+      what made every prior reading treat it as unresolvable — that
+      reasoning was measuring the wrong risk. The rulebook's Requisites
+      section states the closest analogue outright: *"the base Arts and
+      level for the spell are those for the highest-level effect it
+      has"* — written for an added Art, not a same-Technique/Form guideline,
+      but the same "does not raise the cost" logic applies once both
+      guidelines share a level. (`peig-4a`'s "extinguish" is still excluded
+      on its own separate, textual grounds — contradicted by the spell's own
+      text for anything bigger than a campfire, the *level 3* guideline, not
+      level 4.)
+
+      **What changed:** `peig-4b` goes through `resolutions.json` like any
+      other multi-candidate spell, chosen arbitrarily since the choice is
+      cosmetic (either candidate computes identically). `peig-4c` is
+      recorded as a magnitude-0 `LevelAdjustment` — real, UI-visible data (a
+      breakdown line with a note), not silently dropped — via the new
+      `extract_spells.COMBINED_BASE_EFFECTS` table and `emit.build_spell`'s
+      new `extra_adjustment` parameter. `KNOWN_UNRESOLVABLE` is now empty;
+      the mechanism stays for a future spell that turns out to be a genuine,
+      no-forced-discriminator tie.
 
 **Different from item 28**, not a duplicate: there the correct row is missing and
 needs adding; here every candidate already exists and is individually plausible,
 and the work is close reading. **Not a harness blocker** — `KNOWN_UNRESOLVABLE` in
-`extract_spells.py` routes the one remaining spell to `blocked` rather than
-`unresolved`.
+`extract_spells.py` would route a spell here to `blocked` rather than
+`unresolved`, but is currently empty.
 
 **See also item 32**, which applies the same discipline to entries that *did* make
 it into the ledger.
 
-- **Files:** `scripts/spell_import/resolutions.json`, `scripts/spell_import/extract_spells.py`
+- **Files:** `scripts/spell_import/resolutions.json`, `scripts/spell_import/extract_spells.py`,
+  `scripts/spell_import/emit.py` (`build_spell`'s `extra_adjustment` parameter, for
+  *Conjuration of the Indubitable Cold*'s combined base effects)
 
 ### 26. Non-standard Ranges, Durations and Targets — mechanism DECIDED, spells still blocked
 

@@ -4753,6 +4753,37 @@
     ]
   },
   {
+    "id": "lib-peig-conjuration-indubitable-cold",
+    "name": "Conjuration of the Indubitable Cold",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "size-ignem": [
+        "size-ignem-2"
+      ]
+    },
+    "baseEffectId": "peig-4b",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-part",
+    "summary": "Cools the air within ten paces of the target, leaving it slightly below freezing. All nonliving things are chilled thoroughly, not just on the surface. All living things (except you, if you cast with a Rego requisite) lose one Fatigue level. House fires become as small as campfires, bonfires become as small as torch fires, and campfires and smaller fires go out. Level 25.",
+    "description": "Cools the air within ten paces of the target, leaving it slightly below freezing. All nonliving things are chilled thoroughly, not just on the surface. All living things (except you, if you cast with a Rego requisite) lose one Fatigue level. House fires become as small as campfires, bonfires become as small as torch fires, and campfires and smaller fires go out.",
+    "printedLevel": 25,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ],
+    "adjustments": [
+      {
+        "magnitude": 0,
+        "note": "Also chills a person, causing a lost Fatigue level (peig-4c), at the same base level as the chosen guideline (peig-4b, chilling an object) -- both are printed at level 4, so combining them adds nothing to the spell's cost."
+      }
+    ]
+  },
+  {
     "id": "lib-peig-gloom-evening",
     "name": "Gloom of Evening",
     "requisites": {},

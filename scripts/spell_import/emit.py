@@ -124,6 +124,7 @@ def build_spell(
     realm_by_spell_id: dict[str, str] | None = None,
     chosen_base_level: int | None = None,
     override_modifiers: dict[str, list[str]] | None = None,
+    extra_adjustment: tuple[int, str] | None = None,
 ) -> dict:
     range_id = catalog.parameter_id("Range", _parameter_name(design, "range", block))
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
@@ -214,6 +215,19 @@ def build_spell(
                         magnitude = token.magnitude - parameter_magnitudes.get(parameter_id, 0)
                         break
             adjustments.append({"magnitude": magnitude, "note": token.note})
+
+    if extra_adjustment is not None:
+        # A hand-authored adjustment with no design-line token behind it --
+        # unlike every other entry above, which is derived from one. Exists
+        # for a spell that genuinely achieves a second base-effect guideline
+        # at the same level as its chosen one, so combining them is free
+        # (magnitude 0): the schema has only one `baseEffectId`, and a
+        # magnitude-0 LevelAdjustment is the one honest, UI-visible place to
+        # record the second effect rather than silently dropping it. See
+        # extract_spells.COMBINED_BASE_EFFECTS.
+        magnitude, note = extra_adjustment
+        adjustments.append({"magnitude": magnitude, "note": note})
+
     if adjustments:
         spell["adjustments"] = adjustments
 
