@@ -184,6 +184,102 @@ void main() {
     ],
   );
 
+  // The suggestion fixture the two tests below share: same Technique/Form as
+  // the draft they are calculated against, so findSimilarSpells returns it.
+  SpellCreationBloc blocWithOneSuggestion() {
+    final suggestionRecord = Spell(
+      id: 'suggestion-1',
+      name: 'Pillar of Fire',
+      baseEffectId: creoIgnemEffect.id,
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      requisites: const {},
+      summary: 'Raises a pillar of flame.',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final suggestion = ResolvedSpell(
+      record: suggestionRecord, baseEffect: creoIgnemEffect,
+      range: rangeParam, duration: durationParam, target: targetParam);
+    return SpellCreationBloc(
+      spellEngine: SpellEngine(allSpells: [suggestion]),
+      spellRepository: spellRepository,
+    );
+  }
+
+  void calculateAValidDraft(SpellCreationBloc bloc) {
+    bloc.add(const TechniqueSelected('Creo'));
+    bloc.add(const FormSelected('Ignem'));
+    bloc.add(BaseEffectSelected(creoIgnemEffect));
+    bloc.add(RangeSelected(rangeParam));
+    bloc.add(DurationSelected(durationParam));
+    bloc.add(TargetSelected(targetParam));
+    bloc.add(const SpellCalculated());
+  }
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'an edit after SpellCalculated clears the suggestions it produced, and their '
+    'companion maps, while the level is recomputed',
+    // Each suggestion carries a precomputed level that was compared against a
+    // level the draft no longer has, so a suggestion list is strictly more
+    // stale-dangerous than the validationErrors the emit funnel already clears
+    // on a draft change -- red text saying "Target must be selected" is at
+    // least about the draft in front of you. Left uncleared, the list only
+    // *looked* gone: the screen hid it on `status: editing` while it sat in
+    // state, and a save started after the edit put it back on screen (the
+    // status moves to saving/error, which the screen has to read as "keep
+    // showing a calculated list" so a save does not take the suggestions away
+    // from under someone who did press the button).
+    build: blocWithOneSuggestion,
+    act: (bloc) {
+      calculateAValidDraft(bloc);
+      // A different Duration: a real draft change, and one that moves the
+      // level, so the recomputation is visible in the same emit.
+      bloc.add(DurationSelected(Parameter(
+          id: 'p-sun', name: 'Sun', category: 'Duration', magnitude: 2,
+          provenance: Provenance(
+              source: PublicationSource.published,
+              citations: const [Citation(bookId: 'arm5-core')]))));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having((s) => s.suggestions, 'suggestions', isEmpty)
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isEmpty)
+          .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', isEmpty)
+          // The level is not merely retained, it is recomputed: the point of
+          // clearing the suggestions is that they no longer describe this
+          // draft, and the thing that does describe it must still be there.
+          .having((s) => s.breakdown, 'breakdown', isNotNull)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 70),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'SpellCalculated does not clear the suggestions it just produced',
+    // The reverse guard on the clear above. It fires on `draftChanged`, and
+    // _handleSpellCalculated emits `state.copyWith(...)` without a draft --
+    // same instance, so the predicate is false and the list it just built
+    // survives its own emit. A clear that fired here would empty the
+    // suggestions on the very event that computes them, and the symptom would
+    // be an always-empty Similar Spells section rather than a stale one.
+    // ritualSuggestionIds has the same guard in the Ritual-suggestion test
+    // below, which asserts a populated set straight out of SpellCalculated.
+    build: blocWithOneSuggestion,
+    act: calculateAValidDraft,
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isNotEmpty),
+    ],
+  );
+
   blocTest<SpellCreationBloc, SpellCreationState>(
     'SpellCalculated flags a Ritual suggestion in ritualSuggestionIds, leaving a non-Ritual one out',
     build: () {

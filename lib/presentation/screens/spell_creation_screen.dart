@@ -100,12 +100,13 @@ class SpellCreationScreen extends StatelessWidget {
           // actually produced, which is what stops a save taking the
           // suggestions away from under a user who did press the button.
           //
-          // The honest limit: a list superseded by an edit stays in
-          // SpellCreationState (only its `calculated` marker moves), so a save
-          // started after that edit preserves it too. Closing that needs the
-          // bloc's emit funnel to clear suggestions on a draft change, beside
-          // the validationErrors it already clears there for the same reason --
-          // not this screen's to do.
+          // `isNotEmpty` is an exact test for that, not a heuristic:
+          // SpellCreationBloc's emit funnel empties `suggestions` on any draft
+          // change, beside the validationErrors it clears there for the same
+          // reason, so a non-empty list can only be one calculated against the
+          // draft on screen. It is load-bearing rather than belt-and-braces --
+          // once the save lifecycle has overwritten `calculated`, the list
+          // itself is the only remaining evidence that the user ever asked.
           final showSuggestions = state.status == SpellCreationStatus.calculated ||
               ((isSaving || state.status == SpellCreationStatus.error) &&
                   state.suggestions.isNotEmpty);

@@ -124,6 +124,32 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // remainder back, computed against the draft they actually have, on their
       // next press. `null` is copyWith's "leave it alone".
       validationErrors: draftChanged ? const <String>[] : null,
+      // The same rule as validationErrors above, and it applies harder here.
+      // A validation error at least describes the draft in front of you; a
+      // suggestion carries a precomputed level (suggestionLevels) that was
+      // chosen for being *similar to* a level this draft no longer has, so an
+      // edit does not merely date the list, it falsifies the comparison the
+      // list exists to make. Before this, an edit only appeared to clear them:
+      // the screen stopped showing the section on `status: editing` while the
+      // list sat in state, and a save started after that edit put it back --
+      // the status moves to saving/error, which the screen must read as "keep
+      // showing a calculated list" so a save does not take the suggestions
+      // away from a user who did press the button.
+      //
+      // All three together, not just `suggestions`. They are written by one
+      // handler in one emit and keyed to that one list: suggestionLevels and
+      // ritualSuggestionIds are maps from the ids in `suggestions`, so leaving
+      // them behind an emptied list would keep exactly the stale numbers
+      // (a level of 60 against a draft since edited to 70) with nothing left
+      // to make them reachable -- dead state that reads as live if anything
+      // ever indexes it again.
+      //
+      // Like validationErrors, this clears and never populates: only
+      // SpellCalculated fills these, and its own emit passes no draft, so the
+      // predicate is false there and the list survives the emit that built it.
+      suggestions: draftChanged ? const <ResolvedSpell>[] : null,
+      suggestionLevels: draftChanged ? const <String, int>{} : null,
+      ritualSuggestionIds: draftChanged ? const <String>{} : null,
     ));
   }
 
