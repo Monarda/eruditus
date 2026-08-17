@@ -16,6 +16,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -24,6 +25,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
@@ -1633,5 +1635,108 @@ void main() {
     await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
 
     expect(find.text('Seeded from a template.'), findsNothing);
+  });
+
+  group('container mode field', () {
+    // targetParam (top of file) is the pre-existing 'Individual' fixture and
+    // carries no targetType (null), so it already stands in for a
+    // non-container Target -- only a fresh container fixture is needed here.
+    final roomTarget = Parameter(
+      id: 'p-target-room', name: 'Room', category: 'Target', magnitude: 10,
+      targetType: TargetType.container,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+    SpellCreationState stateWithTarget(Parameter? selectedTarget) => SpellCreationState(
+          status: SpellCreationStatus.editing,
+          draft: SpellDraft(
+            technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+            range: range, duration: duration, target: selectedTarget,
+          ),
+        );
+
+    Future<void> pumpWithTargetCatalog(
+        WidgetTester tester, StreamController<SpellCreationState> controller) async {
+      useTallSurface(tester);
+      whenListen(bloc, controller.stream, initialState: stateWithTarget(null));
+      whenListen(
+        configBloc,
+        const Stream<ConfigurationState>.empty(),
+        initialState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [voiceParam, durationParam, targetParam, roomTarget],
+        ),
+      );
+      await tester.pumpWidget(MaterialApp(
+        home: MultiBlocProvider(
+          providers: [
+            BlocProvider<SpellCreationBloc>.value(value: bloc),
+            BlocProvider<ConfigurationBloc>.value(value: configBloc),
+          ],
+          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        ),
+      ));
+    }
+
+    // Drives the Target dropdown to [param], then pushes the state the real
+    // bloc's TargetSelected handler would emit -- the mocked bloc used
+    // elsewhere in this file never updates its exposed state on `add`, so
+    // proving the conditional control reacts to a Target change needs a real
+    // state stream, the same technique the Ritual-banner and summary-resync
+    // tests above use.
+    Future<void> selectTarget(WidgetTester tester,
+        StreamController<SpellCreationState> controller, Parameter param) async {
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('target-dropdown')),
+        100,
+        scrollable: screenScrollable,
+      );
+      await tester.tap(find.byKey(const Key('target-dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('${param.name} (+${param.magnitude})').last);
+      await tester.pumpAndSettle();
+      controller.add(stateWithTarget(param));
+      await tester.pump();
+    }
+
+    testWidgets('the container mode control appears only for a container Target',
+        (tester) async {
+      final controller = StreamController<SpellCreationState>();
+      addTearDown(controller.close);
+      await pumpWithTargetCatalog(tester, controller);
+
+      await selectTarget(tester, controller, targetParam);
+      expect(find.byKey(const Key('container-mode-field')), findsNothing);
+
+      await selectTarget(tester, controller, roomTarget);
+      // scrollUntilVisible against the screen's own scrollable -- a bare find
+      // would be ambiguous, because every TextField on this screen builds its
+      // own Scrollable. screenScrollable (top of file) anchors on the
+      // ListView's key and picks its own Scrollable descendant.
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('container-mode-field')),
+        100,
+        scrollable: screenScrollable,
+      );
+      expect(find.byKey(const Key('container-mode-field')), findsOneWidget);
+    });
+
+    testWidgets('choosing a segment dispatches ContainerModeSelected', (tester) async {
+      final controller = StreamController<SpellCreationState>();
+      addTearDown(controller.close);
+      await pumpWithTargetCatalog(tester, controller);
+      await selectTarget(tester, controller, roomTarget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('container-mode-field')),
+        100,
+        scrollable: screenScrollable,
+      );
+
+      await tester.tap(find.text('Dynamic'));
+      await tester.pumpAndSettle();
+
+      verify(() => bloc.add(const ContainerModeSelected(ContainerMode.dynamic)))
+          .called(1);
+    });
   });
 }

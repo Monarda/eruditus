@@ -8,10 +8,12 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/presentation/widgets/level_breakdown_card.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 import 'package:eruditus/presentation/widgets/ritual_section.dart';
@@ -250,6 +252,14 @@ class SpellCreationScreen extends StatelessWidget {
                     if (param != null) bloc.add(TargetSelected(param));
                   },
                 ),
+                if (draft.target?.targetType == TargetType.container) ...[
+                  const SizedBox(height: 12),
+                  _ContainerModeField(
+                    value: draft.containerMode,
+                    targetName: draft.target!.name,
+                    onChanged: (mode) => bloc.add(ContainerModeSelected(mode)),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 _buildRequisitesSection(context, bloc, draft),
                 const SizedBox(height: 16),
@@ -771,6 +781,73 @@ class _SummaryFieldState extends State<_SummaryField> {
         helperText: 'Required. Shown on this spell\'s card in your library.',
       ),
       onChanged: widget.onChanged,
+    );
+  }
+}
+
+/// The static/dynamic choice for a container Target (Core Rules' "Container
+/// Targets" sidebar).
+///
+/// Stateless, unlike [_SummaryField] and [_GuidelineLevelField]: there is no
+/// controller to resync, because a segmented button reads its selection
+/// straight from [value] on every build.
+///
+/// [ContainerMode.unstated] is a visible, selectable segment rather than an
+/// absence, because it is a real stored value — deferring the decision should
+/// be something the user does, not something that happens by not noticing a
+/// control.
+class _ContainerModeField extends StatelessWidget {
+  final ContainerMode value;
+  final String targetName;
+  final ValueChanged<ContainerMode> onChanged;
+
+  const _ContainerModeField({
+    required this.value,
+    required this.targetName,
+    required this.onChanged,
+  });
+
+  static const Map<ContainerMode, String> _labels = {
+    ContainerMode.unstated: 'Not stated',
+    ContainerMode.static: 'Static',
+    ContainerMode.dynamic: 'Dynamic',
+  };
+
+  String get _helper {
+    switch (value) {
+      case ContainerMode.unstated:
+        return 'Not recorded. The rulebook fixes this when the spell is '
+            'designed, so it is worth deciding.';
+      case ContainerMode.static:
+        return 'Affects whatever is in the $targetName when cast, and keeps '
+            'affecting it even after it leaves.';
+      case ContainerMode.dynamic:
+        return 'Affects whatever is in the $targetName at the time. Leaving '
+            'ends the effect; entering starts it.';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Container behaviour',
+            style: Theme.of(context).textTheme.bodyMedium),
+        const SizedBox(height: 4),
+        SegmentedButton<ContainerMode>(
+          key: const Key('container-mode-field'),
+          segments: ContainerMode.values
+              .map((mode) =>
+                  ButtonSegment(value: mode, label: Text(_labels[mode]!)))
+              .toList(),
+          selected: {value},
+          showSelectedIcon: false,
+          onSelectionChanged: (selection) => onChanged(selection.single),
+        ),
+        const SizedBox(height: 4),
+        Text(_helper, style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }
