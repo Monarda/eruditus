@@ -1564,9 +1564,13 @@
       "crvi-G1",
       "crvi-G2",
       "crvi-G3",
-      "crvi-G4"
+      "crvi-G4",
+      "crvi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'This spell temporarily restores spell traces to a fresh state (as if they had just expired). The spell will restore spell traces of negative magnitude up to the magnitude of this spell –3.' crvi-G4 is the only one of the four Creo Vim General bullets about traces — 'Refreshes all spell traces within the target that are less than the magnitude of the guideline –1, in negative magnitude (this restores them to their initial strength, generally half the magnitude of the spell)' — and its arithmetic lands exactly: the design line (Base, +1 Touch, +1 Dia) puts the guideline two magnitudes below the spell, so 'the magnitude of the guideline –1' is 'the magnitude of this spell –3'. crvi-G2 is the nearest rejected candidate, being the other bullet that turns on Intellego investigation of magic, but it 'prevents Intellego spells ... from learning any details about the magic on the target' — this spell exists to make the traces examinable, which is the opposite; crvi-G1 and crvi-G3 are likewise concealment shells, not restorations."
+    "rationale": "Its prose reads 'This spell temporarily restores spell traces to a fresh state (as if they had just expired). The spell will restore spell traces of negative magnitude up to the magnitude of this spell –3.' crvi-G4 is the only one of the four Creo Vim General bullets about traces — 'Refreshes all spell traces within the target that are less than the magnitude of the guideline –1, in negative magnitude (this restores them to their initial strength, generally half the magnitude of the spell)' — and its arithmetic lands exactly: the design line (Base, +1 Touch, +1 Dia) puts the guideline two magnitudes below the spell, so 'the magnitude of the guideline –1' is 'the magnitude of this spell –3'. crvi-G2 is the nearest rejected candidate, being the other bullet that turns on Intellego investigation of magic, but it 'prevents Intellego spells ... from learning any details about the magic on the target' — this spell exists to make the traces examinable, which is the opposite; crvi-G1 and crvi-G3 are likewise concealment shells, not restorations.",
+    "unreviewedCandidates": [
+      "crvi-hohmc-G1"
+    ]
   },
   "lib-crvi-shell-false-determinations": {
     "baseEffectId": "crvi-G3",
@@ -1574,9 +1578,13 @@
       "crvi-G1",
       "crvi-G2",
       "crvi-G3",
-      "crvi-G4"
+      "crvi-G4",
+      "crvi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'All attempts to investigate the magic item give false information about its powers unless half of the level of the shell is exceeded by the magus's Investigation roll.' crvi-G3 is 'Create a magical shell which gives false information about the target to Intellego spells with level less than or equal to half its level plus one magnitude' — the only bullet that supplies false information, and the only one whose threshold is halved, matching the printed 'half of the level of the shell' (with (Base effect, +1 Touch), half the guideline plus one magnitude is half the shell's own level). crvi-G1 is the near miss and is excluded by its own parenthetical: 'this aura is generic magic only — no misleading information can be supplied'. crvi-G2's threshold is the full level, which is Shell of Opaque Mysteries, not this spell; crvi-G4 is about spell traces."
+    "rationale": "Its prose reads 'All attempts to investigate the magic item give false information about its powers unless half of the level of the shell is exceeded by the magus's Investigation roll.' crvi-G3 is 'Create a magical shell which gives false information about the target to Intellego spells with level less than or equal to half its level plus one magnitude' — the only bullet that supplies false information, and the only one whose threshold is halved, matching the printed 'half of the level of the shell' (with (Base effect, +1 Touch), half the guideline plus one magnitude is half the shell's own level). crvi-G1 is the near miss and is excluded by its own parenthetical: 'this aura is generic magic only — no misleading information can be supplied'. crvi-G2's threshold is the full level, which is Shell of Opaque Mysteries, not this spell; crvi-G4 is about spell traces.",
+    "unreviewedCandidates": [
+      "crvi-hohmc-G1"
+    ]
   },
   "lib-crvi-shell-opaque-mysteries": {
     "baseEffectId": "crvi-G2",
@@ -1584,9 +1592,13 @@
       "crvi-G1",
       "crvi-G2",
       "crvi-G3",
-      "crvi-G4"
+      "crvi-G4",
+      "crvi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'it causes all attempts to investigate the magic item to utterly fail, unless the level of the ritual is exceeded by the magus's Investigation roll.' crvi-G2 is 'Create a magical shell which prevents Intellego spells with a level less than or equal to its level, plus one magnitude from learning any details about the magic on the target' — learning no details at all is 'utterly fail', and the threshold is the full level of the ritual, exactly as printed (with (Base effect, +1 Touch), the guideline plus one magnitude is the ritual's own level). crvi-G3 is the near miss — the entry itself says this spell is 'similar to Shell of False Determinations' — and is excluded twice over: it 'gives false information about the target', which this spell explicitly does not do, and its threshold is half the level rather than 'the level of the ritual'. crvi-G1 supplies a merely generic aura and crvi-G4 is about spell traces."
+    "rationale": "Its prose reads 'it causes all attempts to investigate the magic item to utterly fail, unless the level of the ritual is exceeded by the magus's Investigation roll.' crvi-G2 is 'Create a magical shell which prevents Intellego spells with a level less than or equal to its level, plus one magnitude from learning any details about the magic on the target' — learning no details at all is 'utterly fail', and the threshold is the full level of the ritual, exactly as printed (with (Base effect, +1 Touch), the guideline plus one magnitude is the ritual's own level). crvi-G3 is the near miss — the entry itself says this spell is 'similar to Shell of False Determinations' — and is excluded twice over: it 'gives false information about the target', which this spell explicitly does not do, and its threshold is half the level rather than 'the level of the ritual'. crvi-G1 supplies a merely generic aura and crvi-G4 is about spell traces.",
+    "unreviewedCandidates": [
+      "crvi-hohmc-G1"
+    ]
   },
   "lib-muvi-mirror-opposition-form": {
     "baseEffectId": "muvi-G3",

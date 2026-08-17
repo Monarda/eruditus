@@ -25,6 +25,26 @@ FORM_ABBREVIATION = {
 # Leading articles and stock phrases the existing 36 ids drop.
 _STOPWORDS = {"the", "of", "a", "an", "phantasm"}
 
+CORE_BOOK_ID = "arm5-core"
+
+
+def cites(entry: dict, book_id: str) -> bool:
+    """Does this catalog row come from `book_id`?
+
+    The catalog stopped being core-rules-only when todo item 17 added a
+    guideline from Houses of Hermes: Mystery Cults, and several tests here
+    measure the catalog against the *core rulebook's* printed tables. Those
+    have to say which rows they are talking about rather than assuming every
+    row is core — a supplement row is not a surplus to be deleted.
+
+    Candidate resolution deliberately does **not** use this: a spell's
+    guideline is chosen from everything the catalog offers, and a row that
+    should not have been a candidate is a ledger decision, not a filter (see
+    todo item 55, and `migrate_ledger.py` for how such a row is carried past
+    existing decisions).
+    """
+    return any(c.get("bookId") == book_id for c in entry.get("citations") or [])
+
 
 def slug_id(technique: str, form: str, name: str) -> str:
     prefix = TECHNIQUE_ABBREVIATION[technique] + FORM_ABBREVIATION[form]

@@ -21,6 +21,19 @@ EXCEPTIONS_PATH = catalog_module.DATA_DIR / "spell_exceptions.json"
 PROPOSALS_PATH = ledger_module.LEDGER_PATH.with_name("resolutions.proposed.json")
 REPORT_PATH = ledger_module.LEDGER_PATH.with_name("import_report.md")
 
+# Templates that exist but are not extracted from Chapter 9, because they are
+# not printed there: today, item 17's worked example out of Houses of Hermes:
+# Mystery Cults. They live here, as a committed *input*, for one reason —
+# `--write` rebuilds spell_templates.json from this run's output, so a
+# template the run does not produce is deleted by the next regeneration. That
+# very nearly happened: the entry sat only in the asset until todo item 55
+# went looking. Keeping it as an input also keeps the regeneration assertion
+# honest, since the asset is then fully derived from committed inputs rather
+# than partly from its own previous self.
+HAND_AUTHORED_TEMPLATES_PATH = (
+    ledger_module.LEDGER_PATH.with_name("hand_authored_templates.json")
+)
+
 
 class SourceMoved(Exception):
     """The rulebook changed since the committed asset was generated."""
@@ -555,6 +568,21 @@ class Report:
     problems: list[str]
     identity: provenance.SourceIdentity
     design_lines: dict[str, str]
+    # spell id -> the catalog's current candidate list, for every entry whose
+    # recorded decision still stands but whose candidate set grew. Collected
+    # here rather than acted on, because the extractor must never write the
+    # ledger (see ledger.py's module docstring); `migrate_ledger.py` consumes
+    # this and is the only thing that does.
+    widenings: dict[str, list[str]]
+    # spell id -> candidates a past migration carried the decision past without
+    # a human weighing them. Reported on every run so the backlog cannot go
+    # quiet: nothing else fails while it grows.
+    unreviewed: dict[str, tuple[str, ...]]
+    # Spells with no ledger entry at all, which is what PROPOSALS_PATH gets
+    # written from. Distinct from `unresolved`, which also holds widenings and
+    # stale entries — those need no proposal, and pointing at the proposals
+    # file for them sends the reader to a file that says nothing about them.
+    proposals: dict[str, dict]
 
 
 def serialize(spells: list[dict]) -> str:
@@ -580,6 +608,18 @@ def regeneration_failure_message(
     )
 
 
+def hand_authored_templates() -> list[dict]:
+    """Templates carried in from a committed input rather than extracted.
+
+    Read on every run, so a fresh run reproduces the committed asset exactly
+    and `--write` cannot drop them. If the file goes missing the count simply
+    falls short, and the regeneration assertion is what says so.
+    """
+    if not HAND_AUTHORED_TEMPLATES_PATH.is_file():
+        return []
+    return json.loads(HAND_AUTHORED_TEMPLATES_PATH.read_text(encoding="utf-8"))
+
+
 def run(write: bool = False, accept_source: bool = False) -> Report:
     root = sources.default_root()
     path = sources.resolve_book(sources.DE_TITLE, root)
@@ -596,6 +636,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
     blocked: list[tuple[str, str]] = []
     unresolved: list[str] = []
     proposals: dict[str, dict] = {}
+    widenings: dict[str, list[str]] = {}
 
     for block in parsed:
         corrected_name = SPELL_NAME_TYPOS.get(block.name)
@@ -733,6 +774,10 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                     ],
                 }
                 continue
+            except ledger_module.WidenedEntry as error:
+                unresolved.append(str(error))
+                widenings[spell_id] = general_candidates
+                continue
             except ledger_module.LedgerError as error:
                 unresolved.append(str(error))
                 continue
@@ -794,6 +839,10 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 ],
             }
             continue
+        except ledger_module.WidenedEntry as error:
+            unresolved.append(str(error))
+            widenings[spell_id] = candidates
+            continue
         except ledger_module.LedgerError as error:
             unresolved.append(str(error))
             continue
@@ -807,6 +856,8 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             ))
         except (designline.UnknownToken, KeyError) as error:
             blocked.append((block.name, str(error)))
+
+    templates.extend(hand_authored_templates())
 
     if proposals:
         PROPOSALS_PATH.write_text(
@@ -872,11 +923,21 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                     encoding="utf-8",
                 )
             provenance.write(identity)
+        elif provenance.matches(lock, identity) and lock.to_dict() != identity.to_dict():
+            # Same rulebook, so nothing is being *adopted* and the
+            # --accept-source gate has nothing to guard: only the lock's
+            # advisory counts have drifted from what this run produced. They
+            # had drifted a long way (294 recorded against 325 imported)
+            # precisely because the lock was rewritten only when the source
+            # moved, which is the one case those counts are read in — the
+            # "N parsed, M imported" line of the source-moved message.
+            provenance.write(identity)
 
     return Report(
         spells=spells, templates=templates, exceptions=exception_spells,
         blocked=blocked, unresolved=unresolved,
         problems=problems, identity=identity, design_lines=design_lines,
+        widenings=widenings, unreviewed=book.unreviewed(), proposals=proposals,
     )
 
 
@@ -923,13 +984,24 @@ def main(argv: list[str] | None = None) -> int:
             for spell in spells:
                 print(f"  - {spell}")
 
+    if report.unreviewed:
+        total = sum(len(ids) for ids in report.unreviewed.values())
+        print(f"unreviewed: {total} candidate(s) across {len(report.unreviewed)} "
+              "ledger entries, carried past by a migration and never weighed "
+              "(see migrate_ledger.py)")
+
     for problem in report.problems:
         print(f"  PARSE  {problem}", file=sys.stderr)
     for message in report.unresolved[:20]:
         print(f"  LEDGER {message}", file=sys.stderr)
     if report.unresolved:
-        print(f"\nwrote {PROPOSALS_PATH} — copy decisions into resolutions.json by hand",
-              file=sys.stderr)
+        if report.widenings:
+            print(f"\n{len(report.widenings)} of these only widened — run "
+                  "`python -m scripts.spell_import.migrate_ledger --write`",
+                  file=sys.stderr)
+        if report.proposals:
+            print(f"wrote {PROPOSALS_PATH} — copy decisions into resolutions.json by hand",
+                  file=sys.stderr)
 
     if report.problems or report.unresolved:
         return 1

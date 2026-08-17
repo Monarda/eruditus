@@ -9,6 +9,7 @@ from scripts.spell_import.sources import REPO_ROOT
 
 LIBRARY = REPO_ROOT / "assets" / "data" / "spell_library.json"
 EXCEPTIONS = REPO_ROOT / "assets" / "data" / "spell_exceptions.json"
+TEMPLATES = REPO_ROOT / "assets" / "data" / "spell_templates.json"
 
 
 class RunTest(unittest.TestCase):
@@ -48,9 +49,15 @@ class RunTest(unittest.TestCase):
         # of the report entirely -- silently dropped rather than appearing in
         # report.blocked -- this sum would fall short of spells_parsed and
         # catch it. (Verified today: 325+27+8+0+0 = 360 = spells_parsed.)
+        #
+        # Hand-authored templates are subtracted back out because they were
+        # never parsed: they come from a committed input, not from Chapter 9,
+        # so counting them would make this sum exceed spells_parsed and mask
+        # a genuine shortfall by exactly as many as there are of them.
         r = self.report
+        carried_in = len(extract_spells.hand_authored_templates())
         self.assertEqual(
-            len(r.spells) + len(r.templates) + len(r.exceptions)
+            len(r.spells) + len(r.templates) - carried_in + len(r.exceptions)
             + len(r.blocked) + len(r.unresolved),
             r.identity.spells_parsed,
             "a spell fell out of the report entirely -- it must appear in "
@@ -90,6 +97,36 @@ class RegenerationTest(unittest.TestCase):
             extract_spells.serialize(report.exceptions),
             extract_spells.serialize(committed),
         )
+
+    def test_committed_templates_match_a_fresh_run(self):
+        """The third asset --write rewrites, and the last to get this check.
+
+        Its absence hid a real divergence: when todo item 17's supplement
+        guideline made three Creo Vim templates unresolvable, the committed
+        file kept 28 entries while a fresh run produced 24, and nothing
+        failed. Both other assets had this assertion; templates did not.
+        """
+        report = extract_spells.run(write=False)
+        committed = json.loads(TEMPLATES.read_text(encoding="utf-8"))
+        self.assertEqual(
+            extract_spells.serialize(report.templates),
+            extract_spells.serialize(committed),
+        )
+
+    def test_hand_authored_templates_survive_a_run(self):
+        """A template the extractor cannot produce must still come out of it.
+
+        `--write` rebuilds spell_templates.json from the run's own output, so
+        anything only present in the committed asset is deleted by the next
+        regeneration -- which is what would have happened to item 17's worked
+        example. Pinned separately from the equality above because that one
+        would go green again if somebody deleted the entry from *both* sides.
+        """
+        report = extract_spells.run(write=False)
+        emitted = {t["id"] for t in report.templates}
+        for template in extract_spells.hand_authored_templates():
+            with self.subTest(template["id"]):
+                self.assertIn(template["id"], emitted)
 
 
 class HandDerivedTest(unittest.TestCase):

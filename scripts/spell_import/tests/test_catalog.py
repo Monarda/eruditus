@@ -25,7 +25,14 @@ class CandidatesTest(unittest.TestCase):
 
     def test_loads_the_committed_catalogs(self):
         self.assertGreater(len(self.catalog.base_effects), 600)
-        self.assertEqual(len(self.catalog.parameters), 25)
+        # A floor, not an equality. This was `== 25`, the core rulebook's own
+        # Range/Duration/Target count (todo item 15), until item 17 added
+        # nine virtue-gated parameters and made a hand-maintained total
+        # something every future supplement has to bump -- exactly the drift
+        # item 5 fixed by deriving counts instead of writing them down. What
+        # actually needs guarding is that every parameter a spell references
+        # resolves, and assertion 4 does that against the real corpus.
+        self.assertGreaterEqual(len(self.catalog.parameters), 25)
 
     def test_creo_animal_level_15_is_ambiguous(self):
         # Soothe Pains of the Beast says "Base level 15" and Creo Animal has
@@ -208,11 +215,32 @@ class BaseEffectIdSchemeTest(unittest.TestCase):
                 mismatches.append((effect["id"], effect["technique"], effect["form"], expected))
         self.assertEqual(mismatches, [], msg="id prefix must be technique+form abbreviation")
 
+    @staticmethod
+    def _suffix(effect: dict) -> str:
+        """The id's level part, with any book segment stripped.
+
+        A core row is `<technique><form>-<level>`. A row from a supplement
+        carries its book between the two -- `crvi-hohmc-G1` cites
+        `arm5-hohmc` -- so a reader can tell at a glance that the guideline
+        is not in the core rulebook's own tables. Deriving that segment from
+        the row's own citation rather than a hardcoded list makes this
+        enforce the convention instead of tolerating one exception to it: a
+        supplement row that omits its segment, or names the wrong book, still
+        lands in `unparsed` below.
+        """
+        suffix = effect["id"].split("-", 1)[1]
+        for citation in effect.get("citations") or []:
+            book = citation.get("bookId", "")
+            segment = book.split("-", 1)[-1]
+            if book != catalog.CORE_BOOK_ID and suffix.startswith(f"{segment}-"):
+                return suffix[len(segment) + 1:]
+        return suffix
+
     def test_every_id_suffix_matches_its_own_base_level(self):
         mismatches = []
         unparsed = []
         for effect in self.effects:
-            suffix = effect["id"].split("-", 1)[1]
+            suffix = self._suffix(effect)
             if self._GENERAL_SUFFIX.match(suffix):
                 if effect["baseLevel"] is not None:
                     mismatches.append((effect["id"], "General", effect["baseLevel"]))

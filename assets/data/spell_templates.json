@@ -1,5 +1,25 @@
 [
   {
+    "id": "tpl-crvi-faerie-chains-familiar-slave",
+    "name": "Faerie Chains of the Familiar Slave",
+    "technique": "Creo",
+    "form": "Vim",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "crvi-hohmc-G1",
+    "rangeId": "range-touch",
+    "durationId": "duration-until-condition",
+    "targetId": "target-individual",
+    "summary": "This ritual binds a supernatural creature to the caster as her familiar, until a condition incorporated into the spell comes to pass. The level of the ritual must be no less than (the creature's Might + 15).",
+    "description": "This ritual binds a supernatural creature to the caster as her familiar, until a condition incorporated into the spell comes to pass. The level of the ritual must be no less than (the creature's Might + 15), though she may also need to penetrate its Magic Resistance if casting on an unwilling target. It has no effect if the target is already bound as a familiar to another. Casting requisites of a Technique and Form appropriate to the creature's nature and physical form may be included; this app has no way to model a per-casting, creature-dependent requisite, so none is recorded here (see todo item 54). It may be invented by anyone who has been Initiated into the Outer Mystery of Faerie Magic.",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
     "id": "tpl-crvi-restore-faded-threads",
     "name": "Restore the Faded Threads",
     "technique": "Creo",
@@ -566,26 +586,6 @@
     "citations": [
       {
         "bookId": "arm5-core"
-      }
-    ]
-  },
-  {
-    "id": "tpl-crvi-faerie-chains-familiar-slave",
-    "name": "Faerie Chains of the Familiar Slave",
-    "technique": "Creo",
-    "form": "Vim",
-    "requisites": {},
-    "source": "published",
-    "selectedModifiers": {},
-    "baseEffectId": "crvi-hohmc-G1",
-    "rangeId": "range-touch",
-    "durationId": "duration-until-condition",
-    "targetId": "target-individual",
-    "summary": "This ritual binds a supernatural creature to the caster as her familiar, until a condition incorporated into the spell comes to pass. The level of the ritual must be no less than (the creature's Might + 15).",
-    "description": "This ritual binds a supernatural creature to the caster as her familiar, until a condition incorporated into the spell comes to pass. The level of the ritual must be no less than (the creature's Might + 15), though she may also need to penetrate its Magic Resistance if casting on an unwilling target. It has no effect if the target is already bound as a familiar to another. Casting requisites of a Technique and Form appropriate to the creature's nature and physical form may be included; this app has no way to model a per-casting, creature-dependent requisite, so none is recorded here (see todo item 54). It may be invented by anyone who has been Initiated into the Outer Mystery of Faerie Magic.",
-    "citations": [
-      {
-        "bookId": "arm5-hohmc"
       }
     ]
   }

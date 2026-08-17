@@ -38,6 +38,10 @@ class ResolveTest(unittest.TestCase):
     def test_stale_candidate_set_fails(self):
         # Todo item 22 adds guideline rows. A decision made against three
         # candidates deserves re-examination when there are four.
+        #
+        # A pure addition like this one is the *widening* case (below), which
+        # `WidenedEntry` subclasses `StaleEntry` for -- so this assertion
+        # still holds, and the build still fails until somebody acts.
         book = build({
             "lib-cran-x": {
                 "baseEffectId": "cran-5a",
@@ -90,6 +94,98 @@ class ResolveTest(unittest.TestCase):
     def test_entry_without_a_rationale_is_rejected(self):
         with self.assertRaises(ValueError):
             build({"lib-cran-x": {"baseEffectId": "cran-5a", "candidates": ["cran-5a", "cran-5b"]}})
+
+
+class WideningTest(unittest.TestCase):
+    """Adding a catalog row must not cost a re-read of unrelated spells.
+
+    Todo item 55: one supplement guideline invalidated three Creo Vim
+    entries whose choices it could not possibly have changed. A widening is
+    the case where that is mechanically true — rows were added, none
+    removed, and the recorded choice is still on offer.
+    """
+
+    ENTRY = {
+        "lib-cran-x": {
+            "baseEffectId": "cran-5a",
+            "candidates": ["cran-5a", "cran-5b"],
+            "rationale": "chosen when there were two",
+        }
+    }
+
+    def test_a_pure_addition_is_a_widening(self):
+        with self.assertRaises(ledger.WidenedEntry):
+            build(self.ENTRY).resolve("lib-cran-x", ["cran-5a", "cran-5b", "cran-5c"])
+
+    def test_a_removal_is_not_a_widening(self):
+        # The choice survives, but a candidate the rationale argued against
+        # has vanished, so the recorded reasoning no longer describes the
+        # catalog. That needs a human, not a rewrite.
+        with self.assertRaises(ledger.StaleEntry):
+            build(self.ENTRY).resolve("lib-cran-x", ["cran-5a", "cran-5c"])
+        self.assertNotIsInstance(
+            self._raised(["cran-5a", "cran-5c"]), ledger.WidenedEntry)
+
+    def test_losing_the_chosen_row_is_not_a_widening(self):
+        self.assertNotIsInstance(
+            self._raised(["cran-5b", "cran-5c", "cran-5d"]), ledger.WidenedEntry)
+
+    def _raised(self, candidates: list[str]) -> Exception:
+        try:
+            build(self.ENTRY).resolve("lib-cran-x", candidates)
+        except ledger.LedgerError as error:
+            return error
+        raise AssertionError("expected a LedgerError")
+
+    def test_migration_keeps_the_decision_and_names_what_it_skipped(self):
+        migrated = ledger.migrate_raw(
+            self.ENTRY, {"lib-cran-x": ["cran-5a", "cran-5b", "cran-5c"]})
+        entry = migrated["lib-cran-x"]
+
+        self.assertEqual(entry["baseEffectId"], "cran-5a")
+        self.assertEqual(entry["rationale"], "chosen when there were two")
+        self.assertEqual(entry["candidates"], ["cran-5a", "cran-5b", "cran-5c"])
+        # The point of the whole mechanism: the new row is recorded as
+        # something nobody weighed, rather than absorbed into a candidate
+        # list whose rationale never mentions it.
+        self.assertEqual(entry["unreviewedCandidates"], ["cran-5c"])
+
+    def test_migration_leaves_other_entries_untouched(self):
+        raw = dict(self.ENTRY)
+        raw["lib-cran-y"] = {
+            "baseEffectId": "cran-9a",
+            "candidates": ["cran-9a", "cran-9b"],
+            "rationale": "unrelated",
+        }
+        migrated = ledger.migrate_raw(raw, {"lib-cran-x": ["cran-5a", "cran-5b", "cran-5c"]})
+        self.assertEqual(migrated["lib-cran-y"], raw["lib-cran-y"])
+
+    def test_a_second_widening_accumulates_rather_than_replaces(self):
+        once = ledger.migrate_raw(
+            self.ENTRY, {"lib-cran-x": ["cran-5a", "cran-5b", "cran-5c"]})
+        twice = ledger.migrate_raw(
+            once, {"lib-cran-x": ["cran-5a", "cran-5b", "cran-5c", "cran-5d"]})
+        self.assertEqual(twice["lib-cran-x"]["unreviewedCandidates"],
+                         ["cran-5c", "cran-5d"])
+
+    def test_a_migrated_entry_still_resolves(self):
+        migrated = ledger.migrate_raw(
+            self.ENTRY, {"lib-cran-x": ["cran-5a", "cran-5b", "cran-5c"]})
+        book = build(migrated)
+        self.assertEqual(
+            book.resolve("lib-cran-x", ["cran-5a", "cran-5b", "cran-5c"]), "cran-5a")
+        self.assertEqual(book.unreviewed(), {"lib-cran-x": ("cran-5c",)})
+
+    def test_unreviewed_candidates_must_be_candidates(self):
+        with self.assertRaises(ValueError):
+            build({
+                "lib-cran-x": {
+                    "baseEffectId": "cran-5a",
+                    "candidates": ["cran-5a", "cran-5b"],
+                    "rationale": "x",
+                    "unreviewedCandidates": ["cran-5z"],
+                }
+            })
 
 
 class CommittedLedgerTest(unittest.TestCase):
