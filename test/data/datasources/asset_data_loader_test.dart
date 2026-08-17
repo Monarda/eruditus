@@ -5,12 +5,10 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_engine.dart';
-import 'package:eruditus/engine/spell_level_calculator.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/publication_source.dart';
-import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/target_type.dart';
@@ -353,34 +351,36 @@ void main() {
       return printedLevel as int;
     }
 
-    final effects = await loader.loadBaseEffects();
-    final parameters = await loader.loadParameters();
-    final effectsById = {for (final e in effects) e.id: e};
-    final parametersById = {for (final p in parameters) p.id: p};
+    final effectsById = {for (final e in await loader.loadBaseEffects()) e.id: e};
+    final parametersById = {for (final p in await loader.loadParameters()) p.id: p};
+
+    // Ask the engine rather than re-summing the magnitudes here. This test
+    // kept its own copy of that sum until todo item 29, and the copy drifted
+    // exactly as predicted: when item 24 taught the engine about
+    // `adjustments`, this list had to be patched separately, and until it was,
+    // The Severed Limb Made Whole computed 30 against a printed 25. A General
+    // base effect's missing baseLevel is likewise the engine's business —
+    // `chosenBaseLevel` supplies it.
+    //
+    // `allParameters` is left empty, matching assertion 1 in
+    // published_spell_import_test.dart, so neither oracle applies the
+    // base-effect reference discount.
+    final engine = SpellEngine(allSpells: const [], allModifiers: modifiers);
 
     for (final spell in spells) {
-      final statedLevel = levelStatedInDescription(spell);
-      final baseEffect = effectsById[spell.baseEffectId]!;
+      final breakdown = engine.calculateBreakdown(
+        baseEffect: effectsById[spell.baseEffectId]!,
+        chosenBaseLevel: spell.chosenBaseLevel,
+        range: parametersById[spell.rangeId]!,
+        duration: parametersById[spell.durationId]!,
+        target: parametersById[spell.targetId]!,
+        selectedModifiers: spell.selectedModifiers,
+        requisites: spell.requisites,
+        adjustments: spell.adjustments,
+        ritualDeclaration: spell.ritualDeclaration,
+      );
 
-      final magnitudes = [
-        parametersById[spell.rangeId]!.magnitude,
-        parametersById[spell.durationId]!.magnitude,
-        parametersById[spell.targetId]!.magnitude,
-        for (final entry in spell.selectedModifiers.entries)
-          for (final optionId in entry.value)
-            modifiers.firstWhere((m) => m.id == entry.key).optionById(optionId)!.magnitude,
-        ...spell.requisites.values.map((k) => k.magnitude),
-        // Adjustments are magnitudes like any other (see
-        // SpellEngine.calculateBreakdown). Omitting them silently overstated
-        // every spell that carries one — the first such spell in the library,
-        // The Severed Limb Made Whole, computed 30 against a printed 25.
-        ...spell.adjustments.map((a) => a.magnitude),
-      ];
-
-      // A General base effect carries no baseLevel of its own — the spell's
-      // own chosenBaseLevel supplies it instead (see SpellEngine.calculateBreakdown).
-      final baseLevel = baseEffect.isGeneral ? spell.chosenBaseLevel! : baseEffect.baseLevel!;
-      expect(SpellLevelCalculator.calculate(baseLevel, magnitudes), statedLevel,
+      expect(breakdown.level, levelStatedInDescription(spell),
           reason: '${spell.name}: calculated level does not match the stated level');
     }
   });

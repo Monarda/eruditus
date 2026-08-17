@@ -8,7 +8,17 @@ class SlugTest(unittest.TestCase):
     def test_matches_the_existing_library_convention(self):
         self.assertEqual(
             catalog.slug_id("Creo", "Imaginem", "Phantasm of the Talking Head"),
-            "lib-crim-talking-head",
+            "lib-crim-phantasm-talking-head",
+        )
+
+    def test_keeps_content_words_that_look_like_stock_phrases(self):
+        # "Phantasm" was a stopword until todo item 29: it is a content word
+        # naming what the spell creates, and stripping it silently merged the
+        # distinguishing half of two ids away. Only articles and prepositions
+        # are dropped.
+        self.assertEqual(
+            catalog.slug_id("Creo", "Imaginem", "Phantasm of the Human Form"),
+            "lib-crim-phantasm-human-form",
         )
 
     def test_strips_apostrophes_and_punctuation(self):

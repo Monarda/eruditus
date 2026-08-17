@@ -1316,7 +1316,7 @@
     ]
   },
   {
-    "id": "lib-crim-human-form",
+    "id": "lib-crim-phantasm-human-form",
     "name": "Phantasm of the Human Form",
     "technique": "Creo",
     "form": "Imaginem",
@@ -1337,6 +1337,33 @@
     "summary": "Makes an image of a clothed and equipped person that can make noise. Under your direct, unspoken command, the person can move about, speak, and behave as a human does. Level 25.",
     "description": "Makes an image of a clothed and equipped person that can make noise. Under your direct, unspoken command, the person can move about, speak, and behave as a human does.",
     "printedLevel": 25,
+    "citations": [
+      {
+        "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crim-phantasm-talking-head",
+    "name": "Phantasm of the Talking Head",
+    "technique": "Creo",
+    "form": "Imaginem",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "crim-complexity": [
+        "crim-sensory-complexity"
+      ]
+    },
+    "baseEffectId": "crim-2",
+    "rangeId": "range-voice",
+    "durationId": "duration-diameter",
+    "targetId": "target-individual",
+    "summary": "Creates an illusory face on a wall or other flat object. The visage can speak during the spell's duration. Individual wizards' sigils can produce very interesting differences in how the voice sounds, how the face looks, and so on. Level 10.",
+    "description": "Creates an illusory face on a wall or other flat object. The visage can speak during the spell's duration. Individual wizards' sigils can produce very interesting differences in how the voice sounds, how the face looks, and so on.",
+    "printedLevel": 10,
     "citations": [
       {
         "bookId": "arm5-core"
@@ -1427,33 +1454,6 @@
       {
         "magnitude": 5,
         "note": "for a very elaborate effect"
-      }
-    ]
-  },
-  {
-    "id": "lib-crim-talking-head",
-    "name": "Phantasm of the Talking Head",
-    "technique": "Creo",
-    "form": "Imaginem",
-    "requisites": {},
-    "source": "published",
-    "createdAt": "2026-01-01T00:00:00.000",
-    "updatedAt": "2026-01-01T00:00:00.000",
-    "selectedModifiers": {
-      "crim-complexity": [
-        "crim-sensory-complexity"
-      ]
-    },
-    "baseEffectId": "crim-2",
-    "rangeId": "range-voice",
-    "durationId": "duration-diameter",
-    "targetId": "target-individual",
-    "summary": "Creates an illusory face on a wall or other flat object. The visage can speak during the spell's duration. Individual wizards' sigils can produce very interesting differences in how the voice sounds, how the face looks, and so on. Level 10.",
-    "description": "Creates an illusory face on a wall or other flat object. The visage can speak during the spell's duration. Individual wizards' sigils can produce very interesting differences in how the voice sounds, how the face looks, and so on.",
-    "printedLevel": 10,
-    "citations": [
-      {
-        "bookId": "arm5-core"
       }
     ]
   },

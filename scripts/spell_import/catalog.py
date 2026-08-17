@@ -22,8 +22,11 @@ FORM_ABBREVIATION = {
     "Ignem": "ig", "Imaginem": "im", "Mentem": "me", "Terram": "te", "Vim": "vi",
 }
 
-# Leading articles and stock phrases the existing 36 ids drop.
-_STOPWORDS = {"the", "of", "a", "an", "phantasm"}
+# Leading articles and prepositions the existing ids drop. Content words stay,
+# however stock-phrase-like they look: "phantasm" lived here until todo item 29
+# and cost `lib-crim-human-form` and `lib-crim-talking-head` the word naming
+# what they conjure.
+_STOPWORDS = {"the", "of", "a", "an"}
 
 CORE_BOOK_ID = "arm5-core"
 
