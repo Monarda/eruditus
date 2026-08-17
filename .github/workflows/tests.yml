@@ -7,10 +7,14 @@
 # in a way that reaches the library?" -- is rulebook-freshness.yml's job, and
 # keeping those two questions in separate workflows is the point.
 #
-# It runs BOTH suites. `flutter test` matters as much as the Python one: the
-# generated asset is verified on the Dart side, and a regression that emptied
-# `selectedModifiers` would pass every Python test while only the Dart
-# assertion caught it.
+# It runs ALL THREE suites. `flutter test` matters as much as the Python one:
+# the generated asset is verified on the Dart side, and a regression that
+# emptied `selectedModifiers` would pass every Python test while only the Dart
+# assertion caught it. The `integration` job below is the third, and it is
+# here because `flutter test` does NOT run `integration_test/` -- those need a
+# device, so before this job existed the end-to-end suite ran only when
+# someone remembered to run it by hand, and rotted silently in between (see
+# .superpowers/todo.md item 6).
 name: tests
 
 on:
@@ -110,3 +114,42 @@ jobs:
       # does not exist.
       - name: Flutter suite
         run: flutter test
+
+  # `integration_test/` drives the real app against real Blocs and a real
+  # database, which is the coverage the widget tests cannot reach: a mocked
+  # Bloc emits no new state, so a rebuild-after-interaction bug (the
+  # add-requisite `DropdownButtonFormField` crash) stays invisible to them.
+  #
+  # A SEPARATE JOB, on WINDOWS, for two reasons worth keeping:
+  #  - It needs a device, so it needs a desktop runner -- a different OS from
+  #    the `tests` job, which is what makes it a job and not another step.
+  #  - `windows-latest` is the only configuration this suite has ever run in
+  #    (`-d windows`, 8 of 8 green). `linux/` desktop support does exist in
+  #    this repo, and moving here would be cheaper in runner minutes, but it
+  #    has never been exercised and would need the GTK toolchain plus xvfb.
+  #    Switching is a deliberate experiment, not a tidy-up -- do it on a branch
+  #    and watch it go green before trusting it.
+  #
+  # No rulebook pin here either, and for the same reason as the Flutter suite
+  # above: this reads the committed assets, never the rulebook.
+  integration:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # Defensive: desktop support is on by default in this Flutter version,
+      # but an explicit enable costs nothing and turns a confusing "no devices
+      # found" into a non-event.
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Integration suite
+        run: flutter test integration_test -d windows
