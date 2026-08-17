@@ -34,8 +34,11 @@ void main() {
       bloc.add(const TechniqueSelected('Creo'));
       await tester.pumpAndSettle();
 
-      // A mocked bloc emits no new state, so this assertion is the one a mock
-      // structurally cannot make fail.
+      // A mocked bloc emits no new state, so it cannot make this assertion
+      // pass -- swapping realSpellCreationBloc() for mockSpellCreationBloc()
+      // here fails with "Found 0 widgets with text 'Creo'". That is what
+      // makes this test the discriminator between a real bloc and a mock,
+      // rather than a restatement of the framework's behaviour.
       expect(find.text('Creo'), findsOneWidget);
     },
   );
