@@ -400,11 +400,13 @@ one; `target-symbol` is "essentially a large Group", an object target.
 **Corpus impact — 29 container rows**, 20 in `spell_library.json` (boundary 8,
 room 9, structure 2, circle 1) and 9 in `spell_templates.json` (circle 8, room
 1). Of these:
-- **9 are Circle wards**, dynamic by the Magical Wards rule.
+- **8 are Circle wards**, dynamic by the Magical Wards rule. (Corrected from an
+  earlier count of 9: `tpl-crvi-restore-faded-threads` is Circle + Diameter but
+  is *not* a ward, so the ward rule does not decide it.)
 - **5 are Momentary**, where the distinction is vacuous — nothing can enter
   during a duration that does not elapse. A backfill must not force a mode on
   these; leaving it unset is the honest record.
-- **~15 need their printed description read** to assign a mode. That reading is
+- **16 need their printed description read** to assign a mode. That reading is
   the real cost of this item, and it is per-spell.
 
 - **No published core spell is blocked by this** — a fidelity improvement, and
