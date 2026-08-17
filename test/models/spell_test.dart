@@ -515,6 +515,57 @@ void main() {
       );
       expect(Spell.fromMap(withSlot.toMap()).chosenSlots, {'realm': 'Infernal'});
     });
+
+    group('fromMap prose backfill', () {
+      Map<String, dynamic> userCreatedMap({String? summary, String? description}) => {
+            'id': 'u1',
+            'name': 'My Spell',
+            'baseEffectId': 'e1',
+            'technique': 'Creo',
+            'form': 'Ignem',
+            'rangeId': 'range-voice',
+            'durationId': 'duration-momentary',
+            'targetId': 'target-individual',
+            'requisites': <String, dynamic>{},
+            'summary': summary,
+            'description': description,
+            'source': 'user-created',
+            'createdAt': DateTime(2026, 1, 1).toIso8601String(),
+            'updatedAt': DateTime(2026, 1, 1).toIso8601String(),
+          };
+
+      test('a user-created record with no prose is backfilled, not rejected', () {
+        final spell = Spell.fromMap(userCreatedMap());
+        expect(spell.summary, legacySummaryPlaceholder);
+      });
+
+      test('an existing summary is left alone', () {
+        final spell = Spell.fromMap(userCreatedMap(summary: 'Mine.'));
+        expect(spell.summary, 'Mine.');
+      });
+
+      test('a description alone is enough, and no summary is invented', () {
+        final spell = Spell.fromMap(userCreatedMap(description: 'Long form.'));
+        expect(spell.summary, isNull);
+      });
+
+      test('an empty-string summary counts as absent', () {
+        final spell = Spell.fromMap(userCreatedMap(summary: '   '));
+        expect(spell.summary, legacySummaryPlaceholder);
+      });
+
+      test('a published record with no prose still throws', () {
+        // The backfill must never reach published data: assertion 7 in
+        // published_spell_import_test.dart is what stops a prose-less spell
+        // shipping, and silently repairing one here would take its teeth out.
+        final map = userCreatedMap()
+          ..['source'] = 'published'
+          ..['citations'] = [
+            {'bookId': 'arm5-core'}
+          ];
+        expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
+      });
+    });
   });
 
   group('spell field invariants', () {

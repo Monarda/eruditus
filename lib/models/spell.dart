@@ -203,6 +203,35 @@ List<String> validateSpellAgainstCatalog({
   return problems;
 }
 
+/// Stands in for the prose of a user-created spell saved before a summary was
+/// required (todo item 13).
+///
+/// Not a derivation: name and stat line both already appear on the card, so
+/// deriving from them would add nothing, and the provenance design
+/// (2026-07-27) rejected auto-derived summaries as storing derivable data.
+/// This states the one true thing instead -- that none was recorded.
+const String legacySummaryPlaceholder = 'No summary recorded.';
+
+/// The summary a deserialized record should carry.
+///
+/// Applied in `fromMap` rather than in the datasource because a backup
+/// written before the rule existed hits the identical wall one layer over --
+/// `BackupService.importFromJson` builds its spells in a list literal, so one
+/// throwing record aborts the whole restore. Read-only: nothing is written
+/// back, so there is still no migration story.
+String? _backfilledSummary(Map<String, dynamic> map) {
+  final summary = map['summary'] as String?;
+  final description = map['description'] as String?;
+  final hasProse = (summary != null && summary.trim().isNotEmpty) ||
+      (description != null && description.trim().isNotEmpty);
+  if (hasProse) return summary;
+  // Published records are deliberately excluded: one with no prose is an
+  // importer bug, and must keep failing loudly.
+  return Provenance.fromMap(map).source == PublicationSource.userCreated
+      ? legacySummaryPlaceholder
+      : summary;
+}
+
 /// A saved spell, stored as references into the effect/parameter catalogs.
 ///
 /// This record deliberately holds no copy of any catalog data -- no base
@@ -340,7 +369,7 @@ class Spell {
                 ?.map((a) => LevelAdjustment.fromMap(a as Map<String, dynamic>))
                 .toList() ??
             [],
-        summary: map['summary'] as String?,
+        summary: _backfilledSummary(map),
         description: map['description'] as String?,
         printedLevel: map['printedLevel'] as int?,
         provenance: Provenance.fromMap(map),
