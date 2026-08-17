@@ -601,6 +601,341 @@ void main() {
     },
   );
 
+  // --- todo item 60: a draft starts at its guideline's own reference triple ---
+  //
+  // A separate engine from the shared `spellEngine` above, which is
+  // deliberately built with an empty allParameters: every existing test in
+  // this file therefore still exercises the "catalog unavailable, seed
+  // degrades to null" path, and only the tests below see a catalog.
+
+  Parameter seedParam(String id, String name, String category, int magnitude,
+          {TargetType? targetType, ParameterScope scope = const ParameterScope()}) =>
+      Parameter(
+        id: id, name: name, category: category, magnitude: magnitude,
+        targetType: targetType, scope: scope,
+        provenance: Provenance(
+            source: PublicationSource.published,
+            citations: const [Citation(bookId: 'arm5-core')]),
+      );
+
+  final personal = seedParam('range-personal', 'Personal', 'Range', 0);
+  final touch = seedParam('range-touch', 'Touch', 'Range', 1);
+  final voice = seedParam('range-voice', 'Voice', 'Range', 2);
+  final momentary = seedParam('duration-momentary', 'Momentary', 'Duration', 0);
+  final ring = seedParam('duration-ring', 'Ring', 'Duration', 2);
+  final fire = seedParam('duration-fire', 'Fire', 'Duration', 1,
+      scope: const ParameterScope(forms: ['Ignem', 'Imaginem']));
+  final individual = seedParam('target-individual', 'Individual', 'Target', 0,
+      targetType: TargetType.object);
+  final circle = seedParam('target-circle', 'Circle', 'Target', 0,
+      targetType: TargetType.container);
+  final room = seedParam('target-room', 'Room', 'Target', 2,
+      targetType: TargetType.container);
+
+  final seedCatalog = [personal, touch, voice, momentary, ring, fire,
+      individual, circle, room];
+
+  // Reference Touch/Ring/Circle -- the shape all 12 ward guidelines carry.
+  //
+  // Deliberately given a numeric baseLevel rather than being General like the
+  // real ward rows. Nothing in the seed rule reads `isGeneral`, and a General
+  // entry would drag in an effectFormula and a chosenBaseLevel that these
+  // tests would have to satisfy for no gain.
+  final wardEffect = BaseEffect(
+    id: 'ward-1', technique: 'Rego', form: 'Ignem',
+    description: 'Ward against fire', baseLevel: 5,
+    reference: const ParameterTriple(
+        rangeId: 'range-touch', durationId: 'duration-ring', targetId: 'target-circle'),
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+
+  // No `reference` at all -- falls back to ParameterTriple.standard(), like
+  // 596 of the 609 catalog entries.
+  final plainEffect = BaseEffect(
+    id: 'plain-1', technique: 'Creo', form: 'Ignem',
+    description: 'Create flame', baseLevel: 10,
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+
+  SpellCreationBloc seedingBloc() => SpellCreationBloc(
+        spellEngine: SpellEngine(allSpells: const [], allParameters: seedCatalog),
+        spellRepository: spellRepository,
+      );
+
+  test('the initial state is seeded at the standard reference triple', () {
+    final bloc = seedingBloc();
+    expect(bloc.state.draft.range?.id, 'range-personal');
+    expect(bloc.state.draft.duration?.id, 'duration-momentary');
+    expect(bloc.state.draft.target?.id, 'target-individual');
+    bloc.close();
+  });
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'SpellDiscarded resets to a draft seeded at the standard reference triple',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(RangeSelected(voice));
+      bloc.add(const SpellDiscarded());
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.initial)
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'the post-save reset is seeded at the standard reference triple',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(plainEffect));
+      bloc.add(RangeSelected(voice));
+      bloc.add(const SpellSaveRequested('Seeded Spell', summary: 'A jet of flame.'));
+    },
+    skip: 4,
+    wait: const Duration(milliseconds: 300),
+    expect: () => [
+      isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.saved)
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'selecting a ward guideline adopts its Touch/Ring/Circle reference when the '
+    'draft is still at the previous guideline reference',
+    build: seedingBloc,
+    act: (bloc) => bloc.add(BaseEffectSelected(wardEffect)),
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-touch')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-circle'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a deliberately chosen parameter survives a guideline switch',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(RangeSelected(voice));
+      bloc.add(DurationSelected(ring));
+      bloc.add(TargetSelected(room));
+      bloc.add(BaseEffectSelected(wardEffect));
+    },
+    skip: 3,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-voice')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-room'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'the adopt is per-slot: an untouched Range and Duration follow the new '
+    'guideline while a chosen Target stays',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect));  // -> touch / ring / circle
+      bloc.add(TargetSelected(room));            // deliberately off the seed
+      bloc.add(BaseEffectSelected(plainEffect)); // reference: standard
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-room'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'adopting a non-container Target clears a container mode stated under the old one',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect)); // Target -> Circle (container)
+      bloc.add(const ContainerModeSelected(ContainerMode.dynamic));
+      bloc.add(BaseEffectSelected(plainEffect)); // Target -> Individual (object)
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual')
+          .having((s) => s.draft.containerMode, 'draft.containerMode',
+              ContainerMode.unstated),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // TechniqueSelected/FormSelected never touched containerMode before the
+    // reference-seed rule; only BaseEffectSelected has a test for it above.
+    // This pins the same clearing behaviour reached through TechniqueSelected's
+    // re-seed: without it, validateSpellAgainstCatalog's check 9 would reject
+    // the save with no visible cause.
+    'changing Technique clears a container mode stranded by the Target re-seed',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect)); // Target -> Circle (container)
+      bloc.add(const ContainerModeSelected(ContainerMode.dynamic));
+      bloc.add(const TechniqueSelected('Creo')); // guideline cleared, Target -> Individual (object)
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual')
+          .having((s) => s.draft.containerMode, 'draft.containerMode',
+              ContainerMode.unstated),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a container mode survives a seed that lands on another container Target',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(TargetSelected(room));
+      bloc.add(const ContainerModeSelected(ContainerMode.dynamic));
+      bloc.add(BaseEffectSelected(wardEffect)); // Target stays Room (chosen)
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-room')
+          .having((s) => s.draft.containerMode, 'draft.containerMode',
+              ContainerMode.dynamic),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'adopting Ring drops a lastingCreation declaration, which is only true at Momentary',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));   // Creo + Momentary seed
+      bloc.add(BaseEffectSelected(wardEffect));    // -> Duration Ring
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
+          .having((s) => s.draft.ritualDeclaration, 'draft.ritualDeclaration',
+              RitualDeclaration.none),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a guideline whose reference names a Form-scoped parameter out of scope for '
+    'the draft is not adopted',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(const FormSelected('Aquam'));
+      bloc.add(BaseEffectSelected(BaseEffect(
+        id: 'fire-ref', technique: 'Creo', form: 'Ignem',
+        description: 'Priced against Fire duration', baseLevel: 5,
+        reference: const ParameterTriple(
+            rangeId: 'range-personal',
+            durationId: 'duration-fire',
+            targetId: 'target-individual'),
+        provenance: Provenance(source: PublicationSource.userCreated),
+      )));
+    },
+    skip: 1,
+    expect: () => [
+      // Fire is Ignem/Imaginem only; the draft is Aquam, so the seed is
+      // skipped and the Momentary already there is left alone.
+      isA<SpellCreationState>()
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Technique clears the guideline and returns an untouched draft to '
+    'the standard reference triple',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect)); // -> touch / ring / circle
+      bloc.add(const TechniqueSelected('Creo')); // guideline cleared
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.baseEffect, 'draft.baseEffect', isNull)
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Form refills a Form-scoped Duration it just pruned',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(DurationSelected(fire)); // Fire is Ignem/Imaginem only
+      bloc.add(const FormSelected('Aquam'));
+    },
+    skip: 2,
+    expect: () => [
+      // Pruned out of scope, then refilled by the seed rather than left blank.
+      isA<SpellCreationState>()
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Form leaves a deliberately chosen, still-in-scope parameter alone',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(RangeSelected(voice));
+      bloc.add(const FormSelected('Aquam'));
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-voice'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // rangeId is deliberately 'range-personal' -- the standard triple's own
+    // Range value -- rather than another off-seed choice like voice. If
+    // TemplateInstantiated were ever wired through _withSeededParameters (the
+    // regression this test exists to catch), previousReference would be the
+    // standard triple, this Range would look untouched, and the seed would
+    // overwrite it with wardEffect's reference Range (Touch). Duration and
+    // Target keep off-standard values so the test still covers "a chosen
+    // value survives" alongside "the standard-looking one isn't rewritten".
+    'TemplateInstantiated keeps the template parameters verbatim, unseeded',
+    build: seedingBloc,
+    act: (bloc) => bloc.add(TemplateInstantiated(ResolvedTemplate(
+      record: SpellTemplate(
+        id: 'tpl-seed', name: 'Voiced Ward', baseEffectId: 'ward-1',
+        technique: 'Rego', form: 'Ignem',
+        rangeId: 'range-personal', durationId: 'duration-ring', targetId: 'target-room',
+        summary: 'A published template whose parameters must survive verbatim.',
+        provenance: Provenance(source: PublicationSource.published,
+            citations: const [Citation(bookId: 'arm5-core')]),
+      ),
+      baseEffect: wardEffect,
+      range: personal, duration: ring, target: room,
+    ))),
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-room'),
+    ],
+  );
+
   blocTest<SpellCreationBloc, SpellCreationState>(
     'RequisiteAdded appends a requisite of the given kind',
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),

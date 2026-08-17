@@ -10,6 +10,7 @@ import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/requisite.dart' show RequisiteKind;
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
@@ -33,7 +34,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   SpellCreationBloc({
     required this.spellEngine,
     required this.spellRepository,
-  }) : super(SpellCreationState.initial()) {
+  })  : // The first thing the Create tab renders. Seeded here rather than in
+        // SpellCreationState.initial(), which has no catalog to resolve ids
+        // against -- and must not gain one, since TemplateInstantiated builds
+        // on it and its parameters must survive verbatim.
+        super(SpellCreationState.initial().copyWith(
+          draft: _emptySeeded(spellEngine.allParameters),
+        )) {
     on<SpellCreationEvent>(
       _onEvent,
       transformer: (events, mapper) => events.asyncExpand(mapper),
@@ -42,23 +49,27 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
   Future<void> _onEvent(SpellCreationEvent event, Emitter<SpellCreationState> emit) async {
     if (event is TechniqueSelected) {
+      final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(state.draft.copyWith(
-          technique: event.technique,
-          baseEffect: null,
-          // A chosen level or template link both point at the base effect
-          // that just disappeared -- neither can survive it, for the same
-          // reason pruneModifierSelections drops a stranded modifier rather
-          // than let it keep affecting the level invisibly. analogyRationale
-          // is the same shape as templateId here: it explains why *this*
-          // draft's Technique/Form diverged from the base effect that just
-          // disappeared, so it cannot survive either -- left in place, a
-          // stale rationale can permanently trip check 8's "matches, but a
-          // rationale is still set" branch with no UI path to clear it.
-          chosenBaseLevel: null,
-          templateId: null,
-          chosenSlots: const {},
-          analogyRationale: null,
+        _withPrunedModifiers(_withSeededParameters(
+          state.draft.copyWith(
+            technique: event.technique,
+            baseEffect: null,
+            // A chosen level or template link both point at the base effect
+            // that just disappeared -- neither can survive it, for the same
+            // reason pruneModifierSelections drops a stranded modifier rather
+            // than let it keep affecting the level invisibly. analogyRationale
+            // is the same shape as templateId here: it explains why *this*
+            // draft's Technique/Form diverged from the base effect that just
+            // disappeared, so it cannot survive either -- left in place, a
+            // stale rationale can permanently trip check 8's "matches, but a
+            // rationale is still set" branch with no UI path to clear it.
+            chosenBaseLevel: null,
+            templateId: null,
+            chosenSlots: const {},
+            analogyRationale: null,
+          ),
+          previousReference,
         )),
         reapplyDefault: false,
       );
@@ -68,17 +79,21 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is FormSelected) {
+      final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(_withPrunedFormScopedParameters(state.draft.copyWith(
-          form: event.form,
-          baseEffect: null,
-          chosenBaseLevel: null,
-          templateId: null,
-          chosenSlots: const {},
-          // See TechniqueSelected above: analogyRationale cannot outlive the
-          // base effect it was explaining a divergence from.
-          analogyRationale: null,
-        ))),
+        _withPrunedModifiers(_withSeededParameters(
+          _withPrunedFormScopedParameters(state.draft.copyWith(
+            form: event.form,
+            baseEffect: null,
+            chosenBaseLevel: null,
+            templateId: null,
+            chosenSlots: const {},
+            // See TechniqueSelected above: analogyRationale cannot outlive the
+            // base effect it was explaining a divergence from.
+            analogyRationale: null,
+          )),
+          previousReference,
+        )),
         reapplyDefault: false,
       );
       emit(state.copyWith(
@@ -87,31 +102,37 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is BaseEffectSelected) {
+      // Captured before the draft moves: the seed keeps any parameter the
+      // user moved off this triple, and re-seeds the ones they never touched.
+      final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(state.draft.copyWith(
-          baseEffect: event.effect,
-          // A template link asserts lineage to the *previous* base effect;
-          // it cannot survive a change to a new one, General or not.
-          templateId: null,
-          // Same reasoning as templateId, unconditionally: analogyRationale
-          // explains why the draft's Technique/Form diverged from the
-          // *previous* base effect specifically. That explanation cannot be
-          // assumed to describe a divergence from the newly-selected effect
-          // too -- even when the new effect's Technique/Form still happens
-          // to differ from the draft's own, the stored prose was written
-          // about the old guideline, not this one. Instantiating a fresh
-          // by-analogy template (TemplateInstantiated) is the only path that
-          // sets it again, with a rationale actually about the effect it
-          // names.
-          analogyRationale: null,
-          // Deliberate: unlike Technique/Form, a chosen level isn't tied to
-          // one specific General guideline -- it's "spell level N", equally
-          // meaningful against whichever General guideline is selected. Only
-          // clear it when the new effect isn't General at all; forcing a
-          // re-type on every guideline switch would be friction with no
-          // correctness gain.
-          chosenBaseLevel: event.effect.isGeneral ? state.draft.chosenBaseLevel : null,
-          chosenSlots: _prunedSlots(state.draft.chosenSlots, event.effect),
+        _withPrunedModifiers(_withSeededParameters(
+          state.draft.copyWith(
+            baseEffect: event.effect,
+            // A template link asserts lineage to the *previous* base effect;
+            // it cannot survive a change to a new one, General or not.
+            templateId: null,
+            // Same reasoning as templateId, unconditionally: analogyRationale
+            // explains why the draft's Technique/Form diverged from the
+            // *previous* base effect specifically. That explanation cannot be
+            // assumed to describe a divergence from the newly-selected effect
+            // too -- even when the new effect's Technique/Form still happens
+            // to differ from the draft's own, the stored prose was written
+            // about the old guideline, not this one. Instantiating a fresh
+            // by-analogy template (TemplateInstantiated) is the only path that
+            // sets it again, with a rationale actually about the effect it
+            // names.
+            analogyRationale: null,
+            // Deliberate: unlike Technique/Form, a chosen level isn't tied to
+            // one specific General guideline -- it's "spell level N", equally
+            // meaningful against whichever General guideline is selected. Only
+            // clear it when the new effect isn't General at all; forcing a
+            // re-type on every guideline switch would be friction with no
+            // correctness gain.
+            chosenBaseLevel: event.effect.isGeneral ? state.draft.chosenBaseLevel : null,
+            chosenSlots: _prunedSlots(state.draft.chosenSlots, event.effect),
+          ),
+          previousReference,
         )),
         reapplyDefault: true,
       );
@@ -157,7 +178,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // Individual is precisely what validateSpellAgainstCatalog's check 9
       // rejects, so the save would fail with no visible cause. Conditional on
       // the *new* Target's kind, so Room -> Structure keeps the choice.
-      final keepsMode = event.parameter.targetType == TargetType.container;
+      final keepsMode = _isContainer(event.parameter);
       final draft = _withPrunedModifiers(state.draft.copyWith(
         target: event.parameter,
         containerMode: keepsMode ? null : ContainerMode.unstated,
@@ -326,7 +347,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     } else if (event is SpellSaveRequested) {
       await _handleSpellSaveRequested(event, emit);
     } else if (event is SpellDiscarded) {
-      emit(SpellCreationState.initial());
+      emit(SpellCreationState.initial().copyWith(draft: _emptySeededDraft()));
     }
   }
 
@@ -386,6 +407,104 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       target: pruneIfOutOfScope(draft.target),
     );
   }
+
+  /// The reference triple [draft]'s guideline is priced against, or the
+  /// standard Personal/Momentary/Individual when no guideline is selected.
+  ///
+  /// [BaseEffect.reference] already *defaults* to `ParameterTriple.standard()`
+  /// -- in the constructor (`base_effect.dart:122`) and again when the field
+  /// is absent from JSON (`:153-155`). So "the guideline's reference where
+  /// explicit, the fixed default otherwise" and "always `baseEffect.reference`"
+  /// are the same rule, and this is the second one. There is deliberately no
+  /// is-this-explicit predicate; see todo item 60.
+  static ParameterTriple _referenceOf(SpellDraft draft) =>
+      draft.baseEffect?.reference ?? const ParameterTriple.standard();
+
+  /// Moves [draft]'s Range/Duration/Target to the zero point its
+  /// (already-updated) guideline is priced against.
+  ///
+  /// A slot is re-seeded only when it is null, or when it still holds
+  /// [previousReference]'s value for that slot -- i.e. the user never moved it
+  /// off the seed. A parameter chosen deliberately survives a guideline
+  /// switch. Evaluated one slot at a time, so a caster who picked a Target
+  /// keeps it while their untouched Range and Duration follow the new
+  /// guideline. That is the same shape of answer BaseEffectSelected already
+  /// gives for `chosenBaseLevel` above: a keep-or-clear rule reasoned from
+  /// what the value still means, rather than a blanket policy either way.
+  ///
+  /// It matters because `_parameterContribution` charges each parameter as a
+  /// *delta* from the reference. A ward guideline (Touch/Ring/Circle) left at
+  /// the blank-draft default contributes -1, -2, 0, which can drive the level
+  /// below 1 and tell the caster their spell is broken -- when all that
+  /// happened is that the app never put them at the guideline's own start.
+  ///
+  /// Both lookups degrade rather than throw. An id that does not resolve
+  /// leaves the slot untouched, so with an empty [parameters] every slot stays
+  /// null -- exactly the behaviour before this rule existed. A candidate out
+  /// of scope for the draft's Form, or filed under the wrong category, is
+  /// skipped for the same reason _withPrunedFormScopedParameters exists:
+  /// writing one in would trip DropdownButtonFormField's assertion that its
+  /// value appear in `items`. Both checks mirror _buildParameterDropdown's own
+  /// filter (`p.category == category && p.scope.appliesTo(form: form)`) --
+  /// the seed writes straight into the same field that dropdown reads, so a
+  /// candidate it would never have offered must never land there either. No
+  /// catalog reference names a Form-scoped or wrong-category parameter today,
+  /// but a custom guideline could.
+  ///
+  /// `containerMode` is pruned here rather than at each call site, because
+  /// every handler that can re-seed a Target can strand a mode. `keepsMode` is
+  /// computed from the *resulting* Target, not from whether the seed changed
+  /// it: when the seed leaves the Target alone, a mode can only be set if that
+  /// Target is already a container (ContainerModeSelected is the only path
+  /// that sets one, and TargetSelected prunes it otherwise), so the check is a
+  /// no-op in exactly the cases where nothing moved.
+  static SpellDraft _seedParameters(
+    SpellDraft draft,
+    ParameterTriple previousReference,
+    List<Parameter> parameters,
+  ) {
+    final next = _referenceOf(draft);
+
+    Parameter? seed(Parameter? current, String previousId, String nextId, String category) {
+      if (current != null && current.id != previousId) return current;
+      final candidate = parameters.firstWhereOrNull((p) => p.id == nextId);
+      if (candidate == null ||
+          candidate.category != category ||
+          !candidate.scope.appliesTo(form: draft.form)) {
+        return current;
+      }
+      return candidate;
+    }
+
+    final target = seed(draft.target, previousReference.targetId, next.targetId, 'Target');
+    final keepsMode = _isContainer(target);
+
+    return draft.copyWith(
+      range: seed(draft.range, previousReference.rangeId, next.rangeId, 'Range'),
+      duration: seed(draft.duration, previousReference.durationId, next.durationId, 'Duration'),
+      target: target,
+      containerMode: keepsMode ? null : ContainerMode.unstated,
+    );
+  }
+
+  /// Whether [parameter] is a container Target -- the one property both
+  /// TargetSelected and [_seedParameters] need to decide whether a stated
+  /// `containerMode` can survive landing on it.
+  static bool _isContainer(Parameter? parameter) => parameter?.targetType == TargetType.container;
+
+  /// [_seedParameters] against the engine's live parameter catalog.
+  SpellDraft _withSeededParameters(SpellDraft draft, ParameterTriple previousReference) =>
+      _seedParameters(draft, previousReference, spellEngine.allParameters);
+
+  /// A fresh, empty draft -- new id, no guideline -- seeded at the standard
+  /// reference triple. The draft every "start over" path resets to.
+  SpellDraft _emptySeededDraft() => _emptySeeded(spellEngine.allParameters);
+
+  /// [_emptySeededDraft] without an instance -- the constructor's `super(...)`
+  /// argument runs before `this` exists, so it cannot call the instance
+  /// method above even though it needs the same draft.
+  static SpellDraft _emptySeeded(List<Parameter> parameters) =>
+      _seedParameters(SpellDraft(), const ParameterTriple.standard(), parameters);
 
   /// Re-derives [SpellDraft.ritualDeclaration] after a change to Technique,
   /// Form, base effect or Duration.
@@ -512,6 +631,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       emit(SpellCreationState.initial().copyWith(
         status: SpellCreationStatus.saved,
         savedSpell: spell,
+        draft: _emptySeededDraft(),
       ));
     } catch (e) {
       emit(state.copyWith(
