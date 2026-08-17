@@ -853,6 +853,53 @@ modifier (items 28/41's pattern) would model the wrong mechanism; it's closer to
 - **Re-measure now the library holds 325 spells**, each computing a level on load.
   This item's premise is only now testable. See also item 38's efficiency bullet.
 
+### 56. Rules Hints — What a Choice Means, and Where It Comes From
+
+**Opened 2026-08-17, from item 14's brainstorm.** A general gap, not a bug: the
+creation screen offers choices whose rulebook meaning is invisible. The user
+sees a name and a magnitude and has to already know the rules. Pure UI work, no
+model change, no fidelity risk — deferred on purpose.
+
+**Concrete instances found so far.** These are examples of one need, not
+separate items:
+
+- **`target-bloodline` carries a built-in ongoing rule that nothing surfaces.**
+  The spell "applies to all members of the bloodline born during its duration,
+  as well as those already living when it is cast" (core 10046). A user picking
+  it gets no hint. Found while writing item 14's spec, which deliberately does
+  *not* give Bloodline a static/dynamic control — the behaviour is the Target's
+  own rule, not a per-spell choice, so it is display work and belongs here.
+- **Circle's "ends if the circle is broken"** — same class, and it interacts
+  with Ring Duration in a way the two dropdowns never show.
+- **`requiresVirtue` renders as bare label text** ("Bloodline (+3, requires
+  Faerie Magic)") and `requiresRitual` renders as nothing at all in the
+  dropdown. Both are informational only — there is no character/Virtue model
+  (`parameter.dart:40-44`) — but the *reason* is unexplained.
+- **Item 14's segmented control ships its own one-off helper line.** That is the
+  first instance of this pattern; if a general mechanism lands, fold it in
+  rather than leaving one bespoke explainer behind.
+
+**⚠️ The one decision that stops this being "pure UI."** Where does the hint
+text live?
+- **UI copy** — hardcoded strings beside each control. Genuinely pure UI, and
+  what makes this deferrable, but hand-maintained and unable to cite anything.
+- **Catalog data** — a new `Parameter`/`BaseEffect` field, importable and
+  citable, but then it needs importer work and an extraction source, and it
+  stops being a UI item.
+
+Decide this first when picking the item up; the estimate swings entirely on it.
+
+**⚠️ Citations cannot supply page numbers.** `Citation.page` is null for every
+built-in entry and structurally cannot be filled: the reviewed rulebook markdown
+carries no page markers, only prose cross-references, and `citation.dart:5-11`
+records that an earlier promise to add them "could not be kept." So a hint may
+name a **book and a section heading** — the markdown does have headings — never
+a page. Do not plan a "see p. 112" affordance.
+
+- **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
+  `lib/models/parameter.dart` and `assets/data/parameters.json` (only if the
+  catalog-data route wins)
+
 ---
 
 ## Completed ✅

@@ -281,3 +281,9 @@ Full verification is `flutter test`, `integration_test/`, and the Python suite �
   assertions 1–7 are unaffected either way.
 - **`Restore the Faded Threads`.** A Circle spell the ward rule does not decide;
   it stays `unstated` rather than being guessed at.
+- **Explaining a Target's own built-in rules** — Bloodline's "members born
+  during its duration", Circle's "ends if the circle is broken". These are
+  properties of the Target that the app never surfaces, which is display work,
+  not modelling: **todo item 56**. The segmented control's helper line is this
+  design's one local instance, and should be folded into any general mechanism
+  that lands later rather than left as a bespoke explainer.
