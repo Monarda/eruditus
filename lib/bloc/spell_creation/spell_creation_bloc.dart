@@ -469,13 +469,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   ) async {
     emit(state.copyWith(status: SpellCreationStatus.saving));
 
+    // One event, one atomic save. Dispatching SummaryChanged and then
+    // SpellSaveRequested would leave the draft half-updated if the second
+    // never arrived. Computed outside the try so the catch branch below can
+    // also emit it: the dialog-supplied summary lives only on this local
+    // `draft`, never on `state.draft`, so re-emitting `state` on failure
+    // would silently drop it and leave a retry finding the dialog empty.
+    final draft = event.summary == null
+        ? state.draft
+        : state.draft.copyWith(summary: event.summary);
+
     try {
-      // One event, one atomic save. Dispatching SummaryChanged and then
-      // SpellSaveRequested would leave the draft half-updated if the second
-      // never arrived.
-      final draft = event.summary == null
-          ? state.draft
-          : state.draft.copyWith(summary: event.summary);
       final spell = draft.toSpell(name: event.name, source: PublicationSource.userCreated);
       await spellRepository.saveSpell(spell);
 
@@ -491,7 +495,11 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         savedSpell: spell,
       ));
     } catch (e) {
-      emit(state.copyWith(status: SpellCreationStatus.error, errorMessage: e.toString()));
+      emit(state.copyWith(
+        draft: draft,
+        status: SpellCreationStatus.error,
+        errorMessage: e.toString(),
+      ));
     }
   }
 }

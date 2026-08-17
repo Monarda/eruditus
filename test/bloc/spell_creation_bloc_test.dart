@@ -478,7 +478,41 @@ void main() {
           .having((s) => s.errorMessage, 'errorMessage', contains('disk full'))
           // The in-progress draft is preserved (not reset) on failure, so the
           // user doesn't lose their work and can retry.
-          .having((s) => s.draft.technique, 'draft.technique (preserved)', 'Creo'),
+          .having((s) => s.draft.technique, 'draft.technique (preserved)', 'Creo')
+          // The summary the save dialog collected must survive the failure
+          // too -- it was applied to a local `draft`, not to state.draft,
+          // so the error branch must emit that local draft rather than
+          // state.draft, or a retry finds the dialog empty again.
+          .having((s) => s.draft.summary, 'draft.summary (dialog-supplied, preserved on error)',
+              'A jet of flame.'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // SpellDraft.toSpell throws StateError when validateSpellProse rejects a
+    // draft with neither summary nor description -- normally unreachable
+    // through the screen, since the save dialog always collects a summary
+    // first when the draft has none, but the bloc's own handler must still
+    // degrade to an error status rather than let that StateError escape
+    // uncaught, the same contract the repository-failure test above pins.
+    'SpellSaveRequested with no summary over a prose-less draft emits an error status '
+    'instead of letting toSpell\'s StateError escape',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellSaveRequested('Prose-less Spell'));
+    },
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.error)
+          .having((s) => s.errorMessage, 'errorMessage', contains('summary or a description')),
     ],
   );
 
