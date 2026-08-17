@@ -55,6 +55,7 @@ import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/library_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/invalid_spell_exception.dart';
 import 'package:eruditus/models/modifier.dart';
@@ -301,3 +302,34 @@ class FakeConfigurationRepository implements ConfigurationRepository {
   Future<void> deleteCustomModifier(String id) async =>
       modifiers.removeWhere((m) => m.id == id);
 }
+
+/// A **real** [SpellCreationBloc] over an in-memory repository.
+///
+/// Synchronous by design — call it straight from a `testWidgets` body. Use
+/// this, not [mockSpellCreationBloc], when the assertion is about a rebuild.
+SpellCreationBloc realSpellCreationBloc({
+  FakeSpellRepository? spells,
+  SpellEngine? engine,
+}) =>
+    SpellCreationBloc(
+      spellEngine: engine ?? SpellEngine(allSpells: const []),
+      spellRepository: spells ?? FakeSpellRepository(),
+    );
+
+/// A **real** [SpellLibraryBloc] over an in-memory repository.
+SpellLibraryBloc realSpellLibraryBloc({
+  FakeLibraryRepository? library,
+  SpellEngine? engine,
+}) =>
+    SpellLibraryBloc(
+      libraryRepository: library ?? FakeLibraryRepository(),
+      spellEngine: engine ?? SpellEngine(allSpells: const []),
+    );
+
+/// A **real** [ConfigurationBloc] over an in-memory repository.
+ConfigurationBloc realConfigurationBloc({
+  FakeConfigurationRepository? configuration,
+}) =>
+    ConfigurationBloc(
+      configRepository: configuration ?? FakeConfigurationRepository(),
+    );
