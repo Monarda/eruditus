@@ -10,6 +10,7 @@ import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
+import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/requisite.dart' show RequisiteKind;
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
@@ -31,9 +32,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   // getting clobbered by a save that was already in flight). Sequential
   // processing here guarantees events are applied strictly in arrival order.
   SpellCreationBloc({
-    required this.spellEngine,
+    required SpellEngine spellEngine,
     required this.spellRepository,
-  }) : super(SpellCreationState.initial()) {
+  })  : spellEngine = spellEngine,
+        // The first thing the Create tab renders. Seeded here rather than in
+        // SpellCreationState.initial(), which has no catalog to resolve ids
+        // against -- and must not gain one, since TemplateInstantiated builds
+        // on it and its parameters must survive verbatim.
+        super(SpellCreationState.initial().copyWith(
+          draft: _seedParameters(
+              SpellDraft(), const ParameterTriple.standard(), spellEngine.allParameters),
+        )) {
     on<SpellCreationEvent>(
       _onEvent,
       transformer: (events, mapper) => events.asyncExpand(mapper),
@@ -326,7 +335,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     } else if (event is SpellSaveRequested) {
       await _handleSpellSaveRequested(event, emit);
     } else if (event is SpellDiscarded) {
-      emit(SpellCreationState.initial());
+      emit(SpellCreationState.initial().copyWith(draft: _emptySeededDraft()));
     }
   }
 
@@ -386,6 +395,88 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       target: pruneIfOutOfScope(draft.target),
     );
   }
+
+  /// The reference triple [draft]'s guideline is priced against, or the
+  /// standard Personal/Momentary/Individual when no guideline is selected.
+  ///
+  /// [BaseEffect.reference] already *defaults* to `ParameterTriple.standard()`
+  /// -- in the constructor (`base_effect.dart:122`) and again when the field
+  /// is absent from JSON (`:153-155`). So "the guideline's reference where
+  /// explicit, the fixed default otherwise" and "always `baseEffect.reference`"
+  /// are the same rule, and this is the second one. There is deliberately no
+  /// is-this-explicit predicate; see todo item 60.
+  static ParameterTriple _referenceOf(SpellDraft draft) =>
+      draft.baseEffect?.reference ?? const ParameterTriple.standard();
+
+  /// Moves [draft]'s Range/Duration/Target to the zero point its
+  /// (already-updated) guideline is priced against.
+  ///
+  /// A slot is re-seeded only when it is null, or when it still holds
+  /// [previousReference]'s value for that slot -- i.e. the user never moved it
+  /// off the seed. A parameter chosen deliberately survives a guideline
+  /// switch. Evaluated one slot at a time, so a caster who picked a Target
+  /// keeps it while their untouched Range and Duration follow the new
+  /// guideline. That is the same shape of answer BaseEffectSelected already
+  /// gives for `chosenBaseLevel` above: a keep-or-clear rule reasoned from
+  /// what the value still means, rather than a blanket policy either way.
+  ///
+  /// It matters because `_parameterContribution` charges each parameter as a
+  /// *delta* from the reference. A ward guideline (Touch/Ring/Circle) left at
+  /// the blank-draft default contributes -1, -2, 0, which can drive the level
+  /// below 1 and tell the caster their spell is broken -- when all that
+  /// happened is that the app never put them at the guideline's own start.
+  ///
+  /// Both lookups degrade rather than throw. An id that does not resolve
+  /// leaves the slot untouched, so with an empty [parameters] every slot stays
+  /// null -- exactly the behaviour before this rule existed. A candidate out
+  /// of scope for the draft's Form is skipped for the same reason
+  /// _withPrunedFormScopedParameters exists: writing one in would trip
+  /// DropdownButtonFormField's assertion that its value appear in `items`.
+  /// No catalog reference names a Form-scoped parameter today, but a custom
+  /// guideline could.
+  ///
+  /// `containerMode` is pruned here rather than at each call site, because
+  /// every handler that can re-seed a Target can strand a mode. `keepsMode` is
+  /// computed from the *resulting* Target, not from whether the seed changed
+  /// it: when the seed leaves the Target alone, a mode can only be set if that
+  /// Target is already a container (ContainerModeSelected is the only path
+  /// that sets one, and TargetSelected prunes it otherwise), so the check is a
+  /// no-op in exactly the cases where nothing moved.
+  static SpellDraft _seedParameters(
+    SpellDraft draft,
+    ParameterTriple previousReference,
+    List<Parameter> parameters,
+  ) {
+    final next = _referenceOf(draft);
+
+    Parameter? seed(Parameter? current, String previousId, String nextId) {
+      if (current != null && current.id != previousId) return current;
+      final candidate = parameters.firstWhereOrNull((p) => p.id == nextId);
+      if (candidate == null || !candidate.scope.appliesTo(form: draft.form)) {
+        return current;
+      }
+      return candidate;
+    }
+
+    final target = seed(draft.target, previousReference.targetId, next.targetId);
+    final keepsMode = target?.targetType == TargetType.container;
+
+    return draft.copyWith(
+      range: seed(draft.range, previousReference.rangeId, next.rangeId),
+      duration: seed(draft.duration, previousReference.durationId, next.durationId),
+      target: target,
+      containerMode: keepsMode ? null : ContainerMode.unstated,
+    );
+  }
+
+  /// [_seedParameters] against the engine's live parameter catalog.
+  SpellDraft _withSeededParameters(SpellDraft draft, ParameterTriple previousReference) =>
+      _seedParameters(draft, previousReference, spellEngine.allParameters);
+
+  /// A fresh, empty draft -- new id, no guideline -- seeded at the standard
+  /// reference triple. The draft every "start over" path resets to.
+  SpellDraft _emptySeededDraft() =>
+      _seedParameters(SpellDraft(), const ParameterTriple.standard(), spellEngine.allParameters);
 
   /// Re-derives [SpellDraft.ritualDeclaration] after a change to Technique,
   /// Form, base effect or Duration.
@@ -512,6 +603,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       emit(SpellCreationState.initial().copyWith(
         status: SpellCreationStatus.saved,
         savedSpell: spell,
+        draft: _emptySeededDraft(),
       ));
     } catch (e) {
       emit(state.copyWith(
