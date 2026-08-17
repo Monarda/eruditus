@@ -13,6 +13,7 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/engine/ritual_status.dart';
+import 'package:eruditus/models/target_type.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -98,6 +99,48 @@ void main() {
     expect(byVirtue['Symbolic Magic'], {
       'range-symbol', 'duration-symbol', 'target-symbol',
     });
+  });
+
+  test('every Target declares a targetType, and exactly four are containers',
+      () async {
+    final parameters = await loader.loadParameters();
+    final targets = parameters.where((p) => p.category == 'Target').toList();
+
+    // Hardcoded like the requiresRitual test above, and for the same reason:
+    // parameters.json is small and hand-maintained, so a count that drifts
+    // silently is the failure mode worth catching.
+    expect(targets.length, 14);
+
+    for (final target in targets) {
+      expect(target.targetType, isNotNull,
+          reason: '${target.id} has no targetType — every Target needs one, '
+              'or check 9 silently stops applying to it');
+    }
+
+    final containers = targets
+        .where((p) => p.targetType == TargetType.container)
+        .map((p) => p.id)
+        .toSet();
+    expect(containers, {
+      'target-circle',
+      'target-room',
+      'target-structure',
+      'target-boundary',
+    });
+
+    // Bloodline is an object Target that carries its own ongoing rule (a
+    // spell "applies to all members of the bloodline born during its
+    // duration"), which is the Target's behaviour and not a per-spell design
+    // choice. Pinned so nobody later "fixes" it into a container.
+    expect(
+      parameters.firstWhere((p) => p.id == 'target-bloodline').targetType,
+      TargetType.object,
+    );
+    // Symbol is "essentially a large Group" (Houses of Hermes: Mystery Cults).
+    expect(
+      parameters.firstWhere((p) => p.id == 'target-symbol').targetType,
+      TargetType.object,
+    );
   });
 
   test('Fire is scoped to Ignem and Imaginem; every other parameter is unrestricted', () async {

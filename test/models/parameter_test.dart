@@ -3,6 +3,7 @@ import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/target_type.dart';
 
 void main() {
   group('Parameter', () {
@@ -183,6 +184,53 @@ void main() {
         ],
       });
       expect(restored.scope.forms, isEmpty);
+    });
+
+    group('targetType', () {
+      Map<String, dynamic> base() => {
+            'id': 'target-room',
+            'name': 'Room',
+            'category': 'Target',
+            'magnitude': 2,
+            'source': 'published',
+            'citations': [
+              {'bookId': 'arm5-core'}
+            ],
+          };
+
+      test('parses all three kinds', () {
+        for (final kind in TargetType.values) {
+          final parameter =
+              Parameter.fromMap({...base(), 'targetType': kind.name});
+          expect(parameter.targetType, kind);
+        }
+      });
+
+      test('is null when absent, which is how a Range or Duration row reads', () {
+        final parameter = Parameter.fromMap({
+          ...base(),
+          'id': 'duration-sun',
+          'name': 'Sun',
+          'category': 'Duration',
+        });
+        expect(parameter.targetType, isNull);
+      });
+
+      test('throws on an unknown kind rather than defaulting', () {
+        expect(
+          () => Parameter.fromMap({...base(), 'targetType': 'volume'}),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      test('round-trips through toMap, and omits the key when null', () {
+        final annotated =
+            Parameter.fromMap({...base(), 'targetType': 'container'});
+        expect(annotated.toMap()['targetType'], 'container');
+
+        final bare = Parameter.fromMap(base());
+        expect(bare.toMap().containsKey('targetType'), isFalse);
+      });
     });
   });
 

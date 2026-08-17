@@ -161,6 +161,7 @@
     "name": "Individual",
     "category": "Target",
     "magnitude": 0,
+    "targetType": "object",
     "source": "published",
     "citations": [
       {
@@ -173,6 +174,7 @@
     "name": "Circle",
     "category": "Target",
     "magnitude": 0,
+    "targetType": "container",
     "source": "published",
     "citations": [
       {
@@ -185,6 +187,7 @@
     "name": "Taste",
     "category": "Target",
     "magnitude": 0,
+    "targetType": "sense",
     "source": "published",
     "citations": [
       {
@@ -197,6 +200,7 @@
     "name": "Part",
     "category": "Target",
     "magnitude": 1,
+    "targetType": "object",
     "source": "published",
     "citations": [
       {
@@ -209,6 +213,7 @@
     "name": "Touch",
     "category": "Target",
     "magnitude": 1,
+    "targetType": "sense",
     "source": "published",
     "citations": [
       {
@@ -221,6 +226,7 @@
     "name": "Group",
     "category": "Target",
     "magnitude": 2,
+    "targetType": "object",
     "source": "published",
     "citations": [
       {
@@ -233,6 +239,7 @@
     "name": "Room",
     "category": "Target",
     "magnitude": 2,
+    "targetType": "container",
     "source": "published",
     "citations": [
       {
@@ -245,6 +252,7 @@
     "name": "Smell",
     "category": "Target",
     "magnitude": 2,
+    "targetType": "sense",
     "source": "published",
     "citations": [
       {
@@ -257,6 +265,7 @@
     "name": "Structure",
     "category": "Target",
     "magnitude": 3,
+    "targetType": "container",
     "source": "published",
     "citations": [
       {
@@ -269,6 +278,7 @@
     "name": "Hearing",
     "category": "Target",
     "magnitude": 3,
+    "targetType": "sense",
     "source": "published",
     "citations": [
       {
@@ -281,6 +291,7 @@
     "name": "Vision",
     "category": "Target",
     "magnitude": 4,
+    "targetType": "sense",
     "source": "published",
     "citations": [
       {
@@ -293,6 +304,7 @@
     "name": "Boundary",
     "category": "Target",
     "magnitude": 4,
+    "targetType": "container",
     "requiresRitual": true,
     "source": "published",
     "citations": [
@@ -376,6 +388,7 @@
     "name": "Bloodline",
     "category": "Target",
     "magnitude": 3,
+    "targetType": "object",
     "requiresVirtue": "Faerie Magic",
     "source": "published",
     "citations": [
@@ -417,6 +430,7 @@
     "name": "Symbol",
     "category": "Target",
     "magnitude": 4,
+    "targetType": "object",
     "requiresRitual": true,
     "requiresVirtue": "Symbolic Magic",
     "source": "published",

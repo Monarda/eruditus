@@ -1,4 +1,5 @@
 import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 /// Which Forms a parameter is offered for. Empty means unrestricted.
@@ -47,6 +48,18 @@ class Parameter {
   /// Fire (Ignem/Imaginem only, todo item 17) uses this today.
   final ParameterScope scope;
 
+  /// Which of the rulebook's three kinds of Target this is, or null when this
+  /// parameter is not a Target at all (every Range and Duration row).
+  ///
+  /// Nullable rather than defaulted: "this is not a Target" and "this is a
+  /// Target of unknown kind" are different, and only the first should be
+  /// silent. A Target with no annotation is a data bug, caught by
+  /// `asset_data_loader_test.dart`, not papered over here.
+  ///
+  /// Read by `validateSpellAgainstCatalog`'s check 9 and by the creation
+  /// screen, which offers the container-mode control only for a container.
+  final TargetType? targetType;
+
   final Provenance provenance;
 
   Parameter({
@@ -57,6 +70,7 @@ class Parameter {
     this.requiresRitual = false,
     this.requiresVirtue,
     this.scope = const ParameterScope(),
+    this.targetType,
     required this.provenance,
   });
 
@@ -67,6 +81,7 @@ class Parameter {
     'magnitude': magnitude,
     'requiresRitual': requiresRitual,
     if (requiresVirtue != null) 'requiresVirtue': requiresVirtue,
+    if (targetType != null) 'targetType': targetType!.name,
     'scope': scope.toMap(),
     ...provenance.toMap(),
   };
@@ -81,6 +96,9 @@ class Parameter {
     scope: map['scope'] == null
         ? const ParameterScope()
         : ParameterScope.fromMap(map['scope'] as Map<String, dynamic>),
+    targetType: map['targetType'] == null
+        ? null
+        : targetTypeFromName(map['targetType'] as String, 'Parameter'),
     provenance: Provenance.fromMap(map),
   );
 
