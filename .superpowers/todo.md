@@ -696,6 +696,109 @@ the "Container Targets" sidebar's static/dynamic test.
       Momentary, and `containerMode` still `unstated`
 - **See also:** item 14 (closed, `## Completed ✅`)
 
+### 59. The Level Should Compute Live, Not Behind a Button
+
+**Opened 2026-08-17**, from the user's pass over the spell creation screen.
+Today the level exists only after pressing **Calculate & View Suggestions**
+(`spell_creation_screen.dart:310-314`), and every subsequent edit emits
+`status: editing`, which hides the card again — `showResultsBlock` gates it on
+`status == calculated` (`:81-83`, `:307-308`). So the number a caster is
+designing towards is absent exactly while they are designing.
+
+- [ ] Recompute the breakdown on every draft-changing event and show the level
+      at all times, rather than on a button press
+- [ ] **Decide what the button becomes.** Suggestions are the expensive half —
+      `findSimilarSpells` plus a `calculateBreakdown` per candidate
+      (`spell_creation_bloc.dart:434-472`) — and are the part that genuinely
+      wants a button. The level is a pure function of the draft and does not.
+- [ ] **Decide the incomplete-draft display.** Until a base effect and all three
+      parameters are set there is no level; the card needs a placeholder rather
+      than an absence. Item 60 shrinks this window but does not close it.
+- [ ] **Two ways `calculateBreakdown` throws, both reachable mid-edit**, and a
+      live path must handle them where the current one-shot path does not:
+      negative magnitudes driving the level below 1, and a General guideline
+      with no `chosenBaseLevel` yet (`spell_engine.dart:140-146`). Today
+      `validateSpellDraft` converts the first into a message
+      (`spell_engine.dart:107-123`) and the button is the only caller.
+- [ ] **Do not make validation errors live along with the level.** They render
+      as bare red text (`spell_creation_screen.dart:303-306`); firing them on
+      every keystroke would flag a half-built draft as broken. The level and the
+      errors want different triggers.
+- **Also fixes the missing reset path.** Discard renders only inside
+  `showResultsBlock` (`:315`, `:348-356`), so **before the first Calculate there
+  is no way to abandon a draft at all**. Item 61 closed the case that made this
+  acute — a stuck modifier selection with no way out — but only that case; the
+  escape hatch itself is still missing for every other mistake. Whatever gates
+  the results block should stop gating Discard.
+- **Subsumes item 58's first bullet**, which is the same defect seen through two
+  events (`ContainerModeSelected`, `SummaryChanged`): a level card that is never
+  hidden by an edit cannot be hidden by those two either. Fix here, and close
+  that bullet rather than patching it separately.
+- **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
+  `lib/bloc/spell_creation/spell_creation_bloc.dart`,
+  `lib/presentation/widgets/level_breakdown_card.dart`
+- **See also:** items 60, 58
+
+### 60. A Draft Should Start at Its Guideline's Own Reference Triple
+
+**Opened 2026-08-17**, from the same pass. `SpellDraft` leaves `range`,
+`duration` and `target` null (`lib/models/spell.dart:467-469`, no defaults in
+the constructor at `:483-507`), and `SpellDiscarded` emits a bare
+`SpellCreationState.initial()` (`spell_creation_bloc.dart:328-329`), so a reset
+draft shows three empty dropdowns.
+
+**Decided 2026-08-17:** seed from the selected guideline's own `reference`
+where that guidance is explicit, and from Personal / Momentary / Individual
+otherwise.
+
+- [ ] Seed a draft with no guideline selected — the reset case — from
+      `range-personal`, `duration-momentary`, `target-individual`
+- [ ] Seed from `baseEffect.reference` once a guideline is selected, so a draft
+      starts at the zero point that guideline is actually priced against
+- [ ] **Decide where the seed lives.** `SpellDraft`'s constructor cannot hold it
+      — the fields are `Parameter` objects, not ids, and the catalog is loaded
+      asynchronously — so this is a bloc-level seed from
+      `ConfigurationRepository`, in the same shape as item 38's
+      `allParameters` fix, and probably wants to land with it.
+- [ ] **Check every construction path, not just Discard.** `TemplateInstantiated`
+      builds its own `SpellDraft` from the template (`:290-314`) and must keep
+      the template's parameters; only the genuinely empty draft gets seeded.
+- **⚠️ The explicit/implicit distinction needs no code.** `BaseEffect.reference`
+  already *defaults* to `ParameterTriple.standard()` — Personal/Momentary/
+  Individual — both in the constructor (`base_effect.dart:122`) and when the
+  field is absent from JSON (`:153-155`). So "the guideline's reference where
+  explicit, the fixed default otherwise" and "always `baseEffect.reference`"
+  are the same rule, and the second is the one to write. **Do not build an
+  is-this-explicit predicate**; item 38's open worry that the model cannot tell
+  an authored Personal/Momentary/Individual from an unauthored one is real, and
+  is irrelevant here precisely because both readings seed identically.
+- **Measured 2026-08-17: 13 of the 609 catalog entries carry an explicit
+  `reference`**, and all 13 are General — 12 ward rows at Touch/Ring/Circle and
+  one Intellego Imaginem row at Personal/Momentary/Vision. The other 596 fall
+  back to standard. So this rule changes the seed for 13 guidelines and leaves
+  596 at the flat default, which is also why the wards are the only place it is
+  observable — and the reason it is worth doing, since a ward seeded at
+  Personal/Momentary/Individual starts below its own zero point.
+- [ ] **Open: does selecting a guideline overwrite parameters the user already
+      set?** Adopting a new reference on every `BaseEffectSelected` would
+      silently rewrite a Range the caster chose deliberately. `BaseEffectSelected`
+      already faces this exact question for `chosenBaseLevel` and answers it with
+      a documented rule (kept across a General→General switch, cleared otherwise
+      — `spell_creation_bloc.dart:107-113`); follow that precedent rather than
+      inventing a second policy.
+- **Reuse the ids, not the type.** `ParameterTriple` answers "what is this
+  *guideline* priced against" and lives on `BaseEffect.reference`; the seed
+  answers "where does a *draft* start". Reading the former to produce the latter
+  is the point of this item — but they remain different questions, and nothing
+  guarantees the no-guideline default must track `ParameterTriple.standard()`
+  forever.
+- **Files:** `lib/bloc/spell_creation/spell_creation_bloc.dart`,
+  `lib/models/spell.dart`
+- **See also:** items 59, 38
+
+### 61. A Single-Select Modifier Cannot Be Cleared Once Chosen
+**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
+
 ---
 
 ## D. Low Priority / Nice-to-Have
@@ -717,6 +820,23 @@ the "Container Targets" sidebar's static/dynamic test.
 creation screen offers choices whose rulebook meaning is invisible. The user
 sees a name and a magnitude and has to already know the rules. Pure UI work, no
 model change, no fidelity risk — deferred on purpose.
+
+**⚠️ Asked for directly by the user, 2026-08-17**, in the same pass that opened
+items 59-61: *"there needs to be a help mouseover or other way of bringing up a
+more detailed explanation of what is being chosen and why"*. That is this item,
+and it moves it from "found while doing something else" to requested work —
+consider its position in section D accordingly.
+
+- [ ] **Decide the affordance, which the item did not previously cover.** A
+      hover tooltip is desktop-only; the app also builds for Android and iOS,
+      where there is no hover, so a mouseover alone cannot be the whole answer.
+      Likely an info icon opening a sheet or popover, with the tooltip as the
+      desktop convenience on top of it — one source of text, two ways in.
+- [ ] **Decide the coverage bar.** The user's ask is "what is being chosen and
+      why", which reaches every control on the creation screen — Technique,
+      Form, base effect, all three parameters, modifiers, requisites,
+      adjustments, Ritual — not only the four instances listed below. Those are
+      where the gap was *noticed*, not its extent.
 
 **Concrete instances found so far.** These are examples of one need, not
 separate items:
@@ -771,7 +891,9 @@ none blocking, all polish on the container-mode feature closed as item 14.
       mode makes the level card vanish and forces a recalculate, for a field
       the design calls level-neutral. **`SummaryChanged` has the identical
       wart** — fix both events together rather than leaving them inconsistent.
-      The most user-visible of the six.
+      The most user-visible of the six. **⚠️ Superseded by item 59**, which
+      makes the level card live and so unhideable by *any* edit — do that
+      instead of patching these two events, and close this bullet with it.
 - [ ] **The control nudges a decision the model says is not owed.** It renders
       for any container Target (`spell_creation_screen.dart:255`), and on a
       Momentary container spell the helper line still reads "Not recorded… so
@@ -820,7 +942,7 @@ none blocking, all polish on the container-mode feature closed as item 14.
   `test/presentation/screens/spell_creation_screen_test.dart:143-148` sets a
   1200×5000 view, and the three labels ("Not stated", "Static", "Dynamic")
   will be tight on a 320dp phone.
-- **See also:** item 14 (closed, `## Completed ✅`), item 57
+- **See also:** item 14 (closed, `## Completed ✅`), item 57, item 59
 
 ---
 
@@ -828,6 +950,28 @@ none blocking, all polish on the container-mode feature closed as item 14.
 
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
+
+### 61. Clearable Single-Select Modifiers (`337adb4`)
+A single-select modifier's dropdown offered its own options and nothing else,
+and `onChanged` ignored null, so selection was one-way. Fixed by a null-valued
+**"None"** entry; `DropdownButtonFormField`'s generic is `ModifierOption?` to
+carry it. **Widget-only** — `ModifierOptionDeselected` already dropped the map
+key when the last option went, so the bloc needed no change.
+
+- **The clearing branch deselects *every* selected id, not just the first.**
+  `_buildSingle`'s `value` already tolerates a stored selection carrying more
+  than one option by showing nothing; clearing has to tolerate it identically,
+  or the surplus survives with the field reading None and no way left to reach
+  it. Do not "simplify" that loop to `selectedIds.first`.
+- **An unselected single-select modifier now reads "None" rather than blank**,
+  for all 31 of them — a deliberate side effect, making the empty state
+  explicit instead of looking unset-because-unloaded.
+- **Why it mattered more than a mis-click:** `no-gestures` and `no-words` are
+  scoped to no Technique or Form, so they appear on every draft, costing +1 or
+  +2 magnitudes permanently. With Discard rendering only inside the results
+  block, the only escape was to calculate a spell you no longer wanted to reach
+  the button that discarded it. **That second half is still true and is item
+  59's**, which this fix does not touch.
 
 ### 1. Spell Constraint: One of Each Parameter (`2d897db`)
 Exactly one Range, one Duration, one Target. **Ars Magica rule: modifiers scale the
