@@ -42,7 +42,7 @@ reason the guidelines don't apply to it (item 46).
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **660 tests, green** |
+| Dart | `flutter test` | **661 tests, green** |
 | Python | `python -m unittest discover -s scripts/spell_import/tests -p "test_*.py"` | **316 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
@@ -286,71 +286,6 @@ code seam earns its place.
 ## C. Not on the Critical Path
 
 Real work, none of it blocking the import.
-
-### 6. Widget-Test Coverage Hole *(was: "…from the Real-Bloc Hang" — see the correction)*
-
-- [ ] Create a test helper with bloc factories — **both kinds**, see the
-      correction below: mocked blocs for state-driven assertions, and
-      **real blocs with faked repositories** for anything testing a rebuild.
-      Nine test files currently hand-roll their own `MockBloc` subclasses and
-      `registerFallbackValue` blocks (verified 2026-08-17).
-- [ ] Document the resulting rule (below) somewhere a test author will see it.
-- [ ] One script/alias running all three suites, so "tests pass" means all of
-      them. Nothing of the kind exists — `tool/setup_web.dart` is the only
-      tooling in the repo.
-- [x] **Run integration tests as part of verification — DONE 2026-08-17.**
-      `tests.yml` gained an `integration` job. It is a separate job on
-      `windows-latest` because the suite needs a device and that is the only
-      configuration it has ever run in; the rationale, including what switching
-      to Linux would cost, is commented in the workflow. Verified by running
-      CI's exact command locally: `flutter test integration_test -d windows`,
-      **8 of 8 green** — and **green on its first real run on GitHub's
-      `windows-latest`**, so the hosted runner's build environment is a proven
-      baseline, not an assumption. That is the comparison any future attempt to
-      move this job to Linux is measured against. Note the *directory* form, so
-      a second integration file is picked up without editing the workflow.
-
-**⚠️ Correction 2026-08-17: this item's founding premise was wrong.** It held
-that "a real Bloc hangs forever under flutter_tester; known Bloc limitation."
-That does not reproduce. A probe with a **real** `SpellCreationBloc` — mocking
-only `SpellRepository` — dispatching `TechniqueSelected` and rebuilding a
-`BlocBuilder` passed in under a second, `pumpAndSettle` included.
-
-The accurate diagnosis was already in the repo, at `test/widget_test.dart:54-60`:
-**real async I/O awaited directly inside a `testWidgets` body** hangs, because
-that body runs in a fake-async zone — which is why the real `AppDatabase` is
-opened in `setUp` instead. That comment then guesses it is "the same category of
-issue documented for real Blocs." It is not. A Bloc is an event handler; it hangs
-only if it awaits real I/O, and mocking the *repository* removes that.
-
-- **The rule is "don't await real I/O in a test body," not "don't use real
-  Blocs."** Corollaries: `setUp`/`tearDown` run outside the fake-async zone, and
-  `tester.runAsync` is the documented escape hatch from inside it — unmentioned
-  anywhere in this repo.
-- **This is why the item looked expensive.** Failure mode 2 below concluded that
-  re-render coverage had to go to `integration_test/`. It does not: a real bloc
-  with a faked repository re-renders in a plain widget test, at widget-test
-  speed. The false premise foreclosed the cheap fix.
-
-- **Two failure modes, one now mitigated:**
-  1. `flutter test` does **not** run `integration_test/` — those need a device, so
-     the suite rots silently. A broken end-to-end test once went unnoticed across
-     several "suite is green" checks because the file simply never ran.
-     **CI now runs it**, so this binds only for local runs.
-  2. **Mocked blocs cannot catch re-render bugs.** A mock emits no new state, so the
-     rebuild after an interaction never happens. The add-requisite crash
-     (`DropdownButtonFormField` holding a value no longer in its `items`) was
-     invisible to 6 passing widget tests for exactly this reason. When the failure
-     mode *is* "what happens on re-render", **use a real bloc with a faked
-     repository** — or drive states through a `StreamController` on the mock, or
-     cover it in `integration_test/`.
-     Item 52 is the same lesson one layer up: a widget-tree presence check is
-     neither a reachability nor a visibility check.
-- **Superseded note, kept because it was a real correction:** this item once
-  carried "⚠️ 2 of 5 fail" from 2026-08-06 (two `scrollUntilVisible` failures),
-  fixed 2026-08-10 with a `maxScrolls: 500` budget.
-- **Files:** test helpers, widget test templates, `integration_test/`,
-  `.github/workflows/tests.yml`
 
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells conform to the one-Range/Duration/Target constraint
@@ -1001,6 +936,89 @@ Fixed 19 built-in spells referencing base-effect ids not in the catalog (no leve
 changes). **The lasting fix is that counts are derived, not hardcoded** — the loader
 test derives its expected count from the raw JSON, an oracle independent of the
 loader. A hardcoded count is exactly what silently drifted by 566 entries.
+
+### 6. Widget-Test Coverage Hole — DONE 2026-08-17
+
+- [x] **Create a test helper with bloc factories — DONE 2026-08-17.**
+      `test/support/bloc_factories.dart` provides both kinds: `mock*Bloc`
+      factories that pair construction with `whenListen` (a bare `MockBloc`
+      has a null state, and every call site used to repeat that pairing by
+      hand), and `real*Bloc` factories over hand-written in-memory
+      repository fakes. **Corrected: this said "nine test files" — it is
+      five.** The nine came from a `mocktail|bloc_test` grep that swept up
+      `configuration_bloc_test.dart` (imports `bloc_test`, hand-rolls
+      nothing) and `spell_engine_test.dart` (matched only a comment naming
+      another file). Seven if you count the two that hand-roll a repository
+      mock — and **those two are deliberately not migrated**: both use
+      mocktail for *error injection* (`thenThrow`), which an in-memory fake
+      models worse, so the fakes carry no error hook.
+- [x] **Document the resulting rule — DONE 2026-08-17.** It is the library
+      dartdoc on `bloc_factories.dart`, so an author cannot reach a factory
+      without passing the explanation of which one to pick. The false
+      premise was also removed from `test/widget_test.dart`'s `setUp`
+      comment, which had explained the real workaround and then attributed
+      it to a Bloc limitation.
+- [x] **One command running all suites — DONE 2026-08-17.**
+      `dart run tool/run_all_tests.dart`. **Four steps, not three:**
+      `flutter analyze` gates the Dart suite in CI, so a three-step runner
+      could go green where CI would not. Every step runs even after one
+      fails, so the summary answers "which suites actually ran". The device
+      comes from `Platform.operatingSystem` rather than a hard-coded
+      `windows`, so the Linux-runner experiment the workflow comments keep
+      open does not need this file edited.
+- [x] **Run integration tests as part of verification — DONE 2026-08-17.**
+      `tests.yml` gained an `integration` job. It is a separate job on
+      `windows-latest` because the suite needs a device and that is the only
+      configuration it has ever run in; the rationale, including what switching
+      to Linux would cost, is commented in the workflow. Verified by running
+      CI's exact command locally: `flutter test integration_test -d windows`,
+      **8 of 8 green** — and **green on its first real run on GitHub's
+      `windows-latest`**, so the hosted runner's build environment is a proven
+      baseline, not an assumption. That is the comparison any future attempt to
+      move this job to Linux is measured against. Note the *directory* form, so
+      a second integration file is picked up without editing the workflow.
+
+**⚠️ Correction 2026-08-17: this item's founding premise was wrong.** It held
+that "a real Bloc hangs forever under flutter_tester; known Bloc limitation."
+That does not reproduce. A probe with a **real** `SpellCreationBloc` — mocking
+only `SpellRepository` — dispatching `TechniqueSelected` and rebuilding a
+`BlocBuilder` passed in under a second, `pumpAndSettle` included.
+
+The accurate diagnosis was already in the repo, at `test/widget_test.dart:54-60`:
+**real async I/O awaited directly inside a `testWidgets` body** hangs, because
+that body runs in a fake-async zone — which is why the real `AppDatabase` is
+opened in `setUp` instead. That comment then guesses it is "the same category of
+issue documented for real Blocs." It is not. A Bloc is an event handler; it hangs
+only if it awaits real I/O, and mocking the *repository* removes that.
+
+- **The rule is "don't await real I/O in a test body," not "don't use real
+  Blocs."** Corollaries: `setUp`/`tearDown` run outside the fake-async zone, and
+  `tester.runAsync` is the documented escape hatch from inside it — unmentioned
+  anywhere in this repo.
+- **This is why the item looked expensive.** Failure mode 2 below concluded that
+  re-render coverage had to go to `integration_test/`. It does not: a real bloc
+  with a faked repository re-renders in a plain widget test, at widget-test
+  speed. The false premise foreclosed the cheap fix.
+
+- **Two failure modes, one now mitigated:**
+  1. `flutter test` does **not** run `integration_test/` — those need a device, so
+     the suite rots silently. A broken end-to-end test once went unnoticed across
+     several "suite is green" checks because the file simply never ran.
+     **CI now runs it**, so this binds only for local runs.
+  2. **Mocked blocs cannot catch re-render bugs.** A mock emits no new state, so the
+     rebuild after an interaction never happens. The add-requisite crash
+     (`DropdownButtonFormField` holding a value no longer in its `items`) was
+     invisible to 6 passing widget tests for exactly this reason. When the failure
+     mode *is* "what happens on re-render", **use a real bloc with a faked
+     repository** — or drive states through a `StreamController` on the mock, or
+     cover it in `integration_test/`.
+     Item 52 is the same lesson one layer up: a widget-tree presence check is
+     neither a reachability nor a visibility check.
+- **Superseded note, kept because it was a real correction:** this item once
+  carried "⚠️ 2 of 5 fail" from 2026-08-06 (two `scrollUntilVisible` failures),
+  fixed 2026-08-10 with a `maxScrolls: 500` budget.
+- **Files:** test helpers, widget test templates, `integration_test/`,
+  `.github/workflows/tests.yml`
 
 ### 8. UI: Disable Multi-Select for Range/Duration/Target — OBSOLETE
 Superseded by item 1: selecting multiple Ranges, Durations or Targets is no longer
