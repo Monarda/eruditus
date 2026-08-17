@@ -120,6 +120,78 @@ void main() {
     expect(calls, ['terram-material/mat-metal']);
   });
 
+  testWidgets('the single-select dropdown offers a None entry', (tester) async {
+    await pump(tester, modifiers: [material]);
+
+    await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('modifier-dropdown-terram-material')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('None'), findsWidgets);
+  });
+
+  testWidgets('choosing None invokes onDeselect for the selected option', (tester) async {
+    final calls = <String>[];
+    await pump(
+      tester,
+      modifiers: [material],
+      selected: const {'terram-material': ['mat-metal']},
+      onDeselect: (modifierId, optionId) => calls.add('$modifierId/$optionId'),
+    );
+
+    await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('modifier-dropdown-terram-material')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('None').last);
+    await tester.pumpAndSettle();
+
+    expect(calls, ['terram-material/mat-metal']);
+  });
+
+  testWidgets('choosing None with nothing selected does nothing', (tester) async {
+    final calls = <String>[];
+    await pump(
+      tester,
+      modifiers: [material],
+      onDeselect: (modifierId, optionId) => calls.add('$modifierId/$optionId'),
+    );
+
+    await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('modifier-dropdown-terram-material')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('None').last);
+    await tester.pumpAndSettle();
+
+    expect(calls, isEmpty);
+  });
+
+  // The dropdown already tolerates a stored single-select selection carrying
+  // more than one option (it shows no value rather than asserting). Clearing
+  // has to tolerate it too: deselecting only the first would leave the rest
+  // selected and the field still showing None, i.e. still unclearable.
+  testWidgets('choosing None clears every option of a multi-valued stored selection',
+      (tester) async {
+    final calls = <String>[];
+    await pump(
+      tester,
+      modifiers: [material],
+      selected: const {'terram-material': ['mat-stone', 'mat-metal']},
+      onDeselect: (modifierId, optionId) => calls.add('$modifierId/$optionId'),
+    );
+
+    await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('modifier-dropdown-terram-material')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('None').last);
+    await tester.pumpAndSettle();
+
+    expect(calls, ['terram-material/mat-stone', 'terram-material/mat-metal']);
+  });
+
   testWidgets('unticking a checkbox invokes onDeselect', (tester) async {
     final calls = <String>[];
     await pump(
