@@ -51,23 +51,27 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
   Future<void> _onEvent(SpellCreationEvent event, Emitter<SpellCreationState> emit) async {
     if (event is TechniqueSelected) {
+      final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(state.draft.copyWith(
-          technique: event.technique,
-          baseEffect: null,
-          // A chosen level or template link both point at the base effect
-          // that just disappeared -- neither can survive it, for the same
-          // reason pruneModifierSelections drops a stranded modifier rather
-          // than let it keep affecting the level invisibly. analogyRationale
-          // is the same shape as templateId here: it explains why *this*
-          // draft's Technique/Form diverged from the base effect that just
-          // disappeared, so it cannot survive either -- left in place, a
-          // stale rationale can permanently trip check 8's "matches, but a
-          // rationale is still set" branch with no UI path to clear it.
-          chosenBaseLevel: null,
-          templateId: null,
-          chosenSlots: const {},
-          analogyRationale: null,
+        _withPrunedModifiers(_withSeededParameters(
+          state.draft.copyWith(
+            technique: event.technique,
+            baseEffect: null,
+            // A chosen level or template link both point at the base effect
+            // that just disappeared -- neither can survive it, for the same
+            // reason pruneModifierSelections drops a stranded modifier rather
+            // than let it keep affecting the level invisibly. analogyRationale
+            // is the same shape as templateId here: it explains why *this*
+            // draft's Technique/Form diverged from the base effect that just
+            // disappeared, so it cannot survive either -- left in place, a
+            // stale rationale can permanently trip check 8's "matches, but a
+            // rationale is still set" branch with no UI path to clear it.
+            chosenBaseLevel: null,
+            templateId: null,
+            chosenSlots: const {},
+            analogyRationale: null,
+          ),
+          previousReference,
         )),
         reapplyDefault: false,
       );
@@ -77,17 +81,21 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is FormSelected) {
+      final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(_withPrunedFormScopedParameters(state.draft.copyWith(
-          form: event.form,
-          baseEffect: null,
-          chosenBaseLevel: null,
-          templateId: null,
-          chosenSlots: const {},
-          // See TechniqueSelected above: analogyRationale cannot outlive the
-          // base effect it was explaining a divergence from.
-          analogyRationale: null,
-        ))),
+        _withPrunedModifiers(_withSeededParameters(
+          _withPrunedFormScopedParameters(state.draft.copyWith(
+            form: event.form,
+            baseEffect: null,
+            chosenBaseLevel: null,
+            templateId: null,
+            chosenSlots: const {},
+            // See TechniqueSelected above: analogyRationale cannot outlive the
+            // base effect it was explaining a divergence from.
+            analogyRationale: null,
+          )),
+          previousReference,
+        )),
         reapplyDefault: false,
       );
       emit(state.copyWith(

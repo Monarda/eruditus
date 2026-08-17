@@ -836,6 +836,77 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Technique clears the guideline and returns an untouched draft to '
+    'the standard reference triple',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect)); // -> touch / ring / circle
+      bloc.add(const TechniqueSelected('Creo')); // guideline cleared
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.baseEffect, 'draft.baseEffect', isNull)
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Form refills a Form-scoped Duration it just pruned',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(DurationSelected(fire)); // Fire is Ignem/Imaginem only
+      bloc.add(const FormSelected('Aquam'));
+    },
+    skip: 2,
+    expect: () => [
+      // Pruned out of scope, then refilled by the seed rather than left blank.
+      isA<SpellCreationState>()
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'changing Form leaves a deliberately chosen, still-in-scope parameter alone',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(RangeSelected(voice));
+      bloc.add(const FormSelected('Aquam'));
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-voice'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'TemplateInstantiated keeps the template parameters verbatim, unseeded',
+    build: seedingBloc,
+    act: (bloc) => bloc.add(TemplateInstantiated(ResolvedTemplate(
+      record: SpellTemplate(
+        id: 'tpl-seed', name: 'Voiced Ward', baseEffectId: 'ward-1',
+        technique: 'Rego', form: 'Ignem',
+        rangeId: 'range-voice', durationId: 'duration-ring', targetId: 'target-room',
+        summary: 'A published template whose parameters must survive verbatim.',
+        provenance: Provenance(source: PublicationSource.published,
+            citations: const [Citation(bookId: 'arm5-core')]),
+      ),
+      baseEffect: wardEffect,
+      range: voice, duration: ring, target: room,
+    ))),
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-voice')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-room'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'RequisiteAdded appends a requisite of the given kind',
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
     act: (bloc) {
