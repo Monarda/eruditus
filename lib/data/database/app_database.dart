@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const String _databaseName = 'eruditus.db';
-  static const int _databaseVersion = 8;
+  static const int _databaseVersion = 9;
 
   final Database db;
 
@@ -66,6 +66,14 @@ class AppDatabase {
         // the same policy as v4 through v7 -- backward compatibility is not
         // a goal for this prototype -- but here the drop is load-bearing, not
         // just consistent: without it, every read of an old row fails.
+        // The v9 bump adds `containerMode` to the `spells` blob. Additive like
+        // v5/v6/v7 — `Spell.fromMap` defaults a missing key to
+        // `ContainerMode.unstated` — so this one could have been translated by
+        // a silent per-field default. Dropped anyway under the same policy:
+        // backward compatibility is not a goal for this prototype, and a
+        // silent per-field default is one more implicit behavior to maintain
+        // forever. `SpellTemplate` gained the same field, but templates are
+        // asset-only and never persisted here, so there is nothing to migrate.
         onUpgrade: (db, oldVersion, newVersion) async {
           for (final table in const ['spells', 'custom_factors']) {
             await db.execute('DROP TABLE IF EXISTS $table');

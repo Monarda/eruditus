@@ -1,4 +1,5 @@
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -288,6 +289,15 @@ class Spell {
   /// match; enforced by `validateSpellAgainstCatalog`'s check 8.
   final String? analogyRationale;
 
+  /// Whether this spell's container Target is static or dynamic. Meaningful
+  /// only when [targetId] names a container Target — enforced by
+  /// `validateSpellAgainstCatalog`'s check 9.
+  ///
+  /// Follows [RitualDeclaration]'s path deliberately: an enum with a neutral
+  /// member, carried by the model and the built-in library before any UI sets
+  /// it, so that making it required later needs no migration. See todo item 14.
+  final ContainerMode containerMode;
+
   Spell({
     required this.id,
     this.name,
@@ -306,6 +316,7 @@ class Spell {
     required this.provenance,
     this.tags = const [],
     this.ritualDeclaration = RitualDeclaration.none,
+    this.containerMode = ContainerMode.unstated,
     required this.createdAt,
     required this.updatedAt,
     this.chosenBaseLevel,
@@ -340,6 +351,7 @@ class Spell {
         ...provenance.toMap(),
         'tags': tags,
         'ritualDeclaration': ritualDeclaration.name,
+        'containerMode': containerMode.name,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         'chosenBaseLevel': chosenBaseLevel,
@@ -375,6 +387,10 @@ class Spell {
             ? RitualDeclaration.none
             : ritualDeclarationFromName(
                 requireField<String>(map, 'ritualDeclaration', 'Spell'), 'Spell'),
+        containerMode: map['containerMode'] == null
+            ? ContainerMode.unstated
+            : containerModeFromName(
+                requireField<String>(map, 'containerMode', 'Spell'), 'Spell'),
         createdAt: DateTime.parse(requireField<String>(map, 'createdAt', 'Spell')),
         updatedAt: DateTime.parse(requireField<String>(map, 'updatedAt', 'Spell')),
         chosenBaseLevel: map['chosenBaseLevel'] as int?,
@@ -399,6 +415,7 @@ class SpellDraft {
   String? description;
   int? printedLevel;
   RitualDeclaration ritualDeclaration;
+  ContainerMode containerMode;
   int? chosenBaseLevel;
   Map<String, String> chosenSlots;
   String? templateId;
@@ -419,6 +436,7 @@ class SpellDraft {
     this.description,
     this.printedLevel,
     this.ritualDeclaration = RitualDeclaration.none,
+    this.containerMode = ContainerMode.unstated,
     this.chosenBaseLevel,
     Map<String, String>? chosenSlots,
     this.templateId,
@@ -478,6 +496,7 @@ class SpellDraft {
       description: description,
       printedLevel: printedLevel,
       ritualDeclaration: ritualDeclaration,
+      containerMode: containerMode,
       chosenBaseLevel: chosenBaseLevel,
       chosenSlots: chosenSlots,
       templateId: templateId,
@@ -502,6 +521,7 @@ class SpellDraft {
     String? description,
     int? printedLevel,
     RitualDeclaration? ritualDeclaration,
+    ContainerMode? containerMode,
     Object? chosenBaseLevel = _unset,
     Map<String, String>? chosenSlots,
     Object? templateId = _unset,
@@ -522,6 +542,7 @@ class SpellDraft {
       description: description ?? this.description,
       printedLevel: printedLevel ?? this.printedLevel,
       ritualDeclaration: ritualDeclaration ?? this.ritualDeclaration,
+      containerMode: containerMode ?? this.containerMode,
       chosenBaseLevel: identical(chosenBaseLevel, _unset)
           ? this.chosenBaseLevel
           : chosenBaseLevel as int?,

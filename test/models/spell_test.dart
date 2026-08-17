@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -994,6 +995,53 @@ void main() {
         modifiers: const [],
       );
       expect(problems, ["analogyRationale is set but Technique/Form already matches the base effect's own -- remove it"]);
+    });
+  });
+
+  group('containerMode', () {
+    Spell buildSpell({ContainerMode containerMode = ContainerMode.unstated}) => Spell(
+          id: 's-1',
+          baseEffectId: 'e1',
+          technique: 'Creo',
+          form: 'Ignem',
+          rangeId: 'p1',
+          durationId: 'p2',
+          targetId: 'p3',
+          requisites: const {},
+          summary: 'Conjures a bolt of flame.',
+          containerMode: containerMode,
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        );
+
+    test('defaults to unstated', () {
+      expect(buildSpell().containerMode, ContainerMode.unstated);
+    });
+
+    test('round-trips through toMap/fromMap', () {
+      for (final mode in ContainerMode.values) {
+        final restored =
+            Spell.fromMap(buildSpell(containerMode: mode).toMap());
+        expect(restored.containerMode, mode);
+      }
+    });
+
+    test('serializes to the rulebook words', () {
+      expect(buildSpell(containerMode: ContainerMode.static).toMap()['containerMode'],
+          'static');
+      expect(buildSpell(containerMode: ContainerMode.dynamic).toMap()['containerMode'],
+          'dynamic');
+    });
+
+    test('a record with no containerMode key reads as unstated', () {
+      final map = buildSpell().toMap()..remove('containerMode');
+      expect(Spell.fromMap(map).containerMode, ContainerMode.unstated);
+    });
+
+    test('throws on an unknown stored value rather than defaulting', () {
+      final map = buildSpell().toMap()..['containerMode'] = 'ongoing';
+      expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
     });
   });
 }

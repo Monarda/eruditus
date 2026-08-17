@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
@@ -69,5 +70,22 @@ void main() {
     final draft = SpellDraft(templateId: 'tpl-1');
 
     expect(draft.copyWith(technique: 'Rego').templateId, 'tpl-1');
+  });
+
+  test('copyWith sets the container mode, and omitting it preserves one', () {
+    final stated = SpellDraft().copyWith(containerMode: ContainerMode.dynamic);
+    expect(stated.containerMode, ContainerMode.dynamic);
+
+    // Omitted means "keep", which is what lets every other handler copyWith
+    // the draft without clobbering a stated mode.
+    expect(stated.copyWith(summary: 'x').containerMode, ContainerMode.dynamic);
+
+    // Passing unstated explicitly is how TargetSelected clears it. Unlike the
+    // nullable fields, this needs no _unset sentinel: unstated is a real
+    // non-null value, so `?? this.containerMode` cannot swallow it.
+    expect(
+      stated.copyWith(containerMode: ContainerMode.unstated).containerMode,
+      ContainerMode.unstated,
+    );
   });
 }

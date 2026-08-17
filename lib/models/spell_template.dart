@@ -1,4 +1,5 @@
 import 'package:eruditus/models/base_effect.dart' show chosenSlotsFromMap;
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/requisite.dart';
@@ -43,6 +44,10 @@ class SpellTemplate {
   /// See [Spell.analogyRationale] -- identical contract.
   final String? analogyRationale;
 
+  /// See [Spell.containerMode] — identical contract. Carried here because 8
+  /// of the built-in Circle wards are templates.
+  final ContainerMode containerMode;
+
   SpellTemplate({
     required this.id,
     required this.name,
@@ -61,6 +66,7 @@ class SpellTemplate {
     required this.provenance,
     this.tags = const [],
     this.ritualDeclaration = RitualDeclaration.none,
+    this.containerMode = ContainerMode.unstated,
     this.analogyRationale,
   }) {
     final problems = validateSpellProse(
@@ -90,6 +96,7 @@ class SpellTemplate {
         ...provenance.toMap(),
         'tags': tags,
         'ritualDeclaration': ritualDeclaration.name,
+        'containerMode': containerMode.name,
         'analogyRationale': analogyRationale,
       };
 
@@ -120,6 +127,11 @@ class SpellTemplate {
             ? RitualDeclaration.none
             : ritualDeclarationFromName(
                 requireField<String>(map, 'ritualDeclaration', 'SpellTemplate'), 'SpellTemplate'),
+        containerMode: map['containerMode'] == null
+            ? ContainerMode.unstated
+            : containerModeFromName(
+                requireField<String>(map, 'containerMode', 'SpellTemplate'),
+                'SpellTemplate'),
         analogyRationale: map['analogyRationale'] as String?,
       );
 }
