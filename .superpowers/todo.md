@@ -38,12 +38,13 @@ reason the guidelines don't apply to it (item 46).
 > **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**
 > — plus `unreviewed: 3`, see below.
 
-**Suite status, all run 2026-08-17 after item 13:**
+**Suite status, Dart and Python re-run 2026-08-17 after item 29 (items 1 and 3
+each added a test); Integration last run 2026-08-17 after item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **661 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **316 tests, green** |
+| Dart | `flutter test` | **662 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **317 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **3 ledger entries carry an unreviewed candidate.** Item 55's migration
