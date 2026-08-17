@@ -11,9 +11,27 @@ class SpellCreationState extends Equatable {
   final List<String> validationErrors;
   final LevelBreakdown? breakdown;
   /// Why there is no [breakdown], when there isn't one — "Choose a base effect
-  /// to see a level.", and so on. Non-null exactly when [breakdown] is null,
-  /// because both are written together by SpellCreationBloc's emit funnel from
-  /// a single SpellEngine.previewLevel result.
+  /// to see a level.", and so on.
+  ///
+  /// This and [breakdown] are always *written together*, never separately:
+  /// every emit in SpellCreationBloc goes through its `_emit` funnel, which
+  /// sets both from one SpellEngine.previewLevel result, and LevelPreview's two
+  /// constructors fill exactly one of them. So after any funnel pass this is
+  /// non-null exactly when [breakdown] is null.
+  ///
+  /// That is a property of the funnel, not an invariant of this class, and the
+  /// difference is reachable. [SpellCreationState.initial] leaves both null,
+  /// because it predates any funnel pass — it is the deliberately catalog-free
+  /// seed the bloc's constructor, TemplateInstantiated, SpellDiscarded and the
+  /// post-save reset all build on, and it must stay that way (its draft's
+  /// parameters have to survive verbatim, with no catalog to resolve ids
+  /// against). A state in that shape renders the banner as a bare em dash with
+  /// nothing under it explaining why. The running app never shows one: the
+  /// bloc's initial state is `_initialState`, already through the funnel, and
+  /// every handler that starts from `initial()` emits through the funnel too.
+  /// Tests that seed `initial()` directly and read it as live state are the
+  /// one place it exists, which is why this documents the rule rather than
+  /// asserting it.
   ///
   /// Not a validation error: it renders inside the level banner as ordinary
   /// text saying what to do next, never as the red error text those use.

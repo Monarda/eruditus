@@ -102,8 +102,17 @@ class SpellEngine {
     // ArgumentError straight out of the handler, and _handleSpellSaveRequested
     // never calls the calculator at all, so an uncomputable draft would save.
     // Reported here instead, as one more validation message the creation
-    // screen already renders, which also keeps the Save button unreachable
-    // (it only renders once a draft has calculated).
+    // screen already renders -- and this check is also what keeps such a draft
+    // out of the repository, because _handleSpellSaveRequested calls this
+    // method before it writes anything and returns on the first non-empty
+    // result (see the guard at the top of that method). Nothing in the UI can
+    // stand in for it: Save renders unconditionally since todo item 59, so the
+    // button is pressable on a draft that never calculated, and its
+    // disabled-while-there-is-no-level state is an affordance rather than a
+    // gate -- a dispatched SpellSaveRequested has to be safe on its own. The
+    // motivating case is a stack of negative adjustments on an otherwise
+    // complete draft: previewLevel already answers "no level" in the banner,
+    // but only this line stops the same draft being saved.
     if (errors.isEmpty) {
       try {
         calculateBreakdown(
