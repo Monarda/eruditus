@@ -66,10 +66,17 @@ Future<void> selectBaseEffect(WidgetTester tester, String descriptionSubstring) 
 ///
 /// `scrollUntilVisible` with no `scrollable:` requires exactly one Scrollable
 /// in the tree, and every TextField builds one -- so the always-present
-/// summary field makes the bare form ambiguous. Using .first ensures we always
-/// scroll the ListView, not a TextFormField's internal Scrollable, keeping
-/// these scrolls deterministic no matter how many fields render.
-final spellCreationScrollable = find.byType(Scrollable).first;
+/// summary field makes the bare form ambiguous. Anchored on the ListView's
+/// own key (spell_creation_screen.dart) rather than `find.byType(Scrollable)
+/// .first`: once both tabs are mounted under the app's IndexedStack, "first
+/// in the tree" no longer reliably means "the Create tab's own list" (see the
+/// Library-tab scroll below, which needs the same anchoring for the same
+/// reason). `.first` here picks the ListView's own Scrollable over the
+/// summary field's internal EditableText Scrollable, both of which are
+/// descendants of the keyed ListView.
+final spellCreationScrollable = find
+    .descendant(of: find.byKey(const Key('spell-creation-scroll')), matching: find.byType(Scrollable))
+    .first;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -305,7 +312,7 @@ void main() {
       await tester.pumpAndSettle();
 
       Future<void> scrollTo(Finder finder) async {
-        await tester.scrollUntilVisible(finder, 200.0, scrollable: find.byType(Scrollable).first);
+        await tester.scrollUntilVisible(finder, 200.0, scrollable: spellCreationScrollable);
         await tester.pumpAndSettle();
       }
 
@@ -317,7 +324,7 @@ void main() {
       // ever scrolls forward, so getting back to it needs a negative delta —
       // same technique already used below for form-dropdown.
       Future<void> scrollBackTo(Finder finder) async {
-        await tester.scrollUntilVisible(finder, -200.0, scrollable: find.byType(Scrollable).first);
+        await tester.scrollUntilVisible(finder, -200.0, scrollable: spellCreationScrollable);
         await tester.pumpAndSettle();
       }
 
@@ -469,7 +476,7 @@ void main() {
 
       Future<void> scrollTo(Finder finder) async {
         await tester.scrollUntilVisible(finder, 200.0,
-            scrollable: find.byType(Scrollable).first);
+            scrollable: spellCreationScrollable);
         await tester.pumpAndSettle();
       }
 
@@ -509,7 +516,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('form-dropdown')),
         -200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('form-dropdown')));
@@ -740,7 +747,7 @@ void main() {
       await tester.scrollUntilVisible(
         lastingCreationRadio,
         200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
       expect(
@@ -752,7 +759,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('calculate-button')),
         200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('calculate-button')));
@@ -764,7 +771,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('ritual-banner')),
         200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
 
@@ -920,7 +927,7 @@ void main() {
       // calculate-button scroll in this file.
       await tester.scrollUntilVisible(
         find.byKey(const Key('calculate-button')), 200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('calculate-button')));
