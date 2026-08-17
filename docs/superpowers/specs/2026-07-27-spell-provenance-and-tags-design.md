@@ -55,22 +55,24 @@ class Spell {
 
 ### Invariants
 
-1. A **published** spell has at least one of `summary` / `description`, present
-   and non-empty. A **user-created** spell may have neither.
+1. Every spell has at least one of `summary` / `description`, present and
+   non-empty, regardless of `source`.
 2. `source == userCreated` ⟺ `citations.isEmpty`.
 3. `source == published` ⟹ at least one citation.
 
-**Invariant 1 is conditional only as an interim measure.** User-created spells
-should eventually carry a summary or description too. They cannot yet: the
-creation screen collects only a name — `SpellSaveRequested(name)` carries
-nothing else — so an unconditional rule would reject every user-created spell on
-save. Collecting the text needs an input field and a new event, which is UI work
-and out of scope here.
+**Invariant 1 was conditional on `source == published` when this plan was
+written, as an interim measure** — the creation screen collected only a name
+(`SpellSaveRequested(name)` carried nothing else), so an unconditional rule
+would have rejected every user-created spell on save. This plan prepared the
+model and deferred the UI: `SpellDraft` gained a `summary` field (see below)
+so the later work would be purely presentational, with no further model
+change. Tracked as todo item 13.
 
-So this plan prepares the model and defers the UI. `SpellDraft` gains a `summary`
-field (see below) so the later work is purely presentational, with no further
-model change. When that UI lands, invariant 1 should be tightened to apply to
-both sources. Tracked as todo item 13.
+**Settled 2026-08-17.** The creation screen gained a `Summary` field and the
+save dialog collects one as a backstop when the draft has neither summary nor
+description, so invariant 1 above is now unconditional — the `source` branch
+in `validateSpellProse` was deleted rather than widened. See
+`docs/superpowers/specs/2026-08-17-user-created-spell-prose-design.md`.
 
 The two alternatives were both worse: forcing a prose field into the creation
 screen now is scope creep, and auto-deriving a summary would store derivable

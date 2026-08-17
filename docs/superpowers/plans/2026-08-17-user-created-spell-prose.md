@@ -91,27 +91,55 @@ Add to `test/bloc/spell_creation_bloc_test.dart`:
   blocTest<SpellCreationBloc, SpellCreationState>(
     'SummaryChanged does not recompute the breakdown',
     // Prose cannot change a level, so recomputing on every keystroke of a
-    // multi-line field is pure waste. Pinned because the surrounding
-    // handlers all DO recompute, making this the odd one out on purpose.
+    // multi-line field is pure waste. Identity, not value: copyWith carries
+    // the old breakdown forward as `breakdown ?? this.breakdown`, so a value
+    // check would pass whether or not a recompute had run.
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
-    act: (bloc) {
-      bloc.add(const TechniqueSelected('Creo'));
-      bloc.add(const FormSelected('Ignem'));
-      bloc.add(BaseEffectSelected(creoIgnemEffect));
-      bloc.add(RangeSelected(rangeParam));
-      bloc.add(DurationSelected(durationParam));
-      bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellCalculated());
-      bloc.add(const SummaryChanged('A jet of flame.'));
+    seed: () {
+      // Start with a state that has been calculated, so we have a baseline
+      // breakdown to verify doesn't change when SummaryChanged runs.
+      breakdownBeforeSummary = spellEngine.calculateBreakdown(
+        baseEffect: creoIgnemEffect,
+        chosenBaseLevel: null,
+        range: rangeParam,
+        duration: durationParam,
+        target: targetParam,
+        selectedModifiers: const {},
+        requisites: const {},
+        adjustments: const [],
+        ritualDeclaration: RitualDeclaration.none,
+      );
+      return SpellCreationState(
+        status: SpellCreationStatus.calculated,
+        draft: SpellDraft(
+          technique: 'Creo',
+          form: 'Ignem',
+          baseEffect: creoIgnemEffect,
+          range: rangeParam,
+          duration: durationParam,
+          target: targetParam,
+        ),
+        breakdown: breakdownBeforeSummary,
+        calculatedLevel: breakdownBeforeSummary.level,
+      );
     },
-    skip: 7,
-    expect: () => [
-      isA<SpellCreationState>()
-          .having((s) => s.draft.summary, 'draft.summary', 'A jet of flame.')
-          .having((s) => s.calculatedLevel, 'calculatedLevel', isNotNull),
-    ],
+    act: (bloc) => bloc.add(const SummaryChanged('A jet of flame.')),
+    verify: (bloc) {
+      expect(bloc.state.breakdown, isNotNull,
+          reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
+      expect(bloc.state.draft.summary, 'A jet of flame.');
+      expect(bloc.state.breakdown, same(breakdownBeforeSummary),
+          reason: 'SummaryChanged must not recompute the breakdown');
+    },
   );
 ```
+
+> **Corrected during execution, 2026-08-17.** As originally written above, this
+> test asserted `calculatedLevel isNotNull`, which `copyWith` preserves by
+> construction regardless of whether a recompute ran — it could not fail for
+> the reason it claimed to test. The human partner ruled that the reviewer
+> governs, and it shipped instead as an identity check (`same(...)`) on the
+> `breakdown` instance, per the version above.
 
 - [ ] **Step 2: Run the test to verify it fails**
 

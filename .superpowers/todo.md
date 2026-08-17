@@ -38,11 +38,11 @@ reason the guidelines don't apply to it (item 46).
 > **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**
 > — plus `unreviewed: 3`, see below.
 
-**Suite status, all run 2026-08-17 after item 55:**
+**Suite status, all run 2026-08-17 after item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **609 tests, green** |
+| Dart | `flutter test` | **623 tests, green** |
 | Python | `python -m unittest discover -s scripts/spell_import/tests -p "test_*.py"` | **306 tests, green** |
 | Integration | `flutter test integration_test/spell_creation_flow_test.dart -d windows` | **8 tests, green** |
 
@@ -107,18 +107,18 @@ neighbours. It sits above section A because items 35 and 37 changed the
 to be rewritten after it. Deciding first was the cheaper order; it was not new
 scope.
 
-**Status: 3 of 5 rows done, 1 confirmed as needing no model change, 1 open.**
+**Status: 4 of 5 rows done, 1 confirmed as needing no model change, 1 open.**
 
 | # | Item | Model change | Status |
 |---|---|---|---|
 | 1 | **40** | Give the non-prose invariants an enforcement home both construction paths share | ✅ COMPLETE 2026-08-16 |
 | 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields | ✅ DONE 2026-08-14/15 |
-| 3 | **13** | Tighten `validateSpellProse` to user-created spells too | Open — no summary/description input exists on the creation screen yet |
+| 3 | **13** | Tighten `validateSpellProse` to user-created spells too | ✅ DONE 2026-08-17 |
 | 4 | **19** | `ModifierScope` gains a Target restriction | ✅ COMPLETE 2026-08-16 |
-| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed. **14**: open — the rulebook reading that settles it hasn't been done |
+| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed. **14**: open — the only thing left open in this table; the rulebook reading that settles it hasn't been done |
 
-Items 13 and 14 keep their numbers and live in section C; this table is the
-ordering, not a second home for them.
+Item 14 keeps its number and lives in section C; this table is the ordering,
+not a second home for it.
 
 ---
 
@@ -328,28 +328,6 @@ Real work, none of it blocking the import.
 - **Files:** `lib/presentation/screens/spell_library_screen.dart` (tag filter UI),
   `lib/presentation/screens/spell_creation_screen.dart` (tag entry),
   `lib/bloc/spell_library/` (filter events/state)
-
-### 13. Summary/Description Entry for User-Created Spells
-**In section 0** — the smallest item in it: `validateSpellProse` is already the
-correctly-shared validator, so the model change is deleting one
-`source == PublicationSource.published` guard (`spell.dart:33`). Gated on the UI
-input landing first.
-
-- [ ] Add a summary input (and optionally a description input) to the creation screen
-- [ ] Carry the text on the save event so it reaches `SpellDraft` → `Spell`
-- [ ] Tighten the summary-or-description invariant to apply to **both** sources
-- [ ] Update the invariant tests and the spec's "interim" note
-- **Why user-created spells are exempt today:** the Spell Provenance work split
-  `description` into `summary` (paraphrase) and `description` (verbatim rulebook
-  text) and required at least one on published spells. The creation screen collects
-  nothing but a name — verified 2026-08-17, `spell_creation_event.dart` carries no
-  prose at all — so an unconditional rule would reject every user-created spell.
-- **The model is already ready.** `SpellDraft` carries both and `toSpell` passes
-  both through. Purely presentational: an input widget plus an event.
-- **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
-  `lib/bloc/spell_creation/spell_creation_event.dart`,
-  `lib/bloc/spell_creation/spell_creation_bloc.dart`, `lib/models/spell.dart`
-- **Spec:** `docs/superpowers/specs/2026-07-27-spell-provenance-and-tags-design.md`
 
 ### 14. Container Targets: At-Casting vs. Subsequently-Entering
 **In section 0 only as a "confirm no model change" check.** Read the rulebook's
@@ -878,6 +856,34 @@ loader. A hardcoded count is exactly what silently drifted by 566 entries.
 ### 8. UI: Disable Multi-Select for Range/Duration/Target — OBSOLETE
 Superseded by item 1: selecting multiple Ranges, Durations or Targets is no longer
 representable.
+
+### 13. Summary/Description Entry for User-Created Spells — DONE 2026-08-17
+`validateSpellProse` lost its `source` parameter entirely: every spell, published
+or user-created, now needs a summary or a description
+(`'a spell needs a summary or a description'`), enforced at all four call
+sites — the `Spell` constructor, `SpellDraft.toSpell`, and the `ExceptionSpell`
+and `SpellTemplate` constructors. What binds:
+- **`SpellDraft` is home, the save dialog is the backstop.** The creation
+  screen's new `Summary` field (key `summary-field`) writes `SpellDraft.summary`
+  via a new `SummaryChanged` event, updating the draft only — no breakdown
+  recompute, since prose cannot change a level. `_SaveSpellDialog` takes
+  `requiresSummary` and collects a summary only when the draft has neither
+  summary nor description; its Save button stays disabled until both fields are
+  non-empty. `SpellSaveRequested` gained `String? summary`, applied via
+  `copyWith` before `toSpell` — one event, one atomic save.
+- **`SpellEngine.validateSpellDraft` deliberately gained nothing.** It gates
+  breakdown recalculation, so a prose check there would stop the level
+  displaying until a summary was typed.
+- **`Spell.fromMap` backfills `summary` with `legacySummaryPlaceholder`
+  (`'No summary recorded.'`) for two narrow reasons.** It lives in `fromMap`
+  rather than the datasource because a pre-change *backup* would otherwise
+  abort a whole restore in `BackupService`'s list literal. And it fires only
+  for records whose source is user-created and which have no prose — a
+  published record with no prose still throws, so the import assertion keeps
+  its teeth. Read-only: nothing is written back, so there is no migration.
+- **`TemplateInstantiated` needed no change** — it already seeded the draft
+  summary from the template, and was already tested.
+- **Spec:** `docs/superpowers/specs/2026-08-17-user-created-spell-prose-design.md`
 
 ### 15. Add All Core-Rulebook Parameters (`c835d0a`)
 The catalog held 17; the core rulebook defines **25**. Added Range Eye (+1), Duration
