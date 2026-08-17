@@ -107,10 +107,8 @@ neighbours. It sits above section A because items 35 and 37 changed the
 to be rewritten after it. Deciding first was the cheaper order; it was not new
 scope.
 
-**Status: the ordering question is settled — all 5 rows are answered.** Four
-rows landed their change; row 5's confirmation came back split, and the
-*answer* is what section 0 owed. The remaining implementation is item 14's,
-tracked in section C.
+**Status: fully discharged — all 5 rows are answered, and all 5 changes (where
+one was needed) have landed.**
 
 | # | Item | Model change | Status |
 |---|---|---|---|
@@ -118,13 +116,14 @@ tracked in section C.
 | 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields | ✅ DONE 2026-08-14/15 |
 | 3 | **13** | Tighten `validateSpellProse` to user-created spells too | ✅ DONE 2026-08-17 |
 | 4 | **19** | `ModifierScope` gains a Target restriction | ✅ COMPLETE 2026-08-16 |
-| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed, none needed. **14**: answered 2026-08-17 — a model change **is** needed, and it is a stored per-spell field. See item 14 |
+| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed, none needed. **14**: a model change **was** needed — a stored `ContainerMode` field — and it is now implemented and closed. See item 14 (`## Completed ✅`) |
 
-Item 14 keeps its number and lives in section C; this table is the ordering,
-not a second home for it. Section 0 asked only whether a field was needed, so
-it is discharged by the answer — but note the answer went *against* the
-optimistic reading the item had carried since 2026-08-09, so the work it
-guards is real rather than dismissable.
+Item 14 keeps its number; this table was the ordering question, not a second
+home for it. Its answer went *against* the optimistic reading the item had
+carried since 2026-08-09, so the implementation it guarded was real rather
+than dismissable — and that implementation is now done. The 16 container rows
+still needing a per-spell prose reading are a separate, non-blocking
+follow-up: item 57.
 
 ---
 
@@ -334,87 +333,6 @@ Real work, none of it blocking the import.
 - **Files:** `lib/presentation/screens/spell_library_screen.dart` (tag filter UI),
   `lib/presentation/screens/spell_creation_screen.dart` (tag entry),
   `lib/bloc/spell_library/` (filter events/state)
-
-### 14. Container Targets: Static vs. Dynamic
-
-**The rulebook reading is done (2026-08-17) and it settles the design.** The
-Definitive Edition answers this outright in the **"Container Targets" sidebar,
-under "Static and Dynamic Targets"** — a section the item's old ⚠️ note had
-missed, which is why that note guessed wrong in both directions. Its guesses are
-deleted rather than preserved: they were wrong, not superseded.
-
-**What the book says.** A container-target spell works in one of two ways, and
-the terms below are the rulebook's own:
-
-- **Static** — affects valid targets inside the container *at the moment of
-  casting*, and keeps affecting them even if they leave, and even if the
-  container ceases to exist. Nothing entering later is affected. This is how
-  object Targets always work. *Exception:* a static Circle spell still ends if
-  the circle is broken.
-- **Dynamic** — affects valid targets *while* they are in the container. A
-  target that leaves stops being affected; one that enters or re-enters starts
-  being affected. The spell ends early if the container ceases to exist.
-
-**Three consequences that decide the design:**
-
-1. **It is a stored per-spell field, not a property of the Target.** "The way
-   that a particular spell works is fixed when it is designed, and cannot be
-   changed by the casting magus" — design-time, so it belongs on the spell, and
-   the old note's hoped-for `parameters.json`-annotation-only outcome is
-   unavailable.
-2. **It is not derivable.** The worked example is two spells with *identical*
-   Technique, Form, Range, Duration and Target that differ only in mode — so no
-   function of the parameter tuple can recover it. The item's own "is
-   Circle+Ring implicitly ongoing?" question is answered **no**. This is
-   therefore not the storing-derivable-data that the id-reference normalization
-   removed.
-3. **It is level-neutral.** Both versions in that example are the same level.
-   No magnitudes appear anywhere in the sidebar. **Purely descriptive** —
-   `SpellEngine` is untouched.
-
-**Both of the old note's per-target claims were wrong for this purpose:**
-*Group* is fixed at casting, but Group is an **object** target, so it was never
-in scope. *Circle* is **not** inherently ongoing — the "prevents entering"
-language belongs to the **Magical Wards** rules and binds Circle *wards*, not
-the Circle target. All four container targets take either mode.
-
-- [x] Model at-casting vs. enters-later — **answered above**
-- [ ] Add the stored field. Enum, using the rulebook's words
-      (`static`/`dynamic`), not a boolean: a boolean has to be named after one
-      pole and reads as a default, and these are peer readings
-- [ ] Annotate each Target with its **type** (`object` / `container` / `sense`)
-      in `parameters.json`. This gate does not exist today and the field cannot
-      be validated without it. The core rules state the type per target
-      explicitly, so it is a transcription, not a judgement
-- [ ] Expose the choice in the UI, only when the selected Target is a container
-- [ ] Validate the choice is absent for non-container targets
-- [x] Decide level impact — **none**
-
-**The two supplement Targets in `parameters.json` are both non-containers**
-(checked while doing the above, since the type annotation must cover them):
-`target-bloodline` is an object-like target carrying its *own* baked-in dynamic
-rule ("applies to all members of the bloodline born during its duration, as well
-as those already living when it is cast") — not a choice, so it must not offer
-one; `target-symbol` is "essentially a large Group", an object target.
-
-**Corpus impact — 29 container rows**, 20 in `spell_library.json` (boundary 8,
-room 9, structure 2, circle 1) and 9 in `spell_templates.json` (circle 8, room
-1). Of these:
-- **8 are Circle wards**, dynamic by the Magical Wards rule. (Corrected from an
-  earlier count of 9: `tpl-crvi-restore-faded-threads` is Circle + Diameter but
-  is *not* a ward, so the ward rule does not decide it.)
-- **5 are Momentary**, where the distinction is vacuous — nothing can enter
-  during a duration that does not elapse. A backfill must not force a mode on
-  these; leaving it unset is the honest record.
-- **16 need their printed description read** to assign a mode. That reading is
-  the real cost of this item, and it is per-spell.
-
-- **No published core spell is blocked by this** — a fidelity improvement, and
-  it changes no computed level, so assertions 1-7 stay green either way.
-- **Files:** `lib/models/spell.dart`, `assets/data/parameters.json`,
-  `lib/presentation/screens/spell_creation_screen.dart`,
-  `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart`,
-  and the importer if the ~15 rows are to be backfilled from their descriptions
 
 ### 47. Multiple Base Effects in Spell Creation — Combined Guidelines
 
@@ -838,6 +756,26 @@ modifier (items 28/41's pattern) would model the wrong mechanism; it's closer to
 - **Files:** `lib/engine/spell_engine.dart` (or wherever `effectFormula` is
   rendered), `assets/data/base_effects.json`
 
+### 57. The Remaining 16 Container Rows Still Owe a Static/Dynamic Ruling
+
+**Opened 2026-08-17, split off item 14 on close.** Item 14 backfilled the 8
+Circle wards `dynamic` from one shared Magical Wards rationale, and 5 Momentary
+container rows are left unset on purpose (the distinction is vacuous when
+nothing can enter during a duration that doesn't elapse). The other 16 have no
+shared rule to lean on — each needs its own printed description read against
+the "Container Targets" sidebar's static/dynamic test.
+
+- [ ] Read each of the 16 rows' printed description and decide static or
+      dynamic, citing the specific line that settles it (a shared "container
+      target, ward-like" rationale is not enough — item 14's wards case only
+      worked because all 8 cite the same rule)
+- [ ] Record each ruling in `scripts/spell_import/container_modes.json`,
+      the same file the 8 wards used, with a rationale apiece
+- [ ] `spellOwesContainerMode` (`lib/models/spell.dart`) is the predicate that
+      identifies which spells still need this — a container Target, not
+      Momentary, and `containerMode` still `unstated`
+- **See also:** item 14 (closed, `## Completed ✅`)
+
 ---
 
 ## D. Low Priority / Nice-to-Have
@@ -979,6 +917,35 @@ and `SpellTemplate` constructors. What binds:
 - **`TemplateInstantiated` needed no change** — it already seeded the draft
   summary from the template, and was already tested.
 - **Spec:** `docs/superpowers/specs/2026-08-17-user-created-spell-prose-design.md`
+
+### 14. Container Targets: Static vs. Dynamic — DONE 2026-08-17
+The rulebook's "Container Targets" sidebar settles it: a container-target spell
+is either **static** (affects whoever is inside at the moment of casting, keeps
+affecting them if they leave or the container ends) or **dynamic** (affects
+whoever is currently inside, gained or lost as they cross the boundary). What
+binds, beyond what the code already records:
+- **The mode is fixed at design time (Core Rules 12250), and it is not
+  derivable** — two spells with identical Technique/Form/Range/Duration/Target
+  can differ in mode (12252). It is therefore a stored per-spell field, not
+  computed from the parameter tuple, and it is **level-neutral**: no magnitude
+  reads it.
+- **`unstated` means "no decision recorded," never "none owed."**
+  `spellOwesContainerMode` (`lib/models/spell.dart`) derives the latter and has
+  no production caller yet — there's no character to owe it to until spells
+  belong to one.
+- **Check 9 in `validateSpellAgainstCatalog` tests Target kind only.** Momentary
+  spells (where the static/dynamic distinction is vacuous) are excluded in the
+  `spellOwesContainerMode` predicate, not in the check.
+- **8 Circle wards were backfilled `dynamic`** from one shared Magical Wards
+  rationale (`scripts/spell_import/container_modes.json`). **16 container rows
+  still need a per-spell prose reading** before a mode can be assigned —
+  tracked as item 57. `tpl-crvi-restore-faded-threads` is among them: a Circle
+  spell that is not a ward, so the wards rationale doesn't decide it.
+- **`target-bloodline` is an `object` Target with its own baked-in ongoing
+  rule** ("applies to all members ... born during its duration, as well as
+  those already living when it is cast") and must never become a container —
+  the rule is the Target's, not a per-spell choice.
+- **Spec:** `docs/superpowers/specs/2026-08-17-container-target-mode-design.md`
 
 ### 15. Add All Core-Rulebook Parameters (`c835d0a`)
 The catalog held 17; the core rulebook defines **25**. Added Range Eye (+1), Duration
