@@ -838,6 +838,70 @@ a page. Do not plan a "see p. 112" affordance.
   `lib/models/parameter.dart` and `assets/data/parameters.json` (only if the
   catalog-data route wins)
 
+### 58. Container Target Mode — UX Seam Between the Bloc/UI Work and the Derived Predicate
+
+**Opened 2026-08-17, from item 14's whole-branch final review.** Six follow-ups,
+none blocking, all polish on the container-mode feature closed as item 14.
+
+- [ ] **`ContainerModeSelected` hides the level breakdown.** It emits
+      `status: SpellCreationStatus.editing`
+      (`lib/bloc/spell_creation/spell_creation_bloc.dart:170`), and the screen
+      gates the results block on `status == calculated`
+      (`lib/presentation/screens/spell_creation_screen.dart:81-83`). Picking a
+      mode makes the level card vanish and forces a recalculate, for a field
+      the design calls level-neutral. **`SummaryChanged` has the identical
+      wart** — fix both events together rather than leaving them inconsistent.
+      The most user-visible of the six.
+- [ ] **The control nudges a decision the model says is not owed.** It renders
+      for any container Target (`spell_creation_screen.dart:255`), and on a
+      Momentary container spell the helper line still reads "Not recorded… so
+      it is worth deciding" (`:819`) even though `spellOwesContainerMode` says
+      such a spell owes nothing and the importer deliberately leaves the 5
+      Momentary rows unset. ⚠️ The obvious fix — the widget consulting
+      `spellOwesContainerMode` — would give that predicate a **production
+      caller**, which item 14's design deliberately withheld so it stays the
+      hook a future character-library feature flips to a requirement. Needs a
+      design decision first, not just a patch.
+- [ ] **A user-authored custom Target can never carry a mode.**
+      `lib/presentation/screens/configuration_screen.dart:285-291` builds a
+      custom `Parameter` with no `targetType`, so the control never appears
+      and check 9 would reject a mode on it anyway. Item 14's design cited
+      exactly this case as the reason to make the kind catalog data.
+      `requiresRitual`, `requiresVirtue` and `scope` are equally unsettable
+      there already — fix the family, not just this field.
+- [ ] **A latent hole in `_withPrunedFormScopedParameters`**
+      (`lib/bloc/spell_creation/spell_creation_bloc.dart:379-388`): it can null
+      the target without clearing `containerMode`, so a mode stated under Room
+      could survive a Form change and reattach to the next container chosen.
+      **Unreachable today** — `duration-fire` is the only Form-scoped
+      parameter and no Target is scoped — but the helper is generic and
+      `TargetSelected` is currently the only place the mode/Target coupling is
+      maintained.
+- [ ] **An importer id mismatch aborts before the diagnostics exist.**
+      `apply_container_modes` raises at
+      `scripts/spell_import/extract_spells.py:919`, before the run's report is
+      assembled. If a spell named in `container_modes.json` later falls into
+      `blocked`/`unresolved`, the operator sees
+      `UnknownContainerModeSpell: names spells no run produced` — wrong in
+      that case, since the run did produce the spell, just into another
+      bucket — instead of the report explaining why it disappeared. Failing
+      loudly is right; failing before the report exists is not.
+- [ ] **The ward rationale does not engage the strongest counter-reading.** All
+      8 entries in `container_modes.json` cite Core Rules 12166, but 12164
+      says a ward's "target is the thing protected, rather than the things
+      warded against" and 12168 says such wards "target the circle itself,
+      which cannot leave the circle" — a reading under which the Target is
+      fixed at casting, i.e. static. The branch's `dynamic` reading is right (a
+      static ward would let a demon walk in after casting, contradicting
+      12166), but whoever works item 57 will hit this tension on the first
+      non-ward Circle spell. One sentence in the shared rationale addressing
+      12164/12170 would pre-empt it. See item 57.
+- Also worth a line: the segmented control is untested below 1200 logical px —
+  `test/presentation/screens/spell_creation_screen_test.dart:143-148` sets a
+  1200×5000 view, and the three labels ("Not stated", "Static", "Dynamic")
+  will be tight on a 320dp phone.
+- **See also:** item 14 (closed, `## Completed ✅`), item 57
+
 ---
 
 ## Completed ✅
