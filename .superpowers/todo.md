@@ -107,7 +107,10 @@ neighbours. It sits above section A because items 35 and 37 changed the
 to be rewritten after it. Deciding first was the cheaper order; it was not new
 scope.
 
-**Status: 4 of 5 rows done, 1 confirmed as needing no model change, 1 open.**
+**Status: the ordering question is settled — all 5 rows are answered.** Four
+rows landed their change; row 5's confirmation came back split, and the
+*answer* is what section 0 owed. The remaining implementation is item 14's,
+tracked in section C.
 
 | # | Item | Model change | Status |
 |---|---|---|---|
@@ -115,10 +118,13 @@ scope.
 | 2 | **37** + **35** | One `choices` map vs. three more bespoke `chosen*` fields | ✅ DONE 2026-08-14/15 |
 | 3 | **13** | Tighten `validateSpellProse` to user-created spells too | ✅ DONE 2026-08-17 |
 | 4 | **19** | `ModifierScope` gains a Target restriction | ✅ COMPLETE 2026-08-16 |
-| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed. **14**: open — the only thing left open in this table; the rulebook reading that settles it hasn't been done |
+| 5 | **14**, **26** | Confirm *no* model change is needed, before anyone adds a field on assumption | **26**: confirmed, none needed. **14**: answered 2026-08-17 — a model change **is** needed, and it is a stored per-spell field. See item 14 |
 
 Item 14 keeps its number and lives in section C; this table is the ordering,
-not a second home for it.
+not a second home for it. Section 0 asked only whether a field was needed, so
+it is discharged by the answer — but note the answer went *against* the
+optimistic reading the item had carried since 2026-08-09, so the work it
+guards is real rather than dismissable.
 
 ---
 
@@ -329,44 +335,84 @@ Real work, none of it blocking the import.
   `lib/presentation/screens/spell_creation_screen.dart` (tag entry),
   `lib/bloc/spell_library/` (filter events/state)
 
-### 14. Container Targets: At-Casting vs. Subsequently-Entering
-**In section 0 only as a "confirm no model change" check.** Read the rulebook's
-"Ranges, Durations, Targets" and "Magical Wards" sections and settle the ⚠️ note
-below **before anyone adds a field on the assumption that a user-facing choice is
-needed.**
+### 14. Container Targets: Static vs. Dynamic
 
-- [ ] Model whether a container-target spell affects only what is inside **at the
-      moment of casting**, or also whatever **enters later**
+**The rulebook reading is done (2026-08-17) and it settles the design.** The
+Definitive Edition answers this outright in the **"Container Targets" sidebar,
+under "Static and Dynamic Targets"** — a section the item's old ⚠️ note had
+missed, which is why that note guessed wrong in both directions. Its guesses are
+deleted rather than preserved: they were wrong, not superseded.
+
+**What the book says.** A container-target spell works in one of two ways, and
+the terms below are the rulebook's own:
+
+- **Static** — affects valid targets inside the container *at the moment of
+  casting*, and keeps affecting them even if they leave, and even if the
+  container ceases to exist. Nothing entering later is affected. This is how
+  object Targets always work. *Exception:* a static Circle spell still ends if
+  the circle is broken.
+- **Dynamic** — affects valid targets *while* they are in the container. A
+  target that leaves stops being affected; one that enters or re-enters starts
+  being affected. The spell ends early if the container ceases to exist.
+
+**Three consequences that decide the design:**
+
+1. **It is a stored per-spell field, not a property of the Target.** "The way
+   that a particular spell works is fixed when it is designed, and cannot be
+   changed by the casting magus" — design-time, so it belongs on the spell, and
+   the old note's hoped-for `parameters.json`-annotation-only outcome is
+   unavailable.
+2. **It is not derivable.** The worked example is two spells with *identical*
+   Technique, Form, Range, Duration and Target that differ only in mode — so no
+   function of the parameter tuple can recover it. The item's own "is
+   Circle+Ring implicitly ongoing?" question is answered **no**. This is
+   therefore not the storing-derivable-data that the id-reference normalization
+   removed.
+3. **It is level-neutral.** Both versions in that example are the same level.
+   No magnitudes appear anywhere in the sidebar. **Purely descriptive** —
+   `SpellEngine` is untouched.
+
+**Both of the old note's per-target claims were wrong for this purpose:**
+*Group* is fixed at casting, but Group is an **object** target, so it was never
+in scope. *Circle* is **not** inherently ongoing — the "prevents entering"
+language belongs to the **Magical Wards** rules and binds Circle *wards*, not
+the Circle target. All four container targets take either mode.
+
+- [x] Model at-casting vs. enters-later — **answered above**
+- [ ] Add the stored field. Enum, using the rulebook's words
+      (`static`/`dynamic`), not a boolean: a boolean has to be named after one
+      pole and reads as a default, and these are peer readings
+- [ ] Annotate each Target with its **type** (`object` / `container` / `sense`)
+      in `parameters.json`. This gate does not exist today and the field cannot
+      be validated without it. The core rules state the type per target
+      explicitly, so it is a transcription, not a judgement
 - [ ] Expose the choice in the UI, only when the selected Target is a container
 - [ ] Validate the choice is absent for non-container targets
-- [ ] Decide whether it affects the calculated level, or is purely descriptive
-- **Rationale:** the two readings are different spells. A Room-target spell that
-  cleanses everyone present is not the same as one that cleanses everyone who walks
-  in for the rest of its Duration. Nothing records which was meant.
-- **Container targets today:** `target-room` (+2), `target-structure` (+3),
-  `target-boundary` (+4), `target-circle` (+0).
-- **⚠️ The rulebook may already answer this, collapsing the whole item.** ArM5 core
-  defines the behaviour *per target*:
-  - **Group:** things in the Group at casting are affected for the whole duration
-    even if they split up; things that join later are **not**. Fixed at casting,
-    stated outright.
-  - **Circle:** a ward prevents warded things inside from leaving and outside from
-    **entering** — explicitly ongoing.
-  - Room, Structure and Boundary are defined spatially without settling it.
+- [x] Decide level impact — **none**
 
-  So this may be a **property of the Target parameter** — a `parameters.json`
-  annotation plus display, with no `Spell` field, no schema bump and no UI control.
-  If only Room/Structure/Boundary are genuinely ambiguous, scope shrinks to three.
-- **No published core spell is blocked by this** — a fidelity improvement.
-- **Open design questions:** boolean or enum (`atCasting`/`ongoing`)? On `Spell`
-  directly, or as a property of the target selection (tidier, but there is no
-  "target selection" object — the spell holds a bare `targetId`)? Is it implied by
-  the Target/Duration pairing (Circle+Ring implying ongoing), and therefore
-  derivable rather than stored? Storing derivable data is exactly what the
-  id-reference normalization removed.
+**The two supplement Targets in `parameters.json` are both non-containers**
+(checked while doing the above, since the type annotation must cover them):
+`target-bloodline` is an object-like target carrying its *own* baked-in dynamic
+rule ("applies to all members of the bloodline born during its duration, as well
+as those already living when it is cast") — not a choice, so it must not offer
+one; `target-symbol` is "essentially a large Group", an object target.
+
+**Corpus impact — 29 container rows**, 20 in `spell_library.json` (boundary 8,
+room 9, structure 2, circle 1) and 9 in `spell_templates.json` (circle 8, room
+1). Of these:
+- **9 are Circle wards**, dynamic by the Magical Wards rule.
+- **5 are Momentary**, where the distinction is vacuous — nothing can enter
+  during a duration that does not elapse. A backfill must not force a mode on
+  these; leaving it unset is the honest record.
+- **~15 need their printed description read** to assign a mode. That reading is
+  the real cost of this item, and it is per-spell.
+
+- **No published core spell is blocked by this** — a fidelity improvement, and
+  it changes no computed level, so assertions 1-7 stay green either way.
 - **Files:** `lib/models/spell.dart`, `assets/data/parameters.json`,
   `lib/presentation/screens/spell_creation_screen.dart`,
-  `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart` (if stored)
+  `lib/bloc/spell_creation/`, `lib/data/database/app_database.dart`,
+  and the importer if the ~15 rows are to be backfilled from their descriptions
 
 ### 47. Multiple Base Effects in Spell Creation — Combined Guidelines
 
