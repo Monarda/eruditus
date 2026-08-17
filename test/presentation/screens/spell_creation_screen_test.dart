@@ -1,13 +1,11 @@
 import 'dart:async';
 
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
-import 'package:eruditus/bloc/configuration/configuration_event.dart';
 import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
@@ -29,21 +27,7 @@ import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
-class MockSpellCreationBloc
-    extends MockBloc<SpellCreationEvent, SpellCreationState>
-    implements SpellCreationBloc {}
-
-class MockConfigurationBloc
-    extends MockBloc<ConfigurationEvent, ConfigurationState>
-    implements ConfigurationBloc {}
-
-class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
-
-class FakeSpellCreationState extends Fake implements SpellCreationState {}
-
-class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
-
-class FakeConfigurationState extends Fake implements ConfigurationState {}
+import '../../support/bloc_factories.dart';
 
 /// The screen's own ListView.
 ///
@@ -121,16 +105,9 @@ void main() {
   late Parameter duration;
   late Parameter target;
 
-  setUpAll(() {
-    registerFallbackValue(FakeSpellCreationEvent());
-    registerFallbackValue(FakeSpellCreationState());
-    registerFallbackValue(FakeConfigurationEvent());
-    registerFallbackValue(FakeConfigurationState());
-  });
+  setUpAll(registerBlocFallbackValues);
 
   setUp(() {
-    bloc = MockSpellCreationBloc();
-    configBloc = MockConfigurationBloc();
     range = voiceParam;
     duration = durationParam;
     target = targetParam;
@@ -153,10 +130,8 @@ void main() {
     ConfigurationState? configState,
   }) async {
     useTallSurface(tester);
-    whenListen(bloc, const Stream<SpellCreationState>.empty(), initialState: state);
-    whenListen(
-      configBloc,
-      const Stream<ConfigurationState>.empty(),
+    bloc = mockSpellCreationBloc(initialState: state);
+    configBloc = mockConfigurationBloc(
       initialState: configState ??
           ConfigurationState(
             status: ConfigurationStatus.loaded,
@@ -306,10 +281,11 @@ void main() {
       ),
     );
 
-    whenListen(bloc, stateController.stream, initialState: calculatedState);
-    whenListen(
-      configBloc,
-      const Stream<ConfigurationState>.empty(),
+    bloc = mockSpellCreationBloc(
+      initialState: calculatedState,
+      states: stateController.stream,
+    );
+    configBloc = mockConfigurationBloc(
       initialState: ConfigurationState(
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
@@ -570,14 +546,11 @@ void main() {
         savedSpell: savedSpell,
       ),
     ]);
-    whenListen(
-      bloc,
-      states,
+    bloc = mockSpellCreationBloc(
       initialState: SpellCreationState(status: SpellCreationStatus.saving, draft: SpellDraft()),
+      states: states,
     );
-    whenListen(
-      configBloc,
-      const Stream<ConfigurationState>.empty(),
+    configBloc = mockConfigurationBloc(
       initialState: ConfigurationState(
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
@@ -611,18 +584,15 @@ void main() {
         errorMessage: 'disk full',
       ),
     ]);
-    whenListen(
-      bloc,
-      states,
+    bloc = mockSpellCreationBloc(
       initialState: SpellCreationState(
         status: SpellCreationStatus.saving,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
         calculatedLevel: 10,
       ),
+      states: states,
     );
-    whenListen(
-      configBloc,
-      const Stream<ConfigurationState>.empty(),
+    configBloc = mockConfigurationBloc(
       initialState: ConfigurationState(
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
@@ -761,10 +731,8 @@ void main() {
         status: SpellCreationStatus.editing,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
       );
-      whenListen(bloc, stateController.stream, initialState: initial);
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(initialState: initial, states: stateController.stream);
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect, generalWardEffect],
@@ -825,10 +793,8 @@ void main() {
         status: SpellCreationStatus.editing,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
       );
-      whenListen(bloc, stateController.stream, initialState: initial);
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(initialState: initial, states: stateController.stream);
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect, generalWardEffect, otherGeneralEffect],
@@ -880,10 +846,8 @@ void main() {
         status: SpellCreationStatus.editing,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: generalWardEffect),
       );
-      whenListen(bloc, stateController.stream, initialState: initial);
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(initialState: initial, states: stateController.stream);
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect, generalWardEffect],
@@ -1130,10 +1094,8 @@ void main() {
         status: SpellCreationStatus.editing,
         draft: SpellDraft(technique: 'Perdo', form: 'Vim', baseEffect: specificTypeSlotEffect),
       );
-      whenListen(bloc, stateController.stream, initialState: initial);
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(initialState: initial, states: stateController.stream);
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect, specificTypeSlotEffect],
@@ -1317,10 +1279,11 @@ void main() {
             ),
           );
 
-      whenListen(bloc, stateController.stream, initialState: stateWith(const {}));
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(
+        initialState: stateWith(const {}),
+        states: stateController.stream,
+      );
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect],
@@ -1429,11 +1392,8 @@ void main() {
           );
 
       final initial = stateWith(['first', 'second', 'third']);
-      when(() => bloc.state).thenReturn(initial);
-      whenListen(bloc, controller.stream, initialState: initial);
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(initialState: initial, states: controller.stream);
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect],
@@ -1603,10 +1563,8 @@ void main() {
       status: SpellCreationStatus.editing,
       draft: SpellDraft(summary: 'Seeded from a template.'),
     );
-    whenListen(bloc, stateController.stream, initialState: initial);
-    whenListen(
-      configBloc,
-      const Stream<ConfigurationState>.empty(),
+    bloc = mockSpellCreationBloc(initialState: initial, states: stateController.stream);
+    configBloc = mockConfigurationBloc(
       initialState: ConfigurationState(
         status: ConfigurationStatus.loaded,
         effects: [creoIgnemEffect],
@@ -1657,10 +1615,11 @@ void main() {
     Future<void> pumpWithTargetCatalog(
         WidgetTester tester, StreamController<SpellCreationState> controller) async {
       useTallSurface(tester);
-      whenListen(bloc, controller.stream, initialState: stateWithTarget(null));
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      bloc = mockSpellCreationBloc(
+        initialState: stateWithTarget(null),
+        states: controller.stream,
+      );
+      configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           effects: [creoIgnemEffect],

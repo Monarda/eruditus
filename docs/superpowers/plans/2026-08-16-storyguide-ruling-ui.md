@@ -14,6 +14,7 @@
 - Out of scope: todo items 21 and 23, and reclassifying any of the 4 remaining non-derivable Ritual spells (*Rain of Oil*, *Incantation of Summoning the Dead*, *Disenchant*, *Watching Ward*).
 - Widget test command: `flutter test`.
 - Integration test command: `flutter test integration_test/spell_creation_flow_test.dart -d windows` (required separately — `flutter test` alone does not run `integration_test/`, and this project has a known real-Bloc hang under `flutter_tester`).
+- **Superseded 2026-08-17: this is false.** A real Bloc hangs only if it awaits real I/O; the fake-async zone is the actual cause. See `test/support/bloc_factories.dart`.
 - Follow the existing `RadioGroup<T>` pattern already used in `lib/presentation/screens/spell_library_screen.dart` (a `RadioGroup<T>(groupValue:, onChanged:, child: Column/Row of RadioListTile<T>(value:, title:, ...))` — individual tiles take no `groupValue`/`onChanged` of their own).
 
 ---

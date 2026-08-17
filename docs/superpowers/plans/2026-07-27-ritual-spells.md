@@ -16,6 +16,7 @@
   `export PATH="$HOME/Development/SDKs/flutter/flutter/bin:$PATH"`
 - **`flutter test` does not run `integration_test/`.** Those need a device: `flutter test integration_test/... -d windows`. "Tests pass" for this branch means **both** suites. See todo item 6. Windows Developer Mode is enabled on this machine and `-d windows` is verified working, so this is a normal step, not a blocker.
 - **Real Blocs hang forever under `flutter_tester`.** Widget tests must use `MockBloc` from `bloc_test`; anything needing a real Bloc goes in `integration_test/`.
+- **Superseded 2026-08-17: this is false.** A real Bloc hangs only if it awaits real I/O; the fake-async zone is the actual cause. See `test/support/bloc_factories.dart`.
 - **Ritual threshold is `> 50`, not `>= 50`.** Level 50 is a legal Formulaic spell (line 12346).
 - **Ritual minimum level is 20** (line 12354).
 - **Backward compatibility is not a goal.** Dropping and rebuilding the `spells` table on upgrade is the established pattern.

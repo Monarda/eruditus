@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
-import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
@@ -24,19 +23,7 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
-class MockSpellLibraryBloc extends MockBloc<SpellLibraryEvent, SpellLibraryState>
-    implements SpellLibraryBloc {}
-
-class MockSpellCreationBloc extends MockBloc<SpellCreationEvent, SpellCreationState>
-    implements SpellCreationBloc {}
-
-class FakeSpellLibraryEvent extends Fake implements SpellLibraryEvent {}
-
-class FakeSpellLibraryState extends Fake implements SpellLibraryState {}
-
-class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
-
-class FakeSpellCreationState extends Fake implements SpellCreationState {}
+import '../../support/bloc_factories.dart';
 
 void main() {
   late MockSpellLibraryBloc bloc;
@@ -129,14 +116,11 @@ void main() {
   }
 
   setUpAll(() {
-    registerFallbackValue(FakeSpellLibraryEvent());
-    registerFallbackValue(FakeSpellLibraryState());
-    registerFallbackValue(FakeSpellCreationEvent());
-    registerFallbackValue(FakeSpellCreationState());
+    registerBlocFallbackValues();
   });
 
   setUp(() {
-    bloc = MockSpellLibraryBloc();
+    bloc = mockSpellLibraryBloc();
   });
 
   Future<void> pumpScreen(WidgetTester tester, SpellLibraryState state) async {
@@ -158,9 +142,7 @@ void main() {
     VoidCallback? onTemplateLearned,
   }) async {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
-    final resolvedCreationBloc = creationBloc ?? MockSpellCreationBloc();
-    whenListen(resolvedCreationBloc, const Stream<SpellCreationState>.empty(),
-        initialState: SpellCreationState.initial());
+    final resolvedCreationBloc = creationBloc ?? mockSpellCreationBloc();
     await tester.pumpWidget(MaterialApp(
       home: MultiBlocProvider(
         providers: [
@@ -308,7 +290,7 @@ void main() {
         (tester) async {
       final template = buildTemplate('tpl-1', 'Ward against Faeries of the Waters');
       var learned = false;
-      final creationBloc = MockSpellCreationBloc();
+      final creationBloc = mockSpellCreationBloc();
       await pumpScreenWithCreationBloc(
         tester,
         SpellLibraryState(status: SpellLibraryStatus.loaded, templates: [template]),
