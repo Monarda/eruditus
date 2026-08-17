@@ -86,12 +86,16 @@ class SpellCard extends StatelessWidget {
           ? '${entry.technique} ${entry.form} • Level $level$levelSuffix'
           : '${entry.technique} ${entry.form}';
     }
-    // Prefer the paraphrase; fall back to the verbatim rulebook text. Every
-    // entry carries at least one of them now that validateSpellProse's rule
-    // is unconditional (todo item 13) -- hasBlurb is kept as cheap defence
-    // for any LibraryEntry implementation that doesn't itself validate prose,
-    // not because a real entry here can still lack both.
-    final blurb = entry.summary ?? entry.description;
+    // Prefer the paraphrase; fall back to the verbatim rulebook text.
+    // validateSpellProse's rule is unconditional (todo item 13), so every
+    // entry is guaranteed a non-blank summary or description -- but that
+    // guarantee is about the pair together, not about summary alone: a
+    // template can be instantiated with both, then have its summary cleared
+    // back to '' before save, leaving a real description behind it. `??`
+    // only falls through on null, so an empty-string summary must be treated
+    // as absent explicitly or that description would never render.
+    final summary = entry.summary;
+    final blurb = (summary != null && summary.trim().isNotEmpty) ? summary : entry.description;
     final hasBlurb = blurb != null && blurb.isNotEmpty;
 
     return Card(

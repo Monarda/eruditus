@@ -24,8 +24,8 @@ List<String> validateSpellProse({
   required String? summary,
   required String? description,
 }) {
-  final hasProse = (summary != null && summary.isNotEmpty) ||
-      (description != null && description.isNotEmpty);
+  final hasProse = (summary != null && summary.trim().isNotEmpty) ||
+      (description != null && description.trim().isNotEmpty);
 
   if (!hasProse) {
     return ['a spell needs a summary or a description'];

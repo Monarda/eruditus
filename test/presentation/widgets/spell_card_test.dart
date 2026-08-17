@@ -116,6 +116,25 @@ void main() {
     expect(find.text('A wall of roaring flame.'), findsOneWidget);
   });
 
+  testWidgets('falls back to the description when summary is the empty string, not just null',
+      (tester) async {
+    // Reachable in ordinary use: instantiate a template (seeds both), clear
+    // the Summary field (SummaryChanged('') -> draft.summary == ''), save.
+    // `entry.summary ?? entry.description` does not fall through on '' since
+    // `??` only checks for null, so this pins the blank-is-absent treatment.
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SpellCard(
+          entry: buildSpell(
+              name: 'Pillar of Fire', summary: '', description: 'A wall of roaring flame.'),
+          level: 25,
+        ),
+      ),
+    ));
+
+    expect(find.text('A wall of roaring flame.'), findsOneWidget);
+  });
+
   testWidgets('tapping the card invokes onTap', (tester) async {
     var tapped = false;
     await tester.pumpWidget(MaterialApp(
