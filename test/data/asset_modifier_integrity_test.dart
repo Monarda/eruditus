@@ -122,14 +122,33 @@ void main() {
     expect(distance.scope.form, isNull);
   });
 
-  test('every scoped effectId refers to a real base effect', () async {
+  test('every scoped effectId refers to a real base effect of the scoped Art', () async {
     final modifiers = await loader.loadModifiers();
-    final effectIds = (await loader.loadBaseEffects()).map((e) => e.id).toSet();
+    final byId = {for (final e in await loader.loadBaseEffects()) e.id: e};
 
     for (final modifier in modifiers) {
       for (final id in modifier.scope.effectIds) {
-        expect(effectIds.contains(id), isTrue,
-            reason: '${modifier.id} references unknown base effect $id');
+        final effect = byId[id];
+        // `fail` returns Never, which promotes `effect` to non-null below.
+        // `expect(effect, isNotNull)` would not, and every later line would
+        // need a `!`.
+        if (effect == null) {
+          fail('${modifier.id} references unknown base effect $id');
+        }
+        // Existence alone would accept crhe-1b on a Creo Animal modifier.
+        // A null side of a scope is a deliberate wildcard — the transport
+        // ladder spans five Forms — so only a stated Technique or Form is
+        // held to agree.
+        if (modifier.scope.technique != null) {
+          expect(effect.technique, modifier.scope.technique,
+              reason: '${modifier.id} is scoped to ${modifier.scope.technique} '
+                  'but $id is ${effect.technique}');
+        }
+        if (modifier.scope.form != null) {
+          expect(effect.form, modifier.scope.form,
+              reason: '${modifier.id} is scoped to ${modifier.scope.form} '
+                  'but $id is ${effect.form}');
+        }
       }
     }
   });
@@ -172,6 +191,41 @@ void main() {
     }
   });
 
+  test('the treated-product modifiers skip rows that already price treatment', () async {
+    final modifiers = await loader.loadModifiers();
+    final herbam = modifiers.firstWhere((m) => m.id == 'creo-herbam-treated-product');
+    final animal = modifiers.firstWhere((m) => m.id == 'creo-animal-treated-product');
+
+    expect([...herbam.scope.effectIds]..sort(), ['crhe-1b', 'crhe-1c', 'crhe-3a']);
+    expect([...animal.scope.effectIds]..sort(), ['cran-10a', 'cran-5a']);
+
+    expect(
+      herbam.scope.appliesTo(technique: 'Creo', form: 'Herbam', baseEffectId: 'crhe-2a'),
+      isFalse,
+      reason: 'crhe-2a "Create a processed plant product" is crhe-1b with the '
+          'treated rule already applied — levels 1-5 are the additive tier, so '
+          'one magnitude is one level. Offering the modifier there double-counts',
+    );
+    for (final living in ['cran-5b', 'cran-10b', 'cran-15c', 'cran-50']) {
+      expect(
+        animal.scope.appliesTo(technique: 'Creo', form: 'Animal', baseEffectId: living),
+        isFalse,
+        reason: '$living creates a living animal, and the rule prices treatment '
+            'against the level to create an equivalent amount of dead animal',
+      );
+    }
+    expect(
+      herbam.scope.appliesTo(technique: 'Creo', form: 'Herbam', baseEffectId: 'crhe-1b'),
+      isTrue,
+      reason: 'the rule has to still apply somewhere',
+    );
+    expect(
+      animal.scope.appliesTo(technique: 'Creo', form: 'Animal', baseEffectId: 'cran-5a'),
+      isTrue,
+      reason: 'the rule has to still apply somewhere',
+    );
+  });
+
   test('every new additive modifier loads with its stated Technique and Form', () async {
     final modifiers = await loader.loadModifiers();
     final expectedScopes = {
@@ -182,6 +236,8 @@ void main() {
       'perdo-herbam-live-wood': ('Perdo', 'Herbam'),
       'perdo-auram-precision': ('Perdo', 'Auram'),
       'rego-auram-precision': ('Rego', 'Auram'),
+      'creo-aquam-unnatural': ('Creo', 'Aquam'),
+      'creo-herbam-treated-product': ('Creo', 'Herbam'),
     };
 
     for (final entry in expectedScopes.entries) {
@@ -195,5 +251,7 @@ void main() {
     expect(modifiers.firstWhere((m) => m.id == 'perdo-herbam-live-wood').options.map((o) => o.magnitude).toList(), [1]);
     expect(modifiers.firstWhere((m) => m.id == 'perdo-auram-precision').options.map((o) => o.magnitude).toList(), [1]);
     expect(modifiers.firstWhere((m) => m.id == 'rego-auram-precision').options.map((o) => o.magnitude).toList(), [1]);
+    expect(modifiers.firstWhere((m) => m.id == 'creo-aquam-unnatural').options.map((o) => o.magnitude).toList(), [0, 1, 2]);
+    expect(modifiers.firstWhere((m) => m.id == 'creo-herbam-treated-product').options.map((o) => o.magnitude).toList(), [1, 2]);
   });
 }

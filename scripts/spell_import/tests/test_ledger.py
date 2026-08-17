@@ -63,6 +63,32 @@ class ResolveTest(unittest.TestCase):
         with self.assertRaises(ledger.UnnecessaryEntry):
             book.resolve("lib-cran-x", ["cran-5a"])
 
+    def test_an_entry_may_not_override_a_sole_candidate(self):
+        # Todo item 29, decided 2026-08-17. The import design spec once
+        # promised an "explicit override" for exactly this shape -- one
+        # candidate, and an entry naming a different id. `resolve` never
+        # implemented it, and the promise was dropped rather than built.
+        #
+        # This reads like `test_chosen_id_must_be_among_the_candidates` with
+        # a shorter list, and that is the point: the one-candidate case is
+        # the override case, and it is the one somebody would be tempted to
+        # special-case. Deleting this as a duplicate would delete the
+        # decision.
+        #
+        # The rule: the ledger records a choice *among* the candidates a
+        # spell's design line admits, never one against them. A sole
+        # candidate that is the wrong guideline is a `base_effects.json`
+        # bug, or an ExceptionSpell.
+        book = build({
+            "lib-cran-x": {
+                "baseEffectId": "cran-5b",
+                "candidates": ["cran-5a"],
+                "rationale": "an override the ledger does not offer",
+            }
+        })
+        with self.assertRaises(ledger.StaleEntry):
+            book.resolve("lib-cran-x", ["cran-5a"])
+
     def test_stale_multi_candidate_entry_becomes_unnecessary_at_one(self):
         # A ledger entry was written when there were two candidates, and the
         # catalog has since narrowed to one (a guideline row was corrected or
