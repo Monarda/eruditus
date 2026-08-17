@@ -122,14 +122,33 @@ void main() {
     expect(distance.scope.form, isNull);
   });
 
-  test('every scoped effectId refers to a real base effect', () async {
+  test('every scoped effectId refers to a real base effect of the scoped Art', () async {
     final modifiers = await loader.loadModifiers();
-    final effectIds = (await loader.loadBaseEffects()).map((e) => e.id).toSet();
+    final byId = {for (final e in await loader.loadBaseEffects()) e.id: e};
 
     for (final modifier in modifiers) {
       for (final id in modifier.scope.effectIds) {
-        expect(effectIds.contains(id), isTrue,
-            reason: '${modifier.id} references unknown base effect $id');
+        final effect = byId[id];
+        // `fail` returns Never, which promotes `effect` to non-null below.
+        // `expect(effect, isNotNull)` would not, and every later line would
+        // need a `!`.
+        if (effect == null) {
+          fail('${modifier.id} references unknown base effect $id');
+        }
+        // Existence alone would accept crhe-1b on a Creo Animal modifier.
+        // A null side of a scope is a deliberate wildcard — the transport
+        // ladder spans five Forms — so only a stated Technique or Form is
+        // held to agree.
+        if (modifier.scope.technique != null) {
+          expect(effect.technique, modifier.scope.technique,
+              reason: '${modifier.id} is scoped to ${modifier.scope.technique} '
+                  'but $id is ${effect.technique}');
+        }
+        if (modifier.scope.form != null) {
+          expect(effect.form, modifier.scope.form,
+              reason: '${modifier.id} is scoped to ${modifier.scope.form} '
+                  'but $id is ${effect.form}');
+        }
       }
     }
   });
