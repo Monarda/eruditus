@@ -546,7 +546,7 @@ not do it on its own.**
 None of this blocks anything. Found by an Opus-run multi-angle `code-review --max`
 of `feature/general-base-effects`, each finding re-verified against source.
 
-- [ ] **`SpellEngine.allParameters` starts empty and is populated only by a listener
+- [x] **`SpellEngine.allParameters` starts empty and is populated only by a listener
       scoped to the Create screen.** Verified 2026-08-17: `spell_engine.dart:32`
       defaults it to `const []`, filled only via `AvailableParametersSynced` from
       `SpellCreationScreen`'s `BlocListener`. `main.dart`'s `IndexedStack` builds the
@@ -555,8 +555,9 @@ of `feature/general-base-effects`, each finding re-verified against source.
       lands. Then `_parameterById` returns null and the reference discount is
       silently skipped — the spell is momentarily overcharged, with no error
       surfaced. Not reachable from today's shipped library, but nothing prevents it
-      for the first user-saved spell that does. **Fix:** seed `allParameters` from
-      `ConfigurationRepository` synchronously in `main.dart`.
+      for the first user-saved spell that does. **DONE 2026-08-17** (`54addae`, with
+      item 60) — `main.dart` now hoists `getAllParameters()` and passes it to
+      `SpellEngine` at construction.
 - [ ] **Duplicated join/filter logic between `Spell`'s path and `SpellTemplate`'s.**
       All real, none urgent; worth collapsing **before a third catalog-referencing
       record type shows up** (`ExceptionSpell` already made it three):
@@ -741,60 +742,7 @@ designing towards is absent exactly while they are designing.
 
 ### 60. A Draft Should Start at Its Guideline's Own Reference Triple
 
-**Opened 2026-08-17**, from the same pass. `SpellDraft` leaves `range`,
-`duration` and `target` null (`lib/models/spell.dart:467-469`, no defaults in
-the constructor at `:483-507`), and `SpellDiscarded` emits a bare
-`SpellCreationState.initial()` (`spell_creation_bloc.dart:328-329`), so a reset
-draft shows three empty dropdowns.
-
-**Decided 2026-08-17:** seed from the selected guideline's own `reference`
-where that guidance is explicit, and from Personal / Momentary / Individual
-otherwise.
-
-- [ ] Seed a draft with no guideline selected — the reset case — from
-      `range-personal`, `duration-momentary`, `target-individual`
-- [ ] Seed from `baseEffect.reference` once a guideline is selected, so a draft
-      starts at the zero point that guideline is actually priced against
-- [ ] **Decide where the seed lives.** `SpellDraft`'s constructor cannot hold it
-      — the fields are `Parameter` objects, not ids, and the catalog is loaded
-      asynchronously — so this is a bloc-level seed from
-      `ConfigurationRepository`, in the same shape as item 38's
-      `allParameters` fix, and probably wants to land with it.
-- [ ] **Check every construction path, not just Discard.** `TemplateInstantiated`
-      builds its own `SpellDraft` from the template (`:290-314`) and must keep
-      the template's parameters; only the genuinely empty draft gets seeded.
-- **⚠️ The explicit/implicit distinction needs no code.** `BaseEffect.reference`
-  already *defaults* to `ParameterTriple.standard()` — Personal/Momentary/
-  Individual — both in the constructor (`base_effect.dart:122`) and when the
-  field is absent from JSON (`:153-155`). So "the guideline's reference where
-  explicit, the fixed default otherwise" and "always `baseEffect.reference`"
-  are the same rule, and the second is the one to write. **Do not build an
-  is-this-explicit predicate**; item 38's open worry that the model cannot tell
-  an authored Personal/Momentary/Individual from an unauthored one is real, and
-  is irrelevant here precisely because both readings seed identically.
-- **Measured 2026-08-17: 13 of the 609 catalog entries carry an explicit
-  `reference`**, and all 13 are General — 12 ward rows at Touch/Ring/Circle and
-  one Intellego Imaginem row at Personal/Momentary/Vision. The other 596 fall
-  back to standard. So this rule changes the seed for 13 guidelines and leaves
-  596 at the flat default, which is also why the wards are the only place it is
-  observable — and the reason it is worth doing, since a ward seeded at
-  Personal/Momentary/Individual starts below its own zero point.
-- [ ] **Open: does selecting a guideline overwrite parameters the user already
-      set?** Adopting a new reference on every `BaseEffectSelected` would
-      silently rewrite a Range the caster chose deliberately. `BaseEffectSelected`
-      already faces this exact question for `chosenBaseLevel` and answers it with
-      a documented rule (kept across a General→General switch, cleared otherwise
-      — `spell_creation_bloc.dart:107-113`); follow that precedent rather than
-      inventing a second policy.
-- **Reuse the ids, not the type.** `ParameterTriple` answers "what is this
-  *guideline* priced against" and lives on `BaseEffect.reference`; the seed
-  answers "where does a *draft* start". Reading the former to produce the latter
-  is the point of this item — but they remain different questions, and nothing
-  guarantees the no-guideline default must track `ParameterTriple.standard()`
-  forever.
-- **Files:** `lib/bloc/spell_creation/spell_creation_bloc.dart`,
-  `lib/models/spell.dart`
-- **See also:** items 59, 38
+**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
 
 ### 61. A Single-Select Modifier Cannot Be Cleared Once Chosen
 **✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
@@ -950,6 +898,43 @@ none blocking, all polish on the container-mode feature closed as item 14.
 
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
+
+### 60. Drafts Seed From Their Guideline's Reference Triple (`657c491`)
+`SpellDraft` left Range/Duration/Target null, so every empty draft showed
+three blank dropdowns — and a ward guideline priced against Touch/Ring/Circle
+started three magnitudes *below* its own zero point, since
+`_parameterContribution` charges each parameter as a delta from the reference.
+One private static `_seedParameters` now re-seeds all three, called from the
+initial state, `SpellDiscarded`, the post-save reset, `BaseEffectSelected`,
+`TechniqueSelected` and `FormSelected`.
+
+- **A slot is re-seeded only when it is null or still holds the *outgoing*
+  guideline's reference value** — the decided answer to the item's one open
+  question. A deliberately chosen parameter survives a guideline switch;
+  evaluated per slot, so a chosen Target stays while an untouched Range and
+  Duration follow. No "touched" flag: it is a value comparison against data
+  already in hand.
+- **No is-this-explicit predicate, deliberately.** `BaseEffect.reference`
+  already defaults to `ParameterTriple.standard()` in both the constructor and
+  the JSON factory, so "explicit reference, else standard" and "always
+  `reference`" are the same rule. Item 38's worry that the model cannot tell
+  an authored Personal/Momentary/Individual from an unauthored one is real and
+  irrelevant here, because both readings seed identically.
+- **13 of 609 entries carry an explicit `reference`** — 12 wards at
+  Touch/Ring/Circle, `inim-G` at Personal/Momentary/Vision. The other 596 seed
+  to standard, which is why the wards are the only place it is observable.
+- **`containerMode` is pruned inside the seed, not at each call site**, because
+  every handler that can re-seed a Target can strand a mode. Computed from the
+  resulting Target, which is a no-op when nothing moved.
+- **`TemplateInstantiated` is never seeded.** A template's parameters are
+  published catalog data about that specific effect.
+- **Also closed item 38's first bullet**, as a hard prerequisite: `main.dart`
+  built `SpellEngine` with no parameters and the only filler was a
+  `listenWhen` listener that fires on *change*, so the catalog could stay empty
+  for the life of the app and no seed id would resolve.
+- **`FormSelected` now refills a `duration-fire` its own prune nulled** — the
+  same blank dropdown, reached by a different door. The one Form-scoped
+  parameter in the catalog.
 
 ### 61. Clearable Single-Select Modifiers (`337adb4`)
 A single-select modifier's dropdown offered its own options and nothing else,
