@@ -32,16 +32,14 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   // getting clobbered by a save that was already in flight). Sequential
   // processing here guarantees events are applied strictly in arrival order.
   SpellCreationBloc({
-    required SpellEngine spellEngine,
+    required this.spellEngine,
     required this.spellRepository,
-  })  : spellEngine = spellEngine,
-        // The first thing the Create tab renders. Seeded here rather than in
+  })  : // The first thing the Create tab renders. Seeded here rather than in
         // SpellCreationState.initial(), which has no catalog to resolve ids
         // against -- and must not gain one, since TemplateInstantiated builds
         // on it and its parameters must survive verbatim.
         super(SpellCreationState.initial().copyWith(
-          draft: _seedParameters(
-              SpellDraft(), const ParameterTriple.standard(), spellEngine.allParameters),
+          draft: _emptySeeded(spellEngine.allParameters),
         )) {
     on<SpellCreationEvent>(
       _onEvent,
@@ -180,7 +178,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // Individual is precisely what validateSpellAgainstCatalog's check 9
       // rejects, so the save would fail with no visible cause. Conditional on
       // the *new* Target's kind, so Room -> Structure keeps the choice.
-      final keepsMode = event.parameter.targetType == TargetType.container;
+      final keepsMode = _isContainer(event.parameter);
       final draft = _withPrunedModifiers(state.draft.copyWith(
         target: event.parameter,
         containerMode: keepsMode ? null : ContainerMode.unstated,
@@ -443,11 +441,15 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// Both lookups degrade rather than throw. An id that does not resolve
   /// leaves the slot untouched, so with an empty [parameters] every slot stays
   /// null -- exactly the behaviour before this rule existed. A candidate out
-  /// of scope for the draft's Form is skipped for the same reason
-  /// _withPrunedFormScopedParameters exists: writing one in would trip
-  /// DropdownButtonFormField's assertion that its value appear in `items`.
-  /// No catalog reference names a Form-scoped parameter today, but a custom
-  /// guideline could.
+  /// of scope for the draft's Form, or filed under the wrong category, is
+  /// skipped for the same reason _withPrunedFormScopedParameters exists:
+  /// writing one in would trip DropdownButtonFormField's assertion that its
+  /// value appear in `items`. Both checks mirror _buildParameterDropdown's own
+  /// filter (`p.category == category && p.scope.appliesTo(form: form)`) --
+  /// the seed writes straight into the same field that dropdown reads, so a
+  /// candidate it would never have offered must never land there either. No
+  /// catalog reference names a Form-scoped or wrong-category parameter today,
+  /// but a custom guideline could.
   ///
   /// `containerMode` is pruned here rather than at each call site, because
   /// every handler that can re-seed a Target can strand a mode. `keepsMode` is
@@ -463,25 +465,32 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   ) {
     final next = _referenceOf(draft);
 
-    Parameter? seed(Parameter? current, String previousId, String nextId) {
+    Parameter? seed(Parameter? current, String previousId, String nextId, String category) {
       if (current != null && current.id != previousId) return current;
       final candidate = parameters.firstWhereOrNull((p) => p.id == nextId);
-      if (candidate == null || !candidate.scope.appliesTo(form: draft.form)) {
+      if (candidate == null ||
+          candidate.category != category ||
+          !candidate.scope.appliesTo(form: draft.form)) {
         return current;
       }
       return candidate;
     }
 
-    final target = seed(draft.target, previousReference.targetId, next.targetId);
-    final keepsMode = target?.targetType == TargetType.container;
+    final target = seed(draft.target, previousReference.targetId, next.targetId, 'Target');
+    final keepsMode = _isContainer(target);
 
     return draft.copyWith(
-      range: seed(draft.range, previousReference.rangeId, next.rangeId),
-      duration: seed(draft.duration, previousReference.durationId, next.durationId),
+      range: seed(draft.range, previousReference.rangeId, next.rangeId, 'Range'),
+      duration: seed(draft.duration, previousReference.durationId, next.durationId, 'Duration'),
       target: target,
       containerMode: keepsMode ? null : ContainerMode.unstated,
     );
   }
+
+  /// Whether [parameter] is a container Target -- the one property both
+  /// TargetSelected and [_seedParameters] need to decide whether a stated
+  /// `containerMode` can survive landing on it.
+  static bool _isContainer(Parameter? parameter) => parameter?.targetType == TargetType.container;
 
   /// [_seedParameters] against the engine's live parameter catalog.
   SpellDraft _withSeededParameters(SpellDraft draft, ParameterTriple previousReference) =>
@@ -489,8 +498,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
   /// A fresh, empty draft -- new id, no guideline -- seeded at the standard
   /// reference triple. The draft every "start over" path resets to.
-  SpellDraft _emptySeededDraft() =>
-      _seedParameters(SpellDraft(), const ParameterTriple.standard(), spellEngine.allParameters);
+  SpellDraft _emptySeededDraft() => _emptySeeded(spellEngine.allParameters);
+
+  /// [_emptySeededDraft] without an instance -- the constructor's `super(...)`
+  /// argument runs before `this` exists, so it cannot call the instance
+  /// method above even though it needs the same draft.
+  static SpellDraft _emptySeeded(List<Parameter> parameters) =>
+      _seedParameters(SpellDraft(), const ParameterTriple.standard(), parameters);
 
   /// Re-derives [SpellDraft.ritualDeclaration] after a change to Technique,
   /// Form, base effect or Duration.

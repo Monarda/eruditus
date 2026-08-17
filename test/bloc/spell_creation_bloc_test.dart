@@ -778,6 +778,28 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    // TechniqueSelected/FormSelected never touched containerMode before the
+    // reference-seed rule; only BaseEffectSelected has a test for it above.
+    // This pins the same clearing behaviour reached through TechniqueSelected's
+    // re-seed: without it, validateSpellAgainstCatalog's check 9 would reject
+    // the save with no visible cause.
+    'changing Technique clears a container mode stranded by the Target re-seed',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect)); // Target -> Circle (container)
+      bloc.add(const ContainerModeSelected(ContainerMode.dynamic));
+      bloc.add(const TechniqueSelected('Creo')); // guideline cleared, Target -> Individual (object)
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-individual')
+          .having((s) => s.draft.containerMode, 'draft.containerMode',
+              ContainerMode.unstated),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'a container mode survives a seed that lands on another container Target',
     build: seedingBloc,
     act: (bloc) {
@@ -884,23 +906,31 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    // rangeId is deliberately 'range-personal' -- the standard triple's own
+    // Range value -- rather than another off-seed choice like voice. If
+    // TemplateInstantiated were ever wired through _withSeededParameters (the
+    // regression this test exists to catch), previousReference would be the
+    // standard triple, this Range would look untouched, and the seed would
+    // overwrite it with wardEffect's reference Range (Touch). Duration and
+    // Target keep off-standard values so the test still covers "a chosen
+    // value survives" alongside "the standard-looking one isn't rewritten".
     'TemplateInstantiated keeps the template parameters verbatim, unseeded',
     build: seedingBloc,
     act: (bloc) => bloc.add(TemplateInstantiated(ResolvedTemplate(
       record: SpellTemplate(
         id: 'tpl-seed', name: 'Voiced Ward', baseEffectId: 'ward-1',
         technique: 'Rego', form: 'Ignem',
-        rangeId: 'range-voice', durationId: 'duration-ring', targetId: 'target-room',
+        rangeId: 'range-personal', durationId: 'duration-ring', targetId: 'target-room',
         summary: 'A published template whose parameters must survive verbatim.',
         provenance: Provenance(source: PublicationSource.published,
             citations: const [Citation(bookId: 'arm5-core')]),
       ),
       baseEffect: wardEffect,
-      range: voice, duration: ring, target: room,
+      range: personal, duration: ring, target: room,
     ))),
     expect: () => [
       isA<SpellCreationState>()
-          .having((s) => s.draft.range?.id, 'draft.range', 'range-voice')
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
           .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
           .having((s) => s.draft.target?.id, 'draft.target', 'target-room'),
     ],
