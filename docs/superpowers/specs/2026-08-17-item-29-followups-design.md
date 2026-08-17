@@ -180,8 +180,10 @@ the prose gives as a treated product. A user selecting `crhe-2a` and then the
 "treated" option would pay for the same treatment twice. Creo Animal's table prints
 no equivalent row, which is why `creo-animal-treated-product` never met this problem.
 
-Listing the three creation rows also keeps the control off the eight healing and
-maturity rows, where "treated" is meaningless.
+Listing the three creation rows also keeps the control off the eleven healing and
+maturity rows (`crhe-1e`, `crhe-2c`, `crhe-3b`, `crhe-4`, `crhe-5`, `crhe-10`,
+`crhe-15a`, `crhe-20`, `crhe-25`, `crhe-30`, `crhe-40`), where "treated" is
+meaningless.
 
 ### `creo-animal-treated-product` retrofit
 

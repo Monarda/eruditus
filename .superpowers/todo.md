@@ -38,8 +38,9 @@ reason the guidelines don't apply to it (item 46).
 > **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**
 > — plus `unreviewed: 3`, see below.
 
-**Suite status, Dart and Python re-run 2026-08-17 after item 29 (items 1 and 3
-each added a test); Integration last run 2026-08-17 after item 13:**
+**Suite status, Dart and Python re-run 2026-08-17 after item 29 (the ledger task
+and the modifier task each added a test); Integration last run 2026-08-17 after
+item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
@@ -59,7 +60,7 @@ belongs to item 32.
 |---|---|---|
 | `base_effects.json` | 609 | 50 General — 49 core plus item 17's one supplement row |
 | `parameters.json` | 34 | 25 core (item 15) + 9 virtue-gated (item 17) |
-| `modifiers.json` | 32 | |
+| `modifiers.json` | 34 | |
 | `spell_library.json` | 325 | |
 | `spell_templates.json` | 28 | 27 extracted + 1 carried in from `hand_authored_templates.json` |
 | `spell_exceptions.json` | 8 | item 46 |

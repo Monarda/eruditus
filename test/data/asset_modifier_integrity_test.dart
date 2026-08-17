@@ -196,8 +196,8 @@ void main() {
     final herbam = modifiers.firstWhere((m) => m.id == 'creo-herbam-treated-product');
     final animal = modifiers.firstWhere((m) => m.id == 'creo-animal-treated-product');
 
-    expect(herbam.scope.effectIds..sort(), ['crhe-1b', 'crhe-1c', 'crhe-3a']);
-    expect(animal.scope.effectIds..sort(), ['cran-10a', 'cran-5a']);
+    expect([...herbam.scope.effectIds]..sort(), ['crhe-1b', 'crhe-1c', 'crhe-3a']);
+    expect([...animal.scope.effectIds]..sort(), ['cran-10a', 'cran-5a']);
 
     expect(
       herbam.scope.appliesTo(technique: 'Creo', form: 'Herbam', baseEffectId: 'crhe-2a'),
@@ -216,6 +216,11 @@ void main() {
     }
     expect(
       herbam.scope.appliesTo(technique: 'Creo', form: 'Herbam', baseEffectId: 'crhe-1b'),
+      isTrue,
+      reason: 'the rule has to still apply somewhere',
+    );
+    expect(
+      animal.scope.appliesTo(technique: 'Creo', form: 'Animal', baseEffectId: 'cran-5a'),
       isTrue,
       reason: 'the rule has to still apply somewhere',
     );

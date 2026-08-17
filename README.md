@@ -14,6 +14,7 @@ spells against the same rules.
 |---|---|
 | `lib/models/` | The domain types — `Spell`, `BaseEffect`, `Parameter`, `Modifier` |
 | `lib/engine/` | `SpellEngine`, which turns a draft into a `LevelBreakdown` |
+| `lib/data/` | `datasources/` and `repositories/` that load the JSON catalogs, `app_database.dart`, and `spell_resolver.dart` |
 | `lib/bloc/`, `lib/presentation/` | State management and the Flutter UI |
 | `assets/data/` | The catalogs: base effects, parameters, modifiers, books, and the published spell library, templates and exceptions |
 | `scripts/spell_import/` | The Python extractor that builds the spell library from the rulebook, and `resolutions.json`, its hand-written decision ledger |
@@ -70,6 +71,10 @@ To rebuild the spell library from the rulebook:
 python -m scripts.spell_import.extract_spells          # report only
 python -m scripts.spell_import.extract_spells --write  # rewrite the assets
 ```
+
+`--write` only succeeds while the rulebook still matches `source.lock`; once upstream
+moves, it raises `SourceMoved` and needs `--accept-source` added to knowingly adopt
+the new rulebook (this rewrites `source.lock` and the change report too).
 
 ## Provenance
 
