@@ -462,7 +462,64 @@ void main() {
     verify(() => bloc.add(const SpellDiscarded())).called(1);
   });
 
-  testWidgets('saving with a name dispatches SpellSaveRequested', (tester) async {
+  // Supersedes the old 'saving with a name dispatches SpellSaveRequested'
+  // test: that draft also had no summary, so under the mandatory-summary
+  // dialog it would have blocked on a save it never filled in. This covers
+  // the same path -- a summary-less draft saved through the dialog -- while
+  // also exercising the new summary field.
+  testWidgets('the save dialog asks for a summary when the draft has none', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+    await tester.tap(find.byKey(const Key('save-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('save-dialog-summary-field')), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('spell-name-field')), 'My Fireball');
+    await tester.enterText(find.byKey(const Key('save-dialog-summary-field')), 'A jet of flame.');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirm-save-button')));
+    await tester.pumpAndSettle();
+
+    verify(() => bloc.add(
+        const SpellSaveRequested('My Fireball', summary: 'A jet of flame.'))).called(1);
+  });
+
+  testWidgets('the save dialog asks only for a name when the draft has a summary',
+      (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.calculated,
+      draft: SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: range, duration: duration, target: target,
+        summary: 'Already written.',
+      ),
+      calculatedLevel: 10,
+    );
+    await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+    await tester.tap(find.byKey(const Key('save-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('save-dialog-summary-field')), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('spell-name-field')), 'My Fireball');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirm-save-button')));
+    await tester.pumpAndSettle();
+
+    verify(() => bloc.add(const SpellSaveRequested('My Fireball'))).called(1);
+  });
+
+  testWidgets('the save dialog blocks confirmation until both fields are filled',
+      (tester) async {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
@@ -475,10 +532,10 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byKey(const Key('spell-name-field')), 'My Fireball');
-    await tester.tap(find.byKey(const Key('confirm-save-button')));
     await tester.pumpAndSettle();
 
-    verify(() => bloc.add(const SpellSaveRequested('My Fireball'))).called(1);
+    final confirm = tester.widget<ElevatedButton>(find.byKey(const Key('confirm-save-button')));
+    expect(confirm.onPressed, isNull);
   });
 
   testWidgets('shows a success SnackBar when a save completes', (tester) async {

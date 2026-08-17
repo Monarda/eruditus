@@ -351,12 +351,18 @@ class SpellCreationScreen extends StatelessWidget {
                           onPressed: isSaving
                               ? null
                               : () async {
-                                  final name = await showDialog<String>(
+                                  final hasProse =
+                                      (draft.summary ?? '').trim().isNotEmpty ||
+                                          (draft.description ?? '').trim().isNotEmpty;
+                                  final result =
+                                      await showDialog<({String name, String? summary})>(
                                     context: context,
-                                    builder: (dialogContext) => const _SaveSpellDialog(),
+                                    builder: (dialogContext) =>
+                                        _SaveSpellDialog(requiresSummary: !hasProse),
                                   );
-                                  if (name != null && name.isNotEmpty) {
-                                    bloc.add(SpellSaveRequested(name));
+                                  if (result != null && result.name.isNotEmpty) {
+                                    bloc.add(SpellSaveRequested(result.name,
+                                        summary: result.summary));
                                   }
                                 },
                           child: isSaving
@@ -852,29 +858,60 @@ class _AdjustmentNoteFieldState extends State<_AdjustmentNoteField> {
 }
 
 class _SaveSpellDialog extends StatefulWidget {
-  const _SaveSpellDialog();
+  /// Whether to collect a summary as well as a name. True when the draft
+  /// carries no prose at all -- the summary-or-description rule has to be
+  /// satisfied by the time this spell is constructed, and this dialog is the
+  /// last point at which it can be.
+  final bool requiresSummary;
+
+  const _SaveSpellDialog({required this.requiresSummary});
 
   @override
   State<_SaveSpellDialog> createState() => _SaveSpellDialogState();
 }
 
 class _SaveSpellDialogState extends State<_SaveSpellDialog> {
-  final _controller = TextEditingController();
+  final _nameController = TextEditingController();
+  final _summaryController = TextEditingController();
 
   @override
   void dispose() {
-    _controller.dispose();
+    _nameController.dispose();
+    _summaryController.dispose();
     super.dispose();
   }
+
+  bool get _canSave =>
+      _nameController.text.trim().isNotEmpty &&
+      (!widget.requiresSummary || _summaryController.text.trim().isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Name Your Spell'),
-      content: TextField(
-        key: const Key('spell-name-field'),
-        controller: _controller,
-        decoration: const InputDecoration(hintText: 'e.g., Pillar of Flames'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            key: const Key('spell-name-field'),
+            controller: _nameController,
+            decoration: const InputDecoration(hintText: 'e.g., Pillar of Flames'),
+            onChanged: (_) => setState(() {}),
+          ),
+          if (widget.requiresSummary) ...[
+            const SizedBox(height: 16),
+            TextField(
+              key: const Key('save-dialog-summary-field'),
+              controller: _summaryController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'Summary',
+                hintText: 'What does this spell do?',
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ],
       ),
       actions: [
         TextButton(
@@ -883,7 +920,12 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
         ),
         ElevatedButton(
           key: const Key('confirm-save-button'),
-          onPressed: () => Navigator.of(context).pop(_controller.text),
+          onPressed: _canSave
+              ? () => Navigator.of(context).pop((
+                  name: _nameController.text,
+                  summary: widget.requiresSummary ? _summaryController.text : null,
+                ))
+              : null,
           child: const Text('Save'),
         ),
       ],

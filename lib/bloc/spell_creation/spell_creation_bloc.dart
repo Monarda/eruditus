@@ -470,7 +470,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     emit(state.copyWith(status: SpellCreationStatus.saving));
 
     try {
-      final spell = state.draft.toSpell(name: event.name, source: PublicationSource.userCreated);
+      // One event, one atomic save. Dispatching SummaryChanged and then
+      // SpellSaveRequested would leave the draft half-updated if the second
+      // never arrived.
+      final draft = event.summary == null
+          ? state.draft
+          : state.draft.copyWith(summary: event.summary);
+      final spell = draft.toSpell(name: event.name, source: PublicationSource.userCreated);
       await spellRepository.saveSpell(spell);
 
       // Reset to a fresh, empty draft (with a newly generated id) rather than

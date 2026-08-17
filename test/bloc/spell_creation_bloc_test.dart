@@ -345,6 +345,45 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'a summary supplied at save time reaches the saved spell',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellSaveRequested('My Fireball', summary: 'A jet of flame.'));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.savedSpell?.summary, 'savedSpell.summary', 'A jet of flame.'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a draft summary survives a save that supplies none',
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SummaryChanged('Typed while building.'));
+      bloc.add(const SpellSaveRequested('My Fireball'));
+    },
+    skip: 8,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.savedSpell?.summary, 'savedSpell.summary', 'Typed while building.'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'SpellSaveRequested resets to a fresh, empty draft after a successful save',
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
     act: (bloc) {

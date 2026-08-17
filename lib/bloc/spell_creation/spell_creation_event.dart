@@ -114,9 +114,14 @@ class SpellCalculated extends SpellCreationEvent {
 
 class SpellSaveRequested extends SpellCreationEvent {
   final String name;
-  const SpellSaveRequested(this.name);
+
+  /// Supplied by the save dialog when the draft had no prose of its own.
+  /// Null means "the draft already has it" -- not "clear it".
+  final String? summary;
+
+  const SpellSaveRequested(this.name, {this.summary});
   @override
-  List<Object?> get props => [name];
+  List<Object?> get props => [name, summary];
 }
 
 class SpellDiscarded extends SpellCreationEvent {
