@@ -43,6 +43,22 @@ class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
 
 class FakeConfigurationState extends Fake implements ConfigurationState {}
 
+/// The screen's own ListView.
+///
+/// `scrollUntilVisible` with no `scrollable:` requires exactly one Scrollable
+/// in the tree, and every TextField builds one -- so the always-present
+/// summary field makes the bare form ambiguous. `find.byType(Scrollable).first`
+/// is unreliable once more than one screen's worth of Scrollables can be in
+/// the tree (see the same problem solved in the integration test), so this
+/// anchors on the ListView's own key instead -- `.first` because the summary
+/// field's own internal EditableText Scrollable is also a descendant of the
+/// keyed ListView, and would otherwise tie for the match. No dependency on
+/// setUp state, so this is a plain top-level final rather than reassigned
+/// per-test.
+final screenScrollable = find
+    .descendant(of: find.byKey(const Key('spell-creation-scroll')), matching: find.byType(Scrollable))
+    .first;
+
 void main() {
   late MockSpellCreationBloc bloc;
   late MockConfigurationBloc configBloc;
@@ -103,14 +119,6 @@ void main() {
   late Parameter duration;
   late Parameter target;
 
-  /// The screen's own ListView.
-  ///
-  /// `scrollUntilVisible` with no `scrollable:` requires exactly one Scrollable
-  /// in the tree, and every TextField builds one -- so the always-present
-  /// summary field makes the bare form ambiguous. Naming the screen's own list
-  /// keeps these scrolls deterministic no matter how many fields render.
-  late Finder screenScrollable;
-
   setUpAll(() {
     registerFallbackValue(FakeSpellCreationEvent());
     registerFallbackValue(FakeSpellCreationState());
@@ -124,7 +132,6 @@ void main() {
     range = voiceParam;
     duration = durationParam;
     target = targetParam;
-    screenScrollable = find.byType(Scrollable).first;
   });
 
   /// The screen is a lazily-built ListView, so widgets below the fold are
@@ -1581,5 +1588,50 @@ void main() {
     await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
 
     expect(find.text('Seeded from a template.'), findsOneWidget);
+  });
+
+  testWidgets(
+      'the draft resetting to SpellCreationState.initial() after a save clears the summary '
+      'field (the didUpdateWidget resync path)', (tester) async {
+    useTallSurface(tester);
+    final stateController = StreamController<SpellCreationState>();
+    addTearDown(stateController.close);
+
+    final initial = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(summary: 'Seeded from a template.'),
+    );
+    whenListen(bloc, stateController.stream, initialState: initial);
+    whenListen(
+      configBloc,
+      const Stream<ConfigurationState>.empty(),
+      initialState: ConfigurationState(
+        status: ConfigurationStatus.loaded,
+        effects: [creoIgnemEffect],
+        parameters: [voiceParam],
+      ),
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      ),
+    ));
+    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
+
+    expect(find.text('Seeded from a template.'), findsOneWidget);
+
+    // What the real bloc emits after a successful save -- pushed onto the
+    // SAME widget tree, so this exercises _SummaryFieldState.didUpdateWidget,
+    // not just the constructor's initial controller seed.
+    stateController.add(SpellCreationState.initial());
+    await tester.pump();
+    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
+
+    expect(find.text('Seeded from a template.'), findsNothing);
   });
 }
