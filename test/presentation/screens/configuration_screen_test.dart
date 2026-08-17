@@ -1,4 +1,3 @@
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,27 +12,15 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 
-class MockConfigurationBloc extends MockBloc<ConfigurationEvent, ConfigurationState>
-    implements ConfigurationBloc {}
-
-class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
-
-class FakeConfigurationState extends Fake implements ConfigurationState {}
+import '../../support/bloc_factories.dart';
 
 void main() {
   late MockConfigurationBloc bloc;
 
-  setUpAll(() {
-    registerFallbackValue(FakeConfigurationEvent());
-    registerFallbackValue(FakeConfigurationState());
-  });
-
-  setUp(() {
-    bloc = MockConfigurationBloc();
-  });
+  setUpAll(registerBlocFallbackValues);
 
   Future<void> pumpScreen(WidgetTester tester, ConfigurationState state) async {
-    whenListen(bloc, const Stream<ConfigurationState>.empty(), initialState: state);
+    bloc = mockConfigurationBloc(initialState: state);
     await tester.pumpWidget(MaterialApp(
       home: BlocProvider<ConfigurationBloc>.value(value: bloc, child: const ConfigurationScreen()),
     ));
