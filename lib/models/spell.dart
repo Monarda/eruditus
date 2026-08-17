@@ -238,8 +238,9 @@ String? _backfilledSummary(Map<String, dynamic> map) {
 /// here, they cannot be safely derived and must be stored.
 ///
 /// [summary] is a short paraphrase; [description] is verbatim text from the
-/// rulebook. Both are optional individually, and a published spell needs at
-/// least one of them.
+/// rulebook. Both are optional individually, but every spell needs at least
+/// one of them -- see [validateSpellProse], unconditional since todo item 13
+/// landed the creation screen's summary input.
 class Spell {
   final String id;
   final String? name;

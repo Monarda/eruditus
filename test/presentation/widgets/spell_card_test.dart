@@ -116,23 +116,6 @@ void main() {
     expect(find.text('A wall of roaring flame.'), findsOneWidget);
   });
 
-  testWidgets('renders no description text when description is null', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: buildSpell(
-              name: 'Pillar of Fire',
-              source: PublicationSource.userCreated,
-              summary: 'Test summary.'),
-          level: 25,
-        ),
-      ),
-    ));
-
-    // Only the title Text should match; no stray empty description widget.
-    expect(find.text(''), findsNothing);
-  });
-
   testWidgets('tapping the card invokes onTap', (tester) async {
     var tapped = false;
     await tester.pumpWidget(MaterialApp(

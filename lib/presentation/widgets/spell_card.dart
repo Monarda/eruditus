@@ -86,9 +86,11 @@ class SpellCard extends StatelessWidget {
           ? '${entry.technique} ${entry.form} • Level $level$levelSuffix'
           : '${entry.technique} ${entry.form}';
     }
-    // Prefer the paraphrase; fall back to the verbatim rulebook text. A
-    // published spell always has at least one of them; a user-created spell may
-    // have neither, in which case the blurb is simply omitted.
+    // Prefer the paraphrase; fall back to the verbatim rulebook text. Every
+    // entry carries at least one of them now that validateSpellProse's rule
+    // is unconditional (todo item 13) -- hasBlurb is kept as cheap defence
+    // for any LibraryEntry implementation that doesn't itself validate prose,
+    // not because a real entry here can still lack both.
     final blurb = entry.summary ?? entry.description;
     final hasBlurb = blurb != null && blurb.isNotEmpty;
 
