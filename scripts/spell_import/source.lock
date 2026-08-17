@@ -1,11 +1,11 @@
 {
   "book": "Ars Magica - Definitive Edition (Core Rules)",
   "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
-  "sha256": "33dcdf25364d1b535f3dec9e645f0b95024f978c39d2eb3261d43314e272ff4f",
+  "sha256": "73e1a0b07daf7442ce29cd72fc5afb2f8ab437748651022c4188b1c7f5c5036f",
   "rulebook": {
-    "commit": "e292c50",
-    "date": "2026-08-09",
-    "subject": "Fixed several \"Reg:\" -> \"Req:\""
+    "commit": "9c6aee1",
+    "date": "2026-08-16",
+    "subject": "Update Ars Magica - Definitive Edition (Core Rules).md"
   },
   "spellsParsed": 360,
   "spellsImported": 325
