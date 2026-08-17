@@ -2175,11 +2175,7 @@ void main() {
     late LevelBreakdown breakdownBeforeSummary;
 
     blocTest<SpellCreationBloc, SpellCreationState>(
-      'SummaryChanged does not recompute the breakdown',
-      // Prose cannot change a level, so recomputing on every keystroke of a
-      // multi-line field is pure waste. Identity, not value: copyWith carries
-      // the old breakdown forward as `breakdown ?? this.breakdown`, so a value
-      // check would pass whether or not a recompute had run.
+      'SummaryChanged leaves the breakdown at an equal value',
       build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
       seed: () {
         // Start with a state that has been calculated, so we have a baseline
@@ -2213,8 +2209,13 @@ void main() {
         expect(bloc.state.breakdown, isNotNull,
             reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
         expect(bloc.state.draft.summary, 'A jet of flame.');
-        expect(bloc.state.breakdown, same(breakdownBeforeSummary),
-            reason: 'SummaryChanged must not recompute the breakdown');
+        // Value, not identity (this used to assert `same`). The emit funnel
+        // rebuilds the breakdown on every event, so what matters is that a
+        // level-neutral edit lands on an equal one -- prose cannot move a
+        // level, and the level must not blink out while it is typed.
+        // This is todo item 58's first bullet.
+        expect(bloc.state.breakdown, breakdownBeforeSummary);
+        expect(bloc.state.levelUnavailableReason, isNull);
       },
     );
   });
@@ -2233,11 +2234,7 @@ void main() {
     late LevelBreakdown breakdownBeforeContainerMode;
 
     blocTest<SpellCreationBloc, SpellCreationState>(
-      'does not recompute the breakdown — the mode is level-neutral',
-      // Identity, not value: copyWith carries the old breakdown forward as
-      // `breakdown ?? this.breakdown`, so a value/non-null check would pass
-      // whether or not a recompute had run. Only `same` proves nothing was
-      // recalculated -- mirrors the SummaryChanged test above.
+      'leaves the breakdown at an equal value — the mode is level-neutral',
       build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
       seed: () {
         breakdownBeforeContainerMode = spellEngine.calculateBreakdown(
@@ -2269,8 +2266,10 @@ void main() {
         expect(bloc.state.breakdown, isNotNull,
             reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
         expect(bloc.state.draft.containerMode, ContainerMode.static);
-        expect(bloc.state.breakdown, same(breakdownBeforeContainerMode),
-            reason: 'ContainerModeSelected must not recompute the breakdown');
+        // See the SummaryChanged test above: the container mode is
+        // level-neutral, so the recomputed breakdown must compare equal.
+        expect(bloc.state.breakdown, breakdownBeforeContainerMode);
+        expect(bloc.state.levelUnavailableReason, isNull);
       },
     );
   });
@@ -2343,5 +2342,80 @@ void main() {
           'Choose a base effect to see a level.');
       expect(withReason.copyWith(levelUnavailableReason: null).levelUnavailableReason, isNull);
     });
+  });
+
+  group('the level is live', () {
+    test('the initial state already explains why there is no level', () {
+      final bloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      addTearDown(bloc.close);
+
+      expect(bloc.state.breakdown, isNull);
+      expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+    });
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a complete draft has a level with no button press at all',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(RangeSelected(rangeParam))
+        ..add(DurationSelected(durationParam))
+        ..add(TargetSelected(targetParam)),
+      verify: (bloc) {
+        expect(bloc.state.status, SpellCreationStatus.editing,
+            reason: 'no SpellCalculated was ever dispatched');
+        expect(bloc.state.breakdown, isNotNull);
+        expect(bloc.state.levelUnavailableReason, isNull);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an edit that empties the draft clears the level and says why',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(RangeSelected(rangeParam))
+        ..add(DurationSelected(durationParam))
+        ..add(TargetSelected(targetParam))
+        // Clears baseEffect (spell_creation_bloc.dart:57), so the level goes
+        // with it rather than lingering as a number for a spell that no
+        // longer has a guideline.
+        ..add(const TechniqueSelected('Perdo')),
+      verify: (bloc) {
+        expect(bloc.state.breakdown, isNull);
+        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'discarding resets to a draft that explains itself',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(const SpellDiscarded()),
+      verify: (bloc) {
+        expect(bloc.state.breakdown, isNull);
+        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'saving an invalid draft emits its errors and writes nothing',
+      // With Save no longer sitting behind Calculate, this guard is the only
+      // thing between an incomplete draft and the repository.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(const SpellSaveRequested('Pillar of Flames')),
+      verify: (bloc) {
+        expect(bloc.state.validationErrors, isNotEmpty);
+        expect(bloc.state.status, SpellCreationStatus.editing);
+        expect(bloc.state.savedSpell, isNull);
+      },
+    );
   });
 }

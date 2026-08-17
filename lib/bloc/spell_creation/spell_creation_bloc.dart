@@ -34,17 +34,67 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   SpellCreationBloc({
     required this.spellEngine,
     required this.spellRepository,
-  })  : // The first thing the Create tab renders. Seeded here rather than in
-        // SpellCreationState.initial(), which has no catalog to resolve ids
-        // against -- and must not gain one, since TemplateInstantiated builds
-        // on it and its parameters must survive verbatim.
-        super(SpellCreationState.initial().copyWith(
-          draft: _emptySeeded(spellEngine.allParameters),
-        )) {
+  }) : super(_initialState(spellEngine)) {
     on<SpellCreationEvent>(
       _onEvent,
       transformer: (events, mapper) => events.asyncExpand(mapper),
     );
+  }
+
+  /// The first thing the Create tab renders: an empty draft seeded at the
+  /// standard reference triple, already carrying the reason it has no level.
+  ///
+  /// A static method taking the engine, rather than an instance one, for the
+  /// same reason [_emptySeeded] is: `super(...)` runs before `this` exists, so
+  /// the constructor cannot reach [_emit] even though it needs exactly what
+  /// [_emit] does. Seeded here rather than in SpellCreationState.initial(),
+  /// which has no catalog to resolve ids against -- and must not gain one,
+  /// since TemplateInstantiated builds on it and its parameters must survive
+  /// verbatim.
+  static SpellCreationState _initialState(SpellEngine engine) {
+    final draft = _emptySeeded(engine.allParameters);
+    final preview = engine.previewLevel(draft);
+    return SpellCreationState.initial().copyWith(
+      draft: draft,
+      breakdown: preview.breakdown,
+      levelUnavailableReason: preview.unavailableReason,
+    );
+  }
+
+  /// Emits [next] with its level recomputed from its own draft.
+  ///
+  /// **Every emit in this bloc goes through here.** That is the whole point:
+  /// the level is a pure function of the draft, so no handler should have to
+  /// remember to refresh it, and none can forget. Before this, an edit emitted
+  /// `status: editing` and the screen hid the level card until the user pressed
+  /// Calculate again -- so the number a caster designs towards was absent
+  /// exactly while they were designing (todo item 59), and two level-neutral
+  /// events hid it for no reason at all (todo item 58).
+  ///
+  /// Recomputing unconditionally is cheap: [SpellEngine.previewLevel] walks a
+  /// handful of contributions. The expensive half -- findSimilarSpells and a
+  /// calculateBreakdown per candidate -- stays behind SpellCalculated.
+  ///
+  /// A level-neutral edit produces an *equal* breakdown rather than the same
+  /// instance, which is why LevelBreakdown, LevelContribution and RitualStatus
+  /// carry value equality: SpellCreationState lists breakdown in its props, and
+  /// identity comparison would make every state here look changed.
+  void _emit(Emitter<SpellCreationState> emit, SpellCreationState next) {
+    final preview = spellEngine.previewLevel(next.draft);
+    emit(next.copyWith(
+      breakdown: preview.breakdown,
+      levelUnavailableReason: preview.unavailableReason,
+      // Re-passed rather than omitted, and it is the only field that needs to
+      // be. SpellCreationState.copyWith deliberately does *not* carry
+      // errorMessage forward -- every emit clears a stale error unless the
+      // handler re-states one -- and that rule is written for handler emits,
+      // not for this pass-through. Omitted here, the copyWith that attaches the
+      // level would silently swallow the message _handleSpellSaveRequested's
+      // catch branch had just set, and a failed save would render an error
+      // status with nothing to show for it. Every other field either carries
+      // forward via `??` or through the `_unset` sentinel.
+      errorMessage: next.errorMessage,
+    ));
   }
 
   Future<void> _onEvent(SpellCreationEvent event, Emitter<SpellCreationState> emit) async {
@@ -73,7 +123,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         )),
         reapplyDefault: false,
       );
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
         generalEffectSentence: _generalEffectSentenceFor(draft),
@@ -96,7 +146,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         )),
         reapplyDefault: false,
       );
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
         generalEffectSentence: _generalEffectSentenceFor(draft),
@@ -136,31 +186,31 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         )),
         reapplyDefault: true,
       );
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
         generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is ChosenBaseLevelChanged) {
       final draft = state.draft.copyWith(chosenBaseLevel: event.level);
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
         generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is OpenSlotChosen) {
       final updated = {...state.draft.chosenSlots, event.kind: event.value};
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(chosenSlots: updated),
       ));
     } else if (event is RangeSelected) {
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(range: event.parameter),
       ));
     } else if (event is DurationSelected) {
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: _withRitualDeclaration(
           state.draft.copyWith(duration: event.parameter),
@@ -183,33 +233,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         target: event.parameter,
         containerMode: keepsMode ? null : ContainerMode.unstated,
       ));
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
       ));
     } else if (event is ContainerModeSelected) {
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(containerMode: event.mode),
       ));
     } else if (event is RequisiteAdded) {
       final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
       final updated = {...state.draft.requisites, event.art: kind};
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
     } else if (event is RequisiteRemoved) {
       final updated = Map<String, RequisiteKind>.from(state.draft.requisites)
         ..remove(event.art);
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
     } else if (event is RequisiteKindChanged) {
       final kind = event.newKind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
       final updated = {...state.draft.requisites, event.art: kind};
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(requisites: updated),
       ));
@@ -218,7 +268,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         ...state.draft.adjustments,
         LevelAdjustment(magnitude: 0, note: '(describe this adjustment)'),
       ];
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(adjustments: updated),
       ));
@@ -227,7 +277,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // ignored rather than throwing RangeError into the bloc.
       if (event.index < 0 || event.index >= state.draft.adjustments.length) return;
       final updated = [...state.draft.adjustments]..removeAt(event.index);
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(adjustments: updated),
       ));
@@ -244,16 +294,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       final note = event.note.trim().isEmpty ? existing.note : event.note;
       final updated = [...state.draft.adjustments];
       updated[event.index] = LevelAdjustment(magnitude: event.magnitude, note: note);
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(adjustments: updated),
       ));
     } else if (event is SummaryChanged) {
-      // Draft only, deliberately no recompute: prose cannot change a level,
-      // unlike every neighbouring handler here. Nor is there any pruning to
-      // do on the way out -- prose is scoped to no Technique, Form or
-      // guideline, so nothing it touches can go stale.
-      emit(state.copyWith(
+      // Draft only, and no pruning on the way out -- prose is scoped to no
+      // Technique, Form or guideline, so nothing it touches can go stale.
+      // The funnel still recomputes the level, as it does for every event;
+      // prose cannot move it, so the recomputed breakdown compares equal and
+      // the level does not blink while the field is typed (todo item 58).
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(summary: event.summary),
       ));
@@ -264,7 +315,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       final updated = modifier?.selectionMode == ModifierSelectionMode.single
           ? [event.optionId]
           : [...current.where((id) => id != event.optionId), event.optionId];
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(selectedModifiers: {
           ...state.draft.selectedModifiers,
@@ -281,16 +332,23 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       } else {
         updated[event.modifierId] = remaining;
       }
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(selectedModifiers: updated),
       ));
     } else if (event is AvailableModifiersSynced) {
       spellEngine.updateModifiers(event.modifiers);
+      // Re-emits the current state so the funnel recomputes the level against
+      // the new catalog. A selected modifier whose magnitude only just became
+      // resolvable changes the level, and with the level live that has to show
+      // immediately rather than at the next unrelated edit. When nothing moves,
+      // the recomputed state compares equal and Bloc emits nothing.
+      _emit(emit, state);
     } else if (event is AvailableParametersSynced) {
       spellEngine.updateParameters(event.parameters);
+      _emit(emit, state);
     } else if (event is RitualDeclarationChanged) {
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(ritualDeclaration: event.declaration),
       ));
@@ -334,10 +392,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         analogyRationale: template.analogyRationale,
       ));
 
-      // From SpellCreationState.initial(), not state.copyWith(...): a stale
-      // breakdown/suggestions/calculatedLevel left over from whatever the
-      // user was doing before must not follow them into the new spell.
-      emit(SpellCreationState.initial().copyWith(
+      // From SpellCreationState.initial(), not state.copyWith(...): stale
+      // suggestions left over from whatever the user was doing before must not
+      // follow them into the new spell. The level halves are not carried over
+      // either, but they need no clearing here: the funnel overwrites both
+      // from this draft on the way out.
+      _emit(emit, SpellCreationState.initial().copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
         generalEffectSentence: _generalEffectSentenceFor(draft),
@@ -347,7 +407,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     } else if (event is SpellSaveRequested) {
       await _handleSpellSaveRequested(event, emit);
     } else if (event is SpellDiscarded) {
-      emit(SpellCreationState.initial().copyWith(draft: _emptySeededDraft()));
+      _emit(emit, SpellCreationState.initial().copyWith(draft: _emptySeededDraft()));
     }
   }
 
@@ -533,22 +593,15 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   void _handleSpellCalculated(Emitter<SpellCreationState> emit) {
     final errors = spellEngine.validateSpellDraft(state.draft);
     if (errors.isNotEmpty) {
-      emit(state.copyWith(status: SpellCreationStatus.editing, validationErrors: errors));
+      _emit(emit, state.copyWith(status: SpellCreationStatus.editing, validationErrors: errors));
       return;
     }
 
-    final breakdown = spellEngine.calculateBreakdown(
-      baseEffect: state.draft.baseEffect!,
-      chosenBaseLevel: state.draft.chosenBaseLevel,
-      range: state.draft.range!,
-      duration: state.draft.duration!,
-      target: state.draft.target!,
-      selectedModifiers: state.draft.selectedModifiers,
-      requisites: state.draft.requisites,
-      adjustments: state.draft.adjustments,
-      ritualDeclaration: state.draft.ritualDeclaration,
-    );
-    final level = breakdown.level;
+    // The funnel already computed this draft's breakdown, and validateSpellDraft
+    // returning empty just re-ran the same calculation over the same draft --
+    // so it is non-null here by construction. Reading it beats a third identical
+    // call whose only product is the reference level below.
+    final level = state.breakdown!.level;
 
     final candidateSuggestions = spellEngine.findSimilarSpells(
       state.draft.technique!,
@@ -590,10 +643,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       }
     }
 
-    emit(state.copyWith(
+    _emit(emit, state.copyWith(
       status: SpellCreationStatus.calculated,
       validationErrors: const [],
-      breakdown: breakdown,
       suggestions: suggestions,
       suggestionLevels: suggestionLevels,
       ritualSuggestionIds: ritualSuggestionIds,
@@ -604,7 +656,22 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     SpellSaveRequested event,
     Emitter<SpellCreationState> emit,
   ) async {
-    emit(state.copyWith(status: SpellCreationStatus.saving));
+    // Save used to render only after a successful Calculate, so the draft
+    // reaching here had already been validated. It renders unconditionally now
+    // (todo item 59), which makes this the only thing between an invalid draft
+    // and the repository. The screen also disables the button while there is no
+    // level, but that is an affordance, not a gate -- a dispatched event has to
+    // be safe on its own.
+    final errors = spellEngine.validateSpellDraft(state.draft);
+    if (errors.isNotEmpty) {
+      _emit(emit, state.copyWith(
+        status: SpellCreationStatus.editing,
+        validationErrors: errors,
+      ));
+      return;
+    }
+
+    _emit(emit, state.copyWith(status: SpellCreationStatus.saving));
 
     // One event, one atomic save. Dispatching SummaryChanged and then
     // SpellSaveRequested would leave the draft half-updated if the second
@@ -627,13 +694,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // "keep editing the same one", and (b) structurally prevents the
       // previous crash: a subsequent SpellSaveRequested can no longer collide
       // on the same primary key, since the draft backing it is always new.
-      emit(SpellCreationState.initial().copyWith(
+      _emit(emit, SpellCreationState.initial().copyWith(
         status: SpellCreationStatus.saved,
         savedSpell: spell,
         draft: _emptySeededDraft(),
       ));
     } catch (e) {
-      emit(state.copyWith(
+      _emit(emit, state.copyWith(
         draft: draft,
         status: SpellCreationStatus.error,
         errorMessage: e.toString(),
