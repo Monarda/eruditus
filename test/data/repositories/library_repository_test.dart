@@ -79,6 +79,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'Conjures a bolt of flame.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
 
@@ -109,6 +110,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'Conjures a bolt of flame.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
 
@@ -175,6 +177,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),

@@ -199,6 +199,9 @@ void main() {
       await tester.tap(find.byKey(const Key('save-button')));
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('spell-name-field')), 'My New Illusion');
+      await tester.enterText(
+          find.byKey(const Key('save-dialog-summary-field')), 'Created by an integration test.');
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('confirm-save-button')));
       await tester.pumpAndSettle();
       // The save chain (dialog pop -> outer showDialog future -> bloc.add ->
@@ -593,6 +596,7 @@ void main() {
         durationId: 'duration-momentary',
         targetId: 'target-individual',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),

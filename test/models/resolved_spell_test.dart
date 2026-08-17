@@ -162,6 +162,7 @@ void main() {
       rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       requisites: const {},
       chosenSlots: const {'realm': 'Divine'},
+      summary: 'Wards a circle against the Divine realm.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
@@ -183,6 +184,7 @@ void main() {
       rangeId: 'p1', durationId: 'p2', targetId: 'p3',
       requisites: const {},
       chosenBaseLevel: 20,
+      summary: 'Wards a circle against beings from one realm.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
@@ -205,6 +207,7 @@ void main() {
       requisites: const {},
       chosenBaseLevel: 20,
       chosenSlots: const {'realm': 'Divine'},
+      summary: 'Wards a circle against beings from the Divine realm.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );

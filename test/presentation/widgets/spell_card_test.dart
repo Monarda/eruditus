@@ -84,7 +84,11 @@ void main() {
   testWidgets('shows "My Spell" badge for user-created spells', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        body: SpellCard(entry: buildSpell(name: 'My Fireball', source: PublicationSource.userCreated)),
+        body: SpellCard(
+            entry: buildSpell(
+                name: 'My Fireball',
+                source: PublicationSource.userCreated,
+                summary: 'Test summary.')),
       ),
     ));
 
@@ -116,7 +120,10 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          entry: buildSpell(name: 'Pillar of Fire', source: PublicationSource.userCreated),
+          entry: buildSpell(
+              name: 'Pillar of Fire',
+              source: PublicationSource.userCreated,
+              summary: 'Test summary.'),
           level: 25,
         ),
       ),
@@ -131,7 +138,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: SpellCard(
-          entry: buildSpell(name: 'Test', source: PublicationSource.userCreated),
+          entry: buildSpell(
+              name: 'Test', source: PublicationSource.userCreated, summary: 'Test summary.'),
           onTap: () => tapped = true,
         ),
       ),
@@ -152,6 +160,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'Conjures a bolt of flame.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
@@ -253,6 +262,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'Conjures a bolt of flame, partially.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),

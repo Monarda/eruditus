@@ -64,7 +64,6 @@ class SpellTemplate {
     this.analogyRationale,
   }) {
     final problems = validateSpellProse(
-      source: provenance.source,
       summary: summary,
       description: description,
     );

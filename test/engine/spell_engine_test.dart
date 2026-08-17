@@ -859,6 +859,7 @@ void main() {
         durationId: _duration.id,
         targetId: _target.id,
         requisites: {},
+        summary: 'A $technique $form effect.',
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime.now(), updatedAt: DateTime.now(),
       );
       return ResolvedSpell(
@@ -920,6 +921,7 @@ void main() {
           durationId: _duration.id,
           targetId: _target.id,
           requisites: const {},
+          summary: 'A spell whose range parameter has since been deleted.',
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),
@@ -965,6 +967,7 @@ void main() {
           targetId: _target.id,
           requisites: const {},
           adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
+          summary: 'Discounted so far it has no computable level.',
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),
@@ -1076,6 +1079,7 @@ void main() {
             form: 'Imaginem',
             rangeId: _range.id, durationId: _duration.id, targetId: _target.id,
             requisites: const {}, adjustments: adj,
+            summary: 'A Muto Imaginem effect.',
             provenance: Provenance(source: PublicationSource.userCreated),
             createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
           ),

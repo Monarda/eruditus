@@ -549,6 +549,7 @@ void main() {
       durationId: durationParam.id,
       targetId: targetParam.id,
       requisites: const {},
+      summary: 'Conjures a bolt of flame.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     useTallSurface(tester);

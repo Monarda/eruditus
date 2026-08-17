@@ -64,6 +64,7 @@ void main() {
         targetId: 'target-individual',
         requisites: const {},
         chosenBaseLevel: chosenBaseLevel,
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -98,6 +99,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'Conjures a bolt of flame.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     await configRepository.addCustomEffect(BaseEffect(
@@ -128,6 +130,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'A spell restored from a backup file.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final backup = {
@@ -167,6 +170,7 @@ void main() {
       durationId: 'duration-momentary',
       targetId: 'target-individual',
       requisites: const {},
+      summary: 'A spell restored from a backup file.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final jsonString = jsonEncode({
@@ -210,6 +214,7 @@ void main() {
       targetId: 'target-individual',
       requisites: const {},
       ritualDeclaration: RitualDeclaration.lastingCreation,
+      summary: 'Transmutes base metal into gold.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026), updatedAt: DateTime(2026),
     );
@@ -236,6 +241,7 @@ void main() {
           durationId: 'duration-ring',
           targetId: 'target-circle',
           requisites: const {},
+          summary: 'Wards a circle against beasts of legend.',
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026, 1, 1),
           updatedAt: DateTime(2026, 1, 1),

@@ -79,6 +79,7 @@ void main() {
       durationId: 'p4',
       targetId: 'p3',
       requisites: const {},
+      summary: 'Lets the caster step sideways out of danger.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
@@ -104,6 +105,7 @@ void main() {
       targetId: 'p3',
       requisites: const {},
       adjustments: [LevelAdjustment(magnitude: -5, note: 'far too generous')],
+      summary: 'Discounted so far it has no computable level.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
@@ -124,6 +126,7 @@ void main() {
       durationId: 'p2',
       targetId: 'p3',
       requisites: const {},
+      summary: 'An ordinary fire-conjuring spell.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
@@ -192,6 +195,7 @@ void main() {
       durationId: 'p2',
       targetId: 'p3',
       requisites: const {},
+      summary: 'A custom fireball spell.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
     libraryRepository = LibraryRepository(
@@ -273,6 +277,7 @@ void main() {
           'no-longer-exists': ['no-longer-exists'],
         },
         requisites: const {},
+        summary: 'A spell referencing a since-deleted modifier.',
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       ));
     },

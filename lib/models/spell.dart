@@ -8,30 +8,27 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
-/// The prose rule every published [Spell] must satisfy, stated once and
-/// shared by [Spell.fromMap] and [SpellDraft.toSpell] so the two paths
-/// cannot drift.
+/// Every spell needs a summary or a description.
+///
+/// Unconditional since todo item 13 landed the creation screen's summary
+/// input. It was conditional on `source == published` only because the screen
+/// collected nothing but a name, which the 2026-07-27 provenance design
+/// recorded as an interim measure.
 ///
 /// Returns a list of human-readable problems; empty means valid.
-///
-/// This rule applies to published spells only. This is interim: user-created
-/// spells should carry prose too, but the creation screen collects nothing
-/// but a name, so an unconditional rule would reject every user-created
-/// spell on save. Tighten this when that UI lands — todo item 13.
 ///
 /// The citation invariant (published needs ≥1 citation, user-created needs
 /// 0) is no longer checked here — it now lives on [Provenance] itself, and
 /// is enforced when the [Provenance] passed to this [Spell] was constructed.
 List<String> validateSpellProse({
-  required PublicationSource source,
   required String? summary,
   required String? description,
 }) {
   final hasProse = (summary != null && summary.isNotEmpty) ||
       (description != null && description.isNotEmpty);
 
-  if (source == PublicationSource.published && !hasProse) {
-    return ['a published spell needs a summary or a description'];
+  if (!hasProse) {
+    return ['a spell needs a summary or a description'];
   }
   return const [];
 }
@@ -316,7 +313,6 @@ class Spell {
     this.analogyRationale,
   }) {
     final problems = validateSpellProse(
-      source: provenance.source,
       summary: summary,
       description: description,
     );
@@ -460,7 +456,7 @@ class SpellDraft {
       );
     }
 
-    final problems = validateSpellProse(source: source, summary: summary, description: description);
+    final problems = validateSpellProse(summary: summary, description: description);
     if (problems.isNotEmpty) {
       throw StateError('Cannot convert SpellDraft to Spell: ${problems.join('; ')}');
     }

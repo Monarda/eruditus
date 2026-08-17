@@ -65,6 +65,7 @@ void main() {
         targetId: 'target-individual',
         requisites: const {},
         selectedModifiers: selectedModifiers,
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated, citations: const []),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

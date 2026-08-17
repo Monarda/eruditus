@@ -68,6 +68,7 @@ void main() {
         rangeId: 'param-voice',
         durationId: 'param-sun', targetId: 'param-individual',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026), updatedAt: DateTime(2026),
       ).toMap();
@@ -93,6 +94,7 @@ void main() {
         rangeId: 'param-voice',
         durationId: 'param-sun', targetId: 'param-individual',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026), updatedAt: DateTime(2026),
       ).toMap();
@@ -158,6 +160,7 @@ void main() {
         range: range,
         duration: duration,
         target: target,
+        summary: 'Transforms the target body.',
       );
 
       final spell = draft.toSpell(name: 'My Spell', source: PublicationSource.userCreated);
@@ -242,6 +245,7 @@ void main() {
           'rego-transport-distance': ['dist-500-paces'],
         },
         requisites: const {},
+        summary: 'Shapes and hurls a metal object.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -263,6 +267,7 @@ void main() {
         durationId: 'p2',
         targetId: 'p3',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -282,6 +287,7 @@ void main() {
         durationId: 'p2',
         targetId: 'p3',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1),
         updatedAt: DateTime(2026, 1, 1),
@@ -297,6 +303,7 @@ void main() {
         durationId: 'p2',
         targetId: 'p3',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         tags: const ['architecture', 'defensive'],
         createdAt: DateTime(2026, 1, 1),
@@ -331,6 +338,7 @@ void main() {
           targetId: 'target-individual',
           requisites: const {},
           ritualDeclaration: value,
+          summary: 'Transmutes base metal into gold.',
           provenance: Provenance(source: PublicationSource.userCreated),
           createdAt: DateTime(2026), updatedAt: DateTime(2026),
         );
@@ -402,6 +410,7 @@ void main() {
           provenance: Provenance(source: PublicationSource.userCreated),
         ),
         ritualDeclaration: RitualDeclaration.lastingCreation,
+        summary: 'Transmutes base metal into gold.',
       );
 
       final spell = draft.toSpell(
@@ -465,6 +474,7 @@ void main() {
         durationId: 'duration-ring', targetId: 'target-circle',
         chosenBaseLevel: 20, templateId: 'tpl-revi-circular-ward-against-demons',
         requisites: const {},
+        summary: 'Wards a circle against demons.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime.utc(2026), updatedAt: DateTime.utc(2026),
       );
@@ -483,6 +493,7 @@ void main() {
         rangeId: 'range-voice',
         durationId: 'duration-momentary', targetId: 'target-individual',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime.utc(2026), updatedAt: DateTime.utc(2026),
       );
@@ -498,6 +509,7 @@ void main() {
         form: 'Ignem',
         rangeId: 'p1', durationId: 'p2', targetId: 'p3',
         requisites: const {},
+        summary: 'Conjures a bolt of flame.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
@@ -510,6 +522,7 @@ void main() {
         rangeId: 'p1', durationId: 'p2', targetId: 'p3',
         requisites: const {},
         chosenSlots: const {'realm': 'Infernal'},
+        summary: 'Wards a circle against the Infernal realm.',
         provenance: Provenance(source: PublicationSource.userCreated),
         createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
@@ -610,13 +623,42 @@ void main() {
       expect(() => Spell.fromMap(map), throwsA(isA<FormatException>()));
     });
 
-    test('a user-created spell with neither summary nor description is valid', () {
-      // Interim: the creation screen collects only a name. See todo item 13.
+    test('a user-created record with neither summary nor description is backfilled, not rejected', () {
+      // fromMap's backfill (todo item 13) stands in for a pre-rule record; the
+      // rule itself no longer carves out an exception for user-created spells
+      // -- see the two tests below.
       final map = baseMap()
         ..remove('summary')
         ..['source'] = 'user-created'
         ..['citations'] = <dynamic>[];
       expect(Spell.fromMap(map).provenance.source, PublicationSource.userCreated);
+    });
+
+    test('a user-created spell needs a summary or a description', () {
+      expect(
+        () => Spell(
+          id: 'u1',
+          name: 'My Spell',
+          baseEffectId: 'e1',
+          technique: 'Creo',
+          form: 'Ignem',
+          rangeId: 'range-voice',
+          durationId: 'duration-momentary',
+          targetId: 'target-individual',
+          requisites: const {},
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        ),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test('the rule names no source', () {
+      expect(
+        validateSpellProse(summary: null, description: null),
+        ['a spell needs a summary or a description'],
+      );
     });
   });
 

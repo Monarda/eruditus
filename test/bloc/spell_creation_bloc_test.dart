@@ -46,6 +46,7 @@ void main() {
       durationId: 'p2',
       targetId: 'p3',
       requisites: const {},
+      summary: 'Fallback spell for mocktail argument matching.',
       provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     ));
   });
@@ -151,6 +152,7 @@ void main() {
         durationId: durationParam.id,
         targetId: targetParam.id,
         requisites: const {},
+        summary: 'Raises a pillar of flame.',
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final suggestion = ResolvedSpell(
@@ -210,6 +212,7 @@ void main() {
         durationId: yearDuration.id,
         targetId: targetParam.id,
         requisites: const {},
+        summary: 'A flame that never goes out.',
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final ordinaryRecord = Spell(
@@ -222,6 +225,7 @@ void main() {
         durationId: durationParam.id,
         targetId: zeroTarget.id,
         requisites: const {},
+        summary: 'A small, comforting warmth.',
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final ritualSuggestion = ResolvedSpell(
@@ -281,6 +285,7 @@ void main() {
         targetId: targetParam.id,
         requisites: const {},
         adjustments: [LevelAdjustment(magnitude: -20, note: 'far too generous')],
+        summary: 'Discounted so far it has no computable level.',
         provenance: Provenance(source: PublicationSource.userCreated), createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
       );
       final uncomputable = ResolvedSpell(
@@ -327,7 +332,7 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellSaveRequested('My Fireball'));
+      bloc.add(const SpellSaveRequested('My Fireball', summary: 'A jet of flame.'));
     },
     skip: 6,
     wait: const Duration(milliseconds: 300),
@@ -393,7 +398,7 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellSaveRequested('My Fireball'));
+      bloc.add(const SpellSaveRequested('My Fireball', summary: 'A jet of flame.'));
     },
     skip: 6,
     wait: const Duration(milliseconds: 300),
@@ -425,7 +430,7 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellSaveRequested('First Spell'));
+      bloc.add(const SpellSaveRequested('First Spell', summary: 'A jet of flame.'));
       await Future<void>.delayed(const Duration(milliseconds: 300));
 
       bloc.add(const TechniqueSelected('Rego'));
@@ -438,7 +443,7 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellSaveRequested('Second Spell'));
+      bloc.add(const SpellSaveRequested('Second Spell', summary: 'Redirects flame elsewhere.'));
     },
     wait: const Duration(milliseconds: 300),
     verify: (_) async {
@@ -463,7 +468,7 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellSaveRequested('Doomed Spell'));
+      bloc.add(const SpellSaveRequested('Doomed Spell', summary: 'A jet of flame.'));
     },
     skip: 6,
     expect: () => [
@@ -541,7 +546,7 @@ void main() {
       bloc.add(RangeSelected(rangeParam));
       bloc.add(DurationSelected(durationParam));
       bloc.add(TargetSelected(targetParam));
-      bloc.add(const SpellSaveRequested('Raced Spell'));
+      bloc.add(const SpellSaveRequested('Raced Spell', summary: 'A jet of flame.'));
       bloc.add(const SpellDiscarded());
     },
     skip: 6,

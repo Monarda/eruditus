@@ -57,7 +57,6 @@ class ExceptionSpell {
     this.tags = const [],
   }) {
     final problems = validateSpellProse(
-      source: provenance.source,
       summary: summary,
       description: description,
     );
