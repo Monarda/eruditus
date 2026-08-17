@@ -125,6 +125,59 @@ class SpellEngine {
     return errors;
   }
 
+  /// [calculateBreakdown] for a draft that may not be finished — the level as
+  /// it stands, or the single reason there isn't one.
+  ///
+  /// **This is not validation.** It answers "is there a number", not "is this
+  /// spell legal": [validateSpellDraft] owns the catalog invariants and stays
+  /// behind a button press, because its messages render as red text and firing
+  /// them on every keystroke would flag a half-built draft as broken (todo
+  /// item 59). This method's reasons are the opposite in tone — they say what
+  /// to do next, not what is wrong.
+  ///
+  /// It exists because [calculateBreakdown] throws two ways that are ordinary
+  /// intermediate states rather than errors: a General guideline before its
+  /// level is typed, and negative magnitudes that momentarily drive the level
+  /// below 1. The button-driven path could let those escape, since nothing
+  /// called it until the draft was finished. A live path cannot, so every
+  /// throw is converted here and this method never throws.
+  ///
+  /// A null Technique or Form needs no reason of its own: the base effect
+  /// dropdown does not render without them
+  /// (`spell_creation_screen.dart:115`), so the first branch covers it.
+  LevelPreview previewLevel(SpellDraft draft) {
+    final baseEffect = draft.baseEffect;
+    if (baseEffect == null) {
+      return const LevelPreview.unavailable('Choose a base effect to see a level.');
+    }
+    if (baseEffect.isGeneral && draft.chosenBaseLevel == null) {
+      return const LevelPreview.unavailable('Type a level for this General guideline.');
+    }
+
+    final range = draft.range;
+    final duration = draft.duration;
+    final target = draft.target;
+    if (range == null || duration == null || target == null) {
+      return const LevelPreview.unavailable('Choose a Range, Duration and Target.');
+    }
+
+    try {
+      return LevelPreview.available(calculateBreakdown(
+        baseEffect: baseEffect,
+        chosenBaseLevel: draft.chosenBaseLevel,
+        range: range,
+        duration: duration,
+        target: target,
+        selectedModifiers: draft.selectedModifiers,
+        requisites: draft.requisites,
+        adjustments: draft.adjustments,
+        ritualDeclaration: draft.ritualDeclaration,
+      ));
+    } on ArgumentError {
+      return const LevelPreview.unavailable('Magnitudes reduce this spell below level 1.');
+    }
+  }
+
   LevelBreakdown calculateBreakdown({
     required BaseEffect baseEffect,
     int? chosenBaseLevel,

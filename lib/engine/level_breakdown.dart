@@ -56,3 +56,24 @@ class LevelBreakdown extends Equatable {
   @override
   List<Object?> get props => [level, rawLevel, ritualStatus, contributions];
 }
+
+/// The answer to "does this draft have a level yet, and if not, why not".
+///
+/// Exactly one of [breakdown] and [unavailableReason] is non-null. This exists
+/// because [LevelBreakdown] is computed live, on every draft-changing event,
+/// and a draft mid-edit is routinely not computable — see
+/// `SpellEngine.previewLevel`, the only thing that constructs one.
+///
+/// Deliberately not Equatable, unlike its neighbours in this file: it is never
+/// stored in bloc state. `SpellCreationState` holds its two halves as separate
+/// fields, and those are what get compared.
+class LevelPreview {
+  final LevelBreakdown? breakdown;
+  final String? unavailableReason;
+
+  const LevelPreview.available(LevelBreakdown this.breakdown)
+      : unavailableReason = null;
+
+  const LevelPreview.unavailable(String this.unavailableReason)
+      : breakdown = null;
+}
