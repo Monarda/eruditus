@@ -83,6 +83,7 @@ class SpellCreationScreen extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(title: const Text('Create Spell')),
             body: ListView(
+              key: const Key('spell-creation-scroll'),
               padding: const EdgeInsets.all(16),
               children: [
                 DropdownButtonFormField<String>(

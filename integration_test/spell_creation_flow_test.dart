@@ -62,6 +62,15 @@ Future<void> selectBaseEffect(WidgetTester tester, String descriptionSubstring) 
   await tester.pumpAndSettle();
 }
 
+/// The spell creation screen's own Scrollable.
+///
+/// `scrollUntilVisible` with no `scrollable:` requires exactly one Scrollable
+/// in the tree, and every TextField builds one -- so the always-present
+/// summary field makes the bare form ambiguous. Using .first ensures we always
+/// scroll the ListView, not a TextFormField's internal Scrollable, keeping
+/// these scrolls deterministic no matter how many fields render.
+final spellCreationScrollable = find.byType(Scrollable).first;
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -145,7 +154,7 @@ void main() {
         await tester.scrollUntilVisible(
           find.byKey(Key(entry.key)),
           200.0,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: spellCreationScrollable,
         );
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(Key(entry.key)));
@@ -159,7 +168,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('calculate-button')),
         200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('calculate-button')));
@@ -172,7 +181,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.text('Phantasm of the Talking Head'),
         200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
 
@@ -184,7 +193,7 @@ void main() {
       await tester.scrollUntilVisible(
         find.byKey(const Key('save-button')),
         200.0,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: spellCreationScrollable,
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('save-button')));
@@ -707,7 +716,7 @@ void main() {
         await tester.scrollUntilVisible(
           find.byKey(Key(entry.key)),
           200.0,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: spellCreationScrollable,
         );
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(Key(entry.key)));

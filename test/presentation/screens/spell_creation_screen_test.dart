@@ -103,6 +103,14 @@ void main() {
   late Parameter duration;
   late Parameter target;
 
+  /// The screen's own ListView.
+  ///
+  /// `scrollUntilVisible` with no `scrollable:` requires exactly one Scrollable
+  /// in the tree, and every TextField builds one -- so the always-present
+  /// summary field makes the bare form ambiguous. Naming the screen's own list
+  /// keeps these scrolls deterministic no matter how many fields render.
+  late Finder screenScrollable;
+
   setUpAll(() {
     registerFallbackValue(FakeSpellCreationEvent());
     registerFallbackValue(FakeSpellCreationState());
@@ -116,6 +124,7 @@ void main() {
     range = voiceParam;
     duration = durationParam;
     target = targetParam;
+    screenScrollable = find.byType(Scrollable).first;
   });
 
   /// The screen is a lazily-built ListView, so widgets below the fold are
@@ -358,7 +367,7 @@ void main() {
       suggestionLevels: const {'s1': 10},
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.text('Pillar of Fire'), 200);
+    await tester.scrollUntilVisible(find.text('Pillar of Fire'), 200, scrollable: screenScrollable);
 
     expect(find.text('Pillar of Fire'), findsOneWidget);
     expect(find.textContaining('Level 10'), findsWidgets);
@@ -393,7 +402,7 @@ void main() {
       suggestionLevels: const {'s-gen': 20},
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.text('Ward against the Undying'), 200);
+    await tester.scrollUntilVisible(find.text('Ward against the Undying'), 200, scrollable: screenScrollable);
 
     expect(find.byKey(const Key('general-chip')), findsOneWidget);
   });
@@ -432,7 +441,7 @@ void main() {
       suggestionLevels: const {'s-flawed': 10},
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.text('Miscast Pillar'), 200);
+    await tester.scrollUntilVisible(find.text('Miscast Pillar'), 200, scrollable: screenScrollable);
 
     expect(find.byKey(const Key('needs-review-chip')), findsOneWidget);
     expect(find.byKey(const Key('spell-card-invalid')), findsOneWidget);
@@ -445,7 +454,7 @@ void main() {
       calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.byKey(const Key('discard-button')), 200);
+    await tester.scrollUntilVisible(find.byKey(const Key('discard-button')), 200, scrollable: screenScrollable);
 
     await tester.tap(find.byKey(const Key('discard-button')));
     await tester.pump();
@@ -460,7 +469,7 @@ void main() {
       calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
 
     await tester.tap(find.byKey(const Key('save-button')));
     await tester.pumpAndSettle();
@@ -569,7 +578,7 @@ void main() {
     expect(find.textContaining('disk full'), findsWidgets);
     // The Save/Discard controls are still present so the user isn't
     // stranded and can retry.
-    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
     expect(find.byKey(const Key('save-button')), findsOneWidget);
     expect(find.byKey(const Key('discard-button')), findsOneWidget);
   });
@@ -581,7 +590,7 @@ void main() {
       calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200);
+    await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
 
     final saveButton = tester.widget<ElevatedButton>(find.byKey(const Key('save-button')));
     final discardButton = tester.widget<OutlinedButton>(find.byKey(const Key('discard-button')));
@@ -1132,7 +1141,7 @@ void main() {
     testWidgets('shows an empty-state message when the draft has no requisites',
         (tester) async {
       await pumpScreen(tester, draftWith(const {}));
-      await tester.scrollUntilVisible(find.text('Requisites'), 200);
+      await tester.scrollUntilVisible(find.text('Requisites'), 200, scrollable: screenScrollable);
 
       expect(find.text('No requisites.'), findsOneWidget);
     });
@@ -1140,7 +1149,7 @@ void main() {
     testWidgets('selecting an art from the add dropdown dispatches RequisiteAdded as free',
         (tester) async {
       await pumpScreen(tester, draftWith(const {}));
-      await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200);
+      await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200, scrollable: screenScrollable);
 
       await tester.tap(find.byKey(const Key('requisite-add-dropdown')));
       await tester.pumpAndSettle();
@@ -1153,7 +1162,7 @@ void main() {
     testWidgets("the add dropdown offers neither the spell's own technique nor its form",
         (tester) async {
       await pumpScreen(tester, draftWith(const {}));
-      await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200);
+      await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200, scrollable: screenScrollable);
 
       // Creo and Ignem already appear on screen as the selected technique and
       // form, so a bare find.text would match those rather than the menu.
@@ -1179,7 +1188,7 @@ void main() {
         tester,
         draftWith({'Auram': RequisiteKind.free}),
       );
-      await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200);
+      await tester.scrollUntilVisible(find.byKey(const Key('requisite-add-dropdown')), 200, scrollable: screenScrollable);
 
       await tester.tap(find.byKey(const Key('requisite-add-dropdown')));
       await tester.pumpAndSettle();
@@ -1193,7 +1202,7 @@ void main() {
         tester,
         draftWith({'Auram': RequisiteKind.free}),
       );
-      await tester.scrollUntilVisible(find.byKey(const Key('requisite-kind-Auram')), 200);
+      await tester.scrollUntilVisible(find.byKey(const Key('requisite-kind-Auram')), 200, scrollable: screenScrollable);
 
       await tester.tap(find.byKey(const Key('requisite-kind-Auram')));
       await tester.pumpAndSettle();
@@ -1208,7 +1217,7 @@ void main() {
         tester,
         draftWith({'Auram': RequisiteKind.adding}),
       );
-      await tester.scrollUntilVisible(find.byKey(const Key('requisite-remove-Auram')), 200);
+      await tester.scrollUntilVisible(find.byKey(const Key('requisite-remove-Auram')), 200, scrollable: screenScrollable);
 
       await tester.tap(find.byKey(const Key('requisite-remove-Auram')));
       await tester.pump();
@@ -1286,7 +1295,7 @@ void main() {
           'Rego': RequisiteKind.adding,
         }),
       );
-      await tester.scrollUntilVisible(find.byKey(const Key('requisite-row-Auram')), 200);
+      await tester.scrollUntilVisible(find.byKey(const Key('requisite-row-Auram')), 200, scrollable: screenScrollable);
 
       expect(find.byKey(const Key('requisite-row-Auram')), findsOneWidget);
       expect(find.byKey(const Key('requisite-row-Terram')), findsOneWidget);
@@ -1497,7 +1506,7 @@ void main() {
 
   testWidgets('typing a summary dispatches SummaryChanged', (tester) async {
     await pumpScreen(tester, SpellCreationState.initial());
-    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200);
+    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
 
     await tester.enterText(find.byKey(const Key('summary-field')), 'A jet of flame.');
     await tester.pump();
@@ -1511,7 +1520,7 @@ void main() {
       draft: SpellDraft(summary: 'Seeded from a template.'),
     );
     await pumpScreen(tester, state);
-    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200);
+    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
 
     expect(find.text('Seeded from a template.'), findsOneWidget);
   });
