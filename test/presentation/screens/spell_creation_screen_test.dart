@@ -317,56 +317,46 @@ void main() {
     // carried forward across edits, and an edit could leave "Ritual: Year
     // duration" on screen over a Momentary draft. SpellCreationBloc now
     // recomputes the breakdown on every emit, so the fix is the emit itself
-    // rather than a gate -- what must be proved is that the section follows
-    // the *new* breakdown, not that it is hidden. Still driven through a
-    // controller rather than a static mock state, because the defect only
-    // ever appeared on the rebuild that follows an edit, exactly as the
-    // "requisite survives the rebuild" test below does for its own bug.
-    useTallSurface(tester);
-    final stateController = StreamController<SpellCreationState>();
-    addTearDown(stateController.close);
-
+    // rather than a gate: what must be proved is that the section renders
+    // whatever ritualStatus the *current* breakdown carries.
+    //
+    // Deliberately two plain pumps rather than the StreamController this test
+    // used to use. That machinery earns its keep only where a defect appears
+    // solely on the rebuild that follows a change (the requisite add-dropdown
+    // crash below, where a FormField holds state across it). Nothing here
+    // holds state across a rebuild any more -- RitualSection is stateless and
+    // reads its status from the breakdown it is handed on every build -- so a
+    // second static state proves exactly what a streamed one would, and says
+    // so without implying a rebuild-only route that no longer exists.
     final yearParam = Parameter(
         id: 'p-year', name: 'Year', category: 'Duration', magnitude: 4,
         provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
-    final calculatedState = SpellCreationState(
-      status: SpellCreationStatus.calculated,
-      draft: SpellDraft(
-        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
-        range: range, duration: yearParam, target: target,
-      ),
-      breakdown: const LevelBreakdown(
-        level: 20,
-        rawLevel: 20,
-        ritualStatus: RitualStatus([RitualReason.ritualOnlyDuration]),
-        contributions: [
-          LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
-        ],
-      ),
+    final catalog = ConfigurationState(
+      status: ConfigurationStatus.loaded,
+      effects: [creoIgnemEffect],
+      parameters: [voiceParam, yearParam, durationParam, targetParam],
     );
 
-    bloc = mockSpellCreationBloc(
-      initialState: calculatedState,
-      states: stateController.stream,
-    );
-    configBloc = mockConfigurationBloc(
-      initialState: ConfigurationState(
-        status: ConfigurationStatus.loaded,
-        effects: [creoIgnemEffect],
-        parameters: [voiceParam, yearParam, durationParam, targetParam],
+    await pumpScreen(
+      tester,
+      SpellCreationState(
+        status: SpellCreationStatus.calculated,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: range, duration: yearParam, target: target,
+        ),
+        breakdown: const LevelBreakdown(
+          level: 20,
+          rawLevel: 20,
+          ritualStatus: RitualStatus([RitualReason.ritualOnlyDuration]),
+          contributions: [
+            LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+          ],
+        ),
       ),
+      configState: catalog,
     );
-
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellCreationBloc>.value(value: bloc),
-          BlocProvider<ConfigurationBloc>.value(value: configBloc),
-        ],
-        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-      ),
-    ));
 
     expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
     expect(find.textContaining('Year duration'), findsOneWidget);
@@ -375,21 +365,24 @@ void main() {
     // _emit funnel produces is a *recomputed* breakdown for the new draft --
     // no longer a Ritual, and no longer floored to 20 -- not the Year
     // snapshot carried forward.
-    stateController.add(SpellCreationState(
-      status: SpellCreationStatus.editing,
-      draft: SpellDraft(
-        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
-        range: range, duration: durationParam, target: target,
+    await pumpScreen(
+      tester,
+      SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: range, duration: durationParam, target: target,
+        ),
+        breakdown: const LevelBreakdown(
+          level: 12,
+          rawLevel: 12,
+          contributions: [
+            LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+          ],
+        ),
       ),
-      breakdown: const LevelBreakdown(
-        level: 12,
-        rawLevel: 12,
-        contributions: [
-          LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
-        ],
-      ),
-    ));
-    await tester.pump();
+      configState: catalog,
+    );
 
     // No stale "Ritual: Year duration" over a Momentary draft -- and, unlike
     // before, the level itself stays on screen throughout, which is the whole
@@ -398,6 +391,100 @@ void main() {
     expect(find.textContaining('Year duration'), findsNothing);
     expect(find.byKey(const Key('level-banner')), findsOneWidget);
     expect(find.text('12'), findsOneWidget);
+  });
+
+  group('the save lifecycle does not open the suggestions section', () {
+    // Save renders unconditionally now, so `saving` and `error` are reachable
+    // on a draft that was never calculated. The old gate read either status as
+    // "show the results block", which materialised a "Similar Spells" heading
+    // over "No similar spells found." above the save error -- an empty section
+    // the user never asked for, standing between them and the one message they
+    // did need. These three pin both directions: the section must not open on
+    // a save, and must not close on one either.
+    final completeDraft = SpellDraft(
+      technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+      range: voiceParam, duration: durationParam, target: targetParam,
+    );
+    const liveBreakdown = LevelBreakdown(level: 20, rawLevel: 20, contributions: []);
+
+    testWidgets('a save failure on a never-calculated draft shows the error and no '
+        'Similar Spells heading', (tester) async {
+      await pumpScreen(
+        tester,
+        SpellCreationState(
+          status: SpellCreationStatus.error,
+          draft: completeDraft,
+          breakdown: liveBreakdown,
+          errorMessage: 'disk full',
+        ),
+      );
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+      expect(find.text('disk full'), findsOneWidget);
+      expect(find.text('Similar Spells'), findsNothing);
+      expect(find.text('No similar spells found.'), findsNothing);
+    });
+
+    testWidgets('a save failure after a successful Calculate still shows both',
+        (tester) async {
+      // The regression in the other direction: narrowing the gate to
+      // `calculated` alone would take the suggestions away the instant the
+      // user pressed Save on them.
+      final suggestionRecord = Spell(
+        id: 's1',
+        name: 'Pillar of Fire',
+        baseEffectId: creoIgnemEffect.id,
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: voiceParam.id,
+        durationId: durationParam.id,
+        targetId: targetParam.id,
+        requisites: const {},
+        description: 'A roaring pillar of flame.',
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+      final suggestion = ResolvedSpell(
+          record: suggestionRecord, baseEffect: creoIgnemEffect,
+          range: voiceParam, duration: durationParam, target: targetParam);
+
+      await pumpScreen(
+        tester,
+        SpellCreationState(
+          status: SpellCreationStatus.error,
+          draft: completeDraft,
+          breakdown: liveBreakdown,
+          errorMessage: 'disk full',
+          suggestions: [suggestion],
+          suggestionLevels: const {'s1': 10},
+        ),
+      );
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+      expect(find.text('disk full'), findsOneWidget);
+      expect(find.text('Similar Spells'), findsOneWidget);
+      expect(find.text('Pillar of Fire'), findsOneWidget);
+    });
+
+    testWidgets('the saving state on a never-calculated draft shows no Similar Spells '
+        'heading', (tester) async {
+      await pumpScreen(
+        tester,
+        SpellCreationState(
+          status: SpellCreationStatus.saving,
+          draft: completeDraft,
+          breakdown: liveBreakdown,
+        ),
+      );
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+      expect(find.text('Similar Spells'), findsNothing);
+      expect(find.text('No similar spells found.'), findsNothing);
+    });
   });
 
   testWidgets('shows suggestions with their level and description when status is calculated',

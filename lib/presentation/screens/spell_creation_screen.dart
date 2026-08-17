@@ -82,12 +82,33 @@ class SpellCreationScreen extends StatelessWidget {
           // and the Save/Discard row too. Only the suggestions are still worth
           // a button (findSimilarSpells plus a calculateBreakdown per
           // candidate); the level is a pure function of the draft and is now
-          // always on screen. An edit still clears the list, which stays
-          // right -- suggestions computed against a superseded level should
-          // not linger.
+          // always on screen.
+          //
+          // `calculated` is the marker that the user asked for suggestions and
+          // no edit has superseded them: every editing handler emits `editing`,
+          // so a list computed against an older level stops being shown. The
+          // save lifecycle destroys that marker -- pressing Save moves the
+          // status to `saving` and then `saved`/`error` -- which is why the old
+          // gate named those statuses too. Reading them as "show the
+          // suggestions" was safe only while Save itself sat behind Calculate.
+          // Save renders unconditionally now, so a failed save on a
+          // never-calculated draft flipped the whole block open and
+          // materialised a "Similar Spells" heading over "No similar spells
+          // found.", an empty section the user never asked for and one standing
+          // between them and the error they did need. So those two statuses no
+          // longer *open* the section; they only preserve a list some Calculate
+          // actually produced, which is what stops a save taking the
+          // suggestions away from under a user who did press the button.
+          //
+          // The honest limit: a list superseded by an edit stays in
+          // SpellCreationState (only its `calculated` marker moves), so a save
+          // started after that edit preserves it too. Closing that needs the
+          // bloc's emit funnel to clear suggestions on a draft change, beside
+          // the validationErrors it already clears there for the same reason --
+          // not this screen's to do.
           final showSuggestions = state.status == SpellCreationStatus.calculated ||
-              isSaving ||
-              state.status == SpellCreationStatus.error;
+              ((isSaving || state.status == SpellCreationStatus.error) &&
+                  state.suggestions.isNotEmpty);
 
           return Scaffold(
             appBar: AppBar(title: const Text('Create Spell')),
@@ -346,15 +367,23 @@ class SpellCreationScreen extends StatelessWidget {
                               problems: s.problems,
                             ),
                           ),
-                        if (state.status == SpellCreationStatus.error)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              state.errorMessage ?? 'Failed to save spell.',
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          ),
                       ],
+                      // Gated on its own status, outside the block above. It
+                      // used to sit inside, which was safe only while the block
+                      // and the Save button opened together: a failed save on a
+                      // never-calculated draft would otherwise have to open the
+                      // whole suggestions section just to render this one line.
+                      // It reads as a note on the Save button directly below it
+                      // rather than as a tail on the suggestions list, which is
+                      // what it always was.
+                      if (state.status == SpellCreationStatus.error)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            state.errorMessage ?? 'Failed to save spell.',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
                       // Outside the suggestions block, unlike before. Discard used
                       // to render only alongside the suggestions, so before the
                       // first button press there was no way to abandon a draft at
