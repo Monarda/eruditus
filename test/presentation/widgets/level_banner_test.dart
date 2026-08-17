@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
-import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/presentation/widgets/level_banner.dart';
 
 void main() {

@@ -35,8 +35,13 @@ void main() {
 
   group('value equality', () {
     test('two structurally identical contributions are equal', () {
-      // Avoid const canonicalization by building at runtime
-      final a = LevelContribution(label: 'Range' + ' · Voice', magnitude: 1 + 1);
+      // Two *distinct* instances, deliberately. The constructor calls here are
+      // not `const` and are not in a const context, so each allocates rather
+      // than being canonicalized to one shared instance -- which is what makes
+      // the equality assertions below test Equatable rather than tautologically
+      // comparing an object with itself. The `identical` check on the next line
+      // is what pins that; it is the test's own proof, not a formality.
+      final a = LevelContribution(label: 'Range · Voice', magnitude: 1 + 1);
       final b = LevelContribution(label: 'Range · Voice', magnitude: 2);
 
       expect(identical(a, b), isFalse);
@@ -44,17 +49,18 @@ void main() {
     });
 
     test('contributions differing in any field are not equal', () {
-      final a = LevelContribution(label: 'Range' + ' · Voice', magnitude: 1 + 1);
+      final a = LevelContribution(label: 'Range · Voice', magnitude: 1 + 1);
       final b = LevelContribution(label: 'Range · Voice', magnitude: 1 + 2);
       expect(a, isNot(b));
 
-      final c = LevelContribution(label: 'Base' + '', magnitude: 2, isBase: true);
+      final c = LevelContribution(label: 'Base', magnitude: 2, isBase: true);
       final d = LevelContribution(label: 'Base', magnitude: 2);
       expect(c, isNot(d));
     });
 
     test('two structurally identical ritual statuses are equal', () {
-      // Avoid const canonicalization by building list at runtime
+      // Non-const calls again, so these are two instances holding two lists.
+      // See the first test in this group for why that matters.
       final a = RitualStatus([RitualReason.lastingCreation]);
       final b = RitualStatus([RitualReason.lastingCreation]);
 
@@ -73,7 +79,7 @@ void main() {
             rawLevel: 20,
             ritualStatus: RitualStatus([RitualReason.lastingCreation]),
             contributions: [
-              LevelContribution(label: 'Base effect' + ' · Create flame', magnitude: 5 * 2, isBase: true),
+              LevelContribution(label: 'Base effect · Create flame', magnitude: 5 * 2, isBase: true),
               LevelContribution(label: 'Range · Voice', magnitude: 1 + 1),
             ],
           );
@@ -87,11 +93,11 @@ void main() {
     test('breakdowns differing only in a nested contribution are not equal', () {
       final a = LevelBreakdown(
         level: 20, rawLevel: 20,
-        contributions: [LevelContribution(label: 'Range' + ' · Voice', magnitude: 2)],
+        contributions: [LevelContribution(label: 'Range · Voice', magnitude: 2)],
       );
       final b = LevelBreakdown(
         level: 20, rawLevel: 20,
-        contributions: [LevelContribution(label: 'Range' + ' · Touch', magnitude: 1)],
+        contributions: [LevelContribution(label: 'Range · Touch', magnitude: 1)],
       );
 
       expect(a, isNot(b));
