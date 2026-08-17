@@ -304,8 +304,11 @@ Real work, none of it blocking the import.
       configuration it has ever run in; the rationale, including what switching
       to Linux would cost, is commented in the workflow. Verified by running
       CI's exact command locally: `flutter test integration_test -d windows`,
-      **8 of 8 green**. Note the *directory* form, so a second integration file
-      is picked up without editing the workflow.
+      **8 of 8 green** — and **green on its first real run on GitHub's
+      `windows-latest`**, so the hosted runner's build environment is a proven
+      baseline, not an assumption. That is the comparison any future attempt to
+      move this job to Linux is measured against. Note the *directory* form, so
+      a second integration file is picked up without editing the workflow.
 
 **⚠️ Correction 2026-08-17: this item's founding premise was wrong.** It held
 that "a real Bloc hangs forever under flutter_tester; known Bloc limitation."
