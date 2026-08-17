@@ -5977,7 +5977,8 @@
       {
         "bookId": "arm5-core"
       }
-    ]
+    ],
+    "containerMode": "dynamic"
   },
   {
     "id": "lib-rean-commanding-harnessed-beast",

@@ -368,7 +368,8 @@
     ],
     "chosenSlots": {
       "realm": "Magic"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-reaq-ward-against-faeries-waters",
@@ -391,7 +392,8 @@
     ],
     "chosenSlots": {
       "realm": "Faerie"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-reau-ward-against-faeries-air",
@@ -414,7 +416,8 @@
     ],
     "chosenSlots": {
       "realm": "Faerie"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-rehe-ward-against-faeries-wood",
@@ -437,7 +440,8 @@
     ],
     "chosenSlots": {
       "realm": "Faerie"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-reim-restore-moved-image",
@@ -481,7 +485,8 @@
     ],
     "chosenSlots": {
       "realm": "Magic"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-rete-ward-against-faeries-mountain",
@@ -504,7 +509,8 @@
     ],
     "chosenSlots": {
       "realm": "Faerie"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-revi-circular-ward-against-demons",
@@ -527,7 +533,8 @@
     ],
     "chosenSlots": {
       "realm": "Infernal"
-    }
+    },
+    "containerMode": "dynamic"
   },
   {
     "id": "tpl-revi-maintaining-demanding-spell",

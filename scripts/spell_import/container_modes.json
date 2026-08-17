@@ -1,0 +1,34 @@
+{
+  "lib-rean-circle-beast-warding": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-rean-ward-against-beasts-legend": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-reaq-ward-against-faeries-waters": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-reau-ward-against-faeries-air": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-rehe-ward-against-faeries-wood": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-reme-ring-warding-against-spirits": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-rete-ward-against-faeries-mountain": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  },
+  "tpl-revi-circular-ward-against-demons": {
+    "mode": "dynamic",
+    "rationale": "Magical Wards (Core Rules 12166): a ward with a Circle target prevents warded things inside from leaving and warded things outside from entering. That is the dynamic reading — membership changes over the duration."
+  }
+}

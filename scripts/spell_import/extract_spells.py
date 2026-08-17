@@ -34,6 +34,8 @@ HAND_AUTHORED_TEMPLATES_PATH = (
     ledger_module.LEDGER_PATH.with_name("hand_authored_templates.json")
 )
 
+CONTAINER_MODES_PATH = ledger_module.LEDGER_PATH.with_name("container_modes.json")
+
 
 class SourceMoved(Exception):
     """The rulebook changed since the committed asset was generated."""
@@ -620,6 +622,57 @@ def hand_authored_templates() -> list[dict]:
     return json.loads(HAND_AUTHORED_TEMPLATES_PATH.read_text(encoding="utf-8"))
 
 
+class UnknownContainerModeSpell(Exception):
+    """A container_modes.json entry names a spell no run produced."""
+
+
+class NotAContainerTarget(Exception):
+    """A container_modes.json entry names a spell whose Target is not a container."""
+
+
+def container_modes() -> dict[str, dict]:
+    """Hand-authored static/dynamic rulings, keyed by spell id.
+
+    A committed *input*, not an output: `--write` regenerates both
+    spell_library.json and spell_templates.json, so a mode written into either
+    asset would be destroyed on the next run. Same role as
+    hand_authored_templates.json.
+    """
+    if not CONTAINER_MODES_PATH.is_file():
+        return {}
+    return json.loads(CONTAINER_MODES_PATH.read_text(encoding="utf-8"))
+
+
+def apply_container_modes(
+    rows: list[dict], catalog: catalog_module.Catalog, modes: dict[str, dict]
+) -> None:
+    """Stamp hand-authored container modes onto the rows they name, in place.
+
+    Every entry must land. An id no run produced, or one whose Target is not a
+    container, raises rather than being skipped: a silently-ignored entry is a
+    decision that looks recorded and isn't, which is the whole failure mode
+    this file exists to avoid.
+    """
+    by_id = {row["id"]: row for row in rows}
+
+    unknown = sorted(set(modes) - set(by_id))
+    if unknown:
+        raise UnknownContainerModeSpell(
+            "container_modes.json names spells no run produced: "
+            + ", ".join(unknown)
+        )
+
+    for spell_id, entry in modes.items():
+        row = by_id[spell_id]
+        target_id = row["targetId"]
+        if catalog.target_type(target_id) != "container":
+            raise NotAContainerTarget(
+                f"{spell_id}: container mode '{entry['mode']}' recorded, but "
+                f"its Target {target_id} is not a container"
+            )
+        row["containerMode"] = entry["mode"]
+
+
 def run(write: bool = False, accept_source: bool = False) -> Report:
     root = sources.default_root()
     path = sources.resolve_book(sources.DE_TITLE, root)
@@ -858,6 +911,12 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             blocked.append((block.name, str(error)))
 
     templates.extend(hand_authored_templates())
+
+    # One call across both lists: an id lives in exactly one of them, so
+    # checking each separately would report every template id as unknown to
+    # the spells pass. `spells + templates` is a new list of the *same* dicts,
+    # so mutating through it mutates the rows that get serialized.
+    apply_container_modes(spells + templates, catalog, container_modes())
 
     if proposals:
         PROPOSALS_PATH.write_text(

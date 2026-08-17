@@ -119,6 +119,21 @@ class Catalog:
             raise KeyError(f"no base effect with id {effect_id!r} in base_effects.json")
         return list(effect.get("openSlots") or [])
 
+    def target_type(self, parameter_id: str) -> str | None:
+        """The rulebook's kind for a Target: "object", "container" or "sense".
+
+        None for a Range or Duration row, for an unknown id, and for a Target
+        that has not been annotated. The Dart-side assertion in
+        `asset_data_loader_test.dart` is what forbids the last case; treating
+        it as None here means an un-annotated Target simply never matches
+        "container", which fails loudly at the call site rather than silently
+        stamping a mode onto the wrong row.
+        """
+        for parameter in self.parameters:
+            if parameter["id"] == parameter_id:
+                return parameter.get("targetType")
+        return None
+
     def parameter_id(self, category: str, name: str) -> str:
         for parameter in self.parameters:
             if parameter["category"] == category and parameter["name"] == name:

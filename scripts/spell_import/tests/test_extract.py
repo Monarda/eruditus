@@ -2,6 +2,7 @@ import dataclasses
 import json
 import unittest
 
+from scripts.spell_import import catalog as catalog_module
 from scripts.spell_import import extract_spells
 from scripts.spell_import import exceptions as exceptions_module
 from scripts.spell_import import ledger as ledger_module
@@ -10,6 +11,47 @@ from scripts.spell_import.sources import REPO_ROOT
 LIBRARY = REPO_ROOT / "assets" / "data" / "spell_library.json"
 EXCEPTIONS = REPO_ROOT / "assets" / "data" / "spell_exceptions.json"
 TEMPLATES = REPO_ROOT / "assets" / "data" / "spell_templates.json"
+
+
+class ContainerModesTest(unittest.TestCase):
+    def setUp(self):
+        self.catalog = catalog_module.Catalog.load()
+
+    def _rows(self):
+        return [
+            {"id": "lib-a", "targetId": "target-circle"},
+            {"id": "lib-b", "targetId": "target-group"},
+        ]
+
+    def test_stamps_the_mode_onto_the_row_it_names(self):
+        rows = self._rows()
+        extract_spells.apply_container_modes(
+            rows, self.catalog, {"lib-a": {"mode": "dynamic", "rationale": "x"}}
+        )
+        self.assertEqual(rows[0]["containerMode"], "dynamic")
+
+    def test_leaves_unnamed_rows_alone(self):
+        rows = self._rows()
+        extract_spells.apply_container_modes(
+            rows, self.catalog, {"lib-a": {"mode": "dynamic", "rationale": "x"}}
+        )
+        self.assertNotIn("containerMode", rows[1])
+
+    def test_raises_on_an_id_no_run_produced(self):
+        with self.assertRaises(extract_spells.UnknownContainerModeSpell):
+            extract_spells.apply_container_modes(
+                self._rows(),
+                self.catalog,
+                {"lib-ghost": {"mode": "static", "rationale": "x"}},
+            )
+
+    def test_raises_when_the_target_is_not_a_container(self):
+        with self.assertRaises(extract_spells.NotAContainerTarget):
+            extract_spells.apply_container_modes(
+                self._rows(),
+                self.catalog,
+                {"lib-b": {"mode": "dynamic", "rationale": "x"}},
+            )
 
 
 class RunTest(unittest.TestCase):
@@ -62,6 +104,32 @@ class RunTest(unittest.TestCase):
             r.identity.spells_parsed,
             "a spell fell out of the report entirely -- it must appear in "
             "exactly one bucket, blocked included")
+
+    def test_the_eight_circle_wards_carry_a_dynamic_container_mode(self):
+        wards = {
+            "lib-rean-circle-beast-warding",
+            "tpl-rean-ward-against-beasts-legend",
+            "tpl-reaq-ward-against-faeries-waters",
+            "tpl-reau-ward-against-faeries-air",
+            "tpl-rehe-ward-against-faeries-wood",
+            "tpl-reme-ring-warding-against-spirits",
+            "tpl-rete-ward-against-faeries-mountain",
+            "tpl-revi-circular-ward-against-demons",
+        }
+        rows = {
+            row["id"]: row
+            for row in list(self.report.spells) + list(self.report.templates)
+        }
+        for ward in wards:
+            self.assertEqual(rows[ward].get("containerMode"), "dynamic", ward)
+
+    def test_restore_the_faded_threads_stays_unstated(self):
+        # A Circle spell the Magical Wards rule does not decide, because it is
+        # not a ward. Guessing at it is exactly what the backfill must not do.
+        rows = {row["id"]: row for row in self.report.templates}
+        self.assertNotIn(
+            "containerMode", rows["tpl-crvi-restore-faded-threads"]
+        )
 
 
 class RegenerationTest(unittest.TestCase):

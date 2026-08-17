@@ -165,6 +165,22 @@ class CandidatesTest(unittest.TestCase):
         )
 
 
+class TargetTypeTest(unittest.TestCase):
+    def setUp(self):
+        self.catalog = catalog.Catalog.load()
+
+    def test_returns_the_kind_for_a_target(self):
+        self.assertEqual(self.catalog.target_type("target-room"), "container")
+        self.assertEqual(self.catalog.target_type("target-group"), "object")
+        self.assertEqual(self.catalog.target_type("target-vision"), "sense")
+
+    def test_returns_none_for_a_non_target_parameter(self):
+        self.assertIsNone(self.catalog.target_type("duration-sun"))
+
+    def test_returns_none_for_an_unknown_id(self):
+        self.assertIsNone(self.catalog.target_type("target-nowhere"))
+
+
 class ExistingIdsTest(unittest.TestCase):
     def test_slugger_reproduces_every_committed_library_id(self):
         import json
