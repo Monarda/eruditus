@@ -651,19 +651,12 @@ Append to `test/models/spell_test.dart`. The existing `validateSpellAgainstCatal
       );
     });
 
-    test('a Momentary Duration does not make a stated mode invalid', () {
-      // Momentary belongs to spellOwesContainerMode, not here. The rulebook
-      // constrains the Target kind and nothing else, so stating a mode on a
-      // Momentary container spell is vacuous, not wrong. If this test ever
-      // starts failing, check 9 has grown a Duration clause it must not have.
-      expect(
-        validate(
-          target: targetOfType('target-room', TargetType.container),
-          containerMode: ContainerMode.static,
-        ),
-        isEmpty,
-      );
-    });
+    // Deliberately NO Momentary test in this group. Check 9 takes no Duration
+    // — that is Decision 4 — so a "Momentary does not invalidate a stated
+    // mode" test here could only duplicate the accept case above while its
+    // comment claimed a guarantee it cannot provide. The Momentary rule is
+    // pinned where it is actually executable, in spellOwesContainerMode's
+    // group below. Do not add one here.
   });
 
   group('spellOwesContainerMode', () {
