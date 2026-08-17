@@ -137,10 +137,18 @@ class SpellEngine {
   ///
   /// It exists because [calculateBreakdown] throws two ways that are ordinary
   /// intermediate states rather than errors: a General guideline before its
-  /// level is typed, and negative magnitudes that momentarily drive the level
-  /// below 1. The button-driven path could let those escape, since nothing
-  /// called it until the draft was finished. A live path cannot, so every
-  /// throw is converted here and this method never throws.
+  /// level is typed, and a level that lands below 1. The button-driven path
+  /// could let those escape, since nothing called it until the draft was
+  /// finished. A live path cannot, so every throw is converted here and this
+  /// method never throws.
+  ///
+  /// The below-1 throw arrives by two quite different routes and so gets two
+  /// different reasons. A caster who typed `0` into the Guideline level field
+  /// has an out-of-range base level and no magnitudes involved at all; a caster
+  /// whose negative adjustments outran a legal base level has the opposite
+  /// problem. Both reach the same ArgumentError from SpellLevelCalculator, so
+  /// the General case is answered *before* the try below rather than inside its
+  /// catch, which cannot tell them apart.
   ///
   /// A null Technique or Form needs no reason of its own: the base effect
   /// dropdown does not render without them
@@ -150,8 +158,23 @@ class SpellEngine {
     if (baseEffect == null) {
       return const LevelPreview.unavailable('Choose a base effect to see a level.');
     }
-    if (baseEffect.isGeneral && draft.chosenBaseLevel == null) {
-      return const LevelPreview.unavailable('Type a level for this General guideline.');
+    if (baseEffect.isGeneral) {
+      final chosenBaseLevel = draft.chosenBaseLevel;
+      if (chosenBaseLevel == null) {
+        return const LevelPreview.unavailable('Type a level for this General guideline.');
+      }
+      // A typed `0` -- or a backspace down to it, which the field commits the
+      // same way -- is not the null case above and not the magnitudes case
+      // below. calculateBreakdown hands the chosen level straight to
+      // SpellLevelCalculator, which rejects `baseLevel < 1` before a single
+      // magnitude has been applied, so without this branch a bare `0` fell
+      // through to the catch at the end of this method and told the caster
+      // "Magnitudes reduce this spell below level 1." on a draft that has no
+      // magnitudes to blame. Found by hand-testing the live banner during item
+      // 59's review, on a General guideline with the level field emptied.
+      if (chosenBaseLevel < 1) {
+        return const LevelPreview.unavailable('A General guideline needs a level of 1 or more.');
+      }
     }
 
     final range = draft.range;

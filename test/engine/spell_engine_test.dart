@@ -1218,6 +1218,31 @@ void main() {
       expect(preview.unavailableReason, 'Type a level for this General guideline.');
     });
 
+    test('General guideline typed at 0: blames the level, not the magnitudes', () {
+      // Reproduced by hand on the live banner: typing 0 into the Guideline
+      // level field used to read "Magnitudes reduce this spell below level 1."
+      // on a draft carrying no magnitudes at all. The chosen level is present,
+      // so the null branch above does not catch it, and SpellLevelCalculator
+      // rejects `baseLevel < 1` from inside calculateBreakdown -- the same
+      // ArgumentError the negative-adjustments test below produces, which is
+      // why the two cannot be told apart in the catch and this one is answered
+      // ahead of it.
+      final general = BaseEffect(
+        id: 'gen-1', technique: 'Creo', form: 'Ignem',
+        description: 'Ward against beings', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final draft = SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: general, chosenBaseLevel: 0,
+        range: _range, duration: _duration, target: _target,
+      );
+
+      final preview = engine.previewLevel(draft);
+
+      expect(preview.breakdown, isNull);
+      expect(preview.unavailableReason, 'A General guideline needs a level of 1 or more.');
+    });
+
     test('a missing parameter: says so instead of computing', () {
       final preview = engine.previewLevel(SpellDraft(
         technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
