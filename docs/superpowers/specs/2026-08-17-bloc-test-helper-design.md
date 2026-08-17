@@ -175,10 +175,20 @@ and the ambient environment passes through.
 
 ## Component 4 — Migration
 
-The 5 files drop their local `Mock*`/`Fake*` classes and `registerFallbackValue`
-blocks in favour of helper imports. **Behaviour-preserving: no assertion
-changes.** The 2 repository-mock files are migrated to the fakes as well, since
-that is what the fakes are for.
+The 5 `MockBloc` files drop their local `Mock*`/`Fake*` classes and
+`registerFallbackValue` blocks in favour of helper imports.
+**Behaviour-preserving: no assertion changes.**
+
+**The 2 repository-mock files stay as they are, and this reverses an earlier
+intention in this spec.** Reading them settled it: both use their mock for
+**error injection**, not for standing in for storage —
+`spell_library_bloc_test.dart` stubs `thenThrow(Exception('boom'))` across ~10
+sites, and `spell_creation_bloc_test.dart` touches its mock at exactly one line
+(`:462-463`, `saveSpell` throwing "disk full"). Mocktail is the right tool for
+making a call fail on demand; an in-memory fake models storage that *works*.
+Migrating them would mean growing the fakes an error-injection hook to replace
+a mechanism that already reads clearly — churn, and a worse result. The fakes
+exist to serve real-bloc rebuild tests, which is a different job.
 
 Then item 6's three boxes are ticked and its "nine test files" figure is
 corrected to five, with a line recording where the nine came from.
