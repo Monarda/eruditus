@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
-import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
@@ -144,8 +143,6 @@ void main() {
   }) async {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
     final resolvedCreationBloc = creationBloc ?? mockSpellCreationBloc();
-    whenListen(resolvedCreationBloc, const Stream<SpellCreationState>.empty(),
-        initialState: SpellCreationState.initial());
     await tester.pumpWidget(MaterialApp(
       home: MultiBlocProvider(
         providers: [
