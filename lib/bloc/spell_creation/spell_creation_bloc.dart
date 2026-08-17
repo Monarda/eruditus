@@ -80,8 +80,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// carry value equality: SpellCreationState lists breakdown in its props, and
   /// identity comparison would make every state here look changed.
   ///
-  /// It also clears [SpellCreationState.validationErrors] whenever the draft
-  /// moves -- see the `draftChanged` comment below.
+  /// It is also this state's invalidation point: it clears
+  /// [SpellCreationState.validationErrors] whenever the draft moves, and the
+  /// three suggestion fields whenever the *level* moves. Those are two
+  /// different predicates on purpose -- see the two comments below. (One field
+  /// it deliberately does not own is `generalEffectSentence`, still recomputed
+  /// at its handlers' call sites; see todo item 62.)
   void _emit(Emitter<SpellCreationState> emit, SpellCreationState next) {
     final preview = spellEngine.previewLevel(next.draft);
 
@@ -89,10 +93,23 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     // `!=` here is identity: true exactly when a handler produced a new draft
     // (they all go through `state.draft.copyWith(...)` or build a fresh one),
     // and false when a handler emitted a status/errors change over the draft it
-    // was given. That is precisely the distinction needed below, and it stays
-    // correct if SpellDraft ever gains value equality -- an edit that changed
-    // nothing has nothing to invalidate either.
+    // was given.
+    //
+    // Read it as "a handler rebuilt the draft", not "the draft's contents
+    // differ": copyWith allocates unconditionally, so re-picking the Duration a
+    // draft already has arrives here as a change. That over-clears rather than
+    // under-clears, which is the safe direction for what it guards, and it
+    // stays correct if SpellDraft ever gains value equality.
     final draftChanged = next.draft != state.draft;
+
+    // Whether the *level* moved, which is a different question and has a
+    // different answer. LevelBreakdown, LevelContribution and RitualStatus all
+    // carry value equality, so this compares contents: a level-neutral edit
+    // mints a new breakdown that compares equal and reads as no movement, while
+    // an edit that changes nothing about the draft but everything about what
+    // the engine makes of it -- a catalog sync -- reads as movement. Null on
+    // either side counts, so gaining or losing a level is a move too.
+    final breakdownChanged = preview.breakdown != state.breakdown;
 
     emit(next.copyWith(
       breakdown: preview.breakdown,
@@ -107,8 +124,14 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // status with nothing to show for it. Every other field either carries
       // forward via `??` or through the `_unset` sentinel.
       errorMessage: next.errorMessage,
-      // Validation errors describe the draft they were computed from, so they
-      // cannot outlive it. Nothing else cleared them: every edit handler omits
+      // Validation errors describe the *draft* they were computed from, which
+      // is why this one is on `draftChanged` and the three below are not.
+      // "Target must be selected" and "Requisite art cannot be the spell's own
+      // technique" are statements about the draft's own contents; nothing about
+      // the level can confirm or refute them, and a catalog sync that moves the
+      // level leaves every one of them exactly as true as it was.
+      //
+      // Nothing else cleared them: every edit handler omits
       // the field, copyWith carries it forward, and only a successful
       // SpellCalculated ever reset it -- so saving an incomplete draft, reading
       // "Target must be selected" in red, and then picking a Target left the
@@ -124,17 +147,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // remainder back, computed against the draft they actually have, on their
       // next press. `null` is copyWith's "leave it alone".
       validationErrors: draftChanged ? const <String>[] : null,
-      // The same rule as validationErrors above, and it applies harder here.
-      // A validation error at least describes the draft in front of you; a
-      // suggestion carries a precomputed level (suggestionLevels) that was
-      // chosen for being *similar to* a level this draft no longer has, so an
-      // edit does not merely date the list, it falsifies the comparison the
-      // list exists to make. Before this, an edit only appeared to clear them:
-      // the screen stopped showing the section on `status: editing` while the
-      // list sat in state, and a save started after that edit put it back --
-      // the status moves to saving/error, which the screen must read as "keep
-      // showing a calculated list" so a save does not take the suggestions
-      // away from a user who did press the button.
+      // The same *kind* of rule as validationErrors above, on a deliberately
+      // different predicate. A suggestion is not a statement about the draft;
+      // it is a statement about a number. findSimilarSpells is asked for spells
+      // near `referenceLevel`, and suggestionLevels holds each one's own level
+      // so a card can show the comparison. What falsifies that is the reference
+      // level moving -- and only that. A draft edit is merely the usual way a
+      // level moves, not the thing itself.
+      //
+      // Keying this to `draftChanged` was wrong in both directions, and the
+      // catalog-sync branches are the sharp end. AvailableModifiersSynced and
+      // AvailableParametersSynced re-emit precisely *because* a catalog change
+      // moves the level without the draft changing: a selected modifier whose
+      // magnitude only just became resolvable, or a guideline's reference
+      // parameter that only just started resolving, recompute the breakdown off
+      // an untouched draft. On the draft predicate a sync in `calculated`
+      // status wrote a new breakdown and left all three suggestion fields
+      // standing against a reference level that no longer existed -- the exact
+      // failure this funnel was built to make impossible. On the level
+      // predicate the sync clears them, and a sync that moves nothing still
+      // does not (the state compares equal and Bloc emits nothing at all).
+      //
+      // The other direction is a smaller win: a prose edit, or a container
+      // mode, produces an equal breakdown and now leaves a valid list alone.
+      // That also covers a *failed* save whose summary came from the save
+      // dialog -- _handleSpellSaveRequested's catch re-emits a rebuilt draft
+      // carrying it, which the draft predicate treated as invalidating even
+      // though only prose had changed.
       //
       // All three together, not just `suggestions`. They are written by one
       // handler in one emit and keyed to that one list: suggestionLevels and
@@ -144,12 +183,20 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // to make them reachable -- dead state that reads as live if anything
       // ever indexes it again.
       //
-      // Like validationErrors, this clears and never populates: only
-      // SpellCalculated fills these, and its own emit passes no draft, so the
-      // predicate is false there and the list survives the emit that built it.
-      suggestions: draftChanged ? const <ResolvedSpell>[] : null,
-      suggestionLevels: draftChanged ? const <String, int>{} : null,
-      ritualSuggestionIds: draftChanged ? const <String>{} : null,
+      // Like validationErrors, this clears and never populates -- and the
+      // ordering that makes that safe is worth stating, because it is the one
+      // place the two predicates behave differently. Only SpellCalculated fills
+      // these, and its emit passes no draft *and* no new level: the breakdown
+      // recomputed here comes from the same draft, against the same catalogs,
+      // that produced `state.breakdown` on the previous funnel pass, so
+      // `breakdownChanged` is false and the list survives the emit that built
+      // it. That rests on an invariant this funnel itself maintains -- every
+      // state the bloc has ever emitted left here with its breakdown computed
+      // from its own draft -- which is exactly what "every emit goes through
+      // here" buys.
+      suggestions: breakdownChanged ? const <ResolvedSpell>[] : null,
+      suggestionLevels: breakdownChanged ? const <String, int>{} : null,
+      ritualSuggestionIds: breakdownChanged ? const <String>{} : null,
     ));
   }
 
@@ -399,6 +446,10 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // resolvable changes the level, and with the level live that has to show
       // immediately rather than at the next unrelated edit. When nothing moves,
       // the recomputed state compares equal and Bloc emits nothing.
+      //
+      // This is also why the funnel invalidates suggestions on the level rather
+      // than on the draft: this branch is the one that moves the first without
+      // the second.
       _emit(emit, state);
     } else if (event is AvailableParametersSynced) {
       spellEngine.updateParameters(event.parameters);
@@ -407,7 +458,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // resolves the *reference* triple each parameter is charged as a delta
       // from: a ward guideline referencing Touch scores its Range differently
       // once Touch resolves than while it does not. The draft has not changed,
-      // but what the engine makes of it has.
+      // but what the engine makes of it has -- and any suggestions on screen
+      // were chosen against the level it used to make of it, so the funnel
+      // drops them here. See the `breakdownChanged` comment in _emit.
       _emit(emit, state);
     } else if (event is RitualDeclarationChanged) {
       _emit(emit, state.copyWith(

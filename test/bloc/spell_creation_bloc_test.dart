@@ -224,15 +224,17 @@ void main() {
     'an edit after SpellCalculated clears the suggestions it produced, and their '
     'companion maps, while the level is recomputed',
     // Each suggestion carries a precomputed level that was compared against a
-    // level the draft no longer has, so a suggestion list is strictly more
-    // stale-dangerous than the validationErrors the emit funnel already clears
-    // on a draft change -- red text saying "Target must be selected" is at
-    // least about the draft in front of you. Left uncleared, the list only
-    // *looked* gone: the screen hid it on `status: editing` while it sat in
-    // state, and a save started after the edit put it back on screen (the
-    // status moves to saving/error, which the screen has to read as "keep
-    // showing a calculated list" so a save does not take the suggestions away
-    // from under someone who did press the button).
+    // reference level this draft no longer has, so the edit does not merely
+    // date the list, it falsifies the comparison the list exists to make. Left
+    // uncleared, the list only *looked* gone: the screen hid it on
+    // `status: editing` while it sat in state, and a save started after the
+    // edit put it back on screen (the status moves to saving/error, which the
+    // screen has to read as "keep showing a calculated list" so a save does not
+    // take the suggestions away from under someone who did press the button).
+    //
+    // The funnel's predicate is the level moving, not the draft moving, so this
+    // test's edit is chosen to do both -- see the two tests after it for the
+    // cases where they come apart.
     build: blocWithOneSuggestion,
     act: (bloc) {
       calculateAValidDraft(bloc);
@@ -260,15 +262,106 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'a catalog sync that moves the level clears the suggestions, though the draft '
+    'never changed',
+    // The case the old draft-based predicate could not see, and the reason the
+    // funnel now clears on the breakdown instead. AvailableParametersSynced
+    // re-emits the *same* state object: the draft is untouched and only the
+    // engine's catalog moved, so `draftChanged` was false and all three
+    // suggestion fields survived a recomputed breakdown -- a list of spells
+    // chosen for being near level 60, sitting under a banner reading 55.
+    //
+    // The guideline below is priced against a Touch Range, the shape every ward
+    // row in the catalog has. Its reference id resolves to nothing while the
+    // parameter catalog is empty, so the draft's Voice Range is charged its
+    // full 2 magnitudes; once `p-touch` (magnitude 1) arrives, the same Range
+    // is charged the delta of 1, and the level drops from 60 to 55 with no
+    // event having touched the draft at all.
+    build: blocWithOneSuggestion,
+    act: (bloc) {
+      final wardEffect = BaseEffect(
+        id: 'e-ward', technique: 'Creo', form: 'Ignem',
+        description: 'Ward against flame', baseLevel: 10,
+        reference: const ParameterTriple(
+          rangeId: 'p-touch', durationId: 'duration-momentary',
+          targetId: 'target-individual'),
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final touchParam = Parameter(
+        id: 'p-touch', name: 'Touch', category: 'Range', magnitude: 1,
+        provenance: Provenance(
+            source: PublicationSource.published,
+            citations: const [Citation(bookId: 'arm5-core')]),
+      );
+
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(wardEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellCalculated());
+      bloc.add(AvailableParametersSynced(
+          [rangeParam, durationParam, targetParam, touchParam]));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          // Still `calculated`: the sync re-emits the state it was given, so
+          // nothing but the level and the invalidated fields moves. That is
+          // what makes this dangerous -- the screen would have gone on showing
+          // the section.
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          .having((s) => s.suggestions, 'suggestions', isEmpty)
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isEmpty)
+          .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', isEmpty)
+          // Recomputed, not merely retained: base 10 + (Range 2-1 + Duration 0
+          // + Target 8) * 5 = 55, down from the 60 the suggestions were chosen
+          // against.
+          .having((s) => s.breakdown?.level, 'breakdown.level', 55)
+          // The draft is the same object the Calculate ran on -- proof the
+          // clear cannot have come from a draft change.
+          .having((s) => s.draft.range?.id, 'draft.range.id', 'p1'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a level-neutral edit after SpellCalculated leaves the suggestions alone',
+    // The other side of moving the predicate off the draft, and intentional.
+    // Prose is scoped to nothing and cannot move the level, so the list is
+    // still a list of spells near *this* level. The screen hides the section
+    // anyway while the status is `editing`; what this buys is that a save which
+    // then fails -- and a save dialog's summary rebuilds the draft exactly like
+    // this -- reopens it with a list that was never invalidated.
+    build: blocWithOneSuggestion,
+    act: (bloc) {
+      calculateAValidDraft(bloc);
+      bloc.add(const SummaryChanged('A pillar of flame, but described better.'));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having((s) => s.draft.summary, 'draft.summary',
+              'A pillar of flame, but described better.')
+          .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isNotEmpty)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'SpellCalculated does not clear the suggestions it just produced',
-    // The reverse guard on the clear above. It fires on `draftChanged`, and
-    // _handleSpellCalculated emits `state.copyWith(...)` without a draft --
-    // same instance, so the predicate is false and the list it just built
-    // survives its own emit. A clear that fired here would empty the
-    // suggestions on the very event that computes them, and the symptom would
-    // be an always-empty Similar Spells section rather than a stale one.
-    // ritualSuggestionIds has the same guard in the Ritual-suggestion test
-    // below, which asserts a populated set straight out of SpellCalculated.
+    // The reverse guard on the clears above, and the ordering the whole change
+    // rests on. _handleSpellCalculated emits `state.copyWith(...)`, so the
+    // funnel recomputes the breakdown from the same draft against the same
+    // catalogs that produced `state.breakdown` on the previous pass -- equal by
+    // value, so `breakdownChanged` is false and the list survives the emit that
+    // built it. A clear that fired here would empty the suggestions on the very
+    // event that computes them, and the symptom would be an always-empty
+    // Similar Spells section rather than a stale one. ritualSuggestionIds has
+    // the same guard in the Ritual-suggestion test below, which asserts a
+    // populated set straight out of SpellCalculated.
     build: blocWithOneSuggestion,
     act: calculateAValidDraft,
     skip: 6,

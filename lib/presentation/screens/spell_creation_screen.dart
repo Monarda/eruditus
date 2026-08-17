@@ -101,12 +101,27 @@ class SpellCreationScreen extends StatelessWidget {
           // suggestions away from under a user who did press the button.
           //
           // `isNotEmpty` is an exact test for that, not a heuristic:
-          // SpellCreationBloc's emit funnel empties `suggestions` on any draft
-          // change, beside the validationErrors it clears there for the same
-          // reason, so a non-empty list can only be one calculated against the
-          // draft on screen. It is load-bearing rather than belt-and-braces --
-          // once the save lifecycle has overwritten `calculated`, the list
-          // itself is the only remaining evidence that the user ever asked.
+          // SpellCreationBloc's emit funnel empties all three suggestion fields
+          // whenever the recomputed breakdown differs from the one already in
+          // state. The level moving is the right trigger rather than the draft
+          // moving, because a suggestion asserts "similar to level N" and only
+          // N can falsify it -- which also covers the case a draft-based
+          // predicate missed, a catalog sync moving the level with the draft
+          // untouched. So a non-empty list here is always one calculated
+          // against the level on screen. It is load-bearing rather than
+          // belt-and-braces -- once the save lifecycle has overwritten
+          // `calculated`, the list itself is the only remaining evidence that
+          // the user ever asked.
+          //
+          // Note what that does *not* claim. A level-neutral edit -- a summary,
+          // a container mode -- leaves the list in state, so a non-empty list
+          // is not evidence the draft is unedited, only that its level is
+          // unchanged. Nothing here needs the stronger claim: such an edit
+          // emits `editing`, which closes the section by the first clause
+          // anyway, and if a save then fails the list reopens still valid,
+          // measured against a level that never moved. The save dialog's own
+          // summary is the same case -- it rebuilds the draft, and only the
+          // prose in it.
           final showSuggestions = state.status == SpellCreationStatus.calculated ||
               ((isSaving || state.status == SpellCreationStatus.error) &&
                   state.suggestions.isNotEmpty);
