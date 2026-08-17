@@ -1494,4 +1494,25 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('typing a summary dispatches SummaryChanged', (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial());
+    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200);
+
+    await tester.enterText(find.byKey(const Key('summary-field')), 'A jet of flame.');
+    await tester.pump();
+
+    verify(() => bloc.add(const SummaryChanged('A jet of flame.'))).called(1);
+  });
+
+  testWidgets('the summary field shows the draft summary', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(summary: 'Seeded from a template.'),
+    );
+    await pumpScreen(tester, state);
+    await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200);
+
+    expect(find.text('Seeded from a template.'), findsOneWidget);
+  });
 }

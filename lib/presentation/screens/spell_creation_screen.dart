@@ -284,6 +284,11 @@ class SpellCreationScreen extends StatelessWidget {
                       bloc.add(RitualDeclarationChanged(declaration)),
                 ),
                 const SizedBox(height: 16),
+                _SummaryField(
+                  key: const Key('summary-field'),
+                  value: draft.summary,
+                  onChanged: (value) => bloc.add(SummaryChanged(value)),
+                ),
                 if (state.validationErrors.isNotEmpty)
                   ...state.validationErrors.map(
                     (e) => Text(e, style: const TextStyle(color: Colors.red)),
@@ -708,6 +713,56 @@ class _SpecificTypeFieldState extends State<_SpecificTypeField> {
     return TextFormField(
       controller: _controller,
       decoration: const InputDecoration(labelText: 'Specific type'),
+      onChanged: widget.onChanged,
+    );
+  }
+}
+
+/// The spell's own summary.
+///
+/// A real [StatefulWidget] owning its controller, for the same reason as
+/// [_SpecificTypeField]: an uncontrolled [TextFormField] seeds itself from
+/// `initialValue` once and never resyncs. That resync is load-bearing here,
+/// not decorative -- a successful save resets the draft to
+/// `SpellCreationState.initial()`, and without it this field would keep
+/// showing the saved spell's summary over an empty draft.
+class _SummaryField extends StatefulWidget {
+  final String? value;
+  final ValueChanged<String> onChanged;
+
+  const _SummaryField({super.key, required this.value, required this.onChanged});
+
+  @override
+  State<_SummaryField> createState() => _SummaryFieldState();
+}
+
+class _SummaryFieldState extends State<_SummaryField> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.value ?? '');
+
+  @override
+  void didUpdateWidget(covariant _SummaryField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_controller.text != (widget.value ?? '')) {
+      _controller.text = widget.value ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: _controller,
+      maxLines: 3,
+      decoration: const InputDecoration(
+        labelText: 'Summary',
+        helperText: 'Required. Shown on this spell\'s card in your library.',
+      ),
       onChanged: widget.onChanged,
     );
   }
