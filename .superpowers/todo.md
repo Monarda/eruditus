@@ -699,46 +699,7 @@ the "Container Targets" sidebar's static/dynamic test.
 
 ### 59. The Level Should Compute Live, Not Behind a Button
 
-**Opened 2026-08-17**, from the user's pass over the spell creation screen.
-Today the level exists only after pressing **Calculate & View Suggestions**
-(`spell_creation_screen.dart:310-314`), and every subsequent edit emits
-`status: editing`, which hides the card again — `showResultsBlock` gates it on
-`status == calculated` (`:81-83`, `:307-308`). So the number a caster is
-designing towards is absent exactly while they are designing.
-
-- [ ] Recompute the breakdown on every draft-changing event and show the level
-      at all times, rather than on a button press
-- [ ] **Decide what the button becomes.** Suggestions are the expensive half —
-      `findSimilarSpells` plus a `calculateBreakdown` per candidate
-      (`spell_creation_bloc.dart:434-472`) — and are the part that genuinely
-      wants a button. The level is a pure function of the draft and does not.
-- [ ] **Decide the incomplete-draft display.** Until a base effect and all three
-      parameters are set there is no level; the card needs a placeholder rather
-      than an absence. Item 60 shrinks this window but does not close it.
-- [ ] **Two ways `calculateBreakdown` throws, both reachable mid-edit**, and a
-      live path must handle them where the current one-shot path does not:
-      negative magnitudes driving the level below 1, and a General guideline
-      with no `chosenBaseLevel` yet (`spell_engine.dart:140-146`). Today
-      `validateSpellDraft` converts the first into a message
-      (`spell_engine.dart:107-123`) and the button is the only caller.
-- [ ] **Do not make validation errors live along with the level.** They render
-      as bare red text (`spell_creation_screen.dart:303-306`); firing them on
-      every keystroke would flag a half-built draft as broken. The level and the
-      errors want different triggers.
-- **Also fixes the missing reset path.** Discard renders only inside
-  `showResultsBlock` (`:315`, `:348-356`), so **before the first Calculate there
-  is no way to abandon a draft at all**. Item 61 closed the case that made this
-  acute — a stuck modifier selection with no way out — but only that case; the
-  escape hatch itself is still missing for every other mistake. Whatever gates
-  the results block should stop gating Discard.
-- **Subsumes item 58's first bullet**, which is the same defect seen through two
-  events (`ContainerModeSelected`, `SummaryChanged`): a level card that is never
-  hidden by an edit cannot be hidden by those two either. Fix here, and close
-  that bullet rather than patching it separately.
-- **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
-  `lib/bloc/spell_creation/spell_creation_bloc.dart`,
-  `lib/presentation/widgets/level_breakdown_card.dart`
-- **See also:** items 60, 58
+**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
 
 ### 60. A Draft Should Start at Its Guideline's Own Reference Triple
 
@@ -831,7 +792,7 @@ a page. Do not plan a "see p. 112" affordance.
 **Opened 2026-08-17, from item 14's whole-branch final review.** Six follow-ups,
 none blocking, all polish on the container-mode feature closed as item 14.
 
-- [ ] **`ContainerModeSelected` hides the level breakdown.** It emits
+- [x] **`ContainerModeSelected` hides the level breakdown.** It emits
       `status: SpellCreationStatus.editing`
       (`lib/bloc/spell_creation/spell_creation_bloc.dart:170`), and the screen
       gates the results block on `status == calculated`
@@ -842,6 +803,10 @@ none blocking, all polish on the container-mode feature closed as item 14.
       The most user-visible of the six. **⚠️ Superseded by item 59**, which
       makes the level card live and so unhideable by *any* edit — do that
       instead of patching these two events, and close this bullet with it.
+      **✅ DONE 2026-08-17 via item 59.** The emit funnel recomputes the level
+      on every event, so no edit can hide it — including these two. Both
+      events' tests now assert the recomputed breakdown compares *equal*
+      (they previously asserted `same`, which encoded the old contract).
 - [ ] **The control nudges a decision the model says is not owed.** It renders
       for any container Target (`spell_creation_screen.dart:255`), and on a
       Momentary container spell the helper line still reads "Not recorded… so
@@ -898,6 +863,39 @@ none blocking, all polish on the container-mode feature closed as item 14.
 
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
+
+### 59. The Spell Level Computes Live (`99aa462`)
+The level existed only after pressing **Calculate & View Suggestions**, and
+every later edit emitted `status: editing`, which hid it again — so the number
+a caster designs towards was absent exactly while they were designing. One
+button gated three unrelated things; they are now separated.
+
+- **Every emit in `SpellCreationBloc` goes through one `_emit` funnel** that
+  attaches `SpellEngine.previewLevel(draft)`. No handler can emit a state whose
+  breakdown disagrees with its own draft, which is why this closed item 58's
+  first bullet as a consequence rather than a patch — a level no edit can hide
+  cannot be hidden by `ContainerModeSelected` or `SummaryChanged` either.
+- **`previewLevel` is not validation, deliberately.** It answers "is there a
+  number", returning either a breakdown or one of four reasons; both of
+  `calculateBreakdown`'s reachable throws (a General guideline before its level
+  is typed, magnitudes below level 1) become reasons rather than escaping.
+  `validateSpellDraft` still owns the catalog invariants and still fires only on
+  the two button presses, because its messages render as red text and firing
+  them per keystroke would flag a half-built draft as broken.
+- **`LevelBreakdown`, `LevelContribution` and `RitualStatus` gained value
+  equality.** The funnel mints a new breakdown per emit and `breakdown` is in
+  `SpellCreationState.props`, so identity comparison would make every state look
+  changed. Two bloc tests that asserted `same(...)` now assert equality.
+- **The button became "Find Similar Spells"** and gates only the suggestions —
+  `findSimilarSpells` plus a `calculateBreakdown` per candidate is the half
+  expensive enough to deserve one.
+- **Save and Discard render unconditionally.** Discard was previously
+  unreachable before the first Calculate, leaving no way to abandon a draft at
+  all. Save is disabled while there is no level, and
+  `_handleSpellSaveRequested` validates first — the affordance is not the gate.
+- **`LevelBreakdownCard` became `LevelBanner`**, pinned above the scroll in a
+  `Column` (above the ListView, so the keyboard cannot cover it), collapsed by
+  default, showing an em dash plus a reason when there is no level.
 
 ### 60. Drafts Seed From Their Guideline's Reference Triple (`657c491`)
 `SpellDraft` left Range/Duration/Target null, so every empty draft showed
