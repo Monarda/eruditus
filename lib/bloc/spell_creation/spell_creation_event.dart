@@ -98,6 +98,16 @@ class RequisiteKindChanged extends SpellCreationEvent {
   List<Object?> get props => [art, newKind];
 }
 
+/// The spell's own prose. Only [summary] is user-editable: `description` is
+/// documented as verbatim rulebook text, which a user-created spell has none
+/// of (design spec Decision 2).
+class SummaryChanged extends SpellCreationEvent {
+  final String summary;
+  const SummaryChanged(this.summary);
+  @override
+  List<Object?> get props => [summary];
+}
+
 class SpellCalculated extends SpellCreationEvent {
   const SpellCalculated();
 }

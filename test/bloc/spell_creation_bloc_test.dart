@@ -1731,5 +1731,40 @@ void main() {
       act: (bloc) => bloc.add(const FormSelected('Imaginem')),
       verify: (bloc) => expect(bloc.state.draft.duration, fireLikeDuration),
     );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'SummaryChanged writes the text to the draft',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(const SummaryChanged('A jet of flame.')),
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.status, 'status', SpellCreationStatus.editing)
+            .having((s) => s.draft.summary, 'draft.summary', 'A jet of flame.'),
+      ],
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'SummaryChanged does not recompute the breakdown',
+      // Prose cannot change a level, so recomputing on every keystroke of a
+      // multi-line field is pure waste. Pinned because the surrounding
+      // handlers all DO recompute, making this the odd one out on purpose.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) {
+        bloc.add(const TechniqueSelected('Creo'));
+        bloc.add(const FormSelected('Ignem'));
+        bloc.add(BaseEffectSelected(creoIgnemEffect));
+        bloc.add(RangeSelected(rangeParam));
+        bloc.add(DurationSelected(durationParam));
+        bloc.add(TargetSelected(targetParam));
+        bloc.add(const SpellCalculated());
+        bloc.add(const SummaryChanged('A jet of flame.'));
+      },
+      skip: 7,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.draft.summary, 'draft.summary', 'A jet of flame.')
+            .having((s) => s.calculatedLevel, 'calculatedLevel', isNotNull),
+      ],
+    );
   });
 }

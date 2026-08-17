@@ -209,6 +209,15 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(adjustments: updated),
       ));
+    } else if (event is SummaryChanged) {
+      // Draft only, deliberately no recompute: prose cannot change a level,
+      // unlike every neighbouring handler here. Nor is there any pruning to
+      // do on the way out -- prose is scoped to no Technique, Form or
+      // guideline, so nothing it touches can go stale.
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(summary: event.summary),
+      ));
     } else if (event is ModifierOptionSelected) {
       final modifier =
           spellEngine.allModifiers.where((m) => m.id == event.modifierId).firstOrNull;
