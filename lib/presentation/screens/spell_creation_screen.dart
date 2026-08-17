@@ -889,6 +889,9 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Name Your Spell'),
+      // Two fields now, not one -- a short viewport with the keyboard up
+      // could otherwise overflow the non-scrolling Column below.
+      scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -920,10 +923,13 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
         ),
         ElevatedButton(
           key: const Key('confirm-save-button'),
+          // Trimmed to match _canSave's own gate (which trims before checking
+          // isNotEmpty) -- otherwise a name or summary of all-whitespace could
+          // pass the gate but land untrimmed in the saved record.
           onPressed: _canSave
               ? () => Navigator.of(context).pop((
-                  name: _nameController.text,
-                  summary: widget.requiresSummary ? _summaryController.text : null,
+                  name: _nameController.text.trim(),
+                  summary: widget.requiresSummary ? _summaryController.text.trim() : null,
                 ))
               : null,
           child: const Text('Save'),
