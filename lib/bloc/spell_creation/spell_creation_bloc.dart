@@ -96,31 +96,37 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is BaseEffectSelected) {
+      // Captured before the draft moves: the seed keeps any parameter the
+      // user moved off this triple, and re-seeds the ones they never touched.
+      final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
-        _withPrunedModifiers(state.draft.copyWith(
-          baseEffect: event.effect,
-          // A template link asserts lineage to the *previous* base effect;
-          // it cannot survive a change to a new one, General or not.
-          templateId: null,
-          // Same reasoning as templateId, unconditionally: analogyRationale
-          // explains why the draft's Technique/Form diverged from the
-          // *previous* base effect specifically. That explanation cannot be
-          // assumed to describe a divergence from the newly-selected effect
-          // too -- even when the new effect's Technique/Form still happens
-          // to differ from the draft's own, the stored prose was written
-          // about the old guideline, not this one. Instantiating a fresh
-          // by-analogy template (TemplateInstantiated) is the only path that
-          // sets it again, with a rationale actually about the effect it
-          // names.
-          analogyRationale: null,
-          // Deliberate: unlike Technique/Form, a chosen level isn't tied to
-          // one specific General guideline -- it's "spell level N", equally
-          // meaningful against whichever General guideline is selected. Only
-          // clear it when the new effect isn't General at all; forcing a
-          // re-type on every guideline switch would be friction with no
-          // correctness gain.
-          chosenBaseLevel: event.effect.isGeneral ? state.draft.chosenBaseLevel : null,
-          chosenSlots: _prunedSlots(state.draft.chosenSlots, event.effect),
+        _withPrunedModifiers(_withSeededParameters(
+          state.draft.copyWith(
+            baseEffect: event.effect,
+            // A template link asserts lineage to the *previous* base effect;
+            // it cannot survive a change to a new one, General or not.
+            templateId: null,
+            // Same reasoning as templateId, unconditionally: analogyRationale
+            // explains why the draft's Technique/Form diverged from the
+            // *previous* base effect specifically. That explanation cannot be
+            // assumed to describe a divergence from the newly-selected effect
+            // too -- even when the new effect's Technique/Form still happens
+            // to differ from the draft's own, the stored prose was written
+            // about the old guideline, not this one. Instantiating a fresh
+            // by-analogy template (TemplateInstantiated) is the only path that
+            // sets it again, with a rationale actually about the effect it
+            // names.
+            analogyRationale: null,
+            // Deliberate: unlike Technique/Form, a chosen level isn't tied to
+            // one specific General guideline -- it's "spell level N", equally
+            // meaningful against whichever General guideline is selected. Only
+            // clear it when the new effect isn't General at all; forcing a
+            // re-type on every guideline switch would be friction with no
+            // correctness gain.
+            chosenBaseLevel: event.effect.isGeneral ? state.draft.chosenBaseLevel : null,
+            chosenSlots: _prunedSlots(state.draft.chosenSlots, event.effect),
+          ),
+          previousReference,
         )),
         reapplyDefault: true,
       );
