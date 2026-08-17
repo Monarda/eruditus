@@ -319,7 +319,7 @@ void main() {
       // The RitualSection widget added between the Modifiers section and the
       // Calculate button (Task 7 of the Ritual Spells work) added enough
       // extra height that, once the viewport has scrolled forward to reach
-      // calculate-button/level-breakdown-card, the requisite row further up
+      // the calculate button, the requisite row further up
       // the list is scrolled out of view above the viewport. scrollTo only
       // ever scrolls forward, so getting back to it needs a negative delta —
       // same technique already used below for form-dropdown.
@@ -375,10 +375,13 @@ void main() {
       expect(find.byKey(const Key('requisite-row-Auram')), findsOneWidget);
 
       // Free by default, so the level matches the no-requisite calculation.
+      // No scroll to reach the level any more: the banner is pinned above the
+      // ListView (todo item 59), so it is on screen wherever the form is
+      // scrolled to. The button press stays because it still drives the
+      // suggestions, which this flow leaves exercised.
       await scrollTo(find.byKey(const Key('calculate-button')));
       await tester.tap(find.byKey(const Key('calculate-button')));
       await tester.pumpAndSettle();
-      await scrollTo(find.byKey(const Key('level-breakdown-card')));
       final levelWithFreeRequisite = tester
           .widget<Text>(find.descendant(
             of: find.byKey(const Key('breakdown-total')),
@@ -397,7 +400,6 @@ void main() {
       await scrollTo(find.byKey(const Key('calculate-button')));
       await tester.tap(find.byKey(const Key('calculate-button')));
       await tester.pumpAndSettle();
-      await scrollTo(find.byKey(const Key('level-breakdown-card')));
       final levelWithAddingRequisite = tester
           .widget<Text>(find.descendant(
             of: find.byKey(const Key('breakdown-total')),

@@ -14,7 +14,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/target_type.dart';
-import 'package:eruditus/presentation/widgets/level_breakdown_card.dart';
+import 'package:eruditus/presentation/widgets/level_banner.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 import 'package:eruditus/presentation/widgets/ritual_section.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
@@ -78,315 +78,341 @@ class SpellCreationScreen extends StatelessWidget {
               .toList();
 
           final isSaving = state.status == SpellCreationStatus.saving;
-          final showResultsBlock = state.status == SpellCreationStatus.calculated ||
+          // Narrowed from the old showResultsBlock, which gated the level card
+          // and the Save/Discard row too. Only the suggestions are still worth
+          // a button (findSimilarSpells plus a calculateBreakdown per
+          // candidate); the level is a pure function of the draft and is now
+          // always on screen. An edit still clears the list, which stays
+          // right -- suggestions computed against a superseded level should
+          // not linger.
+          final showSuggestions = state.status == SpellCreationStatus.calculated ||
               isSaving ||
               state.status == SpellCreationStatus.error;
 
           return Scaffold(
             appBar: AppBar(title: const Text('Create Spell')),
-            body: ListView(
-              key: const Key('spell-creation-scroll'),
-              padding: const EdgeInsets.all(16),
+            body: Column(
               children: [
-                DropdownButtonFormField<String>(
-                  key: const Key('technique-dropdown'),
-                  decoration: const InputDecoration(labelText: 'Technique'),
-                  initialValue: draft.technique,
-                  items: techniques
-                      .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) bloc.add(TechniqueSelected(value));
-                  },
+                LevelBanner(
+                  breakdown: state.breakdown,
+                  unavailableReason: state.levelUnavailableReason,
                 ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  key: const Key('form-dropdown'),
-                  decoration: const InputDecoration(labelText: 'Form'),
-                  initialValue: draft.form,
-                  items: forms
-                      .map((f) => DropdownMenuItem(value: f, child: Text(f)))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) bloc.add(FormSelected(value));
-                  },
-                ),
-                const SizedBox(height: 8),
-                if (effectsForSelection.isNotEmpty)
-                  DropdownButtonFormField<BaseEffect>(
-                    key: const Key('base-effect-dropdown'),
-                    decoration: const InputDecoration(labelText: 'Base Effect'),
-                    initialValue: draft.baseEffect,
-                    // Base effect descriptions can be long, and a Form switch
-                    // swaps in a differently-sized list on the very next
-                    // rebuild. Without isExpanded, the field sizes itself to
-                    // its widest item's intrinsic width, which briefly
-                    // overflows the row during that transition (caught by
-                    // the real-bloc pruning integration test in Task 14).
-                    isExpanded: true,
-                    items: effectsForSelection
-                        .map((e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(
-                                // A General guideline has no baseLevel to print
-                                // (Core Rules leaves that row's level to the
-                                // caster) -- printing the literal null would
-                                // read as "(Base null)". The numbered case is
-                                // untouched: existing tests pin its exact text.
-                                '${e.description} (${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'}'
-                                '${e.requiresVirtue == null ? '' : ', requires ${e.requiresVirtue}'})',
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) bloc.add(BaseEffectSelected(value));
-                    },
-                  ),
-                if (draft.baseEffect?.isGeneral ?? false) ...[
-                  const SizedBox(height: 8),
-                  // Controlled, because it is externally settable: picking
-                  // "Learn at level…" on a template in the Library tab
-                  // (TemplateInstantiated) can set a *new* General base
-                  // effect with chosenBaseLevel reset to null while this
-                  // screen's widget state survives underneath main.dart's
-                  // IndexedStack. isGeneral stays true across that swap, so
-                  // the `if` above never flips and this field's Element is
-                  // never torn down -- an uncontrolled field would never
-                  // re-read initialValue and would keep showing whatever the
-                  // previous guideline's level was typed as.
-                  _GuidelineLevelField(
-                    value: draft.chosenBaseLevel,
-                    onChanged: (value) => bloc.add(ChosenBaseLevelChanged(value)),
-                  ),
-                  if (state.generalEffectSentence != null)
-                    Text(state.generalEffectSentence!, key: const Key('general-effect-sentence')),
-                ],
-                if (draft.baseEffect?.openSlots.contains(OpenSlotKind.realm) ?? false) ...[
-                  const SizedBox(height: 8),
-                  // ValueKey forces a fresh Element (and a fresh initialValue
-                  // read) whenever the chosen realm changes out from under
-                  // this field -- e.g. TemplateInstantiated setting a new
-                  // pre-filled value while this screen's widget state
-                  // survives underneath main.dart's IndexedStack. A dropdown
-                  // has no in-progress typing state to lose, unlike
-                  // _GuidelineLevelField's text field, so a full StatefulWidget
-                  // isn't needed here -- keying by value is sufficient.
-                  DropdownButtonFormField<String>(
-                    key: ValueKey('chosen-realm-field-${draft.chosenSlots['realm']}'),
-                    decoration: const InputDecoration(labelText: 'Realm'),
-                    initialValue: draft.chosenSlots['realm'],
-                    items: const ['Divine', 'Faerie', 'Infernal', 'Magic']
-                        .map((realm) => DropdownMenuItem(value: realm, child: Text(realm)))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) bloc.add(OpenSlotChosen('realm', value));
-                    },
-                  ),
-                ],
-                if (draft.baseEffect?.openSlots.contains(OpenSlotKind.form) ?? false) ...[
-                  const SizedBox(height: 8),
-                  // Same ValueKey rationale as the realm dropdown above --
-                  // forces a fresh initialValue read on external change
-                  // (template instantiation) without needing a StatefulWidget.
-                  DropdownButtonFormField<String>(
-                    key: ValueKey('chosen-form-field-${draft.chosenSlots['form']}'),
-                    decoration: const InputDecoration(labelText: 'Form'),
-                    initialValue: draft.chosenSlots['form'],
-                    items: ArsForms.all
-                        .map((form) => DropdownMenuItem(value: form, child: Text(form)))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) bloc.add(OpenSlotChosen('form', value));
-                    },
-                  ),
-                ],
-                if (draft.baseEffect?.openSlots.contains(OpenSlotKind.specificType) ?? false) ...[
-                  const SizedBox(height: 8),
-                  _SpecificTypeField(
-                    key: const Key('chosen-specific-type-field'),
-                    value: draft.chosenSlots['specificType'],
-                    onChanged: (value) => bloc.add(OpenSlotChosen('specificType', value)),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Text('Every spell requires exactly one of each:', style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 12),
-                // Range dropdown
-                _buildParameterDropdown(
-                  key: const Key('range-dropdown'),
-                  label: 'Range',
-                  category: 'Range',
-                  parameters: configState.parameters,
-                  selectedParameter: draft.range,
-                  form: draft.form,
-                  onChanged: (param) {
-                    if (param != null) bloc.add(RangeSelected(param));
-                  },
-                ),
-                const SizedBox(height: 12),
-                // Duration dropdown
-                _buildParameterDropdown(
-                  key: const Key('duration-dropdown'),
-                  label: 'Duration',
-                  category: 'Duration',
-                  parameters: configState.parameters,
-                  selectedParameter: draft.duration,
-                  form: draft.form,
-                  onChanged: (param) {
-                    if (param != null) bloc.add(DurationSelected(param));
-                  },
-                ),
-                const SizedBox(height: 12),
-                // Target dropdown
-                _buildParameterDropdown(
-                  key: const Key('target-dropdown'),
-                  label: 'Target',
-                  category: 'Target',
-                  parameters: configState.parameters,
-                  selectedParameter: draft.target,
-                  form: draft.form,
-                  onChanged: (param) {
-                    if (param != null) bloc.add(TargetSelected(param));
-                  },
-                ),
-                if (draft.target?.targetType == TargetType.container) ...[
-                  const SizedBox(height: 12),
-                  _ContainerModeField(
-                    value: draft.containerMode,
-                    targetName: draft.target!.name,
-                    onChanged: (mode) => bloc.add(ContainerModeSelected(mode)),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                _buildRequisitesSection(context, bloc, draft),
-                const SizedBox(height: 16),
-                _buildAdjustmentsSection(context, bloc, draft),
-                const SizedBox(height: 16),
-                ModifiersSection(
-                  modifiers: modifiersForSelection,
-                  selected: draft.selectedModifiers,
-                  onSelect: (modifierId, optionId) =>
-                      bloc.add(ModifierOptionSelected(modifierId, optionId)),
-                  onDeselect: (modifierId, optionId) =>
-                      bloc.add(ModifierOptionDeselected(modifierId, optionId)),
-                ),
-                const SizedBox(height: 16),
-                RitualSection(
-                  // Gated the same as LevelBreakdownCard below: state.breakdown
-                  // is carried forward by copyWith across edits made after
-                  // Calculate, so without this gate the banner would keep
-                  // showing a reason computed for a draft the user has since
-                  // changed (e.g. still reading "Year duration" after Duration
-                  // was switched to Sun).
-                  ritualStatus: showResultsBlock
-                      ? (state.breakdown?.ritualStatus ?? const RitualStatus.notRitual())
-                      : const RitualStatus.notRitual(),
-                  declaration: draft.ritualDeclaration,
-                  showLastingCreationOption: draft.isEligibleForLastingCreationDeclaration,
-                  rangeName: draft.range?.name ?? '',
-                  durationName: draft.duration?.name ?? '',
-                  targetName: draft.target?.name ?? '',
-                  guidelineIsSuggested: draft.baseEffect?.ritualRequirement ==
-                      RitualRequirement.suggested,
-                  onDeclarationChanged: (declaration) =>
-                      bloc.add(RitualDeclarationChanged(declaration)),
-                ),
-                const SizedBox(height: 16),
-                _SummaryField(
-                  key: const Key('summary-field'),
-                  value: draft.summary,
-                  onChanged: (value) => bloc.add(SummaryChanged(value)),
-                ),
-                if (state.validationErrors.isNotEmpty)
-                  ...state.validationErrors.map(
-                    (e) => Text(e, style: const TextStyle(color: Colors.red)),
-                  ),
-                if (showResultsBlock && state.breakdown != null)
-                  LevelBreakdownCard(breakdown: state.breakdown!),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  key: const Key('calculate-button'),
-                  onPressed: () => bloc.add(const SpellCalculated()),
-                  child: const Text('Calculate & View Suggestions'),
-                ),
-                if (showResultsBlock) ...[
-                  const SizedBox(height: 16),
-                  Text('Similar Spells', style: Theme.of(context).textTheme.titleMedium),
-                  if (state.suggestions.isEmpty)
-                    const Text('No similar spells found.')
-                  else
-                    ...state.suggestions.map(
-                      (s) => SpellCard(
-                        entry: s,
-                        level: state.suggestionLevels[s.id],
-                        isRitual: state.ritualSuggestionIds.contains(s.id),
-                        // Missing here would mean a suggested spell built on
-                        // a General guideline shows no "Gen" chip, unlike the
-                        // Library screen's template cards -- the same badge
-                        // should read the same way everywhere it appears.
-                        isGeneral: s.baseEffect?.isGeneral ?? false,
-                        // Same reasoning as the Gen chip above: this is the
-                        // other ResolvedSpell -> SpellCard call site (see
-                        // SpellLibraryScreen's), and a flawed suggestion
-                        // should read as flawed here too, not just in the
-                        // Library.
-                        problems: s.problems,
-                      ),
-                    ),
-                  if (state.status == SpellCreationStatus.error)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        state.errorMessage ?? 'Failed to save spell.',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-                  Row(
+                Expanded(
+                  child: ListView(
+                    key: const Key('spell-creation-scroll'),
+                    padding: const EdgeInsets.all(16),
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          key: const Key('discard-button'),
-                          onPressed: isSaving ? null : () => bloc.add(const SpellDiscarded()),
-                          child: const Text('Discard'),
-                        ),
+                      DropdownButtonFormField<String>(
+                        key: const Key('technique-dropdown'),
+                        decoration: const InputDecoration(labelText: 'Technique'),
+                        initialValue: draft.technique,
+                        items: techniques
+                            .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) bloc.add(TechniqueSelected(value));
+                        },
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton(
-                          key: const Key('save-button'),
-                          onPressed: isSaving
-                              ? null
-                              : () async {
-                                  final hasProse =
-                                      (draft.summary ?? '').trim().isNotEmpty ||
-                                          (draft.description ?? '').trim().isNotEmpty;
-                                  final result =
-                                      await showDialog<({String name, String? summary})>(
-                                    context: context,
-                                    builder: (dialogContext) =>
-                                        _SaveSpellDialog(requiresSummary: !hasProse),
-                                  );
-                                  if (result != null && result.name.isNotEmpty) {
-                                    bloc.add(SpellSaveRequested(result.name,
-                                        summary: result.summary));
-                                  }
-                                },
-                          child: isSaving
-                              ? const SizedBox(
-                                  height: 16,
-                                  width: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Save to Library'),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        key: const Key('form-dropdown'),
+                        decoration: const InputDecoration(labelText: 'Form'),
+                        initialValue: draft.form,
+                        items: forms
+                            .map((f) => DropdownMenuItem(value: f, child: Text(f)))
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) bloc.add(FormSelected(value));
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      if (effectsForSelection.isNotEmpty)
+                        DropdownButtonFormField<BaseEffect>(
+                          key: const Key('base-effect-dropdown'),
+                          decoration: const InputDecoration(labelText: 'Base Effect'),
+                          initialValue: draft.baseEffect,
+                          // Base effect descriptions can be long, and a Form switch
+                          // swaps in a differently-sized list on the very next
+                          // rebuild. Without isExpanded, the field sizes itself to
+                          // its widest item's intrinsic width, which briefly
+                          // overflows the row during that transition (caught by
+                          // the real-bloc pruning integration test in Task 14).
+                          isExpanded: true,
+                          items: effectsForSelection
+                              .map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text(
+                                      // A General guideline has no baseLevel to print
+                                      // (Core Rules leaves that row's level to the
+                                      // caster) -- printing the literal null would
+                                      // read as "(Base null)". The numbered case is
+                                      // untouched: existing tests pin its exact text.
+                                      '${e.description} (${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'}'
+                                      '${e.requiresVirtue == null ? '' : ', requires ${e.requiresVirtue}'})',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) bloc.add(BaseEffectSelected(value));
+                          },
                         ),
+                      if (draft.baseEffect?.isGeneral ?? false) ...[
+                        const SizedBox(height: 8),
+                        // Controlled, because it is externally settable: picking
+                        // "Learn at level…" on a template in the Library tab
+                        // (TemplateInstantiated) can set a *new* General base
+                        // effect with chosenBaseLevel reset to null while this
+                        // screen's widget state survives underneath main.dart's
+                        // IndexedStack. isGeneral stays true across that swap, so
+                        // the `if` above never flips and this field's Element is
+                        // never torn down -- an uncontrolled field would never
+                        // re-read initialValue and would keep showing whatever the
+                        // previous guideline's level was typed as.
+                        _GuidelineLevelField(
+                          value: draft.chosenBaseLevel,
+                          onChanged: (value) => bloc.add(ChosenBaseLevelChanged(value)),
+                        ),
+                        if (state.generalEffectSentence != null)
+                          Text(state.generalEffectSentence!, key: const Key('general-effect-sentence')),
+                      ],
+                      if (draft.baseEffect?.openSlots.contains(OpenSlotKind.realm) ?? false) ...[
+                        const SizedBox(height: 8),
+                        // ValueKey forces a fresh Element (and a fresh initialValue
+                        // read) whenever the chosen realm changes out from under
+                        // this field -- e.g. TemplateInstantiated setting a new
+                        // pre-filled value while this screen's widget state
+                        // survives underneath main.dart's IndexedStack. A dropdown
+                        // has no in-progress typing state to lose, unlike
+                        // _GuidelineLevelField's text field, so a full StatefulWidget
+                        // isn't needed here -- keying by value is sufficient.
+                        DropdownButtonFormField<String>(
+                          key: ValueKey('chosen-realm-field-${draft.chosenSlots['realm']}'),
+                          decoration: const InputDecoration(labelText: 'Realm'),
+                          initialValue: draft.chosenSlots['realm'],
+                          items: const ['Divine', 'Faerie', 'Infernal', 'Magic']
+                              .map((realm) => DropdownMenuItem(value: realm, child: Text(realm)))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) bloc.add(OpenSlotChosen('realm', value));
+                          },
+                        ),
+                      ],
+                      if (draft.baseEffect?.openSlots.contains(OpenSlotKind.form) ?? false) ...[
+                        const SizedBox(height: 8),
+                        // Same ValueKey rationale as the realm dropdown above --
+                        // forces a fresh initialValue read on external change
+                        // (template instantiation) without needing a StatefulWidget.
+                        DropdownButtonFormField<String>(
+                          key: ValueKey('chosen-form-field-${draft.chosenSlots['form']}'),
+                          decoration: const InputDecoration(labelText: 'Form'),
+                          initialValue: draft.chosenSlots['form'],
+                          items: ArsForms.all
+                              .map((form) => DropdownMenuItem(value: form, child: Text(form)))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) bloc.add(OpenSlotChosen('form', value));
+                          },
+                        ),
+                      ],
+                      if (draft.baseEffect?.openSlots.contains(OpenSlotKind.specificType) ?? false) ...[
+                        const SizedBox(height: 8),
+                        _SpecificTypeField(
+                          key: const Key('chosen-specific-type-field'),
+                          value: draft.chosenSlots['specificType'],
+                          onChanged: (value) => bloc.add(OpenSlotChosen('specificType', value)),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      Text('Every spell requires exactly one of each:', style: Theme.of(context).textTheme.bodySmall),
+                      const SizedBox(height: 12),
+                      // Range dropdown
+                      _buildParameterDropdown(
+                        key: const Key('range-dropdown'),
+                        label: 'Range',
+                        category: 'Range',
+                        parameters: configState.parameters,
+                        selectedParameter: draft.range,
+                        form: draft.form,
+                        onChanged: (param) {
+                          if (param != null) bloc.add(RangeSelected(param));
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      // Duration dropdown
+                      _buildParameterDropdown(
+                        key: const Key('duration-dropdown'),
+                        label: 'Duration',
+                        category: 'Duration',
+                        parameters: configState.parameters,
+                        selectedParameter: draft.duration,
+                        form: draft.form,
+                        onChanged: (param) {
+                          if (param != null) bloc.add(DurationSelected(param));
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      // Target dropdown
+                      _buildParameterDropdown(
+                        key: const Key('target-dropdown'),
+                        label: 'Target',
+                        category: 'Target',
+                        parameters: configState.parameters,
+                        selectedParameter: draft.target,
+                        form: draft.form,
+                        onChanged: (param) {
+                          if (param != null) bloc.add(TargetSelected(param));
+                        },
+                      ),
+                      if (draft.target?.targetType == TargetType.container) ...[
+                        const SizedBox(height: 12),
+                        _ContainerModeField(
+                          value: draft.containerMode,
+                          targetName: draft.target!.name,
+                          onChanged: (mode) => bloc.add(ContainerModeSelected(mode)),
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      _buildRequisitesSection(context, bloc, draft),
+                      const SizedBox(height: 16),
+                      _buildAdjustmentsSection(context, bloc, draft),
+                      const SizedBox(height: 16),
+                      ModifiersSection(
+                        modifiers: modifiersForSelection,
+                        selected: draft.selectedModifiers,
+                        onSelect: (modifierId, optionId) =>
+                            bloc.add(ModifierOptionSelected(modifierId, optionId)),
+                        onDeselect: (modifierId, optionId) =>
+                            bloc.add(ModifierOptionDeselected(modifierId, optionId)),
+                      ),
+                      const SizedBox(height: 16),
+                      RitualSection(
+                        // Ungated, unlike before: this used to be forced to
+                        // notRitual outside the results block because state.breakdown
+                        // was a snapshot carried forward across edits, so the banner
+                        // could keep showing a reason computed for a draft the user
+                        // had since changed. The breakdown is recomputed on every
+                        // emit now, so there is no stale value left to guard against.
+                        ritualStatus: state.breakdown?.ritualStatus ?? const RitualStatus.notRitual(),
+                        declaration: draft.ritualDeclaration,
+                        showLastingCreationOption: draft.isEligibleForLastingCreationDeclaration,
+                        rangeName: draft.range?.name ?? '',
+                        durationName: draft.duration?.name ?? '',
+                        targetName: draft.target?.name ?? '',
+                        guidelineIsSuggested: draft.baseEffect?.ritualRequirement ==
+                            RitualRequirement.suggested,
+                        onDeclarationChanged: (declaration) =>
+                            bloc.add(RitualDeclarationChanged(declaration)),
+                      ),
+                      const SizedBox(height: 16),
+                      _SummaryField(
+                        key: const Key('summary-field'),
+                        value: draft.summary,
+                        onChanged: (value) => bloc.add(SummaryChanged(value)),
+                      ),
+                      if (state.validationErrors.isNotEmpty)
+                        ...state.validationErrors.map(
+                          (e) => Text(e, style: const TextStyle(color: Colors.red)),
+                        ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        key: const Key('calculate-button'),
+                        onPressed: () => bloc.add(const SpellCalculated()),
+                        child: const Text('Find Similar Spells'),
+                      ),
+                      if (showSuggestions) ...[
+                        const SizedBox(height: 16),
+                        Text('Similar Spells', style: Theme.of(context).textTheme.titleMedium),
+                        if (state.suggestions.isEmpty)
+                          const Text('No similar spells found.')
+                        else
+                          ...state.suggestions.map(
+                            (s) => SpellCard(
+                              entry: s,
+                              level: state.suggestionLevels[s.id],
+                              isRitual: state.ritualSuggestionIds.contains(s.id),
+                              // Missing here would mean a suggested spell built on
+                              // a General guideline shows no "Gen" chip, unlike the
+                              // Library screen's template cards -- the same badge
+                              // should read the same way everywhere it appears.
+                              isGeneral: s.baseEffect?.isGeneral ?? false,
+                              // Same reasoning as the Gen chip above: this is the
+                              // other ResolvedSpell -> SpellCard call site (see
+                              // SpellLibraryScreen's), and a flawed suggestion
+                              // should read as flawed here too, not just in the
+                              // Library.
+                              problems: s.problems,
+                            ),
+                          ),
+                        if (state.status == SpellCreationStatus.error)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              state.errorMessage ?? 'Failed to save spell.',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                      ],
+                      // Outside the suggestions block, unlike before. Discard used
+                      // to render only alongside the suggestions, so before the
+                      // first button press there was no way to abandon a draft at
+                      // all -- the one control whose whole purpose is escaping a
+                      // draft you do not want was unreachable until you had asked
+                      // for suggestions on it.
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              key: const Key('discard-button'),
+                              onPressed: isSaving ? null : () => bloc.add(const SpellDiscarded()),
+                              child: const Text('Discard'),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton(
+                              key: const Key('save-button'),
+                              // Disabled with no level as well as mid-save. An
+                              // affordance only -- SpellCreationBloc validates the
+                              // draft independently on SpellSaveRequested -- but a
+                              // draft with no computable level has nothing to save,
+                              // and the banner pinned above already says what is
+                              // missing, so offering the dialog would only lead to a
+                              // rejection the user could have been spared.
+                              onPressed: isSaving || state.breakdown == null
+                                  ? null
+                                  : () async {
+                                      final hasProse =
+                                          (draft.summary ?? '').trim().isNotEmpty ||
+                                              (draft.description ?? '').trim().isNotEmpty;
+                                      final result =
+                                          await showDialog<({String name, String? summary})>(
+                                        context: context,
+                                        builder: (dialogContext) =>
+                                            _SaveSpellDialog(requiresSummary: !hasProse),
+                                      );
+                                      if (result != null && result.name.isNotEmpty) {
+                                        bloc.add(SpellSaveRequested(result.name,
+                                            summary: result.summary));
+                                      }
+                                    },
+                              child: isSaving
+                                  ? const SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Text('Save to Library'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ],
             ),
           );
