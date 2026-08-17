@@ -12,6 +12,7 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
@@ -1731,7 +1732,9 @@ void main() {
       act: (bloc) => bloc.add(const FormSelected('Imaginem')),
       verify: (bloc) => expect(bloc.state.draft.duration, fireLikeDuration),
     );
+  });
 
+  group('SummaryChanged', () {
     blocTest<SpellCreationBloc, SpellCreationState>(
       'SummaryChanged writes the text to the draft',
       build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
@@ -1743,28 +1746,51 @@ void main() {
       ],
     );
 
+    late LevelBreakdown breakdownBeforeSummary;
+
     blocTest<SpellCreationBloc, SpellCreationState>(
       'SummaryChanged does not recompute the breakdown',
       // Prose cannot change a level, so recomputing on every keystroke of a
-      // multi-line field is pure waste. Pinned because the surrounding
-      // handlers all DO recompute, making this the odd one out on purpose.
+      // multi-line field is pure waste. Identity, not value: copyWith carries
+      // the old breakdown forward as `breakdown ?? this.breakdown`, so a value
+      // check would pass whether or not a recompute had run.
       build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
-      act: (bloc) {
-        bloc.add(const TechniqueSelected('Creo'));
-        bloc.add(const FormSelected('Ignem'));
-        bloc.add(BaseEffectSelected(creoIgnemEffect));
-        bloc.add(RangeSelected(rangeParam));
-        bloc.add(DurationSelected(durationParam));
-        bloc.add(TargetSelected(targetParam));
-        bloc.add(const SpellCalculated());
-        bloc.add(const SummaryChanged('A jet of flame.'));
+      seed: () {
+        // Start with a state that has been calculated, so we have a baseline
+        // breakdown to verify doesn't change when SummaryChanged runs.
+        breakdownBeforeSummary = spellEngine.calculateBreakdown(
+          baseEffect: creoIgnemEffect,
+          chosenBaseLevel: null,
+          range: rangeParam,
+          duration: durationParam,
+          target: targetParam,
+          selectedModifiers: const {},
+          requisites: const {},
+          adjustments: const [],
+          ritualDeclaration: RitualDeclaration.none,
+        );
+        return SpellCreationState(
+          status: SpellCreationStatus.calculated,
+          draft: SpellDraft(
+            technique: 'Creo',
+            form: 'Ignem',
+            baseEffect: creoIgnemEffect,
+            range: rangeParam,
+            duration: durationParam,
+            target: targetParam,
+          ),
+          breakdown: breakdownBeforeSummary,
+          calculatedLevel: breakdownBeforeSummary.level,
+        );
       },
-      skip: 7,
-      expect: () => [
-        isA<SpellCreationState>()
-            .having((s) => s.draft.summary, 'draft.summary', 'A jet of flame.')
-            .having((s) => s.calculatedLevel, 'calculatedLevel', isNotNull),
-      ],
+      act: (bloc) => bloc.add(const SummaryChanged('A jet of flame.')),
+      verify: (bloc) {
+        expect(bloc.state.breakdown, isNotNull,
+            reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
+        expect(bloc.state.draft.summary, 'A jet of flame.');
+        expect(bloc.state.breakdown, same(breakdownBeforeSummary),
+            reason: 'SummaryChanged must not recompute the breakdown');
+      },
     );
   });
 }
