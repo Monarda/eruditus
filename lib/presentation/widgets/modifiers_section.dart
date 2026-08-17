@@ -89,18 +89,36 @@ class _ModifiersSectionState extends State<ModifiersSection> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: DropdownButtonFormField<ModifierOption>(
+      // Nullable, for the sake of the None entry below: without an item to
+      // pick, a single-select modifier is a one-way choice -- and since
+      // no-gestures and no-words are scoped to no Technique or Form, they
+      // appear on every draft, where a mis-click would cost +1 or +2
+      // magnitudes permanently. See todo item 61.
+      child: DropdownButtonFormField<ModifierOption?>(
         key: Key('modifier-dropdown-${modifier.id}'),
         decoration: InputDecoration(labelText: modifier.name),
         initialValue: value,
-        items: modifier.options
-            .map((option) => DropdownMenuItem(
-                  value: option,
-                  child: Text('${option.label} (+${option.magnitude})'),
-                ))
-            .toList(),
+        items: [
+          const DropdownMenuItem<ModifierOption?>(value: null, child: Text('None')),
+          ...modifier.options.map((option) => DropdownMenuItem<ModifierOption?>(
+                value: option,
+                child: Text('${option.label} (+${option.magnitude})'),
+              )),
+        ],
         onChanged: (option) {
-          if (option != null) widget.onSelect(modifier.id, option.id);
+          if (option != null) {
+            widget.onSelect(modifier.id, option.id);
+            return;
+          }
+          // Every selected id, not just the first. `value` above already
+          // tolerates a stored selection carrying more than one option by
+          // showing nothing; clearing has to tolerate it too, or the surplus
+          // would survive with the field reading None and no way left to
+          // reach it. Deselecting nothing when nothing is selected falls out
+          // of the same loop.
+          for (final optionId in selectedIds) {
+            widget.onDeselect(modifier.id, optionId);
+          }
         },
       ),
     );
