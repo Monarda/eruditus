@@ -201,23 +201,37 @@ is in scope because leaving the two halves of one rulebook rule encoded two
 different ways, with nothing in the data saying why, is exactly the kind of drift
 item 36 exists to hunt.
 
-### The guard test
+### The guard tests
 
-Narrowing by id is only safe if a typo fails the build. Add one assertion over
-`modifiers.json`: **every id in a modifier's `effectIds` names a real base effect
-whose own `technique` and `form` match that modifier's scope.**
+**Correction, made while planning:** an earlier draft of this section called the
+guard wholly new and put it in the Python catalog tests. Both were wrong.
+`test/data/asset_modifier_integrity_test.dart` already exists and is the home for
+exactly this kind of assertion, and one half of the guard is already there.
 
-Without it, a mistyped id silently disables the modifier for every spell — the
-failure is invisible, because a modifier nothing offers looks exactly like a
-modifier nobody selected. Three entries now depend on this
-(`creo-herbam-treated-product`, `creo-animal-treated-product`, and any future
-narrowing), where before the retrofit none did.
+Narrowing by id is only safe if a typo fails the build. A mistyped id silently
+disables the modifier for every spell, and the failure is invisible — a modifier
+nothing offers looks exactly like a modifier nobody selected. Two entries depend on
+this after the retrofit (`creo-herbam-treated-product`,
+`creo-animal-treated-product`), where before it none did.
 
-Home: the Python catalog tests (`scripts/spell_import/tests/test_catalog.py`). That
-side already reads both `modifiers.json` and `base_effects.json` as data and asserts
-their integrity, which is what this check is; the Dart suite's concern is what
-`ModifierScope.appliesTo` *does* with a scope, not whether the scope's ids exist.
-One home, not both.
+Two assertions, both in `test/data/asset_modifier_integrity_test.dart`:
+
+1. **Extend the existing** *"every scoped effectId refers to a real base effect"*
+   (line 125) so it also checks **agreement**: a referenced base effect's own
+   `technique` and `form` must match the modifier's scope where the scope states
+   them. Existence alone would accept `crhe-1b` on a Creo *Animal* modifier.
+   `rego-transport-distance` scopes `technique: null, form: null` across five Forms,
+   so the check must skip a null side rather than demand a match.
+2. **A new exclusion test** pinning that neither treated-product modifier is offered
+   on a row that already prices treatment — `crhe-2a` for Herbam, and the live-animal
+   and healing rows for Animal. This has direct precedent in the same file: *"the
+   Rego Ignem fire-intensity modifier is scoped to controlling rows, not the ward
+   table"* (line 158) exists for the identical reason and should be mirrored in shape
+   and in the wording of its `reason:`.
+
+Also extend the file's *"every new additive modifier loads with its stated Technique
+and Form"* map (line 175) with the two new ids, as every previous modifier addition
+has done.
 
 ## Part C — README
 
@@ -260,14 +274,14 @@ declined for exactly that reason.
 | Change | How it is verified |
 |---|---|
 | Part A spec + comment | Prose; no test. |
-| Part A behaviour | New `test_ledger.py` case: an entry disagreeing with a sole candidate raises `StaleEntry`. |
-| Both new modifiers | Existing asset-loading tests parse them; the new guard test checks `creo-herbam-treated-product`'s `effectIds`. |
-| `creo-animal-treated-product` retrofit | The new guard test, plus the full Dart suite proving no computed level moved. |
+| Part A behaviour | New `test_ledger.py` case: an entry disagreeing with a sole candidate raises `StaleEntry`. Mutation-checked — it must fail against a `resolve()` that returns the recorded id. |
+| Both new modifiers | The extended technique/form agreement check, the new exclusion test, and the extended scope map in `asset_modifier_integrity_test.dart`. |
+| `creo-animal-treated-product` retrofit | The same three, plus the full Dart suite proving no computed level moved. |
 | Part C README | Every command in it is run once, by hand, and the output matches what the README claims. A README nobody executed is the failure mode being fixed. |
 
-Full-suite expectation after the work: Dart 661 unchanged, Python 316 + 2 (the
-ledger case and the guard test), integration 8 unchanged. The extractor must still
-report
+Full-suite expectation after the work: Dart 661 + 1 (the exclusion test; the other
+two are extensions of existing cases), Python 316 + 1 (the ledger case), integration
+8 unchanged. The extractor must still report
 **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**, with
 `unreviewed: 3` — item 32's business, untouched here.
 
