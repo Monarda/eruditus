@@ -593,7 +593,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     emit(state.copyWith(
       status: SpellCreationStatus.calculated,
       validationErrors: const [],
-      calculatedLevel: level,
       breakdown: breakdown,
       suggestions: suggestions,
       suggestionLevels: suggestionLevels,

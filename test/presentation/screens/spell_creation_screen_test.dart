@@ -224,7 +224,6 @@ void main() {
         technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
         range: range, duration: duration, target: target,
       ),
-      calculatedLevel: 20,
       breakdown: const LevelBreakdown(
         level: 20,
         rawLevel: 20,
@@ -270,7 +269,6 @@ void main() {
         technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
         range: range, duration: yearParam, target: target,
       ),
-      calculatedLevel: 20,
       breakdown: const LevelBreakdown(
         level: 20,
         rawLevel: 20,
@@ -347,7 +345,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
       suggestions: [suggestion],
       suggestionLevels: const {'s1': 10},
     );
@@ -382,7 +379,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
       suggestions: [generalSuggestion],
       suggestionLevels: const {'s-gen': 20},
     );
@@ -421,7 +417,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
       suggestions: [flawedSuggestion],
       suggestionLevels: const {'s-flawed': 10},
     );
@@ -436,7 +431,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('discard-button')), 200, scrollable: screenScrollable);
@@ -456,7 +450,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
@@ -485,7 +478,6 @@ void main() {
         range: range, duration: duration, target: target,
         summary: 'Already written.',
       ),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
@@ -508,7 +500,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
@@ -580,7 +571,6 @@ void main() {
       SpellCreationState(
         status: SpellCreationStatus.error,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-        calculatedLevel: 10,
         errorMessage: 'disk full',
       ),
     ]);
@@ -588,7 +578,6 @@ void main() {
       initialState: SpellCreationState(
         status: SpellCreationStatus.saving,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-        calculatedLevel: 10,
       ),
       states: states,
     );
@@ -624,7 +613,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.saving,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);

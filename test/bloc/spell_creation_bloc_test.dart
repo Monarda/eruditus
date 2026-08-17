@@ -136,7 +136,7 @@ void main() {
           // Base 10 already exceeds the additive-tier cap of 5, so all of
           // Range(+2) + Duration(+0) + Target(+8) = 10 magnitude falls in the
           // multiplier tier: 10 + (10 * 5) = 60.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60)
           .having((s) => s.validationErrors, 'validationErrors', isEmpty),
     ],
   );
@@ -314,7 +314,7 @@ void main() {
           // Base 10 + (10 magnitude * 5) = 60, same as the plain-draft test
           // above — proves the handler still reaches a normal calculated
           // state rather than throwing out of the bloc.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60)
           .having((s) => s.validationErrors, 'validationErrors', isEmpty)
           // The uncomputable spell is dropped, not kept as a level-less
           // suggestion card.
@@ -1009,7 +1009,7 @@ void main() {
           // Base 10 exceeds the additive cap, so the parameters' 10 magnitude
           // plus the requisite's 1 all fall in the multiplier tier:
           // 10 + (11 * 5) = 65, i.e. 5 more than the same draft without it.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 65),
+          .having((s) => s.breakdown?.level, 'breakdown.level', 65),
     ],
   );
 
@@ -1031,7 +1031,7 @@ void main() {
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           // Same 60 as the no-requisite case: a free requisite adds 0.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 60),
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60),
     ],
   );
 
@@ -1095,7 +1095,7 @@ void main() {
           // Base 10 already exceeds the additive-tier cap of 5, so all of
           // Range(+2) + Duration(+0) + Target(+8) + Custom(+3) = 13 magnitude
           // falls in the multiplier tier: 10 + (13 * 5) = 75.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 75),
+          .having((s) => s.breakdown?.level, 'breakdown.level', 75),
     ],
   );
 
@@ -1937,10 +1937,9 @@ void main() {
       seed: () => SpellCreationState(
         status: SpellCreationStatus.calculated,
         draft: SpellDraft(),
-        calculatedLevel: 42,
       ),
       act: (bloc) => bloc.add(TemplateInstantiated(wardTemplate)),
-      verify: (bloc) => expect(bloc.state.calculatedLevel, isNull),
+      verify: (bloc) => expect(bloc.state.breakdown, isNull),
     );
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -2049,7 +2048,7 @@ void main() {
         expect(bloc.state.draft.form, 'Imaginem');
         expect(bloc.state.validationErrors, isEmpty);
         expect(bloc.state.status, SpellCreationStatus.calculated);
-        expect(bloc.state.calculatedLevel, isNotNull);
+        expect(bloc.state.breakdown, isNotNull);
       },
     );
 
@@ -2207,7 +2206,6 @@ void main() {
             target: targetParam,
           ),
           breakdown: breakdownBeforeSummary,
-          calculatedLevel: breakdownBeforeSummary.level,
         );
       },
       act: (bloc) => bloc.add(const SummaryChanged('A jet of flame.')),
@@ -2264,7 +2262,6 @@ void main() {
             target: targetParam,
           ),
           breakdown: breakdownBeforeContainerMode,
-          calculatedLevel: breakdownBeforeContainerMode.level,
         );
       },
       act: (bloc) => bloc.add(const ContainerModeSelected(ContainerMode.static)),
@@ -2318,5 +2315,33 @@ void main() {
       verify: (bloc) =>
           expect(bloc.state.draft.containerMode, ContainerMode.dynamic),
     );
+  });
+
+  group('SpellCreationState.copyWith clearing', () {
+    test('an omitted breakdown is carried forward, an explicit null clears it', () {
+      const breakdown = LevelBreakdown(level: 20, rawLevel: 20, contributions: []);
+      final withBreakdown = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(),
+        breakdown: breakdown,
+      );
+
+      expect(withBreakdown.copyWith(status: SpellCreationStatus.saving).breakdown, breakdown,
+          reason: 'an emit that says nothing about the level must not wipe it');
+      expect(withBreakdown.copyWith(breakdown: null).breakdown, isNull,
+          reason: 'a draft going incomplete must be able to clear the level');
+    });
+
+    test('an omitted reason is carried forward, an explicit null clears it', () {
+      final withReason = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(),
+        levelUnavailableReason: 'Choose a base effect to see a level.',
+      );
+
+      expect(withReason.copyWith(status: SpellCreationStatus.saving).levelUnavailableReason,
+          'Choose a base effect to see a level.');
+      expect(withReason.copyWith(levelUnavailableReason: null).levelUnavailableReason, isNull);
+    });
   });
 }

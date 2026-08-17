@@ -9,8 +9,15 @@ class SpellCreationState extends Equatable {
   final SpellCreationStatus status;
   final SpellDraft draft;
   final List<String> validationErrors;
-  final int? calculatedLevel;
   final LevelBreakdown? breakdown;
+  /// Why there is no [breakdown], when there isn't one — "Choose a base effect
+  /// to see a level.", and so on. Non-null exactly when [breakdown] is null,
+  /// because both are written together by SpellCreationBloc's emit funnel from
+  /// a single SpellEngine.previewLevel result.
+  ///
+  /// Not a validation error: it renders inside the level banner as ordinary
+  /// text saying what to do next, never as the red error text those use.
+  final String? levelUnavailableReason;
   final List<ResolvedSpell> suggestions;
   // Precomputed per-suggestion spell levels, keyed by spell id, so the UI can
   // show "name, level, source, description" on each suggestion card without
@@ -36,8 +43,8 @@ class SpellCreationState extends Equatable {
     required this.status,
     required this.draft,
     this.validationErrors = const [],
-    this.calculatedLevel,
     this.breakdown,
+    this.levelUnavailableReason,
     this.suggestions = const [],
     this.suggestionLevels = const {},
     this.ritualSuggestionIds = const {},
@@ -55,8 +62,8 @@ class SpellCreationState extends Equatable {
     SpellCreationStatus? status,
     SpellDraft? draft,
     List<String>? validationErrors,
-    int? calculatedLevel,
-    LevelBreakdown? breakdown,
+    Object? breakdown = _unset,
+    Object? levelUnavailableReason = _unset,
     List<ResolvedSpell>? suggestions,
     Map<String, int>? suggestionLevels,
     Set<String>? ritualSuggestionIds,
@@ -68,8 +75,18 @@ class SpellCreationState extends Equatable {
       status: status ?? this.status,
       draft: draft ?? this.draft,
       validationErrors: validationErrors ?? this.validationErrors,
-      calculatedLevel: calculatedLevel ?? this.calculatedLevel,
-      breakdown: breakdown ?? this.breakdown,
+      // Both use the same `_unset` sentinel as generalEffectSentence below,
+      // and for a sharper version of the same reason. The emit funnel writes
+      // whichever of the two the current draft calls for and clears the other,
+      // so a plain `?? this.breakdown` -- which cannot tell "omitted" from
+      // "explicitly cleared" apart -- would strand a level on screen for a
+      // draft that no longer has one.
+      breakdown: identical(breakdown, _unset)
+          ? this.breakdown
+          : breakdown as LevelBreakdown?,
+      levelUnavailableReason: identical(levelUnavailableReason, _unset)
+          ? this.levelUnavailableReason
+          : levelUnavailableReason as String?,
       suggestions: suggestions ?? this.suggestions,
       suggestionLevels: suggestionLevels ?? this.suggestionLevels,
       ritualSuggestionIds: ritualSuggestionIds ?? this.ritualSuggestionIds,
@@ -97,8 +114,8 @@ class SpellCreationState extends Equatable {
         status,
         draft,
         validationErrors,
-        calculatedLevel,
         breakdown,
+        levelUnavailableReason,
         suggestions,
         suggestionLevels,
         ritualSuggestionIds,
