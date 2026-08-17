@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 
 /// One line of a spell's level calculation. [magnitude] holds the base level
 /// when [isBase] is true, and a magnitude contribution otherwise.
-class LevelContribution {
+class LevelContribution extends Equatable {
   final String label;
   final int magnitude;
   final bool isBase;
@@ -12,10 +13,14 @@ class LevelContribution {
     required this.magnitude,
     this.isBase = false,
   });
+
+  // See RitualStatus.props for why these three types carry value equality.
+  @override
+  List<Object?> get props => [label, magnitude, isBase];
 }
 
 /// A spell's calculated level together with the sources that produced it.
-class LevelBreakdown {
+class LevelBreakdown extends Equatable {
   /// The level after the Ritual minimum has been applied. This is the number
   /// the user sees.
   final int level;
@@ -47,4 +52,7 @@ class LevelBreakdown {
   int get magnitudeTotal => contributions
       .where((c) => !c.isBase)
       .fold(0, (sum, c) => sum + c.magnitude);
+
+  @override
+  List<Object?> get props => [level, rawLevel, ritualStatus, contributions];
 }

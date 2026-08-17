@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+
 /// Why a spell is a Ritual. See Core Rules "Ritual Spells", line 12340.
 ///
 /// [ritualOnlyRange], [ritualOnlyDuration] and [ritualOnlyTarget] are named
@@ -23,7 +25,7 @@ enum RitualReason {
 /// the UI text wrong. It would also foreclose the enchanted-item rule at Core
 /// Rules line 10566, which turns on a spell being a Ritual *only* because its
 /// level exceeds the Formulaic cap.
-class RitualStatus {
+class RitualStatus extends Equatable {
   /// The highest level a Formulaic or Spontaneous spell may have. Core Rules
   /// line 12346: "they may have a level of 50, but not 51 or higher."
   static const int maxFormulaicLevel = 50;
@@ -39,4 +41,11 @@ class RitualStatus {
   const RitualStatus.notRitual() : reasons = const [];
 
   bool get isRitual => reasons.isNotEmpty;
+
+  // Value equality, not identity: this sits inside LevelBreakdown, which sits
+  // in SpellCreationState.props. SpellCreationBloc rebuilds the breakdown on
+  // every emit, so an identity comparison here would make every state look
+  // changed even when the level and its reasons had not moved.
+  @override
+  List<Object?> get props => [reasons];
 }
