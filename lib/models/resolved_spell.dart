@@ -81,6 +81,8 @@ class ResolvedSpell implements LibraryEntry {
       selectedModifiers: record.selectedModifiers,
       modifiers: modifiers,
       chosenSlots: record.chosenSlots,
+      target: target,
+      containerMode: record.containerMode,
     );
   }
 

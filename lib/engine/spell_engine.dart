@@ -90,6 +90,8 @@ class SpellEngine {
         selectedModifiers: draft.selectedModifiers,
         modifiers: allModifiers,
         chosenSlots: draft.chosenSlots,
+        target: draft.target,
+        containerMode: draft.containerMode,
       ));
     }
 

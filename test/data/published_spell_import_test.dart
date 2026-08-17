@@ -166,10 +166,15 @@ void main() {
 
   test('assertion 7: every published spell and template satisfies the catalog invariants', () async {
     final effects = {for (final e in await loader.loadBaseEffects()) e.id: e};
+    final parameters = {for (final p in await loader.loadParameters()) p.id: p};
     final modifiers = await loader.loadModifiers();
 
     final failures = <String>[];
 
+    // The real resolved target and the row's own containerMode, not
+    // target: null -- this is where check 9 is actually enforced over the
+    // built-in library and templates, since isTemplate: true appears only
+    // in tests and a SpellTemplate never reaches this function in production.
     for (final spell in await loader.loadSpellLibrary()) {
       final effect = effects[spell.baseEffectId];
       // Assertion 4 already covers an id that does not resolve.
@@ -183,6 +188,8 @@ void main() {
         requisites: spell.requisites,
         selectedModifiers: spell.selectedModifiers,
         chosenSlots: spell.chosenSlots,
+        target: parameters[spell.targetId],
+        containerMode: spell.containerMode,
         modifiers: modifiers,
       );
       if (problems.isNotEmpty) {
@@ -205,6 +212,8 @@ void main() {
         requisites: template.requisites,
         selectedModifiers: template.selectedModifiers,
         chosenSlots: template.chosenSlots,
+        target: parameters[template.targetId],
+        containerMode: template.containerMode,
         modifiers: modifiers,
         isTemplate: true,
       );
@@ -272,6 +281,8 @@ void main() {
       requisites: spell.requisites,
       selectedModifiers: spell.selectedModifiers,
       chosenSlots: spell.chosenSlots,
+      target: parameters[spell.targetId],
+      containerMode: spell.containerMode,
       modifiers: modifiers,
     );
 
@@ -326,6 +337,8 @@ void main() {
       requisites: unfilled.requisites,
       selectedModifiers: unfilled.selectedModifiers,
       chosenSlots: unfilled.chosenSlots,
+      target: parameters[unfilled.targetId],
+      containerMode: unfilled.containerMode,
       modifiers: modifiers,
     );
     expect(unfilledProblems, contains('Choose a Form for this guideline'));
@@ -341,6 +354,8 @@ void main() {
       requisites: filled.requisites,
       selectedModifiers: filled.selectedModifiers,
       chosenSlots: filled.chosenSlots,
+      target: parameters[filled.targetId],
+      containerMode: filled.containerMode,
       modifiers: modifiers,
     );
     expect(filledProblems, isEmpty, reason: filledProblems.join('; '));

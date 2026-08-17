@@ -7,6 +7,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
+import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 /// Every spell needs a summary or a description.
@@ -60,6 +61,11 @@ String _openSlotDescription(OpenSlotKind kind) {
   }
 }
 
+/// Shared by [SpellDraft.isEligibleForLastingCreationDeclaration] and
+/// [spellOwesContainerMode] — both ask whether a Duration is Momentary, and
+/// two copies of the id would drift.
+const String _momentaryDurationId = 'duration-momentary';
+
 /// The catalog-dependent invariants every spell must satisfy, stated once and
 /// shared by every path that can produce or hold one — the same contract
 /// [validateSpellProse] provides for prose.
@@ -92,6 +98,8 @@ List<String> validateSpellAgainstCatalog({
   required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
   required Map<String, String> chosenSlots,
+  required Parameter? target,
+  required ContainerMode containerMode,
   required List<Modifier> modifiers,
   bool isTemplate = false,
 }) {
@@ -198,8 +206,59 @@ List<String> validateSpellAgainstCatalog({
     );
   }
 
+  // 9. Only a container Target has the static/dynamic distinction at all —
+  //    Core Rules line 12120 names the three kinds, and the "Container
+  //    Targets" sidebar (12238) gives the choice to containers alone. A mode
+  //    stated on an object or sense Target is meaningless stored data, the
+  //    same class of bug check 2 catches for a stray chosenBaseLevel.
+  //
+  //    A null target skips this, matching check 5's tolerance of an
+  //    unresolvable modifier: an id the catalog cannot resolve is a different
+  //    problem, reported by ResolvedSpell.isResolved.
+  //
+  //    Momentary deliberately does NOT appear here. A Momentary container
+  //    spell cannot distinguish the two designs, so it owes no ruling — but
+  //    that is spellOwesContainerMode's question, and stating a mode anyway is
+  //    vacuous rather than wrong. This check tests the Target kind and nothing
+  //    else, because that is all the rulebook constrains.
+  if (containerMode != ContainerMode.unstated &&
+      target != null &&
+      target.targetType != TargetType.container) {
+    problems.add(
+      'A container mode applies only to a container Target, and '
+      '${target.name} is not one',
+    );
+  }
+
   return problems;
 }
+
+/// Does this spell still owe a static/dynamic ruling?
+///
+/// True when the Target is a container, the Duration is not Momentary, and no
+/// mode has been recorded. Derived rather than stored: all three inputs are
+/// catalog data, so a stored "not applicable" would be storing derivable data —
+/// which is exactly what the id-reference normalization removed.
+///
+/// A Momentary container spell owes nothing: nothing can enter a container
+/// during a duration that does not elapse, so the two designs are
+/// indistinguishable. An unresolvable Target or Duration also owes nothing —
+/// there is not enough information to say, and `ResolvedSpell.isResolved`
+/// already reports the unresolvable id.
+///
+/// **Nothing calls this yet, deliberately.** The mode is optional until spells
+/// belong to a character, at which point every spell owes a decision. This is
+/// the hook that work flips to a requirement, and pinning the rule in tests now
+/// is cheaper than re-deriving it from the rulebook later. See todo item 14.
+bool spellOwesContainerMode({
+  required Parameter? target,
+  required Parameter? duration,
+  required ContainerMode mode,
+}) =>
+    mode == ContainerMode.unstated &&
+    target?.targetType == TargetType.container &&
+    duration != null &&
+    duration.id != _momentaryDurationId;
 
 /// Stands in for the prose of a user-created spell saved before a summary was
 /// required (todo item 13).
@@ -450,7 +509,6 @@ class SpellDraft {
   static String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
 
   static const String _creo = 'Creo';
-  static const String _momentaryDurationId = 'duration-momentary';
 
   /// A Momentary Creo spell is the one case the rulebook leaves to the caster
   /// (Core Rules line 12351) — the only case `lastingCreation` is offered as

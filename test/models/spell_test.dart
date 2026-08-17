@@ -10,6 +10,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
+import 'package:eruditus/models/target_type.dart';
 
 void main() {
   group('Spell Model', () {
@@ -731,6 +732,8 @@ void main() {
       Map<String, String> chosenSlots = const {},
       List<Modifier> modifiers = const [],
       bool isTemplate = false,
+      Parameter? target,
+      ContainerMode containerMode = ContainerMode.unstated,
     }) =>
         validateSpellAgainstCatalog(
           effect: effect,
@@ -743,6 +746,8 @@ void main() {
           chosenSlots: chosenSlots,
           modifiers: modifiers,
           isTemplate: isTemplate,
+          target: target,
+          containerMode: containerMode,
         );
 
     test('a valid fixed-level spell has no problems', () {
@@ -932,6 +937,8 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        target: null,
+        containerMode: ContainerMode.unstated,
         modifiers: const [],
       );
       expect(problems, isEmpty);
@@ -952,6 +959,8 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        target: null,
+        containerMode: ContainerMode.unstated,
         modifiers: const [],
       );
       expect(problems, isEmpty);
@@ -972,6 +981,8 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        target: null,
+        containerMode: ContainerMode.unstated,
         modifiers: const [],
       );
       expect(problems, ['Technique/Form differs from the base effect\'s own -- an analogyRationale is required to explain why']);
@@ -992,9 +1003,158 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        target: null,
+        containerMode: ContainerMode.unstated,
         modifiers: const [],
       );
       expect(problems, ["analogyRationale is set but Technique/Form already matches the base effect's own -- remove it"]);
+    });
+
+    group('check 9: container mode belongs only to a container Target', () {
+      Parameter targetOfType(String id, TargetType type) => Parameter(
+            id: id,
+            name: id,
+            category: 'Target',
+            magnitude: 0,
+            targetType: type,
+            provenance: Provenance(
+                source: PublicationSource.published,
+                citations: const [Citation(bookId: 'arm5-core')]),
+          );
+
+      test('accepts either mode on a container Target', () {
+        for (final mode in [ContainerMode.static, ContainerMode.dynamic]) {
+          expect(
+            validate(
+              effect: fixedEffect(),
+              target: targetOfType('target-room', TargetType.container),
+              containerMode: mode,
+            ),
+            isEmpty,
+          );
+        }
+      });
+
+      test('rejects a stated mode on an object Target', () {
+        expect(
+          validate(
+            effect: fixedEffect(),
+            target: targetOfType('target-group', TargetType.object),
+            containerMode: ContainerMode.dynamic,
+          ),
+          contains(contains('container mode applies only to a container Target')),
+        );
+      });
+
+      test('rejects a stated mode on a sense Target', () {
+        expect(
+          validate(
+            effect: fixedEffect(),
+            target: targetOfType('target-vision', TargetType.sense),
+            containerMode: ContainerMode.static,
+          ),
+          contains(contains('container mode applies only to a container Target')),
+        );
+      });
+
+      test('unstated is accepted on every Target kind', () {
+        for (final type in TargetType.values) {
+          expect(
+            validate(
+              effect: fixedEffect(),
+              target: targetOfType('target-x', type),
+              containerMode: ContainerMode.unstated,
+            ),
+            isEmpty,
+          );
+        }
+      });
+
+      test('an unresolvable Target skips the check rather than reporting it', () {
+        // Matches check 5's treatment of an unresolvable modifier: a null here
+        // means the catalog could not resolve the id, which is a different
+        // problem reported elsewhere (ResolvedSpell.isResolved).
+        expect(
+          validate(
+              effect: fixedEffect(), target: null, containerMode: ContainerMode.dynamic),
+          isEmpty,
+        );
+      });
+
+      // Deliberately NO Momentary test in this group. Check 9 takes no Duration
+      // — that is Decision 4 — so a "Momentary does not invalidate a stated
+      // mode" test here could only duplicate the accept case above while its
+      // comment claimed a guarantee it cannot provide. The Momentary rule is
+      // pinned where it is actually executable, in spellOwesContainerMode's
+      // group below. Do not add one here.
+    });
+  });
+
+  group('spellOwesContainerMode', () {
+    Parameter param(String id, {String category = 'Target', TargetType? type}) =>
+        Parameter(
+          id: id,
+          name: id,
+          category: category,
+          magnitude: 0,
+          targetType: type,
+          provenance: Provenance(
+              source: PublicationSource.published,
+              citations: const [Citation(bookId: 'arm5-core')]),
+        );
+
+    final room = param('target-room', type: TargetType.container);
+    final group_ = param('target-group', type: TargetType.object);
+    final sun = param('duration-sun', category: 'Duration');
+    final momentary = param('duration-momentary', category: 'Duration');
+
+    test('true for a container Target, a non-Momentary Duration and no mode', () {
+      expect(
+        spellOwesContainerMode(
+            target: room, duration: sun, mode: ContainerMode.unstated),
+        isTrue,
+      );
+    });
+
+    test('false once a mode is stated', () {
+      for (final mode in [ContainerMode.static, ContainerMode.dynamic]) {
+        expect(
+          spellOwesContainerMode(target: room, duration: sun, mode: mode),
+          isFalse,
+        );
+      }
+    });
+
+    test('false for a non-container Target', () {
+      expect(
+        spellOwesContainerMode(
+            target: group_, duration: sun, mode: ContainerMode.unstated),
+        isFalse,
+      );
+    });
+
+    test('false for a Momentary Duration', () {
+      // Nothing can enter a container during a duration that does not elapse,
+      // so the two designs are indistinguishable and no ruling is owed. This
+      // is the case a later reader is most likely to get wrong.
+      expect(
+        spellOwesContainerMode(
+            target: room, duration: momentary, mode: ContainerMode.unstated),
+        isFalse,
+      );
+    });
+
+    test('false when either parameter is unresolvable', () {
+      expect(
+        spellOwesContainerMode(
+            target: null, duration: sun, mode: ContainerMode.unstated),
+        isFalse,
+      );
+      expect(
+        spellOwesContainerMode(
+            target: room, duration: null, mode: ContainerMode.unstated),
+        isFalse,
+      );
     });
   });
 
