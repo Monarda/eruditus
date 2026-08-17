@@ -6,6 +6,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -14,6 +15,7 @@ import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/target_type.dart';
 
 class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   final SpellEngine spellEngine;
@@ -148,10 +150,26 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // The only Technique/Form/BaseEffect/Target handler that didn't prune
       // stale modifier selections — size-mentem's Target exclusion made that
       // a live bug rather than a theoretical gap. See todo item 19.
-      final draft = _withPrunedModifiers(state.draft.copyWith(target: event.parameter));
+      //
+      // The container mode is pruned here too, for a sharper reason. Unlike
+      // the summary (item 13), which is scoped to nothing, the mode is scoped
+      // to the Target: a mode stated under Room and left behind under
+      // Individual is precisely what validateSpellAgainstCatalog's check 9
+      // rejects, so the save would fail with no visible cause. Conditional on
+      // the *new* Target's kind, so Room -> Structure keeps the choice.
+      final keepsMode = event.parameter.targetType == TargetType.container;
+      final draft = _withPrunedModifiers(state.draft.copyWith(
+        target: event.parameter,
+        containerMode: keepsMode ? null : ContainerMode.unstated,
+      ));
       emit(state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
+      ));
+    } else if (event is ContainerModeSelected) {
+      emit(state.copyWith(
+        status: SpellCreationStatus.editing,
+        draft: state.draft.copyWith(containerMode: event.mode),
       ));
     } else if (event is RequisiteAdded) {
       final kind = event.kind == 'adding' ? RequisiteKind.adding : RequisiteKind.free;
@@ -289,6 +307,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         // default for Creo + Momentary, so routing it through there would
         // silently strip a Ritual status the guideline actually has.
         ritualDeclaration: template.ritualDeclaration,
+        containerMode: template.containerMode,
         templateId: template.id,
         chosenSlots: template.chosenSlots,
         analogyRationale: template.analogyRationale,

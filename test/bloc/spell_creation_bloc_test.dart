@@ -16,6 +16,7 @@ import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
@@ -28,6 +29,7 @@ import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_template.dart';
+import 'package:eruditus/models/target_type.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
 
@@ -1493,6 +1495,11 @@ void main() {
       provenance: Provenance(source: PublicationSource.published,
           citations: const [Citation(bookId: 'arm5-core')]),
       // ritualDeclaration omitted -> RitualDeclaration.none, as on the real asset.
+      // A Circle Target (target-circle) is a container, so this template
+      // carries a real static/dynamic decision -- proves TemplateInstantiated
+      // copies it rather than silently dropping it (Task 6's backfill records
+      // dynamic for the real asset).
+      containerMode: ContainerMode.dynamic,
     );
     final wardTemplate = ResolvedTemplate(
       record: wardTemplateRecord,
@@ -1569,6 +1576,13 @@ void main() {
         expect(draft.templateId, 'tpl-reaq-ward-against-faeries-waters');
         expect(draft.chosenBaseLevel, isNull);
       },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'copies the template containerMode onto the new draft',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(TemplateInstantiated(wardTemplate)),
+      verify: (bloc) => expect(bloc.state.draft.containerMode, ContainerMode.dynamic),
     );
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -1869,6 +1883,105 @@ void main() {
         expect(bloc.state.breakdown, same(breakdownBeforeSummary),
             reason: 'SummaryChanged must not recompute the breakdown');
       },
+    );
+  });
+
+  group('ContainerModeSelected', () {
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'stores the mode on the draft',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(const ContainerModeSelected(ContainerMode.dynamic)),
+      expect: () => [
+        isA<SpellCreationState>().having(
+            (s) => s.draft.containerMode, 'containerMode', ContainerMode.dynamic),
+      ],
+    );
+
+    late LevelBreakdown breakdownBeforeContainerMode;
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'does not recompute the breakdown — the mode is level-neutral',
+      // Identity, not value: copyWith carries the old breakdown forward as
+      // `breakdown ?? this.breakdown`, so a value/non-null check would pass
+      // whether or not a recompute had run. Only `same` proves nothing was
+      // recalculated -- mirrors the SummaryChanged test above.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () {
+        breakdownBeforeContainerMode = spellEngine.calculateBreakdown(
+          baseEffect: creoIgnemEffect,
+          chosenBaseLevel: null,
+          range: rangeParam,
+          duration: durationParam,
+          target: targetParam,
+          selectedModifiers: const {},
+          requisites: const {},
+          adjustments: const [],
+          ritualDeclaration: RitualDeclaration.none,
+        );
+        return SpellCreationState(
+          status: SpellCreationStatus.calculated,
+          draft: SpellDraft(
+            technique: 'Creo',
+            form: 'Ignem',
+            baseEffect: creoIgnemEffect,
+            range: rangeParam,
+            duration: durationParam,
+            target: targetParam,
+          ),
+          breakdown: breakdownBeforeContainerMode,
+          calculatedLevel: breakdownBeforeContainerMode.level,
+        );
+      },
+      act: (bloc) => bloc.add(const ContainerModeSelected(ContainerMode.static)),
+      verify: (bloc) {
+        expect(bloc.state.breakdown, isNotNull,
+            reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
+        expect(bloc.state.draft.containerMode, ContainerMode.static);
+        expect(bloc.state.breakdown, same(breakdownBeforeContainerMode),
+            reason: 'ContainerModeSelected must not recompute the breakdown');
+      },
+    );
+  });
+
+  group('TargetSelected prunes the container mode', () {
+    final individualTarget = Parameter(
+      id: 'p3-individual', name: 'Individual', category: 'Target', magnitude: 8,
+      targetType: TargetType.object,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final roomTarget = Parameter(
+      id: 'p3-room', name: 'Room', category: 'Target', magnitude: 10,
+      targetType: TargetType.container,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final structureTarget = Parameter(
+      id: 'p3-structure', name: 'Structure', category: 'Target', magnitude: 12,
+      targetType: TargetType.container,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'clears a stated mode when the new Target is not a container',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(target: roomTarget, containerMode: ContainerMode.dynamic),
+      ),
+      act: (bloc) => bloc.add(TargetSelected(individualTarget)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.containerMode, ContainerMode.unstated),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'keeps a stated mode when moving between two container Targets',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      seed: () => SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(target: roomTarget, containerMode: ContainerMode.dynamic),
+      ),
+      act: (bloc) => bloc.add(TargetSelected(structureTarget)),
+      verify: (bloc) =>
+          expect(bloc.state.draft.containerMode, ContainerMode.dynamic),
     );
   });
 }

@@ -1,5 +1,6 @@
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/parameter.dart';
@@ -70,4 +71,5 @@ class ResolvedTemplate implements LibraryEntry {
   Map<String, String> get chosenSlots => record.chosenSlots;
   List<LevelAdjustment> get adjustments => record.adjustments;
   RitualDeclaration get ritualDeclaration => record.ritualDeclaration;
+  ContainerMode get containerMode => record.containerMode;
 }

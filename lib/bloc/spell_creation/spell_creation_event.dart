@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/modifier.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/resolved_template.dart';
@@ -195,6 +196,20 @@ class TemplateInstantiated extends SpellCreationEvent {
   const TemplateInstantiated(this.template);
   @override
   List<Object?> get props => [template];
+}
+
+/// The caster's static/dynamic choice for a container Target.
+///
+/// Draft-only and never recomputes the breakdown: the mode is level-neutral,
+/// so recalculating on selection would be pure waste — the same reasoning
+/// SummaryChanged carries.
+class ContainerModeSelected extends SpellCreationEvent {
+  final ContainerMode mode;
+
+  const ContainerModeSelected(this.mode);
+
+  @override
+  List<Object?> get props => [mode];
 }
 
 class AdjustmentUpdated extends SpellCreationEvent {
