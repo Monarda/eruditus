@@ -475,6 +475,25 @@
     "citations": [ { "bookId": "arm5-core" } ]
   },
   {
+    "id": "creo-aquam-unnatural",
+    "name": "Unnatural liquid",
+    "description": "How unlike a natural liquid the created liquid is. Distinct from craq-4a's unnatural shape, and from aquam-base-individual, which sets what one Individual is and costs nothing",
+    "selectionMode": "single",
+    "scope": { "technique": "Creo", "form": "Aquam", "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "creo-aquam-unnatural-none", "label": "A liquid found in nature", "magnitude": 0 },
+      { "id": "creo-aquam-unnatural-slight", "label": "Slightly unnatural liquid", "magnitude": 1 },
+      {
+        "id": "creo-aquam-unnatural-very",
+        "label": "Very unnatural liquid",
+        "description": "Requires a Muto requisite",
+        "magnitude": 2
+      }
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
+  },
+  {
     "id": "rego-transport-distance",
     "name": "Transport distance",
     "description": "The base level covers 5 paces; greater distances cost magnitudes",
@@ -611,11 +630,24 @@
     "name": "Treated Animal Product",
     "description": "Creating a treated, or treated and processed, animal product adds magnitudes",
     "selectionMode": "single",
-    "scope": { "technique": "Creo", "form": "Animal", "effectIds": [], "excludeTechniques": [] },
+    "scope": { "technique": "Creo", "form": "Animal", "effectIds": ["cran-5a", "cran-10a"], "excludeTechniques": [] },
     "source": "published",
     "options": [
       { "id": "creo-animal-treated-product-treated", "label": "Treated (e.g. leather, cloth)", "magnitude": 1 },
       { "id": "creo-animal-treated-product-processed", "label": "Treated and processed (e.g. a leather jacket)", "magnitude": 2 }
+    ],
+    "citations": [{ "bookId": "arm5-core" }]
+  },
+  {
+    "id": "creo-herbam-treated-product",
+    "name": "Treated Plant Product",
+    "description": "Creating a treated, or treated and processed, plant product adds magnitudes",
+    "selectionMode": "single",
+    "scope": { "technique": "Creo", "form": "Herbam", "effectIds": ["crhe-1b", "crhe-1c", "crhe-3a"], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "creo-herbam-treated-product-treated", "label": "Treated (e.g. cut timber, linen cloth, a vegetarian meal)", "magnitude": 1 },
+      { "id": "creo-herbam-treated-product-processed", "label": "Treated and processed (e.g. clothes, furniture)", "magnitude": 2 }
     ],
     "citations": [{ "bookId": "arm5-core" }]
   },
