@@ -43,7 +43,7 @@ reason the guidelines don't apply to it (item 46).
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **661 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -p "test_*.py"` | **316 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **316 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **3 ledger entries carry an unreviewed candidate.** Item 55's migration

@@ -50,6 +50,15 @@ List<_Step> _steps() => [
       // `uv run --no-project` is this machine's convention for a repo with no
       // pyproject.toml. CI uses bare `python` under actions/setup-python; the
       // unittest arguments are identical to CI's on purpose.
+      //
+      // No ARS_RULEBOOK_ROOT set here on purpose: locally,
+      // scripts/spell_import/sources.py:37 falls back to
+      // `REPO_ROOT.parent / "Ars-Magica-Open-License"`, the sibling checkout
+      // this machine actually has. CI sets the variable because
+      // actions/checkout cannot reproduce that sibling layout. That fallback
+      // fails from a git worktree (there is no sibling checkout next to the
+      // worktree) -- if you run this script from inside
+      // `.claude/worktrees/`, set ARS_RULEBOOK_ROOT explicitly first.
       const _Step('Import harness (Python)', 'uv', [
         'run',
         '--no-project',
@@ -72,7 +81,12 @@ List<_Step> _steps() => [
     ];
 
 Future<void> main() async {
-  final results = <String, bool>{};
+  // A list of (label, passed) pairs, not a Map<String, bool>: two steps that
+  // happened to share a label would silently collapse into one row in a map,
+  // under-reporting how many steps ran. Labels are unique today, but this
+  // script's whole purpose is answering "which suites actually ran?", so it
+  // should not have a shape that can silently lose a row.
+  final results = <(String, bool)>[];
 
   for (final step in _steps()) {
     stdout.writeln('');
@@ -100,16 +114,16 @@ Future<void> main() async {
       exitCode = 127;
     }
 
-    results[step.label] = exitCode == 0;
+    results.add((step.label, exitCode == 0));
   }
 
   stdout.writeln('');
   stdout.writeln('=== Summary ===');
-  results.forEach((label, passed) {
+  for (final (label, passed) in results) {
     stdout.writeln('${passed ? 'PASS' : 'FAIL'}  $label');
-  });
+  }
 
-  final failed = results.values.where((passed) => !passed).length;
+  final failed = results.where((result) => !result.$2).length;
   if (failed > 0) {
     stdout.writeln('');
     stdout.writeln('$failed of ${results.length} steps failed.');

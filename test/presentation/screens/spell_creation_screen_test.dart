@@ -1393,7 +1393,6 @@ void main() {
 
       final initial = stateWith(['first', 'second', 'third']);
       bloc = mockSpellCreationBloc(initialState: initial, states: controller.stream);
-      when(() => bloc.state).thenReturn(initial);
       configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,

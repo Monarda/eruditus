@@ -167,6 +167,12 @@ Never _plumbingUnsupported(String fake, String member) => throw UnsupportedError
 /// an invalid spell (`InvalidSpellException` from `saveSpell`, a rejects list
 /// from `saveAll`), and this fake always writes. A test whose subject is
 /// *rejection* wants the real repository built in `setUp`, or a mocktail mock.
+/// Also diverges from the real repository in resolution: [getSpellById] and
+/// [getAllUserSpells] build `ResolvedSpell(record: record)` with no resolver,
+/// so `isResolved` is always false, where the real [SpellRepository] returns
+/// `resolver.resolve(record)` — a test routing user spells through this fake
+/// and into [SpellLibraryBloc] (which skips unresolved spells) would see them
+/// vanish.
 class FakeSpellRepository implements SpellRepository {
   final Map<String, Spell> spells = {};
 
@@ -232,27 +238,29 @@ class FakeLibraryRepository implements LibraryRepository {
   ConfigurationRepository? get configRepository => null;
 
   @override
-  Future<List<ResolvedSpell>> getBuiltInSpells() async => spells;
+  Future<List<ResolvedSpell>> getBuiltInSpells() async => List.of(spells);
 
   @override
-  Future<List<ResolvedTemplate>> getTemplates() async => templates;
+  Future<List<ResolvedTemplate>> getTemplates() async => List.of(templates);
 
   @override
-  Future<List<ResolvedException>> getExceptions() async => exceptions;
+  Future<List<ResolvedException>> getExceptions() async => List.of(exceptions);
 
   @override
-  Future<List<ResolvedSpell>> getAllSpells() async => spells;
+  Future<List<ResolvedSpell>> getAllSpells() async => List.of(spells);
 
   @override
   Future<List<ResolvedSpell>> searchSpells(String query) async {
-    if (query.isEmpty) return spells;
+    if (query.isEmpty) return List.of(spells);
     final lower = query.toLowerCase();
-    return spells.where((s) => (s.name ?? '').toLowerCase().contains(lower)).toList();
+    return List.of(
+      spells.where((s) => (s.name ?? '').toLowerCase().contains(lower)),
+    );
   }
 
   @override
   Future<List<ResolvedSpell>> filterBySource(PublicationSource source) async =>
-      spells.where((s) => s.source == source).toList();
+      List.of(spells.where((s) => s.source == source));
 }
 
 /// An in-memory [ConfigurationRepository]. Assign the lists to control the
@@ -271,13 +279,13 @@ class FakeConfigurationRepository implements ConfigurationRepository {
       _plumbingUnsupported('FakeConfigurationRepository', 'configDatasource');
 
   @override
-  Future<List<BaseEffect>> getAllEffects() async => effects;
+  Future<List<BaseEffect>> getAllEffects() async => List.of(effects);
 
   @override
-  Future<List<Parameter>> getAllParameters() async => parameters;
+  Future<List<Parameter>> getAllParameters() async => List.of(parameters);
 
   @override
-  Future<List<Modifier>> getAllModifiers() async => modifiers;
+  Future<List<Modifier>> getAllModifiers() async => List.of(modifiers);
 
   @override
   Future<void> addCustomEffect(BaseEffect effect) async => effects.add(effect);
