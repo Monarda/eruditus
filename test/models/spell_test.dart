@@ -660,6 +660,24 @@ void main() {
         ['a spell needs a summary or a description'],
       );
     });
+
+    test('whitespace is not prose', () {
+      // Pins the trim directly, because nothing else can: the fromMap route
+      // never reaches an untrimmed validator -- `_backfilledSummary` trims
+      // first and substitutes the placeholder, so a blank summary arrives at
+      // the constructor already replaced. Without this test, dropping the
+      // trim from validateSpellProse leaves the whole suite green while a
+      // spell whose only prose is spaces saves and renders as a blank card.
+      expect(
+        validateSpellProse(summary: '   ', description: null),
+        ['a spell needs a summary or a description'],
+      );
+      expect(
+        validateSpellProse(summary: null, description: '\n\t '),
+        ['a spell needs a summary or a description'],
+      );
+      expect(validateSpellProse(summary: '  x  ', description: null), isEmpty);
+    });
   });
 
   group('validateSpellAgainstCatalog', () {

@@ -210,7 +210,10 @@ void main() {
       // validateSpellAgainstCatalog's check 3 rejects -- the simplest way to
       // get a genuinely non-empty ResolvedSpell.problems for this fixture.
       requisites: const {'Creo': RequisiteKind.adding},
-      description: 'A test spell.',
+      // A summary, not a description: description is verbatim rulebook text
+      // and is never offered to users, so a user-created spell carrying one
+      // is a shape this app cannot produce.
+      summary: 'A test spell.',
       provenance: Provenance(source: PublicationSource.userCreated),
       createdAt: DateTime(2026, 1, 1),
       updatedAt: DateTime(2026, 1, 1),
