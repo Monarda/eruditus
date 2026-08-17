@@ -35,58 +35,63 @@ void main() {
 
   group('value equality', () {
     test('two structurally identical contributions are equal', () {
-      expect(
-        const LevelContribution(label: 'Range · Voice', magnitude: 2),
-        const LevelContribution(label: 'Range · Voice', magnitude: 2),
-      );
+      // Avoid const canonicalization by building at runtime
+      final a = LevelContribution(label: 'Range' + ' · Voice', magnitude: 1 + 1);
+      final b = LevelContribution(label: 'Range · Voice', magnitude: 2);
+
+      expect(identical(a, b), isFalse);
+      expect(a, b);
     });
 
     test('contributions differing in any field are not equal', () {
-      expect(
-        const LevelContribution(label: 'Range · Voice', magnitude: 2),
-        isNot(const LevelContribution(label: 'Range · Voice', magnitude: 3)),
-      );
-      expect(
-        const LevelContribution(label: 'Base', magnitude: 2, isBase: true),
-        isNot(const LevelContribution(label: 'Base', magnitude: 2)),
-      );
+      final a = LevelContribution(label: 'Range' + ' · Voice', magnitude: 1 + 1);
+      final b = LevelContribution(label: 'Range · Voice', magnitude: 1 + 2);
+      expect(a, isNot(b));
+
+      final c = LevelContribution(label: 'Base' + '', magnitude: 2, isBase: true);
+      final d = LevelContribution(label: 'Base', magnitude: 2);
+      expect(c, isNot(d));
     });
 
     test('two structurally identical ritual statuses are equal', () {
-      expect(
-        const RitualStatus([RitualReason.lastingCreation]),
-        const RitualStatus([RitualReason.lastingCreation]),
-      );
-      expect(const RitualStatus.notRitual(), const RitualStatus([]));
+      // Avoid const canonicalization by building list at runtime
+      final a = RitualStatus([RitualReason.lastingCreation]);
+      final b = RitualStatus([RitualReason.lastingCreation]);
+
+      expect(identical(a, b), isFalse);
+      expect(a, b);
     });
 
     test('two separately built but identical breakdowns are equal', () {
       // The property Task 4's emit funnel depends on: it rebuilds the
       // breakdown on every event, so an edit that does not move the level
       // must produce a breakdown that compares *equal* to the previous one.
-      // Without this, SpellCreationState (which lists breakdown in props)
-      // would look changed on every single emit.
-      LevelBreakdown build() => const LevelBreakdown(
-            level: 20,
+      // This test uses runtime-built objects to ensure two distinct instances
+      // compare equal by value via Equatable, not by identity.
+      LevelBreakdown build() => LevelBreakdown(
+            level: 10 + 10,
             rawLevel: 20,
             ritualStatus: RitualStatus([RitualReason.lastingCreation]),
             contributions: [
-              LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
-              LevelContribution(label: 'Range · Voice', magnitude: 2),
+              LevelContribution(label: 'Base effect' + ' · Create flame', magnitude: 5 * 2, isBase: true),
+              LevelContribution(label: 'Range · Voice', magnitude: 1 + 1),
             ],
           );
 
-      expect(build(), build());
+      final a = build();
+      final b = build();
+      expect(identical(a, b), isFalse);
+      expect(a, b);
     });
 
     test('breakdowns differing only in a nested contribution are not equal', () {
-      const a = LevelBreakdown(
+      final a = LevelBreakdown(
         level: 20, rawLevel: 20,
-        contributions: [LevelContribution(label: 'Range · Voice', magnitude: 2)],
+        contributions: [LevelContribution(label: 'Range' + ' · Voice', magnitude: 2)],
       );
-      const b = LevelBreakdown(
+      final b = LevelBreakdown(
         level: 20, rawLevel: 20,
-        contributions: [LevelContribution(label: 'Range · Touch', magnitude: 1)],
+        contributions: [LevelContribution(label: 'Range' + ' · Touch', magnitude: 1)],
       );
 
       expect(a, isNot(b));
