@@ -1,8 +1,19 @@
-// Runs every suite this project has, in the order .github/workflows/tests.yml
-// runs them. `flutter test` alone is NOT the suite: it does not run
-// integration_test/ (those need a device), and CI additionally gates on
-// `flutter analyze`. Before this script existed there was no single command
-// meaning "everything CI checks" -- see .superpowers/todo.md item 6.
+// Runs the same four checks CI runs: `flutter analyze`, the Python import
+// harness, the Dart suite, and the integration suite. `flutter test` alone
+// is NOT the suite: it does not run integration_test/ (those need a
+// device), and CI additionally gates on `flutter analyze`. Before this
+// script existed there was no single command meaning "everything CI checks"
+// -- see .superpowers/todo.md item 6.
+//
+// The order below is deliberately NOT CI's order. CI's `tests` job runs the
+// Python step, then `flutter analyze`, then `flutter test` -- an artifact of
+// installing Python tooling before Flutter tooling in that job -- and runs
+// integration as a separate job entirely. This script runs Analyze first:
+// CI fails fast, so its order decides which failure masks the others, but
+// this script runs every step regardless of earlier failures, so order only
+// affects when output appears, never what gets reported. Analyze takes ~3s
+// and catches lint before a five-minute integration build, so it goes first
+// here.
 //
 // Every step runs even after one fails, then the summary prints. Stopping at
 // the first failure would hide exactly the question this script exists to
@@ -78,7 +89,13 @@ Future<void> main() async {
       );
       exitCode = await process.exitCode;
     } on ProcessException catch (error) {
-      // A missing executable is a failure of this step, not of the script.
+      // runInShell: true is required -- `flutter` is a .bat on Windows and
+      // can't be exec'd directly -- which means a missing executable does
+      // NOT throw here: the shell starts fine, prints its own "not
+      // recognized" message via inherited stdio, and exits non-zero, which
+      // is reported as an ordinary FAIL below. This catch is cheap insurance
+      // for the cases where Process.start genuinely fails to start the
+      // process at all.
       stdout.writeln('Could not run ${step.executable}: ${error.message}');
       exitCode = 127;
     }
