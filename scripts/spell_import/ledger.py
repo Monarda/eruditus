@@ -102,12 +102,16 @@ class Ledger:
 
         if len(candidates) == 1:
             if entry is not None and entry.base_effect_id == candidates[0]:
-                # NOTE: an entry disagreeing with the sole candidate does NOT
-                # reach here — it falls through to the `not in candidates`
-                # check below, which always raises StaleEntry. There is
-                # currently no way to record a deliberate override of an
-                # unambiguous spell (see .superpowers/todo.md item 27); the
-                # message below only covers the "remove it" half of that.
+                # An entry disagreeing with the sole candidate does NOT reach
+                # here: it falls through to the `not in candidates` check
+                # below, which raises StaleEntry. That is the design, not a
+                # gap (todo item 29, decided 2026-08-17). The ledger records
+                # a choice *among* the candidates a spell's design line
+                # admits, never one against them -- `candidates` is what lets
+                # the build re-check a decision when the catalog moves, and a
+                # choice outside its own candidate set cannot be re-checked
+                # at all. A sole candidate that is the wrong guideline is a
+                # base_effects.json bug, or an ExceptionSpell.
                 raise UnnecessaryEntry(f"{spell_id}: only one candidate ({candidates[0]}); "
                                         "remove the ledger entry")
             if entry is None:

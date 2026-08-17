@@ -202,8 +202,19 @@ something the build enforces.
 
 Entries are required only where judgement was exercised. An entry for an
 unambiguous spell is rejected, to keep the ledger a record of decisions rather
-than a second copy of the library — except as an explicit override, which needs
-a rationale like any other decision.
+than a second copy of the library. There is no override: the ledger records a
+choice *among* the candidates a spell's design line admits, never one against
+them. A spell whose sole candidate is the wrong guideline is evidence that
+`base_effects.json` is wrong at that level, and is fixed there.
+
+> **Amended 2026-08-17 (todo item 29).** This paragraph previously ended
+> "— except as an explicit override, which needs a rationale like any other
+> decision." `Ledger.resolve()` never implemented that promise. It was dropped
+> rather than built: no entry in the ledger needs it, the cases it would serve
+> already have homes (`adjustments`, and the exception-spell mechanism added
+> later), and an entry whose choice lies outside its own candidate set defeats
+> the staleness check that makes the ledger trustworthy. See
+> `docs/superpowers/specs/2026-08-17-item-29-followups-design.md`.
 
 ### Five assertions
 
