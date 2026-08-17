@@ -128,11 +128,23 @@ class SpellCreationScreen extends StatelessWidget {
 
           return Scaffold(
             appBar: AppBar(title: const Text('Create Spell')),
-            body: Column(
+            // The LayoutBuilder exists for the banner alone. A Column lays its
+            // non-flex children out with an *unbounded* main-axis constraint,
+            // so a LayoutBuilder inside LevelBanner would be told its height
+            // may be infinite and could not size its expanded detail against
+            // the body it shares with the ListView below. Measuring the body
+            // here and handing it down as a real maxHeight is what lets the
+            // banner cap itself; see its build method for why the cap must be a
+            // fraction of the body rather than of MediaQuery.size.
+            body: LayoutBuilder(
+              builder: (context, bodyConstraints) => Column(
               children: [
-                LevelBanner(
-                  breakdown: state.breakdown,
-                  unavailableReason: state.levelUnavailableReason,
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: bodyConstraints.maxHeight),
+                  child: LevelBanner(
+                    breakdown: state.breakdown,
+                    unavailableReason: state.levelUnavailableReason,
+                  ),
                 ),
                 Expanded(
                   child: ListView(
@@ -459,6 +471,7 @@ class SpellCreationScreen extends StatelessWidget {
                   ),
                 ),
               ],
+              ),
             ),
           );
         },

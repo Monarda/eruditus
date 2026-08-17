@@ -106,6 +106,54 @@ void main() {
     expect(find.text('Ritual minimum: raised from 2 to 20'), findsOneWidget);
   });
 
+  testWidgets('caps the expanded detail against the height it is given, not the screen',
+      (tester) async {
+    // The banner is boxed to 200 logical px on a 3000px-tall view, so the two
+    // rules give wildly different answers: 40% of the box is 80, 40% of the
+    // screen is 1200. The old `MediaQuery.of(context).size.height` rule would
+    // therefore have let this twelve-row detail render at its natural height
+    // and blow the box -- the same shape of failure the creation screen hits
+    // for real, where the banner is a non-flex Column child above an Expanded
+    // ListView and a detail sized against the screen starves the form to zero.
+    const tallBreakdown = LevelBreakdown(
+      level: 30,
+      rawLevel: 30,
+      contributions: [
+        LevelContribution(label: 'Base effect · Create flame', magnitude: 4, isBase: true),
+        LevelContribution(label: 'Range · Voice', magnitude: 2),
+        LevelContribution(label: 'Duration · Sun', magnitude: 2),
+        LevelContribution(label: 'Target · Room', magnitude: 2),
+        LevelContribution(label: 'Requisite · Rego, adding', magnitude: 1),
+        LevelContribution(label: 'Requisite · Vim, adding', magnitude: 1),
+        LevelContribution(label: 'Adjustment · unusually precise', magnitude: 1),
+        LevelContribution(label: 'Adjustment · at a distance', magnitude: 1),
+        LevelContribution(label: 'Complexity · Intricate design', magnitude: 1),
+        LevelContribution(label: 'Material difficulty · Metal or gemstone', magnitude: 2),
+        LevelContribution(label: 'Size · +1', magnitude: 1),
+        LevelContribution(label: 'Penetration · +5', magnitude: 1),
+      ],
+    );
+
+    await pump(tester, const SizedBox(
+      height: 200,
+      child: LevelBanner(breakdown: tallBreakdown),
+    ));
+
+    await tester.tap(find.byKey(const Key('level-banner-toggle')));
+    await tester.pumpAndSettle();
+
+    final detail = find.descendant(
+      of: find.byKey(const Key('level-banner')),
+      matching: find.byType(SingleChildScrollView),
+    );
+    expect(tester.getSize(detail).height, 80.0);
+    // The banner fits the box it was given, so a sibling sharing that space
+    // still has room. Without the cap the Column inside overflows instead.
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byKey(const Key('level-banner'))).height,
+        lessThanOrEqualTo(200.0));
+  });
+
   testWidgets('with no level, shows an em dash and the reason', (tester) async {
     await pump(tester, const LevelBanner(
       unavailableReason: 'Choose a base effect to see a level.',
