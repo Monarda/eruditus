@@ -17,7 +17,6 @@
 // pumpWidget call.
 import 'dart:async';
 
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,28 +37,11 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
-class MockSpellCreationBloc
-    extends MockBloc<SpellCreationEvent, SpellCreationState>
-    implements SpellCreationBloc {}
-
-class MockConfigurationBloc
-    extends MockBloc<ConfigurationEvent, ConfigurationState>
-    implements ConfigurationBloc {}
-
-class FakeSpellCreationEvent extends Fake implements SpellCreationEvent {}
-
-class FakeSpellCreationState extends Fake implements SpellCreationState {}
-
-class FakeConfigurationEvent extends Fake implements ConfigurationEvent {}
-
-class FakeConfigurationState extends Fake implements ConfigurationState {}
+import '../../support/bloc_factories.dart';
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(FakeSpellCreationEvent());
-    registerFallbackValue(FakeSpellCreationState());
-    registerFallbackValue(FakeConfigurationEvent());
-    registerFallbackValue(FakeConfigurationState());
+    registerBlocFallbackValues();
   });
 
   final creoIgnemEffect = BaseEffect(
@@ -97,8 +79,6 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final spellCreationBloc = MockSpellCreationBloc();
-      final configBloc = MockConfigurationBloc();
       final configController = StreamController<ConfigurationState>();
       addTearDown(configController.close);
 
@@ -108,15 +88,16 @@ void main() {
         parameters: const [],
       );
 
-      whenListen(
-        spellCreationBloc,
-        const Stream<SpellCreationState>.empty(),
+      final spellCreationBloc = mockSpellCreationBloc(
         initialState: SpellCreationState(
           status: SpellCreationStatus.editing,
           draft: SpellDraft(technique: 'Creo', form: 'Ignem'),
         ),
       );
-      whenListen(configBloc, configController.stream, initialState: initialConfigState);
+      final configBloc = mockConfigurationBloc(
+        initialState: initialConfigState,
+        states: configController.stream,
+      );
 
       await tester.pumpWidget(MaterialApp(
         home: MultiBlocProvider(
@@ -178,8 +159,6 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final spellCreationBloc = MockSpellCreationBloc();
-      final configBloc = MockConfigurationBloc();
       final configController = StreamController<ConfigurationState>();
       addTearDown(configController.close);
 
@@ -189,15 +168,16 @@ void main() {
         parameters: const [],
       );
 
-      whenListen(
-        spellCreationBloc,
-        const Stream<SpellCreationState>.empty(),
+      final spellCreationBloc = mockSpellCreationBloc(
         initialState: SpellCreationState(
           status: SpellCreationStatus.editing,
           draft: SpellDraft(technique: 'Creo', form: 'Ignem'),
         ),
       );
-      whenListen(configBloc, configController.stream, initialState: initialConfigState);
+      final configBloc = mockConfigurationBloc(
+        initialState: initialConfigState,
+        states: configController.stream,
+      );
 
       await tester.pumpWidget(MaterialApp(
         home: MultiBlocProvider(
@@ -253,20 +233,13 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final spellCreationBloc = MockSpellCreationBloc();
-      final configBloc = MockConfigurationBloc();
-
-      whenListen(
-        spellCreationBloc,
-        const Stream<SpellCreationState>.empty(),
+      final spellCreationBloc = mockSpellCreationBloc(
         initialState: SpellCreationState(
           status: SpellCreationStatus.editing,
           draft: SpellDraft(technique: 'Creo', form: 'Mentem', target: individualTarget),
         ),
       );
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      final configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           modifiers: [sizeMentemModifier],
@@ -298,20 +271,13 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      final spellCreationBloc = MockSpellCreationBloc();
-      final configBloc = MockConfigurationBloc();
-
-      whenListen(
-        spellCreationBloc,
-        const Stream<SpellCreationState>.empty(),
+      final spellCreationBloc = mockSpellCreationBloc(
         initialState: SpellCreationState(
           status: SpellCreationStatus.editing,
           draft: SpellDraft(technique: 'Creo', form: 'Mentem', target: groupTarget),
         ),
       );
-      whenListen(
-        configBloc,
-        const Stream<ConfigurationState>.empty(),
+      final configBloc = mockConfigurationBloc(
         initialState: ConfigurationState(
           status: ConfigurationStatus.loaded,
           modifiers: [sizeMentemModifier],
