@@ -161,6 +161,11 @@ Never _plumbingUnsupported(String fake, String member) => throw UnsupportedError
 /// Deliberately has no error-injection hook: mocktail is the better tool for
 /// making a call fail on demand, and `test/bloc/spell_creation_bloc_test.dart`
 /// already uses it that way. This fake models storage that works.
+///
+/// Deliberately does no validation either: the real [SpellRepository] refuses
+/// an invalid spell (`InvalidSpellException` from `saveSpell`, a rejects list
+/// from `saveAll`), and this fake always writes. A test whose subject is
+/// *rejection* wants the real repository built in `setUp`, or a mocktail mock.
 class FakeSpellRepository implements SpellRepository {
   final Map<String, Spell> spells = {};
 
