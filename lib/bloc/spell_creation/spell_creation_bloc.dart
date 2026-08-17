@@ -79,8 +79,21 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// instance, which is why LevelBreakdown, LevelContribution and RitualStatus
   /// carry value equality: SpellCreationState lists breakdown in its props, and
   /// identity comparison would make every state here look changed.
+  ///
+  /// It also clears [SpellCreationState.validationErrors] whenever the draft
+  /// moves -- see the `draftChanged` comment below.
   void _emit(Emitter<SpellCreationState> emit, SpellCreationState next) {
     final preview = spellEngine.previewLevel(next.draft);
+
+    // Whether this emit rebuilt the draft. SpellDraft has no value equality, so
+    // `!=` here is identity: true exactly when a handler produced a new draft
+    // (they all go through `state.draft.copyWith(...)` or build a fresh one),
+    // and false when a handler emitted a status/errors change over the draft it
+    // was given. That is precisely the distinction needed below, and it stays
+    // correct if SpellDraft ever gains value equality -- an edit that changed
+    // nothing has nothing to invalidate either.
+    final draftChanged = next.draft != state.draft;
+
     emit(next.copyWith(
       breakdown: preview.breakdown,
       levelUnavailableReason: preview.unavailableReason,
@@ -94,6 +107,23 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // status with nothing to show for it. Every other field either carries
       // forward via `??` or through the `_unset` sentinel.
       errorMessage: next.errorMessage,
+      // Validation errors describe the draft they were computed from, so they
+      // cannot outlive it. Nothing else cleared them: every edit handler omits
+      // the field, copyWith carries it forward, and only a successful
+      // SpellCalculated ever reset it -- so saving an incomplete draft, reading
+      // "Target must be selected" in red, and then picking a Target left the
+      // red text still demanding a Target. Reachable without a Calculate only
+      // because Save now renders unconditionally, which is what makes it this
+      // task's to fix.
+      //
+      // This clears; it never populates. Validation stays behind the two button
+      // presses on purpose -- its messages render as red "this is broken" text,
+      // and recomputing them per keystroke would flag every half-built draft as
+      // broken (todo item 59). So an edit that fixes only some of the errors
+      // drops all of them rather than showing a stale subset; the user gets the
+      // remainder back, computed against the draft they actually have, on their
+      // next press. `null` is copyWith's "leave it alone".
+      validationErrors: draftChanged ? const <String>[] : null,
     ));
   }
 
@@ -346,6 +376,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       _emit(emit, state);
     } else if (event is AvailableParametersSynced) {
       spellEngine.updateParameters(event.parameters);
+      // The same re-emit, for a different reason than the modifiers above. A
+      // parameter catalog change moves the level through _parameterById, which
+      // resolves the *reference* triple each parameter is charged as a delta
+      // from: a ward guideline referencing Touch scores its Range differently
+      // once Touch resolves than while it does not. The draft has not changed,
+      // but what the engine makes of it has.
       _emit(emit, state);
     } else if (event is RitualDeclarationChanged) {
       _emit(emit, state.copyWith(

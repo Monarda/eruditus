@@ -2418,4 +2418,79 @@ void main() {
       },
     );
   });
+
+  group('validation errors do not outlive the draft they described', () {
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a rejected save clears its errors on the next edit that fixes them',
+      // The errors were computed from a draft that no longer exists. Left in
+      // place they contradict what the user is now looking at: save an
+      // incomplete draft, read "Target must be selected" in red, pick a
+      // Target, and the red text still says to pick a Target. The pattern
+      // predates this task, but an unconditional Save is what makes it
+      // reachable without a Calculate.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(RangeSelected(rangeParam))
+        ..add(DurationSelected(durationParam))
+        // No Target yet, so the save is rejected rather than written.
+        ..add(const SpellSaveRequested('Pillar of Flames'))
+        ..add(TargetSelected(targetParam)),
+      skip: 5,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.status, 'status', SpellCreationStatus.editing)
+            .having((s) => s.validationErrors, 'validationErrors',
+                contains('Target must be selected')),
+        isA<SpellCreationState>()
+            .having((s) => s.draft.target, 'draft.target', targetParam)
+            .having((s) => s.validationErrors, 'validationErrors (cleared by the edit)', isEmpty),
+      ],
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a SpellCalculated that produces errors keeps them -- the emit carrying them does not clear them',
+      // The reverse guard on the test above. Clearing is conditional on the
+      // draft having actually moved, so the emit that *reports* errors -- which
+      // leaves the draft alone -- must not wipe them on the way out.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(const SpellCalculated()),
+      skip: 3,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.status, 'status', SpellCreationStatus.editing)
+            .having((s) => s.validationErrors, 'validationErrors',
+                contains('Range must be selected')),
+      ],
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an edit that does not fix the errors still clears them, rather than showing a stale subset',
+      // Deliberately not "recompute the errors on every edit": validation stays
+      // behind the two button presses (its messages render as red text, and
+      // firing them per keystroke would flag a half-built draft as broken --
+      // todo item 59). The funnel only ever clears. The user gets them back,
+      // recomputed against the draft they now have, on their next press.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(const SpellSaveRequested('Pillar of Flames'))
+        // Fixes neither the missing Duration nor the missing Target.
+        ..add(RangeSelected(rangeParam)),
+      skip: 4,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.draft.range, 'draft.range', rangeParam)
+            .having((s) => s.validationErrors, 'validationErrors', isEmpty),
+      ],
+    );
+  });
 }
