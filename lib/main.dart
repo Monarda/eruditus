@@ -45,9 +45,18 @@ Future<void> main() async {
     assetLoader: assetLoader,
     configDatasource: LocalConfigurationDatasource(database: database),
   );
+  // Hoisted out of the SpellResolver call below so SpellEngine can share it.
+  // The engine resolves a guideline's reference parameter by id, both to
+  // charge Range/Duration/Target as a delta and to seed a new draft at that
+  // reference. Its only other filler is AvailableParametersSynced, dispatched
+  // from a BlocListener whose listenWhen fires on *change* -- so if
+  // ConfigurationBloc has already loaded by the time the Create tab first
+  // builds, that listener never fires and allParameters would stay empty for
+  // the life of the app. See todo items 38 and 60.
+  final allParameters = await configRepository.getAllParameters();
   final resolver = SpellResolver(
     effects: await configRepository.getAllEffects(),
-    parameters: await configRepository.getAllParameters(),
+    parameters: allParameters,
     modifiers: await configRepository.getAllModifiers(),
   );
   final spellRepository = SpellRepository(
@@ -65,7 +74,7 @@ Future<void> main() async {
 
   final allSpells = await libraryRepository.getAllSpells();
 
-  final spellEngine = SpellEngine(allSpells: allSpells);
+  final spellEngine = SpellEngine(allSpells: allSpells, allParameters: allParameters);
 
   final spellCreationBloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
   // Shares the same SpellEngine instance as spellCreationBloc, purely for its
