@@ -59,6 +59,10 @@ void main() {
 
   ResolvedSpell buildSpell(String id, String name,
       {PublicationSource source = PublicationSource.published}) {
+    // description is verbatim rulebook text and is never offered to users
+    // (only summary is) -- a user-created fixture must carry summary
+    // instead, or it builds a shape the app itself cannot produce.
+    final isUserCreated = source == PublicationSource.userCreated;
     final record = Spell(
       id: id,
       name: name,
@@ -69,7 +73,8 @@ void main() {
       durationId: durationParam.id,
       targetId: targetParam.id,
       requisites: const {},
-      description: 'A test spell.',
+      summary: isUserCreated ? 'A test spell.' : null,
+      description: isUserCreated ? null : 'A test spell.',
       provenance: Provenance(
         source: source,
         citations: source == PublicationSource.published
