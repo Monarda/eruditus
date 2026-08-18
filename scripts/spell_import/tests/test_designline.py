@@ -496,6 +496,26 @@ class ElaborateEffectTest(unittest.TestCase):
                 self.assertEqual(tokens[0].magnitude, magnitude)
 
 
+class ComplexityTest(unittest.TestCase):
+    def test_bare_complexity_is_its_own_kind(self):
+        design = designline.parse_design("(Base 5, +2 Sun; +1 complexity)")
+        kinds = [t.kind for t in design.tokens if "complex" in t.label.lower()]
+        self.assertEqual(kinds, ["complexity"])
+
+    def test_capitalised_complexity_is_recognised(self):
+        design = designline.parse_design("(Base 5, +2 Complexity)")
+        token = next(t for t in design.tokens if t.kind == "complexity")
+        self.assertEqual(token.magnitude, 2)
+
+    def test_the_imaginem_complexity_factors_are_still_modifiers(self):
+        # intricacy and changing image map to real per-Technique options and
+        # must not be swept into the general kind.
+        design = designline.parse_design("(Base 2, +1 intricacy, +1 changing image)")
+        kinds = {t.label: t.kind for t in design.tokens}
+        self.assertEqual(kinds["intricacy"], "modifier")
+        self.assertEqual(kinds["changing image"], "modifier")
+
+
 class AdjustmentTest(unittest.TestCase):
     def test_an_allow_listed_token_becomes_an_adjustment(self):
         design = designline.parse_design(

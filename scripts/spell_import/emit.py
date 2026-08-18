@@ -59,6 +59,28 @@ _ELABORATE_OPTIONS = {
     3: "elaborate-effect-extensive",
 }
 
+# designline's `complexity` tokens carry the printed magnitude; this maps it to
+# the modifiers.json option that already encodes that magnitude, the same
+# discipline as _ELABORATE_OPTIONS above and for the same reason: a magnitude
+# outside this map raises rather than defaulting.
+_COMPLEXITY_OPTIONS = {
+    0: "complexity-none",
+    1: "complexity-slight",
+    2: "complexity-considerable",
+    3: "complexity-extensive",
+    4: "complexity-intricate",
+    5: "complexity-exceptional",
+}
+
+# Modifiers whose option is chosen by the design line's own magnitude rather
+# than by its label -- the label names the mechanism, the magnitude names the
+# rung. Both are storyguide judgement magnitudes with a degree ladder in
+# modifiers.json and no printed table in the rulebook.
+_MAGNITUDE_KEYED_MODIFIERS = {
+    "elaborate": ("elaborate-effect", _ELABORATE_OPTIONS),
+    "complexity": ("complexity", _COMPLEXITY_OPTIONS),
+}
+
 # Design-line modifier labels that resolve to one named modifiers.json option,
 # keyed by (Technique, Form, label) because the Imaginem complexity modifiers
 # are Technique/Form-scoped and the same label can mean different options under
@@ -609,29 +631,31 @@ def _selected_modifiers(
     """
     selected: dict[str, list[str]] = {}
     for token in design.tokens:
-        if token.kind == "elaborate":
-            option_id = _ELABORATE_OPTIONS.get(token.magnitude)
+        if token.kind in _MAGNITUDE_KEYED_MODIFIERS:
+            modifier_id, options = _MAGNITUDE_KEYED_MODIFIERS[token.kind]
+            option_id = options.get(token.magnitude)
             if option_id is None:
                 raise designline.UnknownToken(
-                    f"{block.name}: no elaborate-effect option at magnitude "
+                    f"{block.name}: no {modifier_id} option at magnitude "
                     f"{token.magnitude}"
                 )
-            if not _option_exists(catalog, "elaborate-effect", option_id, token.magnitude):
+            if not _option_exists(catalog, modifier_id, option_id, token.magnitude):
                 raise designline.UnknownToken(
-                    f"{block.name}: modifiers.json has no 'elaborate-effect' option "
+                    f"{block.name}: modifiers.json has no {modifier_id!r} option "
                     f"{option_id!r} at magnitude {token.magnitude}"
                 )
-            if "elaborate-effect" in selected:
-                # elaborate-effect is selectionMode "single". Two elaborate
-                # tokens on one design line would put two option ids under it,
-                # producing an asset the app's own validateSpellDraft rejects.
-                # No corpus spell does this today and nothing else in the
-                # pipeline would notice if one appeared.
+            if modifier_id in selected:
+                # Both elaborate-effect and complexity are selectionMode
+                # "single". Two tokens of the same magnitude-keyed kind on one
+                # design line would put two option ids under it, producing an
+                # asset the app's own validateSpellDraft rejects. No corpus
+                # spell does this today and nothing else in the pipeline
+                # would notice if one appeared.
                 raise designline.UnknownToken(
-                    f"{block.name}: two elaborate tokens, but 'elaborate-effect' "
+                    f"{block.name}: two {token.kind} tokens, but {modifier_id!r} "
                     f"is a single-selection modifier"
                 )
-            selected["elaborate-effect"] = [option_id]
+            selected[modifier_id] = [option_id]
             continue
         if token.kind != "modifier":
             continue
@@ -706,10 +730,11 @@ def _option_exists(
 ) -> bool:
     """Is `option_id` really a `modifier_id` option carrying `magnitude`?
 
-    _ELABORATE_OPTIONS is a hand-written id table, so a typo in it — or a
-    renamed option in modifiers.json — would otherwise put a dangling id
-    into the asset with no Python test to catch it. Checking the magnitude
-    too means the table cannot drift out of step with the catalog silently.
+    _ELABORATE_OPTIONS and _COMPLEXITY_OPTIONS are hand-written id tables, so
+    a typo in one of them — or a renamed option in modifiers.json — would
+    otherwise put a dangling id into the asset with no Python test to catch
+    it. Checking the magnitude too means the table cannot drift out of step
+    with the catalog silently.
     """
     modifier = next((m for m in catalog.modifiers if m["id"] == modifier_id), None)
     if modifier is None:

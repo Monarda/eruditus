@@ -416,6 +416,62 @@ class ElaborateEffectEmissionTest(unittest.TestCase):
                 self.assertEqual(options[option_id], magnitude)
 
 
+def _any_block() -> blocks.SpellBlock:
+    """A block for paths that read neither its Technique nor its Form."""
+    return _block("Test Spell", "Rego", "Terram", 5)
+
+
+class ComplexityEmissionTest(unittest.TestCase):
+    """`complexity` is resolved by the same magnitude-keyed branch as
+    elaborate-effect (see emit._MAGNITUDE_KEYED_MODIFIERS); these pin that
+    generalisation didn't lose complexity's own checks or break elaborate's.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_a_complexity_token_selects_the_rung_matching_its_magnitude(self):
+        design = designline.parse_design("(Base 5, +2 Sun; +2 complexity)")
+        selected = emit._selected_modifiers(design, _any_block(), self.catalog)
+        self.assertEqual(selected["complexity"], ["complexity-considerable"])
+
+    def test_a_complexity_magnitude_with_no_rung_raises(self):
+        design = designline.parse_design("(Base 5, +9 complexity)")
+        with self.assertRaises(designline.UnknownToken):
+            emit._selected_modifiers(design, _any_block(), self.catalog)
+
+    def test_two_complexity_tokens_raise_because_it_is_single_selection(self):
+        design = designline.parse_design("(Base 5, +1 complexity, +2 complexity)")
+        with self.assertRaises(designline.UnknownToken):
+            emit._selected_modifiers(design, _any_block(), self.catalog)
+
+    def test_elaborate_effect_still_resolves_after_the_generalisation(self):
+        # "for a very elaborate effect" (the brief's own wording) is actually
+        # an ADJUSTMENT_LABELS entry, not an ELABORATE_LABELS one -- it
+        # tokenizes as kind="adjustment" and _selected_modifiers ignores it,
+        # so it cannot exercise this branch. "fancy effect" is a genuine
+        # ELABORATE_LABELS wording (see ElaborateEffectEmissionTest above)
+        # and is what actually reaches kind="elaborate".
+        design = designline.parse_design("(Base 5, +1 fancy effect)")
+        selected = emit._selected_modifiers(design, _any_block(), self.catalog)
+        self.assertEqual(selected["elaborate-effect"], ["elaborate-effect-minor"])
+
+    def test_every_table_entry_names_a_real_option_at_that_magnitude(self):
+        # Guards the hand-written id table against a typo or a rename in
+        # modifiers.json, the same discipline as elaborate-effect's own check.
+        modifier = next(m for m in self.catalog.modifiers if m["id"] == "complexity")
+        options = {o["id"]: o["magnitude"] for o in modifier["options"]}
+        for magnitude, option_id in emit._COMPLEXITY_OPTIONS.items():
+            with self.subTest(option_id=option_id):
+                self.assertIn(option_id, options)
+                self.assertEqual(options[option_id], magnitude)
+
+    def test_complexity_is_a_single_selection_modifier_in_the_catalog(self):
+        modifier = next(m for m in self.catalog.modifiers if m["id"] == "complexity")
+        self.assertEqual(modifier["selectionMode"], "single")
+
+
 class ModifierOptionTableTest(unittest.TestCase):
     """`emit._MODIFIER_OPTIONS` is hand-written; the catalog is the authority."""
 

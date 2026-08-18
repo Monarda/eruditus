@@ -111,7 +111,7 @@ MODIFIER_LABELS = {
     # the rulebook didn't bother distinguishing them. See emit.py's Terram
     # material handling for which option this resolves to and why.
     "metal/gems",
-    "changing image", "intricacy", "complexity",
+    "changing image", "intricacy",
     # Creo Auram's own guideline table (Definitive Edition, Creo Auram
     # Guidelines, Notes row) spells the same +2 tier "very unnatural";
     # "highly unnatural" (Wings of the Soaring Wind) is the one design line
@@ -218,6 +218,14 @@ ELABORATE_LABELS = frozenset({
     "additional effect",
     "elaborate design",
 })
+
+# Bare "complexity", as distinct from the Imaginem sensory-complexity factors
+# in MODIFIER_LABELS. Core Rules 12204 makes this a general judgement
+# magnitude -- "this normally adds magnitudes to the spell level to account
+# for the complexity" -- and the corpus bears that out: 23 tokens across 9
+# books and 12 Technique/Form pairs, none of them Imaginem. Both spellings
+# occur in print.
+COMPLEXITY_LABELS = frozenset({"complexity", "Complexity"})
 
 # Closed allow-list of per-spell adjustments, matched exactly against the
 # token's *note* -- the raw text with its "+N "/"-N " prefix removed, brackets
@@ -444,6 +452,10 @@ def parse_design(text: str) -> Design:
         # see ADJUSTMENT_LABELS.
         if label in ELABORATE_LABELS:
             tokens.append(Token(magnitude, label, "elaborate"))
+            continue
+
+        if label in COMPLEXITY_LABELS:
+            tokens.append(Token(magnitude, label, "complexity"))
             continue
 
         raw_match = _TOKEN.match(raw)

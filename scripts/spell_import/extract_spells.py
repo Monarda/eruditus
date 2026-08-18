@@ -683,7 +683,11 @@ def container_modes() -> dict[str, dict]:
 
 
 def apply_container_modes(
-    rows: list[dict], catalog: catalog_module.Catalog, modes: dict[str, dict]
+    rows: list[dict],
+    catalog: catalog_module.Catalog,
+    modes: dict[str, dict],
+    *,
+    unresolved: bool = False,
 ) -> None:
     """Stamp hand-authored container modes onto the rows they name, in place.
 
@@ -691,18 +695,32 @@ def apply_container_modes(
     container, raises rather than being skipped: a silently-ignored entry is a
     decision that looks recorded and isn't, which is the whole failure mode
     this file exists to avoid.
+
+    `unresolved` excuses only the first of those two checks. A widened ledger
+    entry leaves its spell unproduced -- an entry naming it is not stale, the
+    run just did not get that far -- and `migrate_ledger.py`, the only tool
+    that resolves a widening, calls `run(write=False)` and would otherwise hit
+    the very guard meant to catch stale entries on a clean run. A run with
+    unresolved ledger entries already reports why elsewhere; this guard would
+    only add noise on top, and block the fix. The Target-is-a-container check
+    is a property of the entry itself, not of the run's completeness, so it
+    still runs for every entry that does have a row.
     """
     by_id = {row["id"]: row for row in rows}
 
     unknown = sorted(set(modes) - set(by_id))
-    if unknown:
+    if unknown and not unresolved:
         raise UnknownContainerModeSpell(
             "container_modes.json names spells no run produced: "
             + ", ".join(unknown)
         )
 
     for spell_id, entry in modes.items():
-        row = by_id[spell_id]
+        row = by_id.get(spell_id)
+        if row is None:
+            # Only reachable with unresolved=True -- the check above already
+            # raised for a clean run's stale entry.
+            continue
         target_id = row["targetId"]
         if catalog.target_type(target_id) != "container":
             raise NotAContainerTarget(
@@ -998,7 +1016,9 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
     # checking each separately would report every template id as unknown to
     # the spells pass. `spells + templates` is a new list of the *same* dicts,
     # so mutating through it mutates the rows that get serialized.
-    apply_container_modes(spells + templates, catalog, container_modes())
+    apply_container_modes(
+        spells + templates, catalog, container_modes(), unresolved=bool(unresolved)
+    )
 
     if proposals:
         PROPOSALS_PATH.write_text(

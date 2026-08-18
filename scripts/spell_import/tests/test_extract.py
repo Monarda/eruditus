@@ -54,6 +54,22 @@ class ContainerModesTest(unittest.TestCase):
                 {"lib-b": {"mode": "dynamic", "rationale": "x"}},
             )
 
+    def test_container_modes_are_not_checked_while_entries_are_unresolved(self):
+        # A widened ledger entry leaves its spell unproduced, which would
+        # otherwise trip the stale-entry guard -- and migrate_ledger.py, the
+        # only thing that fixes a widening, calls run() and would hit the
+        # same crash. The guard is meaningful only on a clean run.
+        modes = {"lib-revi-circular-ward-against-demons": {"mode": "dynamic",
+                                                             "rationale": "test"}}
+        extract_spells.apply_container_modes([], self.catalog, modes, unresolved=True)
+
+    def test_container_modes_are_still_checked_on_a_clean_run(self):
+        modes = {"lib-nonesuch-spell": {"mode": "dynamic", "rationale": "test"}}
+        with self.assertRaises(extract_spells.UnknownContainerModeSpell):
+            extract_spells.apply_container_modes(
+                [], self.catalog, modes, unresolved=False
+            )
+
 
 class RunTest(unittest.TestCase):
     @classmethod
