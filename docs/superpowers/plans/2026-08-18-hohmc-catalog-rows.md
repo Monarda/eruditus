@@ -245,7 +245,12 @@ and these tests should not depend on one that will exist later.
       magnitude: 3,
       targetType: TargetType.container,
       scope: const ParameterScope(excludeTechniques: ['Intellego']),
-      provenance: Provenance(source: PublicationSource.published),
+      // Provenance's constructor rejects a published source with no
+      // citations, so this cites the book the real Target comes from.
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-hohmc')],
+      ),
     );
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -275,7 +280,7 @@ and these tests should not depend on one that will exist later.
   });
 ```
 
-If `ContainerMode`, `TargetType`, `Parameter`, `Provenance` or
+If `ContainerMode`, `TargetType`, `Parameter`, `Provenance`, `Citation` or
 `PublicationSource` are not already imported by that test file, add the imports
 — check the file's existing import block first, since most are likely present.
 
