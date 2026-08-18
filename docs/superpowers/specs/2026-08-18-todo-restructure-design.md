@@ -51,6 +51,8 @@ Three structural faults, distinct from mere size:
 - Generating `STATUS.md`. Specified here as a follow-on; deliberately excluded
   from this work (see *Sequencing*).
 - Any change to `docs/superpowers/plans/`, `specs/` or `reports/`.
+- Any change to `~/.claude/settings.json`. The rule-3 gate is project-scoped by
+  requirement; it must not fire in other repositories.
 
 ## Design
 
@@ -68,6 +70,10 @@ Three structural faults, distinct from mere size:
     app.md             the Flutter app and project chores         (9 items)
     multibook.md       the second-book program, sub-project C     (2 items)
   ARCHIVE.md         42 closed items, verbatim. not loaded by default. ~950 lines
+  .last-reviewed-merge  one sha. state for the rule-3 gate (see below)
+.claude/
+  settings.json      project-scoped Stop hook
+  skills/closing-an-item/SKILL.md   the extraction procedure
 ```
 
 A session reads `todo.md` + `DECISIONS.md` always, and one theme file on top
@@ -169,6 +175,66 @@ dropdown, is unusable.  *(item 72)*
 4. A new finding becomes a sub-id under the item that produced it, not a new
    item, unless genuinely unrelated to that parent.
 
+### Enforcing rule 3
+
+Rule 3 is the one that decides whether this restructure holds. Rules 1, 2 and 4
+are conventions whose violation is visible in a diff; rule 3's violation is an
+*omission*, and omissions are invisible. Left to discipline it will decay the
+same way the Completed section did.
+
+Note the distinction from migration step 3 below: that is a one-time backfill of
+42 already-closed bodies, and no branch will ever finish for those. What is
+automated here is the recurring rule.
+
+**A hook cannot perform the extraction.** Deciding which sentences of a closed
+item still bind is judgement; a hook is a shell command. It can only remind (so
+the model does the work) or gate (check that the work happened and refuse to end
+the turn otherwise). This design gates, because the failure mode being guarded
+against is precisely a step quietly not happening.
+
+**Trigger: a `Stop` hook keyed on merges, not on the finishing skill.** Matching
+`PostToolUse` on the `Skill` tool was considered and rejected — it fires when
+`finishing-a-development-branch` *launches*, before tests run and before
+anything is closed, so it can only inject a reminder into the top of a long flow
+and hope it survives.
+
+Instead, `.superpowers/.last-reviewed-merge` holds one sha. On `Stop` the hook
+compares it against `git rev-list --merges -1 HEAD`:
+
+- equal → exit 0, silent.
+- different → exit 2 with a message naming the merge; the model receives it and
+  must address it before the turn ends. Performing the extraction updates the
+  file, which self-clears the prompt.
+
+Three consequences, of which the third is the strongest argument for the design:
+
+1. It cannot scroll out of context the way an injected reminder can.
+2. A false positive is cheap — many merges bind nothing new, and "no standing
+   constraints here" is a five-second answer. A false negative is what produced
+   the 1007-line Completed section.
+3. **It catches merges made outside Claude Code.** No hook fires for a merge in
+   a terminal or a GUI, but the sha still moves, so the next session in this
+   repo opens by asking. Nothing keyed to the skill can do this.
+
+**The procedure lives in a project skill, not in the hook.**
+`.claude/skills/closing-an-item/SKILL.md` holds the extraction steps; the hook
+carries only the trigger and a pointer to it. This keeps the procedure versioned
+in the repo, editable without touching settings, and invokable by hand when an
+item closes without a merge.
+
+Two constraints on the implementation:
+
+- The hook must declare `"shell": "bash"` to work on Windows. Superpowers' own
+  `docs/windows/polyglot-hooks.md` documents the failure it avoids: PowerShell
+  and CMD both mis-parse a leading quoted path.
+- **Merge-and-item-close is a proxy, not an identity.** One merge may close
+  three items or none. The gate asks a question; it does not assert that an item
+  closed.
+
+Scope: this is project-scoped configuration in the repo's own
+`.claude/settings.json`, which travels with the repo and fires nowhere else. The
+user-level `~/.claude/settings.json` is not touched.
+
 ## Migration
 
 1. **Build the index mechanically** from current headings — number, title,
@@ -215,6 +281,12 @@ text.
 Until that script exists, `STATUS.md` holds the current hand-written
 `## Where the import stands` content, moved verbatim and marked as
 hand-maintained.
+
+The rule-3 gate lands **after** migration step 6, for two reasons. It keys on
+`.superpowers/.last-reviewed-merge`, which has nothing to point at until
+`DECISIONS.md` exists; and a gate installed mid-migration would fire on the
+migration's own merge, which closes no item. Its settings edit should go through
+the `update-config` skill rather than a hand-written JSON patch.
 
 ## Appendix: proposed theme assignment
 
