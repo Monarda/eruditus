@@ -872,7 +872,7 @@ void main() {
   );
 
   // No `reference` at all -- falls back to ParameterTriple.standard(), like
-  // 596 of the 609 catalog entries.
+  // 598 of the 611 catalog entries.
   final plainEffect = BaseEffect(
     id: 'plain-1', technique: 'Creo', form: 'Ignem',
     description: 'Create flame', baseLevel: 10,

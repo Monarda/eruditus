@@ -61,7 +61,7 @@ class CandidatesTest(unittest.TestCase):
         self.assertEqual(self.catalog.parameter_id("Range", "Touch"), "range-touch")
         self.assertEqual(self.catalog.parameter_id("Target", "Boundary"), "target-boundary")
         with self.assertRaises(KeyError):
-            self.catalog.parameter_id("Target", "Flavor")
+            self.catalog.parameter_id("Target", "Nowhere")
 
     def test_general_candidates_are_the_levelless_rows(self):
         candidates = self.catalog.general_candidates("Perdo", "Vim")

@@ -1,9 +1,9 @@
 # Eruditus Todo List
 
-**Status:** Active development · **Last updated:** 2026-08-17
+**Status:** Active development · **Last updated:** 2026-08-18
 
 **Every count, line reference and status claim below was re-verified on
-2026-08-17** by running the extractor, both test suites and the integration
+2026-08-18** by running the extractor, both test suites and the integration
 suite, and by reading the assets and code directly. Claims that survived are
 stated plainly; the ones that had gone stale were corrected rather than
 carried forward.
@@ -39,9 +39,10 @@ reason the guidelines don't apply to it (item 46).
 > — plus `unreviewed: 3`, see below.
 
 **Suite status: Dart re-run 2026-08-18 after item 64 (the HoH:MC catalog rows
-work added tests); Python re-run 2026-08-17 after item 29 (the ledger task and
-the modifier task each added a test); Integration last run 2026-08-17 after
-item 13:**
+work added tests); Python re-run 2026-08-18 after item 64 (adding the Flavor
+Target made `test_parameter_lookup_by_category_and_name`'s absent-name probe
+findable, so it was repointed at a name that still cannot exist); Integration
+last run 2026-08-17 after item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
@@ -59,8 +60,8 @@ belongs to item 32.
 
 | Asset | Entries | Note |
 |---|---|---|
-| `base_effects.json` | 609 | 50 General — 49 core plus item 17's one supplement row |
-| `parameters.json` | 34 | 25 core (item 15) + 9 virtue-gated (item 17) |
+| `base_effects.json` | 611 | 50 General — 49 core plus item 17's one supplement row; plus item 64's two Glamour guidelines |
+| `parameters.json` | 39 | 25 core (item 15) + 9 virtue-gated (item 17) + 5 Sensory Targets (item 64) |
 | `modifiers.json` | 34 | |
 | `spell_library.json` | 325 | |
 | `spell_templates.json` | 28 | 27 extracted + 1 carried in from `hand_authored_templates.json` |
@@ -719,7 +720,7 @@ the "Container Targets" sidebar's static/dynamic test.
 - [ ] Document the Aquam sub-type limitation (see *Notes*)
 
 ### 11. Performance
-- [ ] Optimize base effects JSON (609 effects, all loaded at startup)
+- [ ] Optimize base effects JSON (611 effects, all loaded at startup)
 - [ ] Consider lazy loading or caching if the app grows
 - **Re-measure now the library holds 325 spells**, each computing a level on load.
   This item's premise is only now testable. See also item 38's efficiency bullet.
@@ -1134,8 +1135,8 @@ initial state, `SpellDiscarded`, the post-save reset, `BaseEffectSelected`,
   `reference`" are the same rule. Item 38's worry that the model cannot tell
   an authored Personal/Momentary/Individual from an unauthored one is real and
   irrelevant here, because both readings seed identically.
-- **13 of 609 entries carry an explicit `reference`** — 12 wards at
-  Touch/Ring/Circle, `inim-G` at Personal/Momentary/Vision. The other 596 seed
+- **13 of 611 entries carry an explicit `reference`** — 12 wards at
+  Touch/Ring/Circle, `inim-G` at Personal/Momentary/Vision. The other 598 seed
   to standard, which is why the wards are the only place it is observable.
 - **`containerMode` is pruned inside the seed, not at each call site**, because
   every handler that can re-seed a Target can strand a mode. Computed from the
@@ -1825,7 +1826,7 @@ have won is a ledger decision, not a filter. What binds:
 ### Base Effect Extraction
 604 base effects extracted from the rulebook's guideline tables; out-of-scope patterns
 documented; Flutter desktop setup fixed (`sqflite_common_ffi` init). The catalog
-stands at 609 today after items 34, 28 and 17.
+stands at 611 today after items 34, 28, 17 and 64.
 
 ---
 

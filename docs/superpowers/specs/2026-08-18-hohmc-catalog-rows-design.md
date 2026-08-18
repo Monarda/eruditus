@@ -229,10 +229,15 @@ must be updated, and updating them is part of this work rather than a surprise:
 - `test/data/repositories/configuration_repository_test.dart:45,59` — effects
   610 → 612 and 609 → 611
 
-The Python oracles need no change. Item 55 already made them book-aware:
+The Python *count* oracles need no change. Item 55 already made them book-aware:
 counts that must stay exact are scoped with
 `catalog.cites(entry, catalog.CORE_BOOK_ID)`, and the parameter check is a floor
-(`assertGreaterEqual(len(self.catalog.parameters), 25)`).
+(`assertGreaterEqual(len(self.catalog.parameters), 25)`). But
+`test_parameter_lookup_by_category_and_name` is a negative lookup, not a count,
+and counts-scoping does not protect it: it probed `parameter_id("Target",
+"Flavor")` expecting `KeyError`, and this branch adds a Target named Flavor, so
+the probe stopped raising. It was repointed at `"Nowhere"`, mirroring the
+`target_type("target-nowhere")` idiom already used a few tests below.
 
 `test/models/parameter_test.dart:240-250` already covers
 `ParameterScope.appliesTo` for the Forms axis. Those calls stay valid — the new
