@@ -53,19 +53,19 @@ style.
 
 ## The five Sensory Magic Targets
 
-House Bjornaer's Sensory Magic (Minor House Mystery, HoH:MC line 997) adds five
+House Bjornaer's Sensory Magic (Minor House Mystery, HoH:MC line 998) adds five
 Targets. Each is an area of effect around the caster: "anyone sensing the
-Bjornaer magus through the specified sense becomes a target" (line 1001).
+Bjornaer magus through the specified sense becomes a target" (line 1002).
 
 New rows in `assets/data/parameters.json`:
 
 | id | name | magnitude | targetType | book's stated equivalent |
 |---|---|---|---|---|
-| `target-flavor` | Flavor | 0 | `object` | Individual (line 1019) |
-| `target-texture` | Texture | 1 | `object` | Part (line 1023) |
-| `target-scent` | Scent | 2 | `object` | Group (line 1027) |
-| `target-sound` | Sound | 3 | `container` | Structure (line 1031) |
-| `target-spectacle` | Spectacle | 4 | `container` | Boundary (line 1035) |
+| `target-flavor` | Flavor | 0 | `object` | Individual (line 1020) |
+| `target-texture` | Texture | 1 | `object` | Part (line 1024) |
+| `target-scent` | Scent | 2 | `object` | Group (line 1028) |
+| `target-sound` | Sound | 3 | `container` | Structure (line 1032) |
+| `target-spectacle` | Spectacle | 4 | `container` | Boundary (line 1036) |
 
 Every row also carries `"category": "Target"`,
 `"requiresVirtue": "Sensory Magic"`, `"source": "published"` and
@@ -96,7 +96,7 @@ The core catalog already holds a `sense` Target ladder at the *same five
 magnitudes* — Taste 0, Touch 1, Smell 2, Hearing 3, Vision 4 — matching the new
 ladder sense for sense. Grouping the Sensory Targets there would be wrong
 anyway, and the book says so itself: a core `sense` Target grants the caster a
-magical sense, while HoH:MC line 1008 rules that a Sensory Magic spell "cannot
+magical sense, while HoH:MC line 1009 rules that a Sensory Magic spell "cannot
 employ the Technique of Intellego, even as a requisite. Spells which grant
 magical senses … fill that role." One enum value would mean two different
 things.
@@ -124,9 +124,9 @@ represent a Target-level fixed mode.
 
 ## The two Glamour guidelines
 
-Glamour (Major Illusion Mystery, line 3826) is restricted: glamours "are Muto or
+Glamour (Major Illusion Mystery, line 3827) is restricted: glamours "are Muto or
 Creo Imaginem spells that only magi with this Virtue may invent or cast" (line
-3828). Both printed guidelines are level 10 (lines 3840 and 3842-3843).
+3829). Both printed guidelines are level 10 (lines 3841 and 3843-3844).
 
 New rows in `assets/data/base_effects.json`:
 
@@ -151,7 +151,7 @@ style and check `git diff --numstat` shows exactly two added lines.
 
 ## The Intellego exclusion
 
-HoH:MC line 1008: *"The spell cannot employ the Technique of Intellego, even as
+HoH:MC line 1009: *"The spell cannot employ the Technique of Intellego, even as
 a requisite. Spells which grant magical senses (see ArM5, pages 113-114) fill
 that role."*
 
@@ -277,7 +277,7 @@ coverage.
 ## Out of scope, with reasons
 
 - **The glamour complexity modifiers** (+1 for intricate glamours, +2 for
-  animate → inanimate, lines 3834-3836). No HoH:MC spell uses them, and
+  animate → inanimate, lines 3835-3837). No HoH:MC spell uses them, and
   `designline.py` already tokenises `complexity` generically.
 - **The 36 Faerie Magic "Animae" guidelines** — sub-project C.
 - **Per-spell static/dynamic container rulings** — sub-project B.

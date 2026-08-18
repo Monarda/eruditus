@@ -957,7 +957,7 @@ any of its example spells, and item 64 already added that one.
 
 The table is regular — `### <Form>` → `#### <Technique> <Form>` →
 `**Level N:** <description>`, at `Ars Magica 5e - Houses of Hermes - Mystery
-Cults.md:3464-3620` — 36 Creo/Muto "create or change a faerie" rows across the
+Cults.md:3465-3621` — 36 Creo/Muto "create or change a faerie" rows across the
 ten Forms, all gated on Faerie Magic.
 
 - [ ] Decide whether to extract by script or hand-author. The core base-effect
@@ -971,11 +971,14 @@ ten Forms, all gated on Faerie Magic.
 
 ### 67. The Sensory Magic Restrictions the Model Cannot Yet Express
 
-**Opened 2026-08-18, from item 64's review.** HoH:MC lines 1005-1011 put six
-restrictions on Sensory Magic spells. Item 64 implemented one. An earlier draft
-of its spec dismissed all six with a single reason — "the app has no Virtue
-model" — which is true of three and false of two; this item records the accurate
-position so the tractable ones stay visible.
+**Opened 2026-08-18, from item 64's review.** HoH:MC lines 1006-1012 put seven
+restrictions on Sensory Magic spells (not six — the book's bullet list runs to
+seven; the Intellego bullet is fairly split into two below, own-Technique and
+requisite, but two other bullets had gone unrecorded entirely). Item 64
+implemented one — Intellego on the spell's own Technique. An earlier draft of
+its spec dismissed the ones it considered with a single reason — "the app has
+no Virtue model" — which is true of three and false of two; this item records
+the accurate position so the tractable ones stay visible.
 
 - [ ] **No Intellego *as a requisite*.** Item 64's `excludeTechniques` covers
       only the spell's own Technique. The book says "even as a requisite", which
@@ -991,7 +994,13 @@ position so the tractable ones stay visible.
 - **Won't do, recorded so they are not re-litigated:** not investable into
   magical items (the app models no enchantments — the same reason item 65
   excludes *Perceive the Change*); non-initiates cannot learn them, and the
-  Heartbeast Ability adds to the Lab Total (no character model, no lab totals).
+  Heartbeast Ability adds to the Lab Total (no character model, no lab totals);
+  the magus must create a taste, texture, scent, sound, or spectacle that
+  transmits the spell and must continue to radiate it to affect new targets
+  (descriptive of what choosing the Target already means, not a separate
+  structured constraint); and the spell can only affect a being capable of
+  sensing the caster that way, so non-living objects cannot be affected (no
+  creature/character model to check a being's senses against).
 - **Files:** `lib/models/spell.dart` (the validation checks),
   `lib/models/parameter.dart`
 - **See also:** items 64, 56, 17
