@@ -11,5 +11,18 @@
     },
     "spellsParsed": 360,
     "spellsImported": 325
+  },
+  "arm5-hohmc": {
+    "bookId": "arm5-hohmc",
+    "book": "Ars Magica 5e - Houses of Hermes - Mystery Cults",
+    "path": "reviewed/Ars Magica 5e - Houses of Hermes - Mystery Cults.md",
+    "sha256": "33d4535c6dc61c98538cb3331641c4c9196506966ad2943998916c707300bbba",
+    "rulebook": {
+      "commit": "2539318",
+      "date": "2026-07-18",
+      "subject": "[FIX] DE reclassified v/f + minor Church fixes"
+    },
+    "spellsParsed": 16,
+    "spellsImported": 11
   }
 }

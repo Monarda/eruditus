@@ -109,7 +109,7 @@ class RunTest(unittest.TestCase):
         # finds must land in exactly one of these buckets. If a spell fell out
         # of the report entirely -- silently dropped rather than appearing in
         # report.blocked -- this sum would fall short of spells_parsed and
-        # catch it. (Verified today: 325+27+8+0+0 = 360 = spells_parsed.)
+        # catch it. (Verified today: 336+29+8+0+3 = 376 = spells_parsed.)
         #
         # Hand-authored templates are subtracted back out because they were
         # never parsed: they come from a committed input, not from Chapter 9,
@@ -154,6 +154,46 @@ class RunTest(unittest.TestCase):
     def test_every_skip_carries_a_reason(self):
         for name, reason in self.report.skipped:
             self.assertTrue(reason.strip(), msg=name)
+
+    def test_the_supplement_spells_are_imported(self):
+        by_id = {s["id"]: s for s in self.report.spells}
+        for spell_id in ("lib-pean-revenge-bitten-toad",
+                         "lib-crme-scent-predator",
+                         "lib-muim-ball-abysmal-music",
+                         "lib-peme-embrace-boethius"):
+            self.assertIn(spell_id, by_id)
+            self.assertEqual(by_id[spell_id]["citations"],
+                             [{"bookId": "arm5-hohmc"}], msg=spell_id)
+
+    def test_the_two_requisites_of_embrace_of_boethius_both_cost(self):
+        # "+2 necessary requisites" against Req: Vim, Corpus -- +1 each.
+        spell = next(s for s in self.report.spells
+                     if s["id"] == "lib-peme-embrace-boethius")
+        self.assertEqual(spell["requisites"], {"Vim": "adding", "Corpus": "adding"})
+
+    def test_the_four_sensory_spells_state_no_container_mode(self):
+        # Sound and Spectacle are TargetType.sensorium, not container: the
+        # book withholds the static/dynamic choice rather than fixing it, so
+        # nothing is owed and a stated mode would fail validation check 9.
+        rows = {s["id"]: s for s in self.report.spells + self.report.templates}
+        for spell_id in ("lib-mume-clarion-call-war-horse",
+                         "tpl-pevi-roosters-crow",
+                         "lib-crig-brilliance-eagles-plumage",
+                         "lib-peme-closed-mouth-nightwalker"):
+            self.assertNotIn("containerMode", rows[spell_id], spell_id)
+
+    def test_the_three_unimportable_blocks_are_skipped_with_reasons(self):
+        names = {name for name, _ in self.report.skipped}
+        self.assertEqual(names, {
+            "Perceive the Change",
+            "Faerie Chains of the Familiar Slave",
+            "Tie the Threads That Bind",
+        })
+
+    def test_the_hand_authored_automata_template_survives_a_run(self):
+        by_id = {t["id"]: t for t in self.report.templates}
+        template = by_id["tpl-revi-tie-threads-that-bind"]
+        self.assertEqual(template["baseEffectId"], "revi-hohmc-G1")
 
 
 class DuplicateSpellIdTest(unittest.TestCase):

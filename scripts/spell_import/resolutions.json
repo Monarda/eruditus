@@ -1903,5 +1903,113 @@
       "crhe-1e"
     ],
     "rationale": "The design line's own parenthetical says the +1 Size token is 'for a total of +4 Size, including the +3 from the guideline' -- crhe-1a is the only one of the five candidates whose description states a baked-in Size enhancement at all ('includes a +3 Size enhancement'), so the design line's own arithmetic forces this pick, not just prose similarity. Not crhe-1b/1c (create a product/plant -- this spell doesn't create anything, it protects existing crops), 1d (prevent sickness -- narrower than the spell's own 'healthier, larger, and tastier') or 1e (heal a wound -- no wound involved)."
+  },
+  "lib-pean-revenge-bitten-toad": {
+    "baseEffectId": "pean-15b",
+    "candidates": [
+      "pean-15a",
+      "pean-15b",
+      "pean-15c",
+      "pean-15d"
+    ],
+    "rationale": "Its prose reads 'Any creatures who bite (or otherwise taste) the caster suffer a Heavy Wound' -- verbatim the guideline 'Inflict a Heavy Wound'. Not a destroyed sense, a crippled limb, or ageing."
+  },
+  "lib-crme-scent-predator": {
+    "baseEffectId": "crme-4a",
+    "candidates": [
+      "crme-4a",
+      "crme-4b"
+    ],
+    "rationale": "Its prose reads 'Anyone smelling the caster is struck by an overwhelming sensation of menace and hostility' -- an emotion placed into a mind, not a memory restored to a fresh state."
+  },
+  "lib-reco-marking-territory": {
+    "baseEffectId": "reco-3a",
+    "candidates": [
+      "reco-3a",
+      "reco-3b"
+    ],
+    "rationale": "The design line glosses its own base: '(Base 3 [move in direction \"away\"], +2 Ring, +2 Scent)'. That is 'Move a target slowly in one direction', not a minor symptom of disease."
+  },
+  "lib-mume-clarion-call-war-horse": {
+    "baseEffectId": "mume-3b",
+    "candidates": [
+      "mume-3a",
+      "mume-3b"
+    ],
+    "rationale": "Its prose reads 'Anyone hearing the caster's battle cry is heartened by its tone, and receives a +3 bonus to his Brave Personality Trait' -- a major change to emotion, not to a memory of a series of events."
+  },
+  "lib-crig-brilliance-eagles-plumage": {
+    "baseEffectId": "crig-5c",
+    "candidates": [
+      "crig-5a",
+      "crig-5b",
+      "crig-5c",
+      "crig-5d",
+      "crig-5e"
+    ],
+    "rationale": "Its prose reads 'blinded by the brilliant light shining from his body' -- 'Create light as bright as direct sunlight on a clear day'. The spell creates no fire, ignites nothing, and heats nothing."
+  },
+  "lib-peme-closed-mouth-nightwalker": {
+    "baseEffectId": "peme-10a",
+    "candidates": [
+      "peme-10a",
+      "peme-10b"
+    ],
+    "rationale": "Its prose reads 'Anyone seeing the caster instantly forgets that he did so' -- one brief memory removed, not a reduction of all the target's mental capabilities."
+  },
+  "lib-muan-voice-bjornaer-magus": {
+    "baseEffectId": "muan-5b",
+    "candidates": [
+      "muan-5a",
+      "muan-5b",
+      "muan-5c"
+    ],
+    "rationale": "The caster stays the same animal and gains a human voice: 'it targets the vocal capacity of that form'. That is 'Change an animal in a minor way so that it is no longer natural', not a change into a different animal, and the target is a living beast rather than animal products."
+  },
+  "lib-muan-form-temperament-heartbeast": {
+    "baseEffectId": "muan-5b",
+    "candidates": [
+      "muan-5a",
+      "muan-5b",
+      "muan-5c"
+    ],
+    "rationale": "Same reading as The Voice of the Bjornaer Magus: the animal is unchanged and its temperament correspondences are unnaturally enhanced ('they enhance the correspondences to the temperament of that form'). A minor unnatural change to an animal."
+  },
+  "lib-peme-embrace-boethius": {
+    "baseEffectId": "peme-15a",
+    "candidates": [
+      "peme-15a",
+      "peme-15b",
+      "peme-15c"
+    ],
+    "rationale": "Its prose reads 'destroying a part of his understanding of formulaic spell casting' -- a major, long memory removed. It removes no emotions and drives nobody insane."
+  },
+  "lib-muvi-facilitate-stifled-form-spell": {
+    "baseEffectId": "muvi-G1",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "The spell removes the casting penalty for reduced or absent gestures and voice, leaving the targeted spell otherwise intact -- a superficial change. Its prose's ceiling, a target 'whose level must be less than twice the level of this spell', matches G1's doubling tier rather than G2's or G3's tighter ones."
+  },
+  "lib-pevi-roosters-crow": {
+    "baseEffectId": "pevi-G3",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'Any demons who hear the caster's shout lose Might equal to the spell's (level / 5)' -- the same wording and the same mechanic as Demon's Eternal Oblivion, which this ledger already resolves to pevi-G3 (Reduce target's Might Score). Might Score rather than Might Pool for the same reason that spell chose it."
   }
 }

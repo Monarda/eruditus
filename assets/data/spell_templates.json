@@ -102,6 +102,26 @@
     ]
   },
   {
+    "id": "tpl-muvi-facilitate-stifled-form-spell",
+    "name": "Facilitate the Stifled (Form) Spell",
+    "technique": "Muto",
+    "form": "Vim",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "muvi-G1",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "This spell is cast at the same time as another formulaic spell (see ArM5, page 159) whose level must be less than twice the level of this spell. If successfully cast, the targeted spell may be cast with no penalty to the casting total due to reduced or absent gestures and/or voice. While this Muto Vim spell requires gestures and voice as normal, the casting total of the follow-up spell is not p...",
+    "description": "This spell is cast at the same time as another formulaic spell (see ArM5, page 159) whose level must be less than twice the level of this spell. If successfully cast, the targeted spell may be cast with no penalty to the casting total due to reduced or absent gestures and/or voice. While this Muto Vim spell requires gestures and voice as normal, the casting total of the follow-up spell is not penalized, and thus difficult spells at the limit of a magus's ability have a greater chance of success when in restricted circumstances, without incurring fatigue loss. If the targeted spell has Range Voice, the volume used to cast this spell determines the actual range. There are ten versions of this spell, each affecting spells of one of the Hermetic Forms. This spell is particularly useful to Bjornaer magi who wish to maintain the appearance of mundane animals yet still cast spells.",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
     "id": "tpl-muvi-mirror-opposition-form",
     "name": "Mirror of Opposition (form)",
     "technique": "Muto",
@@ -304,6 +324,26 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "tpl-pevi-roosters-crow",
+    "name": "The Rooster's Crow",
+    "technique": "Perdo",
+    "form": "Vim",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "pevi-G3",
+    "rangeId": "range-personal",
+    "durationId": "duration-momentary",
+    "targetId": "target-sound",
+    "summary": "Any demons who hear the caster's shout lose Might equal to the spell's (level – 5) if the spell penetrates their Magic Resistance.",
+    "description": "Any demons who hear the caster's shout lose Might equal to the spell's (level – 5) if the spell penetrates their Magic Resistance.",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -593,6 +633,26 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "tpl-revi-tie-threads-that-bind",
+    "name": "Tie the Threads That Bind",
+    "technique": "Rego",
+    "form": "Vim",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "revi-hohmc-G1",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-group",
+    "summary": "Unites an automaton's instilled effects into a cohesive whole. The spell's base effect level must equal or exceed the construct's Magic Might, so the final level must equal or exceed its Magic Might + 15.",
+    "description": "This ritual is used only in the construction of automata. Once the magus has finished enchanting the automaton, he casts this spell onto the construction to unite all the magic into a cohesive unit. The base effect level must equal or exceed the construct's Magic Might to be successful, meaning the final spell level must equal or exceed the automaton's Magic Might + 15. Hand-authored rather than extracted: HoH:MC prints no Rego Vim guideline for it, only the spell's own level rule, so revi-hohmc-G1 carries no effectFormula and the extractor cannot compute the level. It may be invented by anyone who has been Initiated into the Automata Mystery of House Verditius, which grants the Craft Automata Virtue.",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ]
   }

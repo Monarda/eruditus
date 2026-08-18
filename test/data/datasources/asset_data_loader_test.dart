@@ -242,7 +242,7 @@ void main() {
     expect(idsWith(RitualRequirement.required), {
       'craq-25b', 'crau-25', 'crig-25b', 'crte-25b',
       'pevi-G9', 'pevi-G10',
-      'crvi-hohmc-G1',
+      'crvi-hohmc-G1', 'revi-hohmc-G1',
     });
 
     expect(idsWith(RitualRequirement.suggested), {
