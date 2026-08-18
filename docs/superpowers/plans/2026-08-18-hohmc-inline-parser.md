@@ -1656,6 +1656,27 @@ Stage exactly these four files:
 
 ---
 
+### Task 7A: A general Complexity modifier, and one crash it exposes
+
+**Inserted mid-execution.** Task 7's first attempt was correctly BLOCKED by two
+gaps in this plan, neither the implementer's fault. Its full brief lives at
+`.superpowers/sdd/2026-08-18-hohmc-inline-parser/task-7a-brief.md`; the summary:
+
+- Bare `complexity` sat in `MODIFIER_LABELS` with **no option mapping for any
+  Technique or Form** — a dead label that always failed at emit. No core spell
+  prints it, so it never surfaced. A corpus survey found 23 uses across 9 books
+  and 12 Technique/Form pairs, **none Imaginem**. It is now a general
+  wildcard-scoped modifier with a degree ladder, following `elaborate-effect`'s
+  existing precedent, resolved by the design line's own magnitude.
+- `apply_container_modes`' stale-entry guard fired whenever a ledger entry
+  widened, and `migrate_ledger` — the only tool that fixes a widening — calls
+  `run()` and hit the same crash. The guard now applies only to an otherwise
+  clean run.
+
+Landed as commit `9b21925`. Core import unchanged at 325/28/0/0.
+
+---
+
 ### Task 7: Switch on HoH:MC
 
 **Files:**
