@@ -18,5 +18,25 @@
         "bookId": "arm5-hohmc"
       }
     ]
+  },
+  {
+    "id": "tpl-revi-tie-threads-that-bind",
+    "name": "Tie the Threads That Bind",
+    "technique": "Rego",
+    "form": "Vim",
+    "requisites": {},
+    "source": "published",
+    "selectedModifiers": {},
+    "baseEffectId": "revi-hohmc-G1",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-group",
+    "summary": "Unites an automaton's instilled effects into a cohesive whole. The spell's base effect level must equal or exceed the construct's Magic Might, so the final level must equal or exceed its Magic Might + 15.",
+    "description": "This ritual is used only in the construction of automata. Once the magus has finished enchanting the automaton, he casts this spell onto the construction to unite all the magic into a cohesive unit. The base effect level must equal or exceed the construct's Magic Might to be successful, meaning the final spell level must equal or exceed the automaton's Magic Might + 15. Hand-authored rather than extracted: HoH:MC prints no Rego Vim guideline for it, only the spell's own level rule, so revi-hohmc-G1 carries no effectFormula and the extractor cannot compute the level. It may be invented by anyone who has been Initiated into the Automata Mystery of House Verditius, which grants the Craft Automata Virtue.",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
   }
 ]

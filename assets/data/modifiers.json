@@ -554,6 +554,23 @@
     "citations": [ { "bookId": "arm5-core" } ]
   },
   {
+    "id": "complexity",
+    "name": "Effect complexity",
+    "description": "Designing a spell so the caster can make changes to the product normally adds magnitudes to account for the complexity (Core Rules 12204)",
+    "selectionMode": "single",
+    "scope": { "technique": null, "form": null, "effectIds": [], "excludeTechniques": [] },
+    "source": "published",
+    "options": [
+      { "id": "complexity-none", "label": "No added complexity", "magnitude": 0 },
+      { "id": "complexity-slight", "label": "Slightly complex", "magnitude": 1 },
+      { "id": "complexity-considerable", "label": "Considerably complex", "magnitude": 2 },
+      { "id": "complexity-extensive", "label": "Extensively complex", "magnitude": 3 },
+      { "id": "complexity-intricate", "label": "Intricately complex", "magnitude": 4 },
+      { "id": "complexity-exceptional", "label": "Exceptionally complex", "magnitude": 5 }
+    ],
+    "citations": [ { "bookId": "arm5-core" } ]
+  },
+  {
     "id": "warping-point-burst",
     "name": "Warping Points",
     "description": "Each magnitude gives the target one more Warping Point",

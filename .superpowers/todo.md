@@ -33,45 +33,48 @@ reason the guidelines don't apply to it (item 46).
 
 ## Where the import stands
 
-**Live extractor run, 2026-08-17** (`python -m scripts.spell_import.extract_spells`):
+**Live extractor run, 2026-08-18** (`python -m scripts.spell_import.extract_spells`):
 
-> **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**
-> — plus `unreviewed: 3`, see below.
+> **336 imported · 31 templates · 8 exceptions · 0 blocked · 0 unresolved**
+> — plus `unreviewed: 7`, see below.
 
-**Suite status: Dart re-run 2026-08-18 after item 64 (the HoH:MC catalog rows
-work added tests); Python re-run 2026-08-18 after item 64 (adding the Flavor
-Target made `test_parameter_lookup_by_category_and_name`'s absent-name probe
-findable, so it was repointed at a name that still cannot exist); Integration
-last run 2026-08-17 after item 13:**
+**Suite status: Dart and Python re-run 2026-08-18 after item 65 (the inline
+parser, the multi-book registry and the 14-spell HoH:MC import added tests
+and ledger entries); Integration last run 2026-08-17 after item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **728 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **317 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **374 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
-**3 ledger entries carry an unreviewed candidate.** Item 55's migration
-carried three Creo Vim decisions past `crvi-hohmc-G1` without a human
-weighing it, and each entry says so in its own `unreviewedCandidates` field.
-The extractor prints the count on every run. Clearing it is a re-read, and
+**7 ledger entries carry an unreviewed candidate** (was 3). Item 55's
+migration carried three Creo Vim decisions past `crvi-hohmc-G1` without a
+human weighing it; item 65's `revi-hohmc-G1` (a new general Rego Vim
+guideline) widened four more — the four existing core-book entries it
+touches kept their recorded choice unchanged, and the new id landed in
+`unreviewedCandidates` rather than being folded into a rationale that never
+weighed it. Each entry says so in its own `unreviewedCandidates` field. The
+extractor prints the count on every run. Clearing it is a re-read, and
 belongs to item 32.
 
 **Catalog sizes, counted from the assets today:**
 
 | Asset | Entries | Note |
 |---|---|---|
-| `base_effects.json` | 611 | 50 General — 49 core plus item 17's one supplement row; plus item 64's two Glamour guidelines |
+| `base_effects.json` | 612 | 51 General — 49 core plus two supplement rows (item 17's one, plus item 65's `revi-hohmc-G1`); plus item 64's two Glamour guidelines |
 | `parameters.json` | 39 | 25 core (item 15) + 9 virtue-gated (item 17) + 5 Sensory Targets (item 64) |
-| `modifiers.json` | 34 | |
-| `spell_library.json` | 325 | |
-| `spell_templates.json` | 28 | 27 extracted + 1 carried in from `hand_authored_templates.json` |
+| `modifiers.json` | 35 | 34 plus item 65's `complexity` modifier |
+| `spell_library.json` | 336 | 325 core + 11 HoH:MC (item 65) |
+| `spell_templates.json` | 31 | 27 core-extracted + 4 hand-authored/HoH:MC-extracted (item 17's 1 plus item 65's 3) |
 | `spell_exceptions.json` | 8 | item 46 |
-| `resolutions.json` | 206 | item 32; 3 carry an unreviewed candidate |
+| `resolutions.json` | 217 | item 32; 7 carry an unreviewed candidate |
 
-**All 360 published Chapter 9 spells are still accounted for.** 325 + 28 + 8 =
-361, one more than 360, because `tpl-crvi-faerie-chains-familiar-slave` comes
-from *Houses of Hermes: Mystery Cults*, not Chapter 9. No spell is blocked;
-the 3 unresolved ones are a ledger problem, not a modelling gap.
+**All 360 published Chapter 9 spells are still accounted for**, and item 65
+adds *Houses of Hermes: Mystery Cults*' own 15 (11 library spells + 4
+templates) alongside them: 336 + 31 + 8 = 375, 15 more than 360, all from
+HoH:MC. No spell is blocked; the 7 unreviewed ones are a ledger problem, not
+a modelling gap.
 
 **Standing finding: base-effect resolution rests on human judgement, and most
 of it is unverifiable by test.** A design line names its guideline only by
@@ -599,9 +602,9 @@ of `feature/general-base-effects`, each finding re-verified against source.
 - [ ] **`TemplateInstantiated` silently discards an in-progress, unsaved draft.**
       Deliberate (a stale breakdown must not follow the user into a new spell), but
       there is no confirmation prompt. Worth one if it becomes a reported annoyance.
-- [ ] **37 of the 50 General catalog entries omit an explicit `reference` triple**
-      (recounted 2026-08-17; was "36 of 49" before item 17 added one more without a
-      reference), falling back to `ParameterTriple.standard()` rather than stating it.
+- [ ] **38 of the 51 General catalog entries omit an explicit `reference` triple**
+      (recounted 2026-08-18; was "37 of 50" before item 65 added `revi-hohmc-G1`
+      without a reference), falling back to `ParameterTriple.standard()` rather than stating it.
       The fallback cannot distinguish "explicitly Personal/Momentary/Individual" from
       "field just wasn't authored". A natural extension of item 32. **One specific
       candidate:** `crvi-G4`'s formula codes `offsetMagnitudes: -1` while its one
@@ -905,66 +908,6 @@ where the default is most often wrong.
   `lib/bloc/spell_creation/spell_creation_bloc.dart:725-735`
 - **See also:** item 14 (the "make it catalog data" precedent)
 
-### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B)
-
-**Opened 2026-08-18.** Item 64 landed the catalog rows; this is the work they
-were for, and the real test of whether the core-book importer generalises.
-
-`blocks.parse_de` anchors on `### Creo Animal Spells` + `#### LEVEL 20` +
-`##### Name`. HoH:MC uses `##### Name` followed by `MuAn 15` on the next line,
-much of it inside blockquotes. **Zero of its 16 blocks are visible to the
-current parser.** `run()` also hard-codes `sources.DE_TITLE` and `source.lock`
-holds exactly one book.
-
-- [ ] **Add `parse_inline` behind a per-book registry.** Leave `parse_de`
-      untouched — it imports 325 working spells. Strip blockquote prefixes;
-      anchor on the `TeFo Level` line.
-- [ ] **Extract the 14 spells.** 16 blocks less *Faerie Chains of the Familiar
-      Slave* (hand-authored, item 17) and *Perceive the Change*, which is an
-      enchanted-device effect: `Pen 0, constant effect`, costing `+1 two
-      uses/day, +3 environmental trigger`. The app models no enchantments.
-- [ ] **Record static/dynamic for the four spells using Sound or Spectacle** —
-      *Clarion Call of the War Horse*, *The Rooster's Crow*, *Brilliance of the
-      Eagle's Plumage*, *Closed Mouth of the Nightwalker*. Both Targets are
-      containers, so `spellOwesContainerMode` says they owe an answer — but
-      there is nothing to rule on. HoH:MC line 1002 fixes it: all five Sensory
-      Targets are continuously acquired throughout the spell's duration, i.e.
-      `ContainerMode.dynamic`, stated at the Target level with no per-spell
-      choice offered. Record `dynamic` for these four. See item 57 and item 68
-      (the open question of how the model should represent a Target-level
-      fixed mode instead of a per-spell choice).
-      > ⚠️ **SUPERSEDED — do not record `dynamic`; record nothing.** The
-      > 2026-08-18 cross-field-parameter-constraints spec (`37788f3`) closes
-      > item 68 the other way: Sound and Spectacle **stop being container
-      > Targets** and become `TargetType.sensorium`. Core Rules 12086 forces
-      > this — "Personal Range spells can never have a container Target", and
-      > HoH:MC 1006 requires every Sensory Magic spell's Range to be Personal,
-      > so a container classification makes all four spells simultaneously
-      > required to be Personal and forbidden from being Personal.
-      > **After that lands, a stated mode on these Targets is a validation
-      > error**, because `validateSpellAgainstCatalog`'s check 9 rejects a mode
-      > on a non-container Target — so writing `dynamic` into
-      > `container_modes.json` would turn four correctly-transcribed spells
-      > into failures. `spellOwesContainerMode` also stops asking, so nothing
-      > is owed. **Ordering: Decision 1 of that spec must land before this
-      > import.** The premise stated above ("Both Targets are containers") is
-      > the part that changed; the rest of this bullet is otherwise fine.
-- [ ] **Validate the parser against the other inline books as a diagnostic, not
-      an import.** Covenants (42/44 inline), HoH:Societates (50/59),
-      Transforming Mythic Europe (68/84). **No spell from any book but HoH:MC
-      enters `spell_library.json` in this pass** — otherwise "validation"
-      quietly becomes a 600-spell import. Problems in other books are
-      identified and logged; only cheap resolutions land, of the kind
-      `_normalize_stat_line` already precedents. Expect a long log; that is the
-      honest outcome, not a fault.
-- **Corpus survey backing this** is recorded in item 64's spec: 54 books, 3107
-  stat lines, four anchor styles. The inline style is 664 of them, so it pays
-  for far more than 14 spells. Product line does not predict format —
-  HoH:*True Lineages* is 55/55 *heading* style.
-- **Files:** `scripts/spell_import/blocks.py`, `sources.py`,
-  `extract_spells.py`, `source.lock`
-- **See also:** items 64, 57, 66
-
 ### 66. HoH:MC's 36 Faerie "Animae" Guidelines (sub-project C)
 
 **Opened 2026-08-18.** A bulk catalog sweep, deliberately separated from item 65
@@ -1020,42 +963,6 @@ the accurate position so the tractable ones stay visible.
 - **Files:** `lib/models/spell.dart` (the validation checks),
   `lib/models/parameter.dart`
 - **See also:** items 64, 56, 17
-
-### 68. Do the Sensory Targets' `targetType` Values Misrepresent Their Container Mode? (OPEN)
-
-**Opened 2026-08-18, from item 64's review.** Deferred for study, not decided —
-this item exists to capture the question, not to answer it. No `targetType`
-value has been changed and none should be until this is resolved.
-
-- **The finding.** HoH:MC line 1002 states one behaviour for all five Sensory
-  Targets: "targets need not be present at the casting of the spell, and are
-  continuously acquired throughout the spell's duration." In this app's
-  vocabulary that is `ContainerMode.dynamic`, stated at the Target level with
-  no choice offered.
-- **What the current data does with that.** `target-sound` and
-  `target-spectacle` are `container`, so the creation screen offers a
-  static/dynamic control and a user can answer `static`, which line 1002
-  forbids. `target-flavor`, `target-texture` and `target-scent` are `object`,
-  so no control appears — and `lib/models/target_type.dart`'s own doc comment
-  records that an object Target "is always static (12246)", the opposite of
-  what the book says about them. Scent in particular covers "approximately
-  three paces… up to 15 paces", behaviourally indistinguishable from Sound.
-- **Why the split exists.** The `targetType` values follow the book's printed
-  *magnitude* equivalences (Flavor≡Individual, Texture≡Part, Scent≡Group,
-  Sound≡Structure, Spectacle≡Boundary). Those sentences price the Target; they
-  do not assert it is that kind. The resulting 3/2 split appears nowhere in
-  the source.
-- **Why it is not urgent.** `containerMode` is level-neutral, so no spell
-  computes a wrong level, and `spellOwesContainerMode` still has no production
-  caller. This is a fidelity question, not a live bug.
-- **The options, without picking one.** Leave as-is and document; mark all
-  five `container` (which would offer a choice the book withholds); add a
-  fourth `TargetType` for "area around the caster, dynamic by rule" (which
-  `target_type.dart`'s doc comment resists, since it rests on the Core Rules'
-  "there are three types of target"); or model dynamic-by-rule on the Target
-  itself so no control is offered and the mode is fixed.
-- **See also:** items 64 (which added the rows), 65 (which must not re-derive
-  this), 14 and 57 (the container-mode feature and its ruling backlog).
 
 ### 69. Constraint-Handling Pains Deferred From the Cross-Field Design Discussion
 
@@ -1136,12 +1043,149 @@ unverified agent output. Survey writeup and classification:
 - **See also:** items 67 and 68 (the same cross-field capability), 69 (the
   deferred pains), 36 (catalog audit against the rulebook)
 
+### 71. The Anchored-but-Unparseable Rate, Measured Across Three More Inline Books
+
+**Opened 2026-08-18, from item 65's diagnostics.** The 52-book corpus survey
+behind item 65 classified how spell blocks are *anchored*; it never checked
+whether an anchored block *parses*. `extract_spells --diagnose` (item 65,
+Task 5) makes that check possible, and running it against the three other
+inline-heavy books for the first time is this item's finding. Full numbers,
+raw `--diagnose` output and per-failure breakdown:
+`.superpowers/sdd/2026-08-18-hohmc-inline-parser/task-8-report.md`
+(session-local; re-derive with `extract_spells --diagnose "<title>" --parser
+inline` against each book if lost).
+
+| Book | Blocks | With design line | Tokenized | Notes |
+|---|---|---|---|---|
+| Covenants | 0 | 0 | 0 | 42 of 44 candidate stat lines have their `TeFo Level` anchor one blank line above, not directly above; `parse_inline`'s anchor check requires direct adjacency. |
+| Houses of Hermes: Societates | 0 | 0 | 0 | Same failure mode: 50 of 59 stat lines have a blank-line-separated anchor. |
+| Transforming Mythic Europe | 38 | 37 | 23 | Anchoring itself is mostly fine (41 of 84 stat lines anchor directly); tokenization fails on free-prose modifiers (11 of 14 failures), prose embedded in the parenthetical (2), and 3 malformed stat lines (missing comma before `D:`). |
+
+- [ ] **Anchor-matching gaps, cheap and mechanical if ever done.** Tolerate a
+      blank line between the `TeFo Level` anchor and the stat line (closes
+      Covenants and Societates almost entirely — 92 of 103 stat lines between
+      them); tolerate a trailing `, Ritual` on the anchor line and a
+      parenthetical requisite form (`Mu(Re)Im 10`); accept spelled-out
+      `General` alongside `Gen`. None of this was attempted here — it is scope,
+      not a bug, in `blocks.parse_inline`.
+- [ ] **Design-line vocabulary gaps, not cheap.** TME's 14 tokenization
+      failures are free-hand modifier prose (`+4 transport seven leagues`,
+      `+1 unsupported surface`, `+3 Special Target`…) that would each need
+      either a new vocabulary entry or a deliberate decision that the phrase
+      is intentionally free text. This is per-phrase judgement, not a
+      pattern fix.
+- [ ] **The 3 malformed TME stat lines** (`R: Touch D: Momentary, T: Group,
+      Ritual`, missing the comma before `D:`) are a plausible candidate for a
+      `_normalize_stat_line`-style fix — noted, not acted on, per this item's
+      own diagnostic mandate.
+- **The dominant remaining cost is per-book ledger curation, not parser
+  code.** Even a fully anchor- and vocabulary-complete parser only produces
+  *candidate* blocks — every tokenized block still needs a human to choose
+  its base-effect ledger entry. The core book needed **206** human ledger
+  decisions for **325** spells; HoH:MC needed **11** for **14**. Scaled by
+  that ratio, importing even TME's 23 currently-tokenizing spells would cost
+  on the order of 15-20 ledger rulings before parser work on the other 15
+  blocks even starts — and Covenants and Societates currently tokenize zero.
+  **No import of any of these three books should be scoped as a parser task;
+  it is a ledger-curation task with a parser prerequisite.**
+- **Files (if ever acted on):** `scripts/spell_import/blocks.py`
+  (`_INLINE_ANCHOR`, `_inline_anchor`), `scripts/spell_import/designline.py`
+  (the modifier vocabulary), `scripts/spell_import/statline.py`
+  (`_normalize_stat_line`)
+- **See also:** item 65 (closed, `## Completed ✅` — the parser and the
+  diagnostic mode this measures with), item 32 (ledger curation as its own
+  cost centre)
+
 ---
 
 ## Completed ✅
 
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
+
+### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B) (`7ebd409..eb28b18`)
+Sub-project B of three. Item 64 landed the catalog rows; this proved the
+core-book importer generalises to a second book and a second block-anchoring
+style.
+
+- **`parse_inline` anchors on a bare `TeFo Level` line directly above the stat
+  line**, landed behind a per-book registry (`sources.Book`, `blocks.PARSERS`)
+  so `parse_de` stays untouched — it still imports the 325 core spells
+  unchanged. `run()` now iterates every registered book and `source.lock` is
+  keyed by book id instead of holding exactly one book.
+- **14 of HoH:MC's 16 blocks became real spells**: 11 landed in
+  `spell_library.json`, 3 as templates (2 extracted, 1 hand-authored) —
+  leaving *Faerie Chains of the Familiar Slave* (already hand-authored under
+  item 17) and *Perceive the Change* (an enchanted-device effect the app does
+  not model) untouched, exactly as planned.
+- **The static/dynamic container-mode checklist item is superseded — no
+  container mode was recorded, and none should be.** The original plan called
+  for recording `ContainerMode.dynamic` on the four Sound/Spectacle spells.
+  Before that landed, `TargetType.sensorium` (item 68, closed alongside this)
+  reclassified all five Sensory Targets as non-containers, so
+  `spellOwesContainerMode` no longer asks about them and a stated mode would
+  now fail `validateSpellAgainstCatalog` check 9. `container_modes.json` was
+  not touched.
+- **Diagnosed, not imported, against the three other inline-heavy books** —
+  Covenants, *Houses of Hermes: Societates*, *Transforming Mythic Europe*.
+  `--diagnose` cannot write; no spell from any of the three entered
+  `spell_library.json`.
+
+| Book | Blocks | With design line | Tokenized | Notes |
+|---|---|---|---|---|
+| Covenants | 0 | 0 | 0 | All 44 candidate stat lines sit one blank line below their `TeFo Level` anchor; `parse_inline`'s anchor check requires direct adjacency, so none anchor. |
+| Houses of Hermes: Societates | 0 | 0 | 0 | Same failure mode: 50 of 59 stat lines have a blank-line-separated anchor; `parse_inline` finds none of them. |
+| Transforming Mythic Europe | 38 | 37 | 23 | 11 of 14 design-line failures are free-prose modifiers outside the vocabulary (`+4 transport seven leagues`, `+1 unsupported surface`…); 2 embed full explanatory sentences in the parenthetical; 3 stat lines are malformed (missing comma before `D:`, all three in one template group). |
+
+- **A low tokenize rate is a measurement, not a defect**: the 52-book corpus
+  survey behind this item classified how blocks are *anchored* and never
+  checked that an anchored block *parses* — this is the first time that rate
+  has been observed. Nothing was fixed to improve these numbers. Full figures
+  and failure breakdown: item 71 (opened alongside this).
+- **Corpus survey backing this** is recorded in item 64's spec: 54 books,
+  3107 stat lines, four anchor styles. The inline style is 664 of them, so it
+  pays for far more than 14 spells. Product line does not predict format —
+  HoH:*True Lineages* is 55/55 *heading* style.
+- **Spec:** `docs/superpowers/specs/2026-08-18-hohmc-inline-parser-design.md`.
+  **Plan:** `docs/superpowers/plans/2026-08-18-hohmc-inline-parser.md`.
+- **See also:** items 64, 57, 66, 68 (closed alongside this), 71 (opened
+  alongside this).
+
+### 68. Do the Sensory Targets' `targetType` Values Misrepresent Their Container Mode? (`c60a03d..eb28b18`)
+Opened from item 64's review as a deferred question, not a decision; item 65
+needed an answer before it could touch the four Sound/Spectacle spells, which
+is what forced this closed rather than left open.
+
+- **The finding that opened it stands**: HoH:MC line 1002 states one
+  behaviour for all five Sensory Targets — "targets need not be present at
+  the casting of the spell, and are continuously acquired throughout the
+  spell's duration" — with no per-spell choice offered. The question was
+  whether `container`/`object` on `targetType` was the right encoding of
+  that.
+- **The answer: neither was.** `TargetType` gained a fourth value,
+  `sensorium` — not a rulebook word, chosen deliberately to avoid implying
+  membership in the Core Rules' stated "three types of target". All five
+  Sensory Targets (`target-flavor`, `target-texture`, `target-scent`,
+  `target-sound`, `target-spectacle`) are `sensorium`, not `container` or
+  `object`. Core Rules 12086 ("Personal Range spells can never have a
+  container Target") together with HoH:MC 1006 (every Sensory Magic spell's
+  Range must be Personal) meant `container` was actually unavailable — it
+  would have made the four Sound/Spectacle spells simultaneously required to
+  be Personal and forbidden from being Personal.
+- **So the question is answered, not merely closed: the Sensory Targets are
+  not containers, and no container mode is owed.** `spellOwesContainerMode`
+  does not ask about them; item 65's own container-mode checklist bullet is
+  superseded on this basis, not abandoned.
+- **Landed in two steps**: the first pass reclassified only Sound and
+  Spectacle (the two item 64 had made `container`); a follow-up fix applied
+  the same argument to Flavor, Texture and Scent, which had been left
+  `object` — also wrong, since `object` is documented as "always static"
+  (12246/12254) and the book says otherwise for all five, not just two.
+  Magnitudes were untouched throughout: the book's equivalence sentences
+  price these Targets, they do not classify them.
+- **See also:** items 64 (which added the rows), 65 (which needed this before
+  touching the four spells), 14 and 57 (the container-mode feature and its
+  ruling backlog, neither of which these five Targets participate in now).
 
 ### 64. HoH:MC Catalog Rows and the Intellego Exclusion (`2983b57..497ea1f`)
 Sub-project A of three. The five Sensory Magic Targets and two Glamour

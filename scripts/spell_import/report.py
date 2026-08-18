@@ -56,8 +56,8 @@ def _changed_fields(old: dict, new: dict) -> list[str]:
 
 def render(
     diff: AssetDiff,
-    lock: provenance.SourceIdentity | None,
-    current: provenance.SourceIdentity,
+    locks: dict[str, provenance.SourceIdentity],
+    currents: list[provenance.SourceIdentity],
     imported: int,
     blocked: int,
     unresolved: int,
@@ -66,23 +66,25 @@ def render(
 ) -> str:
     lines = ["# Import change report", ""]
 
-    if lock is None:
-        lines.append(f"Initial import at {current.label().splitlines()[0]}")
-        lines.append(f"Parsed {current.spells_parsed} · imported {imported} · "
-                     f"blocked {blocked} · unresolved {unresolved}")
-    else:
-        old_commit = "unknown" if lock.rulebook is None else lock.rulebook.commit
-        new_commit = "unknown" if current.rulebook is None else current.rulebook.commit
-        subject = "" if current.rulebook is None else f' ("{current.rulebook.subject}")'
-        lines.append(f"Source: {old_commit} → {new_commit}{subject}")
-        # unresolved is always 0 in a committed lock: run() refuses to write otherwise.
-        blocked_before = (lock.spells_parsed or 0) - (lock.spells_imported or 0)
-        lines.append(
-            f"Parsed {lock.spells_parsed} → {current.spells_parsed} · "
-            f"imported {lock.spells_imported} → {imported} · "
-            f"blocked {blocked_before} → {blocked} · "
-            f"unresolved 0 → {unresolved}"
-        )
+    for current in sorted(currents, key=lambda i: i.book_id):
+        recorded = locks.get(current.book_id)
+        lines.append(f"## {current.book} (`{current.book_id}`)")
+        if recorded is None:
+            lines.append(f"Initial import at {current.label().splitlines()[0]}")
+            lines.append(f"Parsed {current.spells_parsed}")
+        else:
+            old_commit = "unknown" if recorded.rulebook is None else recorded.rulebook.commit
+            new_commit = "unknown" if current.rulebook is None else current.rulebook.commit
+            subject = "" if current.rulebook is None else f' ("{current.rulebook.subject}")'
+            lines.append(f"Source: {old_commit} → {new_commit}{subject}")
+            lines.append(
+                f"Parsed {recorded.spells_parsed} → {current.spells_parsed} · "
+                f"imported {recorded.spells_imported} → {current.spells_imported}")
+        lines.append("")
+
+    # Asset-wide totals: the assets are one file each, so their diff is one
+    # diff no matter how many books fed it.
+    lines.append(f"Imported {imported} · blocked {blocked} · unresolved {unresolved}")
     lines.append("")
 
     lines.append(f"## Newly imported ({len(diff.added)})")
@@ -121,12 +123,21 @@ def render(
     return "\n".join(lines)
 
 
-def design_lines_of(text: str) -> dict[str, str]:
-    """Spell id to printed design line, for any revision of the rulebook."""
+def design_lines_of(text: str, parser=None) -> dict[str, str]:
+    """Spell id to printed design line, for any revision of the rulebook.
+
+    `parser` is one of `blocks.PARSERS` — different books use different block
+    formats (arm5-core's headed blocks vs. HoH:MC's inline paragraphs), and a
+    book parsed with the wrong one silently finds zero blocks. Defaults to
+    `blocks.parse_de` so existing callers that only ever read arm5-core need
+    not change.
+    """
     # Local import to keep this function testable without catalog files.
     from . import blocks, catalog as catalog_module
 
-    parsed, _ = blocks.parse_de(text.split("\n"))
+    if parser is None:
+        parser = blocks.parse_de
+    parsed, _ = parser(text.split("\n"))
     return {
         catalog_module.slug_id(block.technique, block.form, block.name): block.design_line
         for block in parsed
@@ -134,12 +145,15 @@ def design_lines_of(text: str) -> dict[str, str]:
     }
 
 
-def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
+def old_design_lines(root, commit: str, relative: str, parser=None) -> dict[str, str] | None:
     """The design lines as of a past rulebook revision. Best effort.
 
     Returns None when the rulebook is not a git checkout, the revision is
     not fetched, or git is unavailable. The report degrades to omitting the
     design-line column; it never fails because of this.
+
+    `parser` is threaded straight to `design_lines_of` — see there for why it
+    matters which one the caller passes.
     """
     # Local import to keep render() and diff_assets() testable without git.
     import subprocess
@@ -154,4 +168,4 @@ def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
         return None
     if finished.returncode != 0:
         return None
-    return design_lines_of(finished.stdout)
+    return design_lines_of(finished.stdout, parser)

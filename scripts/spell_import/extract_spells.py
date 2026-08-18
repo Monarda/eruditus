@@ -343,6 +343,18 @@ ANALOGY_BASE_EFFECTS: dict[str, dict] = {
 #   spells, Aegis of the Hearth, Wizard's Vigil and Sight of the True Form
 #   all import as exception spells instead
 #   (scripts/spell_import/exceptions.py).
+#
+# This table, HAND_DERIVED_ADJUSTMENT, DESIGN_LINE_TYPOS and
+# SPELL_NAME_TYPOS below, and exceptions.py's EXCEPTION_SPELLS, are all keyed
+# by bare spell name across every book -- unlike SKIPPED_BLOCKS just below,
+# which is keyed per book id because HoH:MC needed that. There is no
+# collision today (verified: zero overlap with HoH:MC's 16 block names), but
+# a third book that happened to share a spell's exact name with an existing
+# entry here would silently misapply that entry to the wrong book's spell.
+# `_reject_duplicate_ids` cannot catch this: these tables are consulted
+# while a book is still being parsed, before any spell id exists to compare,
+# so a name collision misfires long before the id-uniqueness guard ever
+# runs. If a third book collides, key these by (book_id, name) instead.
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
     "Ward against Faeries of the Mountain": "(Base effect)",
@@ -472,6 +484,39 @@ SPELL_NAME_TYPOS: dict[str, str] = {
 }
 
 
+class DuplicateSpellId(Exception):
+    """Two books produced the same spell id.
+
+    Ids are flat -- `lib-<tefo>-<slug>`, no book segment -- because they are
+    also the resolutions.json keys, and namespacing them would churn all 206
+    for no correctness gain. The cost of flat ids is that two books naming
+    the same spell at the same Technique and Form would silently merge into
+    one row, so the collision is made loud here instead.
+    """
+
+
+# Blocks the parser finds that are not importable spells, by book id. Each
+# carries its reason: a skip with no stated reason is indistinguishable from
+# a spell somebody forgot about.
+SKIPPED_BLOCKS: dict[str, dict[str, str]] = {
+    "arm5-hohmc": {
+        "Perceive the Change":
+            "an enchanted-device effect, not a spell: 'Pen 0, constant "
+            "effect', costing '+1 two uses/day, +3 environmental trigger'. "
+            "The app models no enchantments. Its stat line mis-parses to "
+            "T: 'Ind Pen', which is the tell.",
+        "Faerie Chains of the Familiar Slave":
+            "hand-authored in hand_authored_templates.json by todo item 17; "
+            "its guideline crvi-hohmc-G1 carries no effectFormula, so the "
+            "extractor cannot build it.",
+        "Tie the Threads That Bind":
+            "hand-authored for the same reason as Faerie Chains: its "
+            "guideline revi-hohmc-G1 carries no effectFormula, because the "
+            "Might threshold is measured against the total computed level.",
+    },
+}
+
+
 # A published spell whose design line's numeric base has no exact catalog
 # match, but resolves to a real base effect once a human reads the
 # guideline text: either a General guideline this specific spell commits to
@@ -568,7 +613,13 @@ class Report:
     blocked: list[tuple[str, str]]
     unresolved: list[str]
     problems: list[str]
-    identity: provenance.SourceIdentity
+    # One identity per book read, by book id. A mapping rather than a single
+    # value because a rulebook that moved is a per-book fact.
+    identities: dict[str, provenance.SourceIdentity]
+    # Parsed blocks deliberately not imported, with the reason each. A bucket
+    # of its own so the conservation invariant in test_extract.py still adds
+    # up: a skipped block was parsed, and must land somewhere.
+    skipped: list[tuple[str, str]]
     design_lines: dict[str, str]
     # spell id -> the catalog's current candidate list, for every entry whose
     # recorded decision still stands but whose candidate set grew. Collected
@@ -594,20 +645,43 @@ def serialize(spells: list[dict]) -> str:
 
 
 def regeneration_failure_message(
-    lock: provenance.SourceIdentity | None, current: provenance.SourceIdentity
+    lock: dict[str, provenance.SourceIdentity],
+    identities: dict[str, provenance.SourceIdentity],
 ) -> str:
     """Why does a fresh run disagree with the committed asset?
 
     Two very different causes, and the wrong guess costs real time: either
-    the rulebook moved under a correct asset, or the asset was edited by
-    hand. The lock is what tells them apart.
+    a rulebook moved under a correct asset, or the asset was edited by
+    hand. The lock is what tells them apart -- checked across every
+    registered book, not just arm5-core, since any one of them moving would
+    produce the same disagreement.
     """
-    if not provenance.matches(lock, current):
-        return provenance.describe_change(lock, current)
+    moved = [current for current in identities.values() if not provenance.matches(lock, current)]
+    if moved:
+        return "\n\n".join(provenance.describe_change(lock, current) for current in moved)
     return (
         "assets/data/spell_library.json is stale or was hand-edited — "
         "re-run `python -m scripts.spell_import.extract_spells --write`"
     )
+
+
+def _matched_lock_updates(
+    lock: dict[str, provenance.SourceIdentity],
+    identities: dict[str, provenance.SourceIdentity],
+) -> dict[str, provenance.SourceIdentity]:
+    """What to write when only advisory counts have drifted, not the source.
+
+    Merged over the loaded lock, so a book whose source moved -- unmatched,
+    by definition -- keeps its previously recorded identity here. Only
+    matched books' entries are refreshed; replacing an unmatched one would
+    attest a source move without the review --accept-source exists to gate.
+    """
+    refreshed = {
+        current.book_id: current
+        for current in identities.values()
+        if provenance.matches(lock, current)
+    }
+    return {**lock, **refreshed}
 
 
 def hand_authored_templates() -> list[dict]:
@@ -644,7 +718,11 @@ def container_modes() -> dict[str, dict]:
 
 
 def apply_container_modes(
-    rows: list[dict], catalog: catalog_module.Catalog, modes: dict[str, dict]
+    rows: list[dict],
+    catalog: catalog_module.Catalog,
+    modes: dict[str, dict],
+    *,
+    unresolved: bool = False,
 ) -> None:
     """Stamp hand-authored container modes onto the rows they name, in place.
 
@@ -652,18 +730,32 @@ def apply_container_modes(
     container, raises rather than being skipped: a silently-ignored entry is a
     decision that looks recorded and isn't, which is the whole failure mode
     this file exists to avoid.
+
+    `unresolved` excuses only the first of those two checks. A widened ledger
+    entry leaves its spell unproduced -- an entry naming it is not stale, the
+    run just did not get that far -- and `migrate_ledger.py`, the only tool
+    that resolves a widening, calls `run(write=False)` and would otherwise hit
+    the very guard meant to catch stale entries on a clean run. A run with
+    unresolved ledger entries already reports why elsewhere; this guard would
+    only add noise on top, and block the fix. The Target-is-a-container check
+    is a property of the entry itself, not of the run's completeness, so it
+    still runs for every entry that does have a row.
     """
     by_id = {row["id"]: row for row in rows}
 
     unknown = sorted(set(modes) - set(by_id))
-    if unknown:
+    if unknown and not unresolved:
         raise UnknownContainerModeSpell(
             "container_modes.json names spells no run produced: "
             + ", ".join(unknown)
         )
 
     for spell_id, entry in modes.items():
-        row = by_id[spell_id]
+        row = by_id.get(spell_id)
+        if row is None:
+            # Only reachable with unresolved=True -- the check above already
+            # raised for a clean run's stale entry.
+            continue
         target_id = row["targetId"]
         if catalog.target_type(target_id) != "container":
             raise NotAContainerTarget(
@@ -673,138 +765,240 @@ def apply_container_modes(
         row["containerMode"] = entry["mode"]
 
 
+def _reject_duplicate_ids(rows: list[dict]) -> None:
+    """Raise if two rows in the combined output share an id.
+
+    Called once, after every source of a row -- parsed spells, parsed
+    templates and hand-authored templates alike -- has been assembled, so a
+    hand-authored template colliding with a parsed one is caught too.
+    """
+    seen: dict[str, str] = {}
+    for row in rows:
+        if row["id"] in seen:
+            raise DuplicateSpellId(
+                f"{row['id']} produced twice: {seen[row['id']]!r} and "
+                f"{row['name']!r}. Spell ids carry no book segment, so two "
+                "books naming the same spell at the same Technique and Form "
+                "collide. Rename one in a typo table, or give it an "
+                "ExceptionSpell."
+            )
+        seen[row["id"]] = row["name"]
+
+
 def run(write: bool = False, accept_source: bool = False) -> Report:
     root = sources.default_root()
-    path = sources.resolve_book(sources.DE_TITLE, root)
-    lines = sources.read_lines(path)
-    parsed, problems = blocks.parse_de(lines)
     catalog = catalog_module.Catalog.load()
     book = ledger_module.Ledger.load()
 
     design_lines: dict[str, str] = {}
-
     spells: list[dict] = []
     templates: list[dict] = []
     exception_spells: list[dict] = []
     blocked: list[tuple[str, str]] = []
+    skipped: list[tuple[str, str]] = []
     unresolved: list[str] = []
+    problems: list[str] = []
     proposals: dict[str, dict] = {}
     widenings: dict[str, list[str]] = {}
+    identities: dict[str, provenance.SourceIdentity] = {}
 
-    for block in parsed:
-        corrected_name = SPELL_NAME_TYPOS.get(block.name)
-        if corrected_name is not None:
-            block = dataclasses.replace(block, name=corrected_name)
+    for registered in sources.BOOKS:
+        path = sources.resolve_book(registered.title, root)
+        lines = sources.read_lines(path)
+        parsed, book_problems = blocks.PARSERS[registered.parser](lines)
+        problems.extend(f"{registered.id}: {p}" for p in book_problems)
 
-        if block.name in exceptions_module.EXCEPTION_SPELLS:
-            exception_spells.append(emit.build_exception_spell(
-                block, exceptions_module.EXCEPTION_SPELLS[block.name]
-            ))
-            continue
+        skips = SKIPPED_BLOCKS.get(registered.id, {})
+        imported_before = len(spells)
 
-        # HAND_DERIVED is checked before block.design_line, not as a
-        # fallback to it. This is defensive, not load-bearing today: all
-        # three current entries actually have block.design_line is None --
-        # e.g. Hermes' Portal's printed "(Mercurian Ritual)" doesn't match
-        # blocks.py's `_DESIGN` regex, so it lands in block.prose, not
-        # block.design_line -- and `None or X == X`, so the old
-        # `block.design_line or HAND_DERIVED.get(...)` ordering would have
-        # worked identically for all three. The reorder guards against a
-        # *future* HAND_DERIVED entry for a spell whose printed line is real
-        # but wrong (e.g. a stat-block typo) -- for that case, checking the
-        # derived value first is the right call. For every spell that is not
-        # a HAND_DERIVED key at all, this is a no-op either way: `.get()`
-        # returns None and the real printed line is used exactly as before.
-        design_text = HAND_DERIVED.get(block.name) or block.design_line
-        if design_text is None:
-            blocked.append((block.name, "no design line printed"))
-            continue
-
-        # The printed line is what the report records; only the parsed copy
-        # gains the hand-derived magnitude or typo fix, so import_report.md
-        # keeps showing the rulebook's own words.
-        parsed_text = design_text
-        typo = DESIGN_LINE_TYPOS.get(block.name)
-        if typo is not None:
-            broken, fixed = typo
-            if broken not in parsed_text:
-                blocked.append(
-                    (block.name, f"design-line typo fix {broken!r} is not in the design line")
-                )
+        for block in parsed:
+            if block.name in skips:
+                skipped.append((block.name, skips[block.name]))
                 continue
-            parsed_text = parsed_text.replace(broken, fixed, 1)
 
-        derived = HAND_DERIVED_ADJUSTMENT.get(block.name)
-        if derived is not None:
-            magnitude, phrase = derived
-            if phrase not in parsed_text:
-                blocked.append(
-                    (block.name, f"hand-derived adjustment {phrase!r} is not in the design line")
-                )
+            corrected_name = SPELL_NAME_TYPOS.get(block.name)
+            if corrected_name is not None:
+                block = dataclasses.replace(block, name=corrected_name)
+
+            if block.name in exceptions_module.EXCEPTION_SPELLS:
+                exception_spells.append(emit.build_exception_spell(
+                    block, exceptions_module.EXCEPTION_SPELLS[block.name],
+                    book_id=registered.id,
+                ))
                 continue
-            parsed_text = parsed_text.replace(phrase, f"+{magnitude} {phrase}", 1)
 
-        try:
-            design = designline.parse_design(parsed_text)
-        except designline.UnknownToken as error:
-            blocked.append((block.name, str(error)))
-            continue
+            # HAND_DERIVED is checked before block.design_line, not as a
+            # fallback to it. This is defensive, not load-bearing today: all
+            # three current entries actually have block.design_line is None --
+            # e.g. Hermes' Portal's printed "(Mercurian Ritual)" doesn't match
+            # blocks.py's `_DESIGN` regex, so it lands in block.prose, not
+            # block.design_line -- and `None or X == X`, so the old
+            # `block.design_line or HAND_DERIVED.get(...)` ordering would have
+            # worked identically for all three. The reorder guards against a
+            # *future* HAND_DERIVED entry for a spell whose printed line is real
+            # but wrong (e.g. a stat-block typo) -- for that case, checking the
+            # derived value first is the right call. For every spell that is not
+            # a HAND_DERIVED key at all, this is a no-op either way: `.get()`
+            # returns None and the real printed line is used exactly as before.
+            design_text = HAND_DERIVED.get(block.name) or block.design_line
+            if design_text is None:
+                blocked.append((block.name, "no design line printed"))
+                continue
 
-        if design.base_level is None or block.printed_level is None:
-            spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
-            design_lines[spell_id] = design_text
+            # The printed line is what the report records; only the parsed copy
+            # gains the hand-derived magnitude or typo fix, so import_report.md
+            # keeps showing the rulebook's own words.
+            parsed_text = design_text
+            typo = DESIGN_LINE_TYPOS.get(block.name)
+            if typo is not None:
+                broken, fixed = typo
+                if broken not in parsed_text:
+                    blocked.append(
+                        (block.name, f"design-line typo fix {broken!r} is not in the design line")
+                    )
+                    continue
+                parsed_text = parsed_text.replace(broken, fixed, 1)
 
-            if spell_id in ANALOGY_BASE_EFFECTS:
-                analogy = ANALOGY_BASE_EFFECTS[spell_id]
+            derived = HAND_DERIVED_ADJUSTMENT.get(block.name)
+            if derived is not None:
+                magnitude, phrase = derived
+                if phrase not in parsed_text:
+                    blocked.append(
+                        (block.name, f"hand-derived adjustment {phrase!r} is not in the design line")
+                    )
+                    continue
+                parsed_text = parsed_text.replace(phrase, f"+{magnitude} {phrase}", 1)
+
+            try:
+                design = designline.parse_design(parsed_text)
+            except designline.UnknownToken as error:
+                blocked.append((block.name, str(error)))
+                continue
+
+            if design.base_level is None or block.printed_level is None:
+                spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
+                design_lines[spell_id] = design_text
+
+                if spell_id in ANALOGY_BASE_EFFECTS:
+                    analogy = ANALOGY_BASE_EFFECTS[spell_id]
+                    try:
+                        templates.append(emit.build_template(
+                            block, analogy["base_effect_id"], catalog, design,
+                            realm_by_spell_id=REALM_BY_SPELL_ID,
+                            analogy_rationale=analogy["rationale"],
+                            chosen_slots=analogy.get("chosen_slots"),
+                            book_id=registered.id,
+                        ))
+                    except (designline.UnknownToken, KeyError) as error:
+                        blocked.append((block.name, str(error)))
+                    continue
+
+                general_candidates = catalog.general_candidates(block.technique, block.form)
+                if not general_candidates:
+                    # Permanent, not a gap to fill: Perdo Imaginem's and Perdo
+                    # Mentem's own guideline tables print no General row at all
+                    # (verified directly against the reviewed Definitive Edition
+                    # text, 2026-08-16), so Dispel the Phantom Image and Lay to
+                    # Rest the Haunting Spirit have nothing to resolve to. A
+                    # catalog row *could* be built from each spell's own prose --
+                    # and one was, twice (`peme-G`, `inco-gen`) -- but
+                    # test_general_catalog.GeneralCatalogTest.
+                    # test_general_entries_match_the_rulebook_bullet_for_bullet
+                    # (docs/superpowers/plans/2026-08-05-general-base-effects.md)
+                    # settled that this counts as inventing rulebook content the
+                    # table does not contain, and both were removed. Adding
+                    # `peim-gen`/`peme-gen` here would revert that decision.
+                    #
+                    # Dispel the Phantom Image's own wording ("whose level you
+                    # match or exceed on a stress die + the level of your
+                    # spell") and Lay to Rest the Haunting Spirit's ("loses a
+                    # number of points from its Might equal to the level of this
+                    # spell", Perdo Vim's pevi-G3 Might-reduction guideline,
+                    # Form-narrowed to spirits) are the same recurring per-Form
+                    # pattern DESIGN_LINE_INCOMPLETE's comment traces above --
+                    # see there (and its elemental-Might-reduction digression)
+                    # for why the pattern doesn't change this either.
+                    # Both resolved 2026-08-16 via ANALOGY_BASE_EFFECTS, checked
+                    # above before this branch is ever reached for their spell
+                    # ids -- this empty-candidates branch itself is unchanged
+                    # and still correct for any future spell with no analogy
+                    # entry. See
+                    # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
+                    blocked.append((block.name, "no General base effect for that Technique/Form"))
+                    continue
+
+                if spell_id in DESIGN_LINE_INCOMPLETE:
+                    blocked.append(
+                        (block.name, f"design line incomplete: {DESIGN_LINE_INCOMPLETE[spell_id]}")
+                    )
+                    continue
+
+                if spell_id in KNOWN_UNRESOLVABLE:
+                    blocked.append((block.name, f"unresolvable: {KNOWN_UNRESOLVABLE[spell_id]}"))
+                    continue
+
+                try:
+                    base_effect_id = book.resolve(spell_id, general_candidates)
+                except ledger_module.MissingEntry as error:
+                    unresolved.append(str(error))
+                    proposals[spell_id] = {
+                        "baseEffectId": "",
+                        "candidates": general_candidates,
+                        "rationale": "",
+                        "_name": block.name,
+                        "_line": block.line_no,
+                        "_descriptions": [
+                            e["description"] for e in catalog.base_effects
+                            if e["id"] in general_candidates
+                        ],
+                    }
+                    continue
+                except ledger_module.WidenedEntry as error:
+                    unresolved.append(str(error))
+                    widenings[spell_id] = general_candidates
+                    continue
+                except ledger_module.LedgerError as error:
+                    unresolved.append(str(error))
+                    continue
+
                 try:
                     templates.append(emit.build_template(
-                        block, analogy["base_effect_id"], catalog, design,
+                        block, base_effect_id, catalog, design,
                         realm_by_spell_id=REALM_BY_SPELL_ID,
-                        analogy_rationale=analogy["rationale"],
-                        chosen_slots=analogy.get("chosen_slots"),
+                        analogy_rationale=None,
+                        book_id=registered.id,
                     ))
                 except (designline.UnknownToken, KeyError) as error:
                     blocked.append((block.name, str(error)))
                 continue
 
-            general_candidates = catalog.general_candidates(block.technique, block.form)
-            if not general_candidates:
-                # Permanent, not a gap to fill: Perdo Imaginem's and Perdo
-                # Mentem's own guideline tables print no General row at all
-                # (verified directly against the reviewed Definitive Edition
-                # text, 2026-08-16), so Dispel the Phantom Image and Lay to
-                # Rest the Haunting Spirit have nothing to resolve to. A
-                # catalog row *could* be built from each spell's own prose --
-                # and one was, twice (`peme-G`, `inco-gen`) -- but
-                # test_general_catalog.GeneralCatalogTest.
-                # test_general_entries_match_the_rulebook_bullet_for_bullet
-                # (docs/superpowers/plans/2026-08-05-general-base-effects.md)
-                # settled that this counts as inventing rulebook content the
-                # table does not contain, and both were removed. Adding
-                # `peim-gen`/`peme-gen` here would revert that decision.
-                #
-                # Dispel the Phantom Image's own wording ("whose level you
-                # match or exceed on a stress die + the level of your
-                # spell") and Lay to Rest the Haunting Spirit's ("loses a
-                # number of points from its Might equal to the level of this
-                # spell", Perdo Vim's pevi-G3 Might-reduction guideline,
-                # Form-narrowed to spirits) are the same recurring per-Form
-                # pattern DESIGN_LINE_INCOMPLETE's comment traces above --
-                # see there (and its elemental-Might-reduction digression)
-                # for why the pattern doesn't change this either.
-                # Both resolved 2026-08-16 via ANALOGY_BASE_EFFECTS, checked
-                # above before this branch is ever reached for their spell
-                # ids -- this empty-candidates branch itself is unchanged
-                # and still correct for any future spell with no analogy
-                # entry. See
-                # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
-                blocked.append((block.name, "no General base effect for that Technique/Form"))
+            spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
+            design_lines[spell_id] = design_text
+            candidates = catalog.candidates(block.technique, block.form, design.base_level)
+
+            if not candidates and spell_id in NUMBERED_OVERRIDES:
+                override = NUMBERED_OVERRIDES[spell_id]
+                try:
+                    spells.append(emit.build_spell(
+                        block, override["base_effect_id"], catalog, design,
+                        realm_by_spell_id=REALM_BY_SPELL_ID,
+                        chosen_base_level=override["chosen_base_level"],
+                        override_modifiers=override["modifiers"],
+                        analogy_rationale=None,
+                        book_id=registered.id,
+                    ))
+                except (designline.UnknownToken, KeyError) as error:
+                    blocked.append((block.name, str(error)))
                 continue
 
-            if spell_id in DESIGN_LINE_INCOMPLETE:
+            if not candidates and spell_id in LEVEL_NEEDS_RULES_DECISION:
                 blocked.append(
-                    (block.name, f"design line incomplete: {DESIGN_LINE_INCOMPLETE[spell_id]}")
+                    (block.name, f"needs a rules decision: {LEVEL_NEEDS_RULES_DECISION[spell_id]}")
                 )
+                continue
+
+            if not candidates:
+                blocked.append((block.name, "no base effect at that Technique/Form/level"))
                 continue
 
             if spell_id in KNOWN_UNRESOLVABLE:
@@ -812,134 +1006,75 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 continue
 
             try:
-                base_effect_id = book.resolve(spell_id, general_candidates)
+                base_effect_id = book.resolve(spell_id, candidates)
             except ledger_module.MissingEntry as error:
                 unresolved.append(str(error))
                 proposals[spell_id] = {
                     "baseEffectId": "",
-                    "candidates": general_candidates,
+                    "candidates": candidates,
                     "rationale": "",
                     "_name": block.name,
                     "_line": block.line_no,
                     "_descriptions": [
-                        e["description"] for e in catalog.base_effects
-                        if e["id"] in general_candidates
+                        e["description"] for e in catalog.base_effects if e["id"] in candidates
                     ],
                 }
                 continue
             except ledger_module.WidenedEntry as error:
                 unresolved.append(str(error))
-                widenings[spell_id] = general_candidates
+                widenings[spell_id] = candidates
                 continue
             except ledger_module.LedgerError as error:
                 unresolved.append(str(error))
                 continue
 
             try:
-                templates.append(emit.build_template(
+                spells.append(emit.build_spell(
                     block, base_effect_id, catalog, design,
                     realm_by_spell_id=REALM_BY_SPELL_ID,
+                    extra_adjustment=COMBINED_BASE_EFFECTS.get(spell_id),
                     analogy_rationale=None,
+                    book_id=registered.id,
                 ))
             except (designline.UnknownToken, KeyError) as error:
                 blocked.append((block.name, str(error)))
-            continue
 
-        spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
-        design_lines[spell_id] = design_text
-        candidates = catalog.candidates(block.technique, block.form, design.base_level)
-
-        if not candidates and spell_id in NUMBERED_OVERRIDES:
-            override = NUMBERED_OVERRIDES[spell_id]
-            try:
-                spells.append(emit.build_spell(
-                    block, override["base_effect_id"], catalog, design,
-                    realm_by_spell_id=REALM_BY_SPELL_ID,
-                    chosen_base_level=override["chosen_base_level"],
-                    override_modifiers=override["modifiers"],
-                    analogy_rationale=None,
-                ))
-            except (designline.UnknownToken, KeyError) as error:
-                blocked.append((block.name, str(error)))
-            continue
-
-        if not candidates and spell_id in LEVEL_NEEDS_RULES_DECISION:
-            blocked.append(
-                (block.name, f"needs a rules decision: {LEVEL_NEEDS_RULES_DECISION[spell_id]}")
-            )
-            continue
-
-        if not candidates:
-            blocked.append((block.name, "no base effect at that Technique/Form/level"))
-            continue
-
-        if spell_id in KNOWN_UNRESOLVABLE:
-            blocked.append((block.name, f"unresolvable: {KNOWN_UNRESOLVABLE[spell_id]}"))
-            continue
-
-        try:
-            base_effect_id = book.resolve(spell_id, candidates)
-        except ledger_module.MissingEntry as error:
-            unresolved.append(str(error))
-            proposals[spell_id] = {
-                "baseEffectId": "",
-                "candidates": candidates,
-                "rationale": "",
-                "_name": block.name,
-                "_line": block.line_no,
-                "_descriptions": [
-                    e["description"] for e in catalog.base_effects if e["id"] in candidates
-                ],
-            }
-            continue
-        except ledger_module.WidenedEntry as error:
-            unresolved.append(str(error))
-            widenings[spell_id] = candidates
-            continue
-        except ledger_module.LedgerError as error:
-            unresolved.append(str(error))
-            continue
-
-        try:
-            spells.append(emit.build_spell(
-                block, base_effect_id, catalog, design,
-                realm_by_spell_id=REALM_BY_SPELL_ID,
-                extra_adjustment=COMBINED_BASE_EFFECTS.get(spell_id),
-                analogy_rationale=None,
-            ))
-        except (designline.UnknownToken, KeyError) as error:
-            blocked.append((block.name, str(error)))
+        identities[registered.id] = provenance.describe(
+            registered.id, registered.title, path, root,
+            parsed=len(parsed), imported=len(spells) - imported_before,
+        )
 
     templates.extend(hand_authored_templates())
+    _reject_duplicate_ids(spells + templates + exception_spells)
 
     # One call across both lists: an id lives in exactly one of them, so
     # checking each separately would report every template id as unknown to
     # the spells pass. `spells + templates` is a new list of the *same* dicts,
     # so mutating through it mutates the rows that get serialized.
-    apply_container_modes(spells + templates, catalog, container_modes())
+    apply_container_modes(
+        spells + templates, catalog, container_modes(), unresolved=bool(unresolved)
+    )
 
     if proposals:
         PROPOSALS_PATH.write_text(
             json.dumps(proposals, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
         )
 
-    identity = provenance.describe(
-        sources.DE_TITLE, path, root, parsed=len(parsed), imported=len(spells)
-    )
-
     if write and not unresolved and not problems:
         lock = provenance.load()
+        moved = [i for i in identities.values() if not provenance.matches(lock, i)]
         fresh = serialize(spells)
         committed = LIBRARY_PATH.read_text(encoding="utf-8") if LIBRARY_PATH.is_file() else ""
         would_change = fresh != committed
 
-        # An absent lock refuses unconditionally: nothing can be attested, so
-        # "the asset happens to match" is not a reason to proceed quietly. A
-        # merely-moved source refuses only when it would actually rewrite the
-        # asset, since otherwise --write is a no-op anyway.
-        if not provenance.matches(lock, identity) and not accept_source:
-            if would_change or lock is None:
-                raise SourceMoved(provenance.describe_change(lock, identity))
+        # An unrecorded book refuses unconditionally: nothing can be attested,
+        # so "the asset happens to match" is not a reason to proceed quietly.
+        # A merely-moved source refuses only when it would actually rewrite
+        # the asset, since otherwise --write is a no-op anyway.
+        if moved and not accept_source:
+            if would_change or any(i.book_id not in lock for i in moved):
+                raise SourceMoved("\n\n".join(
+                    provenance.describe_change(lock, i) for i in moved))
 
         if would_change:
             LIBRARY_PATH.write_text(fresh, encoding="utf-8")
@@ -967,22 +1102,31 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         if accept_source:
             if would_change:
                 old = json.loads(committed) if committed else []
-                previous = None
-                if lock is not None and lock.rulebook is not None:
-                    previous = report_module.old_design_lines(
-                        root, lock.rulebook.commit, lock.path
-                    )
+                # Merge across every recorded book that has a git history to
+                # read from -- with one book in BOOKS today there is at most
+                # one contribution, but the merge itself doesn't assume that.
+                previous: dict[str, str] = {}
+                for current in identities.values():
+                    recorded = lock.get(current.book_id)
+                    if recorded is not None and recorded.rulebook is not None:
+                        parser = blocks.PARSERS[sources.book_by_id(current.book_id).parser]
+                        previous.update(report_module.old_design_lines(
+                            root, recorded.rulebook.commit, recorded.path, parser
+                        ) or {})
                 REPORT_PATH.write_text(
                     report_module.render(
                         report_module.diff_assets(old, spells),
-                        lock, identity,
+                        locks=lock, currents=list(identities.values()),
                         imported=len(spells), blocked=len(blocked), unresolved=len(unresolved),
-                        old_design_lines=previous, new_design_lines=design_lines,
+                        old_design_lines=previous or None, new_design_lines=design_lines,
                     ),
                     encoding="utf-8",
                 )
-            provenance.write(identity)
-        elif provenance.matches(lock, identity) and lock.to_dict() != identity.to_dict():
+            provenance.write(identities)
+        elif any(
+            provenance.matches(lock, current) and lock[current.book_id].to_dict() != current.to_dict()
+            for current in identities.values()
+        ):
             # Same rulebook, so nothing is being *adopted* and the
             # --accept-source gate has nothing to guard: only the lock's
             # advisory counts have drifted from what this run produced. They
@@ -990,14 +1134,56 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             # precisely because the lock was rewritten only when the source
             # moved, which is the one case those counts are read in — the
             # "N parsed, M imported" line of the source-moved message.
-            provenance.write(identity)
+            #
+            # Written through _matched_lock_updates, not identities directly:
+            # a book whose source moved but was not accepted here must keep
+            # its previously recorded identity, not have it laundered in by
+            # this branch's write of a different, merely-drifted book.
+            provenance.write(_matched_lock_updates(lock, identities))
 
     return Report(
         spells=spells, templates=templates, exceptions=exception_spells,
         blocked=blocked, unresolved=unresolved,
-        problems=problems, identity=identity, design_lines=design_lines,
+        problems=problems, identities=identities, skipped=skipped,
+        design_lines=design_lines,
         widenings=widenings, unreviewed=book.unreviewed(), proposals=proposals,
     )
+
+
+def diagnose(title: str, parser: str) -> str:
+    """Parse any book and report what would happen, writing nothing.
+
+    The point of this mode is measurement, not import: the corpus survey
+    behind todo item 65 classified anchors, it never checked that an
+    anchored block parses. A long failure list is the honest result.
+    """
+    root = sources.default_root()
+    path = sources.resolve_book(title, root)
+    parsed, problems = blocks.PARSERS[parser](path.read_text(
+        encoding="utf-8", errors="strict").split("\n"))
+
+    catalog = catalog_module.Catalog.load()
+    with_design = [b for b in parsed if b.design_line]
+    tokenized = 0
+    failures: list[str] = []
+    for block in with_design:
+        try:
+            designline.parse_design(block.design_line)
+            tokenized += 1
+        except designline.UnknownToken as error:
+            failures.append(f"  {block.name}: {error}")
+
+    lines = [
+        f"{title}  [parser: {parser}]",
+        f"  blocks found      : {len(parsed)}",
+        f"  with a design line: {len(with_design)}",
+        f"  design line reads : {tokenized}",
+        f"  parse problems    : {len(problems)}",
+        "",
+    ]
+    lines.extend(f"  PARSE {p}" for p in problems)
+    lines.extend(sorted(failures))
+    return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1011,10 +1197,24 @@ def main(argv: list[str] | None = None) -> int:
         "--show-blocked", action="store_true",
         help="list each blocked spell and its reason",
     )
+    parser.add_argument(
+        "--diagnose", metavar="TITLE",
+        help="parse one book and report what would happen; writes nothing",
+    )
+    parser.add_argument(
+        "--parser", default="inline", choices=sorted(blocks.PARSERS),
+        help="block parser to use with --diagnose (default: inline)",
+    )
     args = parser.parse_args(argv)
 
     if args.accept_source and not args.write:
         parser.error("--accept-source is only meaningful with --write")
+
+    if args.diagnose:
+        if args.write:
+            parser.error("--diagnose writes nothing; drop --write")
+        print(diagnose(args.diagnose, args.parser))
+        return 0
 
     try:
         report = run(write=args.write, accept_source=args.accept_source)
@@ -1026,6 +1226,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"templates: {len(report.templates)}")
     print(f"exceptions: {len(report.exceptions)}")
     print(f"blocked  : {len(report.blocked)}")
+    print(f"skipped  : {len(report.skipped)}")
     print(f"unresolved: {len(report.unresolved)}")
 
     if args.show_blocked and report.blocked:

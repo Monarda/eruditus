@@ -1,10 +1,11 @@
+import json
 import os
 import pathlib
 import tempfile
 import unittest
 from unittest.mock import patch
 
-from scripts.spell_import import sources
+from scripts.spell_import import blocks, catalog as catalog_module, sources
 
 
 class ResolveBookTest(unittest.TestCase):
@@ -98,3 +99,38 @@ class SuggestionTest(unittest.TestCase):
             with self.assertRaises(FileNotFoundError) as caught:
                 sources.resolve_book("Completely Unrelated", root)
             self.assertNotIn("did you mean", str(caught.exception).lower())
+
+
+class BookRegistryTest(unittest.TestCase):
+    def test_every_registered_book_id_is_a_known_book(self):
+        """The registry's ids are what emitted citations carry.
+
+        assets/data/books.json is the app's own list of books; a registry id
+        absent from it would emit a citation pointing at nothing, and no
+        other test joins those two files.
+        """
+        path = catalog_module.DATA_DIR / "books.json"
+        known = {b["id"] for b in json.loads(path.read_text(encoding="utf-8"))}
+        for book in sources.BOOKS:
+            self.assertIn(book.id, known, msg=book.title)
+
+    def test_every_registered_parser_exists(self):
+        for book in sources.BOOKS:
+            self.assertIn(book.parser, blocks.PARSERS, msg=book.id)
+
+    def test_every_registered_book_resolves_to_a_markdown_copy(self):
+        for book in sources.BOOKS:
+            self.assertTrue(sources.resolve_book(book.title).is_file(), msg=book.id)
+
+    def test_book_ids_are_unique(self):
+        ids = [b.id for b in sources.BOOKS]
+        self.assertEqual(sorted(ids), sorted(set(ids)))
+
+    def test_the_core_book_is_registered_with_the_de_parser(self):
+        core = sources.book_by_id("arm5-core")
+        self.assertEqual(core.title, sources.DE_TITLE)
+        self.assertEqual(core.parser, "de")
+
+    def test_book_by_id_rejects_an_unknown_id(self):
+        with self.assertRaises(KeyError):
+            sources.book_by_id("arm5-nonesuch")

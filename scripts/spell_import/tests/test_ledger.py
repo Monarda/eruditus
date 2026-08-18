@@ -230,19 +230,27 @@ class CommittedLedgerTest(unittest.TestCase):
             blocks, catalog as catalog_module, extract_spells, sources,
         )
 
-        lines = sources.read_lines(sources.resolve_book(sources.DE_TITLE))
-        parsed, _ = blocks.parse_de(lines)
-        # SPELL_NAME_TYPOS corrects a name (and so its derived id) before
-        # extract_spells.run ever emits a spell -- mirror that here, or a
-        # corrected id reads as "no matching spell" against this test's own
-        # raw parse, exactly the false positive this test exists to avoid.
-        real_ids = {
-            catalog_module.slug_id(
-                b.technique, b.form,
-                extract_spells.SPELL_NAME_TYPOS.get(b.name, b.name),
+        # A ledger key can come from any registered book, not just the core
+        # rules -- iterate sources.BOOKS with each book's own parser rather
+        # than hardcoding the DE parse, or a second book's real ids read as
+        # "no matching spell" against this test's own raw parse, exactly the
+        # false positive this test exists to avoid.
+        real_ids: set[str] = set()
+        for registered in sources.BOOKS:
+            lines = sources.read_lines(sources.resolve_book(registered.title))
+            parsed, _ = blocks.PARSERS[registered.parser](lines)
+            # SPELL_NAME_TYPOS corrects a name (and so its derived id) before
+            # extract_spells.run ever emits a spell -- mirror that here, or a
+            # corrected id reads as "no matching spell" against this test's
+            # own raw parse, exactly the false positive this test exists to
+            # avoid.
+            real_ids.update(
+                catalog_module.slug_id(
+                    b.technique, b.form,
+                    extract_spells.SPELL_NAME_TYPOS.get(b.name, b.name),
+                )
+                for b in parsed
             )
-            for b in parsed
-        }
 
         book = ledger.Ledger.load()
         unknown = sorted(set(book.entries) - real_ids)

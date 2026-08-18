@@ -62,3 +62,15 @@ class ParseTest(unittest.TestCase):
     def test_damaged_line_raises(self):
         with self.assertRaises(ValueError):
             statline.parse_statline("R: Touch, T: Ring, D: Circle")
+
+
+class StripQuoteTest(unittest.TestCase):
+    def test_strip_quote_removes_blockquote_but_keeps_bold(self):
+        self.assertEqual(statline.strip_quote("> **Ball of Abysmal Music**"),
+                         "**Ball of Abysmal Music**")
+
+    def test_strip_quote_removes_nested_blockquote_markers(self):
+        self.assertEqual(statline.strip_quote("> > MuIm 20"), "MuIm 20")
+
+    def test_strip_markup_still_removes_bold(self):
+        self.assertEqual(statline.strip_markup("> **MuIm 20**"), "MuIm 20")

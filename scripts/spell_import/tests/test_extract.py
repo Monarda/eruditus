@@ -6,6 +6,7 @@ from scripts.spell_import import catalog as catalog_module
 from scripts.spell_import import extract_spells
 from scripts.spell_import import exceptions as exceptions_module
 from scripts.spell_import import ledger as ledger_module
+from scripts.spell_import import sources
 from scripts.spell_import.sources import REPO_ROOT
 
 LIBRARY = REPO_ROOT / "assets" / "data" / "spell_library.json"
@@ -53,6 +54,22 @@ class ContainerModesTest(unittest.TestCase):
                 {"lib-b": {"mode": "dynamic", "rationale": "x"}},
             )
 
+    def test_container_modes_are_not_checked_while_entries_are_unresolved(self):
+        # A widened ledger entry leaves its spell unproduced, which would
+        # otherwise trip the stale-entry guard -- and migrate_ledger.py, the
+        # only thing that fixes a widening, calls run() and would hit the
+        # same crash. The guard is meaningful only on a clean run.
+        modes = {"lib-revi-circular-ward-against-demons": {"mode": "dynamic",
+                                                             "rationale": "test"}}
+        extract_spells.apply_container_modes([], self.catalog, modes, unresolved=True)
+
+    def test_container_modes_are_still_checked_on_a_clean_run(self):
+        modes = {"lib-nonesuch-spell": {"mode": "dynamic", "rationale": "test"}}
+        with self.assertRaises(extract_spells.UnknownContainerModeSpell):
+            extract_spells.apply_container_modes(
+                [], self.catalog, modes, unresolved=False
+            )
+
 
 class RunTest(unittest.TestCase):
     @classmethod
@@ -74,7 +91,9 @@ class RunTest(unittest.TestCase):
                           "summary", "description", "printedLevel", "citations"):
                 self.assertIn(field, spell, msg=spell.get("id"))
             self.assertEqual(spell["source"], "published")
-            self.assertEqual(spell["citations"], [{"bookId": "arm5-core"}])
+            self.assertEqual(len(spell["citations"]), 1)
+            self.assertIn(spell["citations"][0]["bookId"],
+                          {b.id for b in sources.BOOKS}, msg=spell["id"])
 
     def test_ids_are_unique(self):
         ids = [s["id"] for s in self.report.spells]
@@ -90,7 +109,7 @@ class RunTest(unittest.TestCase):
         # finds must land in exactly one of these buckets. If a spell fell out
         # of the report entirely -- silently dropped rather than appearing in
         # report.blocked -- this sum would fall short of spells_parsed and
-        # catch it. (Verified today: 325+27+8+0+0 = 360 = spells_parsed.)
+        # catch it. (Verified today: 336+29+8+0+3 = 376 = spells_parsed.)
         #
         # Hand-authored templates are subtracted back out because they were
         # never parsed: they come from a committed input, not from Chapter 9,
@@ -98,12 +117,13 @@ class RunTest(unittest.TestCase):
         # a genuine shortfall by exactly as many as there are of them.
         r = self.report
         carried_in = len(extract_spells.hand_authored_templates())
+        parsed_total = sum(i.spells_parsed for i in r.identities.values())
         self.assertEqual(
             len(r.spells) + len(r.templates) - carried_in + len(r.exceptions)
-            + len(r.blocked) + len(r.unresolved),
-            r.identity.spells_parsed,
+            + len(r.blocked) + len(r.skipped) + len(r.unresolved),
+            parsed_total,
             "a spell fell out of the report entirely -- it must appear in "
-            "exactly one bucket, blocked included")
+            "exactly one bucket, blocked and skipped included")
 
     def test_the_eight_circle_wards_carry_a_dynamic_container_mode(self):
         wards = {
@@ -131,6 +151,67 @@ class RunTest(unittest.TestCase):
             "containerMode", rows["tpl-crvi-restore-faded-threads"]
         )
 
+    def test_every_skip_carries_a_reason(self):
+        for name, reason in self.report.skipped:
+            self.assertTrue(reason.strip(), msg=name)
+
+    def test_the_supplement_spells_are_imported(self):
+        by_id = {s["id"]: s for s in self.report.spells}
+        for spell_id in ("lib-pean-revenge-bitten-toad",
+                         "lib-crme-scent-predator",
+                         "lib-muim-ball-abysmal-music",
+                         "lib-peme-embrace-boethius"):
+            self.assertIn(spell_id, by_id)
+            self.assertEqual(by_id[spell_id]["citations"],
+                             [{"bookId": "arm5-hohmc"}], msg=spell_id)
+
+    def test_the_two_requisites_of_embrace_of_boethius_both_cost(self):
+        # "+2 necessary requisites" against Req: Vim, Corpus -- +1 each.
+        spell = next(s for s in self.report.spells
+                     if s["id"] == "lib-peme-embrace-boethius")
+        self.assertEqual(spell["requisites"], {"Vim": "adding", "Corpus": "adding"})
+
+    def test_the_four_sensory_spells_state_no_container_mode(self):
+        # Sound and Spectacle are TargetType.sensorium, not container: the
+        # book withholds the static/dynamic choice rather than fixing it, so
+        # nothing is owed and a stated mode would fail validation check 9.
+        rows = {s["id"]: s for s in self.report.spells + self.report.templates}
+        for spell_id in ("lib-mume-clarion-call-war-horse",
+                         "tpl-pevi-roosters-crow",
+                         "lib-crig-brilliance-eagles-plumage",
+                         "lib-peme-closed-mouth-nightwalker"):
+            self.assertNotIn("containerMode", rows[spell_id], spell_id)
+
+    def test_the_three_unimportable_blocks_are_skipped_with_reasons(self):
+        names = {name for name, _ in self.report.skipped}
+        self.assertEqual(names, {
+            "Perceive the Change",
+            "Faerie Chains of the Familiar Slave",
+            "Tie the Threads That Bind",
+        })
+
+    def test_the_hand_authored_automata_template_survives_a_run(self):
+        by_id = {t["id"]: t for t in self.report.templates}
+        template = by_id["tpl-revi-tie-threads-that-bind"]
+        self.assertEqual(template["baseEffectId"], "revi-hohmc-G1")
+
+
+class DuplicateSpellIdTest(unittest.TestCase):
+    """Exercises the real guard, not a reimplementation of it -- see
+    extract_spells._reject_duplicate_ids.
+    """
+
+    def test_two_rows_sharing_an_id_raise(self):
+        rows = [{"id": "lib-muan-x", "name": "First"},
+                {"id": "lib-muan-x", "name": "Second"}]
+        with self.assertRaises(extract_spells.DuplicateSpellId):
+            extract_spells._reject_duplicate_ids(rows)
+
+    def test_distinct_ids_do_not_raise(self):
+        rows = [{"id": "lib-muan-x", "name": "First"},
+                {"id": "lib-muan-y", "name": "Second"}]
+        extract_spells._reject_duplicate_ids(rows)  # must not raise
+
 
 class RegenerationTest(unittest.TestCase):
     """Assertion 5: running the extractor produces no diff.
@@ -149,7 +230,7 @@ class RegenerationTest(unittest.TestCase):
             extract_spells.serialize(report.spells),
             extract_spells.serialize(committed),
             msg="\n\n" + extract_spells.regeneration_failure_message(
-                provenance.load(), report.identity
+                provenance.load(), report.identities
             ),
         )
 
@@ -441,9 +522,10 @@ class WriteGateTest(unittest.TestCase):
 
     def test_report_carries_the_source_identity(self):
         report = extract_spells.run(write=False)
-        self.assertIsNotNone(report.identity.sha256)
-        self.assertEqual(len(report.identity.sha256), 64)
-        self.assertEqual(report.identity.spells_parsed, 360)
+        identity = report.identities["arm5-core"]
+        self.assertIsNotNone(identity.sha256)
+        self.assertEqual(len(identity.sha256), 64)
+        self.assertEqual(identity.spells_parsed, 360)
 
     def test_report_carries_a_design_line_per_imported_spell(self):
         report = extract_spells.run(write=False)
@@ -457,7 +539,7 @@ class WriteGateTest(unittest.TestCase):
         # assertion would gate on every byte to the rulebook. See spec's "Rejected
         # alternatives" for why the lock does not constrain which source is read.
         lock = provenance.load()
-        self.assertIsNotNone(lock, "source.lock is missing — run --write --accept-source")
+        self.assertIn("arm5-core", lock, "source.lock is missing — run --write --accept-source")
 
 
 class RegenerationMessageTest(unittest.TestCase):
@@ -465,37 +547,105 @@ class RegenerationMessageTest(unittest.TestCase):
 
     def test_names_the_source_when_the_lock_disagrees(self):
         from scripts.spell_import import provenance
-        lock = provenance.SourceIdentity(
-            book="B", path="reviewed/B.md", sha256="0" * 64,
+        recorded = provenance.SourceIdentity(
+            book_id="test-book", book="B", path="reviewed/B.md", sha256="0" * 64,
             rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
             spells_parsed=1, spells_imported=1,
         )
-        current = dataclasses.replace(lock, sha256="1" * 64)
-        message = extract_spells.regeneration_failure_message(lock, current)
-        self.assertIn("rulebook source moved", message)
+        current = dataclasses.replace(recorded, sha256="1" * 64)
+        message = extract_spells.regeneration_failure_message(
+            {recorded.book_id: recorded}, {current.book_id: current})
+        self.assertIn("moved", message)
         self.assertNotIn("hand-edited", message)
 
     def test_blames_the_asset_when_the_lock_agrees(self):
         from scripts.spell_import import provenance
-        lock = provenance.SourceIdentity(
-            book="B", path="reviewed/B.md", sha256="0" * 64, rulebook=None,
+        recorded = provenance.SourceIdentity(
+            book_id="test-book", book="B", path="reviewed/B.md", sha256="0" * 64, rulebook=None,
             spells_parsed=1, spells_imported=1,
         )
-        message = extract_spells.regeneration_failure_message(lock, lock)
+        message = extract_spells.regeneration_failure_message(
+            {recorded.book_id: recorded}, {recorded.book_id: recorded})
         self.assertIn("hand-edited", message)
-        self.assertNotIn("rulebook source moved", message)
+        self.assertNotIn("moved", message)
 
     def test_names_the_absent_lock_when_lock_is_missing(self):
         from scripts.spell_import import provenance
         current = provenance.SourceIdentity(
-            book="B", path="reviewed/B.md", sha256="1" * 64, rulebook=None,
+            book_id="test-book", book="B", path="reviewed/B.md", sha256="1" * 64, rulebook=None,
             spells_parsed=1, spells_imported=1,
         )
-        message = extract_spells.regeneration_failure_message(None, current)
-        self.assertIn("no source.lock exists", message)
+        message = extract_spells.regeneration_failure_message({}, {current.book_id: current})
+        self.assertIn("has no record of", message)
         self.assertIn("--accept-source", message)
+
+    def test_names_a_non_core_book_that_moved_rather_than_blaming_the_asset(self):
+        """The exact misdiagnosis this finding fixes.
+
+        Hard-wiring the check to arm5-core meant a moved HoH:MC was invisible
+        to this function: it would report "hand-edited" even though a
+        registered, non-core book had moved. Every identity must be checked.
+        """
+        from scripts.spell_import import provenance
+        core = provenance.SourceIdentity(
+            book_id="arm5-core", book="Core", path="reviewed/Core.md", sha256="c" * 64,
+            rulebook=None, spells_parsed=1, spells_imported=1,
+        )
+        hohmc_recorded = provenance.SourceIdentity(
+            book_id="arm5-hohmc", book="HoH:MC", path="reviewed/HoHMC.md", sha256="0" * 64,
+            rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
+            spells_parsed=1, spells_imported=1,
+        )
+        hohmc_current = dataclasses.replace(hohmc_recorded, sha256="1" * 64)
+        message = extract_spells.regeneration_failure_message(
+            {core.book_id: core, hohmc_recorded.book_id: hohmc_recorded},
+            {core.book_id: core, hohmc_current.book_id: hohmc_current},
+        )
+        self.assertIn("arm5-hohmc", message)
+        self.assertIn("moved", message)
         self.assertNotIn("hand-edited", message)
-        self.assertNotIn("rulebook source moved", message)
+
+
+class MatchedLockUpdatesTest(unittest.TestCase):
+    """The drift branch's write must not launder an unaccepted source move.
+
+    `run()`'s drift branch fires without --accept-source when a *matched*
+    book's advisory counts alone have drifted. It must write only that
+    book's refreshed entry, merged over the loaded lock -- never a moved
+    book's new identity, which only --accept-source may adopt.
+    """
+
+    def test_a_moved_but_unaccepted_book_keeps_its_recorded_identity(self):
+        from scripts.spell_import import provenance
+
+        core_recorded = provenance.SourceIdentity(
+            book_id="arm5-core", book="Core", path="reviewed/Core.md", sha256="c" * 64,
+            rulebook=None, spells_parsed=294, spells_imported=294,
+        )
+        # arm5-core matched (same sha256) but this run's advisory counts
+        # disagree with what's recorded -- the scenario the drift branch
+        # exists for.
+        core_current = dataclasses.replace(core_recorded, spells_parsed=325, spells_imported=325)
+
+        # HoH:MC's markdown moved (different sha256) but was never accepted.
+        hohmc_recorded = provenance.SourceIdentity(
+            book_id="arm5-hohmc", book="HoH:MC", path="reviewed/HoHMC.md", sha256="0" * 64,
+            rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
+            spells_parsed=16, spells_imported=14,
+        )
+        hohmc_current = dataclasses.replace(hohmc_recorded, sha256="1" * 64)
+
+        lock = {core_recorded.book_id: core_recorded, hohmc_recorded.book_id: hohmc_recorded}
+        identities = {core_current.book_id: core_current, hohmc_current.book_id: hohmc_current}
+
+        updated = extract_spells._matched_lock_updates(lock, identities)
+
+        # The matched book's advisory counts are refreshed...
+        self.assertEqual(updated["arm5-core"].spells_parsed, 325)
+        # ...but the moved, unaccepted book's sha256 survives unchanged --
+        # not laundered in by this write of a different book.
+        self.assertEqual(updated["arm5-hohmc"].sha256, "0" * 64)
+        self.assertEqual(updated["arm5-hohmc"], hohmc_recorded)
 
 
 class NumberedOverrideTest(unittest.TestCase):

@@ -1100,6 +1100,29 @@
     ]
   },
   {
+    "id": "lib-crig-brilliance-eagles-plumage",
+    "name": "Brilliance of the Eagle's Plumage",
+    "technique": "Creo",
+    "form": "Ignem",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crig-5c",
+    "rangeId": "range-personal",
+    "durationId": "duration-concentration",
+    "targetId": "target-spectacle",
+    "summary": "Anyone looking directly at the caster is blinded by the brilliant light shining from his body. The caster does not shed light as such; it is only those who look at him who are affected. All victims must make a Stamina stress roll against an Ease Factor of 9 to avoid blindness. On a botch, the blinding is permanent, otherwise a Stamina stress roll (no botch) against an Ease Factor of 9 can be at... Level 30.",
+    "description": "Anyone looking directly at the caster is blinded by the brilliant light shining from his body. The caster does not shed light as such; it is only those who look at him who are affected. All victims must make a Stamina stress roll against an Ease Factor of 9 to avoid blindness. On a botch, the blinding is permanent, otherwise a Stamina stress roll (no botch) against an Ease Factor of 9 can be attempted every minute until recovered.",
+    "printedLevel": 30,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
     "id": "lib-crig-circle-encompassing-flames",
     "name": "Circle of Encompassing Flames",
     "technique": "Creo",
@@ -1570,6 +1593,29 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-crme-scent-predator",
+    "name": "Scent of the Predator",
+    "technique": "Creo",
+    "form": "Mentem",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "crme-4a",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-scent",
+    "summary": "Anyone smelling the caster is struck by an overwhelming sensation of menace and hostility. The cowardly flee, whereas braver souls are intimidated, granting the caster a +3 to all attempts to cow the target into obeying him. Level 20.",
+    "description": "Anyone smelling the caster is struck by an overwhelming sensation of menace and hostility. The cowardly flee, whereas braver souls are intimidated, granting the caster a +3 to all attempts to cow the target into obeying him.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -3122,6 +3168,33 @@
     ]
   },
   {
+    "id": "lib-muan-form-temperament-heartbeast",
+    "name": "Form of the (Temperament) Heartbeast",
+    "technique": "Muto",
+    "form": "Animal",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "complexity": [
+        "complexity-slight"
+      ]
+    },
+    "baseEffectId": "muan-5b",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "There are four versions of this spell, one for each of the sanguine, choleric, melancholic, and phlegmatic temperaments. These spells must be cast in animal form because they enhance the correspondences to the temperament of that form, whereas humans naturally have a more balanced temperament than animals. A Bjornaer magus may revert to human form after casting this spell and still retain its e... Level 20.",
+    "description": "There are four versions of this spell, one for each of the sanguine, choleric, melancholic, and phlegmatic temperaments. These spells must be cast in animal form because they enhance the correspondences to the temperament of that form, whereas humans naturally have a more balanced temperament than animals. A Bjornaer magus may revert to human form after casting this spell and still retain its effects. It is not required that the animal form he takes take matches the temperament listed in the spell's name; however, if the two do match, all bonuses granted by the spell are increased by one. Only one of these spells may be cast on the same character at any one time; they operate by influencing the bodily humors, and only one humor at a time may be influenced in this way. *Sanguine:* +1 Qik; +3 to all rolls to negate the natural fear the caster instills (as a wild animal with The Gift); temporarily acquires the Cheerful Personality Trait at +3 (or increases preexisting trait by 3) *Choleric:* +1 Dex; +3 to all rolls to follow a trail or find something deliberately hidden; temporarily acquires the Brave Personality Trait at +3 (or increases preexisting trait by 3) *Melancholic:* +1 Sta; +3 to all rolls to communicate across a language barrier, through empathy, via sign language, and so forth; temporarily acquires the Creative Personality Trait at +3 (or increases preexisting trait by 3) *Phlegmatic:* +1 Str; +3 to all rolls involving intuition and memory; temporarily acquires the Cool-Headed Personality Trait at +3 (or increases preexisting trait by 3)",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
     "id": "lib-muan-growth-creeping-things",
     "name": "Growth of the Creeping Things",
     "technique": "Muto",
@@ -3191,6 +3264,29 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-muan-voice-bjornaer-magus",
+    "name": "The Voice of the Bjornaer Magus",
+    "technique": "Muto",
+    "form": "Animal",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "muan-5b",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-individual",
+    "summary": "This spell allows the caster to speak with a human voice when shapechanged into the form of an animal. The caster must be in animal form to cast this spell because it targets the vocal capacity of that form, and must be able to cast this spell with no words or gestures (usually a –15 penalty), but while under its influence, may use his own voice without penalty to spellcasting. Level 15.",
+    "description": "This spell allows the caster to speak with a human voice when shapechanged into the form of an animal. The caster must be in animal form to cast this spell because it targets the vocal capacity of that form, and must be able to cast this spell with no words or gestures (usually a –15 penalty), but while under its influence, may use his own voice without penalty to spellcasting.",
+    "printedLevel": 15,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -4070,6 +4166,31 @@
     ]
   },
   {
+    "id": "lib-muim-ball-abysmal-music",
+    "name": "Ball of Abysmal Music",
+    "technique": "Muto",
+    "form": "Imaginem",
+    "requisites": {
+      "Vim": "free"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "muim-hohmc-10",
+    "rangeId": "range-voice",
+    "durationId": "duration-momentary",
+    "targetId": "target-individual",
+    "summary": "This spell targets a formulaic Ignem spell while it is being cast, changing it so that instead of creating fire, heat, or light, it produces a harmless burst of color and sound. This was reputedly Pendule's favorite spell, and he taught it to all of his Merinita followers after Initiating them into the Inner Mystery of Glamour. Note that since the spell must be fast-cast, it cannot be cast form... Level 20.",
+    "description": "This spell targets a formulaic Ignem spell while it is being cast, changing it so that instead of creating fire, heat, or light, it produces a harmless burst of color and sound. This was reputedly Pendule's favorite spell, and he taught it to all of his Merinita followers after Initiating them into the Inner Mystery of Glamour. Note that since the spell must be fast-cast, it cannot be cast formulaically unless it has been mastered for that purpose.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
     "id": "lib-muim-disguise-transformed-image",
     "name": "Disguise of the Transformed Image",
     "technique": "Muto",
@@ -4158,6 +4279,29 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-mume-clarion-call-war-horse",
+    "name": "Clarion Call of the War Horse",
+    "technique": "Muto",
+    "form": "Mentem",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "mume-3b",
+    "rangeId": "range-personal",
+    "durationId": "duration-diameter",
+    "targetId": "target-sound",
+    "summary": "Anyone hearing the caster's battle cry is heartened by its tone, and receives a +3 bonus to his Brave Personality Trait. Those attaining Brave scores greater than +3 through this spell perform acts of courage well beyond those expected of them. Level 15.",
+    "description": "Anyone hearing the caster's battle cry is heartened by its tone, and receives a +3 bonus to his Brave Personality Trait. Those attaining Brave scores greater than +3 through this spell perform acts of courage well beyond those expected of them.",
+    "printedLevel": 15,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -4585,6 +4729,29 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ]
+  },
+  {
+    "id": "lib-pean-revenge-bitten-toad",
+    "name": "Revenge of the Bitten Toad",
+    "technique": "Perdo",
+    "form": "Animal",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "pean-15b",
+    "rangeId": "range-personal",
+    "durationId": "duration-diameter",
+    "targetId": "target-flavor",
+    "summary": "Any creatures who bite (or otherwise taste) the caster suffer a Heavy Wound. Any successful bite attack against the caster results in the creature tasting him, even if no wound is actually inflicted. The caster still suffers any damage inflicted by the bite, but his opponent is typically deterred from further attacks. Level 20.",
+    "description": "Any creatures who bite (or otherwise taste) the caster suffer a Heavy Wound. Any successful bite attack against the caster results in the creature tasting him, even if no wound is actually inflicted. The caster still suffers any damage inflicted by the bite, but his opponent is typically deterred from further attacks.",
+    "printedLevel": 20,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ]
   },
@@ -5615,6 +5782,56 @@
         "bookId": "arm5-core"
       }
     ]
+  },
+  {
+    "id": "lib-peme-closed-mouth-nightwalker",
+    "name": "Closed Mouth of the Nightwalker",
+    "technique": "Perdo",
+    "form": "Mentem",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "peme-10a",
+    "rangeId": "range-personal",
+    "durationId": "duration-sun",
+    "targetId": "target-spectacle",
+    "summary": "Anyone seeing the caster instantly forgets that he did so, assuming that the spell's Penetration breaches the target's Magic Resistance. The caster may not necessarily be aware that he has been seen. Level 40.",
+    "description": "Anyone seeing the caster instantly forgets that he did so, assuming that the spell's Penetration breaches the target's Magic Resistance. The caster may not necessarily be aware that he has been seen.",
+    "printedLevel": 40,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
+    "id": "lib-peme-embrace-boethius",
+    "name": "Embrace of Boethius",
+    "technique": "Perdo",
+    "form": "Mentem",
+    "requisites": {
+      "Vim": "adding",
+      "Corpus": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "peme-15a",
+    "rangeId": "range-touch",
+    "durationId": "duration-momentary",
+    "targetId": "target-part",
+    "summary": "This spell damages the target's mind, heart, and Gift, destroying a part of his understanding of formulaic spell casting and forcing him to rely on casting tools. This highly irregular spell was developed to initiate Hermetic magi of other Houses into House Verditius, and is only used in that rare instance. Because of the bizarre nature of this spell, the target receives 7 Warping Points and mu... Level 35.",
+    "description": "This spell damages the target's mind, heart, and Gift, destroying a part of his understanding of formulaic spell casting and forcing him to rely on casting tools. This highly irregular spell was developed to initiate Hermetic magi of other Houses into House Verditius, and is only used in that rare instance. Because of the bizarre nature of this spell, the target receives 7 Warping Points and must check to avoid temporary Twilight.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
   },
   {
     "id": "lib-peme-enchantment-detachment",
@@ -6748,6 +6965,29 @@
     ]
   },
   {
+    "id": "lib-reco-marking-territory",
+    "name": "Marking the Territory",
+    "technique": "Rego",
+    "form": "Corpus",
+    "requisites": {},
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {},
+    "baseEffectId": "reco-3a",
+    "rangeId": "range-personal",
+    "durationId": "duration-ring",
+    "targetId": "target-scent",
+    "summary": "Anyone smelling the territory marked out by the caster's scent (usually his urine) cannot enter the warded area for as long as the scent stays fresh, requiring the caster to renew it regularly. The spell manifests as a physical compulsion to turn back upon smelling the magus's scent. This spell must penetrate successfully to bar passage to any intruder with Magic Resistance, assuming that the i... Level 15.",
+    "description": "Anyone smelling the territory marked out by the caster's scent (usually his urine) cannot enter the warded area for as long as the scent stays fresh, requiring the caster to renew it regularly. The spell manifests as a physical compulsion to turn back upon smelling the magus's scent. This spell must penetrate successfully to bar passage to any intruder with Magic Resistance, assuming that the intruder is usually associated with the Form of Corpus. (Intruders associated with other Forms are not warded against in any way.)",
+    "printedLevel": 15,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
     "id": "lib-reco-rise-feathery-body",
     "name": "Rise of the Feathery Body",
     "technique": "Rego",
@@ -7550,6 +7790,36 @@
     "citations": [
       {
         "bookId": "arm5-core"
+      }
+    ],
+    "ritualDeclaration": "lastingCreation"
+  },
+  {
+    "id": "lib-reme-hibernation-slumbering-turb",
+    "name": "Hibernation of the Slumbering Turb",
+    "technique": "Rego",
+    "form": "Mentem",
+    "requisites": {
+      "Creo": "adding"
+    },
+    "source": "published",
+    "createdAt": "2026-01-01T00:00:00.000",
+    "updatedAt": "2026-01-01T00:00:00.000",
+    "selectedModifiers": {
+      "complexity": [
+        "complexity-slight"
+      ]
+    },
+    "baseEffectId": "reme-4",
+    "rangeId": "range-personal",
+    "durationId": "duration-year",
+    "targetId": "target-texture",
+    "summary": "Anyone touching the caster falls asleep and does not awaken until the spell expires. The caster is not affected by this magic, and his own sleep is natural. Those affected by the spell do not need to eat or drink while it persists, but when they awaken, they are ravenously hungry. Despite the usual length of a Year Duration spell, this spell's effects always end at the Spring Equinox. This spel... Level 35.",
+    "description": "Anyone touching the caster falls asleep and does not awaken until the spell expires. The caster is not affected by this magic, and his own sleep is natural. Those affected by the spell do not need to eat or drink while it persists, but when they awaken, they are ravenously hungry. Despite the usual length of a Year Duration spell, this spell's effects always end at the Spring Equinox. This spell was invented by Odorpes of the Sept of Urgen, who lives separate from the rest of her covenant. She hibernates and puts all her covenfolk to sleep with her, so she need not provision them during the winter.",
+    "printedLevel": 35,
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
       }
     ],
     "ritualDeclaration": "lastingCreation"

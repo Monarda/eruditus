@@ -29,6 +29,7 @@ class RulebookRevision:
 
 @dataclasses.dataclass(frozen=True)
 class SourceIdentity:
+    book_id: str
     book: str
     path: str
     sha256: str
@@ -38,6 +39,7 @@ class SourceIdentity:
 
     def to_dict(self) -> dict:
         return {
+            "bookId": self.book_id,
             "book": self.book,
             "path": self.path,
             "sha256": self.sha256,
@@ -50,6 +52,7 @@ class SourceIdentity:
     def from_dict(cls, raw: dict) -> "SourceIdentity":
         revision = raw.get("rulebook")
         return cls(
+            book_id=raw["bookId"],
             book=raw["book"],
             path=raw["path"],
             sha256=raw["sha256"],
@@ -97,6 +100,7 @@ def git_revision(root: pathlib.Path, relative: str) -> RulebookRevision | None:
 
 
 def describe(
+    book_id: str,
     book: str,
     path: pathlib.Path,
     root: pathlib.Path,
@@ -105,6 +109,7 @@ def describe(
 ) -> SourceIdentity:
     relative = path.relative_to(root).as_posix()
     return SourceIdentity(
+        book_id=book_id,
         book=book,
         path=relative,
         sha256=sha256_of(path),
@@ -114,38 +119,50 @@ def describe(
     )
 
 
-def load(path: pathlib.Path = LOCK_PATH) -> SourceIdentity | None:
+def load(path: pathlib.Path = LOCK_PATH) -> dict[str, SourceIdentity]:
+    """Every recorded book, by id. An absent lock is an empty mapping.
+
+    A mapping rather than a single identity because the importer reads more
+    than one book, and a book that has not moved must not be re-attested
+    because a different one did.
+    """
     if not path.is_file():
-        return None
-    return SourceIdentity.from_dict(json.loads(path.read_text(encoding="utf-8")))
+        return {}
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    return {book_id: SourceIdentity.from_dict(entry) for book_id, entry in raw.items()}
 
 
-def write(identity: SourceIdentity, path: pathlib.Path = LOCK_PATH) -> None:
+def write(identities: dict[str, SourceIdentity], path: pathlib.Path = LOCK_PATH) -> None:
+    payload = {book_id: identities[book_id].to_dict() for book_id in sorted(identities)}
     path.write_text(
-        json.dumps(identity.to_dict(), indent=2, ensure_ascii=False) + "\n",
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
 
 
-def matches(lock: SourceIdentity | None, current: SourceIdentity) -> bool:
-    """Only the hash decides. Everything else in the lock is advisory."""
-    return lock is not None and lock.sha256 == current.sha256
+def matches(lock: dict[str, SourceIdentity], current: SourceIdentity) -> bool:
+    """Only the hash decides, and only for the book being asked about."""
+    recorded = lock.get(current.book_id)
+    return recorded is not None and recorded.sha256 == current.sha256
 
 
-def describe_change(lock: SourceIdentity | None, current: SourceIdentity) -> str:
+def describe_change(lock: dict[str, SourceIdentity], current: SourceIdentity) -> str:
     accept = "  python -m scripts.spell_import.extract_spells --write --accept-source"
-    if lock is None:
+    recorded = lock.get(current.book_id)
+    if recorded is None:
         return (
-            "no source.lock exists, so the rulebook revision behind "
-            "assets/data/spell_library.json is unrecorded.\n\n"
+            f"source.lock has no record of {current.book_id} ({current.book}), so "
+            "the rulebook revision behind the generated assets is unrecorded.\n\n"
             f"  current  : {current.label()}\n"
             f"             {current.spells_parsed} parsed\n\n"
             "Create it, reviewing the result:\n" + accept
         )
     return (
-        "rulebook source moved since spell_library.json was generated.\n\n"
-        f"  recorded : {lock.label()}\n"
-        f"             {lock.spells_parsed} parsed, {lock.spells_imported} imported\n"
+        f"the source for {current.book_id} ({current.book}) moved since the "
+        "generated assets were built.\n\n"
+        f"  recorded : {recorded.label()}\n"
+        f"             {recorded.spells_parsed} parsed, "
+        f"{recorded.spells_imported} imported\n"
         f"  current  : {current.label()}\n"
         f"             {current.spells_parsed} parsed\n\n"
         "This is not a code failure. Regenerate and review:\n" + accept

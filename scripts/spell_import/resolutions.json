@@ -1747,9 +1747,13 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5"
+      "revi-G5",
+      "revi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'All creatures with Infernal Might equal to or less than the level of the spell are unable to enter the circle or harm those within it.' revi-G1 is 'Ward against all supernatural beings from one realm (Divine, Faerie, Infernal, or Magic) with Might less than or equal to the level of the spell (Touch, Ring, Circle)' — the only one of the five Rego Vim General bullets whose subject is beings rather than spells, and whose printed reference parameters are this spell's own R: Touch, D: Ring, T: Circle, which is why the design line is a bare '(Base spell)' with nothing to charge. revi-G2 is the nearest rejected candidate and is excluded because it sustains or suppresses 'a spell you have cast'; this ward's target is a demon's Might, not a spell, and against revi-G2's Personal/Momentary/Individual reference the Touch/Ring/Circle stat line would owe magnitudes that the printed design line does not charge."
+    "rationale": "Its prose reads 'All creatures with Infernal Might equal to or less than the level of the spell are unable to enter the circle or harm those within it.' revi-G1 is 'Ward against all supernatural beings from one realm (Divine, Faerie, Infernal, or Magic) with Might less than or equal to the level of the spell (Touch, Ring, Circle)' — the only one of the five Rego Vim General bullets whose subject is beings rather than spells, and whose printed reference parameters are this spell's own R: Touch, D: Ring, T: Circle, which is why the design line is a bare '(Base spell)' with nothing to charge. revi-G2 is the nearest rejected candidate and is excluded because it sustains or suppresses 'a spell you have cast'; this ward's target is a demon's Might, not a spell, and against revi-G2's Personal/Momentary/Individual reference the Touch/Ring/Circle stat line would owe magnitudes that the printed design line does not charge.",
+    "unreviewedCandidates": [
+      "revi-hohmc-G1"
+    ]
   },
   "lib-revi-maintaining-demanding-spell": {
     "baseEffectId": "revi-G2",
@@ -1758,9 +1762,13 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5"
+      "revi-G5",
+      "revi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'You cast this spell on a spell that you have already cast and are maintaining through concentration. The spell that requires concentration is then automatically maintained for the duration of this spell ... This spell only works on spells of equal or lower level.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (this cannot make a spell last longer than it could have naturally, so the sustaining version is only useful with Concentration Duration among standard Hermetic Durations)' — the parenthetical describes this spell's use case exactly, and with (Base effect, +1 Touch, +1 Diam) the guideline + 2 magnitudes is the spell's own level, matching 'equal or lower level'. revi-G4 is the near miss and is excluded because it is for 'a spell cast by another', where this one is cast on a spell you have already cast yourself; its cap would also be halved. revi-G5 adds 'of a specific type', which this spell does not specify."
+    "rationale": "Its prose reads 'You cast this spell on a spell that you have already cast and are maintaining through concentration. The spell that requires concentration is then automatically maintained for the duration of this spell ... This spell only works on spells of equal or lower level.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (this cannot make a spell last longer than it could have naturally, so the sustaining version is only useful with Concentration Duration among standard Hermetic Durations)' — the parenthetical describes this spell's use case exactly, and with (Base effect, +1 Touch, +1 Diam) the guideline + 2 magnitudes is the spell's own level, matching 'equal or lower level'. revi-G4 is the near miss and is excluded because it is for 'a spell cast by another', where this one is cast on a spell you have already cast yourself; its cap would also be halved. revi-G5 adds 'of a specific type', which this spell does not specify.",
+    "unreviewedCandidates": [
+      "revi-hohmc-G1"
+    ]
   },
   "lib-revi-opening-intangible-tunnel": {
     "baseEffectId": "revi-G3",
@@ -1769,9 +1777,13 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5"
+      "revi-G5",
+      "revi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'You can open a magical channel from yourself to some target, allowing you to cast any spell with a range greater than Personal on that target ... Spells cast through the tunnel cannot be of higher level than that of this spell.' revi-G3 is 'Create a conduit or container for spells with level less than or equal to the level + 5 magnitudes of the Vim spell (a conduit puts you in mystical contact with the target at effective Touch range, while a container holds a spell for a specific length of time before releasing it)' — the conduit half of that clause is this spell's own description, and with (Base effect, +4 Arc, +1 Conc) the guideline + 5 magnitudes is the spell's own level, matching the printed cap. revi-G4 is the near miss because it carries the same '+5 magnitudes' term, but it 'sustains or suppresses a spell cast by another' and the tunnel neither sustains nor suppresses anything; its cap is halved besides, which the printed cap contradicts."
+    "rationale": "Its prose reads 'You can open a magical channel from yourself to some target, allowing you to cast any spell with a range greater than Personal on that target ... Spells cast through the tunnel cannot be of higher level than that of this spell.' revi-G3 is 'Create a conduit or container for spells with level less than or equal to the level + 5 magnitudes of the Vim spell (a conduit puts you in mystical contact with the target at effective Touch range, while a container holds a spell for a specific length of time before releasing it)' — the conduit half of that clause is this spell's own description, and with (Base effect, +4 Arc, +1 Conc) the guideline + 5 magnitudes is the spell's own level, matching the printed cap. revi-G4 is the near miss because it carries the same '+5 magnitudes' term, but it 'sustains or suppresses a spell cast by another' and the tunnel neither sustains nor suppresses anything; its cap is halved besides, which the printed cap contradicts.",
+    "unreviewedCandidates": [
+      "revi-hohmc-G1"
+    ]
   },
   "lib-revi-suppressing-wizards-handiwork": {
     "baseEffectId": "revi-G2",
@@ -1780,9 +1792,13 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5"
+      "revi-G5",
+      "revi-hohmc-G1"
     ],
-    "rationale": "Its prose reads 'Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return ... The level of the spell to be suppressed must be less than or equal to the level of this spell.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (... a suppressed spell still ends when its original duration expires)'; with (Base, +1 Touch, +1 Conc) the guideline + 2 magnitudes is the spell's own level, matching the printed cap, and 'a spell you have cast' matches 'one spell that you have cast'. revi-G4 is the near miss and is excluded by 'cast by another' plus its halved cap; revi-G5 is excluded because it is also 'cast by another' and further requires spells 'of a specific type', where this spell suppresses any one of your own."
+    "rationale": "Its prose reads 'Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return ... The level of the spell to be suppressed must be less than or equal to the level of this spell.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (... a suppressed spell still ends when its original duration expires)'; with (Base, +1 Touch, +1 Conc) the guideline + 2 magnitudes is the spell's own level, matching the printed cap, and 'a spell you have cast' matches 'one spell that you have cast'. revi-G4 is the near miss and is excluded by 'cast by another' plus its halved cap; revi-G5 is excluded because it is also 'cast by another' and further requires spells 'of a specific type', where this spell suppresses any one of your own.",
+    "unreviewedCandidates": [
+      "revi-hohmc-G1"
+    ]
   },
   "lib-muau-infernal-smoke-death": {
     "baseEffectId": "muau-gen",
@@ -1887,5 +1903,113 @@
       "crhe-1e"
     ],
     "rationale": "The design line's own parenthetical says the +1 Size token is 'for a total of +4 Size, including the +3 from the guideline' -- crhe-1a is the only one of the five candidates whose description states a baked-in Size enhancement at all ('includes a +3 Size enhancement'), so the design line's own arithmetic forces this pick, not just prose similarity. Not crhe-1b/1c (create a product/plant -- this spell doesn't create anything, it protects existing crops), 1d (prevent sickness -- narrower than the spell's own 'healthier, larger, and tastier') or 1e (heal a wound -- no wound involved)."
+  },
+  "lib-pean-revenge-bitten-toad": {
+    "baseEffectId": "pean-15b",
+    "candidates": [
+      "pean-15a",
+      "pean-15b",
+      "pean-15c",
+      "pean-15d"
+    ],
+    "rationale": "Its prose reads 'Any creatures who bite (or otherwise taste) the caster suffer a Heavy Wound' -- verbatim the guideline 'Inflict a Heavy Wound'. Not a destroyed sense, a crippled limb, or ageing."
+  },
+  "lib-crme-scent-predator": {
+    "baseEffectId": "crme-4a",
+    "candidates": [
+      "crme-4a",
+      "crme-4b"
+    ],
+    "rationale": "Its prose reads 'Anyone smelling the caster is struck by an overwhelming sensation of menace and hostility' -- an emotion placed into a mind, not a memory restored to a fresh state."
+  },
+  "lib-reco-marking-territory": {
+    "baseEffectId": "reco-3a",
+    "candidates": [
+      "reco-3a",
+      "reco-3b"
+    ],
+    "rationale": "The design line glosses its own base: '(Base 3 [move in direction \"away\"], +2 Ring, +2 Scent)'. That is 'Move a target slowly in one direction', not a minor symptom of disease."
+  },
+  "lib-mume-clarion-call-war-horse": {
+    "baseEffectId": "mume-3b",
+    "candidates": [
+      "mume-3a",
+      "mume-3b"
+    ],
+    "rationale": "Its prose reads 'Anyone hearing the caster's battle cry is heartened by its tone, and receives a +3 bonus to his Brave Personality Trait' -- a major change to emotion, not to a memory of a series of events."
+  },
+  "lib-crig-brilliance-eagles-plumage": {
+    "baseEffectId": "crig-5c",
+    "candidates": [
+      "crig-5a",
+      "crig-5b",
+      "crig-5c",
+      "crig-5d",
+      "crig-5e"
+    ],
+    "rationale": "Its prose reads 'blinded by the brilliant light shining from his body' -- 'Create light as bright as direct sunlight on a clear day'. The spell creates no fire, ignites nothing, and heats nothing."
+  },
+  "lib-peme-closed-mouth-nightwalker": {
+    "baseEffectId": "peme-10a",
+    "candidates": [
+      "peme-10a",
+      "peme-10b"
+    ],
+    "rationale": "Its prose reads 'Anyone seeing the caster instantly forgets that he did so' -- one brief memory removed, not a reduction of all the target's mental capabilities."
+  },
+  "lib-muan-voice-bjornaer-magus": {
+    "baseEffectId": "muan-5b",
+    "candidates": [
+      "muan-5a",
+      "muan-5b",
+      "muan-5c"
+    ],
+    "rationale": "The caster stays the same animal and gains a human voice: 'it targets the vocal capacity of that form'. That is 'Change an animal in a minor way so that it is no longer natural', not a change into a different animal, and the target is a living beast rather than animal products."
+  },
+  "lib-muan-form-temperament-heartbeast": {
+    "baseEffectId": "muan-5b",
+    "candidates": [
+      "muan-5a",
+      "muan-5b",
+      "muan-5c"
+    ],
+    "rationale": "Same reading as The Voice of the Bjornaer Magus: the animal is unchanged and its temperament correspondences are unnaturally enhanced ('they enhance the correspondences to the temperament of that form'). A minor unnatural change to an animal."
+  },
+  "lib-peme-embrace-boethius": {
+    "baseEffectId": "peme-15a",
+    "candidates": [
+      "peme-15a",
+      "peme-15b",
+      "peme-15c"
+    ],
+    "rationale": "Its prose reads 'destroying a part of his understanding of formulaic spell casting' -- a major, long memory removed. It removes no emotions and drives nobody insane."
+  },
+  "lib-muvi-facilitate-stifled-form-spell": {
+    "baseEffectId": "muvi-G1",
+    "candidates": [
+      "muvi-G1",
+      "muvi-G2",
+      "muvi-G3"
+    ],
+    "rationale": "The spell removes the casting penalty for reduced or absent gestures and voice, leaving the targeted spell otherwise intact -- a superficial change. Its prose's ceiling, a target 'whose level must be less than twice the level of this spell', matches G1's doubling tier rather than G2's or G3's tighter ones."
+  },
+  "lib-pevi-roosters-crow": {
+    "baseEffectId": "pevi-G3",
+    "candidates": [
+      "pevi-G1",
+      "pevi-G10",
+      "pevi-G11",
+      "pevi-G12",
+      "pevi-G13",
+      "pevi-G2",
+      "pevi-G3",
+      "pevi-G4",
+      "pevi-G5",
+      "pevi-G6",
+      "pevi-G7",
+      "pevi-G8",
+      "pevi-G9"
+    ],
+    "rationale": "Its prose reads 'Any demons who hear the caster's shout lose Might equal to the spell's (level – 5)'. Demon's Eternal Oblivion is the established parallel and this ledger already resolves it to pevi-G3: it reads 'the creature loses Might Score equal to the spell's level'. Both reduce Might Score by a quantity derived from the spell's level, which is what separates pevi-G3 from pevi-G4 (Might Pool); the Rooster's Crow's -5 offset does not bear on that distinction."
   }
 }

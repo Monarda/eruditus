@@ -256,6 +256,35 @@ class VocabularyAdditionsTest(unittest.TestCase):
         with self.assertRaises(designline.UnknownToken):
             designline.parse_design("(Base 4, +1 distance)")
 
+    def test_sensory_target_magnitudes_tokenize(self):
+        # Item 64 put these five Targets in parameters.json but not in the
+        # tokenizer's label table, so every spell using one blocked.
+        for label, name in [("Flavor", "Flavor"), ("Texture", "Texture"),
+                            ("Scent", "Scent"), ("Sound", "Sound"),
+                            ("Spectacle", "Spectacle")]:
+            with self.subTest(label):
+                design = designline.parse_design(f"(Base 5, +2 {label})")
+                labels = [t.label for t in design.tokens if t.kind == "parameter"]
+                self.assertIn(name, labels)
+
+    def test_a_capitalised_base_effect_is_a_general_base(self):
+        # Tie the Threads That Bind prints "(Base Effect, ...)"; every core
+        # spell prints "(Base effect, ...)".
+        design = designline.parse_design("(Base Effect, +1 Touch, +2 Group)")
+        self.assertIsNone(design.base_level)
+
+    def test_a_lowercase_base_effect_is_still_a_general_base(self):
+        design = designline.parse_design("(Base effect, +1 Touch)")
+        self.assertIsNone(design.base_level)
+
+    def test_necessary_requisites_is_a_bare_requisite_token(self):
+        design = designline.parse_design(
+            "(Base 15, + 1 Touch, +1 Part, +2 necessary requisites)")
+        bare = [t for t in design.tokens if t.kind == "requisite"]
+        self.assertEqual(len(bare), 1)
+        self.assertEqual(bare[0].magnitude, 2)
+        self.assertEqual(bare[0].label, "")
+
 
 class SplittingTest(unittest.TestCase):
     def test_a_comma_inside_parentheses_does_not_split_a_token(self):
@@ -465,6 +494,26 @@ class ElaborateEffectTest(unittest.TestCase):
                           if t.kind == "elaborate"]
                 self.assertEqual(len(tokens), 1)
                 self.assertEqual(tokens[0].magnitude, magnitude)
+
+
+class ComplexityTest(unittest.TestCase):
+    def test_bare_complexity_is_its_own_kind(self):
+        design = designline.parse_design("(Base 5, +2 Sun; +1 complexity)")
+        kinds = [t.kind for t in design.tokens if "complex" in t.label.lower()]
+        self.assertEqual(kinds, ["complexity"])
+
+    def test_capitalised_complexity_is_recognised(self):
+        design = designline.parse_design("(Base 5, +2 Complexity)")
+        token = next(t for t in design.tokens if t.kind == "complexity")
+        self.assertEqual(token.magnitude, 2)
+
+    def test_the_imaginem_complexity_factors_are_still_modifiers(self):
+        # intricacy and changing image map to real per-Technique options and
+        # must not be swept into the general kind.
+        design = designline.parse_design("(Base 2, +1 intricacy, +1 changing image)")
+        kinds = {t.label: t.kind for t in design.tokens}
+        self.assertEqual(kinds["intricacy"], "modifier")
+        self.assertEqual(kinds["changing image"], "modifier")
 
 
 class AdjustmentTest(unittest.TestCase):

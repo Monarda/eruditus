@@ -19,7 +19,7 @@
   - Python: `python -m unittest discover -s scripts/spell_import/tests -t .` (317 tests green at plan time)
   - Dart: `flutter test` (728 tests green at plan time)
   - Integration: `flutter test integration_test -d windows` (8 tests green at plan time)
-  - Tasks 1–5 touch no Dart and no asset; for those, Python alone is sufficient and the plan says so per task. Tasks 6 and 7 require all three.
+  - Tasks 1–5 touch no Dart and no asset; for those, Python alone is sufficient and the plan says so per task. Tasks 6, 7 and 8 require all three.
 - **Run Python with `uv`:** `uv run --no-project python -m unittest ...`. This repo has no `pyproject.toml`.
 - **Temporary files go in the session scratchpad directory, never `/tmp`.** Python on this machine resolves `/tmp` to `C:\tmp`, the drive root.
 - **The extractor must never write `resolutions.json`.** `run()` only reports what widened; `migrate_ledger.py` is the only writer.
@@ -47,11 +47,10 @@
 **Modified — the run loop (Task 5):**
 - `scripts/spell_import/extract_spells.py` — loops `BOOKS`, threads `book_id`, applies the skip list, checks for duplicate ids, gains `--diagnose`.
 
-**Modified — data and curation (Task 6):**
+**Modified — data and curation (Task 7):**
 - `assets/data/base_effects.json` — one new row, `revi-hohmc-G1`.
 - `scripts/spell_import/hand_authored_templates.json` — one new template.
 - `scripts/spell_import/resolutions.json` — 11 new entries, plus 4 migrated.
-- `scripts/spell_import/container_modes.json` — 4 new entries.
 - `assets/data/spell_library.json`, `assets/data/spell_templates.json` — regenerated.
 
 **Tests:** `scripts/spell_import/tests/test_blocks.py`, `test_statline.py`, `test_sources.py`, `test_designline.py`, `test_emit.py`, `test_provenance.py`, `test_report.py`, `test_extract.py`, `test_catalog.py`.
@@ -497,7 +496,7 @@ is a bold-only spell name requires seeing the asterisks."
   - `sources.BOOKS: tuple[Book, ...]`
   - `sources.book_by_id(book_id: str) -> Book` — raises `KeyError` for an unknown id
 
-**Why the core book only, for now.** `BOOKS` holds one entry in this task. HoH:MC joins it in Task 6, together with the ledger entries and catalog row it needs — switching it on earlier would leave the extractor unable to resolve 11 spells and the suite red for four tasks.
+**Why the core book only, for now.** `BOOKS` holds one entry in this task. HoH:MC joins it in Task 7, together with the ledger entries and catalog row it needs — switching it on earlier would leave the extractor unable to resolve 11 spells and the suite red for four tasks.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1165,7 +1164,7 @@ checkout's filename, which is not stable enough to key on."
   - `Report.skipped: list[tuple[str, str]]`
   - `extract_spells.diagnose(title: str, parser: str) -> str`
 
-**`BOOKS` still holds only the core book after this task.** Every count stays where it is; the suite stays green. Task 6 adds the second entry.
+**`BOOKS` still holds only the core book after this task.** Every count stays where it is; the suite stays green. Task 7 adds the second entry.
 
 - [ ] **Step 1: Add the skip list and the duplicate-id guard**
 
@@ -1479,19 +1478,217 @@ BOOKS still holds only the core book; the counts are unchanged."
 
 ---
 
-### Task 6: Switch on HoH:MC
+### Task 6: `TargetType.sensorium` — the Sensory Targets are not containers
+
+**Files:**
+- Modify: `lib/models/target_type.dart` (the enum and its whole doc comment)
+- Modify: `assets/data/parameters.json` (`target-sound` and `target-spectacle`)
+- Modify: `test/data/datasources/asset_data_loader_test.dart:69-70`
+- Modify: `test/bloc/spell_creation_bloc_test.dart:2737-2743` (the synthetic stand-in)
+
+**Interfaces:**
+- Consumes: nothing from earlier tasks. This task is independent of the parser work and could have been done first.
+- Produces: `TargetType.sensorium`, a fourth enum value. `targetTypeFromName` needs no change — it already derives from `TargetType.values`.
+
+**Why this is in this plan at all.** Task 7 imports four spells whose Target is
+Sound or Spectacle. Item 64 classified both as `container`, and
+`spellOwesContainerMode` therefore demands a static/dynamic ruling for each.
+There is nothing to rule on, and the design decision recorded in
+`docs/superpowers/specs/2026-08-18-cross-field-parameter-constraints-design.md`
+(Decision 1) resolves it: **the classification itself is wrong.**
+
+The argument is a contradiction in the source. HoH:MC 1006 requires the Range
+of every Sensory Magic spell to be Personal. Core Rules 12086 forbids a
+Personal-Range spell from having a container Target. If Sound is a container,
+every Sound spell must be Personal and cannot be Personal. The four printed
+spells confirm the Personal Range arithmetically — *The Rooster's Crow* is
+`(Base 3, +1 Diam, +3 Sound)` for MuMe 15, with no Range term, i.e. Personal
+at +0.
+
+`object` and `sense` are both contradicted too. Core 12128 makes an object
+Target static ("even if they change so that they would no longer qualify"),
+where HoH:MC 1002 says Targets "are continuously acquired throughout the
+spell's duration". And HoH:MC 1009 rules out `sense` explicitly: a `sense`
+Target grants the *caster* a magical sense, where a Sensory Target makes
+*others* sensing the caster into targets — opposite directions.
+
+**Magnitudes do not change** (0/1/2/3/4 stand), so no spell's level moves.
+
+- [ ] **Step 1: Update the failing test first**
+
+In `test/data/datasources/asset_data_loader_test.dart`, change lines 69-70:
+
+```dart
+      'target-sound': (3, TargetType.sensorium),
+      'target-spectacle': (4, TargetType.sensorium),
+```
+
+- [ ] **Step 2: Run it to confirm it fails**
+
+```bash
+flutter test test/data/datasources/asset_data_loader_test.dart
+```
+Expected: FAIL to compile — `TargetType.sensorium` is not defined.
+
+- [ ] **Step 3: Add the enum value and rewrite the doc comment**
+
+Replace the whole of `lib/models/target_type.dart`'s doc comment and enum. The
+comment must do three things the spec names explicitly: drop the "rulebook's
+three kinds" claim, cite HoH:MC 1000 for why a fourth exists, and contrast
+`sense` against `sensorium` in one sentence.
+
+```dart
+/// Which kind of Target a parameter is.
+///
+/// Core Rules line 12120 enumerates three: "There are three types of target:
+/// objects, containers, and senses." Each core Target states its own kind
+/// (Individual 12122, Circle 12124, Part 12128, Group 12130, Room 12132,
+/// Structure 12136, Boundary 12138, senses 12152-12160).
+///
+/// [sensorium] is a fourth, and deliberately not a rulebook word — it appears
+/// nowhere in the corpus. HoH:MC's Sensory Magic Targets (Flavor, Texture,
+/// Scent, Sound, Spectacle) need it because all three core kinds contradict
+/// them, and HoH:MC line 1000 grants the exemption in its own words: these
+/// Targets "were imperfectly melded to Hermetic Theory, remaining a Mystery
+/// of House Bjornaer". A container is ruled out because HoH:MC 1006 requires
+/// Sensory spells to be Personal Range while core 12086 forbids a container
+/// Target on a Personal-Range spell; an object is ruled out because objects
+/// are static (12246) while HoH:MC 1002 acquires targets continuously
+/// throughout the duration.
+///
+/// The distinction from [sense] is the load-bearing one, and is why Intellego
+/// is forbidden on these spells: **a [sense] Target grants the caster a
+/// magical sense; a [sensorium] Target affects those who sense the caster.**
+///
+/// Only a [container] Target has the static/dynamic distinction — see
+/// `ContainerMode`. An [object] Target is always static (12246); a [sense]
+/// Target grants information rather than affecting a volume; and a
+/// [sensorium] Target's membership is fixed by the rulebook rather than
+/// chosen, so none of the three offers the choice.
+enum TargetType { object, container, sense, sensorium }
+```
+
+Leave `targetTypeFromName` exactly as it is — it iterates `TargetType.values`,
+so it accepts the new name with no edit.
+
+- [ ] **Step 4: Reclassify the two Targets**
+
+In `assets/data/parameters.json`, change `"targetType": "container"` to
+`"targetType": "sensorium"` for `target-sound` and `target-spectacle` **only**.
+Do not touch `target-flavor`, `target-texture` or `target-scent` — those are
+`object` and stay `object`; this decision is about the two the book priced
+against Structure and Boundary.
+
+Do not reformat the file. Change two values, nothing else.
+
+- [ ] **Step 5: Fix the synthetic stand-in in the bloc tests**
+
+`test/bloc/spell_creation_bloc_test.dart:2737-2743` builds a fake Sound Target
+to pin Technique-scope pruning independently of the catalog. Its
+`targetType: TargetType.container` is incidental to what that test checks, but
+leaving it makes the stand-in misrepresent the thing it stands in for. Change
+it to `TargetType.sensorium`, and update the comment above it — it currently
+reads "a container Target the rulebook forbids on Intellego spells", which is
+no longer true of the first clause:
+
+```dart
+    // A stand-in for HoH:MC's Sound: a sensorium Target the rulebook forbids
+    // on Intellego spells. Built here rather than read from the catalog so
+    // this behaviour is pinned independently of the data.
+```
+
+- [ ] **Step 6: Run the Dart suites**
+
+```bash
+flutter test
+flutter analyze
+```
+Expected: green, and analyze exit 0. A non-exhaustive `switch` over
+`TargetType` anywhere in `lib/` would fail to compile now that a fourth value
+exists — if that happens, **report it rather than adding a default branch**:
+which behaviour the new kind should take is a design question, and the spec
+says all four existing consumers become correct by doing nothing.
+
+- [ ] **Step 7: Confirm the four consumers now behave**
+
+Read, without changing, each of the four places that test for
+`TargetType.container`:
+`lib/bloc/spell_creation/spell_creation_bloc.dart:708`,
+`lib/models/spell.dart:226`, `lib/models/spell.dart:259`,
+`lib/presentation/screens/spell_creation_screen.dart:321`.
+
+Confirm in your report that each now excludes Sound and Spectacle, and that
+none needed an edit. If one did need an edit, say which and why — that would
+contradict the spec's central claim that this change is nearly free.
+
+- [ ] **Step 8: Run the integration suite**
+
+```bash
+flutter test integration_test -d windows
+```
+Expected: 8 tests green.
+
+- [ ] **Step 9: Commit**
+
+Use exactly this message:
+
+```
+feat: the Sensory Targets are a fourth kind, not containers
+
+Core 12086 forbids a container Target on a Personal-Range spell, and
+HoH:MC 1006 requires every Sensory Magic spell to be Personal. Sound and
+Spectacle cannot be containers without every spell using them being both
+required to be Personal and forbidden from it.
+
+object and sense are contradicted too -- objects are static where HoH:MC
+1002 acquires targets continuously, and a sense Target grants the caster
+a sense where these affect those who sense the caster. HoH:MC 1000 grants
+the exemption: they were "imperfectly melded to Hermetic Theory".
+
+Closes item 68. All four TargetType.container consumers become correct
+without an edit, and no magnitude changes, so no spell's level moves.
+```
+
+Stage exactly these four files:
+`lib/models/target_type.dart`, `assets/data/parameters.json`,
+`test/data/datasources/asset_data_loader_test.dart`,
+`test/bloc/spell_creation_bloc_test.dart`.
+
+---
+
+### Task 7A: A general Complexity modifier, and one crash it exposes
+
+**Inserted mid-execution.** Task 7's first attempt was correctly BLOCKED by two
+gaps in this plan, neither the implementer's fault. Its full brief lives at
+`.superpowers/sdd/2026-08-18-hohmc-inline-parser/task-7a-brief.md`; the summary:
+
+- Bare `complexity` sat in `MODIFIER_LABELS` with **no option mapping for any
+  Technique or Form** — a dead label that always failed at emit. No core spell
+  prints it, so it never surfaced. A corpus survey found 23 uses across 9 books
+  and 12 Technique/Form pairs, **none Imaginem**. It is now a general
+  wildcard-scoped modifier with a degree ladder, following `elaborate-effect`'s
+  existing precedent, resolved by the design line's own magnitude.
+- `apply_container_modes`' stale-entry guard fired whenever a ledger entry
+  widened, and `migrate_ledger` — the only tool that fixes a widening — calls
+  `run()` and hit the same crash. The guard now applies only to an otherwise
+  clean run.
+
+Landed as commit `9b21925`. Core import unchanged at 325/28/0/0.
+
+---
+
+### Task 7: Switch on HoH:MC
 
 **Files:**
 - Modify: `scripts/spell_import/sources.py` (the `BOOKS` tuple)
 - Modify: `assets/data/base_effects.json` (append one row before the closing `]`)
 - Modify: `scripts/spell_import/hand_authored_templates.json` (append one template)
 - Modify: `scripts/spell_import/resolutions.json` (11 new entries)
-- Modify: `scripts/spell_import/container_modes.json` (4 new entries)
 - Regenerate: `assets/data/spell_library.json`, `assets/data/spell_templates.json`, `scripts/spell_import/source.lock`
 - Test: `scripts/spell_import/tests/test_extract.py`
 
 **Interfaces:**
-- Consumes: everything from Tasks 1–5.
+- Consumes: everything from Tasks 1–6.
 - Produces: no new API. This task is data.
 
 **This task is atomic on purpose.** Adding the book without its ledger entries leaves 11 spells unresolved and `run()` refusing to write; adding the entries without the book fails the test that every ledger entry names a parsed spell. They land together.
@@ -1593,28 +1790,33 @@ Append to `scripts/spell_import/resolutions.json`. Indent-2, matching the file. 
   },
 ```
 
-- [ ] **Step 4: Add the four container modes**
+- [ ] **Step 4: Add NO container modes — `container_modes.json` is not touched**
 
-Append to `scripts/spell_import/container_modes.json`, indent-2:
+**This step exists to stop you adding them.** An earlier draft of this plan
+recorded `ContainerMode.dynamic` for the four Sound and Spectacle spells.
+That is now wrong and would actively break the import.
 
-```json
-  "lib-mume-clarion-call-war-horse": {
-    "mode": "dynamic",
-    "rationale": "Sensory Magic Targets (HoH:MC line 1002): the Target is continuously acquired throughout the spell's duration -- anyone who hears the caster's battle cry is affected, for as long as it lasts. Membership changes over the duration, which is the dynamic reading. Stated at the Target level with no per-spell choice offered; see todo item 68."
-  },
-  "tpl-pevi-roosters-crow": {
-    "mode": "dynamic",
-    "rationale": "Sensory Magic Targets (HoH:MC line 1002): the Target is continuously acquired throughout the spell's duration -- any demon who hears the shout is affected. Membership changes over the duration, which is the dynamic reading. Stated at the Target level with no per-spell choice offered; see todo item 68."
-  },
-  "lib-crig-brilliance-eagles-plumage": {
-    "mode": "dynamic",
-    "rationale": "Sensory Magic Targets (HoH:MC line 1002): the Target is continuously acquired throughout the spell's duration -- anyone who looks directly at the caster is affected, for as long as he concentrates. Membership changes over the duration, which is the dynamic reading. Stated at the Target level with no per-spell choice offered; see todo item 68."
-  },
-  "lib-peme-closed-mouth-nightwalker": {
-    "mode": "dynamic",
-    "rationale": "Sensory Magic Targets (HoH:MC line 1002): the Target is continuously acquired throughout the spell's duration -- anyone who sees the caster is affected, for as long as it lasts. Membership changes over the duration, which is the dynamic reading. Stated at the Target level with no per-spell choice offered; see todo item 68."
-  },
+Task 6 (`TargetType.sensorium`) reclassified `target-sound` and
+`target-spectacle` away from `container`. Two consequences, both load-bearing:
+
+- `spellOwesContainerMode` no longer asks these spells for a mode, so nothing
+  is owed.
+- `validateSpellAgainstCatalog`'s check 9 **rejects a stated mode on a
+  non-container Target**, so writing these entries would turn four correctly
+  transcribed spells into validation failures.
+
+Leave `scripts/spell_import/container_modes.json` exactly as it is. Its 8
+existing Circle-ward entries are unrelated and stay.
+
+Verify after the run that none of the four appears in the generated assets:
+
+```bash
+grep -c "containerMode" assets/data/spell_library.json
 ```
+Expected: the same count as before Task 7 began. If any of
+`lib-mume-clarion-call-war-horse`, `tpl-pevi-roosters-crow`,
+`lib-crig-brilliance-eagles-plumage` or `lib-peme-closed-mouth-nightwalker`
+carries a `containerMode`, something re-added it and must be removed.
 
 - [ ] **Step 5: Register the book**
 
@@ -1673,13 +1875,16 @@ Search `scripts/spell_import/tests/test_extract.py` for the comment `(Verified t
                      if s["id"] == "lib-peme-embrace-boethius")
         self.assertEqual(spell["requisites"], {"Vim": "adding", "Corpus": "adding"})
 
-    def test_the_four_sensory_container_spells_are_dynamic(self):
+    def test_the_four_sensory_spells_state_no_container_mode(self):
+        # Sound and Spectacle are TargetType.sensorium, not container: the
+        # book withholds the static/dynamic choice rather than fixing it, so
+        # nothing is owed and a stated mode would fail validation check 9.
         rows = {s["id"]: s for s in self.report.spells + self.report.templates}
         for spell_id in ("lib-mume-clarion-call-war-horse",
                          "tpl-pevi-roosters-crow",
                          "lib-crig-brilliance-eagles-plumage",
                          "lib-peme-closed-mouth-nightwalker"):
-            self.assertEqual(rows[spell_id].get("containerMode"), "dynamic", spell_id)
+            self.assertNotIn("containerMode", rows[spell_id], spell_id)
 
     def test_the_three_unimportable_blocks_are_skipped_with_reasons(self):
         names = {name for name, _ in self.report.skipped}
@@ -1708,13 +1913,16 @@ Expected: Python green; Dart green; `flutter analyze` exit 0; integration green.
 - [ ] **Step 11: Commit**
 
 ```bash
-git add assets/data/base_effects.json assets/data/spell_library.json assets/data/spell_templates.json scripts/spell_import/sources.py scripts/spell_import/resolutions.json scripts/spell_import/container_modes.json scripts/spell_import/hand_authored_templates.json scripts/spell_import/source.lock scripts/spell_import/import_report.md scripts/spell_import/tests/test_extract.py
+git add assets/data/base_effects.json assets/data/spell_library.json assets/data/spell_templates.json scripts/spell_import/sources.py scripts/spell_import/resolutions.json scripts/spell_import/hand_authored_templates.json scripts/spell_import/source.lock scripts/spell_import/import_report.md scripts/spell_import/tests/test_extract.py
 git commit -m "feat: import the 14 HoH:MC spells
 
 Registers Mystery Cults with the inline parser and lands everything it
-needs in one commit: 11 ledger rulings, 4 container modes, the automata
-guideline revi-hohmc-G1, and the hand-authored template that guideline
-exists for.
+needs in one commit: 11 ledger rulings, the automata guideline
+revi-hohmc-G1, and the hand-authored template that guideline exists for.
+
+No container modes: Sound and Spectacle became TargetType.sensorium in
+the previous commit, so nothing is owed and a stated mode would fail
+validation check 9.
 
 revi-hohmc-G1 widens 4 ReVi general entries, migrated in the previous
 commit -- the recorded choices stand and the added id is marked
@@ -1723,7 +1931,7 @@ unreviewed, exactly as crvi-hohmc-G1 was handled by item 17."
 
 ---
 
-### Task 7: Diagnostics across the other inline books
+### Task 8: Diagnostics across the other inline books
 
 **Files:**
 - Modify: `.superpowers/todo.md` (item 65's entry and the *Where the import stands* table)
@@ -1765,7 +1973,7 @@ In `.superpowers/todo.md`, move item 65 to the completed section following the f
 |---|---|---|---|---|
 ```
 
-Update *Where the import stands*: the live extractor run line (`336 imported · 31 templates · 8 exceptions · 0 blocked · 0 unresolved`, or whatever Task 6 actually produced), the three suite counts, the catalog sizes (`base_effects.json` gains one row), and the unreviewed-entry count, which rises from 3 to 7.
+Update *Where the import stands*: the live extractor run line (`336 imported · 31 templates · 8 exceptions · 0 blocked · 0 unresolved`, or whatever Task 7 actually produced), the three suite counts, the catalog sizes (`base_effects.json` gains one row), and the unreviewed-entry count, which rises from 3 to 7.
 
 - [ ] **Step 4: Open a follow-up item for what the diagnostics found**
 
@@ -1788,10 +1996,10 @@ Nothing from these books was imported, per item 65's own constraint."
 
 ## Self-Review
 
-**Spec coverage.** Book registry → Task 2. `parse_inline` → Task 1. `strip_quote` → Task 1. Design-line vocabulary (5 Targets, `Base Effect`, `necessary requisites`) → Task 3. `_resolve_requisite_arts` → Task 3. Per-book `source.lock` → Task 4. Multi-book `run()`, skip list, duplicate-id check, `--diagnose` → Task 5. `revi-hohmc-G1` and the hand-authored template → Task 6. 11 ledger rulings → Task 6. 4 container modes → Task 6. `migrate_ledger` → Task 6. Diagnostics against three books → Task 7. Every spec section maps to a task.
+**Spec coverage.** Book registry → Task 2. `parse_inline` → Task 1. `strip_quote` → Task 1. Design-line vocabulary (5 Targets, `Base Effect`, `necessary requisites`) → Task 3. `_resolve_requisite_arts` → Task 3. Per-book `source.lock` → Task 4. Multi-book `run()`, skip list, duplicate-id check, `--diagnose` → Task 5. `TargetType.sensorium` (spec Decision 1, prerequisite for the four Sensory spells) → Task 6. `revi-hohmc-G1` and the hand-authored template → Task 7. 11 ledger rulings → Task 7. `migrate_ledger` → Task 7. Diagnostics against three books → Task 8. Every spec section maps to a task.
 
-**Placeholder scan.** No TBDs. Every code step carries the actual code; every data step carries the actual JSON; every test step carries the actual test body. Task 7 Steps 2–4 describe judgement work whose output cannot be written in advance — they state exactly what to measure and what not to do about it.
+**Placeholder scan.** No TBDs. Every code step carries the actual code; every data step carries the actual JSON; every test step carries the actual test body. Task 8 Steps 2–4 describe judgement work whose output cannot be written in advance — they state exactly what to measure and what not to do about it.
 
 **Type consistency.** `Book(id, title, parser)` is constructed identically in Tasks 2 and 6. `blocks.PARSERS` keys `"de"`/`"inline"` are the same strings in Tasks 1, 2, 5. `provenance.describe(book_id, book, path, root, parsed, imported)` has the same signature in Tasks 4 and 5. `Report.identities` and `Report.skipped` are introduced in Task 5 and read in Tasks 5 and 6. `emit.build_spell(..., *, book_id)` is defined and called in Task 5.
 
-**One known risk, flagged rather than hidden.** Task 6 Step 6 predicts `imported : 336` and `templates: 31`. Those follow from 11 library spells and 2 extracted templates plus 1 hand-authored, on top of today's 325 and 28. If the extractor reports different numbers, the discrepancy is real information: read `--show-blocked` before adjusting anything, and treat a changed *core* spell as a regression in Tasks 1–5 rather than a number to update.
+**One known risk, flagged rather than hidden.** Task 7 Step 6 predicts `imported : 336` and `templates: 31`. Those follow from 11 library spells and 2 extracted templates plus 1 hand-authored, on top of today's 325 and 28. If the extractor reports different numbers, the discrepancy is real information: read `--show-blocked` before adjusting anything, and treat a changed *core* spell as a regression in Tasks 1–5 rather than a number to update.

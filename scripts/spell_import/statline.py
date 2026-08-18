@@ -39,8 +39,19 @@ ARTS = {
 }
 
 
+def strip_quote(line: str) -> str:
+    """Blockquote markers and <br> removed; emphasis markup preserved.
+
+    `strip_markup` removes `**` too, which is exactly wrong when the question
+    being asked is "is this line a bold-only spell name?" -- by the time the
+    asterisks are gone, `**Ball of Abysmal Music**` is indistinguishable from
+    a line of prose. blocks.parse_inline needs the distinction.
+    """
+    return _BR.sub("", _LEADING.sub("", line)).rstrip()
+
+
 def strip_markup(line: str) -> str:
-    return _BOLD.sub("", _BR.sub("", _LEADING.sub("", line))).strip()
+    return _BOLD.sub("", strip_quote(line)).strip()
 
 
 def is_statline(line: str) -> bool:

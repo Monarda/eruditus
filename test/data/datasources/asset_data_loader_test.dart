@@ -54,20 +54,20 @@ void main() {
   });
 
   test('the five Sensory Magic Targets load with their stated ladder', () async {
-    // The magnitudes are the whole content of these rows and the book gives
-    // them only by equivalence (Flavor to Individual, Texture to Part, Scent to
-    // Group, Sound to Structure, Spectacle to Boundary), so a silent typo in
-    // one produces spells that compute a plausible wrong level. Each was
-    // reconciled against a printed HoH:MC design line -- see the spec.
+    // The magnitudes still follow the book's printed equivalences (Flavor to
+    // Individual, Texture to Part, Scent to Group, Sound to Structure,
+    // Spectacle to Boundary), because those sentences price the Target. They
+    // do not classify it -- all five are `sensorium`. See the 2026-08-18
+    // cross-field-parameter-constraints spec.
     final parameters = await loader.loadParameters();
     final byId = {for (final p in parameters) p.id: p};
 
     const expected = <String, (int, TargetType)>{
-      'target-flavor': (0, TargetType.object),
-      'target-texture': (1, TargetType.object),
-      'target-scent': (2, TargetType.object),
-      'target-sound': (3, TargetType.container),
-      'target-spectacle': (4, TargetType.container),
+      'target-flavor': (0, TargetType.sensorium),
+      'target-texture': (1, TargetType.sensorium),
+      'target-scent': (2, TargetType.sensorium),
+      'target-sound': (3, TargetType.sensorium),
+      'target-spectacle': (4, TargetType.sensorium),
     };
 
     for (final entry in expected.entries) {
@@ -155,7 +155,7 @@ void main() {
     });
   });
 
-  test('every Target declares a targetType, and exactly six are containers',
+  test('every Target declares a targetType, and exactly four are containers',
       () async {
     final parameters = await loader.loadParameters();
     final targets = parameters.where((p) => p.category == 'Target').toList();
@@ -180,6 +180,19 @@ void main() {
       'target-room',
       'target-structure',
       'target-boundary',
+    });
+
+    // All five Sensory Magic Targets are TargetType.sensorium, not object or
+    // container -- see TargetType's doc comment for why the rulebook's three
+    // kinds all contradict HoH:MC's Sensory Magic Targets.
+    final sensoria = targets
+        .where((p) => p.targetType == TargetType.sensorium)
+        .map((p) => p.id)
+        .toSet();
+    expect(sensoria, {
+      'target-flavor',
+      'target-texture',
+      'target-scent',
       'target-sound',
       'target-spectacle',
     });
@@ -235,7 +248,7 @@ void main() {
     expect(idsWith(RitualRequirement.required), {
       'craq-25b', 'crau-25', 'crig-25b', 'crte-25b',
       'pevi-G9', 'pevi-G10',
-      'crvi-hohmc-G1',
+      'crvi-hohmc-G1', 'revi-hohmc-G1',
     });
 
     expect(idsWith(RitualRequirement.suggested), {

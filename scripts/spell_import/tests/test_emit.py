@@ -43,7 +43,8 @@ class AdjustmentEmissionTest(unittest.TestCase):
     def _build(self, design_text: str) -> dict:
         design = designline.parse_design(design_text)
         return emit.build_spell(
-            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design
+            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
 
     def test_an_adjustment_token_becomes_an_adjustments_entry(self):
@@ -81,6 +82,7 @@ class AdjustmentEmissionTest(unittest.TestCase):
         spell = emit.build_spell(
             _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
             extra_adjustment=(0, "Also achieves a second guideline for free."),
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(
             spell["adjustments"],
@@ -92,6 +94,7 @@ class AdjustmentEmissionTest(unittest.TestCase):
         spell = emit.build_spell(
             _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
             extra_adjustment=(0, "Combined effect note."),
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(
             spell["adjustments"],
@@ -125,12 +128,12 @@ class ExceptionSpellEmissionTest(unittest.TestCase):
 
     def test_a_general_kind_exception_has_no_printed_level(self):
         block = self._exception_block("Test Exception", "Muto", "Vim", None)
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertNotIn("printedLevel", exception)
 
     def test_a_fixed_level_exception_carries_its_printed_level(self):
         block = self._exception_block("Test Exception", "Intellego", "Auram", 15)
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["printedLevel"], 15)
 
     def test_range_duration_target_are_the_raw_stat_line_strings(self):
@@ -138,35 +141,35 @@ class ExceptionSpellEmissionTest(unittest.TestCase):
             "Test Exception", "Muto", "Corpus", 60,
             range_name="Voice", duration_name="Sun & Year", target_name="Bound",
         )
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["range"], "Voice")
         self.assertEqual(exception["duration"], "Sun & Year")
         self.assertEqual(exception["target"], "Bound")
 
     def test_the_rationale_is_carried_verbatim(self):
         block = self._exception_block("Test Exception", "Muto", "Vim", None)
-        exception = emit.build_exception_spell(block, "a specific citation")
+        exception = emit.build_exception_spell(block, "a specific citation", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["rationale"], "a specific citation")
 
     def test_the_id_uses_the_exc_prefix_not_lib(self):
         block = self._exception_block("Whispering Winds", "Intellego", "Auram", 15)
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["id"], "exc-inau-whispering-winds")
 
     def test_ritual_is_read_straight_off_the_stat_line(self):
         block = self._exception_block("Test Exception", "Rego", "Vim", None, is_ritual=True)
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertTrue(exception["isRitual"])
 
     def test_technique_and_form_are_carried(self):
         block = self._exception_block("Test Exception", "Rego", "Vim", None)
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["technique"], "Rego")
         self.assertEqual(exception["form"], "Vim")
 
     def test_source_and_citation_match_every_other_published_entry(self):
         block = self._exception_block("Test Exception", "Muto", "Vim", None)
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["source"], "published")
         self.assertEqual(exception["citations"], [{"bookId": "arm5-core"}])
 
@@ -177,12 +180,12 @@ class ExceptionSpellEmissionTest(unittest.TestCase):
         block = self._exception_block(
             "Test Exception", "Muto", "Vim", None, prose="Some test prose here."
         )
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertEqual(exception["summary"], "Some test prose here.")
 
     def test_empty_prose_omits_the_description_key(self):
         block = self._exception_block("Test Exception", "Muto", "Vim", None, prose="")
-        exception = emit.build_exception_spell(block, "test rationale")
+        exception = emit.build_exception_spell(block, "test rationale", book_id=emit.CORE_BOOK_ID)
         self.assertNotIn("description", exception)
 
 
@@ -211,6 +214,7 @@ class RitualDeclarationEmissionTest(unittest.TestCase):
         design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
         spell = emit.build_spell(
             self._ritual_block("Test Spell", is_ritual=False), "reaq-3", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertNotIn("ritualDeclaration", spell)
 
@@ -218,6 +222,7 @@ class RitualDeclarationEmissionTest(unittest.TestCase):
         design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
         spell = emit.build_spell(
             self._ritual_block("Test Spell", is_ritual=True), "reaq-3", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(spell["ritualDeclaration"], "lastingCreation")
 
@@ -228,6 +233,7 @@ class RitualDeclarationEmissionTest(unittest.TestCase):
         spell = emit.build_spell(
             self._ritual_block("Curse of the Ravenous Swarm", is_ritual=True),
             "reaq-3", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(spell["ritualDeclaration"], "storyguideRuling")
 
@@ -242,19 +248,19 @@ class RitualDeclarationEmissionTest(unittest.TestCase):
     def test_build_template_defaults_to_lasting_creation(self):
         design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
         block = self._ritual_block("Test Template", is_ritual=True)
-        template = emit.build_template(block, "pevi-G3", self.catalog, design)
+        template = emit.build_template(block, "pevi-G3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(template["ritualDeclaration"], "lastingCreation")
 
     def test_build_template_uses_storyguide_ruling_for_a_listed_spell(self):
         design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
         block = self._ritual_block("Neptune's Wrath", is_ritual=True)
-        template = emit.build_template(block, "pevi-G3", self.catalog, design)
+        template = emit.build_template(block, "pevi-G3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(template["ritualDeclaration"], "storyguideRuling")
 
     def test_build_template_omits_the_key_for_a_non_ritual_block(self):
         design = designline.parse_design("(Base spell, +1 Touch, +2 Sun)")
         block = self._ritual_block("Test Template", is_ritual=False)
-        template = emit.build_template(block, "pevi-G3", self.catalog, design)
+        template = emit.build_template(block, "pevi-G3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertNotIn("ritualDeclaration", template)
 
 
@@ -289,7 +295,7 @@ class SpecialParameterResolutionTest(unittest.TestCase):
             "(Base 2, +1 Touch, +2 Special (based on Concentration))"
         )
         block = self._block_with_stat("Rego", "Auram", 5, duration_name="Spec")
-        spell = emit.build_spell(block, "reau-2", self.catalog, design)
+        spell = emit.build_spell(block, "reau-2", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(spell["durationId"], "duration-concentration")
 
     def test_special_duration_based_on_mom_resolves_to_momentary(self):
@@ -297,7 +303,7 @@ class SpecialParameterResolutionTest(unittest.TestCase):
             "(Base 3, +2 Voice, +1 Special based on Mom, +1 Part, +2 size, +1 fancy effect)"
         )
         block = self._block_with_stat("Rego", "Terram", 30, duration_name="Spec")
-        spell = emit.build_spell(block, "rete-3", self.catalog, design)
+        spell = emit.build_spell(block, "rete-3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(spell["durationId"], "duration-momentary")
 
     def test_a_special_marker_with_no_named_basis_still_raises(self):
@@ -306,7 +312,7 @@ class SpecialParameterResolutionTest(unittest.TestCase):
         design = designline.parse_design("(Base 2, +1 Touch)")
         block = self._block_with_stat("Rego", "Auram", 5, duration_name="Spec")
         with self.assertRaises(designline.UnknownToken):
-            emit.build_spell(block, "reau-2", self.catalog, design)
+            emit.build_spell(block, "reau-2", self.catalog, design, book_id=emit.CORE_BOOK_ID)
 
     def test_special_parameter_adjustment_magnitude_is_reduced_by_resolved_parameter_magnitude(self):
         # The adjustment token's magnitude must be reduced by the resolved
@@ -320,7 +326,7 @@ class SpecialParameterResolutionTest(unittest.TestCase):
             "(Base 2, +1 Touch, +2 Special (based on Concentration))"
         )
         block = self._block_with_stat("Rego", "Auram", 5, duration_name="Spec")
-        spell = emit.build_spell(block, "reau-2", self.catalog, design)
+        spell = emit.build_spell(block, "reau-2", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         # The spell should have an adjustments entry for the Special token.
         self.assertIn("adjustments", spell)
         self.assertEqual(len(spell["adjustments"]), 1)
@@ -337,7 +343,7 @@ class SpecialParameterResolutionTest(unittest.TestCase):
             "(Base 3, +2 Voice, +1 Special based on Mom, +1 Part, +2 size, +1 fancy effect)"
         )
         block = self._block_with_stat("Rego", "Terram", 30, duration_name="Spec")
-        spell = emit.build_spell(block, "rete-3", self.catalog, design)
+        spell = emit.build_spell(block, "rete-3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         # Find the Special-based-on-Mom adjustment among potentially other adjustments
         special_adjustment = next(
             (a for a in spell.get("adjustments", []) if a["note"] == "Special based on Mom"),
@@ -356,7 +362,8 @@ class ElaborateEffectEmissionTest(unittest.TestCase):
     def _selected(self, design_text: str) -> dict:
         design = designline.parse_design(design_text)
         spell = emit.build_spell(
-            _block("Test Spell", "Rego", "Terram", 10), "rete-3", self.catalog, design
+            _block("Test Spell", "Rego", "Terram", 10), "rete-3", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         return spell["selectedModifiers"]
 
@@ -409,6 +416,62 @@ class ElaborateEffectEmissionTest(unittest.TestCase):
                 self.assertEqual(options[option_id], magnitude)
 
 
+def _any_block() -> blocks.SpellBlock:
+    """A block for paths that read neither its Technique nor its Form."""
+    return _block("Test Spell", "Rego", "Terram", 5)
+
+
+class ComplexityEmissionTest(unittest.TestCase):
+    """`complexity` is resolved by the same magnitude-keyed branch as
+    elaborate-effect (see emit._MAGNITUDE_KEYED_MODIFIERS); these pin that
+    generalisation didn't lose complexity's own checks or break elaborate's.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def test_a_complexity_token_selects_the_rung_matching_its_magnitude(self):
+        design = designline.parse_design("(Base 5, +2 Sun; +2 complexity)")
+        selected = emit._selected_modifiers(design, _any_block(), self.catalog)
+        self.assertEqual(selected["complexity"], ["complexity-considerable"])
+
+    def test_a_complexity_magnitude_with_no_rung_raises(self):
+        design = designline.parse_design("(Base 5, +9 complexity)")
+        with self.assertRaises(designline.UnknownToken):
+            emit._selected_modifiers(design, _any_block(), self.catalog)
+
+    def test_two_complexity_tokens_raise_because_it_is_single_selection(self):
+        design = designline.parse_design("(Base 5, +1 complexity, +2 complexity)")
+        with self.assertRaises(designline.UnknownToken):
+            emit._selected_modifiers(design, _any_block(), self.catalog)
+
+    def test_elaborate_effect_still_resolves_after_the_generalisation(self):
+        # "for a very elaborate effect" (the brief's own wording) is actually
+        # an ADJUSTMENT_LABELS entry, not an ELABORATE_LABELS one -- it
+        # tokenizes as kind="adjustment" and _selected_modifiers ignores it,
+        # so it cannot exercise this branch. "fancy effect" is a genuine
+        # ELABORATE_LABELS wording (see ElaborateEffectEmissionTest above)
+        # and is what actually reaches kind="elaborate".
+        design = designline.parse_design("(Base 5, +1 fancy effect)")
+        selected = emit._selected_modifiers(design, _any_block(), self.catalog)
+        self.assertEqual(selected["elaborate-effect"], ["elaborate-effect-minor"])
+
+    def test_every_table_entry_names_a_real_option_at_that_magnitude(self):
+        # Guards the hand-written id table against a typo or a rename in
+        # modifiers.json, the same discipline as elaborate-effect's own check.
+        modifier = next(m for m in self.catalog.modifiers if m["id"] == "complexity")
+        options = {o["id"]: o["magnitude"] for o in modifier["options"]}
+        for magnitude, option_id in emit._COMPLEXITY_OPTIONS.items():
+            with self.subTest(option_id=option_id):
+                self.assertIn(option_id, options)
+                self.assertEqual(options[option_id], magnitude)
+
+    def test_complexity_is_a_single_selection_modifier_in_the_catalog(self):
+        modifier = next(m for m in self.catalog.modifiers if m["id"] == "complexity")
+        self.assertEqual(modifier["selectionMode"], "single")
+
+
 class ModifierOptionTableTest(unittest.TestCase):
     """`emit._MODIFIER_OPTIONS` is hand-written; the catalog is the authority."""
 
@@ -432,7 +495,8 @@ class ModifierOptionTableTest(unittest.TestCase):
     def test_a_mapped_label_selects_its_option(self):
         design = designline.parse_design("(Base 2, +1 Touch, +1 intricacy)")
         spell = emit.build_spell(
-            _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+            _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(spell["selectedModifiers"]["crim-complexity"], ["crim-intricate-design"])
 
@@ -501,6 +565,7 @@ class ModifierOptionTableTest(unittest.TestCase):
                     f"{modifier_id[:4]}-2",
                     self.catalog,
                     design,
+                    book_id=emit.CORE_BOOK_ID,
                 )
                 self.assertEqual(spell["selectedModifiers"][modifier_id], [option_id])
 
@@ -513,7 +578,8 @@ class ModifierOptionTableTest(unittest.TestCase):
         design = designline.parse_design("(Base 2, +1 Touch, +1 changing image)")
         with self.assertRaises(designline.UnknownToken):
             emit.build_spell(
-                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design,
+                book_id=emit.CORE_BOOK_ID,
             )
 
     def test_a_mapped_label_under_the_wrong_art_raises(self):
@@ -523,7 +589,8 @@ class ModifierOptionTableTest(unittest.TestCase):
         design = designline.parse_design("(Base 2, +1 Touch, +1 additional sense)")
         with self.assertRaises(designline.UnknownToken):
             emit.build_spell(
-                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design,
+                book_id=emit.CORE_BOOK_ID,
             )
 
     def test_a_printed_magnitude_the_option_does_not_carry_raises(self):
@@ -532,7 +599,8 @@ class ModifierOptionTableTest(unittest.TestCase):
         design = designline.parse_design("(Base 2, +1 Touch, +2 intricacy)")
         with self.assertRaises(designline.UnknownToken):
             emit.build_spell(
-                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design
+                _block("Test Spell", "Creo", "Imaginem", 10), "crim-2", self.catalog, design,
+                book_id=emit.CORE_BOOK_ID,
             )
 
 
@@ -571,7 +639,8 @@ class TransportDistanceEmissionTest(unittest.TestCase):
                     tokens=[designline.Token(magnitude=magnitude, label=label, kind="modifier")],
                 )
                 spell = emit.build_spell(
-                    _block("Test Spell", "Rego", "Herbam", 10), "rehe-10b", self.catalog, design
+                    _block("Test Spell", "Rego", "Herbam", 10), "rehe-10b", self.catalog, design,
+                    book_id=emit.CORE_BOOK_ID,
                 )
                 self.assertEqual(spell["selectedModifiers"]["rego-transport-distance"], [option_id])
 
@@ -585,7 +654,8 @@ class TransportDistanceEmissionTest(unittest.TestCase):
         )
         with self.assertRaises(designline.UnknownToken):
             emit.build_spell(
-                _block("Test Spell", "Rego", "Herbam", 10), "rehe-10b", self.catalog, design
+                _block("Test Spell", "Rego", "Herbam", 10), "rehe-10b", self.catalog, design,
+                book_id=emit.CORE_BOOK_ID,
             )
 
 
@@ -609,7 +679,7 @@ class DescriptionEmissionTest(unittest.TestCase):
     def _build(self, prose: str, design_text: str = "(Base 1, +1 Touch, +2 Sun)") -> dict:
         design = designline.parse_design(design_text)
         block = _block("Test Spell", "Rego", "Aquam", 10, prose=prose)
-        return emit.build_spell(block, "reaq-3", self.catalog, design)
+        return emit.build_spell(block, "reaq-3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
 
     def test_description_is_the_full_prose_and_longer_than_the_truncated_summary(self):
         long_prose = "This is a very long sentence about magical effects. " * 20
@@ -651,7 +721,7 @@ class GeneralTemplateEmissionTest(unittest.TestCase):
     def _build(self, design_text: str = "(Base spell, +1 Touch, +2 Sun)") -> dict:
         design = designline.parse_design(design_text)
         block = _block("Demon's Eternal Oblivion", "Perdo", "Vim", None)
-        return emit.build_template(block, "pevi-G3", self.catalog, design)
+        return emit.build_template(block, "pevi-G3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
 
     def test_build_template_omits_every_level_field(self):
         template = self._build()
@@ -710,6 +780,7 @@ class OpenSlotEmissionTest(unittest.TestCase):
         template = emit.build_template(
             block, "revi-G1", self.catalog, design,
             realm_by_spell_id={"lib-revi-circular-ward-against-demons": "Infernal"},
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(template["chosenSlots"], {"realm": "Infernal"})
 
@@ -718,6 +789,7 @@ class OpenSlotEmissionTest(unittest.TestCase):
         block = _block("Wind of Mundane Silence", "Perdo", "Vim", None)
         template = emit.build_template(
             block, "pevi-G5", self.catalog, design, realm_by_spell_id={},
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertNotIn("chosenSlots", template)
 
@@ -729,13 +801,14 @@ class OpenSlotEmissionTest(unittest.TestCase):
         template = emit.build_template(
             block, "pevi-G3", self.catalog, design,
             realm_by_spell_id={"lib-pevi-demons-eternal-oblivion": "Infernal"},
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertNotIn("chosenSlots", template)
 
     def test_realm_by_spell_id_defaults_to_empty_when_omitted(self):
         design = designline.parse_design("(As ward guideline, +1 Touch, +1 Ring)")
         block = _block("Circular Ward against Demons", "Rego", "Vim", None)
-        template = emit.build_template(block, "revi-G1", self.catalog, design)
+        template = emit.build_template(block, "revi-G1", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertNotIn("chosenSlots", template)
 
     def test_build_template_merges_caller_supplied_chosen_slots(self):
@@ -744,6 +817,7 @@ class OpenSlotEmissionTest(unittest.TestCase):
         template = emit.build_template(
             block, "pevi-G2", self.catalog, design,
             chosen_slots={"specificType": "Creo Imaginem"},
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(template["chosenSlots"], {"specificType": "Creo Imaginem"})
 
@@ -757,6 +831,7 @@ class OpenSlotEmissionTest(unittest.TestCase):
         template = emit.build_template(
             block, "pevi-G3", self.catalog, design,
             chosen_slots={"specificType": "something"},
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertNotIn("chosenSlots", template)
 
@@ -780,7 +855,7 @@ class PrintedLevelEmissionTest(unittest.TestCase):
     def _build(self, level: int | None, design_text: str = "(Base 1, +1 Touch, +2 Sun)") -> dict:
         design = designline.parse_design(design_text)
         block = _block("Test Spell", "Rego", "Aquam", level)
-        return emit.build_spell(block, "reaq-3", self.catalog, design)
+        return emit.build_spell(block, "reaq-3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
 
     def test_printed_level_is_emitted_and_matches_the_block(self):
         spell = self._build(10)
@@ -812,13 +887,14 @@ class NumberedOverrideEmissionTest(unittest.TestCase):
         block = _block("Infernal Smoke of Death", "Muto", "Auram", 40)
         spell = emit.build_spell(
             block, "muau-gen", self.catalog, design, chosen_base_level=25,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(spell["chosenBaseLevel"], 25)
 
     def test_chosen_base_level_is_omitted_when_not_provided(self):
         design = designline.parse_design("(Base 3, +1 Touch, +1 Dia)")
         block = _block("Taint Something", "Creo", "Vim", 3)
-        spell = emit.build_spell(block, "crvi-3", self.catalog, design)
+        spell = emit.build_spell(block, "crvi-3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertNotIn("chosenBaseLevel", spell)
 
     def test_override_modifiers_are_merged_into_selectedModifiers(self):
@@ -827,6 +903,7 @@ class NumberedOverrideEmissionTest(unittest.TestCase):
         spell = emit.build_spell(
             block, "crvi-5a", self.catalog, design,
             override_modifiers={"warping-point-burst": ["warping-point-burst-4"]},
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(
             spell["selectedModifiers"]["warping-point-burst"],
@@ -836,7 +913,7 @@ class NumberedOverrideEmissionTest(unittest.TestCase):
     def test_override_modifiers_default_to_no_change_when_not_provided(self):
         design = designline.parse_design("(Base 3, +1 Touch, +1 Dia)")
         block = _block("Taint Something", "Creo", "Vim", 3)
-        spell = emit.build_spell(block, "crvi-3", self.catalog, design)
+        spell = emit.build_spell(block, "crvi-3", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(spell["selectedModifiers"], {})
 
     def test_override_modifiers_with_an_unknown_option_id_raises(self):
@@ -846,6 +923,7 @@ class NumberedOverrideEmissionTest(unittest.TestCase):
             emit.build_spell(
                 block, "crvi-5a", self.catalog, design,
                 override_modifiers={"warping-point-burst": ["warping-point-burst-does-not-exist"]},
+                book_id=emit.CORE_BOOK_ID,
             )
 
     def test_override_modifiers_with_an_unknown_modifier_id_raises(self):
@@ -855,6 +933,7 @@ class NumberedOverrideEmissionTest(unittest.TestCase):
             emit.build_spell(
                 block, "crvi-5a", self.catalog, design,
                 override_modifiers={"no-such-modifier": ["whatever"]},
+                book_id=emit.CORE_BOOK_ID,
             )
 
 
@@ -873,7 +952,7 @@ class RequisiteEmissionTest(unittest.TestCase):
             ),
             prose="Test prose.", design_line=None, line_no=1,
         )
-        spell = emit.build_spell(block, "test-effect", self.catalog, design)
+        spell = emit.build_spell(block, "test-effect", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(spell["requisites"], {"Rego": "adding"})
 
     def test_a_bare_requisite_token_resolves_against_the_sole_stat_line_art(self):
@@ -889,7 +968,7 @@ class RequisiteEmissionTest(unittest.TestCase):
             ),
             prose="Test prose.", design_line=None, line_no=1,
         )
-        spell = emit.build_spell(block, "test-effect", self.catalog, design)
+        spell = emit.build_spell(block, "test-effect", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(spell["requisites"], {"Imaginem": "adding"})
 
     def test_a_bare_requisite_token_with_no_stat_line_art_raises(self):
@@ -903,7 +982,7 @@ class RequisiteEmissionTest(unittest.TestCase):
             prose="Test prose.", design_line=None, line_no=1,
         )
         with self.assertRaises(designline.UnknownToken):
-            emit.build_spell(block, "test-effect", self.catalog, design)
+            emit.build_spell(block, "test-effect", self.catalog, design, book_id=emit.CORE_BOOK_ID)
 
     def test_a_bare_requisite_token_with_two_stat_line_arts_raises(self):
         # Ambiguous which art the magnitude belongs to -- must not guess.
@@ -918,7 +997,7 @@ class RequisiteEmissionTest(unittest.TestCase):
             prose="Test prose.", design_line=None, line_no=1,
         )
         with self.assertRaises(designline.UnknownToken):
-            emit.build_spell(block, "test-effect", self.catalog, design)
+            emit.build_spell(block, "test-effect", self.catalog, design, book_id=emit.CORE_BOOK_ID)
 
     def test_a_design_line_requisite_is_not_overwritten_by_the_stat_lines_free_default(self):
         """setdefault, not assignment: the design line is more specific than
@@ -935,8 +1014,47 @@ class RequisiteEmissionTest(unittest.TestCase):
             ),
             prose="Test prose.", design_line=None, line_no=1,
         )
-        spell = emit.build_spell(block, "test-effect", self.catalog, design)
+        spell = emit.build_spell(block, "test-effect", self.catalog, design, book_id=emit.CORE_BOOK_ID)
         self.assertEqual(spell["requisites"], {"Rego": "adding"})
+
+    def _block_with_requisites(self, arts):
+        return blocks.SpellBlock(
+            name="Test Spell", technique="Perdo", form="Mentem",
+            printed_level=35,
+            stat=statline.StatLine(
+                range_name="Touch", duration_name="Mom", target_name="Part",
+                is_ritual=True, requisite_arts=list(arts), trailing=""),
+            prose="", design_line=None, line_no=1)
+
+    def test_a_labelled_requisite_token_resolves_to_its_own_art(self):
+        token = designline.Token(kind="requisite", magnitude=1, label="Creo")
+        arts = emit._resolve_requisite_arts(token, self._block_with_requisites(["Creo"]))
+        self.assertEqual(arts, ["Creo"])
+
+    def test_a_bare_requisite_token_resolves_to_the_sole_declared_art(self):
+        token = designline.Token(kind="requisite", magnitude=1, label="")
+        arts = emit._resolve_requisite_arts(token, self._block_with_requisites(["Vim"]))
+        self.assertEqual(arts, ["Vim"])
+
+    def test_a_bare_token_splits_across_arts_when_the_count_matches(self):
+        # Embrace of Boethius: Req: Vim, Corpus and "+2 necessary requisites".
+        # Two arts, magnitude two -- +1 each is the book's own arithmetic.
+        token = designline.Token(kind="requisite", magnitude=2, label="")
+        block = self._block_with_requisites(["Vim", "Corpus"])
+        self.assertEqual(emit._resolve_requisite_arts(token, block), ["Vim", "Corpus"])
+
+    def test_a_bare_token_still_raises_when_the_count_does_not_match(self):
+        # Three magnitudes across two arts is a distribution nothing in the
+        # design line states. Guessing it is exactly what this must not do.
+        token = designline.Token(kind="requisite", magnitude=3, label="")
+        block = self._block_with_requisites(["Vim", "Corpus"])
+        with self.assertRaises(designline.UnknownToken):
+            emit._resolve_requisite_arts(token, block)
+
+    def test_a_bare_token_still_raises_when_no_art_is_declared(self):
+        token = designline.Token(kind="requisite", magnitude=1, label="")
+        with self.assertRaises(designline.UnknownToken):
+            emit._resolve_requisite_arts(token, self._block_with_requisites([]))
 
 
 class TechniqueFormEmissionTest(unittest.TestCase):
@@ -947,7 +1065,8 @@ class TechniqueFormEmissionTest(unittest.TestCase):
     def test_build_spell_emits_technique_and_form(self):
         design = designline.parse_design("(Base 2, +1 Touch, +2 Sun)")
         spell = emit.build_spell(
-            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design
+            _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(spell["technique"], "Rego")
         self.assertEqual(spell["form"], "Aquam")
@@ -958,13 +1077,15 @@ class TechniqueFormEmissionTest(unittest.TestCase):
         spell = emit.build_spell(
             _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
             analogy_rationale="By analogy to a Vim guideline.",
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(spell["analogyRationale"], "By analogy to a Vim guideline.")
 
     def test_build_template_emits_technique_and_form(self):
         design = designline.parse_design("(Base effect)")
         template = emit.build_template(
-            _block("Test Template", "Rego", "Vim", None), "revi-G1", self.catalog, design
+            _block("Test Template", "Rego", "Vim", None), "revi-G1", self.catalog, design,
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(template["technique"], "Rego")
         self.assertEqual(template["form"], "Vim")
@@ -975,5 +1096,6 @@ class TechniqueFormEmissionTest(unittest.TestCase):
         template = emit.build_template(
             _block("Test Template", "Rego", "Vim", None), "revi-G1", self.catalog, design,
             analogy_rationale="By analogy to a Vim guideline.",
+            book_id=emit.CORE_BOOK_ID,
         )
         self.assertEqual(template["analogyRationale"], "By analogy to a Vim guideline.")

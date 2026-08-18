@@ -1,12 +1,28 @@
 {
-  "book": "Ars Magica - Definitive Edition (Core Rules)",
-  "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
-  "sha256": "73e1a0b07daf7442ce29cd72fc5afb2f8ab437748651022c4188b1c7f5c5036f",
-  "rulebook": {
-    "commit": "9c6aee1",
-    "date": "2026-08-16",
-    "subject": "Update Ars Magica - Definitive Edition (Core Rules).md"
+  "arm5-core": {
+    "bookId": "arm5-core",
+    "book": "Ars Magica - Definitive Edition (Core Rules)",
+    "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
+    "sha256": "73e1a0b07daf7442ce29cd72fc5afb2f8ab437748651022c4188b1c7f5c5036f",
+    "rulebook": {
+      "commit": "9c6aee1",
+      "date": "2026-08-16",
+      "subject": "Update Ars Magica - Definitive Edition (Core Rules).md"
+    },
+    "spellsParsed": 360,
+    "spellsImported": 325
   },
-  "spellsParsed": 360,
-  "spellsImported": 325
+  "arm5-hohmc": {
+    "bookId": "arm5-hohmc",
+    "book": "Ars Magica 5e - Houses of Hermes - Mystery Cults",
+    "path": "reviewed/Ars Magica 5e - Houses of Hermes - Mystery Cults.md",
+    "sha256": "33d4535c6dc61c98538cb3331641c4c9196506966ad2943998916c707300bbba",
+    "rulebook": {
+      "commit": "2539318",
+      "date": "2026-07-18",
+      "subject": "[FIX] DE reclassified v/f + minor Church fixes"
+    },
+    "spellsParsed": 16,
+    "spellsImported": 11
+  }
 }

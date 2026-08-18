@@ -171,3 +171,142 @@ class ParseDefinitiveEditionTest(unittest.TestCase):
         block = next(b for b in self.blocks if b.name == "Soothe Pains of the Beast")
         self.assertEqual(block.stat.requisite_arts, [])
         self.assertFalse(block.prose.startswith("Req:"))
+
+
+HOHMC_TITLE = "Ars Magica 5e - Houses of Hermes - Mystery Cults"
+
+
+class ParseInlineAgainstMysteryCultsTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        lines = sources.read_lines(sources.resolve_book(HOHMC_TITLE))
+        cls.blocks, cls.problems = blocks.parse_inline(lines)
+
+    def test_finds_all_sixteen_blocks(self):
+        # 16 stat lines in the book, all 16 anchored. Two of these are not
+        # importable spells and are excluded later, in run()'s skip list --
+        # the parser's job is to find blocks, not to judge them.
+        self.assertEqual(len(self.blocks), 16)
+
+    def test_reports_no_parse_problems(self):
+        self.assertEqual(self.problems, [])
+
+    def test_a_blockquoted_block_parses_completely(self):
+        block = next(b for b in self.blocks if b.name == "Revenge of the Bitten Toad")
+        self.assertEqual((block.technique, block.form), ("Perdo", "Animal"))
+        self.assertEqual(block.printed_level, 20)
+        self.assertEqual(block.stat.target_name, "Flavor")
+        self.assertEqual(block.design_line, "(Base 15, +1 Diam)")
+
+    def test_a_plain_unquoted_block_parses_completely(self):
+        block = next(b for b in self.blocks if b.name == "The Voice of the Bjornaer Magus")
+        self.assertEqual((block.technique, block.form), ("Muto", "Animal"))
+        self.assertEqual(block.printed_level, 15)
+        self.assertEqual(block.design_line, "(Base 5, +2 Sun)")
+
+    def test_a_bold_named_block_is_found(self):
+        # Ball of Abysmal Music is the one spell headed **Name** rather than
+        # ##### Name. Rejecting it would lose a real spell to typesetting.
+        block = next(b for b in self.blocks if b.name == "Ball of Abysmal Music")
+        self.assertEqual((block.technique, block.form), ("Muto", "Imaginem"))
+        self.assertEqual(block.printed_level, 20)
+
+    def test_a_blank_line_between_name_and_anchor_is_tolerated(self):
+        # Perceive the Change has a blank blockquote line between its heading
+        # and its InAn 14 line; Revenge of the Bitten Toad has none.
+        block = next(b for b in self.blocks if b.name == "Perceive the Change")
+        self.assertEqual((block.technique, block.form), ("Intellego", "Animal"))
+
+    def test_general_level_blocks_have_no_printed_level(self):
+        general = sorted(b.name for b in self.blocks if b.printed_level is None)
+        self.assertEqual(general, [
+            "Facilitate the Stifled (Form) Spell",
+            "Faerie Chains of the Familiar Slave",
+            "The Rooster's Crow",
+            "Tie the Threads That Bind",
+        ])
+
+    def test_a_design_line_separated_by_paragraphs_is_still_found(self):
+        # Form of the (Temperament) Heartbeast prints four variant paragraphs
+        # between its stat line and its design line. A fixed-size lookahead
+        # window would miss it.
+        block = next(b for b in self.blocks
+                     if b.name == "Form of the (Temperament) Heartbeast")
+        self.assertEqual(block.design_line, "(Base 5, +2 Sun; +1 complexity)")
+
+    def test_a_requisite_continuation_line_is_folded_in(self):
+        # Embrace of Boethius prints "Req: Vim, Corpus" on its own line below
+        # the stat line, the same shape parse_de already folds.
+        block = next(b for b in self.blocks if b.name == "Embrace of Boethius")
+        self.assertEqual(block.stat.requisite_arts, ["Vim", "Corpus"])
+        self.assertTrue(block.stat.is_ritual)
+
+
+class ParseInlineFixtureTest(unittest.TestCase):
+    def test_a_stat_line_with_no_anchor_above_it_is_skipped(self):
+        lines = [
+            "Some prose about a creature.",
+            "",
+            "R: Touch, D: Sun, T: Ind",
+            "",
+            "(Base 5, +2 Sun)",
+        ]
+        found, problems = blocks.parse_inline(lines)
+        self.assertEqual(found, [])
+        self.assertEqual(problems, [])
+
+    def test_an_anchor_with_no_name_above_it_is_skipped(self):
+        lines = [
+            "Just prose, not a name.",
+            "MuAn 15",
+            "R: Per, D: Sun, T: Ind",
+        ]
+        found, problems = blocks.parse_inline(lines)
+        self.assertEqual(found, [])
+        self.assertEqual(problems, [])
+
+    def test_two_adjacent_blocks_do_not_bleed_into_each_other(self):
+        lines = [
+            "##### First Spell",
+            "MuAn 15",
+            "R: Per, D: Sun, T: Ind",
+            "",
+            "Prose for the first.",
+            "",
+            "(Base 5, +2 Sun)",
+            "",
+            "##### Second Spell",
+            "PeAn 20",
+            "R: Per, D: Diam, T: Ind",
+            "",
+            "Prose for the second.",
+            "",
+            "(Base 15, +1 Diam)",
+        ]
+        found, problems = blocks.parse_inline(lines)
+        self.assertEqual(problems, [])
+        self.assertEqual([b.name for b in found], ["First Spell", "Second Spell"])
+        self.assertEqual(found[0].design_line, "(Base 5, +2 Sun)")
+        self.assertEqual(found[0].prose, "Prose for the first.")
+        self.assertEqual(found[1].design_line, "(Base 15, +1 Diam)")
+        self.assertEqual(found[1].prose, "Prose for the second.")
+
+    def test_a_block_with_no_design_line_still_parses(self):
+        lines = [
+            "##### Lonely Spell",
+            "MuAn 15",
+            "R: Per, D: Sun, T: Ind",
+            "",
+            "Prose with no design line.",
+            "",
+            "#### Some Other Section",
+        ]
+        found, problems = blocks.parse_inline(lines)
+        self.assertEqual(problems, [])
+        self.assertEqual(len(found), 1)
+        self.assertIsNone(found[0].design_line)
+
+    def test_parsers_registry_exposes_both_styles(self):
+        self.assertEqual(sorted(blocks.PARSERS), ["de", "inline"])
+        self.assertIs(blocks.PARSERS["de"], blocks.parse_de)
+        self.assertIs(blocks.PARSERS["inline"], blocks.parse_inline)
