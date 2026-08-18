@@ -123,12 +123,21 @@ def render(
     return "\n".join(lines)
 
 
-def design_lines_of(text: str) -> dict[str, str]:
-    """Spell id to printed design line, for any revision of the rulebook."""
+def design_lines_of(text: str, parser=None) -> dict[str, str]:
+    """Spell id to printed design line, for any revision of the rulebook.
+
+    `parser` is one of `blocks.PARSERS` — different books use different block
+    formats (arm5-core's headed blocks vs. HoH:MC's inline paragraphs), and a
+    book parsed with the wrong one silently finds zero blocks. Defaults to
+    `blocks.parse_de` so existing callers that only ever read arm5-core need
+    not change.
+    """
     # Local import to keep this function testable without catalog files.
     from . import blocks, catalog as catalog_module
 
-    parsed, _ = blocks.parse_de(text.split("\n"))
+    if parser is None:
+        parser = blocks.parse_de
+    parsed, _ = parser(text.split("\n"))
     return {
         catalog_module.slug_id(block.technique, block.form, block.name): block.design_line
         for block in parsed
@@ -136,12 +145,15 @@ def design_lines_of(text: str) -> dict[str, str]:
     }
 
 
-def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
+def old_design_lines(root, commit: str, relative: str, parser=None) -> dict[str, str] | None:
     """The design lines as of a past rulebook revision. Best effort.
 
     Returns None when the rulebook is not a git checkout, the revision is
     not fetched, or git is unavailable. The report degrades to omitting the
     design-line column; it never fails because of this.
+
+    `parser` is threaded straight to `design_lines_of` — see there for why it
+    matters which one the caller passes.
     """
     # Local import to keep render() and diff_assets() testable without git.
     import subprocess
@@ -156,4 +168,4 @@ def old_design_lines(root, commit: str, relative: str) -> dict[str, str] | None:
         return None
     if finished.returncode != 0:
         return None
-    return design_lines_of(finished.stdout)
+    return design_lines_of(finished.stdout, parser)

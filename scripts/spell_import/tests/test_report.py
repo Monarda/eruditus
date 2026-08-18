@@ -142,3 +142,32 @@ class DesignLinesTest(unittest.TestCase):
             self.assertIsNone(
                 report.old_design_lines(pathlib.Path("."), "abc123", "Book.md")
             )
+
+    def test_finds_a_hohmc_block_when_given_the_inline_parser(self):
+        """HoH:MC's blocks are inline paragraphs, not headed sections.
+
+        `design_lines_of` defaulted unconditionally to `blocks.parse_de`,
+        which finds zero blocks in HoH:MC's markdown -- a changed design line
+        there would be silently omitted from the change report. Passing
+        `blocks.parse_inline` (looked up the same way the production call
+        site does, via `sources.book_by_id`) must find it.
+        """
+        from scripts.spell_import import blocks as blocks_module, catalog as catalog_module, sources
+
+        book = sources.book_by_id("arm5-hohmc")
+        text = "\n".join(sources.read_lines(sources.resolve_book(book.title)))
+        parser = blocks_module.PARSERS[book.parser]
+
+        found = report.design_lines_of(text, parser)
+
+        expected_id = catalog_module.slug_id("Perdo", "Animal", "Revenge of the Bitten Toad")
+        self.assertEqual(found.get(expected_id), "(Base 15, +1 Diam)")
+
+    def test_defaulting_to_parse_de_misses_hohmc_blocks(self):
+        """The failure mode this finding fixes: the wrong parser finds nothing."""
+        from scripts.spell_import import sources
+
+        book = sources.book_by_id("arm5-hohmc")
+        text = "\n".join(sources.read_lines(sources.resolve_book(book.title)))
+
+        self.assertEqual(report.design_lines_of(text), {})

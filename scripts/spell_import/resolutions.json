@@ -2010,6 +2010,6 @@
       "pevi-G8",
       "pevi-G9"
     ],
-    "rationale": "Its prose reads 'Any demons who hear the caster's shout lose Might equal to the spell's (level / 5)' -- the same wording and the same mechanic as Demon's Eternal Oblivion, which this ledger already resolves to pevi-G3 (Reduce target's Might Score). Might Score rather than Might Pool for the same reason that spell chose it."
+    "rationale": "Its prose reads 'Any demons who hear the caster's shout lose Might equal to the spell's (level – 5)'. Demon's Eternal Oblivion is the established parallel and this ledger already resolves it to pevi-G3: it reads 'the creature loses Might Score equal to the spell's level'. Both reduce Might Score by a quantity derived from the spell's level, which is what separates pevi-G3 from pevi-G4 (Might Pool); the Rooster's Crow's -5 offset does not bear on that distinction."
   }
 }

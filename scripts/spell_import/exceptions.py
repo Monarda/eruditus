@@ -26,6 +26,10 @@ A closed, exact-name table, the same discipline as extract_spells.py's
 HAND_DERIVED/KNOWN_UNRESOLVABLE/DESIGN_LINE_INCOMPLETE. Each value is the
 citation-backed reason a human read off the spell's own printed text, quoted
 or closely paraphrased -- never inferred from a shape or a heuristic.
+
+Like those tables, this one is keyed by bare spell name across every book,
+not per book id -- see the comment above extract_spells.HAND_DERIVED for why
+that is safe today and what a third book's name collision would need.
 """
 
 EXCEPTION_SPELLS: dict[str, str] = {

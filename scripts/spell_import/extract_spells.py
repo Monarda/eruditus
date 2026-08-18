@@ -343,6 +343,18 @@ ANALOGY_BASE_EFFECTS: dict[str, dict] = {
 #   spells, Aegis of the Hearth, Wizard's Vigil and Sight of the True Form
 #   all import as exception spells instead
 #   (scripts/spell_import/exceptions.py).
+#
+# This table, HAND_DERIVED_ADJUSTMENT, DESIGN_LINE_TYPOS and
+# SPELL_NAME_TYPOS below, and exceptions.py's EXCEPTION_SPELLS, are all keyed
+# by bare spell name across every book -- unlike SKIPPED_BLOCKS just below,
+# which is keyed per book id because HoH:MC needed that. There is no
+# collision today (verified: zero overlap with HoH:MC's 16 block names), but
+# a third book that happened to share a spell's exact name with an existing
+# entry here would silently misapply that entry to the wrong book's spell.
+# `_reject_duplicate_ids` cannot catch this: these tables are consulted
+# while a book is still being parsed, before any spell id exists to compare,
+# so a name collision misfires long before the id-uniqueness guard ever
+# runs. If a third book collides, key these by (book_id, name) instead.
 HAND_DERIVED: dict[str, str] = {
     "Enchantment of the Scrying Pool": "(Base 5, +1 Touch, +4 Year)",
     "Ward against Faeries of the Mountain": "(Base effect)",
@@ -633,20 +645,43 @@ def serialize(spells: list[dict]) -> str:
 
 
 def regeneration_failure_message(
-    lock: dict[str, provenance.SourceIdentity], current: provenance.SourceIdentity
+    lock: dict[str, provenance.SourceIdentity],
+    identities: dict[str, provenance.SourceIdentity],
 ) -> str:
     """Why does a fresh run disagree with the committed asset?
 
     Two very different causes, and the wrong guess costs real time: either
-    the rulebook moved under a correct asset, or the asset was edited by
-    hand. The lock is what tells them apart.
+    a rulebook moved under a correct asset, or the asset was edited by
+    hand. The lock is what tells them apart -- checked across every
+    registered book, not just arm5-core, since any one of them moving would
+    produce the same disagreement.
     """
-    if not provenance.matches(lock, current):
-        return provenance.describe_change(lock, current)
+    moved = [current for current in identities.values() if not provenance.matches(lock, current)]
+    if moved:
+        return "\n\n".join(provenance.describe_change(lock, current) for current in moved)
     return (
         "assets/data/spell_library.json is stale or was hand-edited — "
         "re-run `python -m scripts.spell_import.extract_spells --write`"
     )
+
+
+def _matched_lock_updates(
+    lock: dict[str, provenance.SourceIdentity],
+    identities: dict[str, provenance.SourceIdentity],
+) -> dict[str, provenance.SourceIdentity]:
+    """What to write when only advisory counts have drifted, not the source.
+
+    Merged over the loaded lock, so a book whose source moved -- unmatched,
+    by definition -- keeps its previously recorded identity here. Only
+    matched books' entries are refreshed; replacing an unmatched one would
+    attest a source move without the review --accept-source exists to gate.
+    """
+    refreshed = {
+        current.book_id: current
+        for current in identities.values()
+        if provenance.matches(lock, current)
+    }
+    return {**lock, **refreshed}
 
 
 def hand_authored_templates() -> list[dict]:
@@ -1074,8 +1109,9 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 for current in identities.values():
                     recorded = lock.get(current.book_id)
                     if recorded is not None and recorded.rulebook is not None:
+                        parser = blocks.PARSERS[sources.book_by_id(current.book_id).parser]
                         previous.update(report_module.old_design_lines(
-                            root, recorded.rulebook.commit, recorded.path
+                            root, recorded.rulebook.commit, recorded.path, parser
                         ) or {})
                 REPORT_PATH.write_text(
                     report_module.render(
@@ -1098,7 +1134,12 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             # precisely because the lock was rewritten only when the source
             # moved, which is the one case those counts are read in — the
             # "N parsed, M imported" line of the source-moved message.
-            provenance.write(identities)
+            #
+            # Written through _matched_lock_updates, not identities directly:
+            # a book whose source moved but was not accepted here must keep
+            # its previously recorded identity, not have it laundered in by
+            # this branch's write of a different, merely-drifted book.
+            provenance.write(_matched_lock_updates(lock, identities))
 
     return Report(
         spells=spells, templates=templates, exceptions=exception_spells,
@@ -1185,6 +1226,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"templates: {len(report.templates)}")
     print(f"exceptions: {len(report.exceptions)}")
     print(f"blocked  : {len(report.blocked)}")
+    print(f"skipped  : {len(report.skipped)}")
     print(f"unresolved: {len(report.unresolved)}")
 
     if args.show_blocked and report.blocked:

@@ -230,7 +230,7 @@ class RegenerationTest(unittest.TestCase):
             extract_spells.serialize(report.spells),
             extract_spells.serialize(committed),
             msg="\n\n" + extract_spells.regeneration_failure_message(
-                provenance.load(), report.identities["arm5-core"]
+                provenance.load(), report.identities
             ),
         )
 
@@ -554,7 +554,7 @@ class RegenerationMessageTest(unittest.TestCase):
         )
         current = dataclasses.replace(recorded, sha256="1" * 64)
         message = extract_spells.regeneration_failure_message(
-            {recorded.book_id: recorded}, current)
+            {recorded.book_id: recorded}, {current.book_id: current})
         self.assertIn("moved", message)
         self.assertNotIn("hand-edited", message)
 
@@ -565,7 +565,7 @@ class RegenerationMessageTest(unittest.TestCase):
             spells_parsed=1, spells_imported=1,
         )
         message = extract_spells.regeneration_failure_message(
-            {recorded.book_id: recorded}, recorded)
+            {recorded.book_id: recorded}, {recorded.book_id: recorded})
         self.assertIn("hand-edited", message)
         self.assertNotIn("moved", message)
 
@@ -575,10 +575,77 @@ class RegenerationMessageTest(unittest.TestCase):
             book_id="test-book", book="B", path="reviewed/B.md", sha256="1" * 64, rulebook=None,
             spells_parsed=1, spells_imported=1,
         )
-        message = extract_spells.regeneration_failure_message({}, current)
+        message = extract_spells.regeneration_failure_message({}, {current.book_id: current})
         self.assertIn("has no record of", message)
         self.assertIn("--accept-source", message)
+
+    def test_names_a_non_core_book_that_moved_rather_than_blaming_the_asset(self):
+        """The exact misdiagnosis this finding fixes.
+
+        Hard-wiring the check to arm5-core meant a moved HoH:MC was invisible
+        to this function: it would report "hand-edited" even though a
+        registered, non-core book had moved. Every identity must be checked.
+        """
+        from scripts.spell_import import provenance
+        core = provenance.SourceIdentity(
+            book_id="arm5-core", book="Core", path="reviewed/Core.md", sha256="c" * 64,
+            rulebook=None, spells_parsed=1, spells_imported=1,
+        )
+        hohmc_recorded = provenance.SourceIdentity(
+            book_id="arm5-hohmc", book="HoH:MC", path="reviewed/HoHMC.md", sha256="0" * 64,
+            rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
+            spells_parsed=1, spells_imported=1,
+        )
+        hohmc_current = dataclasses.replace(hohmc_recorded, sha256="1" * 64)
+        message = extract_spells.regeneration_failure_message(
+            {core.book_id: core, hohmc_recorded.book_id: hohmc_recorded},
+            {core.book_id: core, hohmc_current.book_id: hohmc_current},
+        )
+        self.assertIn("arm5-hohmc", message)
+        self.assertIn("moved", message)
         self.assertNotIn("hand-edited", message)
+
+
+class MatchedLockUpdatesTest(unittest.TestCase):
+    """The drift branch's write must not launder an unaccepted source move.
+
+    `run()`'s drift branch fires without --accept-source when a *matched*
+    book's advisory counts alone have drifted. It must write only that
+    book's refreshed entry, merged over the loaded lock -- never a moved
+    book's new identity, which only --accept-source may adopt.
+    """
+
+    def test_a_moved_but_unaccepted_book_keeps_its_recorded_identity(self):
+        from scripts.spell_import import provenance
+
+        core_recorded = provenance.SourceIdentity(
+            book_id="arm5-core", book="Core", path="reviewed/Core.md", sha256="c" * 64,
+            rulebook=None, spells_parsed=294, spells_imported=294,
+        )
+        # arm5-core matched (same sha256) but this run's advisory counts
+        # disagree with what's recorded -- the scenario the drift branch
+        # exists for.
+        core_current = dataclasses.replace(core_recorded, spells_parsed=325, spells_imported=325)
+
+        # HoH:MC's markdown moved (different sha256) but was never accepted.
+        hohmc_recorded = provenance.SourceIdentity(
+            book_id="arm5-hohmc", book="HoH:MC", path="reviewed/HoHMC.md", sha256="0" * 64,
+            rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
+            spells_parsed=16, spells_imported=14,
+        )
+        hohmc_current = dataclasses.replace(hohmc_recorded, sha256="1" * 64)
+
+        lock = {core_recorded.book_id: core_recorded, hohmc_recorded.book_id: hohmc_recorded}
+        identities = {core_current.book_id: core_current, hohmc_current.book_id: hohmc_current}
+
+        updated = extract_spells._matched_lock_updates(lock, identities)
+
+        # The matched book's advisory counts are refreshed...
+        self.assertEqual(updated["arm5-core"].spells_parsed, 325)
+        # ...but the moved, unaccepted book's sha256 survives unchanged --
+        # not laundered in by this write of a different book.
+        self.assertEqual(updated["arm5-hohmc"].sha256, "0" * 64)
+        self.assertEqual(updated["arm5-hohmc"], hohmc_recorded)
 
 
 class NumberedOverrideTest(unittest.TestCase):

@@ -62,7 +62,7 @@ belongs to item 32.
 
 | Asset | Entries | Note |
 |---|---|---|
-| `base_effects.json` | 612 | 50 General — 49 core plus item 17's one supplement row; plus item 64's two Glamour guidelines; plus item 65's `revi-hohmc-G1` |
+| `base_effects.json` | 612 | 51 General — 49 core plus two supplement rows (item 17's one, plus item 65's `revi-hohmc-G1`); plus item 64's two Glamour guidelines |
 | `parameters.json` | 39 | 25 core (item 15) + 9 virtue-gated (item 17) + 5 Sensory Targets (item 64) |
 | `modifiers.json` | 35 | 34 plus item 65's `complexity` modifier |
 | `spell_library.json` | 336 | 325 core + 11 HoH:MC (item 65) |
@@ -602,9 +602,9 @@ of `feature/general-base-effects`, each finding re-verified against source.
 - [ ] **`TemplateInstantiated` silently discards an in-progress, unsaved draft.**
       Deliberate (a stale breakdown must not follow the user into a new spell), but
       there is no confirmation prompt. Worth one if it becomes a reported annoyance.
-- [ ] **37 of the 50 General catalog entries omit an explicit `reference` triple**
-      (recounted 2026-08-17; was "36 of 49" before item 17 added one more without a
-      reference), falling back to `ParameterTriple.standard()` rather than stating it.
+- [ ] **38 of the 51 General catalog entries omit an explicit `reference` triple**
+      (recounted 2026-08-18; was "37 of 50" before item 65 added `revi-hohmc-G1`
+      without a reference), falling back to `ParameterTriple.standard()` rather than stating it.
       The fallback cannot distinguish "explicitly Personal/Momentary/Individual" from
       "field just wasn't authored". A natural extension of item 32. **One specific
       candidate:** `crvi-G4`'s formula codes `offsetMagnitudes: -1` while its one

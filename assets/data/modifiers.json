@@ -555,7 +555,7 @@
   },
   {
     "id": "complexity",
-    "name": "Complexity",
+    "name": "Effect complexity",
     "description": "Designing a spell so the caster can make changes to the product normally adds magnitudes to account for the complexity (Core Rules 12204)",
     "selectionMode": "single",
     "scope": { "technique": null, "form": null, "effectIds": [], "excludeTechniques": [] },
