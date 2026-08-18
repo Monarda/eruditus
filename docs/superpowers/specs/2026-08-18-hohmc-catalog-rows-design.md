@@ -108,11 +108,17 @@ three types of target" (line 12120).
 
 **Consequence, stated rather than discovered later:** Sound and Spectacle become
 `container` Targets, so `spellOwesContainerMode` will say they owe a
-static/dynamic ruling. That affects the four HoH:MC spells using them (*Clarion
+static/dynamic answer. That affects the four HoH:MC spells using them (*Clarion
 Call of the War Horse*, *The Rooster's Crow*, *Brilliance of the Eagle's
-Plumage*, *Closed Mouth of the Nightwalker*), and belongs to sub-project B —
-`containerMode` is per-spell, not per-parameter. Item 57's backlog is 16 *core*
-spells; these four are B's to rule on and do not change that count.
+Plumage*, *Closed Mouth of the Nightwalker*), and recording that answer
+belongs to sub-project B. It is not a per-spell judgment call, though: HoH:MC
+line 1002 fixes it — "targets need not be present at the casting of the spell,
+and are continuously acquired throughout the spell's duration" — for all five
+Sensory Targets, stated at the Target level with no choice offered. So B's job
+for these four spells is to record `dynamic`, not to rule on it. Item 57's
+backlog is 16 *core* spells; these four are B's to record and do not change
+that count. See todo item 68 for the open question of how the model should
+represent a Target-level fixed mode.
 
 ## The two Glamour guidelines
 

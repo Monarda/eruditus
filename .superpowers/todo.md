@@ -923,10 +923,16 @@ holds exactly one book.
       Slave* (hand-authored, item 17) and *Perceive the Change*, which is an
       enchanted-device effect: `Pen 0, constant effect`, costing `+1 two
       uses/day, +3 environmental trigger`. The app models no enchantments.
-- [ ] **Rule static/dynamic for the four spells using Sound or Spectacle** —
+- [ ] **Record static/dynamic for the four spells using Sound or Spectacle** —
       *Clarion Call of the War Horse*, *The Rooster's Crow*, *Brilliance of the
       Eagle's Plumage*, *Closed Mouth of the Nightwalker*. Both Targets are
-      containers, so `spellOwesContainerMode` says they owe one. See item 57.
+      containers, so `spellOwesContainerMode` says they owe an answer — but
+      there is nothing to rule on. HoH:MC line 1002 fixes it: all five Sensory
+      Targets are continuously acquired throughout the spell's duration, i.e.
+      `ContainerMode.dynamic`, stated at the Target level with no per-spell
+      choice offered. Record `dynamic` for these four. See item 57 and item 68
+      (the open question of how the model should represent a Target-level
+      fixed mode instead of a per-spell choice).
 - [ ] **Validate the parser against the other inline books as a diagnostic, not
       an import.** Covenants (42/44 inline), HoH:Societates (50/59),
       Transforming Mythic Europe (68/84). **No spell from any book but HoH:MC
@@ -989,6 +995,42 @@ position so the tractable ones stay visible.
 - **Files:** `lib/models/spell.dart` (the validation checks),
   `lib/models/parameter.dart`
 - **See also:** items 64, 56, 17
+
+### 68. Do the Sensory Targets' `targetType` Values Misrepresent Their Container Mode? (OPEN)
+
+**Opened 2026-08-18, from item 64's review.** Deferred for study, not decided —
+this item exists to capture the question, not to answer it. No `targetType`
+value has been changed and none should be until this is resolved.
+
+- **The finding.** HoH:MC line 1002 states one behaviour for all five Sensory
+  Targets: "targets need not be present at the casting of the spell, and are
+  continuously acquired throughout the spell's duration." In this app's
+  vocabulary that is `ContainerMode.dynamic`, stated at the Target level with
+  no choice offered.
+- **What the current data does with that.** `target-sound` and
+  `target-spectacle` are `container`, so the creation screen offers a
+  static/dynamic control and a user can answer `static`, which line 1002
+  forbids. `target-flavor`, `target-texture` and `target-scent` are `object`,
+  so no control appears — and `lib/models/target_type.dart`'s own doc comment
+  records that an object Target "is always static (12246)", the opposite of
+  what the book says about them. Scent in particular covers "approximately
+  three paces… up to 15 paces", behaviourally indistinguishable from Sound.
+- **Why the split exists.** The `targetType` values follow the book's printed
+  *magnitude* equivalences (Flavor≡Individual, Texture≡Part, Scent≡Group,
+  Sound≡Structure, Spectacle≡Boundary). Those sentences price the Target; they
+  do not assert it is that kind. The resulting 3/2 split appears nowhere in
+  the source.
+- **Why it is not urgent.** `containerMode` is level-neutral, so no spell
+  computes a wrong level, and `spellOwesContainerMode` still has no production
+  caller. This is a fidelity question, not a live bug.
+- **The options, without picking one.** Leave as-is and document; mark all
+  five `container` (which would offer a choice the book withholds); add a
+  fourth `TargetType` for "area around the caster, dynamic by rule" (which
+  `target_type.dart`'s doc comment resists, since it rests on the Core Rules'
+  "there are three types of target"); or model dynamic-by-rule on the Target
+  itself so no control is offered and the mode is fixed.
+- **See also:** items 64 (which added the rows), 65 (which must not re-derive
+  this), 14 and 57 (the container-mode feature and its ruling backlog).
 
 ---
 
