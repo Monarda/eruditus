@@ -164,3 +164,162 @@ def parse_de(lines: list[str]) -> tuple[list[SpellBlock], list[str]]:
         name = None
 
     return found, problems
+
+
+# The inline anchor: "PeAn 20" or "MuVi Gen" on its own line, directly above
+# the stat line. Unlike the Definitive Edition's "### Creo Animal Spells" +
+# "#### LEVEL 20" pair, this one line carries Technique, Form and printed
+# level together, so parse_inline needs no section state at all.
+_INLINE_ANCHOR = re.compile(
+    r"^(?P<technique>Cr|In|Mu|Pe|Re)(?P<form>An|Aq|Au|Co|He|Ig|Im|Me|Te|Vi)\s+"
+    r"(?:(?P<level>\d+)|(?P<general>Gen))\s*$"
+)
+_HEADING = re.compile(r"^#{1,6}\s")
+# A name printed as bold text rather than a heading. Ball of Abysmal Music is
+# the only HoH:MC spell headed this way. The `$` anchor is what keeps this
+# from swallowing "**Dutiful Movement:** The automaton can walk..." -- a bold
+# run followed by prose is a labelled paragraph, not a spell name.
+_BOLD_NAME = re.compile(r"^\*\*(?P<name>.+?)\*\*\s*$")
+
+_TECHNIQUE_NAMES = {
+    "Cr": "Creo", "In": "Intellego", "Mu": "Muto", "Pe": "Perdo", "Re": "Rego",
+}
+_FORM_NAMES = {
+    "An": "Animal", "Aq": "Aquam", "Au": "Auram", "Co": "Corpus",
+    "He": "Herbam", "Ig": "Ignem", "Im": "Imaginem", "Me": "Mentem",
+    "Te": "Terram", "Vi": "Vim",
+}
+
+
+def _inline_anchor(lines: list[str], index: int):
+    """The `TeFo Level` match at `index`, or None."""
+    if index < 0:
+        return None
+    return _INLINE_ANCHOR.match(statline.strip_markup(lines[index]))
+
+
+def _inline_name_above(lines: list[str], start: int) -> str | None:
+    """The spell name at or above `start`, skipping blank lines.
+
+    Returns None as soon as a non-blank line that is not a name is reached,
+    so ordinary prose above an anchor cannot be mistaken for a heading. The
+    blank-skipping is not defensive: Perceive the Change has a blank
+    blockquote line between its heading and its anchor, and Revenge of the
+    Bitten Toad has none.
+    """
+    cursor = start
+    while cursor >= 0:
+        quoted = statline.strip_quote(lines[cursor])
+        if not quoted.strip():
+            cursor -= 1
+            continue
+        cleaned = statline.strip_markup(lines[cursor])
+        # Any heading level, not just `#####`: parse_de's _NAME is specific to
+        # the Definitive Edition's own nesting, and the supplements do not
+        # share it.
+        if _HEADING.match(cleaned):
+            return _HEADING.sub("", cleaned).strip()
+        bold = _BOLD_NAME.match(quoted)
+        if bold is not None:
+            return statline.strip_markup(bold.group("name"))
+        return None
+    return None
+
+
+def parse_inline(lines: list[str]) -> tuple[list[SpellBlock], list[str]]:
+    """Assemble spell blocks anchored on an inline `TeFo Level` line.
+
+    Used by supplements rather than the Definitive Edition. The anchor is the
+    stat line, as always; what discriminates a spell from a creature power
+    here is the `TeFo Level` line directly above it, with the name above that
+    as either a heading or a bold run.
+
+    A stat line with no anchor above it is skipped in silence, exactly as
+    parse_de skips creature and elemental powers. Across the corpus those
+    unanchored blocks are overwhelmingly enchanted-device effects and NPC
+    spell lists rather than spells, so reporting each one would bury the
+    genuine problems.
+    """
+    problems: list[str] = []
+    found: list[SpellBlock] = []
+
+    for index, raw in enumerate(lines):
+        if statline.is_damaged_statline(raw):
+            if _inline_anchor(lines, index - 1) is not None:
+                problems.append(f"line {index + 1}: damaged stat line {raw.strip()!r}")
+            continue
+
+        if not statline.is_statline(raw):
+            continue
+
+        anchor = _inline_anchor(lines, index - 1)
+        if anchor is None:
+            continue
+
+        name = _inline_name_above(lines, index - 2)
+        if name is None:
+            continue
+
+        technique = _TECHNIQUE_NAMES[anchor.group("technique")]
+        form = _FORM_NAMES[anchor.group("form")]
+        level = None if anchor.group("general") else int(anchor.group("level"))
+
+        normalized = _normalize_stat_line(raw)
+        folded = statline.strip_markup(normalized)
+
+        # Identical to parse_de's fold: look past blank lines for a `Req:`
+        # continuation printed on its own line and splice it into the stat
+        # line, so parse_statline keeps seeing one logical line.
+        prose_start = index + 1
+        cursor = prose_start
+        while cursor < len(lines) and not statline.strip_markup(lines[cursor]):
+            cursor += 1
+        if cursor < len(lines):
+            candidate = statline.strip_markup(lines[cursor])
+            if _REQ_CONTINUATION.match(candidate):
+                folded = f"{folded}, {candidate}"
+                prose_start = cursor + 1
+
+        try:
+            stat = statline.parse_statline(folded)
+        except ValueError as e:
+            problems.append(f"line {index + 1}: {e}")
+            continue
+
+        prose_lines: list[str] = []
+        design: str | None = None
+        cursor = prose_start
+        while cursor < len(lines):
+            candidate = statline.strip_markup(lines[cursor])
+            if _DESIGN.match(candidate):
+                design = candidate
+                break
+            # Stop at the next block or section. The scan is bounded by
+            # structure rather than a line count on purpose: Form of the
+            # (Temperament) Heartbeast prints four variant paragraphs between
+            # its stat line and its design line.
+            if _HEADING.match(candidate) or _BOLD_NAME.match(
+                    statline.strip_quote(lines[cursor])):
+                break
+            if candidate:
+                prose_lines.append(candidate)
+            cursor += 1
+
+        found.append(SpellBlock(
+            name=name,
+            technique=technique,
+            form=form,
+            printed_level=level,
+            stat=stat,
+            prose=" ".join(prose_lines),
+            design_line=design,
+            line_no=index + 1,
+        ))
+
+    return found, problems
+
+
+PARSERS = {
+    "de": parse_de,
+    "inline": parse_inline,
+}
