@@ -174,6 +174,8 @@ def build_spell(
     override_modifiers: dict[str, list[str]] | None = None,
     extra_adjustment: tuple[int, str] | None = None,
     analogy_rationale: str | None = None,
+    *,
+    book_id: str,
 ) -> dict:
     range_id = catalog.parameter_id("Range", _parameter_name(design, "range", block))
     duration_id = catalog.parameter_id("Duration", _parameter_name(design, "duration", block))
@@ -237,7 +239,7 @@ def build_spell(
         raise ValueError(f"{block.name}: no printed level to emit")
     spell["printedLevel"] = block.printed_level
 
-    spell["citations"] = [{"bookId": CORE_BOOK_ID}]
+    spell["citations"] = [{"bookId": book_id}]
 
     # Build parameter magnitude lookup table for adjustment reduction
     parameter_magnitudes = {p["id"]: p["magnitude"] for p in catalog.parameters}
@@ -305,6 +307,8 @@ def build_template(
     realm_by_spell_id: dict[str, str] | None = None,
     analogy_rationale: str | None = None,
     chosen_slots: dict[str, str] | None = None,
+    *,
+    book_id: str,
 ) -> dict:
     """Build a `SpellTemplate.fromMap`-shaped entry for a General spell.
 
@@ -366,7 +370,7 @@ def build_template(
     if description:
         template["description"] = description
 
-    template["citations"] = [{"bookId": CORE_BOOK_ID}]
+    template["citations"] = [{"bookId": book_id}]
 
     adjustments = [
         {"magnitude": token.magnitude, "note": token.note}
@@ -799,7 +803,7 @@ def _description(block) -> str:
     return " ".join(block.prose.split())
 
 
-def build_exception_spell(block, rationale: str) -> dict:
+def build_exception_spell(block, rationale: str, *, book_id: str) -> dict:
     """Build an `ExceptionSpell.fromMap`-shaped entry for a spell the
     rulebook itself says guideline arithmetic doesn't apply to.
 
@@ -823,7 +827,7 @@ def build_exception_spell(block, rationale: str) -> dict:
         "source": "published",
         "summary": _template_summary(block),
         "rationale": rationale,
-        "citations": [{"bookId": CORE_BOOK_ID}],
+        "citations": [{"bookId": book_id}],
     }
     if block.printed_level is not None:
         exception["printedLevel"] = block.printed_level

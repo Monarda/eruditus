@@ -6,6 +6,7 @@ from scripts.spell_import import catalog as catalog_module
 from scripts.spell_import import extract_spells
 from scripts.spell_import import exceptions as exceptions_module
 from scripts.spell_import import ledger as ledger_module
+from scripts.spell_import import sources
 from scripts.spell_import.sources import REPO_ROOT
 
 LIBRARY = REPO_ROOT / "assets" / "data" / "spell_library.json"
@@ -74,7 +75,9 @@ class RunTest(unittest.TestCase):
                           "summary", "description", "printedLevel", "citations"):
                 self.assertIn(field, spell, msg=spell.get("id"))
             self.assertEqual(spell["source"], "published")
-            self.assertEqual(spell["citations"], [{"bookId": "arm5-core"}])
+            self.assertEqual(len(spell["citations"]), 1)
+            self.assertIn(spell["citations"][0]["bookId"],
+                          {b.id for b in sources.BOOKS}, msg=spell["id"])
 
     def test_ids_are_unique(self):
         ids = [s["id"] for s in self.report.spells]
@@ -98,12 +101,13 @@ class RunTest(unittest.TestCase):
         # a genuine shortfall by exactly as many as there are of them.
         r = self.report
         carried_in = len(extract_spells.hand_authored_templates())
+        parsed_total = sum(i.spells_parsed for i in r.identities.values())
         self.assertEqual(
             len(r.spells) + len(r.templates) - carried_in + len(r.exceptions)
-            + len(r.blocked) + len(r.unresolved),
-            r.identity.spells_parsed,
+            + len(r.blocked) + len(r.skipped) + len(r.unresolved),
+            parsed_total,
             "a spell fell out of the report entirely -- it must appear in "
-            "exactly one bucket, blocked included")
+            "exactly one bucket, blocked and skipped included")
 
     def test_the_eight_circle_wards_carry_a_dynamic_container_mode(self):
         wards = {
@@ -131,6 +135,27 @@ class RunTest(unittest.TestCase):
             "containerMode", rows["tpl-crvi-restore-faded-threads"]
         )
 
+    def test_every_skip_carries_a_reason(self):
+        for name, reason in self.report.skipped:
+            self.assertTrue(reason.strip(), msg=name)
+
+
+class DuplicateSpellIdTest(unittest.TestCase):
+    """Exercises the real guard, not a reimplementation of it -- see
+    extract_spells._reject_duplicate_ids.
+    """
+
+    def test_two_rows_sharing_an_id_raise(self):
+        rows = [{"id": "lib-muan-x", "name": "First"},
+                {"id": "lib-muan-x", "name": "Second"}]
+        with self.assertRaises(extract_spells.DuplicateSpellId):
+            extract_spells._reject_duplicate_ids(rows)
+
+    def test_distinct_ids_do_not_raise(self):
+        rows = [{"id": "lib-muan-x", "name": "First"},
+                {"id": "lib-muan-y", "name": "Second"}]
+        extract_spells._reject_duplicate_ids(rows)  # must not raise
+
 
 class RegenerationTest(unittest.TestCase):
     """Assertion 5: running the extractor produces no diff.
@@ -149,7 +174,7 @@ class RegenerationTest(unittest.TestCase):
             extract_spells.serialize(report.spells),
             extract_spells.serialize(committed),
             msg="\n\n" + extract_spells.regeneration_failure_message(
-                provenance.load(), report.identity
+                provenance.load(), report.identities["arm5-core"]
             ),
         )
 
@@ -441,9 +466,10 @@ class WriteGateTest(unittest.TestCase):
 
     def test_report_carries_the_source_identity(self):
         report = extract_spells.run(write=False)
-        self.assertIsNotNone(report.identity.sha256)
-        self.assertEqual(len(report.identity.sha256), 64)
-        self.assertEqual(report.identity.spells_parsed, 360)
+        identity = report.identities["arm5-core"]
+        self.assertIsNotNone(identity.sha256)
+        self.assertEqual(len(identity.sha256), 64)
+        self.assertEqual(identity.spells_parsed, 360)
 
     def test_report_carries_a_design_line_per_imported_spell(self):
         report = extract_spells.run(write=False)
