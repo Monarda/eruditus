@@ -864,7 +864,7 @@ none blocking, all polish on the container-mode feature closed as item 14.
 (`lib/models/spell.dart:517-518`) is exactly
 `technique == 'Creo' && duration?.id == 'duration-momentary'` — it never looks
 at the Form. So `_withRitualDeclaration`
-(`lib/bloc/spell_creation/spell_creation_bloc.dart:717-727`) defaults **every**
+(`lib/bloc/spell_creation/spell_creation_bloc.dart:725-735`) defaults **every**
 Momentary Creo spell to `RitualDeclaration.lastingCreation`, and a Momentary
 **Creo Imaginem** or **Creo Mentem** spell is auto-declared a Ritual.
 
@@ -892,7 +892,7 @@ where the default is most often wrong.
       would need to be either re-derived or left as an explicit user choice.
       Note the prototype rule: dropping the DB is free if that is cleaner.
 - **Files:** `lib/models/spell.dart:517-518`,
-  `lib/bloc/spell_creation/spell_creation_bloc.dart:717-727`
+  `lib/bloc/spell_creation/spell_creation_bloc.dart:725-735`
 - **See also:** item 14 (the "make it catalog data" precedent)
 
 ---
