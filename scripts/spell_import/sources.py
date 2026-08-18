@@ -12,6 +12,7 @@ than the licensed corpus this importer cites as `arm5-core`.
 A third tier, `raw-md`, held unreviewed OCR and was deleted upstream (rulebook
 commit 8b6c4d6). Nothing here accommodates it any more.
 """
+import dataclasses
 import difflib
 import os
 import pathlib
@@ -22,6 +23,34 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 FOLDERS = ("reviewed", "wip")
 
 DE_TITLE = "Ars Magica - Definitive Edition (Core Rules)"
+
+
+@dataclasses.dataclass(frozen=True)
+class Book:
+    """A book the importer reads, and how to read it.
+
+    `title` is the markdown filename stem in the rulebook checkout, which is
+    NOT the display title assets/data/books.json carries -- the checkout
+    writes "Houses of Hermes - Mystery Cults" where books.json says
+    "Houses of Hermes: Mystery Cults". Deriving one from the other would be a
+    guess about punctuation across 54 filenames, so the mapping is explicit
+    and a test joins the two files.
+    """
+    id: str      # the assets/data/books.json id, e.g. "arm5-hohmc"
+    title: str   # the markdown filename stem in the rulebook checkout
+    parser: str  # a key into blocks.PARSERS
+
+
+BOOKS: tuple[Book, ...] = (
+    Book(id="arm5-core", title=DE_TITLE, parser="de"),
+)
+
+
+def book_by_id(book_id: str) -> Book:
+    for book in BOOKS:
+        if book.id == book_id:
+            return book
+    raise KeyError(f"no registered book with id {book_id!r}")
 
 
 def default_root() -> pathlib.Path:
