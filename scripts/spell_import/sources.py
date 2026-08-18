@@ -43,6 +43,11 @@ class Book:
 
 BOOKS: tuple[Book, ...] = (
     Book(id="arm5-core", title=DE_TITLE, parser="de"),
+    Book(
+        id="arm5-hohmc",
+        title="Ars Magica 5e - Houses of Hermes - Mystery Cults",
+        parser="inline",
+    ),
 )
 
 
