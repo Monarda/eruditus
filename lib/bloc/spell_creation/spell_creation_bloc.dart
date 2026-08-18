@@ -338,9 +338,28 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         draft: state.draft.copyWith(chosenSlots: updated),
       ));
     } else if (event is RangeSelected) {
+      // Range and Target are peers, so this prunes in the opposite direction
+      // from _withPrunedScopedParameters, whose Technique/Form axes are always
+      // upstream. Core 12086 is the rule: a Personal Range forbids a container
+      // Target. The field just edited wins and the conflicting peer yields --
+      // the same rule TargetSelected applies to containerMode below.
+      //
+      // The mode is cleared with the Target rather than left behind: a mode
+      // outliving its Target reattaches to the next container chosen, which is
+      // what check 9 then rejects with no visible cause (todo item 58).
+      final targetKind = state.draft.target?.targetType;
+      final clearsTarget = targetKind != null &&
+          event.parameter.forbidsTargetTypes.contains(targetKind);
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
-        draft: state.draft.copyWith(range: event.parameter),
+        draft: state.draft.copyWith(
+          range: event.parameter,
+          // Explicit null clears (the _unset sentinel); passing the current
+          // value is a no-op.
+          target: clearsTarget ? null : state.draft.target,
+          // null here means "leave alone" -- containerMode uses `??`.
+          containerMode: clearsTarget ? ContainerMode.unstated : null,
+        ),
       ));
     } else if (event is DurationSelected) {
       _emit(emit, state.copyWith(
@@ -361,9 +380,29 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // Individual is precisely what validateSpellAgainstCatalog's check 9
       // rejects, so the save would fail with no visible cause. Conditional on
       // the *new* Target's kind, so Room -> Structure keeps the choice.
+      //
+      // A Target may dictate its Range (HoH:MC 1006, the Sensory Targets) or be
+      // forbidden by the Range already chosen (core 12086). The first wins over
+      // the second: a Target that names its own Range cannot conflict with it.
+      final requiredRangeId = event.parameter.requiresRangeId;
+      final currentRange = state.draft.range;
+      final Parameter? nextRange;
+      if (requiredRangeId != null) {
+        nextRange = spellEngine.allParameters
+                .firstWhereOrNull((p) => p.id == requiredRangeId) ??
+            currentRange;
+      } else if (currentRange != null &&
+          event.parameter.targetType != null &&
+          currentRange.forbidsTargetTypes.contains(event.parameter.targetType)) {
+        nextRange = null;
+      } else {
+        nextRange = currentRange;
+      }
+
       final keepsMode = _isContainer(event.parameter);
       final draft = _withPrunedModifiers(state.draft.copyWith(
         target: event.parameter,
+        range: nextRange,
         containerMode: keepsMode ? null : ContainerMode.unstated,
       ));
       _emit(emit, state.copyWith(
