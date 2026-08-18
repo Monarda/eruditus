@@ -9,10 +9,12 @@ parser changes and no spells: this is the foundation sub-project B consumes.
 **This spec was revised once, during review.** It began as a data-only change.
 Checking whether the Sensory Magic restrictions were implementable — rather than
 asserting they were not — showed that one of them has an extension point already
-waiting for it, and that taking it forces a latent bug in the creation bloc to
-be closed at the same time. Both are now in scope. The section *Why the
-Intellego exclusion pulls in more than a field* records that chain, because the
-cost is not obvious from the change's size.
+waiting for it, which pulls the pruning helper's behaviour and name into scope
+alongside it. That check also raised whether item 58's `containerMode` bullet
+was still live; investigating it, rather than trusting it, found the hole had
+already been closed by unrelated work, so nothing there needed fixing. The
+section *Why the Intellego exclusion pulls in more than a field* records both
+threads, because neither's cost is obvious from the change's size.
 
 ## Why this is one of three
 
@@ -182,8 +184,10 @@ Each of the five Sensory Target rows carries
 
 ### Why the Intellego exclusion pulls in more than a field
 
-A Technique axis on a *Target* is new, and three things follow from it. None is
-optional: skipping any one ships a defect.
+A Technique axis on a *Target* is new, and three things follow from checking
+it. Two are not optional: skipping either ships a defect. The third is a
+record correction, not a code change, and skipping it ships no defect — it
+just leaves a stale bullet on the books.
 
 **`TechniqueSelected` must prune.** `_withPrunedFormScopedParameters`
 (`spell_creation_bloc.dart:604`) is called from exactly one place —
@@ -279,7 +283,7 @@ coverage.
 - **Per-spell static/dynamic container rulings** — sub-project B.
 - **Any parser change** — sub-project B.
 - **The rest of the Sensory Magic restrictions** (lines 1005-1011), filed as
-  todo item 64 rather than deferred silently. An earlier draft of this spec
+  todo item 67 rather than deferred silently. An earlier draft of this spec
   dismissed all of them with one reason — "the app has no Virtue model" — which
   is true of three and false of two. The accurate position, per restriction:
 
