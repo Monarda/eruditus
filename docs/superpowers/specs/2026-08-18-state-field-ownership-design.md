@@ -37,6 +37,10 @@ three classes, and `_emit`'s doc comment names all three:
 | Funnel-invalidated | `validationErrors` (on `draftChanged`); `suggestions`, `suggestionLevels`, `ritualSuggestionIds` (on `breakdownChanged`) | Cleared by predicate; only a handler populates |
 | One-shot payload | `errorMessage`, **`savedSpell`** | Not carried forward by `copyWith`; `_emit` re-passes `next.<field>` |
 
+`status` and `draft` are outside all three classes, as this funnel's inputs
+rather than its output; and the first class's first two fields are functions of
+the draft *and* the engine's catalogs, not the draft alone.
+
 No field is left hand-maintained across handlers. That is the whole content of
 item 62.
 
@@ -65,9 +69,13 @@ above it.
 
 **This is behaviour-preserving.** All 25 handlers were checked:
 
-- `SpellDiscarded`, the save-success emit and `TemplateInstantiated` build from
+- `SpellDiscarded` and the save-success emit build from
   `SpellCreationState.initial()` over a draft with no `baseEffect`, so the
   funnel computes `null` — exactly what they emit today.
+- `TemplateInstantiated` also builds from `initial()`, but its draft always has a
+  `baseEffect`: `ResolvedTemplate.isResolved` requires one and the handler
+  early-returns without it. It was one of the five explicit call sites, so the
+  funnel recomputes the identical sentence from the identical draft.
 - The save-failure emit re-emits `state` with a draft differing only in
   `summary`, which moves neither input.
 - `AvailableModifiersSynced` and `AvailableParametersSynced` cannot move the

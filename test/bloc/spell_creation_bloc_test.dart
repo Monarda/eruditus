@@ -541,6 +541,38 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
+    'savedSpell does not outlive the save it describes',
+    // It is the payload of `status: saved`, exactly as errorMessage is the
+    // payload of `status: error`: meaningful in the emit that writes it, stale
+    // in every emit after. The snack bar reads it from a listener gated on that
+    // status; nothing else may find it still sitting there one edit later.
+    //
+    // The follow-up event is added without waiting, which is safe and is half
+    // the point: the bloc processes events strictly in arrival order, so this
+    // RangeSelected lands on the state the completed save emitted.
+    build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellSaveRequested('My Fireball', summary: 'A jet of flame.'));
+      bloc.add(RangeSelected(rangeParam));
+    },
+    wait: const Duration(milliseconds: 300),
+    verify: (bloc) async {
+      // That the save actually succeeded, so a save that merely failed cannot
+      // pass this test by leaving savedSpell null for the wrong reason.
+      final saved = await spellRepository.getAllUserSpells();
+      expect(saved.length, 1);
+      expect(bloc.state.status, SpellCreationStatus.editing);
+      expect(bloc.state.savedSpell, isNull);
+    },
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
     'a summary supplied at save time reaches the saved spell',
     build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
     act: (bloc) {
@@ -1910,6 +1942,20 @@ void main() {
         ..add(const ChosenBaseLevelChanged(20))
         ..add(BaseEffectSelected(creoIgnemEffect)),
       verify: (bloc) => expect(bloc.state.generalEffectSentence, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'generalEffectSentence survives an edit that moves neither of its inputs',
+      // The funnel recomputes it on every emit now, rather than copyWith
+      // carrying it forward, so every event is a fresh chance to get it wrong
+      // -- including the great majority that touch neither the base effect nor
+      // the chosen level. RangeSelected stands for all of them.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(RangeSelected(rangeParam)),
+      verify: (bloc) => expect(bloc.state.generalEffectSentence, contains('20')),
     );
   });
 

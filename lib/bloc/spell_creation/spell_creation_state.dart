@@ -44,6 +44,13 @@ class SpellCreationState extends Equatable {
   // Ids of suggestions that are themselves Ritual spells, so cards can show
   // the same Ritual chip the library screen shows.
   final Set<String> ritualSuggestionIds;
+  /// The spell the save that produced this state wrote, and only that.
+  ///
+  /// Non-null exactly in the state the save-success branch emits, alongside
+  /// `status: saved` — [copyWith] does not carry it forward, so the next emit
+  /// that does not re-state it drops it. Same rule as [errorMessage], and for
+  /// the same reason: both are payloads for a status, not state that
+  /// accumulates.
   final Spell? savedSpell;
   final String? errorMessage;
   /// The rendered strength of a General guideline at the chosen level, or null
@@ -108,18 +115,26 @@ class SpellCreationState extends Equatable {
       suggestions: suggestions ?? this.suggestions,
       suggestionLevels: suggestionLevels ?? this.suggestionLevels,
       ritualSuggestionIds: ritualSuggestionIds ?? this.ritualSuggestionIds,
-      savedSpell: savedSpell ?? this.savedSpell,
+      // The same rule as errorMessage below, for the same reason: a payload for
+      // the status that carries it, not state. Not carried forward, so it is
+      // readable only in the emit that writes it -- the save-success emit,
+      // whose `status: saved` is what the snack bar's listener is gated on.
+      // Carried forward, as it was until todo item 62, it survived every later
+      // edit, calculate and failed save, and any read not gated on that status
+      // got whatever had last been saved this session.
+      savedSpell: savedSpell,
       // Unlike the other fields, errorMessage is NOT carried forward via a
       // `?? this.errorMessage` fallback: every emit implicitly clears a
       // stale error unless the handler explicitly re-passes one, matching
       // the convention already used by SpellLibraryState/ConfigurationState.
       errorMessage: errorMessage,
-      // Unlike errorMessage, generalEffectSentence must be *clearable*
-      // without being wiped on every emit: only the four handlers that can
-      // change baseEffect or chosenBaseLevel ever recompute it, and every
-      // other emit needs to carry the existing value forward untouched. A
-      // plain `?? this.generalEffectSentence` can't tell "omitted" from
-      // "explicitly cleared to null" apart, so this uses the same
+      // Unlike errorMessage, generalEffectSentence must be *clearable* rather
+      // than merely droppable, for the same reason breakdown above is: the
+      // emit funnel writes it on every pass, from the draft, and "this draft
+      // has no sentence" is a real answer it has to be able to give. A plain
+      // `?? this.generalEffectSentence` cannot tell "omitted" from "explicitly
+      // cleared to null" apart, and would strand a General guideline's
+      // strength on screen after the guideline itself had been replaced. Same
       // `_unset`-sentinel trick as SpellDraft.copyWith.
       generalEffectSentence: identical(generalEffectSentence, _unset)
           ? this.generalEffectSentence

@@ -17,8 +17,10 @@
   formatter is not clean here. Indent by hand and check your diff with
   `git diff -w` to confirm you changed only what you meant to.
 - **`flutter analyze` must exit 0.** Run it before every commit.
-- **Full suite command:** `flutter test`. It must stay green (662 tests at the
-  time of writing).
+- **Full suite command:** `flutter test`. It must stay green. The measured
+  baseline on this branch is **719 tests**. (`.superpowers/todo.md:47` claims
+  662; that line was already stale before this work, and Task 3 Step 4 corrects
+  it.)
 - If `flutter test` reports a **sqlite3.dll permissions error**, that is stale
   `flutter_tester.exe` processes holding the DLL, not a real permissions
   problem. Kill them and re-run: `taskkill /F /IM flutter_tester.exe`
@@ -535,9 +537,9 @@ flutter test
 flutter analyze
 ```
 
-Expected: all tests PASS — 664 now, the 662 baseline plus this plan's two — and
-analyzer 0. Record the actual number you see; you need it in Step 4. If the
-sqlite3.dll error appears, see Global Constraints.
+Expected: all tests PASS — 721 now, the 719 measured baseline plus this plan's
+two — and analyzer 0. Record the actual number you see; you need it in Step 4.
+If the sqlite3.dll error appears, see Global Constraints.
 
 - [ ] **Step 2: Get the commit range**
 

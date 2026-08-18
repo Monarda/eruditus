@@ -83,9 +83,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// It is also this state's invalidation point: it clears
   /// [SpellCreationState.validationErrors] whenever the draft moves, and the
   /// three suggestion fields whenever the *level* moves. Those are two
-  /// different predicates on purpose -- see the two comments below. (One field
-  /// it deliberately does not own is `generalEffectSentence`, still recomputed
-  /// at its handlers' call sites; see todo item 62.)
+  /// different predicates on purpose -- see the two comments below.
+  ///
+  /// Between them, this funnel and [SpellCreationState.copyWith] leave every
+  /// *derived* field of the state under exactly one of three rules, with none
+  /// of them hand-maintained across handlers (todo item 62):
+  ///
+  ///   * **Computed here** -- `breakdown`, `levelUnavailableReason`,
+  ///     `generalEffectSentence`, recomputed unconditionally on every pass. A
+  ///     handler never passes one, and passing one would be overwritten. The
+  ///     first two are functions of the draft *and the engine's catalogs* --
+  ///     which is the whole reason a catalog sync re-emits an untouched state;
+  ///     see `breakdownChanged` below. Only `generalEffectSentence` is a
+  ///     function of the draft alone.
+  ///   * **Invalidated here** -- `validationErrors` on `draftChanged`, the
+  ///     three suggestion fields on `breakdownChanged`. Cleared by predicate,
+  ///     never populated here; only the handler that computes them fills them.
+  ///   * **One-shot payloads** -- `errorMessage`, `savedSpell`. copyWith
+  ///     carries neither forward, so any handler that does not re-state one
+  ///     drops it, which is why both are re-passed below. That rule is written
+  ///     for handler emits, and the limit is worth knowing: the two sync
+  ///     handlers pass `state` straight back in, so a payload can outlive the
+  ///     emit that wrote it by exactly one catalog sync.
+  ///
+  /// `status` and `draft` sit outside all three, because they are this
+  /// funnel's *inputs*: the handler owns them and copyWith carries them
+  /// forward. A new *derived* field belongs to one of the three; a new
+  /// *handler* need do nothing about any of them.
   void _emit(Emitter<SpellCreationState> emit, SpellCreationState next) {
     final preview = spellEngine.previewLevel(next.draft);
 
@@ -114,16 +138,26 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     emit(next.copyWith(
       breakdown: preview.breakdown,
       levelUnavailableReason: preview.unavailableReason,
-      // Re-passed rather than omitted, and it is the only field that needs to
-      // be. SpellCreationState.copyWith deliberately does *not* carry
-      // errorMessage forward -- every emit clears a stale error unless the
-      // handler re-states one -- and that rule is written for handler emits,
-      // not for this pass-through. Omitted here, the copyWith that attaches the
-      // level would silently swallow the message _handleSpellSaveRequested's
-      // catch branch had just set, and a failed save would render an error
-      // status with nothing to show for it. Every other field either carries
-      // forward via `??` or through the `_unset` sentinel.
+      // The third field computed here, and the newest. Like the level it is a
+      // pure function of the draft -- SpellEngine.deriveGeneralEffect reads
+      // baseEffect.effectFormula and chosenBaseLevel and consults no catalog,
+      // so there is no sync event that can move it without the draft moving --
+      // and like the level, no handler should have to remember it and none can
+      // forget. It was recomputed at five handler call sites until todo item
+      // 62. All five were correct, which is exactly why the sixth was the risk.
+      generalEffectSentence: _generalEffectSentenceFor(next.draft),
+      // The two one-shot payloads, re-passed rather than omitted, and the only
+      // fields that need to be. SpellCreationState.copyWith deliberately
+      // carries neither forward -- every emit clears a stale error, and a stale
+      // saved spell, unless the handler re-states one -- and that rule is
+      // written for handler emits, not for this pass-through. Omitted here, the
+      // copyWith that attaches the level would silently swallow whichever one
+      // _handleSpellSaveRequested had just set: its catch branch's message, so
+      // a failed save renders an error status with nothing to show for it, or
+      // its success branch's spell, so the snack bar names nothing. Every other
+      // field either carries forward via `??` or through the `_unset` sentinel.
       errorMessage: next.errorMessage,
+      savedSpell: next.savedSpell,
       // Validation errors describe the *draft* they were computed from, which
       // is why this one is on `draftChanged` and the three below are not.
       // "Target must be selected" and "Requisite art cannot be the spell's own
@@ -229,7 +263,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
-        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is FormSelected) {
       final previousReference = _referenceOf(state.draft);
@@ -252,7 +285,6 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
-        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is BaseEffectSelected) {
       // Captured before the draft moves: the seed keeps any parameter the
@@ -292,14 +324,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
-        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is ChosenBaseLevelChanged) {
       final draft = state.draft.copyWith(chosenBaseLevel: event.level);
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
-        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is OpenSlotChosen) {
       final updated = {...state.draft.chosenSlots, event.kind: event.value};
@@ -509,13 +539,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
 
       // From SpellCreationState.initial(), not state.copyWith(...): stale
       // suggestions left over from whatever the user was doing before must not
-      // follow them into the new spell. The level halves are not carried over
-      // either, but they need no clearing here: the funnel overwrites both
-      // from this draft on the way out.
+      // follow them into the new spell. The level halves and the general-effect
+      // sentence are not carried over either, but they need no clearing here:
+      // the funnel computes all three from this draft on the way out.
       _emit(emit, SpellCreationState.initial().copyWith(
         status: SpellCreationStatus.editing,
         draft: draft,
-        generalEffectSentence: _generalEffectSentenceFor(draft),
       ));
     } else if (event is SpellCalculated) {
       _handleSpellCalculated(emit);
