@@ -36,7 +36,7 @@ void main() {
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });
 
-  test('loadParameters loads all 34 built-in parameters', () async {
+  test('loadParameters loads all 39 built-in parameters', () async {
     final parameters = await loader.loadParameters();
 
     expect(parameters.length, 39);
@@ -128,7 +128,9 @@ void main() {
     );
   });
 
-  test('exactly the Faerie Magic and Symbolic Magic parameters are flagged requiresVirtue', () async {
+  test(
+      'exactly the Faerie Magic, Symbolic Magic and Sensory Magic parameters '
+      'are flagged requiresVirtue', () async {
     final parameters = await loader.loadParameters();
 
     final byVirtue = <String, Set<String>>{};
@@ -137,6 +139,9 @@ void main() {
       byVirtue.putIfAbsent(parameter.requiresVirtue!, () => {}).add(parameter.id);
     }
 
+    // Asserted over the key set too, not just each group's members: without
+    // it, a sixth virtue group could be added tomorrow with nothing failing.
+    expect(byVirtue.keys, {'Faerie Magic', 'Symbolic Magic', 'Sensory Magic'});
     expect(byVirtue['Faerie Magic'], {
       'range-road', 'duration-bargain', 'duration-fire',
       'duration-until-condition', 'duration-year-plus-one', 'target-bloodline',
@@ -144,9 +149,13 @@ void main() {
     expect(byVirtue['Symbolic Magic'], {
       'range-symbol', 'duration-symbol', 'target-symbol',
     });
+    expect(byVirtue['Sensory Magic'], {
+      'target-flavor', 'target-texture', 'target-scent',
+      'target-sound', 'target-spectacle',
+    });
   });
 
-  test('every Target declares a targetType, and exactly four are containers',
+  test('every Target declares a targetType, and exactly six are containers',
       () async {
     final parameters = await loader.loadParameters();
     final targets = parameters.where((p) => p.category == 'Target').toList();
