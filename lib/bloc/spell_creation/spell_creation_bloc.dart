@@ -96,9 +96,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   ///   * **Invalidated here** -- `validationErrors` on `draftChanged`, the
   ///     three suggestion fields on `breakdownChanged`. Cleared by predicate,
   ///     never populated here; only the handler that computes them fills them.
-  ///   * **One-shot payloads** -- `errorMessage`. copyWith does not carry it
-  ///     forward, so it is readable only in the emit that writes it, which is
-  ///     why it is re-passed below.
+  ///   * **One-shot payloads** -- `errorMessage`, `savedSpell`. copyWith
+  ///     carries neither forward, so each is readable only in the emit that
+  ///     writes it, which is why both are re-passed below.
   ///
   /// A new field belongs to one of the three. A new *handler* need do nothing
   /// about any of them.
@@ -138,16 +138,18 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // forget. It was recomputed at five handler call sites until todo item
       // 62. All five were correct, which is exactly why the sixth was the risk.
       generalEffectSentence: _generalEffectSentenceFor(next.draft),
-      // Re-passed rather than omitted, and it is the only field that needs to
-      // be. SpellCreationState.copyWith deliberately does *not* carry
-      // errorMessage forward -- every emit clears a stale error unless the
-      // handler re-states one -- and that rule is written for handler emits,
-      // not for this pass-through. Omitted here, the copyWith that attaches the
-      // level would silently swallow the message _handleSpellSaveRequested's
-      // catch branch had just set, and a failed save would render an error
-      // status with nothing to show for it. Every other field either carries
-      // forward via `??` or through the `_unset` sentinel.
+      // The two one-shot payloads, re-passed rather than omitted, and the only
+      // fields that need to be. SpellCreationState.copyWith deliberately
+      // carries neither forward -- every emit clears a stale error, and a stale
+      // saved spell, unless the handler re-states one -- and that rule is
+      // written for handler emits, not for this pass-through. Omitted here, the
+      // copyWith that attaches the level would silently swallow whichever one
+      // _handleSpellSaveRequested had just set: its catch branch's message, so
+      // a failed save renders an error status with nothing to show for it, or
+      // its success branch's spell, so the snack bar names nothing. Every other
+      // field either carries forward via `??` or through the `_unset` sentinel.
       errorMessage: next.errorMessage,
+      savedSpell: next.savedSpell,
       // Validation errors describe the *draft* they were computed from, which
       // is why this one is on `draftChanged` and the three below are not.
       // "Target must be selected" and "Requisite art cannot be the spell's own

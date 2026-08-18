@@ -44,6 +44,12 @@ class SpellCreationState extends Equatable {
   // Ids of suggestions that are themselves Ritual spells, so cards can show
   // the same Ritual chip the library screen shows.
   final Set<String> ritualSuggestionIds;
+  /// The spell the save that produced this state wrote, and only that.
+  ///
+  /// Non-null exactly in the state the save-success branch emits, alongside
+  /// `status: saved` — [copyWith] does not carry it forward, so the next emit
+  /// of any kind drops it. Same rule as [errorMessage], and for the same
+  /// reason: both are payloads for a status, not state that accumulates.
   final Spell? savedSpell;
   final String? errorMessage;
   /// The rendered strength of a General guideline at the chosen level, or null
@@ -108,7 +114,14 @@ class SpellCreationState extends Equatable {
       suggestions: suggestions ?? this.suggestions,
       suggestionLevels: suggestionLevels ?? this.suggestionLevels,
       ritualSuggestionIds: ritualSuggestionIds ?? this.ritualSuggestionIds,
-      savedSpell: savedSpell ?? this.savedSpell,
+      // The same rule as errorMessage below, for the same reason: a payload for
+      // the status that carries it, not state. Not carried forward, so it is
+      // readable only in the emit that writes it -- the save-success emit,
+      // whose `status: saved` is what the snack bar's listener is gated on.
+      // Carried forward, as it was until todo item 62, it survived every later
+      // edit, calculate and failed save, and any read not gated on that status
+      // got whatever had last been saved this session.
+      savedSpell: savedSpell,
       // Unlike the other fields, errorMessage is NOT carried forward via a
       // `?? this.errorMessage` fallback: every emit implicitly clears a
       // stale error unless the handler explicitly re-passes one, matching
