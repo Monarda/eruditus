@@ -65,9 +65,13 @@ above it.
 
 **This is behaviour-preserving.** All 25 handlers were checked:
 
-- `SpellDiscarded`, the save-success emit and `TemplateInstantiated` build from
+- `SpellDiscarded` and the save-success emit build from
   `SpellCreationState.initial()` over a draft with no `baseEffect`, so the
   funnel computes `null` — exactly what they emit today.
+- `TemplateInstantiated` also builds from `initial()`, but its draft always has a
+  `baseEffect`: `ResolvedTemplate.isResolved` requires one and the handler
+  early-returns without it. It was one of the five explicit call sites, so the
+  funnel recomputes the identical sentence from the identical draft.
 - The save-failure emit re-emits `state` with a draft differing only in
   `summary`, which moves neither input.
 - `AvailableModifiersSynced` and `AvailableParametersSynced` cannot move the

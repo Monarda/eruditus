@@ -917,10 +917,14 @@ inside, and the doc comment names the rule every field of the state follows.
 - **`generalEffectSentence` moved on the same argument as the level.**
   `SpellEngine.deriveGeneralEffect` reads `baseEffect.effectFormula` and
   `chosenBaseLevel` and consults no catalog, so it is `f(draft)` and there is no
-  sync event that can move it without the draft moving. Behaviour-preserving, and
-  recorded as such: the three handlers building from `initial()` emit over a
-  draft with no base effect, where the funnel computes the null they already
-  emitted.
+  sync event that can move it without the draft moving. Behaviour-preserving in
+  two different ways, which is worth stating because only one of them is the
+  obvious one. `SpellDiscarded` and the save-success emit build from
+  `_emptySeededDraft()`, whose draft has no base effect, so the funnel computes
+  the null they already emitted. `TemplateInstantiated` is the opposite case: its
+  draft always *has* a base effect — `isResolved` requires one and the handler
+  early-returns without it — and it was one of the five explicit call sites, so
+  the funnel recomputes exactly the sentence that call site used to pass.
 - **`savedSpell` took `errorMessage`'s rule.** It was the one field with no rule
   at all — `savedSpell ?? this.savedSpell` carried it through every later edit,
   calculate and failed save. Its only reader is gated on `status == saved`, which
