@@ -84,6 +84,22 @@ class Parameter {
   /// screen, which offers the container-mode control only for a container.
   final TargetType? targetType;
 
+  /// Target kinds this parameter may never be combined with.
+  ///
+  /// Only `range-personal` sets it, from Core Rules 12086: "Personal Range
+  /// spells can never have a container Target (such as Circle, Room, or
+  /// Structure)."
+  ///
+  /// Keyed on [TargetType], not on target ids, because that is how the rule is
+  /// written — "such as" is illustrative, and Boundary is a container too
+  /// (12146). Keying on the kind covers Boundary and any future container row
+  /// with no data edit.
+  ///
+  /// The *forbidding* half of the cross-field pair; [requiresRangeId] is the
+  /// forcing half. They are separate fields because a "must not" has no value
+  /// to impose and can only remove options, while a "must" can be auto-set.
+  final List<TargetType> forbidsTargetTypes;
+
   final Provenance provenance;
 
   Parameter({
@@ -95,6 +111,7 @@ class Parameter {
     this.requiresVirtue,
     this.scope = const ParameterScope(),
     this.targetType,
+    this.forbidsTargetTypes = const [],
     required this.provenance,
   });
 
@@ -106,6 +123,8 @@ class Parameter {
     'requiresRitual': requiresRitual,
     if (requiresVirtue != null) 'requiresVirtue': requiresVirtue,
     if (targetType != null) 'targetType': targetType!.name,
+    if (forbidsTargetTypes.isNotEmpty)
+      'forbidsTargetTypes': forbidsTargetTypes.map((t) => t.name).toList(),
     'scope': scope.toMap(),
     ...provenance.toMap(),
   };
@@ -123,6 +142,10 @@ class Parameter {
     targetType: map['targetType'] == null
         ? null
         : targetTypeFromName(map['targetType'] as String, 'Parameter'),
+    forbidsTargetTypes: (map['forbidsTargetTypes'] as List?)
+            ?.map((n) => targetTypeFromName(n as String, 'Parameter'))
+            .toList() ??
+        const [],
     provenance: Provenance.fromMap(map),
   );
 

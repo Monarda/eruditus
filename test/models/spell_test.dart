@@ -732,6 +732,7 @@ void main() {
       Map<String, String> chosenSlots = const {},
       List<Modifier> modifiers = const [],
       bool isTemplate = false,
+      Parameter? range,
       Parameter? target,
       ContainerMode containerMode = ContainerMode.unstated,
     }) =>
@@ -746,6 +747,7 @@ void main() {
           chosenSlots: chosenSlots,
           modifiers: modifiers,
           isTemplate: isTemplate,
+          range: range,
           target: target,
           containerMode: containerMode,
         );
@@ -937,6 +939,7 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        range: null,
         target: null,
         containerMode: ContainerMode.unstated,
         modifiers: const [],
@@ -959,6 +962,7 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        range: null,
         target: null,
         containerMode: ContainerMode.unstated,
         modifiers: const [],
@@ -981,6 +985,7 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        range: null,
         target: null,
         containerMode: ContainerMode.unstated,
         modifiers: const [],
@@ -1003,6 +1008,7 @@ void main() {
         requisites: const {},
         selectedModifiers: const {},
         chosenSlots: const {},
+        range: null,
         target: null,
         containerMode: ContainerMode.unstated,
         modifiers: const [],
@@ -1087,6 +1093,78 @@ void main() {
       // comment claimed a guarantee it cannot provide. The Momentary rule is
       // pinned where it is actually executable, in spellOwesContainerMode's
       // group below. Do not add one here.
+    });
+
+    test('check 10: Personal Range with a container Target is rejected', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Creo', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final personal = Parameter(
+        id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+        forbidsTargetTypes: const [TargetType.container],
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final room = Parameter(
+        id: 'target-room', name: 'Room', category: 'Target', magnitude: 2,
+        targetType: TargetType.container,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Creo',
+        form: 'Ignem',
+        analogyRationale: null,
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        range: personal,
+        target: room,
+        containerMode: ContainerMode.unstated,
+        modifiers: const [],
+      );
+
+      expect(problems, hasLength(1));
+      expect(problems.single, contains('Personal'));
+      expect(problems.single, contains('Room'));
+    });
+
+    test('check 10: Personal Range with a sensorium Target is valid', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Creo', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final personal = Parameter(
+        id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+        forbidsTargetTypes: const [TargetType.container],
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final sound = Parameter(
+        id: 'target-sound', name: 'Sound', category: 'Target', magnitude: 3,
+        targetType: TargetType.sensorium,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Creo',
+        form: 'Ignem',
+        analogyRationale: null,
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        range: personal,
+        target: sound,
+        containerMode: ContainerMode.unstated,
+        modifiers: const [],
+      );
+
+      expect(problems, isEmpty);
     });
   });
 

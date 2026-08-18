@@ -4,6 +4,7 @@
     "name": "Personal",
     "category": "Range",
     "magnitude": 0,
+    "forbidsTargetTypes": ["container"],
     "source": "published",
     "citations": [
       {

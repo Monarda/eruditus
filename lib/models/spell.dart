@@ -98,6 +98,7 @@ List<String> validateSpellAgainstCatalog({
   required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
   required Map<String, String> chosenSlots,
+  required Parameter? range,
   required Parameter? target,
   required ContainerMode containerMode,
   required List<Modifier> modifiers,
@@ -227,6 +228,26 @@ List<String> validateSpellAgainstCatalog({
     problems.add(
       'A container mode applies only to a container Target, and '
       '${target.name} is not one',
+    );
+  }
+
+  // 10. Core Rules 12086: "Personal Range spells can never have a container
+  //     Target (such as Circle, Room, or Structure)." The first constraint in
+  //     this catalog where one parameter forbids another's value, rather than
+  //     forcing Ritual status or removing an option from a picker.
+  //
+  //     A null Range or Target skips this, matching check 9's tolerance: an id
+  //     the catalog cannot resolve is ResolvedSpell.isResolved's problem, not
+  //     this function's. Not wrapped in `if (!isTemplate)` — a template's Range
+  //     and Target are as fully its own as a spell's, and nothing about
+  //     instantiation supplies a Range.
+  final targetKind = target?.targetType;
+  if (range != null &&
+      targetKind != null &&
+      range.forbidsTargetTypes.contains(targetKind)) {
+    problems.add(
+      '${range.name} Range cannot be combined with ${target!.name}, '
+      'which is a ${targetKind.name} Target',
     );
   }
 
