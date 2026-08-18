@@ -38,8 +38,9 @@ reason the guidelines don't apply to it (item 46).
 > **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**
 > — plus `unreviewed: 3`, see below.
 
-**Suite status, Dart and Python re-run 2026-08-17 after item 29 (the ledger task
-and the modifier task each added a test); Integration last run 2026-08-17 after
+**Suite status: Dart re-run 2026-08-18 after item 62 (the state-field-ownership
+work added tests); Python re-run 2026-08-17 after item 29 (the ledger task and
+the modifier task each added a test); Integration last run 2026-08-17 after
 item 13:**
 
 | Suite | Command | Result |
@@ -863,7 +864,7 @@ none blocking, all polish on the container-mode feature closed as item 14.
 (`lib/models/spell.dart:517-518`) is exactly
 `technique == 'Creo' && duration?.id == 'duration-momentary'` — it never looks
 at the Form. So `_withRitualDeclaration`
-(`lib/bloc/spell_creation/spell_creation_bloc.dart:696-706`) defaults **every**
+(`lib/bloc/spell_creation/spell_creation_bloc.dart:717-727`) defaults **every**
 Momentary Creo spell to `RitualDeclaration.lastingCreation`, and a Momentary
 **Creo Imaginem** or **Creo Mentem** spell is auto-declared a Ritual.
 
@@ -891,7 +892,7 @@ where the default is most often wrong.
       would need to be either re-derived or left as an explicit user choice.
       Note the prototype rule: dropping the DB is free if that is cleaner.
 - **Files:** `lib/models/spell.dart:517-518`,
-  `lib/bloc/spell_creation/spell_creation_bloc.dart:696-706`
+  `lib/bloc/spell_creation/spell_creation_bloc.dart:717-727`
 - **See also:** item 14 (the "make it catalog data" precedent)
 
 ---
@@ -906,14 +907,16 @@ linked spec/plan or git history for detail.
 draft's stale halves are settled — while two fields sat outside it. Both are now
 inside, and the doc comment names the rule every field of the state follows.
 
-- **Three rules, and every field is under one of them.** Computed from the draft
-  in the funnel (`breakdown`, `levelUnavailableReason`, `generalEffectSentence`);
-  invalidated in the funnel by predicate (`validationErrors` on `draftChanged`,
-  the three suggestion fields on `breakdownChanged`); or a one-shot payload that
-  `copyWith` drops and the funnel re-passes (`errorMessage`, `savedSpell`). A new
-  field picks one. A new handler does nothing for any of them — which was the
-  whole point, since all five old `generalEffectSentence` call sites were correct
-  and the exposure was only ever the sixth.
+- **Three rules, and every *derived* field is under one of them** — `status` and
+  `draft` sit outside all three, as the funnel's inputs rather than its output.
+  Computed from the draft in the funnel (`breakdown`, `levelUnavailableReason`,
+  `generalEffectSentence`); invalidated in the funnel by predicate
+  (`validationErrors` on `draftChanged`, the three suggestion fields on
+  `breakdownChanged`); or a one-shot payload that `copyWith` drops and the
+  funnel re-passes (`errorMessage`, `savedSpell`). A new field picks one. A new
+  handler does nothing for any of them — which was the whole point, since all
+  five old `generalEffectSentence` call sites were correct and the exposure was
+  only ever the sixth.
 - **`generalEffectSentence` moved on the same argument as the level.**
   `SpellEngine.deriveGeneralEffect` reads `baseEffect.effectFormula` and
   `chosenBaseLevel` and consults no catalog, so it is `f(draft)` and there is no

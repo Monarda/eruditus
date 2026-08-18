@@ -37,6 +37,10 @@ three classes, and `_emit`'s doc comment names all three:
 | Funnel-invalidated | `validationErrors` (on `draftChanged`); `suggestions`, `suggestionLevels`, `ritualSuggestionIds` (on `breakdownChanged`) | Cleared by predicate; only a handler populates |
 | One-shot payload | `errorMessage`, **`savedSpell`** | Not carried forward by `copyWith`; `_emit` re-passes `next.<field>` |
 
+`status` and `draft` are outside all three classes, as this funnel's inputs
+rather than its output; and the first class's first two fields are functions of
+the draft *and* the engine's catalogs, not the draft alone.
+
 No field is left hand-maintained across handlers. That is the whole content of
 item 62.
 

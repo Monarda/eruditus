@@ -86,22 +86,30 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// different predicates on purpose -- see the two comments below.
   ///
   /// Between them, this funnel and [SpellCreationState.copyWith] leave every
-  /// field of the state under exactly one of three rules, with none of them
-  /// hand-maintained across handlers (todo item 62):
+  /// *derived* field of the state under exactly one of three rules, with none
+  /// of them hand-maintained across handlers (todo item 62):
   ///
-  ///   * **Computed here, from the draft** -- `breakdown`,
-  ///     `levelUnavailableReason`, `generalEffectSentence`. Pure functions of
-  ///     `next.draft`, recomputed unconditionally on every pass. A handler
-  ///     never passes one, and passing one would be overwritten.
+  ///   * **Computed here** -- `breakdown`, `levelUnavailableReason`,
+  ///     `generalEffectSentence`, recomputed unconditionally on every pass. A
+  ///     handler never passes one, and passing one would be overwritten. The
+  ///     first two are functions of the draft *and the engine's catalogs* --
+  ///     which is the whole reason a catalog sync re-emits an untouched state;
+  ///     see `breakdownChanged` below. Only `generalEffectSentence` is a
+  ///     function of the draft alone.
   ///   * **Invalidated here** -- `validationErrors` on `draftChanged`, the
   ///     three suggestion fields on `breakdownChanged`. Cleared by predicate,
   ///     never populated here; only the handler that computes them fills them.
   ///   * **One-shot payloads** -- `errorMessage`, `savedSpell`. copyWith
-  ///     carries neither forward, so each is readable only in the emit that
-  ///     writes it, which is why both are re-passed below.
+  ///     carries neither forward, so any handler that does not re-state one
+  ///     drops it, which is why both are re-passed below. That rule is written
+  ///     for handler emits, and the limit is worth knowing: the two sync
+  ///     handlers pass `state` straight back in, so a payload can outlive the
+  ///     emit that wrote it by exactly one catalog sync.
   ///
-  /// A new field belongs to one of the three. A new *handler* need do nothing
-  /// about any of them.
+  /// `status` and `draft` sit outside all three, because they are this
+  /// funnel's *inputs*: the handler owns them and copyWith carries them
+  /// forward. A new *derived* field belongs to one of the three; a new
+  /// *handler* need do nothing about any of them.
   void _emit(Emitter<SpellCreationState> emit, SpellCreationState next) {
     final preview = spellEngine.previewLevel(next.draft);
 

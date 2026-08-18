@@ -48,8 +48,9 @@ class SpellCreationState extends Equatable {
   ///
   /// Non-null exactly in the state the save-success branch emits, alongside
   /// `status: saved` — [copyWith] does not carry it forward, so the next emit
-  /// of any kind drops it. Same rule as [errorMessage], and for the same
-  /// reason: both are payloads for a status, not state that accumulates.
+  /// that does not re-state it drops it. Same rule as [errorMessage], and for
+  /// the same reason: both are payloads for a status, not state that
+  /// accumulates.
   final Spell? savedSpell;
   final String? errorMessage;
   /// The rendered strength of a General guideline at the chosen level, or null
