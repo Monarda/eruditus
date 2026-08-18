@@ -44,7 +44,7 @@ item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **662 tests, green** |
+| Dart | `flutter test` | **721 tests, green** |
 | Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **317 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
@@ -857,48 +857,6 @@ none blocking, all polish on the container-mode feature closed as item 14.
   will be tight on a 320dp phone.
 - **See also:** item 14 (closed, `## Completed ✅`), item 57, item 59
 
-### 62. Two `SpellCreationState` Fields the Emit Funnel Does Not Own
-
-**Opened 2026-08-17, from item 59's whole-branch final review.** Recorded rather
-than fixed: neither is a live bug. Both are about the *rules* the state's fields
-follow now that `SpellCreationBloc._emit` advertises itself, in its own doc
-comment, as the place a moved draft's stale halves are settled — a claim that
-makes the two exceptions below invisible to the next person to add a handler.
-
-- [ ] **`generalEffectSentence` is recomputed at five hand-maintained call
-      sites**, not in the funnel. It is a pure function of `(baseEffect,
-      chosenBaseLevel)` — exactly the shape `SpellEngine.previewLevel` has, and
-      exactly the argument that moved the level into `_emit` in the first place.
-      The five are `TechniqueSelected`, `FormSelected`, `BaseEffectSelected`,
-      `ChosenBaseLevelChanged` and `TemplateInstantiated`, each passing
-      `generalEffectSentence: _generalEffectSentenceFor(draft)`
-      (`lib/bloc/spell_creation/spell_creation_bloc.dart:232, 255, 295, 302,
-      518`). Correct today — every handler that can move either input does call
-      it — so this is about the sixth one. **Decide one of two things, and do
-      not leave it undecided:** move the recomputation into `_emit` (cheap;
-      `deriveGeneralEffect` is one lookup, and `SpellCreationState.copyWith`'s
-      `_unset` sentinel already tells "clear it" from "leave it"), or state the
-      exemption in `_emit`'s doc comment with the reason the field is
-      deliberately handler-owned.
-- [ ] **`savedSpell` has no invalidation story at all** — the one state field
-      with no rule of any kind. `spell_creation_state.dart:111` carries it
-      forward as `savedSpell ?? this.savedSpell`, so once a save writes one it
-      survives every later edit, calculate and failed save; the only thing that
-      drops it is rebuilding from `SpellCreationState.initial()`, which
-      `SpellDiscarded` and `TemplateInstantiated` happen to do for other
-      reasons. Harmless today because its single reader — the snack bar in
-      `spell_creation_screen.dart:55` — is inside a listener gated on
-      `status == saved`, and the post-save emit writes both together. Latent,
-      not broken: any future read not gated on that status gets whatever was
-      last saved this session. **Decide whether it should be dropped on every
-      emit like `errorMessage` is** (which is *not* carried forward, precisely
-      so a stale one cannot be read), or whether "only meaningful under
-      `status == saved`" is the rule — and if so, write that on the field, the
-      way `levelUnavailableReason` now documents its own.
-- **Files:** `lib/bloc/spell_creation/spell_creation_bloc.dart`,
-  `lib/bloc/spell_creation/spell_creation_state.dart`
-- **See also:** item 59 (closed, `## Completed ✅`)
-
 ### 63. The Ritual Default Is Form-Blind, and Imaginem/Mentem Pay for It
 
 **Opened 2026-08-18.** `SpellDraft.isEligibleForLastingCreationDeclaration`
@@ -942,6 +900,35 @@ where the default is most often wrong.
 
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
+
+### 62. Every State Field Has an Owner (`940c8bc..e7774cd`)
+`SpellCreationBloc._emit` claimed, in its own doc comment, to be where a moved
+draft's stale halves are settled — while two fields sat outside it. Both are now
+inside, and the doc comment names the rule every field of the state follows.
+
+- **Three rules, and every field is under one of them.** Computed from the draft
+  in the funnel (`breakdown`, `levelUnavailableReason`, `generalEffectSentence`);
+  invalidated in the funnel by predicate (`validationErrors` on `draftChanged`,
+  the three suggestion fields on `breakdownChanged`); or a one-shot payload that
+  `copyWith` drops and the funnel re-passes (`errorMessage`, `savedSpell`). A new
+  field picks one. A new handler does nothing for any of them — which was the
+  whole point, since all five old `generalEffectSentence` call sites were correct
+  and the exposure was only ever the sixth.
+- **`generalEffectSentence` moved on the same argument as the level.**
+  `SpellEngine.deriveGeneralEffect` reads `baseEffect.effectFormula` and
+  `chosenBaseLevel` and consults no catalog, so it is `f(draft)` and there is no
+  sync event that can move it without the draft moving. Behaviour-preserving, and
+  recorded as such: the three handlers building from `initial()` emit over a
+  draft with no base effect, where the funnel computes the null they already
+  emitted.
+- **`savedSpell` took `errorMessage`'s rule.** It was the one field with no rule
+  at all — `savedSpell ?? this.savedSpell` carried it through every later edit,
+  calculate and failed save. Its only reader is gated on `status == saved`, which
+  is what made this a latent hazard to remove rather than a bug to fix. The
+  behaviour change is deliberate and tested: the next edit after a save nulls it.
+- **Spec:** `docs/superpowers/specs/2026-08-18-state-field-ownership-design.md`.
+  **Plan:** `docs/superpowers/plans/2026-08-18-state-field-ownership.md`.
+- **See also:** item 59 (the funnel this completes), item 58.
 
 ### 59. The Spell Level Computes Live (`99aa462..e6a61b4`)
 The level existed only after pressing **Calculate & View Suggestions**, and
