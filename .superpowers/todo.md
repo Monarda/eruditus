@@ -35,17 +35,17 @@ reason the guidelines don't apply to it (item 46).
 
 **Live extractor run, 2026-08-18** (`python -m scripts.spell_import.extract_spells`):
 
-> **336 imported · 31 templates · 8 exceptions · 0 blocked · 0 unresolved**
+> **336 imported · 31 templates · 8 exceptions · 0 blocked · 3 skipped · 0 unresolved**
 > — plus `unreviewed: 7`, see below.
 
-**Suite status: Dart and Python re-run 2026-08-18 after item 65 (the inline
-parser, the multi-book registry and the 14-spell HoH:MC import added tests
-and ledger entries); Integration last run 2026-08-17 after item 13:**
+**Suite status: all three re-run 2026-08-18 on the merged result of item 65 —
+the inline parser, the multi-book registry and the 14-spell HoH:MC import
+added tests, catalog rows and ledger entries:**
 
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **728 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **374 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **378 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **7 ledger entries carry an unreviewed candidate** (was 3). Item 55's
@@ -73,8 +73,10 @@ belongs to item 32.
 **All 360 published Chapter 9 spells are still accounted for**, and item 65
 adds *Houses of Hermes: Mystery Cults*' own 15 (11 library spells + 4
 templates) alongside them: 336 + 31 + 8 = 375, 15 more than 360, all from
-HoH:MC. No spell is blocked; the 7 unreviewed ones are a ledger problem, not
-a modelling gap.
+HoH:MC. No spell is blocked. HoH:MC's own 16 parsed blocks account as 11
+library + 2 extracted templates + 3 deliberately skipped, with a 4th template
+hand-authored rather than parsed. The 7 unreviewed entries are a ledger
+problem, not a modelling gap.
 
 **Standing finding: base-effect resolution rests on human judgement, and most
 of it is unverifiable by test.** A design line names its guideline only by
@@ -1050,10 +1052,10 @@ behind item 65 classified how spell blocks are *anchored*; it never checked
 whether an anchored block *parses*. `extract_spells --diagnose` (item 65,
 Task 5) makes that check possible, and running it against the three other
 inline-heavy books for the first time is this item's finding. Full numbers,
-raw `--diagnose` output and per-failure breakdown:
-`.superpowers/sdd/2026-08-18-hohmc-inline-parser/task-8-report.md`
-(session-local; re-derive with `extract_spells --diagnose "<title>" --parser
-inline` against each book if lost).
+raw `--diagnose` output and per-failure breakdown are **no longer on disk** —
+they lived in the plan's scratch workspace, which is deleted when a plan
+completes. Re-derive with `extract_spells --diagnose "<title>" --parser inline`
+against each book; the table below is the durable record.
 
 | Book | Blocks | With design line | Tokenized | Notes |
 |---|---|---|---|---|
@@ -1103,7 +1105,92 @@ inline` against each book if lost).
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
 
-### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B) (`7ebd409..eb28b18`)
+### 73. Deferred Minor Findings From Item 65's Reviews
+
+**Opened 2026-08-18.** Item 65 ran nine task reviews plus a whole-branch
+review. Their Critical and Important findings were fixed before merge; these
+are the minors, judged non-blocking at the time and recorded here because
+their only other home was a scratch ledger that has since been deleted. None
+is a correctness bug.
+
+- [ ] **`parse_inline`'s damaged-stat-line branch is unexercised.** HoH:MC has
+      zero damaged stat lines and no fixture covers it, so a polarity bug
+      (reporting when it should skip, or the reverse) would go undetected.
+- [ ] **13 of HoH:MC's 16 blocks rest on an aggregate count.** Only three have
+      their `prose` and `design_line` individually asserted; the rest are
+      covered by `len(blocks) == 16` and `problems == []`, which would not
+      catch a subtly wrong prose or design line on the other 13.
+- [ ] **`diagnose()` carries two lines of dead weight** — a
+      `catalog_module.Catalog.load()` whose result is never used (and which
+      reads the catalog off disk for nothing), and a reimplementation of
+      `sources.read_lines` rather than a call to it. Both inherited verbatim
+      from the plan text.
+- [ ] **`emit.CORE_BOOK_ID` is now referenced only by tests.** Production code
+      threads the book id through instead. The comment justifying its survival
+      names `catalog.CORE_BOOK_ID`, which is a different constant.
+- [ ] **A provenance test lost an assertion.** `test_names_the_absent_lock_...`
+      dropped its `assertNotIn` guard against moved-source wording when it was
+      adapted to the mapping API; its siblings still cover the wording.
+- [ ] **`provenance.load()` raises a bare `AttributeError` on a pre-mapping
+      `source.lock`** rather than a message naming the cause. Only reachable by
+      someone rebasing a branch that predates the format change.
+- [ ] **The per-book split stopped at `SKIPPED_BLOCKS`.** `SPELL_NAME_TYPOS`,
+      `DESIGN_LINE_TYPOS`, `HAND_DERIVED`, `HAND_DERIVED_ADJUSTMENT` and
+      `EXCEPTION_SPELLS` are still keyed by bare spell name across all books.
+      Verified zero collisions today. `_reject_duplicate_ids` cannot catch a
+      future one, because a name-keyed table misfires *before* ids are built —
+      it changes the name, and so the id, so no collision ever materialises. A
+      comment records this at the tables; a third book may force real keys.
+- **See also:** item 65.
+
+### 72. Three Latent Defects the Second Book Exposed (`9b21925`, `757e9a8`)
+
+**Found and fixed during item 65, 2026-08-18.** None was introduced by that
+work; each had been sitting in the importer and only became reachable once a
+second book was registered. Recorded separately from item 65 because none of
+them is about parsing HoH:MC.
+
+- **Bare `complexity` was a dead label.** It sat in
+  `designline.MODIFIER_LABELS` with **no entry in `emit._MODIFIER_OPTIONS` for
+  any Technique/Form combination**, so it tokenized and then always failed at
+  emit — for every book, not just this one. No core-book design line prints
+  it, which is why it never surfaced. A 54-book survey found **23 uses across
+  9 books and 12 Technique/Form pairs, none of them Imaginem**, at magnitudes
+  +1 (x16), +2 (x5), +3 and +5. Core Rules 12204 makes it general: "this
+  normally adds magnitudes to the spell level to account for the complexity."
+  It is now a wildcard-scoped modifier resolved by the design line's own
+  magnitude, following `elaborate-effect`'s existing precedent for a
+  storyguide judgement ladder. **Named "Effect complexity", not "Complexity",
+  because the three Imaginem sensory-complexity modifiers are all already
+  named "Complexity"** and the UI heads each modifier group by name — two
+  groups with the same heading, one a checkbox list and one a dropdown, is
+  unusable. Those three are a different, printed mechanic (core 14596) and
+  were left alone. The rung labels are this project's wording, as
+  `elaborate-effect`'s are; the rulebook prints no ladder for either.
+- **`apply_container_modes` deadlocked against `migrate_ledger`.** Its
+  stale-entry guard raises when `container_modes.json` names a spell the run
+  did not produce. A widened ledger entry leaves its spell unresolved and so
+  unproduced, tripping the guard — and `migrate_ledger.py`, the only tool that
+  resolves a widening, calls `run()` and hit the identical crash. **The tool
+  that fixes the condition could not run while the condition held.** The guard
+  now applies only to an otherwise-clean run; the separate check that a
+  recorded mode's Target really is a container still runs unconditionally.
+  This partially overtakes item 57's bullet on the same function.
+- **The per-book lock could permanently launder a moved source.** Once
+  `source.lock` became a mapping, its drift branch still called
+  `provenance.write(identities)` — writing *every* book's identity, including
+  one whose markdown had moved and was never accepted. Scenario: a supplement
+  moves in a way that leaves `spell_library.json` byte-identical, so the
+  `SourceMoved` guard does not fire; meanwhile the core book's advisory counts
+  drift, the drift branch fires, and the supplement's new sha256 is recorded
+  as attested. The next run sees it as matching and no change report is ever
+  written. Fixed by merging only the entries that actually matched over the
+  loaded lock. The single-book predecessor could not do this, because a match
+  guaranteed the one identity was unchanged.
+
+- **See also:** items 65, 57, 27.
+
+### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B) (`7ebd409..757e9a8`, merged `1a6783e`)
 Sub-project B of three. Item 64 landed the catalog rows; this proved the
 core-book importer generalises to a second book and a second block-anchoring
 style.
@@ -1151,7 +1238,7 @@ style.
 - **See also:** items 64, 57, 66, 68 (closed alongside this), 71 (opened
   alongside this).
 
-### 68. Do the Sensory Targets' `targetType` Values Misrepresent Their Container Mode? (`c60a03d..eb28b18`)
+### 68. Do the Sensory Targets' `targetType` Values Misrepresent Their Container Mode? (`c60a03d..eb28b18`, merged `1a6783e`)
 Opened from item 64's review as a deferred question, not a decision; item 65
 needed an answer before it could touch the four Sound/Spectacle spells, which
 is what forced this closed rather than left open.
