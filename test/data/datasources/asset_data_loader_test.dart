@@ -54,18 +54,18 @@ void main() {
   });
 
   test('the five Sensory Magic Targets load with their stated ladder', () async {
-    // The magnitudes are the whole content of these rows and the book gives
-    // them only by equivalence (Flavor to Individual, Texture to Part, Scent to
-    // Group, Sound to Structure, Spectacle to Boundary), so a silent typo in
-    // one produces spells that compute a plausible wrong level. Each was
-    // reconciled against a printed HoH:MC design line -- see the spec.
+    // The magnitudes still follow the book's printed equivalences (Flavor to
+    // Individual, Texture to Part, Scent to Group, Sound to Structure,
+    // Spectacle to Boundary), because those sentences price the Target. They
+    // do not classify it -- all five are `sensorium`. See the 2026-08-18
+    // cross-field-parameter-constraints spec.
     final parameters = await loader.loadParameters();
     final byId = {for (final p in parameters) p.id: p};
 
     const expected = <String, (int, TargetType)>{
-      'target-flavor': (0, TargetType.object),
-      'target-texture': (1, TargetType.object),
-      'target-scent': (2, TargetType.object),
+      'target-flavor': (0, TargetType.sensorium),
+      'target-texture': (1, TargetType.sensorium),
+      'target-scent': (2, TargetType.sensorium),
       'target-sound': (3, TargetType.sensorium),
       'target-spectacle': (4, TargetType.sensorium),
     };
@@ -182,14 +182,20 @@ void main() {
       'target-boundary',
     });
 
-    // Sound and Spectacle are TargetType.sensorium, not container -- see
-    // TargetType's doc comment for why the rulebook's three kinds all
-    // contradict HoH:MC's Sensory Magic Targets.
+    // All five Sensory Magic Targets are TargetType.sensorium, not object or
+    // container -- see TargetType's doc comment for why the rulebook's three
+    // kinds all contradict HoH:MC's Sensory Magic Targets.
     final sensoria = targets
         .where((p) => p.targetType == TargetType.sensorium)
         .map((p) => p.id)
         .toSet();
-    expect(sensoria, {'target-sound', 'target-spectacle'});
+    expect(sensoria, {
+      'target-flavor',
+      'target-texture',
+      'target-scent',
+      'target-sound',
+      'target-spectacle',
+    });
 
     // Bloodline is an object Target that carries its own ongoing rule (a
     // spell "applies to all members of the bloodline born during its

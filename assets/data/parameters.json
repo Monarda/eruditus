@@ -445,7 +445,7 @@
     "name": "Flavor",
     "category": "Target",
     "magnitude": 0,
-    "targetType": "object",
+    "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
     "scope": {
       "forms": [],
@@ -465,7 +465,7 @@
     "name": "Texture",
     "category": "Target",
     "magnitude": 1,
-    "targetType": "object",
+    "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
     "scope": {
       "forms": [],
@@ -485,7 +485,7 @@
     "name": "Scent",
     "category": "Target",
     "magnitude": 2,
-    "targetType": "object",
+    "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
     "scope": {
       "forms": [],
