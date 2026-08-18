@@ -933,6 +933,22 @@ holds exactly one book.
       choice offered. Record `dynamic` for these four. See item 57 and item 68
       (the open question of how the model should represent a Target-level
       fixed mode instead of a per-spell choice).
+      > ⚠️ **SUPERSEDED — do not record `dynamic`; record nothing.** The
+      > 2026-08-18 cross-field-parameter-constraints spec (`37788f3`) closes
+      > item 68 the other way: Sound and Spectacle **stop being container
+      > Targets** and become `TargetType.sensorium`. Core Rules 12086 forces
+      > this — "Personal Range spells can never have a container Target", and
+      > HoH:MC 1006 requires every Sensory Magic spell's Range to be Personal,
+      > so a container classification makes all four spells simultaneously
+      > required to be Personal and forbidden from being Personal.
+      > **After that lands, a stated mode on these Targets is a validation
+      > error**, because `validateSpellAgainstCatalog`'s check 9 rejects a mode
+      > on a non-container Target — so writing `dynamic` into
+      > `container_modes.json` would turn four correctly-transcribed spells
+      > into failures. `spellOwesContainerMode` also stops asking, so nothing
+      > is owed. **Ordering: Decision 1 of that spec must land before this
+      > import.** The premise stated above ("Both Targets are containers") is
+      > the part that changed; the rest of this bullet is otherwise fine.
 - [ ] **Validate the parser against the other inline books as a diagnostic, not
       an import.** Covenants (42/44 inline), HoH:Societates (50/59),
       Transforming Mythic Europe (68/84). **No spell from any book but HoH:MC
