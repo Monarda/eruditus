@@ -284,6 +284,7 @@ class SpellCreationScreen extends StatelessWidget {
                         category: 'Range',
                         parameters: configState.parameters,
                         selectedParameter: draft.range,
+                        technique: draft.technique,
                         form: draft.form,
                         onChanged: (param) {
                           if (param != null) bloc.add(RangeSelected(param));
@@ -297,6 +298,7 @@ class SpellCreationScreen extends StatelessWidget {
                         category: 'Duration',
                         parameters: configState.parameters,
                         selectedParameter: draft.duration,
+                        technique: draft.technique,
                         form: draft.form,
                         onChanged: (param) {
                           if (param != null) bloc.add(DurationSelected(param));
@@ -310,6 +312,7 @@ class SpellCreationScreen extends StatelessWidget {
                         category: 'Target',
                         parameters: configState.parameters,
                         selectedParameter: draft.target,
+                        technique: draft.technique,
                         form: draft.form,
                         onChanged: (param) {
                           if (param != null) bloc.add(TargetSelected(param));
@@ -680,11 +683,13 @@ class SpellCreationScreen extends StatelessWidget {
     required String category,
     required List<Parameter> parameters,
     required Parameter? selectedParameter,
+    required String? technique,
     required String? form,
     required Function(Parameter?) onChanged,
   }) {
     final categoryParameters = parameters
-        .where((p) => p.category == category && p.scope.appliesTo(form: form))
+        .where((p) =>
+            p.category == category && p.scope.appliesTo(technique: technique, form: form))
         .toList();
 
     return DropdownButtonFormField<Parameter>(
