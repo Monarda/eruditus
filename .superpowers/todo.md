@@ -895,6 +895,36 @@ where the default is most often wrong.
   `lib/bloc/spell_creation/spell_creation_bloc.dart:725-735`
 - **See also:** item 14 (the "make it catalog data" precedent)
 
+### 69. Constraint-Handling Pains Deferred From the Cross-Field Design Discussion
+
+**Opened 2026-08-18.** *(Numbered 69 because 64-68 are claimed on the
+`worktree-item-64-hohmc-catalog-rows` branch, not yet merged.)* A design
+discussion on the growing family of "if X then Y must (not) be Z" rules
+identified four distinct pains. **Cross-field value constraints** (one
+selection forcing another field's value — items 67/68's Range-must-be-Personal
+and dynamic-by-rule) was chosen as the one to solve now and gets its own
+design. The other three were judged real but not primary; recorded here so
+they are considered deliberately later rather than rediscovered:
+
+- [ ] **Per-rule sprawl.** Every new rule touches catalog JSON + model + bloc
+      pruning + validation + tests as bespoke code. Worth revisiting if the
+      per-book marginal cost keeps growing: is there one declarative place a
+      rule could be stated once, with the pruning/validation/UI consequences
+      following automatically?
+- [ ] **Auditability.** Rules are scattered across four mechanisms
+      (availability scoping, derivation, validation checks, display hints), so
+      "does the app enforce HoH:MC line 1008?" takes five files to answer.
+      A registry or taxonomy — every rulebook constraint with one findable
+      statement, even if implementations stay bespoke — would also give item 36's
+      audit a natural home.
+- [ ] **Data-driven rules.** Constraints live partly in code, so a new book
+      (or user-authored content) cannot add one without Dart changes — the
+      same argument that made `scope`/`requiresVirtue` catalog data. Only
+      worth it once the constraint vocabulary has stabilised; premature while
+      each new book still adds a new *kind* of constraint.
+- **See also:** items 67, 68 (the chosen pain's first instances), 56 (display
+  hints), 36 (catalog audit)
+
 ---
 
 ## Completed ✅
