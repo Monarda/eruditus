@@ -1911,6 +1911,20 @@ void main() {
         ..add(BaseEffectSelected(creoIgnemEffect)),
       verify: (bloc) => expect(bloc.state.generalEffectSentence, isNull),
     );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'generalEffectSentence survives an edit that moves neither of its inputs',
+      // The funnel recomputes it on every emit now, rather than copyWith
+      // carrying it forward, so every event is a fresh chance to get it wrong
+      // -- including the great majority that touch neither the base effect nor
+      // the chosen level. RangeSelected stands for all of them.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(BaseEffectSelected(wardGuideline))
+        ..add(const ChosenBaseLevelChanged(20))
+        ..add(RangeSelected(rangeParam)),
+      verify: (bloc) => expect(bloc.state.generalEffectSentence, contains('20')),
+    );
   });
 
   group('Open slots (OpenSlotChosen)', () {
