@@ -933,6 +933,22 @@ holds exactly one book.
       choice offered. Record `dynamic` for these four. See item 57 and item 68
       (the open question of how the model should represent a Target-level
       fixed mode instead of a per-spell choice).
+      > ⚠️ **SUPERSEDED — do not record `dynamic`; record nothing.** The
+      > 2026-08-18 cross-field-parameter-constraints spec (`37788f3`) closes
+      > item 68 the other way: Sound and Spectacle **stop being container
+      > Targets** and become `TargetType.sensorium`. Core Rules 12086 forces
+      > this — "Personal Range spells can never have a container Target", and
+      > HoH:MC 1006 requires every Sensory Magic spell's Range to be Personal,
+      > so a container classification makes all four spells simultaneously
+      > required to be Personal and forbidden from being Personal.
+      > **After that lands, a stated mode on these Targets is a validation
+      > error**, because `validateSpellAgainstCatalog`'s check 9 rejects a mode
+      > on a non-container Target — so writing `dynamic` into
+      > `container_modes.json` would turn four correctly-transcribed spells
+      > into failures. `spellOwesContainerMode` also stops asking, so nothing
+      > is owed. **Ordering: Decision 1 of that spec must land before this
+      > import.** The premise stated above ("Both Targets are containers") is
+      > the part that changed; the rest of this bullet is otherwise fine.
 - [ ] **Validate the parser against the other inline books as a diagnostic, not
       an import.** Covenants (42/44 inline), HoH:Societates (50/59),
       Transforming Mythic Europe (68/84). **No spell from any book but HoH:MC
@@ -1069,6 +1085,56 @@ they are considered deliberately later rather than rediscovered:
       each new book still adds a new *kind* of constraint.
 - **See also:** items 67, 68 (the chosen pain's first instances), 56 (display
   hints), 36 (catalog audit)
+
+### 70. Three Defects Found by the 52-Book Constraint Survey
+
+**Opened 2026-08-18.** A survey of the whole rulebook corpus (52 books, 9
+parallel agents) for "if X then Y must (not) be Z" rules turned up three
+defects incidental to its purpose. **All three were verified by hand against
+`reviewed/`**, unlike the bulk of the survey's 90 raw findings, which are
+unverified agent output. Survey writeup and classification:
+`scratchpad/survey-merged.md` (session-local; re-derive if lost).
+
+- [ ] **A core rule nothing enforces: Personal Range forbids a container
+      Target.** Core Rules line 12086, read against the *current* `reviewed/`
+      file: "Personal Range spells can never have a container Target (such as
+      Circle, Room, or Structure)." Nothing
+      in `lib/` checks this; `grep range-personal lib/` finds only the default
+      reference triple. The 325-spell library has **0 violations**, so it is
+      latent — but the creation screen permits the combination, and Boundary
+      and the two new Sensory containers are equally affected. This is the
+      *same shape* as item 67's "Range must be Personal", pointing the other
+      way, and it is the strongest single argument for building that
+      capability: it is core, universal, and gated behind no Virtue.
+- [ ] **Vim has no size ladder.** Nine `size-<form>` modifiers exist
+      (Animal, Aquam, Auram, Corpus, Herbam, Ignem, Imaginem, Terram, Mentem);
+      Vim is absent entirely. Core Rules line 15670: "Spells and magical
+      effects do not have sizes, so size modifications do not apply to the
+      levels of Individual Target Vim spells. **However, Vim spells affecting
+      areas, or number of spells, must be increased in level for large areas
+      or large numbers, as normal.**" The second sentence is the one the
+      catalog misses. Correct model is a `size-vim` ladder with
+      `excludeTargets: ['target-individual']` — exactly the shape `size-mentem`
+      already uses for the identical "minds have no size" rule. Check whether
+      any imported Vim spell's design line references a size magnitude before
+      assuming the gap is harmless.
+- [ ] **Every core-rules line citation in the codebase is exactly 8 lines
+      low.** 23 citations across `lib/` and `scripts/`
+      (`grep -rnoE "(line|lines) 1[0-9]{4}" lib/ scripts/`). Verified +8 at
+      10566, 12030, 12116, 12120, 12242, 12340, 12346, 12351, 12354, 12410 and
+      13415 — the offset is uniform (current file position = cited number + 8),
+      so the `reviewed/` core file gained 8 lines somewhere before line 10566.
+      Line numbers newly read from the current file — including the two bullets
+      above — are correct as printed and need no adjustment. Mechanically
+      fixable. **This drift
+      class is already known and recurring**: commit `e2f25d8` fixed the
+      HoH:MC citations as "all one low" days earlier. Worth fixing the numbers
+      *and* deciding whether line citations should be anchored to quoted text
+      rather than line numbers, since they have now silently rotted twice.
+- **Files:** `lib/models/spell.dart` (the Personal/container check),
+  `assets/data/modifiers.json` (`size-vim`), and the 23 citation sites
+- **See also:** items 67 and 68 (the same cross-field capability), 69 (the
+  deferred pains), 36 (catalog audit against the rulebook)
 
 ---
 
