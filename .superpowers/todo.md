@@ -38,14 +38,14 @@ reason the guidelines don't apply to it (item 46).
 > **325 imported · 28 templates · 8 exceptions · 0 blocked · 0 unresolved**
 > — plus `unreviewed: 3`, see below.
 
-**Suite status: Dart re-run 2026-08-18 after item 62 (the state-field-ownership
+**Suite status: Dart re-run 2026-08-18 after item 64 (the HoH:MC catalog rows
 work added tests); Python re-run 2026-08-17 after item 29 (the ledger task and
 the modifier task each added a test); Integration last run 2026-08-17 after
 item 13:**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **721 tests, green** |
+| Dart | `flutter test` | **728 tests, green** |
 | Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **317 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
@@ -833,6 +833,15 @@ none blocking, all polish on the container-mode feature closed as item 14.
       parameter and no Target is scoped — but the helper is generic and
       `TargetSelected` is currently the only place the mode/Target coupling is
       maintained.
+      **✅ ALREADY CLOSED — verified 2026-08-18 during item 64.** Not latent:
+      stale. `_seedParameters` ends with
+      `containerMode: keepsMode ? null : ContainerMode.unstated`, computed from
+      the *resulting* Target, and every caller of the pruning helper wraps it in
+      `_withSeededParameters` — so a Target pruned to null always reaches a mode
+      clear one call later. `git log -S` dates that line to `8143c8e`, the
+      draft-reference-seed work, which landed after this bullet was written.
+      Item 64 gave the helper a second axis and looked for the hole to confirm
+      it; there was none to fix.
 - [ ] **An importer id mismatch aborts before the diagnostics exist.**
       `apply_container_modes` raises at
       `scripts/spell_import/extract_spells.py:919`, before the run's report is
@@ -895,12 +904,126 @@ where the default is most often wrong.
   `lib/bloc/spell_creation/spell_creation_bloc.dart:725-735`
 - **See also:** item 14 (the "make it catalog data" precedent)
 
+### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B)
+
+**Opened 2026-08-18.** Item 65 landed the catalog rows; this is the work they
+were for, and the real test of whether the core-book importer generalises.
+
+`blocks.parse_de` anchors on `### Creo Animal Spells` + `#### LEVEL 20` +
+`##### Name`. HoH:MC uses `##### Name` followed by `MuAn 15` on the next line,
+much of it inside blockquotes. **Zero of its 16 blocks are visible to the
+current parser.** `run()` also hard-codes `sources.DE_TITLE` and `source.lock`
+holds exactly one book.
+
+- [ ] **Add `parse_inline` behind a per-book registry.** Leave `parse_de`
+      untouched — it imports 325 working spells. Strip blockquote prefixes;
+      anchor on the `TeFo Level` line.
+- [ ] **Extract the 14 spells.** 16 blocks less *Faerie Chains of the Familiar
+      Slave* (hand-authored, item 17) and *Perceive the Change*, which is an
+      enchanted-device effect: `Pen 0, constant effect`, costing `+1 two
+      uses/day, +3 environmental trigger`. The app models no enchantments.
+- [ ] **Rule static/dynamic for the four spells using Sound or Spectacle** —
+      *Clarion Call of the War Horse*, *The Rooster's Crow*, *Brilliance of the
+      Eagle's Plumage*, *Closed Mouth of the Nightwalker*. Both Targets are
+      containers, so `spellOwesContainerMode` says they owe one. See item 57.
+- [ ] **Validate the parser against the other inline books as a diagnostic, not
+      an import.** Covenants (42/44 inline), HoH:Societates (50/59),
+      Transforming Mythic Europe (68/84). **No spell from any book but HoH:MC
+      enters `spell_library.json` in this pass** — otherwise "validation"
+      quietly becomes a 600-spell import. Problems in other books are
+      identified and logged; only cheap resolutions land, of the kind
+      `_normalize_stat_line` already precedents. Expect a long log; that is the
+      honest outcome, not a fault.
+- **Corpus survey backing this** is recorded in item 64's spec: 54 books, 3107
+  stat lines, four anchor styles. The inline style is 664 of them, so it pays
+  for far more than 14 spells. Product line does not predict format —
+  HoH:*True Lineages* is 55/55 *heading* style.
+- **Files:** `scripts/spell_import/blocks.py`, `sources.py`,
+  `extract_spells.py`, `source.lock`
+- **See also:** items 64, 57, 66
+
+### 66. HoH:MC's 36 Faerie "Animae" Guidelines (sub-project C)
+
+**Opened 2026-08-18.** A bulk catalog sweep, deliberately separated from item 65
+so it cannot block the spells: only 1 of HoH:MC's 38 new guidelines is used by
+any of its example spells, and item 64 already added that one.
+
+The table is regular — `### <Form>` → `#### <Technique> <Form>` →
+`**Level N:** <description>`, at `Ars Magica 5e - Houses of Hermes - Mystery
+Cults.md:3464-3620` — 36 Creo/Muto "create or change a faerie" rows across the
+ten Forms, all gated on Faerie Magic.
+
+- [ ] Decide whether to extract by script or hand-author. The core base-effect
+      extraction is the precedent for the former; item 17's single row for the
+      latter.
+- [ ] Set `requiresVirtue: "Faerie Magic"` on every row, matching
+      `crvi-hohmc-G1`.
+- [ ] Check the ids against the `<te><fo>-hohmc-<level>` convention item 64 used,
+      and against item 41's row-duplication concerns.
+- **See also:** items 64, 65, 17
+
+### 67. The Sensory Magic Restrictions the Model Cannot Yet Express
+
+**Opened 2026-08-18, from item 64's review.** HoH:MC lines 1005-1011 put six
+restrictions on Sensory Magic spells. Item 65 implemented one. An earlier draft
+of its spec dismissed all six with a single reason — "the app has no Virtue
+model" — which is true of three and false of two; this item records the accurate
+position so the tractable ones stay visible.
+
+- [ ] **No Intellego *as a requisite*.** Item 65's `excludeTechniques` covers
+      only the spell's own Technique. The book says "even as a requisite", which
+      needs a validation check over `draft.requisites` — a different mechanism
+      from a scope field, which is why it was not folded in.
+- [ ] **The Range must be Personal.** No capability exists: no parameter
+      constrains another parameter's value today. Building a general
+      cross-parameter mechanism for five rows is disproportionate, so this needs
+      a design decision before any code.
+- [ ] **The Form must suit the sensory medium** ("An Ignem spell cannot be
+      transmitted by sound"). Storyguide judgment by the book's own wording, so
+      display work — belongs with item 56's rules hints, not enforcement.
+- **Won't do, recorded so they are not re-litigated:** not investable into
+  magical items (the app models no enchantments — the same reason item 65
+  excludes *Perceive the Change*); non-initiates cannot learn them, and the
+  Heartbeast Ability adds to the Lab Total (no character model, no lab totals).
+- **Files:** `lib/models/spell.dart` (the validation checks),
+  `lib/models/parameter.dart`
+- **See also:** items 64, 56, 17
+
 ---
 
 ## Completed ✅
 
 Closed items, reduced to the decisions and constraints that still bind. Follow the
 linked spec/plan or git history for detail.
+
+### 64. HoH:MC Catalog Rows and the Intellego Exclusion (`2983b57..497ea1f`)
+Sub-project A of three. The five Sensory Magic Targets and two Glamour
+guidelines *Houses of Hermes: Mystery Cults* needs, plus the one rulebook
+restriction on them the model can express.
+
+- **`ParameterScope` gained a negative Technique axis**, mirroring
+  `ModifierScope.excludeTechniques`, on the evidence its own doc comment asked
+  for. Positive Forms list, negative Technique list, because that is how each
+  rule is written: Fire is offered *for* Ignem and Imaginem; a Sensory Target is
+  offered for everything *except* Intellego.
+- **The Target magnitudes are given only by equivalence in the book**, so each
+  was reconciled against a printed design line before being written down —
+  Flavor 0, Texture 1, Scent 2, Sound 3, Spectacle 4.
+- **`targetType` follows the printed equivalences, not the core `sense` ladder**,
+  which matches sense-for-sense and magnitude-for-magnitude but means the
+  opposite thing. HoH:MC forbids Intellego precisely because granting senses is
+  the other feature.
+- **Taking the exclusion forced two more changes**, neither optional:
+  `TechniqueSelected` had never pruned, because no parameter had ever been
+  Technique-scoped. **Item 58's `containerMode` bullet turned out to be stale,
+  not latent** — `_seedParameters` has cleared a stranded mode since `8143c8e`,
+  and every caller of the pruning helper seeds after it. Recorded rather than
+  "fixed": the second axis is what prompted the check, and the check found
+  nothing to repair.
+- **Spec:** `docs/superpowers/specs/2026-08-18-hohmc-catalog-rows-design.md`.
+  **Plan:** `docs/superpowers/plans/2026-08-18-hohmc-catalog-rows.md`.
+- **See also:** items 17 (the precedent), 55 (book-aware oracles), 58 (bullet
+  closed), 65, 66, 67.
 
 ### 62. Every State Field Has an Owner (`940c8bc..e7774cd`)
 `SpellCreationBloc._emit` claimed, in its own doc comment, to be where a moved
