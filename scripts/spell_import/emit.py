@@ -131,28 +131,37 @@ _MODIFIER_OPTIONS = {
 }
 
 
-def _resolve_requisite_label(token, block) -> str:
-    """The art a `kind="requisite"` token belongs to.
+def _resolve_requisite_arts(token, block) -> list[str]:
+    """The arts a `kind="requisite"` token belongs to.
 
-    Usually just `token.label` -- designline.py already resolved it from the
-    design line's own text. The one exception is a bare requisite token, e.g.
-    "+N requisite" or "+N extra effect from requisite"
+    Usually just `[token.label]` -- designline.py already resolved it from
+    the design line's own text. The exception is a bare requisite token, e.g.
+    "+N requisite" or "+N necessary requisites"
     (designline._BARE_REQUISITE_LABELS), which carries an empty label because
     designline.py never sees the Req: line and so cannot know which art the
-    magnitude belongs to. Resolving it here, against `block.stat`, is safe
-    only when the spell declares exactly one requisite art -- more than one
-    would be a genuine ambiguity this importer must not guess at, the same
-    discipline as every other closed-allow-list decision in this pipeline.
+    magnitude belongs to.
+
+    Resolving it here, against `block.stat`, is safe in exactly two shapes.
+    One declared art takes the whole magnitude. Several declared arts take it
+    only when the magnitude equals how many there are, which makes +1 each
+    the book's own arithmetic rather than an inference -- Embrace of Boethius
+    declares Req: Vim, Corpus and charges "+2 necessary requisites". Any
+    other ratio raises, the same discipline as every other closed-allow-list
+    decision in this pipeline: a distribution the design line does not state
+    is not one this importer may guess at.
     """
     if token.label:
-        return token.label
+        return [token.label]
     arts = block.stat.requisite_arts
-    if len(arts) != 1:
-        raise designline.UnknownToken(
-            f"{block.name}: a bare requisite token needs exactly one Req: art, "
-            f"found {arts!r}"
-        )
-    return arts[0]
+    if len(arts) == 1:
+        return list(arts)
+    if arts and token.magnitude == len(arts):
+        return list(arts)
+    raise designline.UnknownToken(
+        f"{block.name}: a bare requisite token of magnitude {token.magnitude} "
+        f"needs either exactly one Req: art or as many arts as magnitudes, "
+        f"found {arts!r}"
+    )
 
 
 def build_spell(
@@ -173,8 +182,8 @@ def build_spell(
     requisites: dict[str, str] = {}
     for token in design.tokens:
         if token.kind == "requisite" and token.label != "free":
-            art = _resolve_requisite_label(token, block)
-            requisites.setdefault(art, "adding" if token.magnitude else "free")
+            for art in _resolve_requisite_arts(token, block):
+                requisites.setdefault(art, "adding" if token.magnitude else "free")
     for art in block.stat.requisite_arts:
         requisites.setdefault(art, "free")
 
@@ -311,8 +320,8 @@ def build_template(
     requisites: dict[str, str] = {}
     for token in design.tokens:
         if token.kind == "requisite" and token.label != "free":
-            art = _resolve_requisite_label(token, block)
-            requisites.setdefault(art, "adding" if token.magnitude else "free")
+            for art in _resolve_requisite_arts(token, block):
+                requisites.setdefault(art, "adding" if token.magnitude else "free")
     for art in block.stat.requisite_arts:
         requisites.setdefault(art, "free")
 

@@ -938,6 +938,45 @@ class RequisiteEmissionTest(unittest.TestCase):
         spell = emit.build_spell(block, "test-effect", self.catalog, design)
         self.assertEqual(spell["requisites"], {"Rego": "adding"})
 
+    def _block_with_requisites(self, arts):
+        return blocks.SpellBlock(
+            name="Test Spell", technique="Perdo", form="Mentem",
+            printed_level=35,
+            stat=statline.StatLine(
+                range_name="Touch", duration_name="Mom", target_name="Part",
+                is_ritual=True, requisite_arts=list(arts), trailing=""),
+            prose="", design_line=None, line_no=1)
+
+    def test_a_labelled_requisite_token_resolves_to_its_own_art(self):
+        token = designline.Token(kind="requisite", magnitude=1, label="Creo")
+        arts = emit._resolve_requisite_arts(token, self._block_with_requisites(["Creo"]))
+        self.assertEqual(arts, ["Creo"])
+
+    def test_a_bare_requisite_token_resolves_to_the_sole_declared_art(self):
+        token = designline.Token(kind="requisite", magnitude=1, label="")
+        arts = emit._resolve_requisite_arts(token, self._block_with_requisites(["Vim"]))
+        self.assertEqual(arts, ["Vim"])
+
+    def test_a_bare_token_splits_across_arts_when_the_count_matches(self):
+        # Embrace of Boethius: Req: Vim, Corpus and "+2 necessary requisites".
+        # Two arts, magnitude two -- +1 each is the book's own arithmetic.
+        token = designline.Token(kind="requisite", magnitude=2, label="")
+        block = self._block_with_requisites(["Vim", "Corpus"])
+        self.assertEqual(emit._resolve_requisite_arts(token, block), ["Vim", "Corpus"])
+
+    def test_a_bare_token_still_raises_when_the_count_does_not_match(self):
+        # Three magnitudes across two arts is a distribution nothing in the
+        # design line states. Guessing it is exactly what this must not do.
+        token = designline.Token(kind="requisite", magnitude=3, label="")
+        block = self._block_with_requisites(["Vim", "Corpus"])
+        with self.assertRaises(designline.UnknownToken):
+            emit._resolve_requisite_arts(token, block)
+
+    def test_a_bare_token_still_raises_when_no_art_is_declared(self):
+        token = designline.Token(kind="requisite", magnitude=1, label="")
+        with self.assertRaises(designline.UnknownToken):
+            emit._resolve_requisite_arts(token, self._block_with_requisites([]))
+
 
 class TechniqueFormEmissionTest(unittest.TestCase):
     @classmethod

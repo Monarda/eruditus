@@ -12,8 +12,12 @@ import re
 
 _PARENTHETICAL = re.compile(r"\([^)]*\)")
 _BASE = re.compile(r"^Base(?:\s+level)?:?\s+(?P<level>\d+)")
+# "Base Effect" (Tie the Threads That Bind, HoH:MC) alongside the core
+# rulebook's "Base effect". Spelled out rather than re.IGNORECASE, which
+# would also loosen the `Base` and `As ward guideline` alternatives this
+# pattern shares -- "BASE" and "as WARD guideline" are not corpus wordings.
 _BASE_GENERAL = re.compile(
-    r"^Base\s+(effect|spell)\b|^Base$|^As\s+ward\s+guideline$")
+    r"^Base\s+([Ee]ffect|[Ss]pell)\b|^Base$|^As\s+ward\s+guideline$")
 _TOKEN = re.compile(r"^(?P<sign>[+-])\s*(?P<magnitude>\d+)\s+(?P<label>.+)$")
 _REQUISITE = re.compile(r"^(?P<art>[A-Z][a-z]+)\s+requisites?$")
 # A handful of design lines spell the requisite cost as "<Technique> effect"
@@ -60,6 +64,11 @@ _BARE_REQUISITE_LABELS = frozenset({
     "requisite",
     "requisites",
     "extra effect from requisite",
+    # Embrace of Boethius (HoH:MC) charges "+2 necessary requisites" against
+    # its two declared Req: arts. A closed entry rather than a pattern, the
+    # same discipline as the rest of this set: the phrasing occurs exactly
+    # once across all 54 books in the corpus.
+    "necessary requisites",
 })
 
 # Range, Duration and Target names as the design lines spell them, mapped to
@@ -77,6 +86,11 @@ PARAMETER_LABELS = {
     "Circle": "Circle", "Structure": "Structure", "Str": "Structure",
     "Bound": "Boundary", "Boundary": "Boundary",
     "Taste": "Taste", "Smell": "Smell", "Hearing": "Hearing", "Vision": "Vision",
+    # Sensory Magic Targets (HoH:MC, catalog rows added by todo item 64).
+    # The Targets landed in parameters.json without their design-line labels,
+    # which blocked all seven spells that use one.
+    "Flavor": "Flavor", "Texture": "Texture", "Scent": "Scent",
+    "Sound": "Sound", "Spectacle": "Spectacle",
     # "Eve" is a one-letter OCR/typo slip of "Eye" that recurs in the DE text:
     # "Perception of the Conflicting Motives" has R: Eve in its stat line, and
     # "Aura of Rightful Authority" has R: Eye in its stat line but "+1 Eve" in
