@@ -899,6 +899,43 @@ makes the two exceptions below invisible to the next person to add a handler.
   `lib/bloc/spell_creation/spell_creation_state.dart`
 - **See also:** item 59 (closed, `## Completed ✅`)
 
+### 63. The Ritual Default Is Form-Blind, and Imaginem/Mentem Pay for It
+
+**Opened 2026-08-18.** `SpellDraft.isEligibleForLastingCreationDeclaration`
+(`lib/models/spell.dart:517-518`) is exactly
+`technique == 'Creo' && duration?.id == 'duration-momentary'` — it never looks
+at the Form. So `_withRitualDeclaration`
+(`lib/bloc/spell_creation/spell_creation_bloc.dart:696-706`) defaults **every**
+Momentary Creo spell to `RitualDeclaration.lastingCreation`, and a Momentary
+**Creo Imaginem** or **Creo Mentem** spell is auto-declared a Ritual.
+
+That is very unlikely to be right. The lasting-creation rule is about bringing
+something into being that persists after the magic ends; a Momentary image or a
+Momentary mental effect does not leave a created *thing* behind, and neither
+Form is a plausible Ritual by default. The two most affected Forms are the two
+where the default is most often wrong.
+
+- [ ] **Establish the ruling before touching the predicate.** Find what the
+      Definitive Edition actually says about which Creo effects at Momentary
+      require a Ritual (see the rulebook checkout — `reviewed/` is
+      authoritative). The fix hinges on whether the rule is "Creo except
+      Imaginem/Mentem", "Creo of a *material* Form", or something the
+      guideline itself should carry rather than the Technique/Duration pair.
+- [ ] **Decide where the knowledge belongs.** A hardcoded Form exclusion list
+      in `isEligibleForLastingCreationDeclaration` is the cheap fix and the
+      same shape of hardcoding that made this wrong in the first place. The
+      alternative — a flag on the base effect / guideline, so the catalog
+      states it as data — is the direction item 14's design argued for when it
+      hit the same "make the kind catalog data" question for Target kinds.
+- [ ] **Check what a changed default does to already-saved spells.**
+      `_withRitualDeclaration` leaves `storyguideRuling` alone, but any user
+      spell saved with the auto-applied `lastingCreation` keeps it; those rows
+      would need to be either re-derived or left as an explicit user choice.
+      Note the prototype rule: dropping the DB is free if that is cleaner.
+- **Files:** `lib/models/spell.dart:517-518`,
+  `lib/bloc/spell_creation/spell_creation_bloc.dart:696-706`
+- **See also:** item 14 (the "make it catalog data" precedent)
+
 ---
 
 ## Completed ✅
