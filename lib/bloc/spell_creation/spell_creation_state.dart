@@ -114,12 +114,13 @@ class SpellCreationState extends Equatable {
       // stale error unless the handler explicitly re-passes one, matching
       // the convention already used by SpellLibraryState/ConfigurationState.
       errorMessage: errorMessage,
-      // Unlike errorMessage, generalEffectSentence must be *clearable*
-      // without being wiped on every emit: only the four handlers that can
-      // change baseEffect or chosenBaseLevel ever recompute it, and every
-      // other emit needs to carry the existing value forward untouched. A
-      // plain `?? this.generalEffectSentence` can't tell "omitted" from
-      // "explicitly cleared to null" apart, so this uses the same
+      // Unlike errorMessage, generalEffectSentence must be *clearable* rather
+      // than merely droppable, for the same reason breakdown above is: the
+      // emit funnel writes it on every pass, from the draft, and "this draft
+      // has no sentence" is a real answer it has to be able to give. A plain
+      // `?? this.generalEffectSentence` cannot tell "omitted" from "explicitly
+      // cleared to null" apart, and would strand a General guideline's
+      // strength on screen after the guideline itself had been replaced. Same
       // `_unset`-sentinel trick as SpellDraft.copyWith.
       generalEffectSentence: identical(generalEffectSentence, _unset)
           ? this.generalEffectSentence
