@@ -2,26 +2,48 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
-/// Which Forms a parameter is offered for. Empty means unrestricted.
-/// Only a Forms list -- no Technique axis, no exclude-lists, no effectIds --
-/// because Fire is the only parameter across todo item 17's 9 new entries
-/// that needs scoping at all. Extend when real evidence demands it, not
-/// preemptively.
+/// Which Forms a parameter is offered for, and which Techniques it is never
+/// offered for. An empty [forms] means unrestricted.
+///
+/// [excludeTechniques] carves out Techniques the parameter never applies to,
+/// mirroring [ModifierScope.excludeTechniques] and added for the same shape of
+/// rule: HoH:MC's five Sensory Magic Targets, which the book forbids on any
+/// spell employing Intellego, "even as a requisite" -- the requisite half needs
+/// a validation check rather than a scope field, and is todo item 67.
+///
+/// One list is positive and the other negative because that is how each rule is
+/// written, not by accident: Fire is offered *for* Ignem and Imaginem, while a
+/// Sensory Target is offered for everything *except* Intellego. A positive
+/// Technique list could not express the second without naming all four others.
 class ParameterScope {
   final List<String> forms;
-  const ParameterScope({this.forms = const []});
+  final List<String> excludeTechniques;
+  const ParameterScope({this.forms = const [], this.excludeTechniques = const []});
 
-  // form is nullable, not required, matching ModifierScope.appliesTo --
-  // draft.form is String? (unset until the user picks one), and a
-  // Form-restricted parameter must stay hidden until it does. An empty
-  // forms list short-circuits before the null check, so an unrestricted
-  // parameter is unaffected by an unset Form.
-  bool appliesTo({String? form}) => forms.isEmpty || forms.contains(form);
+  // technique and form are nullable, not required, matching
+  // ModifierScope.appliesTo -- draft.technique and draft.form are String?
+  // (unset until the user picks one), and a Form-restricted parameter must stay
+  // hidden until it does. An empty forms list short-circuits before the null
+  // check, so an unrestricted parameter is unaffected by an unset Form.
+  //
+  // An unset *Technique* is the opposite case and excludes nothing: hiding
+  // every Sensory Target before the user has chosen a Technique would hide
+  // them from the four Techniques that may use them.
+  //
+  // Exclusion is tested before the positive match, matching ModifierScope's
+  // ordering, because a Forms match cannot overrule "never on this Technique".
+  bool appliesTo({String? technique, String? form}) {
+    if (technique != null && excludeTechniques.contains(technique)) return false;
+    return forms.isEmpty || forms.contains(form);
+  }
 
-  Map<String, dynamic> toMap() => {'forms': forms};
+  Map<String, dynamic> toMap() => {'forms': forms, 'excludeTechniques': excludeTechniques};
 
   factory ParameterScope.fromMap(Map<String, dynamic>? map) => ParameterScope(
         forms: map == null ? const [] : List<String>.from(map['forms'] as List? ?? const []),
+        excludeTechniques: map == null
+            ? const []
+            : List<String>.from(map['excludeTechniques'] as List? ?? const []),
       );
 }
 
