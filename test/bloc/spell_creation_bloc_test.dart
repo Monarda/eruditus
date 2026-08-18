@@ -136,7 +136,7 @@ void main() {
           // Base 10 already exceeds the additive-tier cap of 5, so all of
           // Range(+2) + Duration(+0) + Target(+8) = 10 magnitude falls in the
           // multiplier tier: 10 + (10 * 5) = 60.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60)
           .having((s) => s.validationErrors, 'validationErrors', isEmpty),
     ],
   );
@@ -181,6 +181,195 @@ void main() {
           .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
           // Same base effect + parameters as the draft: base 10 + (10 magnitude * 5) = 60.
           .having((s) => s.suggestionLevels['suggestion-1'], 'suggestionLevels[suggestion-1]', 60),
+    ],
+  );
+
+  // The suggestion fixture the two tests below share: same Technique/Form as
+  // the draft they are calculated against, so findSimilarSpells returns it.
+  SpellCreationBloc blocWithOneSuggestion() {
+    final suggestionRecord = Spell(
+      id: 'suggestion-1',
+      name: 'Pillar of Fire',
+      baseEffectId: creoIgnemEffect.id,
+      technique: 'Creo',
+      form: 'Ignem',
+      rangeId: rangeParam.id,
+      durationId: durationParam.id,
+      targetId: targetParam.id,
+      requisites: const {},
+      summary: 'Raises a pillar of flame.',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
+    );
+    final suggestion = ResolvedSpell(
+      record: suggestionRecord, baseEffect: creoIgnemEffect,
+      range: rangeParam, duration: durationParam, target: targetParam);
+    return SpellCreationBloc(
+      spellEngine: SpellEngine(allSpells: [suggestion]),
+      spellRepository: spellRepository,
+    );
+  }
+
+  void calculateAValidDraft(SpellCreationBloc bloc) {
+    bloc.add(const TechniqueSelected('Creo'));
+    bloc.add(const FormSelected('Ignem'));
+    bloc.add(BaseEffectSelected(creoIgnemEffect));
+    bloc.add(RangeSelected(rangeParam));
+    bloc.add(DurationSelected(durationParam));
+    bloc.add(TargetSelected(targetParam));
+    bloc.add(const SpellCalculated());
+  }
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'an edit after SpellCalculated clears the suggestions it produced, and their '
+    'companion maps, while the level is recomputed',
+    // Each suggestion carries a precomputed level that was compared against a
+    // reference level this draft no longer has, so the edit does not merely
+    // date the list, it falsifies the comparison the list exists to make. Left
+    // uncleared, the list only *looked* gone: the screen hid it on
+    // `status: editing` while it sat in state, and a save started after the
+    // edit put it back on screen (the status moves to saving/error, which the
+    // screen has to read as "keep showing a calculated list" so a save does not
+    // take the suggestions away from under someone who did press the button).
+    //
+    // The funnel's predicate is the level moving, not the draft moving, so this
+    // test's edit is chosen to do both -- see the two tests after it for the
+    // cases where they come apart.
+    build: blocWithOneSuggestion,
+    act: (bloc) {
+      calculateAValidDraft(bloc);
+      // A different Duration: a real draft change, and one that moves the
+      // level, so the recomputation is visible in the same emit.
+      bloc.add(DurationSelected(Parameter(
+          id: 'p-sun', name: 'Sun', category: 'Duration', magnitude: 2,
+          provenance: Provenance(
+              source: PublicationSource.published,
+              citations: const [Citation(bookId: 'arm5-core')]))));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having((s) => s.suggestions, 'suggestions', isEmpty)
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isEmpty)
+          .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', isEmpty)
+          // The level is not merely retained, it is recomputed: the point of
+          // clearing the suggestions is that they no longer describe this
+          // draft, and the thing that does describe it must still be there.
+          .having((s) => s.breakdown, 'breakdown', isNotNull)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 70),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a catalog sync that moves the level clears the suggestions, though the draft '
+    'never changed',
+    // The case the old draft-based predicate could not see, and the reason the
+    // funnel now clears on the breakdown instead. AvailableParametersSynced
+    // re-emits the *same* state object: the draft is untouched and only the
+    // engine's catalog moved, so `draftChanged` was false and all three
+    // suggestion fields survived a recomputed breakdown -- a list of spells
+    // chosen for being near level 60, sitting under a banner reading 55.
+    //
+    // The guideline below is priced against a Touch Range, the shape every ward
+    // row in the catalog has. Its reference id resolves to nothing while the
+    // parameter catalog is empty, so the draft's Voice Range is charged its
+    // full 2 magnitudes; once `p-touch` (magnitude 1) arrives, the same Range
+    // is charged the delta of 1, and the level drops from 60 to 55 with no
+    // event having touched the draft at all.
+    build: blocWithOneSuggestion,
+    act: (bloc) {
+      final wardEffect = BaseEffect(
+        id: 'e-ward', technique: 'Creo', form: 'Ignem',
+        description: 'Ward against flame', baseLevel: 10,
+        reference: const ParameterTriple(
+          rangeId: 'p-touch', durationId: 'duration-momentary',
+          targetId: 'target-individual'),
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final touchParam = Parameter(
+        id: 'p-touch', name: 'Touch', category: 'Range', magnitude: 1,
+        provenance: Provenance(
+            source: PublicationSource.published,
+            citations: const [Citation(bookId: 'arm5-core')]),
+      );
+
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(wardEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellCalculated());
+      bloc.add(AvailableParametersSynced(
+          [rangeParam, durationParam, targetParam, touchParam]));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          // Still `calculated`: the sync re-emits the state it was given, so
+          // nothing but the level and the invalidated fields moves. That is
+          // what makes this dangerous -- the screen would have gone on showing
+          // the section.
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          .having((s) => s.suggestions, 'suggestions', isEmpty)
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isEmpty)
+          .having((s) => s.ritualSuggestionIds, 'ritualSuggestionIds', isEmpty)
+          // Recomputed, not merely retained: base 10 + (Range 2-1 + Duration 0
+          // + Target 8) * 5 = 55, down from the 60 the suggestions were chosen
+          // against.
+          .having((s) => s.breakdown?.level, 'breakdown.level', 55)
+          // The draft is the same object the Calculate ran on -- proof the
+          // clear cannot have come from a draft change.
+          .having((s) => s.draft.range?.id, 'draft.range.id', 'p1'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'a level-neutral edit after SpellCalculated leaves the suggestions alone',
+    // The other side of moving the predicate off the draft, and intentional.
+    // Prose is scoped to nothing and cannot move the level, so the list is
+    // still a list of spells near *this* level. The screen hides the section
+    // anyway while the status is `editing`; what this buys is that a save which
+    // then fails -- and a save dialog's summary rebuilds the draft exactly like
+    // this -- reopens it with a list that was never invalidated.
+    build: blocWithOneSuggestion,
+    act: (bloc) {
+      calculateAValidDraft(bloc);
+      bloc.add(const SummaryChanged('A pillar of flame, but described better.'));
+    },
+    skip: 7,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having((s) => s.draft.summary, 'draft.summary',
+              'A pillar of flame, but described better.')
+          .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isNotEmpty)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    'SpellCalculated does not clear the suggestions it just produced',
+    // The reverse guard on the clears above, and the ordering the whole change
+    // rests on. _handleSpellCalculated emits `state.copyWith(...)`, so the
+    // funnel recomputes the breakdown from the same draft against the same
+    // catalogs that produced `state.breakdown` on the previous pass -- equal by
+    // value, so `breakdownChanged` is false and the list survives the emit that
+    // built it. A clear that fired here would empty the suggestions on the very
+    // event that computes them, and the symptom would be an always-empty
+    // Similar Spells section rather than a stale one. ritualSuggestionIds has
+    // the same guard in the Ritual-suggestion test below, which asserts a
+    // populated set straight out of SpellCalculated.
+    build: blocWithOneSuggestion,
+    act: calculateAValidDraft,
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.calculated)
+          .having((s) => s.suggestions.map((sp) => sp.id), 'suggestions ids', ['suggestion-1'])
+          .having((s) => s.suggestionLevels, 'suggestionLevels', isNotEmpty),
     ],
   );
 
@@ -314,7 +503,7 @@ void main() {
           // Base 10 + (10 magnitude * 5) = 60, same as the plain-draft test
           // above — proves the handler still reaches a normal calculated
           // state rather than throwing out of the bloc.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 60)
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60)
           .having((s) => s.validationErrors, 'validationErrors', isEmpty)
           // The uncomputable spell is dropped, not kept as a level-less
           // suggestion card.
@@ -1009,7 +1198,7 @@ void main() {
           // Base 10 exceeds the additive cap, so the parameters' 10 magnitude
           // plus the requisite's 1 all fall in the multiplier tier:
           // 10 + (11 * 5) = 65, i.e. 5 more than the same draft without it.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 65),
+          .having((s) => s.breakdown?.level, 'breakdown.level', 65),
     ],
   );
 
@@ -1031,7 +1220,7 @@ void main() {
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           // Same 60 as the no-requisite case: a free requisite adds 0.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 60),
+          .having((s) => s.breakdown?.level, 'breakdown.level', 60),
     ],
   );
 
@@ -1095,7 +1284,7 @@ void main() {
           // Base 10 already exceeds the additive-tier cap of 5, so all of
           // Range(+2) + Duration(+0) + Target(+8) + Custom(+3) = 13 magnitude
           // falls in the multiplier tier: 10 + (13 * 5) = 75.
-          .having((s) => s.calculatedLevel, 'calculatedLevel', 75),
+          .having((s) => s.breakdown?.level, 'breakdown.level', 75),
     ],
   );
 
@@ -1937,10 +2126,9 @@ void main() {
       seed: () => SpellCreationState(
         status: SpellCreationStatus.calculated,
         draft: SpellDraft(),
-        calculatedLevel: 42,
       ),
       act: (bloc) => bloc.add(TemplateInstantiated(wardTemplate)),
-      verify: (bloc) => expect(bloc.state.calculatedLevel, isNull),
+      verify: (bloc) => expect(bloc.state.breakdown, isNull),
     );
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -2049,7 +2237,7 @@ void main() {
         expect(bloc.state.draft.form, 'Imaginem');
         expect(bloc.state.validationErrors, isEmpty);
         expect(bloc.state.status, SpellCreationStatus.calculated);
-        expect(bloc.state.calculatedLevel, isNotNull);
+        expect(bloc.state.breakdown, isNotNull);
       },
     );
 
@@ -2176,11 +2364,7 @@ void main() {
     late LevelBreakdown breakdownBeforeSummary;
 
     blocTest<SpellCreationBloc, SpellCreationState>(
-      'SummaryChanged does not recompute the breakdown',
-      // Prose cannot change a level, so recomputing on every keystroke of a
-      // multi-line field is pure waste. Identity, not value: copyWith carries
-      // the old breakdown forward as `breakdown ?? this.breakdown`, so a value
-      // check would pass whether or not a recompute had run.
+      'SummaryChanged leaves the breakdown at an equal value',
       build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
       seed: () {
         // Start with a state that has been calculated, so we have a baseline
@@ -2207,7 +2391,6 @@ void main() {
             target: targetParam,
           ),
           breakdown: breakdownBeforeSummary,
-          calculatedLevel: breakdownBeforeSummary.level,
         );
       },
       act: (bloc) => bloc.add(const SummaryChanged('A jet of flame.')),
@@ -2215,8 +2398,13 @@ void main() {
         expect(bloc.state.breakdown, isNotNull,
             reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
         expect(bloc.state.draft.summary, 'A jet of flame.');
-        expect(bloc.state.breakdown, same(breakdownBeforeSummary),
-            reason: 'SummaryChanged must not recompute the breakdown');
+        // Value, not identity (this used to assert `same`). The emit funnel
+        // rebuilds the breakdown on every event, so what matters is that a
+        // level-neutral edit lands on an equal one -- prose cannot move a
+        // level, and the level must not blink out while it is typed.
+        // This is todo item 58's first bullet.
+        expect(bloc.state.breakdown, breakdownBeforeSummary);
+        expect(bloc.state.levelUnavailableReason, isNull);
       },
     );
   });
@@ -2235,11 +2423,7 @@ void main() {
     late LevelBreakdown breakdownBeforeContainerMode;
 
     blocTest<SpellCreationBloc, SpellCreationState>(
-      'does not recompute the breakdown — the mode is level-neutral',
-      // Identity, not value: copyWith carries the old breakdown forward as
-      // `breakdown ?? this.breakdown`, so a value/non-null check would pass
-      // whether or not a recompute had run. Only `same` proves nothing was
-      // recalculated -- mirrors the SummaryChanged test above.
+      'leaves the breakdown at an equal value — the mode is level-neutral',
       build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
       seed: () {
         breakdownBeforeContainerMode = spellEngine.calculateBreakdown(
@@ -2264,7 +2448,6 @@ void main() {
             target: targetParam,
           ),
           breakdown: breakdownBeforeContainerMode,
-          calculatedLevel: breakdownBeforeContainerMode.level,
         );
       },
       act: (bloc) => bloc.add(const ContainerModeSelected(ContainerMode.static)),
@@ -2272,8 +2455,10 @@ void main() {
         expect(bloc.state.breakdown, isNotNull,
             reason: 'the fixture must actually produce a breakdown, or this test proves nothing');
         expect(bloc.state.draft.containerMode, ContainerMode.static);
-        expect(bloc.state.breakdown, same(breakdownBeforeContainerMode),
-            reason: 'ContainerModeSelected must not recompute the breakdown');
+        // See the SummaryChanged test above: the container mode is
+        // level-neutral, so the recomputed breakdown must compare equal.
+        expect(bloc.state.breakdown, breakdownBeforeContainerMode);
+        expect(bloc.state.levelUnavailableReason, isNull);
       },
     );
   });
@@ -2317,6 +2502,184 @@ void main() {
       act: (bloc) => bloc.add(TargetSelected(structureTarget)),
       verify: (bloc) =>
           expect(bloc.state.draft.containerMode, ContainerMode.dynamic),
+    );
+  });
+
+  group('SpellCreationState.copyWith clearing', () {
+    test('an omitted breakdown is carried forward, an explicit null clears it', () {
+      const breakdown = LevelBreakdown(level: 20, rawLevel: 20, contributions: []);
+      final withBreakdown = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(),
+        breakdown: breakdown,
+      );
+
+      expect(withBreakdown.copyWith(status: SpellCreationStatus.saving).breakdown, breakdown,
+          reason: 'an emit that says nothing about the level must not wipe it');
+      expect(withBreakdown.copyWith(breakdown: null).breakdown, isNull,
+          reason: 'a draft going incomplete must be able to clear the level');
+    });
+
+    test('an omitted reason is carried forward, an explicit null clears it', () {
+      final withReason = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(),
+        levelUnavailableReason: 'Choose a base effect to see a level.',
+      );
+
+      expect(withReason.copyWith(status: SpellCreationStatus.saving).levelUnavailableReason,
+          'Choose a base effect to see a level.');
+      expect(withReason.copyWith(levelUnavailableReason: null).levelUnavailableReason, isNull);
+    });
+  });
+
+  group('the level is live', () {
+    test('the initial state already explains why there is no level', () {
+      final bloc = SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository);
+      addTearDown(bloc.close);
+
+      expect(bloc.state.breakdown, isNull);
+      expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+    });
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a complete draft has a level with no button press at all',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(RangeSelected(rangeParam))
+        ..add(DurationSelected(durationParam))
+        ..add(TargetSelected(targetParam)),
+      verify: (bloc) {
+        expect(bloc.state.status, SpellCreationStatus.editing,
+            reason: 'no SpellCalculated was ever dispatched');
+        expect(bloc.state.breakdown, isNotNull);
+        expect(bloc.state.levelUnavailableReason, isNull);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an edit that empties the draft clears the level and says why',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(RangeSelected(rangeParam))
+        ..add(DurationSelected(durationParam))
+        ..add(TargetSelected(targetParam))
+        // Clears baseEffect (spell_creation_bloc.dart:57), so the level goes
+        // with it rather than lingering as a number for a spell that no
+        // longer has a guideline.
+        ..add(const TechniqueSelected('Perdo')),
+      verify: (bloc) {
+        expect(bloc.state.breakdown, isNull);
+        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'discarding resets to a draft that explains itself',
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(const SpellDiscarded()),
+      verify: (bloc) {
+        expect(bloc.state.breakdown, isNull);
+        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'saving an invalid draft emits its errors and writes nothing',
+      // With Save no longer sitting behind Calculate, this guard is the only
+      // thing between an incomplete draft and the repository.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc.add(const SpellSaveRequested('Pillar of Flames')),
+      verify: (bloc) {
+        expect(bloc.state.validationErrors, isNotEmpty);
+        expect(bloc.state.status, SpellCreationStatus.editing);
+        expect(bloc.state.savedSpell, isNull);
+      },
+    );
+  });
+
+  group('validation errors do not outlive the draft they described', () {
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a rejected save clears its errors on the next edit that fixes them',
+      // The errors were computed from a draft that no longer exists. Left in
+      // place they contradict what the user is now looking at: save an
+      // incomplete draft, read "Target must be selected" in red, pick a
+      // Target, and the red text still says to pick a Target. The pattern
+      // predates this task, but an unconditional Save is what makes it
+      // reachable without a Calculate.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(RangeSelected(rangeParam))
+        ..add(DurationSelected(durationParam))
+        // No Target yet, so the save is rejected rather than written.
+        ..add(const SpellSaveRequested('Pillar of Flames'))
+        ..add(TargetSelected(targetParam)),
+      skip: 5,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.status, 'status', SpellCreationStatus.editing)
+            .having((s) => s.validationErrors, 'validationErrors',
+                contains('Target must be selected')),
+        isA<SpellCreationState>()
+            .having((s) => s.draft.target, 'draft.target', targetParam)
+            .having((s) => s.validationErrors, 'validationErrors (cleared by the edit)', isEmpty),
+      ],
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a SpellCalculated that produces errors keeps them -- the emit carrying them does not clear them',
+      // The reverse guard on the test above. Clearing is conditional on the
+      // draft having actually moved, so the emit that *reports* errors -- which
+      // leaves the draft alone -- must not wipe them on the way out.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(const SpellCalculated()),
+      skip: 3,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.status, 'status', SpellCreationStatus.editing)
+            .having((s) => s.validationErrors, 'validationErrors',
+                contains('Range must be selected')),
+      ],
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'an edit that does not fix the errors still clears them, rather than showing a stale subset',
+      // Deliberately not "recompute the errors on every edit": validation stays
+      // behind the two button presses (its messages render as red text, and
+      // firing them per keystroke would flag a half-built draft as broken --
+      // todo item 59). The funnel only ever clears. The user gets them back,
+      // recomputed against the draft they now have, on their next press.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(const FormSelected('Ignem'))
+        ..add(BaseEffectSelected(creoIgnemEffect))
+        ..add(const SpellSaveRequested('Pillar of Flames'))
+        // Fixes neither the missing Duration nor the missing Target.
+        ..add(RangeSelected(rangeParam)),
+      skip: 4,
+      expect: () => [
+        isA<SpellCreationState>()
+            .having((s) => s.draft.range, 'draft.range', rangeParam)
+            .having((s) => s.validationErrors, 'validationErrors', isEmpty),
+      ],
     );
   });
 }

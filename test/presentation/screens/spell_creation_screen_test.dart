@@ -217,14 +217,14 @@ void main() {
     expect(find.text('Base effect must be selected'), findsOneWidget);
   });
 
-  testWidgets('renders the level breakdown when status is calculated', (tester) async {
+  testWidgets('renders the level with no calculation, and its detail on demand',
+      (tester) async {
     final state = SpellCreationState(
-      status: SpellCreationStatus.calculated,
+      status: SpellCreationStatus.editing,
       draft: SpellDraft(
         technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
         range: range, duration: duration, target: target,
       ),
-      calculatedLevel: 20,
       breakdown: const LevelBreakdown(
         level: 20,
         rawLevel: 20,
@@ -236,94 +236,255 @@ void main() {
     );
     await pumpScreen(tester, state);
 
-    expect(find.byKey(const Key('level-breakdown-card')), findsOneWidget);
+    expect(find.byKey(const Key('level-banner')), findsOneWidget);
     expect(find.text('20'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('level-banner-toggle')));
+    await tester.pumpAndSettle();
+
     expect(find.text('Range · Voice'), findsOneWidget);
   });
 
-  testWidgets('does not render the calculated-level card before calculation', (tester) async {
+  testWidgets('renders the level placeholder before anything is chosen', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.initial,
+      draft: SpellDraft(),
+      levelUnavailableReason: 'Choose a base effect to see a level.',
+    );
+    await pumpScreen(tester, state);
+
+    expect(find.byKey(const Key('level-banner')), findsOneWidget);
+    expect(find.text('Choose a base effect to see a level.'), findsOneWidget);
+  });
+
+  testWidgets('Discard is reachable before any button press', (tester) async {
+    // The escape hatch that did not exist: Discard rendered only inside the
+    // results block, so before the first Calculate there was no way to
+    // abandon a draft at all.
     await pumpScreen(tester, SpellCreationState.initial());
 
-    expect(find.byKey(const Key('level-breakdown-card')), findsNothing);
+    await tester.tap(find.byKey(const Key('discard-button')));
+    await tester.pump();
+
+    verify(() => bloc.add(const SpellDiscarded())).called(1);
+  });
+
+  testWidgets('Save is offered before any button press, but disabled with no level',
+      (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial());
+
+    final saveButton = tester.widget<ElevatedButton>(find.byKey(const Key('save-button')));
+    expect(saveButton.onPressed, isNull,
+        reason: 'no level means nothing saveable, and the banner already says why');
+  });
+
+  testWidgets('Save is enabled once there is a level', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: range, duration: duration, target: target,
+      ),
+      breakdown: const LevelBreakdown(level: 20, rawLevel: 20, contributions: []),
+    );
+    await pumpScreen(tester, state);
+
+    final saveButton = tester.widget<ElevatedButton>(find.byKey(const Key('save-button')));
+    expect(saveButton.onPressed, isNotNull);
+  });
+
+  testWidgets('suggestions stay behind the button', (tester) async {
+    final state = SpellCreationState(
+      status: SpellCreationStatus.editing,
+      draft: SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: range, duration: duration, target: target,
+      ),
+      breakdown: const LevelBreakdown(level: 20, rawLevel: 20, contributions: []),
+    );
+    await pumpScreen(tester, state);
+
+    expect(find.text('Similar Spells'), findsNothing,
+        reason: 'the level is live but findSimilarSpells is the expensive half');
+    expect(find.text('Find Similar Spells'), findsOneWidget);
   });
 
   testWidgets(
-      'editing the draft after Calculate hides the stale Ritual banner rather than '
-      'leaving its old reason on screen', (tester) async {
-    // Regression test: state.breakdown is carried forward by copyWith across
-    // edits (breakdown ?? this.breakdown), so a mock bloc whose state never
-    // changes cannot catch this -- the bug only appears on the rebuild that
-    // follows an edit. Drive two real states through a controller instead,
-    // exactly as the "requisite survives the rebuild" test above does for the
-    // analogous add-dropdown bug.
-    useTallSurface(tester);
-    final stateController = StreamController<SpellCreationState>();
-    addTearDown(stateController.close);
-
+      'editing the draft replaces the Ritual banner with the recomputed breakdown, '
+      'leaving no stale reason on screen', (tester) async {
+    // Regression test, restated for the live level. The banner used to be
+    // gated on the results block because state.breakdown was a snapshot
+    // carried forward across edits, and an edit could leave "Ritual: Year
+    // duration" on screen over a Momentary draft. SpellCreationBloc now
+    // recomputes the breakdown on every emit, so the fix is the emit itself
+    // rather than a gate: what must be proved is that the section renders
+    // whatever ritualStatus the *current* breakdown carries.
+    //
+    // Deliberately two plain pumps rather than the StreamController this test
+    // used to use. That machinery earns its keep only where a defect appears
+    // solely on the rebuild that follows a change (the requisite add-dropdown
+    // crash below, where a FormField holds state across it). Nothing here
+    // holds state across a rebuild any more -- RitualSection is stateless and
+    // reads its status from the breakdown it is handed on every build -- so a
+    // second static state proves exactly what a streamed one would, and says
+    // so without implying a rebuild-only route that no longer exists.
     final yearParam = Parameter(
         id: 'p-year', name: 'Year', category: 'Duration', magnitude: 4,
         provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
 
-    final calculatedState = SpellCreationState(
-      status: SpellCreationStatus.calculated,
-      draft: SpellDraft(
-        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
-        range: range, duration: yearParam, target: target,
-      ),
-      calculatedLevel: 20,
-      breakdown: const LevelBreakdown(
-        level: 20,
-        rawLevel: 20,
-        ritualStatus: RitualStatus([RitualReason.ritualOnlyDuration]),
-        contributions: [
-          LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
-        ],
-      ),
+    final catalog = ConfigurationState(
+      status: ConfigurationStatus.loaded,
+      effects: [creoIgnemEffect],
+      parameters: [voiceParam, yearParam, durationParam, targetParam],
     );
 
-    bloc = mockSpellCreationBloc(
-      initialState: calculatedState,
-      states: stateController.stream,
-    );
-    configBloc = mockConfigurationBloc(
-      initialState: ConfigurationState(
-        status: ConfigurationStatus.loaded,
-        effects: [creoIgnemEffect],
-        parameters: [voiceParam, yearParam, durationParam, targetParam],
+    await pumpScreen(
+      tester,
+      SpellCreationState(
+        status: SpellCreationStatus.calculated,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: range, duration: yearParam, target: target,
+        ),
+        breakdown: const LevelBreakdown(
+          level: 20,
+          rawLevel: 20,
+          ritualStatus: RitualStatus([RitualReason.ritualOnlyDuration]),
+          contributions: [
+            LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+          ],
+        ),
       ),
+      configState: catalog,
     );
-
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellCreationBloc>.value(value: bloc),
-          BlocProvider<ConfigurationBloc>.value(value: configBloc),
-        ],
-        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-      ),
-    ));
 
     expect(find.byKey(const Key('ritual-banner')), findsOneWidget);
     expect(find.textContaining('Year duration'), findsOneWidget);
 
-    // The user changes Duration after Calculate. The bloc reverts status to
-    // editing (as it does for any editing event) but, per
-    // SpellCreationState.copyWith, the stale breakdown from the Year
-    // calculation still rides along on the new state.
-    stateController.add(SpellCreationState(
-      status: SpellCreationStatus.editing,
-      draft: SpellDraft(
-        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
-        range: range, duration: durationParam, target: target,
+    // The user switches Duration away from Year. What SpellCreationBloc's
+    // _emit funnel produces is a *recomputed* breakdown for the new draft --
+    // no longer a Ritual, and no longer floored to 20 -- not the Year
+    // snapshot carried forward.
+    await pumpScreen(
+      tester,
+      SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: range, duration: durationParam, target: target,
+        ),
+        breakdown: const LevelBreakdown(
+          level: 12,
+          rawLevel: 12,
+          contributions: [
+            LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+          ],
+        ),
       ),
-      breakdown: calculatedState.breakdown,
-    ));
-    await tester.pump();
+      configState: catalog,
+    );
 
-    // The level card is correctly gated already; the banner must now be too,
-    // rather than falsely reading "Ritual: Year duration" for a Momentary draft.
-    expect(find.byKey(const Key('level-breakdown-card')), findsNothing);
+    // No stale "Ritual: Year duration" over a Momentary draft -- and, unlike
+    // before, the level itself stays on screen throughout, which is the whole
+    // point of todo item 59.
     expect(find.byKey(const Key('ritual-banner')), findsNothing);
+    expect(find.textContaining('Year duration'), findsNothing);
+    expect(find.byKey(const Key('level-banner')), findsOneWidget);
+    expect(find.text('12'), findsOneWidget);
+  });
+
+  group('the save lifecycle does not open the suggestions section', () {
+    // Save renders unconditionally now, so `saving` and `error` are reachable
+    // on a draft that was never calculated. The old gate read either status as
+    // "show the results block", which materialised a "Similar Spells" heading
+    // over "No similar spells found." above the save error -- an empty section
+    // the user never asked for, standing between them and the one message they
+    // did need. These three pin both directions: the section must not open on
+    // a save, and must not close on one either.
+    final completeDraft = SpellDraft(
+      technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+      range: voiceParam, duration: durationParam, target: targetParam,
+    );
+    const liveBreakdown = LevelBreakdown(level: 20, rawLevel: 20, contributions: []);
+
+    testWidgets('a save failure on a never-calculated draft shows the error and no '
+        'Similar Spells heading', (tester) async {
+      await pumpScreen(
+        tester,
+        SpellCreationState(
+          status: SpellCreationStatus.error,
+          draft: completeDraft,
+          breakdown: liveBreakdown,
+          errorMessage: 'disk full',
+        ),
+      );
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+      expect(find.text('disk full'), findsOneWidget);
+      expect(find.text('Similar Spells'), findsNothing);
+      expect(find.text('No similar spells found.'), findsNothing);
+    });
+
+    testWidgets('a save failure after a successful Calculate still shows both',
+        (tester) async {
+      // The regression in the other direction: narrowing the gate to
+      // `calculated` alone would take the suggestions away the instant the
+      // user pressed Save on them.
+      final suggestionRecord = Spell(
+        id: 's1',
+        name: 'Pillar of Fire',
+        baseEffectId: creoIgnemEffect.id,
+        technique: 'Creo',
+        form: 'Ignem',
+        rangeId: voiceParam.id,
+        durationId: durationParam.id,
+        targetId: targetParam.id,
+        requisites: const {},
+        description: 'A roaring pillar of flame.',
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      );
+      final suggestion = ResolvedSpell(
+          record: suggestionRecord, baseEffect: creoIgnemEffect,
+          range: voiceParam, duration: durationParam, target: targetParam);
+
+      await pumpScreen(
+        tester,
+        SpellCreationState(
+          status: SpellCreationStatus.error,
+          draft: completeDraft,
+          breakdown: liveBreakdown,
+          errorMessage: 'disk full',
+          suggestions: [suggestion],
+          suggestionLevels: const {'s1': 10},
+        ),
+      );
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+      expect(find.text('disk full'), findsOneWidget);
+      expect(find.text('Similar Spells'), findsOneWidget);
+      expect(find.text('Pillar of Fire'), findsOneWidget);
+    });
+
+    testWidgets('the saving state on a never-calculated draft shows no Similar Spells '
+        'heading', (tester) async {
+      await pumpScreen(
+        tester,
+        SpellCreationState(
+          status: SpellCreationStatus.saving,
+          draft: completeDraft,
+          breakdown: liveBreakdown,
+        ),
+      );
+      await tester.scrollUntilVisible(
+          find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
+
+      expect(find.text('Similar Spells'), findsNothing);
+      expect(find.text('No similar spells found.'), findsNothing);
+    });
   });
 
   testWidgets('shows suggestions with their level and description when status is calculated',
@@ -347,7 +508,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
       suggestions: [suggestion],
       suggestionLevels: const {'s1': 10},
     );
@@ -382,7 +542,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
       suggestions: [generalSuggestion],
       suggestionLevels: const {'s-gen': 20},
     );
@@ -421,7 +580,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
       suggestions: [flawedSuggestion],
       suggestionLevels: const {'s-flawed': 10},
     );
@@ -436,7 +594,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('discard-button')), 200, scrollable: screenScrollable);
@@ -456,7 +613,10 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
+      // Save is offered unconditionally now, but disabled without a level, so
+      // a fixture that exercises the dialog has to carry the breakdown a
+      // complete draft like this one really would.
+      breakdown: const LevelBreakdown(level: 20, rawLevel: 20, contributions: []),
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
@@ -485,7 +645,9 @@ void main() {
         range: range, duration: duration, target: target,
         summary: 'Already written.',
       ),
-      calculatedLevel: 10,
+      // As above: Save is disabled without a level, so the dialog can only be
+      // reached from a draft that has one.
+      breakdown: const LevelBreakdown(level: 20, rawLevel: 20, contributions: []),
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
@@ -508,7 +670,10 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.calculated,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
+      // Save is offered unconditionally now, but disabled without a level, so
+      // a fixture that exercises the dialog has to carry the breakdown a
+      // complete draft like this one really would.
+      breakdown: const LevelBreakdown(level: 20, rawLevel: 20, contributions: []),
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);
@@ -580,7 +745,6 @@ void main() {
       SpellCreationState(
         status: SpellCreationStatus.error,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-        calculatedLevel: 10,
         errorMessage: 'disk full',
       ),
     ]);
@@ -588,7 +752,6 @@ void main() {
       initialState: SpellCreationState(
         status: SpellCreationStatus.saving,
         draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-        calculatedLevel: 10,
       ),
       states: states,
     );
@@ -624,7 +787,6 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.saving,
       draft: SpellDraft(technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect, range: range, duration: duration, target: target),
-      calculatedLevel: 10,
     );
     await pumpScreen(tester, state);
     await tester.scrollUntilVisible(find.byKey(const Key('save-button')), 200, scrollable: screenScrollable);

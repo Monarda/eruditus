@@ -1185,6 +1185,120 @@ void main() {
     });
   });
 
+  group('previewLevel', () {
+    final engine = SpellEngine(allSpells: const []);
+    final creoIgnemEffect = BaseEffect(
+      id: 'crig-test', technique: 'Creo', form: 'Ignem',
+      description: 'Create flame', baseLevel: 10,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+
+    test('no base effect yet: says so instead of computing', () {
+      final preview = engine.previewLevel(SpellDraft(technique: 'Creo', form: 'Ignem'));
+
+      expect(preview.breakdown, isNull);
+      expect(preview.unavailableReason, 'Choose a base effect to see a level.');
+    });
+
+    test('General guideline with no chosen level: says so instead of throwing', () {
+      // calculateBreakdown throws ArgumentError here (spell_engine.dart:140-146)
+      // and this state is reachable on literally every keystroke, so the live
+      // path must answer with a reason rather than propagate.
+      final general = BaseEffect(
+        id: 'gen-1', technique: 'Creo', form: 'Ignem',
+        description: 'Ward against beings', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final preview = engine.previewLevel(SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: general,
+        range: _range, duration: _duration, target: _target,
+      ));
+
+      expect(preview.breakdown, isNull);
+      expect(preview.unavailableReason, 'Type a level for this General guideline.');
+    });
+
+    test('General guideline typed at 0: blames the level, not the magnitudes', () {
+      // Reproduced by hand on the live banner: typing 0 into the Guideline
+      // level field used to read "Magnitudes reduce this spell below level 1."
+      // on a draft carrying no magnitudes at all. The chosen level is present,
+      // so the null branch above does not catch it, and SpellLevelCalculator
+      // rejects `baseLevel < 1` from inside calculateBreakdown -- the same
+      // ArgumentError the negative-adjustments test below produces, which is
+      // why the two cannot be told apart in the catch and this one is answered
+      // ahead of it.
+      final general = BaseEffect(
+        id: 'gen-1', technique: 'Creo', form: 'Ignem',
+        description: 'Ward against beings', baseLevel: null,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final draft = SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: general, chosenBaseLevel: 0,
+        range: _range, duration: _duration, target: _target,
+      );
+
+      final preview = engine.previewLevel(draft);
+
+      expect(preview.breakdown, isNull);
+      expect(preview.unavailableReason, 'A General guideline needs a level of 1 or more.');
+    });
+
+    test('a missing parameter: says so instead of computing', () {
+      final preview = engine.previewLevel(SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: _range, duration: _duration,
+      ));
+
+      expect(preview.breakdown, isNull);
+      expect(preview.unavailableReason, 'Choose a Range, Duration and Target.');
+    });
+
+    test('magnitudes below level 1: says so instead of throwing', () {
+      // The other reachable ArgumentError. A stack of negative adjustments is
+      // an ordinary intermediate state while a caster is still typing notes.
+      final preview = engine.previewLevel(SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: _range, duration: _duration, target: _target,
+        // Not `const`: LevelAdjustment's constructor validates the note.
+        adjustments: [
+          LevelAdjustment(magnitude: -5, note: 'a'),
+          LevelAdjustment(magnitude: -5, note: 'b'),
+          LevelAdjustment(magnitude: -5, note: 'c'),
+        ],
+      ));
+
+      expect(preview.breakdown, isNull);
+      expect(preview.unavailableReason, 'Magnitudes reduce this spell below level 1.');
+    });
+
+    test('a complete draft: returns the same breakdown calculateBreakdown would', () {
+      final draft = SpellDraft(
+        technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+        range: _range, duration: _duration, target: _target,
+      );
+
+      final preview = engine.previewLevel(draft);
+
+      expect(preview.unavailableReason, isNull);
+      expect(
+        preview.breakdown,
+        engine.calculateBreakdown(
+          baseEffect: creoIgnemEffect, chosenBaseLevel: null,
+          range: _range, duration: _duration, target: _target,
+          selectedModifiers: const {}, requisites: const {},
+        ),
+      );
+    });
+
+    test('a base effect missing comes before a missing parameter', () {
+      // Order matters: an empty draft is missing everything, and the caster's
+      // first move is the guideline, so that is the reason worth showing.
+      final preview = engine.previewLevel(SpellDraft());
+
+      expect(preview.unavailableReason, 'Choose a base effect to see a level.');
+    });
+  });
+
   group('General level validation', () {
     Parameter param(String id, String name, String category, int magnitude) => Parameter(
         id: id, name: name, category: category, magnitude: magnitude,

@@ -102,8 +102,17 @@ class SpellEngine {
     // ArgumentError straight out of the handler, and _handleSpellSaveRequested
     // never calls the calculator at all, so an uncomputable draft would save.
     // Reported here instead, as one more validation message the creation
-    // screen already renders, which also keeps the Save button unreachable
-    // (it only renders once a draft has calculated).
+    // screen already renders -- and this check is also what keeps such a draft
+    // out of the repository, because _handleSpellSaveRequested calls this
+    // method before it writes anything and returns on the first non-empty
+    // result (see the guard at the top of that method). Nothing in the UI can
+    // stand in for it: Save renders unconditionally since todo item 59, so the
+    // button is pressable on a draft that never calculated, and its
+    // disabled-while-there-is-no-level state is an affordance rather than a
+    // gate -- a dispatched SpellSaveRequested has to be safe on its own. The
+    // motivating case is a stack of negative adjustments on an otherwise
+    // complete draft: previewLevel already answers "no level" in the banner,
+    // but only this line stops the same draft being saved.
     if (errors.isEmpty) {
       try {
         calculateBreakdown(
@@ -123,6 +132,82 @@ class SpellEngine {
     }
 
     return errors;
+  }
+
+  /// [calculateBreakdown] for a draft that may not be finished — the level as
+  /// it stands, or the single reason there isn't one.
+  ///
+  /// **This is not validation.** It answers "is there a number", not "is this
+  /// spell legal": [validateSpellDraft] owns the catalog invariants and stays
+  /// behind a button press, because its messages render as red text and firing
+  /// them on every keystroke would flag a half-built draft as broken (todo
+  /// item 59). This method's reasons are the opposite in tone — they say what
+  /// to do next, not what is wrong.
+  ///
+  /// It exists because [calculateBreakdown] throws two ways that are ordinary
+  /// intermediate states rather than errors: a General guideline before its
+  /// level is typed, and a level that lands below 1. The button-driven path
+  /// could let those escape, since nothing called it until the draft was
+  /// finished. A live path cannot, so every throw is converted here and this
+  /// method never throws.
+  ///
+  /// The below-1 throw arrives by two quite different routes and so gets two
+  /// different reasons. A caster who typed `0` into the Guideline level field
+  /// has an out-of-range base level and no magnitudes involved at all; a caster
+  /// whose negative adjustments outran a legal base level has the opposite
+  /// problem. Both reach the same ArgumentError from SpellLevelCalculator, so
+  /// the General case is answered *before* the try below rather than inside its
+  /// catch, which cannot tell them apart.
+  ///
+  /// A null Technique or Form needs no reason of its own: the base effect
+  /// dropdown does not render without them
+  /// (`spell_creation_screen.dart:115`), so the first branch covers it.
+  LevelPreview previewLevel(SpellDraft draft) {
+    final baseEffect = draft.baseEffect;
+    if (baseEffect == null) {
+      return const LevelPreview.unavailable('Choose a base effect to see a level.');
+    }
+    if (baseEffect.isGeneral) {
+      final chosenBaseLevel = draft.chosenBaseLevel;
+      if (chosenBaseLevel == null) {
+        return const LevelPreview.unavailable('Type a level for this General guideline.');
+      }
+      // A typed `0` -- or a backspace down to it, which the field commits the
+      // same way -- is not the null case above and not the magnitudes case
+      // below. calculateBreakdown hands the chosen level straight to
+      // SpellLevelCalculator, which rejects `baseLevel < 1` before a single
+      // magnitude has been applied, so without this branch a bare `0` fell
+      // through to the catch at the end of this method and told the caster
+      // "Magnitudes reduce this spell below level 1." on a draft that has no
+      // magnitudes to blame. Found by hand-testing the live banner during item
+      // 59's review, on a General guideline with the level field emptied.
+      if (chosenBaseLevel < 1) {
+        return const LevelPreview.unavailable('A General guideline needs a level of 1 or more.');
+      }
+    }
+
+    final range = draft.range;
+    final duration = draft.duration;
+    final target = draft.target;
+    if (range == null || duration == null || target == null) {
+      return const LevelPreview.unavailable('Choose a Range, Duration and Target.');
+    }
+
+    try {
+      return LevelPreview.available(calculateBreakdown(
+        baseEffect: baseEffect,
+        chosenBaseLevel: draft.chosenBaseLevel,
+        range: range,
+        duration: duration,
+        target: target,
+        selectedModifiers: draft.selectedModifiers,
+        requisites: draft.requisites,
+        adjustments: draft.adjustments,
+        ritualDeclaration: draft.ritualDeclaration,
+      ));
+    } on ArgumentError {
+      return const LevelPreview.unavailable('Magnitudes reduce this spell below level 1.');
+    }
   }
 
   LevelBreakdown calculateBreakdown({
