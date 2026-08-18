@@ -505,7 +505,7 @@
     "name": "Sound",
     "category": "Target",
     "magnitude": 3,
-    "targetType": "container",
+    "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
     "scope": {
       "forms": [],
@@ -525,7 +525,7 @@
     "name": "Spectacle",
     "category": "Target",
     "magnitude": 4,
-    "targetType": "container",
+    "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
     "scope": {
       "forms": [],

@@ -2730,15 +2730,15 @@ void main() {
   });
 
   group('a Technique change prunes parameters it puts out of scope', () {
-    // A stand-in for HoH:MC's Sound, which Task 3 adds: a container Target the
-    // rulebook forbids on Intellego spells. Built here rather than read from
-    // the catalog so this behaviour is pinned independently of the data.
+    // A stand-in for HoH:MC's Sound: a sensorium Target the rulebook forbids
+    // on Intellego spells. Built here rather than read from the catalog so
+    // this behaviour is pinned independently of the data.
     final sensoryTarget = Parameter(
       id: 'target-sound-test',
       name: 'Sound',
       category: 'Target',
       magnitude: 3,
-      targetType: TargetType.container,
+      targetType: TargetType.sensorium,
       scope: const ParameterScope(excludeTechniques: ['Intellego']),
       provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-hohmc')]),
     );

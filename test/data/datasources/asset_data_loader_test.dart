@@ -66,8 +66,8 @@ void main() {
       'target-flavor': (0, TargetType.object),
       'target-texture': (1, TargetType.object),
       'target-scent': (2, TargetType.object),
-      'target-sound': (3, TargetType.container),
-      'target-spectacle': (4, TargetType.container),
+      'target-sound': (3, TargetType.sensorium),
+      'target-spectacle': (4, TargetType.sensorium),
     };
 
     for (final entry in expected.entries) {
@@ -155,7 +155,7 @@ void main() {
     });
   });
 
-  test('every Target declares a targetType, and exactly six are containers',
+  test('every Target declares a targetType, and exactly four are containers',
       () async {
     final parameters = await loader.loadParameters();
     final targets = parameters.where((p) => p.category == 'Target').toList();
@@ -180,9 +180,16 @@ void main() {
       'target-room',
       'target-structure',
       'target-boundary',
-      'target-sound',
-      'target-spectacle',
     });
+
+    // Sound and Spectacle are TargetType.sensorium, not container -- see
+    // TargetType's doc comment for why the rulebook's three kinds all
+    // contradict HoH:MC's Sensory Magic Targets.
+    final sensoria = targets
+        .where((p) => p.targetType == TargetType.sensorium)
+        .map((p) => p.id)
+        .toSet();
+    expect(sensoria, {'target-sound', 'target-spectacle'});
 
     // Bloodline is an object Target that carries its own ongoing rule (a
     // spell "applies to all members of the bloodline born during its
