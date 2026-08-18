@@ -271,6 +271,24 @@ List<String> validateSpellAgainstCatalog({
     );
   }
 
+  // 12. HoH:MC 1009: a Sensory Magic spell "cannot employ the Technique of
+  //     Intellego, even as a requisite." The scope field already keeps these
+  //     Targets out of the picker for an Intellego *spell*; this reaches the
+  //     other half of the same sentence.
+  //
+  //     Reads `scope.excludeTechniques` rather than adding a field, because
+  //     that list already carries exactly the right Techniques for the only
+  //     rule of this shape. ParameterScope's doc comment records that this is
+  //     now the field's meaning.
+  final excludedByTarget = target?.scope.excludeTechniques ?? const <String>[];
+  for (final art in requisites.keys) {
+    if (excludedByTarget.contains(art)) {
+      problems.add(
+        '${target!.name} cannot be used on a spell with a $art requisite',
+      );
+    }
+  }
+
   return problems;
 }
 
