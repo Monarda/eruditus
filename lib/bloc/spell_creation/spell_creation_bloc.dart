@@ -590,7 +590,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       );
 
   /// Nulls out any of [SpellDraft.range]/[SpellDraft.duration]/[SpellDraft.target]
-  /// that are no longer valid for [draft]'s (already-updated) Form.
+  /// that are no longer valid for [draft]'s (already-updated) Technique or Form.
   ///
   /// A Form-scoped parameter (e.g. Fire, Ignem/Imaginem only) selected under
   /// one Technique or Form must not survive a change to one it isn't offered
@@ -600,7 +600,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// its value be present in `items` would fail, since the dropdown filters
   /// its items by the new Technique's and Form's scope. Only the parameters
   /// that actually go out of scope are cleared; one still valid for the new
-  /// Form is left untouched.
+  /// Technique and Form is left untouched.
   SpellDraft _withPrunedScopedParameters(SpellDraft draft) {
     Parameter? pruneIfOutOfScope(Parameter? parameter) =>
         parameter != null &&
@@ -608,20 +608,19 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
             ? null
             : parameter;
 
+    // No containerMode handling here, deliberately. Every caller wraps this in
+    // _withSeededParameters, whose final copyWith sets
+    // `containerMode: keepsMode ? null : ContainerMode.unstated` from the
+    // *resulting* Target -- so a Target pruned to null always reaches a mode
+    // clear one call later. todo item 58 recorded a stranded mode as a latent
+    // hole here; the draft-reference-seed work (8143c8e) closed it before this
+    // change, and a clear in this helper would be unreachable code.
     return draft.copyWith(
       range: pruneIfOutOfScope(draft.range),
       duration: pruneIfOutOfScope(draft.duration),
       target: pruneIfOutOfScope(draft.target),
     );
   }
-
-  // No containerMode handling here, deliberately. Every caller wraps this in
-  // _withSeededParameters, whose final copyWith sets
-  // `containerMode: keepsMode ? null : ContainerMode.unstated` from the
-  // *resulting* Target -- so a Target pruned to null always reaches a mode
-  // clear one call later. todo item 58 recorded a stranded mode as a latent
-  // hole here; the draft-reference-seed work (8143c8e) closed it before this
-  // change, and a clear in this helper would be unreachable code.
 
   /// The reference triple [draft]'s guideline is priced against, or the
   /// standard Personal/Momentary/Individual when no guideline is selected.
@@ -656,12 +655,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// Both lookups degrade rather than throw. An id that does not resolve
   /// leaves the slot untouched, so with an empty [parameters] every slot stays
   /// null -- exactly the behaviour before this rule existed. A candidate out
-  /// of scope for the draft's Form, or filed under the wrong category, is
-  /// skipped for the same reason _withPrunedScopedParameters exists:
-  /// writing one in would trip DropdownButtonFormField's assertion that its
-  /// value appear in `items`. Both checks mirror _buildParameterDropdown's own
-  /// filter (`p.category == category && p.scope.appliesTo(form: form)`) --
-  /// the seed writes straight into the same field that dropdown reads, so a
+  /// of scope for the draft's Technique or Form, or filed under the wrong
+  /// category, is skipped for the same reason _withPrunedScopedParameters
+  /// exists: writing one in would trip DropdownButtonFormField's assertion
+  /// that its value appear in `items`. Both checks mirror
+  /// _buildParameterDropdown's own filter (`p.category == category &&
+  /// p.scope.appliesTo(technique: technique, form: form)`) -- the seed
+  /// writes straight into the same field that dropdown reads, so a
   /// candidate it would never have offered must never land there either. No
   /// catalog reference names a Form-scoped or wrong-category parameter today,
   /// but a custom guideline could.

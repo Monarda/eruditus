@@ -66,8 +66,10 @@ class Parameter {
   /// no character/Virtue model, so nothing is actually gated. See todo item 17.
   final String? requiresVirtue;
 
-  /// Which Forms this parameter is offered for. Unrestricted by default; only
-  /// Fire (Ignem/Imaginem only, todo item 17) uses this today.
+  /// Which Forms and Techniques this parameter is offered for. Unrestricted
+  /// by default; Fire (Ignem/Imaginem only, todo item 17) uses the Forms
+  /// axis, and the five Sensory Targets (Flavor, Texture, Scent, Sound,
+  /// Spectacle; todo item 64) use the Technique axis to exclude Intellego.
   final ParameterScope scope;
 
   /// Which of the rulebook's three kinds of Target this is, or null when this
