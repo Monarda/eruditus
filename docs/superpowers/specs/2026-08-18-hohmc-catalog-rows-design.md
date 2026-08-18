@@ -278,6 +278,8 @@ New coverage:
 - `assets/data/parameters.json` — 5 rows
 - `assets/data/base_effects.json` — 2 rows
 - `lib/models/parameter.dart` — `ParameterScope.excludeTechniques`, `appliesTo`
+  (three production call sites pass the Technique: the pruning helper, `seed()`
+  inside `_withSeededParameters`, and the screen's parameter dropdown)
 - `lib/bloc/spell_creation/spell_creation_bloc.dart` — helper renamed, prunes on
   Technique, clears `containerMode`; `TechniqueSelected` calls it
 - `lib/presentation/screens/spell_creation_screen.dart:687` — the dropdown
