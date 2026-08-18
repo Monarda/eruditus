@@ -2,9 +2,17 @@
 
 **Sub-project A of three.** Designed 2026-08-18.
 
-Adds exactly the catalog rows the *Houses of Hermes: Mystery Cults* spells
-depend on, and nothing else. No parser changes and no spells: this is the
-foundation sub-project B consumes.
+Adds the catalog rows the *Houses of Hermes: Mystery Cults* spells depend on,
+and the one rulebook restriction on them the model can actually express. No
+parser changes and no spells: this is the foundation sub-project B consumes.
+
+**This spec was revised once, during review.** It began as a data-only change.
+Checking whether the Sensory Magic restrictions were implementable — rather than
+asserting they were not — showed that one of them has an extension point already
+waiting for it, and that taking it forces a latent bug in the creation bloc to
+be closed at the same time. Both are now in scope. The section *Why the
+Intellego exclusion pulls in more than a field* records that chain, because the
+cost is not obvious from the change's size.
 
 ## Why this is one of three
 
@@ -14,7 +22,7 @@ own regexes turned that into three separable pieces:
 
 | | Work | Depends on |
 |---|---|---|
-| **A** (this spec) | 5 Sensory Magic Targets + 2 Glamour guidelines | — |
+| **A** (this spec) | 5 Sensory Magic Targets + 2 Glamour guidelines, and the Intellego exclusion the Targets carry | — |
 | **B** | Generalise the parser to HoH:MC's block format; extract its 14 spells | A |
 | **C** | The 36 Faerie Magic "Animae" guideline rows | — |
 
@@ -133,6 +141,75 @@ reason.
 committed JSON assets must not be reformatted. Append the two rows in that
 style and check `git diff --numstat` shows exactly two added lines.
 
+## The Intellego exclusion
+
+HoH:MC line 1008: *"The spell cannot employ the Technique of Intellego, even as
+a requisite. Spells which grant magical senses (see ArM5, pages 113-114) fill
+that role."*
+
+The first half of that rule is expressible today, and the model invites it.
+`ParameterScope`'s doc comment reads:
+
+> Only a Forms list -- no Technique axis, no exclude-lists, no effectIds --
+> because Fire is the only parameter across todo item 17's 9 new entries that
+> needs scoping at all. **Extend when real evidence demands it, not
+> preemptively.**
+
+Five Targets the rulebook forbids on Intellego spells is that evidence, and the
+sibling class already shows the shape: `ModifierScope.excludeTechniques` exists
+for exactly this, used by the Size ladders because "the rules exempt Intellego
+from Target size across every Form".
+
+`ParameterScope` gains `excludeTechniques: List<String>`, and `appliesTo` gains
+a Technique argument, ordered the way `ModifierScope.appliesTo` orders it —
+exclusion first, positive match second:
+
+```dart
+bool appliesTo({String? technique, String? form}) {
+  if (technique != null && excludeTechniques.contains(technique)) return false;
+  return forms.isEmpty || forms.contains(form);
+}
+```
+
+Each of the five Sensory Target rows carries
+`"scope": {"forms": [], "excludeTechniques": ["Intellego"]}`.
+
+### Why the Intellego exclusion pulls in more than a field
+
+A Technique axis on a *Target* is new, and three things follow from it. None is
+optional: skipping any one ships a defect.
+
+**`TechniqueSelected` must prune.** `_withPrunedFormScopedParameters`
+(`spell_creation_bloc.dart:604`) is called from exactly one place —
+`FormSelected` at `:271`. `TechniqueSelected` never calls it, because no
+parameter has ever been Technique-scoped. Once Sound and Spectacle are, changing
+the Technique to Intellego with one selected leaves a Target the dropdown no
+longer offers, and `DropdownButtonFormField` asserts that its value is present in
+its items. The helper's own doc comment already names that failure mode; this
+change is what reaches it.
+
+**The helper is renamed** to `_withPrunedScopedParameters`. It prunes on two
+axes now, and a name saying "Form" would be the third stale comment this area
+has produced.
+
+**Item 58's latent hole stops being latent, and closes here.** Its bullet reads:
+
+> …it can null the target without clearing `containerMode`, so a mode stated
+> under Room could survive a Form change and reattach to the next container
+> chosen. **Unreachable today** — `duration-fire` is the only Form-scoped
+> parameter and no Target is scoped — but the helper is generic and
+> `TargetSelected` is currently the only place the mode/Target coupling is
+> maintained.
+
+This spec makes two Targets scoped, and both are containers. The sequence is
+now reachable: choose Sound, state a mode, change the Technique to Intellego —
+the Target is pruned, the mode survives, and it reattaches to the next container
+chosen, which is what `validateSpellAgainstCatalog`'s check 9 rejects with no
+visible cause. So the helper clears the mode when it prunes a Target, mirroring
+what `TargetSelected` already does at `:364-368` and for the reason stated
+there. Item 58's bullet closes as a consequence of this work, the way item 59
+closed its first bullet.
+
 ## Tests
 
 Three Dart tests hardcode catalog counts as deliberate drift detectors. They
@@ -148,7 +225,11 @@ counts that must stay exact are scoped with
 `catalog.cites(entry, catalog.CORE_BOOK_ID)`, and the parameter check is a floor
 (`assertGreaterEqual(len(self.catalog.parameters), 25)`).
 
-New coverage, one test each:
+`test/models/parameter_test.dart:240-250` already covers
+`ParameterScope.appliesTo` for the Forms axis. Those calls stay valid — the new
+argument is named and optional — so they need no edit.
+
+New coverage:
 
 1. **The five Sensory Targets load with their stated magnitudes and kinds** —
    asserting the 0/1/2/3/4 ladder and the object/object/object/container/
@@ -157,6 +238,18 @@ New coverage, one test each:
 2. **The two Glamour guidelines resolve as candidates at base 10** — via
    `Catalog.candidates("Muto", "Imaginem", 10)`, which returns empty today.
    This is the assertion sub-project B depends on.
+3. **`appliesTo` excludes by Technique, and the exclusion beats the Forms
+   match** — a scope with `excludeTechniques: ["Intellego"]` and an empty
+   `forms` returns false for Intellego and true for the rest, mirroring
+   `ModifierScope`'s ordering.
+4. **A Technique change prunes a now-out-of-scope Target** — select Sound, send
+   `TechniqueSelected('Intellego')`, expect `draft.target` null. This is the
+   dropdown-assertion failure, caught at the bloc rather than in a widget test.
+5. **A pruned Target takes its container mode with it** — the same sequence,
+   asserting `draft.containerMode` is `ContainerMode.unstated`. This is item
+   58's bullet, and it is the one test here that would fail against a plausible
+   implementation: pruning the Target while leaving the mode is exactly what the
+   helper does today.
 
 ## Out of scope, with reasons
 
@@ -166,20 +259,36 @@ New coverage, one test each:
 - **The 36 Faerie Magic "Animae" guidelines** — sub-project C.
 - **Per-spell static/dynamic container rulings** — sub-project B.
 - **Any parser change** — sub-project B.
-- **Enforcing the Sensory Magic restrictions** (Range must be Personal, no
-  Intellego, not investable into items, Form must suit the medium; lines
-  1005-1011). The app has no Virtue model, and these constrain spell *design*
-  rather than the catalog row. Recorded here so a later reader knows they were
-  seen and set aside, not missed.
+- **The rest of the Sensory Magic restrictions** (lines 1005-1011), filed as
+  todo item 64 rather than deferred silently. An earlier draft of this spec
+  dismissed all of them with one reason — "the app has no Virtue model" — which
+  is true of three and false of two. The accurate position, per restriction:
+
+  | Restriction | Status |
+  |---|---|
+  | No Intellego, as the spell's own Technique | **In scope above** |
+  | No Intellego *as a requisite* | Filed. Needs a validation check over `draft.requisites`, a different mechanism from a scope field |
+  | Range must be Personal | Filed. No capability: no parameter constrains another's value today, and building that for five rows is disproportionate |
+  | Form must suit the sensory medium | Filed to item 56. Storyguide judgment by the book's own wording, so display work, not enforcement |
+  | Not investable into magical items | Filed as won't-do. The app models no enchantments at all — the same reason *Perceive the Change* is not an extractable spell |
+  | Non-initiates cannot learn them; Heartbeast adds to Lab Total | Filed as won't-do. No character model, no lab totals |
 
 ## Files
 
-- `assets/data/parameters.json`
-- `assets/data/base_effects.json`
+- `assets/data/parameters.json` — 5 rows
+- `assets/data/base_effects.json` — 2 rows
+- `lib/models/parameter.dart` — `ParameterScope.excludeTechniques`, `appliesTo`
+- `lib/bloc/spell_creation/spell_creation_bloc.dart` — helper renamed, prunes on
+  Technique, clears `containerMode`; `TechniqueSelected` calls it
+- `lib/presentation/screens/spell_creation_screen.dart:687` — the dropdown
+  filter passes the Technique
+- `test/models/parameter_test.dart`
+- `test/bloc/spell_creation_bloc_test.dart`
 - `test/data/datasources/asset_data_loader_test.dart`
 - `test/bloc/configuration_bloc_test.dart`
 - `test/data/repositories/configuration_repository_test.dart`
-- `.superpowers/todo.md` (open the item; file B and C)
+- `.superpowers/todo.md` — open this item; file B, C and 64; close item 58's
+  `_withPrunedFormScopedParameters` bullet
 
 ## See also
 
@@ -188,3 +297,6 @@ New coverage, one test each:
 - Item 55 — what broke when the catalog stopped being core-only, and the
   book-aware oracles that resolved it.
 - Item 57 — the container rows owing static/dynamic rulings.
+- Item 58 — its `_withPrunedFormScopedParameters` bullet closes here, for the
+  reason that bullet predicted.
+- Item 56 — where the un-enforceable restrictions surface as rules hints.
