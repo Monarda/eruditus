@@ -1166,6 +1166,79 @@ void main() {
 
       expect(problems, isEmpty);
     });
+
+    test('check 11: a Sensory Target with a non-Personal Range is rejected', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Creo', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final voice = Parameter(
+        id: 'range-voice', name: 'Voice', category: 'Range', magnitude: 2,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final sound = Parameter(
+        id: 'target-sound', name: 'Sound', category: 'Target', magnitude: 3,
+        targetType: TargetType.sensorium,
+        requiresRangeId: 'range-personal',
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Creo',
+        form: 'Ignem',
+        analogyRationale: null,
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        range: voice,
+        target: sound,
+        containerMode: ContainerMode.unstated,
+        modifiers: const [],
+      );
+
+      expect(problems, hasLength(1));
+      expect(problems.single, contains('Sound'));
+      expect(problems.single, contains('range-personal'));
+    });
+
+    test('check 11: a Sensory Target with the Range it requires is valid', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Creo', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final personal = Parameter(
+        id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+        forbidsTargetTypes: const [TargetType.container],
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final sound = Parameter(
+        id: 'target-sound', name: 'Sound', category: 'Target', magnitude: 3,
+        targetType: TargetType.sensorium,
+        requiresRangeId: 'range-personal',
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Creo',
+        form: 'Ignem',
+        analogyRationale: null,
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        range: personal,
+        target: sound,
+        containerMode: ContainerMode.unstated,
+        modifiers: const [],
+      );
+
+      expect(problems, isEmpty);
+    });
   });
 
   group('spellOwesContainerMode', () {

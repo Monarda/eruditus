@@ -448,6 +448,7 @@
     "magnitude": 0,
     "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
+    "requiresRangeId": "range-personal",
     "scope": {
       "forms": [],
       "excludeTechniques": [
@@ -468,6 +469,7 @@
     "magnitude": 1,
     "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
+    "requiresRangeId": "range-personal",
     "scope": {
       "forms": [],
       "excludeTechniques": [
@@ -488,6 +490,7 @@
     "magnitude": 2,
     "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
+    "requiresRangeId": "range-personal",
     "scope": {
       "forms": [],
       "excludeTechniques": [
@@ -508,6 +511,7 @@
     "magnitude": 3,
     "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
+    "requiresRangeId": "range-personal",
     "scope": {
       "forms": [],
       "excludeTechniques": [
@@ -528,6 +532,7 @@
     "magnitude": 4,
     "targetType": "sensorium",
     "requiresVirtue": "Sensory Magic",
+    "requiresRangeId": "range-personal",
     "scope": {
       "forms": [],
       "excludeTechniques": [

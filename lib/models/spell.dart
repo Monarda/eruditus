@@ -251,6 +251,26 @@ List<String> validateSpellAgainstCatalog({
     );
   }
 
+  // 11. The forcing direction: a Target that dictates its spell's Range.
+  //     HoH:MC 1006 requires every Sensory Magic spell's Range to be Personal.
+  //     The creation screen sets and locks the Range, so a live draft cannot
+  //     reach this — but the importer and already-saved records never pass
+  //     through a dropdown, which is what this check is for.
+  //
+  //     The message names the required *id* rather than a display name,
+  //     deliberately: this function has no parameter catalog to resolve
+  //     against (check 5 resolves modifiers only because it is handed the
+  //     list), and the only reader who sees this message is looking at record
+  //     data, for whom the id is the more useful string. Check 7 sets the same
+  //     precedent when it cannot describe a slot kind.
+  final requiredRangeId = target?.requiresRangeId;
+  if (requiredRangeId != null && range != null && range.id != requiredRangeId) {
+    problems.add(
+      '${target!.name} requires the Range "$requiredRangeId", '
+      'but this spell uses ${range.name}',
+    );
+  }
+
   return problems;
 }
 

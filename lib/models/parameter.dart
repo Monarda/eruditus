@@ -100,6 +100,21 @@ class Parameter {
   /// to impose and can only remove options, while a "must" can be auto-set.
   final List<TargetType> forbidsTargetTypes;
 
+  /// The Range this parameter's spell must use, or null when it dictates none.
+  ///
+  /// Only the five HoH:MC Sensory Magic Targets set it, to `range-personal`,
+  /// from HoH:MC 1006: "The Range must be Personal."
+  ///
+  /// The *forcing* half of the cross-field pair — see [forbidsTargetTypes] for
+  /// the forbidding half and why they are separate. Named for the `requires*`
+  /// family ([requiresRitual], [requiresVirtue]) with the `Id` suffix marking a
+  /// catalog reference, as `rangeId`/`durationId`/`targetId` do elsewhere.
+  ///
+  /// Unlike [requiresVirtue], which is informational because the app has no
+  /// character model, this one *is* enforced: check 11 rejects a mismatch and
+  /// `SpellCreationBloc` sets and locks the Range.
+  final String? requiresRangeId;
+
   final Provenance provenance;
 
   Parameter({
@@ -112,6 +127,7 @@ class Parameter {
     this.scope = const ParameterScope(),
     this.targetType,
     this.forbidsTargetTypes = const [],
+    this.requiresRangeId,
     required this.provenance,
   });
 
@@ -125,6 +141,7 @@ class Parameter {
     if (targetType != null) 'targetType': targetType!.name,
     if (forbidsTargetTypes.isNotEmpty)
       'forbidsTargetTypes': forbidsTargetTypes.map((t) => t.name).toList(),
+    if (requiresRangeId != null) 'requiresRangeId': requiresRangeId,
     'scope': scope.toMap(),
     ...provenance.toMap(),
   };
@@ -146,6 +163,7 @@ class Parameter {
             ?.map((n) => targetTypeFromName(n as String, 'Parameter'))
             .toList() ??
         const [],
+    requiresRangeId: map['requiresRangeId'] as String?,
     provenance: Provenance.fromMap(map),
   );
 
