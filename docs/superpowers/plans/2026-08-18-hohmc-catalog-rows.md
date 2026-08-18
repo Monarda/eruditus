@@ -840,7 +840,7 @@ before the `---` that precedes `## Completed ✅`:
 ```markdown
 ### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B)
 
-**Opened 2026-08-18.** Item 65 landed the catalog rows; this is the work they
+**Opened 2026-08-18.** Item 64 landed the catalog rows; this is the work they
 were for, and the real test of whether the core-book importer generalises.
 
 `blocks.parse_de` anchors on `### Creo Animal Spells` + `#### LEVEL 20` +
@@ -899,12 +899,12 @@ ten Forms, all gated on Faerie Magic.
 ### 67. The Sensory Magic Restrictions the Model Cannot Yet Express
 
 **Opened 2026-08-18, from item 64's review.** HoH:MC lines 1005-1011 put six
-restrictions on Sensory Magic spells. Item 65 implemented one. An earlier draft
+restrictions on Sensory Magic spells. Item 64 implemented one. An earlier draft
 of its spec dismissed all six with a single reason — "the app has no Virtue
 model" — which is true of three and false of two; this item records the accurate
 position so the tractable ones stay visible.
 
-- [ ] **No Intellego *as a requisite*.** Item 65's `excludeTechniques` covers
+- [ ] **No Intellego *as a requisite*.** Item 64's `excludeTechniques` covers
       only the spell's own Technique. The book says "even as a requisite", which
       needs a validation check over `draft.requisites` — a different mechanism
       from a scope field, which is why it was not folded in.
