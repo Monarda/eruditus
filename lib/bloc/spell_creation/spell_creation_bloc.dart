@@ -340,16 +340,27 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     } else if (event is RangeSelected) {
       // Range and Target are peers, so this prunes in the opposite direction
       // from _withPrunedScopedParameters, whose Technique/Form axes are always
-      // upstream. Core 12086 is the rule: a Personal Range forbids a container
-      // Target. The field just edited wins and the conflicting peer yields --
-      // the same rule TargetSelected applies to containerMode below.
+      // upstream. The field just edited wins and the conflicting peer yields --
+      // the same rule TargetSelected applies to containerMode below. Two
+      // rulebook checks can conflict with a newly-picked Range, so both are
+      // checked here: core 12086 (a Personal Range forbids a container
+      // Target) and HoH:MC 1006 (a Sensory Target demands Personal Range,
+      // via requiresRangeId) -- a Target that names a different Range than
+      // the one just chosen is just as much a conflict as one this Range
+      // forbids outright, or the pair could reach check 11's violation with
+      // no TargetSelected in the trace at all.
       //
       // The mode is cleared with the Target rather than left behind: a mode
       // outliving its Target reattaches to the next container chosen, which is
       // what check 9 then rejects with no visible cause (todo item 58).
-      final targetKind = state.draft.target?.targetType;
-      final clearsTarget = targetKind != null &&
+      final currentTarget = state.draft.target;
+      final targetKind = currentTarget?.targetType;
+      final forbidsCurrentTarget = targetKind != null &&
           event.parameter.forbidsTargetTypes.contains(targetKind);
+      final requiredRangeId = currentTarget?.requiresRangeId;
+      final demandsDifferentRange =
+          requiredRangeId != null && requiredRangeId != event.parameter.id;
+      final clearsTarget = forbidsCurrentTarget || demandsDifferentRange;
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(

@@ -1085,6 +1085,22 @@ void main() {
         expect(bloc.state.draft.target, sound);
       },
     );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a Range that conflicts with a Target-forced Range clears the Target',
+      // sound forces Range to Personal (requiresRangeId). Picking Touch next
+      // -- a Range sound never named -- must not leave sound behind: that
+      // pairing is exactly what check 11 rejects.
+      build: seedingBloc,
+      act: (bloc) => bloc
+        ..add(TargetSelected(sound))
+        ..add(RangeSelected(touch)),
+      verify: (bloc) {
+        expect(bloc.state.draft.range, touch);
+        expect(bloc.state.draft.target, isNull);
+        expect(bloc.state.draft.containerMode, ContainerMode.unstated);
+      },
+    );
   });
 
   blocTest<SpellCreationBloc, SpellCreationState>(
