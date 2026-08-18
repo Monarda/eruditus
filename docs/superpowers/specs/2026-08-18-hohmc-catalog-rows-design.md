@@ -192,7 +192,9 @@ change is what reaches it.
 axes now, and a name saying "Form" would be the third stale comment this area
 has produced.
 
-**Item 58's latent hole stops being latent, and closes here.** Its bullet reads:
+**Item 58's `containerMode` bullet turns out to be stale, not latent.**
+Investigating it before implementation — rather than trusting it — showed the
+hole was already closed. Its bullet reads:
 
 > …it can null the target without clearing `containerMode`, so a mode stated
 > under Room could survive a Form change and reattach to the next container
@@ -201,14 +203,21 @@ has produced.
 > `TargetSelected` is currently the only place the mode/Target coupling is
 > maintained.
 
-This spec makes two Targets scoped, and both are containers. The sequence is
-now reachable: choose Sound, state a mode, change the Technique to Intellego —
-the Target is pruned, the mode survives, and it reattaches to the next container
-chosen, which is what `validateSpellAgainstCatalog`'s check 9 rejects with no
-visible cause. So the helper clears the mode when it prunes a Target, mirroring
-what `TargetSelected` already does at `:364-368` and for the reason stated
-there. Item 58's bullet closes as a consequence of this work, the way item 59
-closed its first bullet.
+This spec does make two container Targets scoped, so the sequence the bullet
+describes is now reachable — but it no longer strands anything.
+`_seedParameters` ends with
+`containerMode: keepsMode ? null : ContainerMode.unstated`, computed from the
+*resulting* Target, and **every caller of the pruning helper wraps it in
+`_withSeededParameters`**: `FormSelected` does today, and `TechniqueSelected`
+will once this spec lands. A Target pruned to null therefore always reaches a
+mode clear one call later.
+
+`git log -S` dates that line to `8143c8e`, the draft-reference-seed work
+(item 60), which landed after item 58's bullet was written. So the bullet was
+stale before this spec began. This work gives the helper a second axis and is
+what prompted the check; it is not what fixed the hole, and the record should
+not say otherwise. **No `containerMode` handling is added to the helper** — it
+would be unreachable code.
 
 ## Tests
 
@@ -245,11 +254,10 @@ New coverage:
 4. **A Technique change prunes a now-out-of-scope Target** — select Sound, send
    `TechniqueSelected('Intellego')`, expect `draft.target` null. This is the
    dropdown-assertion failure, caught at the bloc rather than in a widget test.
-5. **A pruned Target takes its container mode with it** — the same sequence,
-   asserting `draft.containerMode` is `ContainerMode.unstated`. This is item
-   58's bullet, and it is the one test here that would fail against a plausible
-   implementation: pruning the Target while leaving the mode is exactly what the
-   helper does today.
+No test is added for a pruned Target's container mode. One was specified in an
+earlier draft; it would pass identically with and without any change, because
+`_seedParameters` clears the mode either way, and a test that cannot fail is not
+coverage.
 
 ## Out of scope, with reasons
 
@@ -281,7 +289,7 @@ New coverage:
   (three production call sites pass the Technique: the pruning helper, `seed()`
   inside `_withSeededParameters`, and the screen's parameter dropdown)
 - `lib/bloc/spell_creation/spell_creation_bloc.dart` — helper renamed, prunes on
-  Technique, clears `containerMode`; `TechniqueSelected` calls it
+  Technique; `TechniqueSelected` calls it
 - `lib/presentation/screens/spell_creation_screen.dart:687` — the dropdown
   filter passes the Technique
 - `test/models/parameter_test.dart`
@@ -289,8 +297,9 @@ New coverage:
 - `test/data/datasources/asset_data_loader_test.dart`
 - `test/bloc/configuration_bloc_test.dart`
 - `test/data/repositories/configuration_repository_test.dart`
-- `.superpowers/todo.md` — open this item; file B, C and 64; close item 58's
-  `_withPrunedFormScopedParameters` bullet
+- `.superpowers/todo.md` — open this item (64); file B (65), C (66) and the
+  deferred restrictions (67); correct item 58's
+  `_withPrunedFormScopedParameters` bullet as stale
 
 ## See also
 
@@ -299,6 +308,6 @@ New coverage:
 - Item 55 — what broke when the catalog stopped being core-only, and the
   book-aware oracles that resolved it.
 - Item 57 — the container rows owing static/dynamic rulings.
-- Item 58 — its `_withPrunedFormScopedParameters` bullet closes here, for the
-  reason that bullet predicted.
+- Item 58 — its `_withPrunedFormScopedParameters` bullet is corrected here as
+  stale. Item 60's seeding work had already closed it.
 - Item 56 — where the un-enforceable restrictions surface as rules hints.
