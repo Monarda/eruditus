@@ -4,7 +4,7 @@
 
 **Goal:** Add the five Sensory Magic Targets and two Glamour guidelines from *Houses of Hermes: Mystery Cults*, together with the Intellego exclusion those Targets carry and the bloc changes that exclusion makes necessary.
 
-**Architecture:** `ParameterScope` gains a negative Technique axis mirroring `ModifierScope.excludeTechniques`. Because a Target becomes Technique-scoped for the first time, `TechniqueSelected` must start pruning out-of-scope parameters — which it has never done — and the pruning helper must clear `containerMode` when it drops a Target, closing a hole todo item 58 recorded as latent. The catalog rows land last, so no intermediate commit ships scoped data the UI does not yet filter.
+**Architecture:** `ParameterScope` gains a negative Technique axis mirroring `ModifierScope.excludeTechniques`. Because a Target becomes Technique-scoped for the first time, `TechniqueSelected` must start pruning out-of-scope parameters, which it has never done. The catalog rows land last, so no intermediate commit ships scoped data the UI does not yet filter.
 
 **Tech Stack:** Dart / Flutter, `flutter_bloc`, `bloc_test`, `equatable`. JSON assets under `assets/data/`.
 
@@ -43,8 +43,8 @@ No files are created. Modified:
 - `lib/models/parameter.dart` — `ParameterScope` gains `excludeTechniques`;
   `appliesTo` gains a Technique argument; `toMap`/`fromMap` carry the field.
 - `lib/bloc/spell_creation/spell_creation_bloc.dart` — pruning helper renamed
-  and taught both axes plus the `containerMode` clear; `TechniqueSelected` calls
-  it; `_withSeededParameters`' `seed()` passes the Technique.
+  and taught both axes; `TechniqueSelected` calls it; `_withSeededParameters`'
+  `seed()` passes the Technique.
 - `lib/presentation/screens/spell_creation_screen.dart` — the parameter dropdown
   filters on Technique; its three callers pass it.
 - `assets/data/parameters.json` — 5 rows.
@@ -67,9 +67,9 @@ No files are created. Modified:
 **Interfaces:**
 - Produces: `ParameterScope({List<String> forms, List<String> excludeTechniques})`
   and `bool appliesTo({String? technique, String? form})`. Tasks 2 and 3 use
-  both. The `technique` argument is **named and optional**, so the four existing
-  `appliesTo(form: ...)` call sites keep compiling untouched — Task 2 updates
-  them deliberately, not because the compiler forces it.
+  both. The `technique` argument is **named and optional**, so the three
+  existing `appliesTo(form: ...)` call sites keep compiling untouched — Task 2
+  updates them deliberately, not because the compiler forces it.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -221,9 +221,8 @@ the field, so nothing changes behaviourally. Both follow.
 - Consumes: `ParameterScope.appliesTo({String? technique, String? form})` from
   Task 1.
 - Produces: `SpellDraft _withPrunedScopedParameters(SpellDraft draft)` —
-  renamed from `_withPrunedFormScopedParameters`, now prunes on both axes and
-  clears `containerMode` when it drops a Target. Task 3's catalog rows rely on
-  this being in place first.
+  renamed from `_withPrunedFormScopedParameters`, now prunes on both axes.
+  Task 3's catalog rows rely on this being in place first.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -246,7 +245,12 @@ and these tests should not depend on one that will exist later.
       magnitude: 3,
       targetType: TargetType.container,
       scope: const ParameterScope(excludeTechniques: ['Intellego']),
-      provenance: Provenance(source: PublicationSource.published),
+      // Provenance's constructor rejects a published source with no
+      // citations, so this cites the book the real Target comes from.
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-hohmc')],
+      ),
     );
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -263,24 +267,6 @@ and these tests should not depend on one that will exist later.
     );
 
     blocTest<SpellCreationBloc, SpellCreationState>(
-      'a pruned Target takes its container mode with it',
-      // todo item 58 recorded this as latent: the helper could null the Target
-      // and leave the mode, which then reattaches to the next container chosen
-      // and is what check 9 rejects with no visible cause. A Technique-scoped
-      // container Target is what makes it reachable.
-      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
-      act: (bloc) => bloc
-        ..add(const TechniqueSelected('Creo'))
-        ..add(TargetSelected(sensoryTarget))
-        ..add(const ContainerModeSelected(ContainerMode.dynamic))
-        ..add(const TechniqueSelected('Intellego')),
-      verify: (bloc) {
-        expect(bloc.state.draft.target, isNull);
-        expect(bloc.state.draft.containerMode, ContainerMode.unstated);
-      },
-    );
-
-    blocTest<SpellCreationBloc, SpellCreationState>(
       'a Target the new Technique still allows is left alone',
       // The helper must prune only what actually went out of scope, the same
       // guarantee its Form axis already gives.
@@ -294,7 +280,7 @@ and these tests should not depend on one that will exist later.
   });
 ```
 
-If `ContainerMode`, `TargetType`, `Parameter`, `Provenance` or
+If `ContainerMode`, `TargetType`, `Parameter`, `Provenance`, `Citation` or
 `PublicationSource` are not already imported by that test file, add the imports
 — check the file's existing import block first, since most are likely present.
 
@@ -302,10 +288,11 @@ If `ContainerMode`, `TargetType`, `Parameter`, `Provenance` or
 
 Run: `flutter test test/bloc/spell_creation_bloc_test.dart --plain-name "prunes parameters it puts out of scope"`
 
-Expected: the first two **FAIL** — `TechniqueSelected` does not prune at all
-today, so `draft.target` is still the Sensory Target and `containerMode` is
-still `ContainerMode.dynamic`. The third **PASSES** already, for the trivial
-reason that nothing prunes anything; it is there to stop the fix over-pruning.
+Expected: the **first FAILS** — `TechniqueSelected` does not prune at all
+today, so `draft.target` is still the Sensory Target. The **second PASSES**
+already, for the trivial reason that nothing prunes anything; it is there to
+stop the fix over-pruning, and it is the assertion that would break if the new
+pruning were keyed to the wrong axis.
 
 - [ ] **Step 3: Rename the helper and teach it both axes**
 
@@ -335,25 +322,20 @@ with:
             ? null
             : parameter;
 
-    final target = pruneIfOutOfScope(draft.target);
-
     return draft.copyWith(
       range: pruneIfOutOfScope(draft.range),
       duration: pruneIfOutOfScope(draft.duration),
-      target: target,
-      // A container mode is scoped to its Target, so pruning the Target has to
-      // take the mode with it -- the same rule TargetSelected applies when the
-      // user picks a non-container, and for the same reason: a mode left
-      // behind reattaches to the next container chosen, which is precisely what
-      // validateSpellAgainstCatalog's check 9 rejects, with no visible cause.
-      //
-      // todo item 58 recorded this as latent, correctly: it needed a *scoped
-      // Target* to be reachable, and until HoH:MC's Sound and Spectacle -- both
-      // containers, both forbidden on Intellego -- no Target was scoped on any
-      // axis. Same idiom as _withSeededParameters below: null means "leave it".
-      containerMode: _isContainer(target) ? null : ContainerMode.unstated,
+      target: pruneIfOutOfScope(draft.target),
     );
   }
+
+  // No containerMode handling here, deliberately. Every caller wraps this in
+  // _withSeededParameters, whose final copyWith sets
+  // `containerMode: keepsMode ? null : ContainerMode.unstated` from the
+  // *resulting* Target -- so a Target pruned to null always reaches a mode
+  // clear one call later. todo item 58 recorded a stranded mode as a latent
+  // hole here; the draft-reference-seed work (8143c8e) closed it before this
+  // change, and a clear in this helper would be unreachable code.
 ```
 
 Also update the helper's doc comment above it: the sentence ending
@@ -457,7 +439,7 @@ flutter test test/bloc/spell_creation_bloc_test.dart
 flutter analyze
 ```
 
-Expected: all three new tests PASS, analyzer 0, and the rest of the bloc suite
+Expected: both new tests PASS, analyzer 0, and the rest of the bloc suite
 unchanged. If a pre-existing test fails, the likely cause is Step 5's
 parenthesis edit — check `git diff -w` on `TechniqueSelected` before assuming
 the test is wrong.
@@ -466,7 +448,7 @@ the test is wrong.
 
 Run: `flutter test`
 
-Expected: 727 passing (724 after Task 1, plus 3). Widget tests must stay green:
+Expected: 726 passing (724 after Task 1, plus 2). Widget tests must stay green:
 no catalog row sets `excludeTechniques` yet, so the dropdowns offer exactly what
 they offered before.
 
@@ -486,12 +468,10 @@ because no parameter had ever been Technique-scoped. HoH:MC's Sensory
 Targets are, so TechniqueSelected has to prune too, and the helper is
 renamed for the axis it gained.
 
-It now also clears containerMode when it drops a Target. todo item 58
-recorded that hole as latent and named its precondition exactly: a
-scoped Target. Sound and Spectacle are containers and Intellego-
-forbidden, so the sequence -- pick Sound, state a mode, switch to
-Intellego -- becomes reachable, and the surviving mode reattaches to the
-next container chosen.
+No containerMode change: every caller wraps this helper in
+_withSeededParameters, which already clears a stranded mode from the
+resulting Target. todo item 58 recorded that hole as latent; 8143c8e
+closed it, and a clear here would be unreachable.
 ```
 
 ---
@@ -727,7 +707,7 @@ flutter test
 flutter analyze
 ```
 
-Expected: 729 passing (727 after Task 2, plus 2), analyzer 0.
+Expected: 728 passing (726 after Task 2, plus 2), analyzer 0.
 
 If a widget test fails here, that is a real signal, not noise: it means a
 dropdown is offering or hiding something unexpectedly, and Task 2's filtering is
@@ -771,7 +751,7 @@ core catalog cannot supply.
 
 ---
 
-### Task 4: File the follow-on work and close item 58's bullet
+### Task 4: File the follow-on work and correct item 58's bullet
 
 **Files:**
 - Modify: `.superpowers/todo.md`
@@ -779,7 +759,7 @@ core catalog cannot supply.
 **Interfaces:**
 - Consumes: the three commits from Tasks 1-3.
 - Produces: item 64 (this work, closed), items 65 and 66 (sub-projects B and
-  C), item 67 (the deferred restrictions), and item 58's bullet marked done.
+  C), item 67 (the deferred restrictions), and item 58's bullet corrected.
 
 - [ ] **Step 1: Run the full suite and record the count**
 
@@ -788,23 +768,29 @@ flutter test
 flutter analyze
 ```
 
-Expected: 729 passing, analyzer 0. Record the actual number — you need it in
+Expected: 728 passing, analyzer 0. Record the actual number — you need it in
 Step 5.
 
-- [ ] **Step 2: Close item 58's `_withPrunedFormScopedParameters` bullet**
+- [ ] **Step 2: Correct item 58's `_withPrunedFormScopedParameters` bullet**
 
 In `.superpowers/todo.md`, find item 58's bullet beginning
 "**A latent hole in `_withPrunedFormScopedParameters`**". Leave its text intact
 — it is the record of the prediction — and append this to the end of that
 bullet, matching the style item 58's first bullet uses for its own closure
-("**✅ DONE 2026-08-17 via item 59.**"):
+("**✅ DONE 2026-08-17 via item 59.**"). Note what it says: the bullet was
+already stale when item 64 began, and item 64 is what revealed that, not what
+fixed it. Do not credit this branch with the fix.
 
 ```markdown
-      **✅ DONE 2026-08-18 via item 64.** The precondition this bullet named —
-      a scoped Target — arrived with HoH:MC's Sound and Spectacle, which are
-      containers *and* Intellego-forbidden, making the sequence reachable. The
-      helper (now `_withPrunedScopedParameters`) clears the mode when it prunes
-      the Target, mirroring `TargetSelected`.
+      **✅ ALREADY CLOSED — verified 2026-08-18 during item 64.** Not latent:
+      stale. `_seedParameters` ends with
+      `containerMode: keepsMode ? null : ContainerMode.unstated`, computed from
+      the *resulting* Target, and every caller of the pruning helper wraps it in
+      `_withSeededParameters` — so a Target pruned to null always reaches a mode
+      clear one call later. `git log -S` dates that line to `8143c8e`, the
+      draft-reference-seed work, which landed after this bullet was written.
+      Item 64 gave the helper a second axis and looked for the hole to confirm
+      it; there was none to fix.
 ```
 
 - [ ] **Step 3: Open item 64 for this work**
@@ -832,8 +818,11 @@ restriction on them the model can express.
   the other feature.
 - **Taking the exclusion forced two more changes**, neither optional:
   `TechniqueSelected` had never pruned, because no parameter had ever been
-  Technique-scoped; and item 58's latent `containerMode` hole became reachable
-  the moment a *container* Target was scoped. Both closed here.
+  Technique-scoped. **Item 58's `containerMode` bullet turned out to be stale,
+  not latent** — `_seedParameters` has cleared a stranded mode since `8143c8e`,
+  and every caller of the pruning helper seeds after it. Recorded rather than
+  "fixed": the second axis is what prompted the check, and the check found
+  nothing to repair.
 - **Spec:** `docs/superpowers/specs/2026-08-18-hohmc-catalog-rows-design.md`.
   **Plan:** `docs/superpowers/plans/2026-08-18-hohmc-catalog-rows.md`.
 - **See also:** items 17 (the precedent), 55 (book-aware oracles), 58 (bullet
@@ -851,7 +840,7 @@ before the `---` that precedes `## Completed ✅`:
 ```markdown
 ### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B)
 
-**Opened 2026-08-18.** Item 65 landed the catalog rows; this is the work they
+**Opened 2026-08-18.** Item 64 landed the catalog rows; this is the work they
 were for, and the real test of whether the core-book importer generalises.
 
 `blocks.parse_de` anchors on `### Creo Animal Spells` + `#### LEVEL 20` +
@@ -910,12 +899,12 @@ ten Forms, all gated on Faerie Magic.
 ### 67. The Sensory Magic Restrictions the Model Cannot Yet Express
 
 **Opened 2026-08-18, from item 64's review.** HoH:MC lines 1005-1011 put six
-restrictions on Sensory Magic spells. Item 65 implemented one. An earlier draft
+restrictions on Sensory Magic spells. Item 64 implemented one. An earlier draft
 of its spec dismissed all six with a single reason — "the app has no Virtue
 model" — which is true of three and false of two; this item records the accurate
 position so the tractable ones stay visible.
 
-- [ ] **No Intellego *as a requisite*.** Item 65's `excludeTechniques` covers
+- [ ] **No Intellego *as a requisite*.** Item 64's `excludeTechniques` covers
       only the spell's own Technique. The book says "even as a requisite", which
       needs a validation check over `draft.requisites` — a different mechanism
       from a scope field, which is why it was not folded in.
@@ -960,5 +949,5 @@ grep -n "_withPrunedFormScopedParameters" lib/
 python -c "import sys; sys.path.insert(0,'scripts'); from spell_import import catalog as C; print(C.Catalog.load().candidates('Muto','Imaginem',10))"
 ```
 
-Expected: 729 passing; analyzer 0; the grep silent (the old helper name is gone);
+Expected: 728 passing; analyzer 0; the grep silent (the old helper name is gone);
 and `['muim-hohmc-10']`, which is what sub-project B will depend on.

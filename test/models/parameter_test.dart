@@ -250,6 +250,30 @@ void main() {
       expect(scope.appliesTo(form: null), isFalse);
     });
 
+    test('excludeTechniques hides the parameter from that Technique only', () {
+      const scope = ParameterScope(excludeTechniques: ['Intellego']);
+      expect(scope.appliesTo(technique: 'Intellego'), isFalse);
+      expect(scope.appliesTo(technique: 'Creo'), isTrue);
+      // An unset Technique cannot exclude: the user has not chosen one yet,
+      // and hiding every Sensory Target until they do would be wrong.
+      expect(scope.appliesTo(technique: null), isTrue);
+    });
+
+    test('the Technique exclusion beats an otherwise-matching Forms list', () {
+      // The two rules cannot be collapsed into one positive match, which is
+      // why the negative list exists and why it is tested first.
+      const scope = ParameterScope(forms: ['Ignem'], excludeTechniques: ['Intellego']);
+      expect(scope.appliesTo(technique: 'Creo', form: 'Ignem'), isTrue);
+      expect(scope.appliesTo(technique: 'Intellego', form: 'Ignem'), isFalse);
+    });
+
+    test('excludeTechniques survives a toMap/fromMap round trip', () {
+      const scope = ParameterScope(forms: ['Ignem'], excludeTechniques: ['Intellego']);
+      final restored = ParameterScope.fromMap(scope.toMap());
+      expect(restored.forms, ['Ignem']);
+      expect(restored.excludeTechniques, ['Intellego']);
+    });
+
     test('toMap/fromMap round-trips forms', () {
       const scope = ParameterScope(forms: ['Ignem', 'Imaginem']);
       final restored = ParameterScope.fromMap(scope.toMap());

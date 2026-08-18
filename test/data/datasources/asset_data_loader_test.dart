@@ -36,10 +36,10 @@ void main() {
     expect(effects.any((e) => e.technique == 'Creo' && e.form == 'Animal'), isTrue);
   });
 
-  test('loadParameters loads all 34 built-in parameters', () async {
+  test('loadParameters loads all 39 built-in parameters', () async {
     final parameters = await loader.loadParameters();
 
-    expect(parameters.length, 34);
+    expect(parameters.length, 39);
     expect(parameters.every((p) => p.provenance.source == PublicationSource.published), isTrue);
     expect(
       parameters.any((p) => p.name == 'Eye' && p.category == 'Range' && p.magnitude == 1),
@@ -51,6 +51,53 @@ void main() {
     );
     expect(parameters.any((p) => p.name == 'Bound'), isFalse,
         reason: 'Bound was a data error; the rulebook name is Boundary');
+  });
+
+  test('the five Sensory Magic Targets load with their stated ladder', () async {
+    // The magnitudes are the whole content of these rows and the book gives
+    // them only by equivalence (Flavor to Individual, Texture to Part, Scent to
+    // Group, Sound to Structure, Spectacle to Boundary), so a silent typo in
+    // one produces spells that compute a plausible wrong level. Each was
+    // reconciled against a printed HoH:MC design line -- see the spec.
+    final parameters = await loader.loadParameters();
+    final byId = {for (final p in parameters) p.id: p};
+
+    const expected = <String, (int, TargetType)>{
+      'target-flavor': (0, TargetType.object),
+      'target-texture': (1, TargetType.object),
+      'target-scent': (2, TargetType.object),
+      'target-sound': (3, TargetType.container),
+      'target-spectacle': (4, TargetType.container),
+    };
+
+    for (final entry in expected.entries) {
+      final parameter = byId[entry.key];
+      expect(parameter, isNotNull, reason: '${entry.key} missing from parameters.json');
+      expect(parameter!.magnitude, entry.value.$1, reason: '${entry.key} magnitude');
+      expect(parameter.targetType, entry.value.$2, reason: '${entry.key} targetType');
+      expect(parameter.category, 'Target');
+      expect(parameter.requiresVirtue, 'Sensory Magic');
+      // The rule this carries: HoH:MC forbids these Targets on any spell
+      // employing Intellego.
+      expect(parameter.scope.excludeTechniques, ['Intellego'], reason: '${entry.key} scope');
+    }
+  });
+
+  test('the two Glamour guidelines load, gated on the Glamour Mystery', () async {
+    // muim-hohmc-10 is the only base level any HoH:MC spell needs that the core
+    // catalog cannot supply -- Ball of Abysmal Music, (Base 10, +2 Voice).
+    final effects = await loader.loadBaseEffects();
+    final byId = {for (final e in effects) e.id: e};
+
+    for (final id in ['crim-hohmc-10', 'muim-hohmc-10']) {
+      final effect = byId[id];
+      expect(effect, isNotNull, reason: '$id missing from base_effects.json');
+      expect(effect!.baseLevel, 10, reason: '$id baseLevel');
+      expect(effect.form, 'Imaginem', reason: '$id form');
+      expect(effect.requiresVirtue, 'Glamour', reason: '$id requiresVirtue');
+    }
+    expect(byId['crim-hohmc-10']!.technique, 'Creo');
+    expect(byId['muim-hohmc-10']!.technique, 'Muto');
   });
 
   test('every ritual-only parameter is flagged, including item 17\'s additions', () async {
@@ -81,7 +128,9 @@ void main() {
     );
   });
 
-  test('exactly the Faerie Magic and Symbolic Magic parameters are flagged requiresVirtue', () async {
+  test(
+      'exactly the Faerie Magic, Symbolic Magic and Sensory Magic parameters '
+      'are flagged requiresVirtue', () async {
     final parameters = await loader.loadParameters();
 
     final byVirtue = <String, Set<String>>{};
@@ -90,6 +139,9 @@ void main() {
       byVirtue.putIfAbsent(parameter.requiresVirtue!, () => {}).add(parameter.id);
     }
 
+    // Asserted over the key set too, not just each group's members: without
+    // it, a sixth virtue group could be added tomorrow with nothing failing.
+    expect(byVirtue.keys, {'Faerie Magic', 'Symbolic Magic', 'Sensory Magic'});
     expect(byVirtue['Faerie Magic'], {
       'range-road', 'duration-bargain', 'duration-fire',
       'duration-until-condition', 'duration-year-plus-one', 'target-bloodline',
@@ -97,9 +149,13 @@ void main() {
     expect(byVirtue['Symbolic Magic'], {
       'range-symbol', 'duration-symbol', 'target-symbol',
     });
+    expect(byVirtue['Sensory Magic'], {
+      'target-flavor', 'target-texture', 'target-scent',
+      'target-sound', 'target-spectacle',
+    });
   });
 
-  test('every Target declares a targetType, and exactly four are containers',
+  test('every Target declares a targetType, and exactly six are containers',
       () async {
     final parameters = await loader.loadParameters();
     final targets = parameters.where((p) => p.category == 'Target').toList();
@@ -107,7 +163,7 @@ void main() {
     // Hardcoded like the requiresRitual test above, and for the same reason:
     // parameters.json is small and hand-maintained, so a count that drifts
     // silently is the failure mode worth catching.
-    expect(targets.length, 14);
+    expect(targets.length, 19);
 
     for (final target in targets) {
       expect(target.targetType, isNotNull,
@@ -124,6 +180,8 @@ void main() {
       'target-room',
       'target-structure',
       'target-boundary',
+      'target-sound',
+      'target-spectacle',
     });
 
     // Bloodline is an object Target that carries its own ongoing rule (a

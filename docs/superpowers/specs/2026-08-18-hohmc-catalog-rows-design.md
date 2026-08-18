@@ -9,10 +9,12 @@ parser changes and no spells: this is the foundation sub-project B consumes.
 **This spec was revised once, during review.** It began as a data-only change.
 Checking whether the Sensory Magic restrictions were implementable — rather than
 asserting they were not — showed that one of them has an extension point already
-waiting for it, and that taking it forces a latent bug in the creation bloc to
-be closed at the same time. Both are now in scope. The section *Why the
-Intellego exclusion pulls in more than a field* records that chain, because the
-cost is not obvious from the change's size.
+waiting for it, which pulls the pruning helper's behaviour and name into scope
+alongside it. That check also raised whether item 58's `containerMode` bullet
+was still live; investigating it, rather than trusting it, found the hole had
+already been closed by unrelated work, so nothing there needed fixing. The
+section *Why the Intellego exclusion pulls in more than a field* records both
+threads, because neither's cost is obvious from the change's size.
 
 ## Why this is one of three
 
@@ -51,19 +53,19 @@ style.
 
 ## The five Sensory Magic Targets
 
-House Bjornaer's Sensory Magic (Minor House Mystery, HoH:MC line 997) adds five
+House Bjornaer's Sensory Magic (Minor House Mystery, HoH:MC line 998) adds five
 Targets. Each is an area of effect around the caster: "anyone sensing the
-Bjornaer magus through the specified sense becomes a target" (line 1001).
+Bjornaer magus through the specified sense becomes a target" (line 1002).
 
 New rows in `assets/data/parameters.json`:
 
 | id | name | magnitude | targetType | book's stated equivalent |
 |---|---|---|---|---|
-| `target-flavor` | Flavor | 0 | `object` | Individual (line 1019) |
-| `target-texture` | Texture | 1 | `object` | Part (line 1023) |
-| `target-scent` | Scent | 2 | `object` | Group (line 1027) |
-| `target-sound` | Sound | 3 | `container` | Structure (line 1031) |
-| `target-spectacle` | Spectacle | 4 | `container` | Boundary (line 1035) |
+| `target-flavor` | Flavor | 0 | `object` | Individual (line 1020) |
+| `target-texture` | Texture | 1 | `object` | Part (line 1024) |
+| `target-scent` | Scent | 2 | `object` | Group (line 1028) |
+| `target-sound` | Sound | 3 | `container` | Structure (line 1032) |
+| `target-spectacle` | Spectacle | 4 | `container` | Boundary (line 1036) |
 
 Every row also carries `"category": "Target"`,
 `"requiresVirtue": "Sensory Magic"`, `"source": "published"` and
@@ -94,7 +96,7 @@ The core catalog already holds a `sense` Target ladder at the *same five
 magnitudes* — Taste 0, Touch 1, Smell 2, Hearing 3, Vision 4 — matching the new
 ladder sense for sense. Grouping the Sensory Targets there would be wrong
 anyway, and the book says so itself: a core `sense` Target grants the caster a
-magical sense, while HoH:MC line 1008 rules that a Sensory Magic spell "cannot
+magical sense, while HoH:MC line 1009 rules that a Sensory Magic spell "cannot
 employ the Technique of Intellego, even as a requisite. Spells which grant
 magical senses … fill that role." One enum value would mean two different
 things.
@@ -108,17 +110,23 @@ three types of target" (line 12120).
 
 **Consequence, stated rather than discovered later:** Sound and Spectacle become
 `container` Targets, so `spellOwesContainerMode` will say they owe a
-static/dynamic ruling. That affects the four HoH:MC spells using them (*Clarion
+static/dynamic answer. That affects the four HoH:MC spells using them (*Clarion
 Call of the War Horse*, *The Rooster's Crow*, *Brilliance of the Eagle's
-Plumage*, *Closed Mouth of the Nightwalker*), and belongs to sub-project B —
-`containerMode` is per-spell, not per-parameter. Item 57's backlog is 16 *core*
-spells; these four are B's to rule on and do not change that count.
+Plumage*, *Closed Mouth of the Nightwalker*), and recording that answer
+belongs to sub-project B. It is not a per-spell judgment call, though: HoH:MC
+line 1002 fixes it — "targets need not be present at the casting of the spell,
+and are continuously acquired throughout the spell's duration" — for all five
+Sensory Targets, stated at the Target level with no choice offered. So B's job
+for these four spells is to record `dynamic`, not to rule on it. Item 57's
+backlog is 16 *core* spells; these four are B's to record and do not change
+that count. See todo item 68 for the open question of how the model should
+represent a Target-level fixed mode.
 
 ## The two Glamour guidelines
 
-Glamour (Major Illusion Mystery, line 3826) is restricted: glamours "are Muto or
+Glamour (Major Illusion Mystery, line 3827) is restricted: glamours "are Muto or
 Creo Imaginem spells that only magi with this Virtue may invent or cast" (line
-3828). Both printed guidelines are level 10 (lines 3840 and 3842-3843).
+3829). Both printed guidelines are level 10 (lines 3841 and 3843-3844).
 
 New rows in `assets/data/base_effects.json`:
 
@@ -143,7 +151,7 @@ style and check `git diff --numstat` shows exactly two added lines.
 
 ## The Intellego exclusion
 
-HoH:MC line 1008: *"The spell cannot employ the Technique of Intellego, even as
+HoH:MC line 1009: *"The spell cannot employ the Technique of Intellego, even as
 a requisite. Spells which grant magical senses (see ArM5, pages 113-114) fill
 that role."*
 
@@ -176,8 +184,10 @@ Each of the five Sensory Target rows carries
 
 ### Why the Intellego exclusion pulls in more than a field
 
-A Technique axis on a *Target* is new, and three things follow from it. None is
-optional: skipping any one ships a defect.
+A Technique axis on a *Target* is new, and three things follow from checking
+it. Two are not optional: skipping either ships a defect. The third is a
+record correction, not a code change, and skipping it ships no defect — it
+just leaves a stale bullet on the books.
 
 **`TechniqueSelected` must prune.** `_withPrunedFormScopedParameters`
 (`spell_creation_bloc.dart:604`) is called from exactly one place —
@@ -192,7 +202,9 @@ change is what reaches it.
 axes now, and a name saying "Form" would be the third stale comment this area
 has produced.
 
-**Item 58's latent hole stops being latent, and closes here.** Its bullet reads:
+**Item 58's `containerMode` bullet turns out to be stale, not latent.**
+Investigating it before implementation — rather than trusting it — showed the
+hole was already closed. Its bullet reads:
 
 > …it can null the target without clearing `containerMode`, so a mode stated
 > under Room could survive a Form change and reattach to the next container
@@ -201,14 +213,21 @@ has produced.
 > `TargetSelected` is currently the only place the mode/Target coupling is
 > maintained.
 
-This spec makes two Targets scoped, and both are containers. The sequence is
-now reachable: choose Sound, state a mode, change the Technique to Intellego —
-the Target is pruned, the mode survives, and it reattaches to the next container
-chosen, which is what `validateSpellAgainstCatalog`'s check 9 rejects with no
-visible cause. So the helper clears the mode when it prunes a Target, mirroring
-what `TargetSelected` already does at `:364-368` and for the reason stated
-there. Item 58's bullet closes as a consequence of this work, the way item 59
-closed its first bullet.
+This spec does make two container Targets scoped, so the sequence the bullet
+describes is now reachable — but it no longer strands anything.
+`_seedParameters` ends with
+`containerMode: keepsMode ? null : ContainerMode.unstated`, computed from the
+*resulting* Target, and **every caller of the pruning helper wraps it in
+`_withSeededParameters`**: `FormSelected` does today, and `TechniqueSelected`
+will once this spec lands. A Target pruned to null therefore always reaches a
+mode clear one call later.
+
+`git log -S` dates that line to `8143c8e`, the draft-reference-seed work
+(item 60), which landed after item 58's bullet was written. So the bullet was
+stale before this spec began. This work gives the helper a second axis and is
+what prompted the check; it is not what fixed the hole, and the record should
+not say otherwise. **No `containerMode` handling is added to the helper** — it
+would be unreachable code.
 
 ## Tests
 
@@ -220,10 +239,15 @@ must be updated, and updating them is part of this work rather than a surprise:
 - `test/data/repositories/configuration_repository_test.dart:45,59` — effects
   610 → 612 and 609 → 611
 
-The Python oracles need no change. Item 55 already made them book-aware:
+The Python *count* oracles need no change. Item 55 already made them book-aware:
 counts that must stay exact are scoped with
 `catalog.cites(entry, catalog.CORE_BOOK_ID)`, and the parameter check is a floor
-(`assertGreaterEqual(len(self.catalog.parameters), 25)`).
+(`assertGreaterEqual(len(self.catalog.parameters), 25)`). But
+`test_parameter_lookup_by_category_and_name` is a negative lookup, not a count,
+and counts-scoping does not protect it: it probed `parameter_id("Target",
+"Flavor")` expecting `KeyError`, and this branch adds a Target named Flavor, so
+the probe stopped raising. It was repointed at `"Nowhere"`, mirroring the
+`target_type("target-nowhere")` idiom already used a few tests below.
 
 `test/models/parameter_test.dart:240-250` already covers
 `ParameterScope.appliesTo` for the Forms axis. Those calls stay valid — the new
@@ -245,22 +269,21 @@ New coverage:
 4. **A Technique change prunes a now-out-of-scope Target** — select Sound, send
    `TechniqueSelected('Intellego')`, expect `draft.target` null. This is the
    dropdown-assertion failure, caught at the bloc rather than in a widget test.
-5. **A pruned Target takes its container mode with it** — the same sequence,
-   asserting `draft.containerMode` is `ContainerMode.unstated`. This is item
-   58's bullet, and it is the one test here that would fail against a plausible
-   implementation: pruning the Target while leaving the mode is exactly what the
-   helper does today.
+No test is added for a pruned Target's container mode. One was specified in an
+earlier draft; it would pass identically with and without any change, because
+`_seedParameters` clears the mode either way, and a test that cannot fail is not
+coverage.
 
 ## Out of scope, with reasons
 
 - **The glamour complexity modifiers** (+1 for intricate glamours, +2 for
-  animate → inanimate, lines 3834-3836). No HoH:MC spell uses them, and
+  animate → inanimate, lines 3835-3837). No HoH:MC spell uses them, and
   `designline.py` already tokenises `complexity` generically.
 - **The 36 Faerie Magic "Animae" guidelines** — sub-project C.
 - **Per-spell static/dynamic container rulings** — sub-project B.
 - **Any parser change** — sub-project B.
 - **The rest of the Sensory Magic restrictions** (lines 1005-1011), filed as
-  todo item 64 rather than deferred silently. An earlier draft of this spec
+  todo item 67 rather than deferred silently. An earlier draft of this spec
   dismissed all of them with one reason — "the app has no Virtue model" — which
   is true of three and false of two. The accurate position, per restriction:
 
@@ -281,7 +304,7 @@ New coverage:
   (three production call sites pass the Technique: the pruning helper, `seed()`
   inside `_withSeededParameters`, and the screen's parameter dropdown)
 - `lib/bloc/spell_creation/spell_creation_bloc.dart` — helper renamed, prunes on
-  Technique, clears `containerMode`; `TechniqueSelected` calls it
+  Technique; `TechniqueSelected` calls it
 - `lib/presentation/screens/spell_creation_screen.dart:687` — the dropdown
   filter passes the Technique
 - `test/models/parameter_test.dart`
@@ -289,8 +312,9 @@ New coverage:
 - `test/data/datasources/asset_data_loader_test.dart`
 - `test/bloc/configuration_bloc_test.dart`
 - `test/data/repositories/configuration_repository_test.dart`
-- `.superpowers/todo.md` — open this item; file B, C and 64; close item 58's
-  `_withPrunedFormScopedParameters` bullet
+- `.superpowers/todo.md` — open this item (64); file B (65), C (66) and the
+  deferred restrictions (67); correct item 58's
+  `_withPrunedFormScopedParameters` bullet as stale
 
 ## See also
 
@@ -299,6 +323,6 @@ New coverage:
 - Item 55 — what broke when the catalog stopped being core-only, and the
   book-aware oracles that resolved it.
 - Item 57 — the container rows owing static/dynamic rulings.
-- Item 58 — its `_withPrunedFormScopedParameters` bullet closes here, for the
-  reason that bullet predicted.
+- Item 58 — its `_withPrunedFormScopedParameters` bullet is corrected here as
+  stale. Item 60's seeding work had already closed it.
 - Item 56 — where the un-enforceable restrictions surface as rules hints.

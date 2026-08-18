@@ -239,7 +239,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
         _withPrunedModifiers(_withSeededParameters(
-          state.draft.copyWith(
+          _withPrunedScopedParameters(state.draft.copyWith(
             technique: event.technique,
             baseEffect: null,
             // A chosen level or template link both point at the base effect
@@ -255,7 +255,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
             templateId: null,
             chosenSlots: const {},
             analogyRationale: null,
-          ),
+          )),
           previousReference,
         )),
         reapplyDefault: false,
@@ -268,7 +268,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       final previousReference = _referenceOf(state.draft);
       final draft = _withRitualDeclaration(
         _withPrunedModifiers(_withSeededParameters(
-          _withPrunedFormScopedParameters(state.draft.copyWith(
+          _withPrunedScopedParameters(state.draft.copyWith(
             form: event.form,
             baseEffect: null,
             chosenBaseLevel: null,
@@ -590,21 +590,31 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       );
 
   /// Nulls out any of [SpellDraft.range]/[SpellDraft.duration]/[SpellDraft.target]
-  /// that are no longer valid for [draft]'s (already-updated) Form.
+  /// that are no longer valid for [draft]'s (already-updated) Technique or Form.
   ///
   /// A Form-scoped parameter (e.g. Fire, Ignem/Imaginem only) selected under
-  /// one Form must not survive a change to a Form it isn't offered for --
-  /// exactly the same principle as pruneModifierSelections dropping a
+  /// one Technique or Form must not survive a change to one it isn't offered
+  /// for -- exactly the same principle as pruneModifierSelections dropping a
   /// stranded modifier rather than let it keep affecting the level
   /// invisibly. Left in place, DropdownButtonFormField's own assertion that
   /// its value be present in `items` would fail, since the dropdown filters
-  /// its items by the new Form's scope. Only the parameters that actually go
-  /// out of scope are cleared; one still valid for the new Form is left
-  /// untouched.
-  SpellDraft _withPrunedFormScopedParameters(SpellDraft draft) {
+  /// its items by the new Technique's and Form's scope. Only the parameters
+  /// that actually go out of scope are cleared; one still valid for the new
+  /// Technique and Form is left untouched.
+  SpellDraft _withPrunedScopedParameters(SpellDraft draft) {
     Parameter? pruneIfOutOfScope(Parameter? parameter) =>
-        parameter != null && !parameter.scope.appliesTo(form: draft.form) ? null : parameter;
+        parameter != null &&
+                !parameter.scope.appliesTo(technique: draft.technique, form: draft.form)
+            ? null
+            : parameter;
 
+    // No containerMode handling here, deliberately. Every caller wraps this in
+    // _withSeededParameters, whose final copyWith sets
+    // `containerMode: keepsMode ? null : ContainerMode.unstated` from the
+    // *resulting* Target -- so a Target pruned to null always reaches a mode
+    // clear one call later. todo item 58 recorded a stranded mode as a latent
+    // hole here; the draft-reference-seed work (8143c8e) closed it before this
+    // change, and a clear in this helper would be unreachable code.
     return draft.copyWith(
       range: pruneIfOutOfScope(draft.range),
       duration: pruneIfOutOfScope(draft.duration),
@@ -645,12 +655,13 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// Both lookups degrade rather than throw. An id that does not resolve
   /// leaves the slot untouched, so with an empty [parameters] every slot stays
   /// null -- exactly the behaviour before this rule existed. A candidate out
-  /// of scope for the draft's Form, or filed under the wrong category, is
-  /// skipped for the same reason _withPrunedFormScopedParameters exists:
-  /// writing one in would trip DropdownButtonFormField's assertion that its
-  /// value appear in `items`. Both checks mirror _buildParameterDropdown's own
-  /// filter (`p.category == category && p.scope.appliesTo(form: form)`) --
-  /// the seed writes straight into the same field that dropdown reads, so a
+  /// of scope for the draft's Technique or Form, or filed under the wrong
+  /// category, is skipped for the same reason _withPrunedScopedParameters
+  /// exists: writing one in would trip DropdownButtonFormField's assertion
+  /// that its value appear in `items`. Both checks mirror
+  /// _buildParameterDropdown's own filter (`p.category == category &&
+  /// p.scope.appliesTo(technique: technique, form: form)`) -- the seed
+  /// writes straight into the same field that dropdown reads, so a
   /// candidate it would never have offered must never land there either. No
   /// catalog reference names a Form-scoped or wrong-category parameter today,
   /// but a custom guideline could.
@@ -674,7 +685,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       final candidate = parameters.firstWhereOrNull((p) => p.id == nextId);
       if (candidate == null ||
           candidate.category != category ||
-          !candidate.scope.appliesTo(form: draft.form)) {
+          !candidate.scope.appliesTo(technique: draft.technique, form: draft.form)) {
         return current;
       }
       return candidate;

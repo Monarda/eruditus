@@ -872,7 +872,7 @@ void main() {
   );
 
   // No `reference` at all -- falls back to ParameterTriple.standard(), like
-  // 596 of the 609 catalog entries.
+  // 598 of the 611 catalog entries.
   final plainEffect = BaseEffect(
     id: 'plain-1', technique: 'Creo', form: 'Ignem',
     description: 'Create flame', baseLevel: 10,
@@ -2726,6 +2726,46 @@ void main() {
             .having((s) => s.draft.range, 'draft.range', rangeParam)
             .having((s) => s.validationErrors, 'validationErrors', isEmpty),
       ],
+    );
+  });
+
+  group('a Technique change prunes parameters it puts out of scope', () {
+    // A stand-in for HoH:MC's Sound, which Task 3 adds: a container Target the
+    // rulebook forbids on Intellego spells. Built here rather than read from
+    // the catalog so this behaviour is pinned independently of the data.
+    final sensoryTarget = Parameter(
+      id: 'target-sound-test',
+      name: 'Sound',
+      category: 'Target',
+      magnitude: 3,
+      targetType: TargetType.container,
+      scope: const ParameterScope(excludeTechniques: ['Intellego']),
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-hohmc')]),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a Target the new Technique forbids is dropped',
+      // Left in place it is a value the dropdown no longer offers, and
+      // DropdownButtonFormField asserts its value appears in its items --
+      // the failure _withPrunedScopedParameters exists to prevent.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(TargetSelected(sensoryTarget))
+        ..add(const TechniqueSelected('Intellego')),
+      verify: (bloc) => expect(bloc.state.draft.target, isNull),
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'a Target the new Technique still allows is left alone',
+      // The helper must prune only what actually went out of scope, the same
+      // guarantee its Form axis already gives.
+      build: () => SpellCreationBloc(spellEngine: spellEngine, spellRepository: spellRepository),
+      act: (bloc) => bloc
+        ..add(const TechniqueSelected('Creo'))
+        ..add(TargetSelected(sensoryTarget))
+        ..add(const TechniqueSelected('Muto')),
+      verify: (bloc) => expect(bloc.state.draft.target?.id, 'target-sound-test'),
     );
   });
 }
