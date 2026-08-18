@@ -301,3 +301,32 @@ anchored-but-unparseable rate is genuinely unknown and worth measuring.
 Both suites must pass — `flutter test` and the Python suite — plus the
 integration test. `flutter analyze` must exit 0. `dart format` is never run in
 this repo.
+
+---
+
+## Amendment, 2026-08-18: the "Container modes" section above is superseded
+
+The section headed **Container modes** is wrong and must not be implemented.
+It recorded `ContainerMode.dynamic` for the four Sound and Spectacle spells on
+the premise that both Targets are containers. That premise no longer holds.
+
+`docs/superpowers/specs/2026-08-18-cross-field-parameter-constraints-design.md`
+(commit `37788f3`) closes item 68 the other way: **Sound and Spectacle stop
+being container Targets** and become `TargetType.sensorium`. Core Rules 12086
+forbids a container Target on a Personal-Range spell, and HoH:MC 1006 requires
+every Sensory Magic spell to be Personal, so a container classification makes
+all four spells simultaneously required to be Personal and forbidden from it.
+
+Two consequences for this plan:
+
+- `spellOwesContainerMode` stops asking, so nothing is owed.
+- `validateSpellAgainstCatalog`'s check 9 rejects a stated mode on a
+  non-container Target, so writing those four entries would turn correctly
+  transcribed spells into validation failures.
+
+The reclassification is a prerequisite, not a follow-up, and is implemented as
+Task 6 of the plan. `container_modes.json` is not touched by this work at all.
+
+The rest of the Container modes section — HoH:MC line 1002's statement that
+the Targets are continuously acquired — remains true. It simply stops being
+something the model records per spell, which is what item 68 was asking for.
