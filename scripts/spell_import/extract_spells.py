@@ -594,7 +594,7 @@ def serialize(spells: list[dict]) -> str:
 
 
 def regeneration_failure_message(
-    lock: provenance.SourceIdentity | None, current: provenance.SourceIdentity
+    lock: dict[str, provenance.SourceIdentity], current: provenance.SourceIdentity
 ) -> str:
     """Why does a fresh run disagree with the committed asset?
 
@@ -924,7 +924,8 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         )
 
     identity = provenance.describe(
-        sources.DE_TITLE, path, root, parsed=len(parsed), imported=len(spells)
+        "arm5-core", sources.DE_TITLE, path, root,
+        parsed=len(parsed), imported=len(spells)
     )
 
     if write and not unresolved and not problems:
@@ -933,12 +934,12 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         committed = LIBRARY_PATH.read_text(encoding="utf-8") if LIBRARY_PATH.is_file() else ""
         would_change = fresh != committed
 
-        # An absent lock refuses unconditionally: nothing can be attested, so
-        # "the asset happens to match" is not a reason to proceed quietly. A
-        # merely-moved source refuses only when it would actually rewrite the
-        # asset, since otherwise --write is a no-op anyway.
+        # An unrecorded book refuses unconditionally: nothing can be attested,
+        # so "the asset happens to match" is not a reason to proceed quietly.
+        # A merely-moved source refuses only when it would actually rewrite
+        # the asset, since otherwise --write is a no-op anyway.
         if not provenance.matches(lock, identity) and not accept_source:
-            if would_change or lock is None:
+            if would_change or identity.book_id not in lock:
                 raise SourceMoved(provenance.describe_change(lock, identity))
 
         if would_change:
@@ -967,22 +968,23 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
         if accept_source:
             if would_change:
                 old = json.loads(committed) if committed else []
+                recorded = lock.get(identity.book_id)
                 previous = None
-                if lock is not None and lock.rulebook is not None:
+                if recorded is not None and recorded.rulebook is not None:
                     previous = report_module.old_design_lines(
-                        root, lock.rulebook.commit, lock.path
+                        root, recorded.rulebook.commit, recorded.path
                     )
                 REPORT_PATH.write_text(
                     report_module.render(
                         report_module.diff_assets(old, spells),
-                        lock, identity,
+                        locks=lock, currents=[identity],
                         imported=len(spells), blocked=len(blocked), unresolved=len(unresolved),
                         old_design_lines=previous, new_design_lines=design_lines,
                     ),
                     encoding="utf-8",
                 )
-            provenance.write(identity)
-        elif provenance.matches(lock, identity) and lock.to_dict() != identity.to_dict():
+            provenance.write({identity.book_id: identity})
+        elif provenance.matches(lock, identity) and lock[identity.book_id].to_dict() != identity.to_dict():
             # Same rulebook, so nothing is being *adopted* and the
             # --accept-source gate has nothing to guard: only the lock's
             # advisory counts have drifted from what this run produced. They
@@ -990,7 +992,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             # precisely because the lock was rewritten only when the source
             # moved, which is the one case those counts are read in — the
             # "N parsed, M imported" line of the source-moved message.
-            provenance.write(identity)
+            provenance.write({identity.book_id: identity})
 
     return Report(
         spells=spells, templates=templates, exceptions=exception_spells,

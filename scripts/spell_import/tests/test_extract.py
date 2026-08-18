@@ -457,7 +457,7 @@ class WriteGateTest(unittest.TestCase):
         # assertion would gate on every byte to the rulebook. See spec's "Rejected
         # alternatives" for why the lock does not constrain which source is read.
         lock = provenance.load()
-        self.assertIsNotNone(lock, "source.lock is missing — run --write --accept-source")
+        self.assertIn("arm5-core", lock, "source.lock is missing — run --write --accept-source")
 
 
 class RegenerationMessageTest(unittest.TestCase):
@@ -465,37 +465,38 @@ class RegenerationMessageTest(unittest.TestCase):
 
     def test_names_the_source_when_the_lock_disagrees(self):
         from scripts.spell_import import provenance
-        lock = provenance.SourceIdentity(
-            book="B", path="reviewed/B.md", sha256="0" * 64,
+        recorded = provenance.SourceIdentity(
+            book_id="test-book", book="B", path="reviewed/B.md", sha256="0" * 64,
             rulebook=provenance.RulebookRevision("aaaaaaa", "2026-01-01", "old"),
             spells_parsed=1, spells_imported=1,
         )
-        current = dataclasses.replace(lock, sha256="1" * 64)
-        message = extract_spells.regeneration_failure_message(lock, current)
-        self.assertIn("rulebook source moved", message)
+        current = dataclasses.replace(recorded, sha256="1" * 64)
+        message = extract_spells.regeneration_failure_message(
+            {recorded.book_id: recorded}, current)
+        self.assertIn("moved", message)
         self.assertNotIn("hand-edited", message)
 
     def test_blames_the_asset_when_the_lock_agrees(self):
         from scripts.spell_import import provenance
-        lock = provenance.SourceIdentity(
-            book="B", path="reviewed/B.md", sha256="0" * 64, rulebook=None,
+        recorded = provenance.SourceIdentity(
+            book_id="test-book", book="B", path="reviewed/B.md", sha256="0" * 64, rulebook=None,
             spells_parsed=1, spells_imported=1,
         )
-        message = extract_spells.regeneration_failure_message(lock, lock)
+        message = extract_spells.regeneration_failure_message(
+            {recorded.book_id: recorded}, recorded)
         self.assertIn("hand-edited", message)
-        self.assertNotIn("rulebook source moved", message)
+        self.assertNotIn("moved", message)
 
     def test_names_the_absent_lock_when_lock_is_missing(self):
         from scripts.spell_import import provenance
         current = provenance.SourceIdentity(
-            book="B", path="reviewed/B.md", sha256="1" * 64, rulebook=None,
+            book_id="test-book", book="B", path="reviewed/B.md", sha256="1" * 64, rulebook=None,
             spells_parsed=1, spells_imported=1,
         )
-        message = extract_spells.regeneration_failure_message(None, current)
-        self.assertIn("no source.lock exists", message)
+        message = extract_spells.regeneration_failure_message({}, current)
+        self.assertIn("has no record of", message)
         self.assertIn("--accept-source", message)
         self.assertNotIn("hand-edited", message)
-        self.assertNotIn("rulebook source moved", message)
 
 
 class NumberedOverrideTest(unittest.TestCase):

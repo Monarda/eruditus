@@ -56,8 +56,8 @@ def _changed_fields(old: dict, new: dict) -> list[str]:
 
 def render(
     diff: AssetDiff,
-    lock: provenance.SourceIdentity | None,
-    current: provenance.SourceIdentity,
+    locks: dict[str, provenance.SourceIdentity],
+    currents: list[provenance.SourceIdentity],
     imported: int,
     blocked: int,
     unresolved: int,
@@ -66,23 +66,25 @@ def render(
 ) -> str:
     lines = ["# Import change report", ""]
 
-    if lock is None:
-        lines.append(f"Initial import at {current.label().splitlines()[0]}")
-        lines.append(f"Parsed {current.spells_parsed} · imported {imported} · "
-                     f"blocked {blocked} · unresolved {unresolved}")
-    else:
-        old_commit = "unknown" if lock.rulebook is None else lock.rulebook.commit
-        new_commit = "unknown" if current.rulebook is None else current.rulebook.commit
-        subject = "" if current.rulebook is None else f' ("{current.rulebook.subject}")'
-        lines.append(f"Source: {old_commit} → {new_commit}{subject}")
-        # unresolved is always 0 in a committed lock: run() refuses to write otherwise.
-        blocked_before = (lock.spells_parsed or 0) - (lock.spells_imported or 0)
-        lines.append(
-            f"Parsed {lock.spells_parsed} → {current.spells_parsed} · "
-            f"imported {lock.spells_imported} → {imported} · "
-            f"blocked {blocked_before} → {blocked} · "
-            f"unresolved 0 → {unresolved}"
-        )
+    for current in sorted(currents, key=lambda i: i.book_id):
+        recorded = locks.get(current.book_id)
+        lines.append(f"## {current.book} (`{current.book_id}`)")
+        if recorded is None:
+            lines.append(f"Initial import at {current.label().splitlines()[0]}")
+            lines.append(f"Parsed {current.spells_parsed}")
+        else:
+            old_commit = "unknown" if recorded.rulebook is None else recorded.rulebook.commit
+            new_commit = "unknown" if current.rulebook is None else current.rulebook.commit
+            subject = "" if current.rulebook is None else f' ("{current.rulebook.subject}")'
+            lines.append(f"Source: {old_commit} → {new_commit}{subject}")
+            lines.append(
+                f"Parsed {recorded.spells_parsed} → {current.spells_parsed} · "
+                f"imported {recorded.spells_imported} → {current.spells_imported}")
+        lines.append("")
+
+    # Asset-wide totals: the assets are one file each, so their diff is one
+    # diff no matter how many books fed it.
+    lines.append(f"Imported {imported} · blocked {blocked} · unresolved {unresolved}")
     lines.append("")
 
     lines.append(f"## Newly imported ({len(diff.added)})")

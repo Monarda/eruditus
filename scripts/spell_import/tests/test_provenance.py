@@ -1,5 +1,6 @@
 import json
 import pathlib
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -8,8 +9,9 @@ from unittest import mock
 from scripts.spell_import import provenance
 
 
-def identity(sha="a" * 64, rev=None, parsed=360, imported=250):
+def identity(book_id="arm5-core", sha="a" * 64, rev=None, parsed=360, imported=250):
     return provenance.SourceIdentity(
+        book_id=book_id,
         book="Ars Magica - Definitive Edition (Core Rules)",
         path="reviewed/Ars Magica - Definitive Edition (Core Rules).md",
         sha256=sha,
@@ -29,7 +31,7 @@ class DescribeTest(unittest.TestCase):
             (root / "reviewed").mkdir()
             book = root / "reviewed" / "Some Book.md"
             book.write_text("hello", encoding="utf-8")
-            found = provenance.describe("Some Book", book, root, parsed=3, imported=2)
+            found = provenance.describe("some-book", "Some Book", book, root, parsed=3, imported=2)
             self.assertEqual(found.path, "reviewed/Some Book.md")
             # sha256("hello")
             self.assertEqual(
@@ -44,7 +46,7 @@ class DescribeTest(unittest.TestCase):
             (root / "reviewed").mkdir()
             book = root / "reviewed" / "Some Book.md"
             book.write_text("hello", encoding="utf-8")
-            self.assertIsNone(provenance.describe("Some Book", book, root).rulebook)
+            self.assertIsNone(provenance.describe("some-book", "Some Book", book, root).rulebook)
 
 
 class GitRevisionDegradationTest(unittest.TestCase):
@@ -91,48 +93,56 @@ class LockFileTest(unittest.TestCase):
     def test_round_trips_with_a_revision(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = pathlib.Path(tmp) / "source.lock"
-            provenance.write(identity(rev=REV), path)
-            self.assertEqual(provenance.load(path), identity(rev=REV))
+            ident = identity(rev=REV)
+            provenance.write({ident.book_id: ident}, path)
+            self.assertEqual(provenance.load(path), {ident.book_id: ident})
 
     def test_round_trips_without_a_revision(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = pathlib.Path(tmp) / "source.lock"
-            provenance.write(identity(rev=None), path)
+            ident = identity(rev=None)
+            provenance.write({ident.book_id: ident}, path)
             loaded = provenance.load(path)
-            self.assertIsNone(loaded.rulebook)
-            self.assertEqual(loaded, identity(rev=None))
+            self.assertIsNone(loaded[ident.book_id].rulebook)
+            self.assertEqual(loaded, {ident.book_id: ident})
 
     def test_absent_lock_loads_as_none(self):
         with tempfile.TemporaryDirectory() as tmp:
-            self.assertIsNone(provenance.load(pathlib.Path(tmp) / "nope.lock"))
+            self.assertEqual(provenance.load(pathlib.Path(tmp) / "nope.lock"), {})
 
     def test_written_lock_is_readable_json_ending_in_a_newline(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = pathlib.Path(tmp) / "source.lock"
-            provenance.write(identity(rev=REV), path)
+            ident = identity(rev=REV)
+            provenance.write({ident.book_id: ident}, path)
             text = path.read_text(encoding="utf-8")
             self.assertTrue(text.endswith("\n"))
-            self.assertEqual(json.loads(text)["rulebook"]["commit"], "97cc62d")
+            self.assertEqual(json.loads(text)[ident.book_id]["rulebook"]["commit"], "97cc62d")
 
     def test_writing_twice_is_byte_identical(self):
         with tempfile.TemporaryDirectory() as tmp:
             first = pathlib.Path(tmp) / "a.lock"
             second = pathlib.Path(tmp) / "b.lock"
-            provenance.write(identity(rev=REV), first)
-            provenance.write(identity(rev=REV), second)
+            ident = identity(rev=REV)
+            provenance.write({ident.book_id: ident}, first)
+            provenance.write({ident.book_id: ident}, second)
             self.assertEqual(first.read_bytes(), second.read_bytes())
 
 
 class MatchesTest(unittest.TestCase):
     def test_only_the_hash_decides(self):
         other_rev = provenance.RulebookRevision(commit="ffffff", date="2026-08-01", subject="x")
-        self.assertTrue(provenance.matches(identity(rev=REV), identity(rev=other_rev)))
+        recorded = identity(rev=REV)
+        self.assertTrue(
+            provenance.matches({recorded.book_id: recorded}, identity(rev=other_rev)))
 
     def test_a_different_hash_is_a_mismatch(self):
-        self.assertFalse(provenance.matches(identity(sha="a" * 64), identity(sha="b" * 64)))
+        recorded = identity(sha="a" * 64)
+        self.assertFalse(
+            provenance.matches({recorded.book_id: recorded}, identity(sha="b" * 64)))
 
     def test_an_absent_lock_never_matches(self):
-        self.assertFalse(provenance.matches(None, identity()))
+        self.assertFalse(provenance.matches({}, identity()))
 
 
 class DescribeChangeTest(unittest.TestCase):
@@ -144,7 +154,7 @@ class DescribeChangeTest(unittest.TestCase):
             parsed=346,
             imported=241,
         )
-        message = provenance.describe_change(old, new)
+        message = provenance.describe_change({old.book_id: old}, new)
         self.assertIn("97cc62d", message)
         self.assertIn("Review chapter 16", message)
         self.assertIn("005a33c", message)
@@ -153,6 +163,47 @@ class DescribeChangeTest(unittest.TestCase):
         self.assertIn("--accept-source", message)
 
     def test_reads_sensibly_when_no_lock_exists_yet(self):
-        message = provenance.describe_change(None, identity())
-        self.assertIn("no source.lock", message)
+        message = provenance.describe_change({}, identity())
+        self.assertIn("has no record of", message)
         self.assertIn("--accept-source", message)
+
+
+class MultiBookLockTest(unittest.TestCase):
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmpdir, ignore_errors=True)
+
+    def _identity(self, book_id="arm5-core", sha="abc123"):
+        return provenance.SourceIdentity(
+            book_id=book_id, book="A Book", path="reviewed/A Book.md",
+            sha256=sha, rulebook=None, spells_parsed=10, spells_imported=9)
+
+    def test_the_lock_round_trips_several_books(self):
+        path = pathlib.Path(self.tmpdir) / "source.lock"
+        identities = {
+            "arm5-core": self._identity("arm5-core", "aaa"),
+            "arm5-hohmc": self._identity("arm5-hohmc", "bbb"),
+        }
+        provenance.write(identities, path)
+        loaded = provenance.load(path)
+        self.assertEqual(sorted(loaded), ["arm5-core", "arm5-hohmc"])
+        self.assertEqual(loaded["arm5-hohmc"].sha256, "bbb")
+
+    def test_an_absent_lock_loads_as_an_empty_mapping(self):
+        path = pathlib.Path(self.tmpdir) / "nonesuch.lock"
+        self.assertEqual(provenance.load(path), {})
+
+    def test_matches_compares_the_named_book_only(self):
+        lock = {"arm5-core": self._identity("arm5-core", "aaa"),
+                "arm5-hohmc": self._identity("arm5-hohmc", "bbb")}
+        self.assertTrue(provenance.matches(lock, self._identity("arm5-hohmc", "bbb")))
+        self.assertFalse(provenance.matches(lock, self._identity("arm5-hohmc", "ccc")))
+
+    def test_a_book_absent_from_the_lock_does_not_match(self):
+        lock = {"arm5-core": self._identity("arm5-core", "aaa")}
+        self.assertFalse(provenance.matches(lock, self._identity("arm5-hohmc", "bbb")))
+
+    def test_describe_change_names_the_book_that_moved(self):
+        lock = {"arm5-hohmc": self._identity("arm5-hohmc", "bbb")}
+        message = provenance.describe_change(lock, self._identity("arm5-hohmc", "ccc"))
+        self.assertIn("arm5-hohmc", message)
