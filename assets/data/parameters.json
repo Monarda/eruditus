@@ -439,5 +439,105 @@
         "bookId": "arm5-hohmc"
       }
     ]
+  },
+  {
+    "id": "target-flavor",
+    "name": "Flavor",
+    "category": "Target",
+    "magnitude": 0,
+    "targetType": "object",
+    "requiresVirtue": "Sensory Magic",
+    "scope": {
+      "forms": [],
+      "excludeTechniques": [
+        "Intellego"
+      ]
+    },
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
+    "id": "target-texture",
+    "name": "Texture",
+    "category": "Target",
+    "magnitude": 1,
+    "targetType": "object",
+    "requiresVirtue": "Sensory Magic",
+    "scope": {
+      "forms": [],
+      "excludeTechniques": [
+        "Intellego"
+      ]
+    },
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
+    "id": "target-scent",
+    "name": "Scent",
+    "category": "Target",
+    "magnitude": 2,
+    "targetType": "object",
+    "requiresVirtue": "Sensory Magic",
+    "scope": {
+      "forms": [],
+      "excludeTechniques": [
+        "Intellego"
+      ]
+    },
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
+    "id": "target-sound",
+    "name": "Sound",
+    "category": "Target",
+    "magnitude": 3,
+    "targetType": "container",
+    "requiresVirtue": "Sensory Magic",
+    "scope": {
+      "forms": [],
+      "excludeTechniques": [
+        "Intellego"
+      ]
+    },
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
+  },
+  {
+    "id": "target-spectacle",
+    "name": "Spectacle",
+    "category": "Target",
+    "magnitude": 4,
+    "targetType": "container",
+    "requiresVirtue": "Sensory Magic",
+    "scope": {
+      "forms": [],
+      "excludeTechniques": [
+        "Intellego"
+      ]
+    },
+    "source": "published",
+    "citations": [
+      {
+        "bookId": "arm5-hohmc"
+      }
+    ]
   }
 ]
