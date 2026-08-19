@@ -578,6 +578,7 @@ class RegenerationMessageTest(unittest.TestCase):
         message = extract_spells.regeneration_failure_message({}, {current.book_id: current})
         self.assertIn("has no record of", message)
         self.assertIn("--accept-source", message)
+        self.assertNotIn("moved", message)
 
     def test_names_a_non_core_book_that_moved_rather_than_blaming_the_asset(self):
         """The exact misdiagnosis this finding fixes.
