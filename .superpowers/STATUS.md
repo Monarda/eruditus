@@ -19,7 +19,7 @@ plus assertion 8):**
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **745 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **392 tests, green** — 2026-08-19; +1 for the report/lock consistency guard |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **393 tests, green** — 2026-08-19; +2 for the report/lock guard and the second combined-effect spell |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **0 ledger entries carry an unreviewed candidate** (was 7), and the count can no
@@ -77,14 +77,19 @@ levels; the 20 were the all-General entries, which are *more* exposed, not
 less. Assertion 1 discriminates among candidates on no entry at all. See item
 32.3.
 
-**Item 32.2 has re-read 2 of those 217, and corrected 1.**
-`lib-crig-heat-searing-forge` moved `crig-4a` → `crig-4d` (*Heat of the Searing
-Forge* creates no fire; it is on the "Heat an object" ladder, and its own first
-sentence says "too hot to touch"), and
-`lib-peig-conjuration-indubitable-cold`'s pick was confirmed with its reasoning
-rewritten. That is the second wrong entry found by a second look, after
-`lib-reim-image-from-wizard-torn` (`cf0b40b`) — a two-for-two rate on a
-deliberately suspect sample of two, not an estimate for the remaining 215.
+**Item 32.2 has swept all 217 with a blind model pass and corrected 4.**
+Eight Sonnet agents, candidates shuffled, answers withheld: **207 agreements,
+10 disagreements, 4 self-flagged**. `lib-inte-tracks-faerie-glow` and
+`lib-inte-sense-feet-that-tread-earth` moved to `inte-4b` (item 39 had
+resolved three spells on one shared argument that holds for only one of them);
+`lib-peco-twist-tongue` moved to `peco-15b` (speech is not a sense);
+`lib-crig-heat-searing-forge` and `lib-peig-conjuration-indubitable-cold` both
+turned out to be combined-effect spells rather than single-guideline ones.
+**The sweep does not close 32.2**: agreement with the ledger scores agreement
+with the artifact under audit, so the 207 unflagged entries are unverified, not
+verified. Two model flags were the model being wrong where the ledger was
+right (*Wind of Mundane Silence*, *Trackless Step*) — read the flags, don't
+obey them.
 
 **Two things confirmed as needing nothing further:**
 - **The parameter catalog is complete.** Every Range, Duration and Target used

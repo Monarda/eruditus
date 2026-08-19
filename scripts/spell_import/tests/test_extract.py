@@ -352,6 +352,24 @@ class CombinedBaseEffectsTest(unittest.TestCase):
         self.assertIn("peig-4c", notes)
         self.assertIn("peig-4a", notes)
 
+    def test_searing_forge_pays_for_its_damage_row_and_gets_the_heat_free(self):
+        """The second spell of this shape, and the one that took three tries.
+
+        Heat of the Searing Forge prints both the fire ladder's "+5 damage"
+        figure and the heat ladder's "too hot to touch". Recording only one
+        is what made the entry arguable in both directions; both are level 4,
+        so the spell pays for one and gets the other free.
+        """
+        report = extract_spells.run(write=False)
+        spell = next(
+            s for s in report.spells if s["name"] == "Heat of the Searing Forge"
+        )
+        self.assertEqual(spell["printedLevel"], 10)
+        self.assertEqual(spell["baseEffectId"], "crig-4a")
+        self.assertEqual(len(spell["adjustments"]), 1)
+        self.assertEqual(spell["adjustments"][0]["magnitude"], 0)
+        self.assertIn("crig-4d", spell["adjustments"][0]["note"])
+
     def test_no_longer_appears_in_known_unresolvable(self):
         self.assertNotIn(
             "lib-peig-conjuration-indubitable-cold", extract_spells.KNOWN_UNRESOLVABLE

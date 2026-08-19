@@ -36,9 +36,21 @@
       `test_a_core_spell_is_never_offered_a_supplement_row`. See DECISIONS.md,
       which records this as a revision of item 55.
 - [ ] **32.2** Re-read every entry against its spell's published text and its candidate
-      guidelines' wording. **2 of 217 done, 2026-08-19** — the two this item
-      already named as suspect, and one of them was wrong:
-      - `lib-crig-heat-searing-forge` **corrected, `crig-4a` → `crig-4d`.** The
+      guidelines' wording. **All 217 swept by a blind model pass 2026-08-19,
+      4 entries corrected, and the sweep does not close this item** — an
+      unflagged entry is unverified, not verified. Started with the two this
+      item already named as suspect:
+      - `lib-crig-heat-searing-forge` **settled as two guidelines, not one.**
+        It is `crig-4a` (the +5 damage figure it prints) *plus* `crig-4d`
+        (the heat its first sentence describes) as a free magnitude-0
+        combination, both being level 4. The entry was argued to `crig-4d`
+        first, then the blind sweep argued it back to `crig-4a`; the user
+        broke the deadlock by pointing out that neither reading was complete.
+        Same shape as *Conjuration of the Indubitable Cold*, and the second
+        spell to need it — `COMBINED_BASE_EFFECTS` is now a sequence per
+        spell for this reason. Guarded by
+        `test_searing_forge_pays_for_its_damage_row_and_gets_the_heat_free`.
+        The reasoning each side rested on: the
         Creo Ignem table runs four parallel ladders, and *Heat of the Searing
         Forge* is on "Heat an object" (2 warm to the touch, 3 hot to the touch,
         4 boil water, 5 glow red-hot): its own first sentence is "Heats a piece
@@ -75,6 +87,35 @@
         Technique and Form is this repo's inference, not a printed rule. It is
         the closest the core rules come, and nothing contradicts it, but a
         troupe could read it more narrowly.
+      - **The blind sweep, 2026-08-19 — all 217 entries.** Eight Sonnet agents,
+        spell text plus candidates in randomised order, recorded answer
+        withheld, `resolutions.json` off-limits. **207 agreements, 10
+        disagreements, 4 self-flagged.** Three disagreements became ledger
+        corrections on the user's ruling (`lib-inte-tracks-faerie-glow` and
+        `lib-inte-sense-feet-that-tread-earth` to `inte-4b`,
+        `lib-peco-twist-tongue` to `peco-15b`); one became the combined-effect
+        settlement above; the rest were adjudicated in the ledger's favour.
+        **Two flags were the model being wrong where the ledger was right**,
+        which is the calibration worth keeping: *Wind of Mundane Silence* was
+        flagged low/ambiguous for arithmetic that in fact matches `pevi-G5`
+        exactly once the four magnitudes of Voice and Room are accounted for,
+        and *Trackless Step* was called undecidable from spell text alone —
+        true, but the ledger reads the printed Duration "Special (based on
+        Concentration)" as `rete-2b`'s "under your conscious control", which
+        the model was not shown. **The flags are worth reading, not obeying.**
+        The unflagged 207 are *not* thereby verified: agreement with the
+        ledger scores agreement with the artifact under audit.
+      - **Item 39's Intellego Terram pass had a systematic error**, and it took
+        the sweep to find it. Three spells were resolved to `inte-4a` on one
+        shared argument, "no seeing is involved". It holds for
+        `lib-inte-eyes-eons` (one property, no visibility) and fails for the
+        other two: *Tracks of the Faerie Glow* is entirely about tracks that
+        "stand out" to the eye, and *Sense the Feet* lists five facts against
+        a guideline reading "**one** mundane property" — five would be the
+        level-10 row. The user's ruling: both get one kind of information and
+        present it in a non-obvious way, which is `inte-4b`. **A shared
+        argument applied to N entries is a single point of failure worth
+        re-checking as a group.**
       - **This is the second demonstrated failure of exactly the kind this item
         was opened for**, after `lib-reim-image-from-wizard-torn` (`cf0b40b`).
         Both were fluent, plausible rationales arguing from one salient detail

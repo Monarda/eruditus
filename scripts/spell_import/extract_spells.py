@@ -109,6 +109,17 @@ COMBINED_BASE_EFFECTS: dict[str, tuple[tuple[int, str], ...]] = {
             "of damage above +5. Also level 4, so also free.",
         ),
     ),
+    "lib-crig-heat-searing-forge": (
+        (
+            0,
+            "Also heats the metal itself to boiling point (crig-4d) -- 'too "
+            "hot to touch', hotter than level 3's 'hot to the touch' and "
+            "cooler than level 5's 'glow red-hot'. The chosen guideline "
+            "(crig-4a) supplies the +5 damage the spell prints; this one "
+            "supplies the heat its first sentence describes. Both are level "
+            "4, so combining them adds nothing to the spell's cost.",
+        ),
+    ),
 }
 
 

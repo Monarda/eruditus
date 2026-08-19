@@ -803,14 +803,14 @@
     "rationale": "Blinds the target with cataracts and explicitly 'heals as a Heavy Wound,' matching peco-20a 'destroy one of a person's major senses (heals as a Heavy Wound)' verbatim, not disease (peco-20b), limb-severing (peco-20c), or a direct Incapacitating Wound (peco-20d)."
   },
   "lib-peco-twist-tongue": {
-    "baseEffectId": "peco-15c",
+    "baseEffectId": "peco-15b",
     "candidates": [
       "peco-15a",
       "peco-15b",
       "peco-15c",
       "peco-15d"
     ],
-    "rationale": "Destroys the target's ability to speak and explicitly 'heals as a Medium Wound,' matching peco-15c's minor-sense-destruction guideline (heals as a Medium Wound) rather than aging (peco-15a), a crippled limb (peco-15b, the tongue is not a limb), or a direct Heavy Wound (peco-15d)."
+    "rationale": "The spell twists the tongue so it cannot function, and the damage 'heals as a Medium Wound' -- a body part rendered unusable but capable of healing, which is peco-15b's structure word for word ('Cripple a limb, making it unusable but still capable of healing (heals as a Medium Wound)'). The 'heals as a Medium Wound' clause does not discriminate, since peco-15c carries it too. What discriminates is that the spell destroys the ability to *speak*, and speech is not a sense: peco-15c destroys 'one of a person's minor senses', and the spell says nothing about taste or any other perception. Both readings stretch a word -- a tongue is not a limb either -- but the smaller stretch is the one that matches what the spell actually does to the body. Corrected under item 32.2 after a blind model pass flagged it; the entry previously read peco-15c, rejecting peco-15b only on 'the tongue is not a limb' without weighing that speech is not a sense."
   },
   "lib-peco-curse-unportended-plague": {
     "baseEffectId": "peco-20b",
@@ -1214,14 +1214,14 @@
     "rationale": "A flame conjured in the palm that 'can ignite very flammable items' matches crig-3c; the spell's total level (Base 3 + Touch + Conc, no extra magnitude) pays for only one base-3 effect, and the torch-like light is the unavoidable physical byproduct of a real flame, not a separately-paid crig-3a light effect — contrast Lamp without Flame, which explicitly buys light with 'no apparent source' (i.e. light without real fire, the case crig-3a actually covers). Nothing chills/heats the caster's own hand (ruling out crig-3b)."
   },
   "lib-crig-heat-searing-forge": {
-    "baseEffectId": "crig-4d",
+    "baseEffectId": "crig-4a",
     "candidates": [
       "crig-4a",
       "crig-4b",
       "crig-4c",
       "crig-4d"
     ],
-    "rationale": "The Creo Ignem table runs four parallel ladders, and this spell is on the 'Heat an object' one: level 2 warm to the touch, 3 hot to the touch, 4 boil water, 5 glow red-hot. The spell's own first sentence is 'Heats a piece of metal so that it is too hot to touch' -- above level 3, below red-hot, which is exactly where crig-4d sits. It creates no fire at all, so crig-4a ('Create a fire doing +5 damage') is the wrong ladder: compare Blade of the Virulent Flame, which does 'form a fire along the length of a metal blade' and pays base 5 for the unnatural shape. The +5 damage here is a consequence of touching heated metal -- it decays to +3 then +1 over following rounds and armour padding grants a +3 Soak bonus against it -- not a conjured fire's flat rating. Corrected under item 32.2; the entry previously read crig-4a, argued from the numeric coincidence of '+5 damage' alone."
+    "rationale": "Two guidelines at once, both level 4, so the spell pays for one. crig-4a ('Create a fire doing +5 damage') is the primary baseEffectId: the spell states +5 damage for a breastplate-sized object in contact for a round, the ladder's own figure. crig-4d ('Heat an object enough to boil water') is recorded as a magnitude-0 adjustment (extract_spells.COMBINED_BASE_EFFECTS): the spell's first sentence is 'Heats a piece of metal so that it is too hot to touch', which is hotter than level 3's 'hot to the touch' and cooler than level 5's 'glow red-hot' -- boiling point, exactly crig-4d. The heat row at level 3 would also combine for free, being lower, but it understates a metal that burns on contact. This entry has been argued both ways: it read crig-4a on the damage figure alone, then crig-4d on the ladder structure alone. Neither was complete -- the spell genuinely does both, and the Requisites section's 'the base Arts and level for the spell are those for the highest-level effect it has' (Core Rules line 12372) is what makes the second free. Settled under item 32.2."
   },
   "lib-crig-lamp-without-flame": {
     "baseEffectId": "crig-4b",
@@ -1833,20 +1833,20 @@
     "rationale": "The spell's own design line says 'ward, so the target is the warded Individual, not the water', matching reaq-5a 'ward against mundane water' by name -- the only warding candidate of the four. Not reaq-5b (control a liquid violently -- this spell blocks water, it doesn't move it), reaq-5c (no disembodied spirit involved) or reaq-5d (no water elemental involved). The 'mundane' qualifier is looser than the spell's own 'including magical ones', the same tolerated description-vs-spell mismatch as elsewhere in this ledger (see item 32)."
   },
   "lib-inte-tracks-faerie-glow": {
-    "baseEffectId": "inte-4a",
+    "baseEffectId": "inte-4b",
     "candidates": [
       "inte-4a",
       "inte-4b"
     ],
-    "rationale": "Makes tracks glow so they stand out to normal eyesight and boosts a Tracking roll -- it reveals a fact about the terrain (something specific passed this way, recently, related to it thus-and-so) rather than granting sight of anything. No seeing is involved, the same discriminator already used for lib-inte-eyes-eons. It also continues this corpus's own R:Per/D:Conc/T:Vision + 'Learn X property' pattern one level up from Eyes of the Treacherous Terrain and The Miner's Keen Eye (both base 2, inte-2 'learn one visible property'): those learn a *visible* property; this one needs magic to perceive at all, matching inte-4a's 'mundane' (i.e. not visible-by-looking) tier exactly. Not inte-4b, whose guideline is about seeing an object and its surroundings."
+    "rationale": "The spell gets one kind of information -- where a specific being passed -- and presents it in a non-obvious way, as a faint light on the tracks themselves. That presentation is what makes it look like a 'learn a property' effect, but what the magic delivers is the tracks together with the ground they sit in, which is inte-4b's 'See an object and its surroundings'; the printed Target is Vision. The entry previously read inte-4a and argued 'no seeing is involved' -- contradicted by the spell's own text, which is about tracks that 'stand out' to the eye and about 'Tracking at night without a light source'. Corrected under item 32.2 on the user's ruling, together with lib-inte-sense-feet-that-tread-earth; lib-inte-eyes-eons keeps inte-4a, where a single mundane property really is all that is learned."
   },
   "lib-inte-sense-feet-that-tread-earth": {
-    "baseEffectId": "inte-4a",
+    "baseEffectId": "inte-4b",
     "candidates": [
       "inte-4a",
       "inte-4b"
     ],
-    "rationale": "The spell's own verb is 'feel', not 'see' -- you touch the earth and feel what moves on it within a mile, entirely tactile/proprioceptive, no vision or line of sight of any kind. No seeing is involved, the same discriminator already used for lib-inte-eyes-eons. The learned facts (direction, distance, weight, number, manner of movement) are all properties of the moving things, matching inte-4a's 'learn one mundane property of an object' read as one themed cluster of facts, not inte-4b's sight-based guideline."
+    "rationale": "One kind of information, delivered through an unexpected sense: you touch the earth and perceive the things moving on it, which is inte-4b's 'See an object and its surroundings' with the ground as the surroundings. The listed facts -- direction, distance, weight, number, manner of movement -- are aspects of perceiving those things where they are, not five separately-learned properties; reading them as properties would put the spell on the *level 10* row ('Learn all the natural properties of an object'), and it is printed at base 4. The entry previously read inte-4a and leaned on the spell's verb being 'feel' rather than 'see', which mistakes the sense used for the kind of information got. Corrected under item 32.2 on the user's ruling, together with lib-inte-tracks-faerie-glow."
   },
   "lib-mute-crystal-dart": {
     "baseEffectId": "mute-3c",
