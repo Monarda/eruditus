@@ -1164,7 +1164,14 @@ git commit -m "docs: distil standing constraints out of the archived bodies"
 
 # Phase 3 — The Rule-3 Gate
 
-Lands after Phase 2, because the gate points at `DECISIONS.md`.
+**Sequencing overridden by the human partner on 2026-08-19:** Phase 3 runs
+BEFORE Phase 2. The gate points at `DECISIONS.md`, which exists and is valid
+from Task 5 onward — it simply holds the verbatim standing-constraints section
+until Phase 2 distils into it. The gate's procedure is unaffected.
+
+One consequence to expect: seeding `.last-reviewed-merge` before this branch
+merges means the gate fires once on that merge. That is correct behaviour, not
+a bug — the answer is "this merge closed no items", then record the sha.
 
 ### Task 7: The closing-an-item skill
 
