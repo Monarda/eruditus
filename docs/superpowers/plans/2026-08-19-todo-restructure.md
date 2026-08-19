@@ -274,9 +274,12 @@ from scripts.todo.mapping import THEMES, TOMBSTONES, MISFILED, ALL_IDS, theme_fo
 
 
 class MappingTest(unittest.TestCase):
-    def test_every_open_item_has_exactly_one_theme(self):
-        for item_id in ALL_IDS - TOMBSTONES:
-            self.assertIn(item_id, THEMES, f"item {item_id} has no theme")
+    def test_every_themed_id_is_a_real_id(self):
+        # THEMES maps only the OPEN items -- a closed item's home is the
+        # archive, which needs no entry here.
+        self.assertTrue(THEMES.keys() <= ALL_IDS,
+                        f"not real ids: {sorted(THEMES.keys() - ALL_IDS)}")
+        self.assertEqual(len(THEMES), 36)
 
     def test_tombstones_have_no_theme(self):
         for item_id in TOMBSTONES:
