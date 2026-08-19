@@ -2,36 +2,39 @@
 
 **Date:** 2026-08-18 · **Status:** design approved, not yet implemented
 
+**Figures re-verified 2026-08-19**, after `023767a` merged item 67's cross-field
+constraints and opened item 74. Every count below is from that tree.
+
 ## Problem
 
-`.superpowers/todo.md` has grown to 2136 lines / 141 KB. It is loaded at the
+`.superpowers/todo.md` has grown to 2230 lines / 144 KB. It is loaded at the
 start of a session so a fresh context knows what is open and what has already
 been decided, and at its current size that purpose is failing: the parts worth
 loading are a small minority of the bytes.
 
-Measured 2026-08-18:
+Measured 2026-08-19:
 
 | | |
 |---|---|
-| Total | 2136 lines / 141 KB |
-| `## Completed ✅` | 1007 lines — 47% of the file |
-| Section C / Section D | 494 / 383 lines |
+| Total | 2230 lines / 144 KB |
+| `## Completed ✅` | 1034 lines — 46% of the file |
+| Section C / Section D | 494 / 477 lines |
 | Preamble (status, counts, how-to-read) | ~110 lines |
-| Item headings | 75 (73 unique numbers) — 37 in open sections, 42 under Completed |
-| Un-ticked `- [ ]` sub-bullets | 78, against 15 ticked |
-| Internal `item N` cross-references | 158 |
+| Item headings | 81 — 38 in open sections, 43 under Completed (42 numbered + one unnumbered summary) |
+| Un-ticked `- [ ]` sub-bullets | 80, against 18 ticked |
+| Internal `item N` cross-references | 165 |
 
 Three structural faults, distinct from mere size:
 
 1. **Status is encoded in three places that disagree.** Section membership,
    heading suffix (`— DONE 2026-08-17`), and per-bullet checkbox. Item 73 sits
-   under `## Completed ✅` with eight open bullets and zero closed. Items 59,
+   under `## Completed ✅` with seven open bullets and zero closed. Items 59,
    60 and 61 each exist twice — once as a tombstone in section C, once for real
    under Completed.
-2. **The real unit of work is an unnumbered sub-bullet.** There are 78 open
+2. **The real unit of work is an unnumbered sub-bullet.** There are 80 open
    ones. Having no id, they cannot be cross-referenced, prioritised or moved,
    so they accumulate inside whichever item spawned them — item 38 holds 7,
-   item 73 holds 8.
+   item 73 holds 7.
 3. **`## Where the import stands` is generated content in a hand-edited file.**
    77 lines of counts, three suite results and a catalog table, all obtained by
    running commands, all requiring periodic manual re-verification.
@@ -40,7 +43,7 @@ Three structural faults, distinct from mere size:
 
 - Cut the always-read core to roughly 200 lines.
 - Preserve every existing item number. No renumbering, no redirect table.
-- Keep all 158 cross-references resolvable.
+- Keep all 165 cross-references resolvable.
 - Make the structure resist re-inflation, rather than merely resetting its size.
 
 ## Non-goals
@@ -65,11 +68,11 @@ Three structural faults, distinct from mere size:
   STATUS.md          generated dashboard. read when the numbers matter
   themes/
     rules-fidelity.md  catalog vs. what the rulebook prints      (12 items)
-    model.md           what the spell model can't yet express     (6 items)
+    model.md           what the spell model can't yet express     (7 items)
     importer.md        scripts/spell_import, ledger, provenance   (6 items)
     app.md             the Flutter app and project chores         (9 items)
     multibook.md       the second-book program, sub-project C     (2 items)
-  ARCHIVE.md         42 closed items, verbatim. not loaded by default. ~950 lines
+  ARCHIVE.md         41 closed items, verbatim. not loaded by default. ~950 lines
   .last-reviewed-merge  one sha. state for the rule-3 gate (see below)
 .claude/
   settings.json      project-scoped Stop hook
@@ -90,7 +93,7 @@ numbers are ids. The index maps every number to its home file and status, so
 labels for grouping.
 
 Renumbering into theme-prefixed ids (`IMP-7`, `CAT-3`) was considered and
-rejected — it invalidates 158 in-file cross-references plus every reference in
+rejected — it invalidates 165 in-file cross-references plus every reference in
 commit messages, specs and plan documents, and makes a redirect table permanent
 load-bearing infrastructure.
 
@@ -103,7 +106,7 @@ does not renumber `38.2`.
 Dotted ids were preferred over promoting each bullet to a full item because the
 grouping carries real provenance — "all seven were found by one whole-branch
 review of item 25" is information, and promotion weakens it to a citation while
-taking the item count from 35 to roughly 110.
+taking the item count from 36 to roughly 116.
 
 ### The index (`todo.md`)
 
@@ -119,7 +122,7 @@ taking the item count from 35 to roughly 110.
 | 32 | do     | open         | importer.md       | Audit resolutions.json             |
 | 38 | do     | open 6/7     | importer.md       | Follow-ups from item 25's review   |
 | 59 | —      | closed 08-17 | ARCHIVE.md        | Spell level computes live          |
-| 73 | do     | open 8/8     | importer.md       | Deferred minors from item 65       |
+| 73 | do     | open 7/7     | importer.md       | Deferred minors from item 65       |
 ```
 
 `open 6/7` means six of seven sub-ids remain open, so an item's weight is
@@ -132,7 +135,7 @@ judgement made weeks ago and are no longer reliable; a stale band is worse than
 no band, because a fresh session will act on it.
 
 Priority survives in exactly one place: the `Now:` line, holding two or three
-item numbers. A short list that is visibly a snapshot is more honest than 35
+item numbers. A short list that is visibly a snapshot is more honest than 36
 rows quietly asserting a stale ordering.
 
 The band column is replaced by `Kind`, which is derivable from the item body
@@ -183,7 +186,7 @@ are conventions whose violation is visible in a diff; rule 3's violation is an
 same way the Completed section did.
 
 Note the distinction from migration step 3 below: that is a one-time backfill of
-42 already-closed bodies, and no branch will ever finish for those. What is
+41 already-closed bodies, and no branch will ever finish for those. What is
 automated here is the recurring rule.
 
 **A hook cannot perform the extraction.** Deciding which sentences of a closed
@@ -239,11 +242,11 @@ user-level `~/.claude/settings.json` is not touched.
 
 1. **Build the index mechanically** from current headings — number, title,
    open/closed state, sub-bullet counts.
-2. **Re-triage the 35 open items** into decide/do/maybe and pick the `Now:`
+2. **Re-triage the 36 open items** into decide/do/maybe and pick the `Now:`
    list. A full classification is proposed from the bodies for the user to
    correct; the `Now:` line is the user's call. *This is the only step
    requiring user input.*
-3. **Extract binding constraints from the 42 closed bodies into
+3. **Extract binding constraints from the 41 closed bodies into
    `DECISIONS.md`,** merged with the existing standing-constraints section.
 4. **Move closed bodies verbatim to `ARCHIVE.md`.** No editing — verbatim is
    what makes step 3 safe to be aggressive.
@@ -254,8 +257,8 @@ user-level `~/.claude/settings.json` is not touched.
 
 ### Verification
 
-- Every number 1–73 appears exactly once in the index.
-- Every one of the 158 `item N` cross-references resolves to an index row.
+- Every number 1–74 appears exactly once in the index.
+- Every one of the 165 `item N` cross-references resolves to an index row.
 - Concatenating the new files reproduces every paragraph of
   `git show HEAD:.superpowers/todo.md` apart from the deliberate deletions,
   which are enumerated explicitly rather than inferred: the three tombstones
@@ -290,14 +293,14 @@ the `update-config` skill rather than a hand-written JSON patch.
 
 ## Appendix: proposed theme assignment
 
-35 open items — the 34 under sections B/C/D once the three tombstones are
+36 open items — the 35 under sections B/C/D once the three tombstones are
 removed, plus item 73, which is currently misfiled under Completed.
 
 | Theme | Items | n |
 |---|---|---|
 | `rules-fidelity.md` | 4, 4b, 4c, 12, 20, 21, 22, 36, 41, 42, 50, 63 | 12 |
 | `app.md` | 7, 9, 10, 11, 16, 18, 33, 56, 58 | 9 |
-| `model.md` | 47, 53, 54, 57, 67, 69 | 6 |
+| `model.md` | 47, 53, 54, 57, 67, 69, 74 | 7 |
 | `importer.md` | 23, 31, 32, 38, 70, 73 | 6 |
 | `multibook.md` | 66, 71 | 2 |
 
