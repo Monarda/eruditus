@@ -241,6 +241,99 @@ class ParseInlineAgainstMysteryCultsTest(unittest.TestCase):
         self.assertEqual(block.stat.requisite_arts, ["Vim", "Corpus"])
         self.assertTrue(block.stat.is_ritual)
 
+    def test_the_remaining_blocks_prose_and_design_line_match_the_book(self):
+        # test_finds_all_sixteen_blocks and test_reports_no_parse_problems
+        # only pin an aggregate count and an empty problem list; that would
+        # not catch a subtly wrong prose or design line on any one block.
+        # Three blocks have their design_line checked individually above
+        # (Revenge of the Bitten Toad, Form of the (Temperament) Heartbeast)
+        # or their stat checked (Embrace of Boethius) -- these are the other
+        # 13, each transcribed here from the book's own printed text
+        # (reviewed/Ars Magica 5e - Houses of Hermes - Mystery Cults.md),
+        # not from what the parser currently emits.
+        expectations = {
+            "Perceive the Change": (
+                "This effect detects whether the enchanted item is touching "
+                "an animal; if so, it triggers any effects tied to it with "
+                "a Linked Trigger.",
+                "(Base 3, +1 Touch, +2 Sun; +1 two uses/day, "
+                "+3 environmental trigger \\[sunrise/sunset\\])",
+            ),
+            "Hibernation of the Slumbering Turb": (
+                "Anyone touching the caster falls asleep and does not "
+                "awaken until the spell expires.",
+                "(Base 4, +4 Year, +1 Texture, +1 Creo requisite, +1 complexity)",
+            ),
+            "Scent of the Predator": (
+                "Anyone smelling the caster is struck by an overwhelming "
+                "sensation of menace and hostility.",
+                "(Base 4, +2 Sun, +2 Scent)",
+            ),
+            "Marking the Territory": (
+                "Anyone smelling the territory marked out by the caster's "
+                "scent (usually his urine) cannot enter the warded area",
+                '(Base 3 \\[move in direction "away"\\], +2 Ring, +2 Scent)',
+            ),
+            "Clarion Call of the War Horse": (
+                "Anyone hearing the caster's battle cry is heartened by its "
+                "tone, and receives a +3 bonus to his Brave Personality Trait.",
+                "(Base 3, +1 Diam, +3 Sound)",
+            ),
+            "The Rooster's Crow": (
+                "Any demons who hear the caster's shout lose Might equal to "
+                "the spell's (level \u2013 5) if the spell penetrates their "
+                "Magic Resistance.",
+                "(Base effect, +3 Sound)",
+            ),
+            "Brilliance of the Eagle's Plumage": (
+                "Anyone looking directly at the caster is blinded by the "
+                "brilliant light shining from his body.",
+                "(Base 5, +1 Conc, +4 Spectacle)",
+            ),
+            "Closed Mouth of the Nightwalker": (
+                "Anyone seeing the caster instantly forgets that he did so, "
+                "assuming that the spell's Penetration breaches the "
+                "target's Magic Resistance.",
+                "(Base 10, +2 Sun, +4 Spectacle)",
+            ),
+            "Facilitate the Stifled (Form) Spell": (
+                "This spell is cast at the same time as another formulaic "
+                "spell (see ArM5, page 159) whose level must be less than "
+                "twice the level of this spell.",
+                "(Base effect, +1 Touch)",
+            ),
+            "Faerie Chains of the Familiar Slave": (
+                "This ritual binds a supernatural creature to the caster "
+                "as her familiar, until a condition incorporated into the "
+                "spell comes to pass.",
+                "(Base effect, +1 Touch, +4 Until)",
+            ),
+            "Ball of Abysmal Music": (
+                "This spell targets a formulaic Ignem spell while it is "
+                "being cast, changing it so that instead of creating fire, "
+                "heat, or light, it produces a harmless burst of color and "
+                "sound.",
+                "(Base 10, +2 Voice)",
+            ),
+            "Embrace of Boethius": (
+                "This spell damages the target's mind, heart, and Gift, "
+                "destroying a part of his understanding of formulaic spell "
+                "casting and forcing him to rely on casting tools.",
+                "(Base 15, + 1 Touch, +1 Part, +2 necessary requisites)",
+            ),
+            "Tie the Threads That Bind": (
+                "This spell is uniquely used for the construction of automata.",
+                "(Base Effect, +1 Touch, +2 Group)",
+            ),
+        }
+        self.assertEqual(len(expectations), 13)
+        by_name = {b.name: b for b in self.blocks}
+        for name, (prose_prefix, design_line) in expectations.items():
+            with self.subTest(name=name):
+                block = by_name[name]
+                self.assertTrue(block.prose.startswith(prose_prefix), block.prose[:120])
+                self.assertEqual(block.design_line, design_line)
+
 
 class ParseInlineFixtureTest(unittest.TestCase):
     def test_a_stat_line_with_no_anchor_above_it_is_skipped(self):
