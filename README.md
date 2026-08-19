@@ -84,7 +84,10 @@ repository for terms.
 
 ## Where to look next
 
-- `.superpowers/todo.md` — open work, in priority order, with the standing
-  constraints each item carries.
+- `.superpowers/todo.md` — the item index: numbers, kind and status, mapping
+  each item to its home file under `.superpowers/themes/`. Standing
+  constraints live in `.superpowers/DECISIONS.md`, closed item bodies in
+  `.superpowers/ARCHIVE.md`, and live counts and suite results in
+  `.superpowers/STATUS.md`.
 - `docs/superpowers/specs/` — the design record. Every non-trivial decision in this
   repo has a spec, and the specs explain *why* far better than the code does.

@@ -94,6 +94,9 @@ jobs:
           ARS_RULEBOOK_ROOT: ${{ runner.temp }}/rulebook
         run: python -m unittest discover -s scripts/spell_import/tests -t .
 
+      - name: Check the todo tree's structural invariants
+        run: python -m scripts.todo.check
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.44.8"

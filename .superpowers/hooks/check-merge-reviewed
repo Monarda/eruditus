@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Stop hook: has the newest merge had its item-closure extraction done?
+# Exit 2 feeds stderr back to Claude and blocks the turn from ending.
+set -u
+
+# Claude Code passes a JSON payload on stdin. When a Stop hook has already
+# blocked once this turn, stop_hook_active is true -- fire again and the turn
+# can never end. Read it and bail out.
+payload=$(cat 2>/dev/null || true)
+case "$payload" in *'"stop_hook_active":true'*) exit 0 ;; esac
+case "$payload" in *'"stop_hook_active": true'*) exit 0 ;; esac
+
+# Anchor to the project, never to the caller's cwd. A relative path makes this
+# a silent no-op -- it fails OPEN -- if a Stop hook is ever invoked from
+# elsewhere, which is the worst failure mode for a guard: absent, not loud.
+root="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)}"
+state="$root/.superpowers/.last-reviewed-merge"
+[ -f "$state" ] || exit 0
+
+# Strip ALL whitespace from both sides before comparing. Command substitution
+# eats trailing newlines but NOT a stray trailing space, and one space in this
+# file would otherwise block every turn until somebody worked out why.
+newest=$(git -C "$root" rev-list --merges -1 HEAD 2>/dev/null | tr -d '[:space:]')
+[ -n "$newest" ] || exit 0
+
+reviewed=$(tr -d '[:space:]' < "$state")
+[ "$newest" = "$reviewed" ] && exit 0
+
+subject=$(git -C "$root" log -1 --format=%s "$newest")
+cat >&2 <<EOF
+Merge $newest has not been through item closure:
+
+  $subject
+
+Invoke the closing-an-item skill. If it closed no items, say so and record it:
+  git rev-list --merges -1 HEAD > .superpowers/.last-reviewed-merge
+EOF
+exit 2

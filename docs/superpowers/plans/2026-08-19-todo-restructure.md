@@ -19,7 +19,7 @@
 - **Hooks must declare `"shell": "bash"`** or they break on Windows (see `superpowers/6.2.0/docs/windows/polyglot-hooks.md`).
 - **Run Python as `uv run --no-project python ...`** locally; this repo has no `pyproject.toml`. CI uses bare `python` on its own runner.
 - **Temporary files go to the session scratchpad**, never `/tmp` (which resolves to `C:\tmp` on this machine).
-- The three deliberate deletions, and nothing else, may be lost: the item 59/60/61 tombstones, the `## 0`/`A`/`B`/`C`/`D` band headers with their preambles, and `## Where the import stands`.
+- The deliberate deletions, and nothing else, may be lost: the item 59/60/61 tombstone **stubs** (emphatically NOT the real closed items sharing those numbers, which run 52, 36 and 21 lines under `## Completed` and must reach the archive), the `## 0`/`A`/`B`/`C`/`D` band headers with their preambles, the file's own title plus `## How to read this file`, and the two-line editorial preamble under `## Completed ✅` — all superseded by the index header and `ARCHIVE.md`'s own. `## Where the import stands` and `## Notes — standing constraints` are NOT deleted: they move to `STATUS.md` and `DECISIONS.md` in Task 5.
 
 ---
 
@@ -57,7 +57,7 @@ Scriptable and verifiable. Ends with a green checker and a byte-level reconcilia
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `Item` dataclass with fields `id: str`, `title: str`, `start: int`, `end: int`, `body: list[str]`, `open_bullets: int`, `done_bullets: int`, and property `total_bullets: int`. Function `parse_items(lines: list[str]) -> list[Item]`. Function `section_of(lines: list[str], line_no: int) -> str` returning the enclosing `## ` heading text.
+- Produces: `Item` dataclass with fields `id: str`, `title: str`, `heading: str` (the raw `### ` line), `start: int`, `end: int`, `body: list[str]`, `open_bullets: int`, `done_bullets: int`, and property `total_bullets: int`. Function `parse_items(lines: list[str]) -> list[Item]`. Function `section_of(lines: list[str], line_no: int) -> str` returning the enclosing `## ` heading text.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -80,14 +80,41 @@ Prose only, no bullets.
 
 ## Completed
 
+### 35 / 37. Open Guideline Slots — DONE
+Two ids in one heading; 35 owns this body.
+
 ### 65. HoH:MC Spell Extraction
 - **Not a checkbox bullet.**
+
+### Base Effect Extraction
+Unnumbered summary, no id at all.
 """.split("\n")
 
 
 class ParseItemsTest(unittest.TestCase):
     def test_finds_every_item_including_letter_suffixed_ids(self):
-        self.assertEqual([i.id for i in parse_items(SAMPLE)], ["7", "4b", "65"])
+        self.assertEqual([i.id for i in parse_items(SAMPLE)],
+                         ["7", "4b", "35", "65"])
+
+    def test_a_compound_heading_is_owned_by_its_first_id(self):
+        item = [i for i in parse_items(SAMPLE) if i.id == "35"][0]
+        self.assertEqual(item.title, "Open Guideline Slots — DONE")
+
+    def test_the_raw_heading_is_kept_verbatim(self):
+        # migration re-emits this line rather than rebuilding it, so the
+        # "/ 37" cross-link survives the move to the archive
+        item = [i for i in parse_items(SAMPLE) if i.id == "35"][0]
+        self.assertEqual(item.heading, "### 35 / 37. Open Guideline Slots — DONE")
+
+    def test_an_unnumbered_heading_is_not_an_item(self):
+        self.assertNotIn("Base Effect Extraction",
+                         [i.title for i in parse_items(SAMPLE)])
+
+    def test_an_unnumbered_heading_still_ends_the_previous_body(self):
+        # otherwise item 65 swallows it, and the migrator emits it twice:
+        # once inside 65's body and once as an unclaimed block.
+        item = [i for i in parse_items(SAMPLE) if i.id == "65"][0]
+        self.assertNotIn("Unnumbered summary, no id at all.", item.body)
 
     def test_counts_open_and_done_bullets_separately(self):
         item = parse_items(SAMPLE)[0]
@@ -98,7 +125,7 @@ class ParseItemsTest(unittest.TestCase):
         self.assertEqual(parse_items(SAMPLE)[1].total_bullets, 0)
 
     def test_a_non_checkbox_bullet_is_not_counted(self):
-        self.assertEqual(parse_items(SAMPLE)[2].total_bullets, 0)
+        self.assertEqual(parse_items(SAMPLE)[3].total_bullets, 0)
 
     def test_body_stops_at_the_next_section_not_the_next_item(self):
         # 4b is the last item of section C; its body must not swallow
@@ -110,7 +137,7 @@ class ParseItemsTest(unittest.TestCase):
     def test_section_of_reports_the_enclosing_section(self):
         items = parse_items(SAMPLE)
         self.assertEqual(section_of(SAMPLE, items[0].start), "C. Not on the Critical Path")
-        self.assertEqual(section_of(SAMPLE, items[2].start), "Completed")
+        self.assertEqual(section_of(SAMPLE, items[3].start), "Completed")
 
     def test_titles_drop_the_id_prefix(self):
         self.assertEqual(parse_items(SAMPLE)[0].title, "Spell Export/Backup Validation")
@@ -141,7 +168,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-ITEM_RE = re.compile(r"^### (?P<id>\d+[a-z]?)\.\s*(?P<title>.*)$")
+# Two closed headings name two ids at once -- `### 35 / 37.`, `### 43 / 45.`.
+# The first id owns the body; the second has a heading of its own elsewhere.
+ITEM_RE = re.compile(
+    r"^### (?P<id>\d+[a-z]?)(?: */ *\d+[a-z]?)*\.\s*(?P<title>.*)$")
 SECTION_RE = re.compile(r"^## (?P<title>.*)$")
 OPEN_BULLET_RE = re.compile(r"^\s*- \[ \]")
 DONE_BULLET_RE = re.compile(r"^\s*- \[x\]")
@@ -151,6 +181,7 @@ DONE_BULLET_RE = re.compile(r"^\s*- \[x\]")
 class Item:
     id: str
     title: str
+    heading: str        # the raw `### ` line, carried verbatim on migration
     start: int          # 1-based line number of the ### heading
     end: int            # 1-based, inclusive, last line of the body
     body: list[str]
@@ -165,8 +196,12 @@ class Item:
 def parse_items(lines: list[str]) -> list[Item]:
     heads = [(n, m) for n, line in enumerate(lines, 1)
              if (m := ITEM_RE.match(line))]
-    stops = sorted([n for n, line in enumerate(lines, 1) if SECTION_RE.match(line)]
-                   + [n for n, _ in heads])
+    # EVERY `### ` line stops a body, not just the ones carrying an id. An
+    # unnumbered heading (`### Base Effect Extraction`) would otherwise be
+    # swallowed by the preceding item AND re-emitted by _unclaimed_blocks,
+    # duplicating it in the archive and blurring that item's boundary.
+    stops = sorted(n for n, line in enumerate(lines, 1)
+                   if line.startswith("### ") or SECTION_RE.match(line))
     items = []
     for line_no, match in heads:
         later = [s for s in stops if s > line_no]
@@ -175,6 +210,7 @@ def parse_items(lines: list[str]) -> list[Item]:
         items.append(Item(
             id=match.group("id"),
             title=match.group("title").strip(),
+            heading=lines[line_no - 1],
             start=line_no,
             end=end,
             body=body,
@@ -198,7 +234,7 @@ def section_of(lines: list[str], line_no: int) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 6 tests
+Expected: PASS, 11 tests
 
 - [ ] **Step 5: Sanity-check against the real file**
 
@@ -211,7 +247,12 @@ items = parse_items(lines)
 print(len(items), 'items;', sum(i.open_bullets for i in items), 'open bullets')
 "
 ```
-Expected: `81 items; 80 open bullets`
+Expected: `80 items; 80 open bullets`
+
+80 items across 81 `### ` headings: two headings name two ids each (`35 / 37`,
+`43 / 45`) and one, `Base Effect Extraction`, has no id and is not an item.
+The 80 cover 76 distinct ids — 4, 59, 60 and 61 each appear twice, three as
+tombstones and one (item 4) as an open body plus an archived predecessor.
 
 - [ ] **Step 6: Commit**
 
@@ -240,18 +281,15 @@ This task is data with a test that pins it to reality, so a later drift in `todo
 # scripts/todo/tests/test_mapping.py
 import unittest
 from scripts.todo.mapping import THEMES, TOMBSTONES, MISFILED, ALL_IDS, theme_for
-from scripts.todo.parse import parse_items
-
-
-def real_items():
-    lines = open(".superpowers/todo.md", encoding="utf-8").read().split("\n")
-    return parse_items(lines)
 
 
 class MappingTest(unittest.TestCase):
-    def test_every_open_item_has_exactly_one_theme(self):
-        for item_id in ALL_IDS - TOMBSTONES:
-            self.assertIn(item_id, THEMES, f"item {item_id} has no theme")
+    def test_every_themed_id_is_a_real_id(self):
+        # THEMES maps only the OPEN items -- a closed item's home is the
+        # archive, which needs no entry here.
+        self.assertTrue(THEMES.keys() <= ALL_IDS,
+                        f"not real ids: {sorted(THEMES.keys() - ALL_IDS)}")
+        self.assertEqual(len(THEMES), 36)
 
     def test_tombstones_have_no_theme(self):
         for item_id in TOMBSTONES:
@@ -263,16 +301,11 @@ class MappingTest(unittest.TestCase):
             counts[theme] = counts.get(theme, 0) + 1
         self.assertEqual(counts, {
             "rules-fidelity.md": 12,
-            "app.md": 9,
+            "app.md": 10,
             "model.md": 7,
-            "importer.md": 6,
+            "importer.md": 5,
             "multibook.md": 2,
         })
-
-    def test_mapping_covers_exactly_the_ids_the_file_actually_has(self):
-        found = {i.id for i in real_items()}
-        self.assertEqual(found, ALL_IDS,
-                         "todo.md changed: reconcile mapping.py before migrating")
 
     def test_item_73_is_recorded_as_misfiled_under_completed(self):
         self.assertEqual(MISFILED["73"], "importer.md")
@@ -316,13 +349,13 @@ THEMES: dict[str, str] = {
     "50": RULES, "63": RULES,
     # the Flutter app and project chores
     "7": APP, "9": APP, "10": APP, "11": APP, "16": APP, "18": APP,
-    "33": APP, "56": APP, "58": APP,
+    "23": APP, "33": APP, "56": APP, "58": APP,
     # what the spell model can't yet express
     "47": MODEL, "53": MODEL, "54": MODEL, "57": MODEL, "67": MODEL,
     "69": MODEL, "74": MODEL,
     # scripts/spell_import, ledger, provenance
-    "23": IMPORTER, "31": IMPORTER, "32": IMPORTER, "38": IMPORTER,
-    "70": IMPORTER, "73": IMPORTER,
+    "31": IMPORTER, "32": IMPORTER, "38": IMPORTER, "70": IMPORTER,
+    "73": IMPORTER,
     # the second-book program
     "66": MULTIBOOK, "71": MULTIBOOK,
 }
@@ -346,9 +379,11 @@ def theme_for(item_id: str) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_mapping -v`
-Expected: PASS, 6 tests.
+Expected: PASS, 5 tests.
 
-If `test_mapping_covers_exactly_the_ids_the_file_actually_has` fails, `todo.md` has moved since 2026-08-19. Do not paper over it — reconcile `ALL_IDS` and `THEMES` against the file and re-run.
+`ALL_IDS` is enforced against the real file by `split`'s precondition in Task 4,
+not by a test here — a test reading `.superpowers/todo.md` would go red the
+moment Task 5 replaces that file with the index.
 
 - [ ] **Step 5: Commit**
 
@@ -366,8 +401,8 @@ git commit -m "feat: pin the id-to-theme mapping with a reality check"
 - Create: `scripts/todo/tests/test_check.py`
 
 **Interfaces:**
-- Consumes: `parse_items`, `Item` from Task 1; `ALL_IDS` from Task 2.
-- Produces: `check(root: Path) -> list[str]` returning human-readable problems, empty when clean. `main() -> int` for CLI use, exit 1 on problems.
+- Consumes: `parse_items`, `Item` from Task 1. An ARCHIVE body is legal for any indexed id (history); a theme body must match its index row.
+- Produces: `check(root: Path) -> list[str]` returning human-readable problems, empty when clean. `main() -> int` for CLI use, exit 1 on problems. Scans only `TRACKED` plus `themes/*.md` — never the git-ignored scratch under `.superpowers/`.
 
 This is the artefact that outlives the migration. It encodes the spec's Verification section as something runnable.
 
@@ -443,6 +478,24 @@ class CheckTest(unittest.TestCase):
         problems = self.run_on(index=INDEX + "| 7 | do | open 2/3 | app.md | Dup |\n")
         self.assertTrue(any("7" in p and "twice" in p.lower() for p in problems))
 
+    def test_an_archived_predecessor_under_an_open_id_is_legal(self):
+        # item 4 has an open body in a theme AND an archived predecessor
+        # under the same number. The archive is history, not a second home.
+        problems = self.run_on(
+            archive=ARCHIVE + "\n### 7. Backup checks, the original\nClosed part.\n")
+        self.assertEqual(problems, [])
+
+    def test_git_ignored_scratch_is_not_scanned(self):
+        # .superpowers/sdd/<plan>/ holds task briefs that quote item numbers
+        # out of the plan. They are not part of the todo tree.
+        with TemporaryDirectory() as d:
+            root = build(Path(d))
+            scratch = root / "sdd" / "a-plan"
+            scratch.mkdir(parents=True)
+            (scratch / "task-1-brief.md").write_text(
+                "Quotes item 999 from the plan.\n", encoding="utf-8")
+            self.assertEqual(check(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -473,7 +526,7 @@ import re
 import sys
 from pathlib import Path
 
-from scripts.todo.parse import parse_items
+from scripts.todo.parse import Item, parse_items
 
 ROW_RE = re.compile(
     r"^\|\s*(?P<id>\d+[a-z]?)\s*\|"      # id
@@ -482,11 +535,32 @@ ROW_RE = re.compile(
     r"\s*(?P<home>[^|]*)\|"              # home
 )
 COUNT_RE = re.compile(r"open\s+(?P<open>\d+)/(?P<total>\d+)")
+# Deliberately under-detects: catches `item 25`, but only the FIRST number of
+# `items 65, 57, 27`. A green run therefore proves that no DETECTED reference
+# dangles -- not that every reference in the tree resolves. Widening this to
+# comma lists is a fine later change; never weaken it to silence a failure.
 XREF_RE = re.compile(r"\bitems?\s+(\d+[a-z]?)")
+
+
+TRACKED = ("todo.md", "DECISIONS.md", "STATUS.md", "ARCHIVE.md")
 
 
 def _read(path: Path) -> list[str]:
     return path.read_text(encoding="utf-8").split("\n")
+
+
+def _tracked_files(root: Path):
+    """Only the todo tree.
+
+    `.superpowers/` also holds git-ignored scratch -- the SDD workspace and
+    base_effects_extraction -- whose prose is not ours to police. Task briefs
+    in particular quote item numbers out of the plan, so an rglob here would
+    fail on this run's own working files.
+    """
+    for name in TRACKED:
+        if (root / name).exists():
+            yield root / name
+    yield from sorted(root.glob("themes/*.md"))
 
 
 def _index_rows(lines: list[str]) -> list[dict[str, str]]:
@@ -508,21 +582,33 @@ def check(root: Path) -> list[str]:
             problems.append(f"item {row['id']}: listed twice in the index")
         seen.add(row["id"])
 
-    # Every body heading, keyed by id, with the file it was found in.
-    bodies: dict[str, tuple[str, object]] = {}
-    for path in sorted(root.glob("themes/*.md")) + [root / "ARCHIVE.md"]:
-        if not path.exists():
-            continue
+    # A theme body is an item's home and must match its index row. An ARCHIVE
+    # body is history and is legal for any indexed id -- item 4 has an open
+    # body in a theme AND an archived predecessor under the same number.
+    theme_bodies: dict[str, tuple[str, Item]] = {}
+    for path in sorted(root.glob("themes/*.md")):
         for item in parse_items(_read(path)):
-            if item.id in bodies:
-                problems.append(f"item {item.id}: body appears in two files")
-            bodies[item.id] = (path.name, item)
+            if item.id in theme_bodies:
+                problems.append(
+                    f"item {item.id}: body appears in two theme files")
+            theme_bodies[item.id] = (path.name, item)
+
+    archive_bodies: dict[str, Item] = {}
+    archive = root / "ARCHIVE.md"
+    if archive.exists():
+        for item in parse_items(_read(archive)):
+            archive_bodies[item.id] = item
 
     by_id = {row["id"]: row for row in rows}
 
     for row in rows:
         home, item_id = row["home"], row["id"]
-        found = bodies.get(item_id)
+        if home == "ARCHIVE.md":
+            if item_id not in archive_bodies:
+                problems.append(
+                    f"item {item_id}: index says ARCHIVE.md, no body there")
+            continue
+        found = theme_bodies.get(item_id)
         if found is None or found[0] != home:
             where = "nowhere" if found is None else found[0]
             problems.append(
@@ -537,11 +623,14 @@ def check(root: Path) -> list[str]:
                     f"item {item_id}: index claims open {claimed[0]}/{claimed[1]}, "
                     f"body has {actual[0]}/{actual[1]}")
 
-    for item_id, (name, _) in sorted(bodies.items()):
+    for item_id, (name, _) in sorted(theme_bodies.items()):
         if item_id not in by_id:
             problems.append(f"item {item_id}: orphan heading in {name}, no index row")
+    for item_id in sorted(archive_bodies):
+        if item_id not in by_id:
+            problems.append(f"item {item_id}: orphan heading in ARCHIVE.md, no index row")
 
-    for path in sorted(root.rglob("*.md")):
+    for path in _tracked_files(root):
         for n, line in enumerate(_read(path), 1):
             if line.lstrip().startswith("|"):
                 continue        # index rows are not cross-references
@@ -568,7 +657,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_check -v`
-Expected: PASS, 6 tests
+Expected: PASS, 8 tests
 
 **Known limitation, accept it deliberately:** `XREF_RE` catches `item 25` and
 the *first* number of `items 65, 57, 27`. It under-detects rather than
@@ -592,8 +681,8 @@ git commit -m "feat: structural invariant checker for the split todo tree"
 - Create: `scripts/todo/tests/test_migrate.py`
 
 **Interfaces:**
-- Consumes: `parse_items`, `Item`, `section_of` from Task 1; `THEMES`, `TOMBSTONES`, `MISFILED` from Task 2.
-- Produces: `split(lines: list[str]) -> dict[str, str]` mapping output relative path to full text. `add_sub_ids(body: list[str], item_id: str) -> list[str]`.
+- Consumes: `parse_items`, `Item`, `section_of` from Task 1; `THEMES`, `TOMBSTONES`, `MISFILED`, `ALL_IDS` from Task 2.
+- Produces: `split(lines: list[str], expected_ids: frozenset[str] | None = None) -> dict[str, str]` mapping output relative path to full text; raises `ValueError` when the file's ids do not match `ALL_IDS`. `add_sub_ids(body: list[str], item_id: str) -> list[str]`.
 
 Pure function. Writing files is the caller's job (Task 5), so the split is unit-testable without touching disk.
 
@@ -608,20 +697,32 @@ SAMPLE = """# Eruditus Todo List
 
 ## C. Not on the Critical Path
 
+### 4. Conditional Wards
+- [ ] Add a ward type field
+
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells
 - [x] Already done
 
 ### 59. The Level Should Compute Live
-**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
+Redirect only — see `## Completed ✅`.
 
 ## Completed ✅
+
+### 4. Resolve Out-of-Scope Base Effects
+The archived predecessor of an id that is still open.
+
+### 59. The Spell Level Computes Live
+The real closed body, which must survive.
 
 ### 65. HoH:MC Spell Extraction
 Closed, with a binding constraint inside.
 
 ### 73. Deferred Minor Findings
 - [ ] Something still open
+
+### Base Effect Extraction
+Unnumbered, but real closed-work summary.
 """.split("\n")
 
 
@@ -648,9 +749,17 @@ class AddSubIdsTest(unittest.TestCase):
         self.assertEqual(out, ["- **See also:** item 65"])
 
 
+SAMPLE_IDS = frozenset({"4", "7", "59", "65", "73"})
+
+
 class SplitTest(unittest.TestCase):
     def setUp(self):
-        self.out = split(SAMPLE)
+        self.out = split(SAMPLE, SAMPLE_IDS)
+
+    def test_a_file_the_mapping_does_not_match_is_refused(self):
+        with self.assertRaises(ValueError) as caught:
+            split(SAMPLE, SAMPLE_IDS | {"999"})
+        self.assertIn("999", str(caught.exception))
 
     def test_open_items_land_in_their_theme_file(self):
         self.assertIn("### 7. Spell Export/Backup Validation",
@@ -664,9 +773,21 @@ class SplitTest(unittest.TestCase):
                       self.out["themes/importer.md"])
         self.assertNotIn("### 73.", self.out["ARCHIVE.md"])
 
-    def test_tombstones_are_dropped_entirely(self):
+    def test_a_tombstone_stub_is_dropped_but_its_real_item_survives(self):
+        # 59 appears twice: a redirect stub in a band section, and the real
+        # closed item under Completed. Filtering on bare id destroys both.
         joined = "".join(self.out.values())
-        self.assertNotIn("### 59.", joined)
+        self.assertNotIn("Redirect only", joined)
+        self.assertIn("The real closed body, which must survive.",
+                      self.out["ARCHIVE.md"])
+
+    def test_an_id_with_an_open_and_an_archived_body_gets_one_row(self):
+        # item 4's archived predecessor is history, not a second home, so it
+        # must not claim its own index row.
+        index = self.out["todo.md"]
+        self.assertEqual(index.count("| 4 |"), 1)
+        self.assertIn("| 4 |  | open", index)
+        self.assertIn("The archived predecessor", self.out["ARCHIVE.md"])
 
     def test_the_index_lists_every_surviving_item_once(self):
         index = self.out["todo.md"]
@@ -675,6 +796,9 @@ class SplitTest(unittest.TestCase):
 
     def test_the_index_records_sub_bullet_counts(self):
         self.assertIn("open 1/2", self.out["todo.md"])
+
+    def test_an_unnumbered_block_still_reaches_the_archive(self):
+        self.assertIn("### Base Effect Extraction", self.out["ARCHIVE.md"])
 
     def test_bodies_are_carried_verbatim_apart_from_sub_ids(self):
         self.assertIn("Closed, with a binding constraint inside.",
@@ -703,7 +827,7 @@ from __future__ import annotations
 
 import re
 
-from scripts.todo.mapping import MISFILED, THEMES, TOMBSTONES
+from scripts.todo.mapping import ALL_IDS, MISFILED, THEMES, TOMBSTONES
 from scripts.todo.parse import Item, parse_items, section_of
 
 CHECKBOX_RE = re.compile(r"^(?P<lead>\s*- \[(?: |x)\] )(?P<rest>.*)$")
@@ -733,6 +857,24 @@ def add_sub_ids(body: list[str], item_id: str) -> list[str]:
     return out
 
 
+def _unclaimed_blocks(lines: list[str]) -> list[str]:
+    """`### ` blocks carrying no parseable id, e.g. `### Base Effect Extraction`.
+
+    They are real closed-work summary and must reach the archive. Only the band
+    headers and the status section are deliberate deletions -- an unnumbered
+    heading is not on that list, and dropping it would be a silent loss.
+    """
+    claimed = {item.start for item in parse_items(lines)}
+    out: list[str] = []
+    for n, line in enumerate(lines, 1):
+        if not line.startswith("### ") or n in claimed:
+            continue
+        end = next((m for m, later in enumerate(lines[n:], n + 1)
+                    if later.startswith(("### ", "## "))), len(lines) + 1)
+        out.extend(lines[n - 1:end - 1] + [""])
+    return out
+
+
 def _status(item: Item, closed: bool) -> str:
     if closed:
         return "closed"
@@ -741,30 +883,57 @@ def _status(item: Item, closed: bool) -> str:
     return "open"
 
 
-def split(lines: list[str]) -> dict[str, str]:
+def split(lines: list[str],
+          expected_ids: frozenset[str] | None = None) -> dict[str, str]:
+    """Split todo.md. Refuses to run against a file mapping.py does not match.
+
+    The guard lives here rather than in a test because a test reading the live
+    todo.md would go red the moment the migration replaces that file.
+    """
+    expected = ALL_IDS if expected_ids is None else expected_ids
+    found = {item.id for item in parse_items(lines)}
+    if found != expected:
+        raise ValueError(
+            f"todo.md has moved since mapping.py was written: "
+            f"{sorted(found ^ expected)} -- reconcile ALL_IDS and THEMES first")
+
     files: dict[str, list[str]] = {}
-    rows: list[tuple[str, str]] = []
+    rows: dict[str, str] = {}
 
     def emit(path: str, text: list[str]) -> None:
         files.setdefault(path, []).extend(text)
 
     for item in parse_items(lines):
-        if item.id in TOMBSTONES:
-            continue
         in_completed = section_of(lines, item.start).startswith("Completed")
+        # A tombstone is the redirect STUB in a band section -- NEVER the real
+        # closed item sharing its number under `## Completed`. Ids 59, 60 and 61
+        # each appear twice; filtering on bare id would delete 109 lines of real
+        # closed history along with the 10 lines of stub.
+        if item.id in TOMBSTONES and not in_completed:
+            continue
         closed = in_completed and item.id not in MISFILED
         home = "ARCHIVE.md" if closed else f"themes/{THEMES[item.id]}"
         body = item.body if closed else add_sub_ids(item.body, item.id)
-        emit(home, [f"### {item.id}. {item.title}"] + body + [""])
+        emit(home, [item.heading] + body + [""])
         shown = home.split("/")[-1]
-        rows.append((item.id, f"| {item.id} |  | {_status(item, closed)} "
-                              f"| {shown} | {item.title} |"))
+        # One row per id. An id with BOTH an open body and an archived
+        # predecessor (item 4) is indexed at its open home -- the archive is
+        # history, not a second home, so it must not claim a second row.
+        if item.id not in rows or not closed:
+            rows[item.id] = (f"| {item.id} |  | {_status(item, closed)} "
+                             f"| {shown} | {item.title} |")
+
+    tail = _unclaimed_blocks(lines)
+    if tail:
+        emit("ARCHIVE.md", tail)
 
     def sort_key(row: tuple[str, str]) -> tuple[int, str]:
         digits = re.match(r"(\d+)([a-z]?)", row[0])
         return int(digits.group(1)), digits.group(2)
 
-    index = INDEX_HEADER + "\n".join(r for _, r in sorted(rows, key=sort_key)) + "\n"
+    index = (INDEX_HEADER
+             + "\n".join(r for _, r in sorted(rows.items(), key=sort_key))
+             + "\n")
 
     out = {"todo.md": index}
     for path, text in files.items():
@@ -776,12 +945,12 @@ def split(lines: list[str]) -> dict[str, str]:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_migrate -v`
-Expected: PASS, 11 tests
+Expected: PASS, 14 tests
 
 - [ ] **Step 5: Run the whole suite**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 29 tests
+Expected: PASS, 38 tests
 
 - [ ] **Step 6: Commit**
 
@@ -872,8 +1041,13 @@ from pathlib import Path
 before = subprocess.run(["git", "show", "HEAD:.superpowers/todo.md"],
                         capture_output=True, text=True,
                         encoding="utf-8").stdout.split("\n")
+# Everything above the status section is the file's own preamble -- title,
+# standing goal, "How to read this file" -- superseded by INDEX_HEADER.
+before = before[next(i for i, l in enumerate(before)
+                     if l.startswith("## Where the import stands")):]
+from scripts.todo.check import _tracked_files
 after = "\n".join(p.read_text(encoding="utf-8")
-                  for p in Path(".superpowers").rglob("*.md"))
+                  for p in _tracked_files(Path(".superpowers")))
 allowed = ("## 0.", "## A.", "## B.", "## C.", "## D.",
            "## Where the import stands", "### 59.", "### 60.", "### 61.")
 missing = [l for l in before
@@ -990,7 +1164,14 @@ git commit -m "docs: distil standing constraints out of the archived bodies"
 
 # Phase 3 — The Rule-3 Gate
 
-Lands after Phase 2, because the gate points at `DECISIONS.md`.
+**Sequencing overridden by the human partner on 2026-08-19:** Phase 3 runs
+BEFORE Phase 2. The gate points at `DECISIONS.md`, which exists and is valid
+from Task 5 onward — it simply holds the verbatim standing-constraints section
+until Phase 2 distils into it. The gate's procedure is unaffected.
+
+One consequence to expect: seeding `.last-reviewed-merge` before this branch
+merges means the gate fires once on that merge. That is correct behaviour, not
+a bug — the answer is "this merge closed no items", then record the sha.
 
 ### Task 7: The closing-an-item skill
 
@@ -1027,7 +1208,10 @@ body is about to stop being read. Anything in it that still binds must move to
    preserve, a rejected approach and why, a gotcha that bit someone. Not: what
    the work was, which commits did it, counts, dates, test names.
 4. **Move the body verbatim to `ARCHIVE.md`** and flip its index row to
-   `closed <MM-DD>`, home `ARCHIVE.md`, `Kind` `—`.
+   Status `closed` — plain, with no date: every closed row in the table reads
+   exactly that, and dates and commit shas live in the Title. Home becomes
+   `ARCHIVE.md` and `Kind` becomes `—`. The checker only validates `open a/b`
+   counts, so it cannot catch a drifting closed-row format for you.
 5. **Record the merge as reviewed:**
 
    ```bash
@@ -1099,16 +1283,23 @@ Create `.superpowers/hooks/check-merge-reviewed` (extensionless, per the Windows
 # Exit 2 feeds stderr back to Claude and blocks the turn from ending.
 set -u
 
-state=".superpowers/.last-reviewed-merge"
+# Anchor to the project, never to the caller's cwd. A relative path makes this
+# a silent no-op -- it fails OPEN -- if a Stop hook is ever invoked from
+# elsewhere, which is the worst failure mode for a guard: absent, not loud.
+root="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)}"
+state="$root/.superpowers/.last-reviewed-merge"
 [ -f "$state" ] || exit 0
 
-newest=$(git rev-list --merges -1 HEAD 2>/dev/null) || exit 0
+# Strip ALL whitespace from both sides before comparing. Command substitution
+# eats trailing newlines but NOT a stray trailing space, and one space in this
+# file would otherwise block every turn until somebody worked out why.
+newest=$(git -C "$root" rev-list --merges -1 HEAD 2>/dev/null | tr -d '[:space:]')
 [ -n "$newest" ] || exit 0
 
-reviewed=$(cat "$state")
+reviewed=$(tr -d '[:space:]' < "$state")
 [ "$newest" = "$reviewed" ] && exit 0
 
-subject=$(git log -1 --format=%s "$newest")
+subject=$(git -C "$root" log -1 --format=%s "$newest")
 cat >&2 <<EOF
 Merge $newest has not been through item closure:
 
@@ -1129,13 +1320,24 @@ bash .superpowers/hooks/check-merge-reviewed; echo "exit=$?"
 ```
 Expected: the message on stderr, `exit=2`.
 
-- [ ] **Step 4: Test it stays quiet when current**
+- [ ] **Step 4: Test it stays quiet when current, and cannot be tripped**
 
 ```bash
 git rev-list --merges -1 HEAD > .superpowers/.last-reviewed-merge
 bash .superpowers/hooks/check-merge-reviewed; echo "exit=$?"
+
+# a stray trailing space must NOT block -- this is the false-positive that
+# would otherwise wedge every future turn in this repo
+printf '%s 
+' "$(git rev-list --merges -1 HEAD)" > .superpowers/.last-reviewed-merge
+bash .superpowers/hooks/check-merge-reviewed; echo "trailing-space exit=$?"
+
+# and it must survive being called from anywhere, not just the project root
+(cd / && bash "$OLDPWD/.superpowers/hooks/check-merge-reviewed"); echo "elsewhere exit=$?"
+
+git checkout -- .superpowers/.last-reviewed-merge
 ```
-Expected: no output, `exit=0`.
+Expected: `exit=0`, `trailing-space exit=0`, `elsewhere exit=0`, all silent.
 
 - [ ] **Step 5: Register the hook**
 
