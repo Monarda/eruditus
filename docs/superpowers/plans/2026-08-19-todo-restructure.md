@@ -19,7 +19,7 @@
 - **Hooks must declare `"shell": "bash"`** or they break on Windows (see `superpowers/6.2.0/docs/windows/polyglot-hooks.md`).
 - **Run Python as `uv run --no-project python ...`** locally; this repo has no `pyproject.toml`. CI uses bare `python` on its own runner.
 - **Temporary files go to the session scratchpad**, never `/tmp` (which resolves to `C:\tmp` on this machine).
-- The three deliberate deletions, and nothing else, may be lost: the item 59/60/61 tombstones, the `## 0`/`A`/`B`/`C`/`D` band headers with their preambles, and `## Where the import stands`.
+- The deliberate deletions, and nothing else, may be lost: the item 59/60/61 tombstone **stubs** (emphatically NOT the real closed items sharing those numbers, which run 52, 36 and 21 lines under `## Completed` and must reach the archive), the `## 0`/`A`/`B`/`C`/`D` band headers with their preambles, and the file's own title plus `## How to read this file`, superseded by the index header. `## Where the import stands` is not deleted — it moves verbatim to `STATUS.md`.
 
 ---
 
@@ -1031,6 +1031,10 @@ from pathlib import Path
 before = subprocess.run(["git", "show", "HEAD:.superpowers/todo.md"],
                         capture_output=True, text=True,
                         encoding="utf-8").stdout.split("\n")
+# Everything above the status section is the file's own preamble -- title,
+# standing goal, "How to read this file" -- superseded by INDEX_HEADER.
+before = before[next(i for i, l in enumerate(before)
+                     if l.startswith("## Where the import stands")):]
 from scripts.todo.check import _tracked_files
 after = "\n".join(p.read_text(encoding="utf-8")
                   for p in _tracked_files(Path(".superpowers")))
