@@ -252,3 +252,14 @@ where the default is most often wrong.
 - **Files:** `lib/models/spell.dart:517-518`,
   `lib/bloc/spell_creation/spell_creation_bloc.dart:725-735`
 - **See also:** item 14 (the "make it catalog data" precedent)
+
+
+### 75. Should Group/Room/Structure/Boundary Cost Differently Under the Size Ladder?
+**Opened 2026-08-19**, rescued from item 19's closed body where it was deferred
+and then became unreachable when that item was archived.
+
+- [ ] **75.1** Decide whether Group, Room, Structure and Boundary should cost
+      differently from each other under the Size ladder. They are priced
+      identically today, which was a deliberate simplification, not a finding.
+- **Spec:** `docs/superpowers/specs/2026-08-16-modifier-target-scope-design.md`
+- **See also:** item 19 (closed, `ARCHIVE.md`).
