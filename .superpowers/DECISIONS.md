@@ -478,8 +478,20 @@ The funnel mints a new breakdown per emit and `breakdown` is in
 *outgoing* guideline's reference value**, evaluated per slot — so a deliberately
 chosen parameter survives a guideline switch while an untouched one follows. There
 is no "touched" flag; it is a value comparison against data already in hand.
-(Item 74 records the one path this does not yet reconcile with the Range/Target
-checks.)  *(items 60, 74)*
+*(items 60, 74)*
+
+**One exception to the per-slot evaluation: a seed that would contradict its
+peer is not written.** Range and Target are not independent, so if the seeded
+pair violates check 10 or check 11, *both* slots keep their pre-adoption values.
+Reverting both is identical to reverting whichever slot moved, and the
+pre-adoption pair is always legal — the constructor seeds the standard triple,
+and `RangeSelected`/`TargetSelected` prune. `TemplateInstantiated` is the one
+path that neither seeds nor prunes; it writes published catalog data, which
+assertion 7 holds to the same two checks. This narrows "an untouched
+slot follows the new guideline"; it carves no exception into "a deliberate
+choice survives a guideline switch". A self-contradictory reference triple is
+the one case reverting cannot fix, and is guarded by assertion 8 rather than
+repaired in the bloc.  *(item 74)*
 
 **No is-this-explicit predicate on `BaseEffect.reference`, deliberately.** It
 already defaults to `ParameterTriple.standard()` in both the constructor and the

@@ -1,6 +1,6 @@
 # Eruditus — Item Index
 
-**Now:** 74 · 32 · 73
+**Now:** 32 · 73
 
 **Standing goal:** every published spell in the Definitive Edition core rules
 is either (a) in the spell library with its computed level matching its
@@ -95,6 +95,6 @@ not-yet-worth-doing.
 | 71 | do | open 3/3 | multibook.md | The Anchored-but-Unparseable Rate, Measured Across Three More Inline Books |
 | 72 | — | closed | ARCHIVE.md | Three Latent Defects the Second Book Exposed (`9b21925`, `757e9a8`) |
 | 73 | — | closed | ARCHIVE.md | Deferred Minor Findings From Item 65's Reviews (`4a2030f`, `df15b84`) |
-| 74 | decide | open 5/5 | model.md | Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects |
+| 74 | — | closed | ARCHIVE.md | Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects (`5bfd5e8`, `f75c2c9`) |
 | 75 | decide | open 1/1 | rules-fidelity.md | Should Group/Room/Structure/Boundary Cost Differently Under the Size Ladder? |
 | 76 | decide | open 1/1 | app.md | Creation-Screen UI for Picking a Cross-Form Base Effect |

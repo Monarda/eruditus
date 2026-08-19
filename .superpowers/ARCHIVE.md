@@ -1,5 +1,68 @@
 # Archive
 
+### 74. Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects (`5bfd5e8`, `f75c2c9`)
+
+**Opened 2026-08-19, from item 67's cross-field-constraints branch, and
+explicitly deferred by the human partner rather than fixed on the spot.**
+Item 67's "Range must be Personal" bullet closed via check 10 (Core Rules
+12086: a Personal Range can never take a container Target) and check 11
+(HoH:MC 1006: the five Sensory Targets require Personal Range), plus
+`SpellCreationBloc` pruning `RangeSelected` and `TargetSelected` against each
+other in both directions. That pruning has a third, unguarded path.
+
+- [x] **74.1** **`_seedParameters` (`lib/bloc/spell_creation/spell_creation_bloc.dart`,
+      currently around lines 726-753) writes Range and Target too, on
+      guideline adoption, and does not participate in the new two-way
+      pruning.** It can seed `range-personal` for an untouched Range slot
+      while a deliberately chosen container Target (e.g. `target-room`)
+      survives untouched in the same call — exactly the combination check 10
+      forbids.
+- [x] **74.2** **This is not theoretical — a passing test already produces it.**
+      `test/bloc/spell_creation_bloc_test.dart`, the case named `'the adopt is
+      per-slot: an untouched Range and Duration follow the new guideline
+      while a chosen Target stays'`, ends its assertion with
+      `draft.range?.id == 'range-personal'` and `draft.target?.id ==
+      'target-room'` — and passes today. `target-room` is a container
+      Target, so this recorded, tested behavior is precisely the state check
+      10 exists to reject.
+- [x] **74.3** **Why this was deferred rather than folded into check 10/11's fix:**
+      closing it means deciding *which field yields* when a guideline switch
+      creates a Range/Target conflict — Range following the guideline while
+      Target stays, or the reverse, or refusing the seed and leaving the slot
+      null. Any answer overturns, or carves an exception into, the
+      deliberate and documented rule that "a parameter chosen deliberately
+      survives a guideline switch" (`_seedParameters`'s doc comment, around
+      lines 690-697). That is a design decision about how adoption should
+      behave, not an implementation detail to patch quietly alongside a
+      corpus-guard task.
+- [x] **74.4** **Why it is safe today, and not urgent:** nothing silently saves an
+      illegal spell. `validateSpellAgainstCatalog` (checks 10-12) still runs
+      on the draft regardless of how it was assembled, so a caster who hits
+      this path sees a validation error before saving — the gap is that the
+      bloc does not *prevent* the state, not that the state escapes
+      unnoticed.
+- [x] **74.5** **The pattern to follow, when this is picked up:** the two-way pruning
+      `RangeSelected` and `TargetSelected` now do against each other — see
+      item 67's "Range must be Personal" resolution — is the shape a fix here
+      would generalize.
+      **Resolved 2026-08-19** (`5bfd5e8`, `f75c2c9`): `_seedParameters` now
+      refuses a seed that would land Range and Target on a combination check
+      10 or check 11 rejects, reverting both slots to their pre-adoption
+      values rather than writing the half that moved. The two shapes above
+      (forbidding from each direction) and a third — a peer already
+      contradictory before the seed runs — are covered in
+      `test/bloc/spell_creation_bloc_test.dart`; a fourth, corpus-level
+      assertion (`test/data/published_spell_import_test.dart`, "assertion 8")
+      confirms no published base effect's own reference triple is
+      self-contradictory, which is the one case reverting cannot fix. The
+      standing constraint is recorded in `DECISIONS.md` under *Bloc and
+      state*.
+- **Files:** `lib/bloc/spell_creation/spell_creation_bloc.dart`,
+  `test/bloc/spell_creation_bloc_test.dart`
+- **See also:** item 67 (the resolved sibling this gap was found while
+  closing), item 58 (the container-mode UX seam between bloc and screen —
+  the same kind of "pruning was added at some call sites but not all" shape)
+
 ### 73. Deferred Minor Findings From Item 65's Reviews (`4a2030f`, `df15b84`)
 
 **Opened 2026-08-18.** Item 65 ran nine task reviews plus a whole-branch

@@ -9,14 +9,14 @@
 > **336 imported · 31 templates · 8 exceptions · 0 blocked · 3 skipped · 0 unresolved**
 > — plus `unreviewed: 7`, see below.
 
-**Suite status: all three re-run 2026-08-18 on the merged result of item 65 —
+**Suite status: all three re-run 2026-08-19 on the merged result of item 65 —
 the inline parser, the multi-book registry and the 14-spell HoH:MC import
 added tests, catalog rows and ledger entries:**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **742 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **382 tests, green** |
+| Dart | `flutter test` | **745 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **383 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **7 ledger entries carry an unreviewed candidate** (was 3). Item 55's

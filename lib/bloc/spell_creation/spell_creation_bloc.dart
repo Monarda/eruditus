@@ -762,7 +762,9 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
     // seed moved, because an unmoved slot already holds its pre-adoption value.
     // That pair is always a legal landing place: the constructor seeds the
     // standard triple (Personal forbids only container, Individual is an object
-    // Target naming no Range), and every other path that emits a pair prunes it.
+    // Target naming no Range), and RangeSelected/TargetSelected prune.
+    // TemplateInstantiated is the one path that neither seeds nor prunes; it
+    // writes published catalog data, held to the same two checks by assertion 7.
     // See todo item 74.
     if (_rangeTargetConflict(range, target)) {
       range = draft.range;
