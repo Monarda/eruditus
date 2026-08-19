@@ -877,6 +877,10 @@ def split(lines: list[str],
         rows.append((item.id, f"| {item.id} |  | {_status(item, closed)} "
                               f"| {shown} | {item.title} |"))
 
+    tail = _unclaimed_blocks(lines)
+    if tail:
+        emit("ARCHIVE.md", tail)
+
     def sort_key(row: tuple[str, str]) -> tuple[int, str]:
         digits = re.match(r"(\d+)([a-z]?)", row[0])
         return int(digits.group(1)), digits.group(2)
