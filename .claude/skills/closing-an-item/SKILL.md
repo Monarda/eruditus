@@ -21,7 +21,10 @@ body is about to stop being read. Anything in it that still binds must move to
    preserve, a rejected approach and why, a gotcha that bit someone. Not: what
    the work was, which commits did it, counts, dates, test names.
 4. **Move the body verbatim to `ARCHIVE.md`** and flip its index row to
-   `closed <MM-DD>`, home `ARCHIVE.md`, `Kind` `—`.
+   Status `closed` — plain, with no date: every closed row in the table reads
+   exactly that, and dates and commit shas live in the Title. Home becomes
+   `ARCHIVE.md` and `Kind` becomes `—`. The checker only validates `open a/b`
+   counts, so it cannot catch a drifting closed-row format for you.
 5. **Record the merge as reviewed:**
 
    ```bash
