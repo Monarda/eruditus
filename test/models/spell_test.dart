@@ -1303,6 +1303,40 @@ void main() {
 
       expect(problems, isEmpty);
     });
+
+    test('check 12: a Sensory Target on an Intellego spell is rejected, not '
+        'just an Intellego requisite', () {
+      final effect = BaseEffect(
+        id: 'e1', technique: 'Intellego', form: 'Ignem',
+        description: 'test', baseLevel: 1,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+      final sound = Parameter(
+        id: 'target-sound', name: 'Sound', category: 'Target', magnitude: 3,
+        targetType: TargetType.sensorium,
+        scope: const ParameterScope(excludeTechniques: ['Intellego']),
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      final problems = validateSpellAgainstCatalog(
+        effect: effect,
+        technique: 'Intellego',
+        form: 'Ignem',
+        analogyRationale: null,
+        chosenBaseLevel: null,
+        requisites: const {},
+        selectedModifiers: const {},
+        chosenSlots: const {},
+        range: null,
+        target: sound,
+        containerMode: ContainerMode.unstated,
+        modifiers: const [],
+      );
+
+      expect(problems, hasLength(1));
+      expect(problems.single, contains('Intellego'));
+      expect(problems.single, contains('Sound'));
+    });
   });
 
   group('spellOwesContainerMode', () {

@@ -1907,9 +1907,14 @@ void main() {
       expect(dropdown.onChanged, isNull);
     });
 
-    testWidgets('container Targets are hidden while Personal Range is chosen',
-        (tester) async {
-      // Pump the creation screen and select Personal as the Range first.
+    testWidgets(
+        'container Targets are still offered while Personal Range is chosen '
+        '(the forbidding direction of check 10 is deliberately not filtered '
+        'here -- see _compatibleWithPeers)', (tester) async {
+      // Pump the creation screen with Personal already selected as the
+      // Range -- this is also the app's own default draft state
+      // (ParameterTriple.standard()), so a filter hiding Room here would
+      // hide it for every fresh spell.
       final draftState = SpellCreationState(
         status: SpellCreationStatus.editing,
         draft: SpellDraft(
@@ -1936,8 +1941,59 @@ void main() {
       await tester.tap(find.byKey(const Key('target-dropdown')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Room (+10)'), findsNothing);
+      expect(find.text('Room (+10)'), findsOneWidget);
       expect(find.text('Individual (+8)'), findsOneWidget);
+    });
+
+    testWidgets(
+        'a draft the bloc can produce -- Personal Range with a container '
+        'Target already selected -- renders both dropdowns without throwing',
+        (tester) async {
+      // Core 12086 forbids this exact pair (a container Target under a
+      // Personal Range), and the old forbidding-direction filter tried to
+      // pre-empt it by dropping the conflicting choice from each dropdown's
+      // `items` -- while `initialValue` still held it, since neither
+      // dropdown's initialValue was ever filtered. That tripped
+      // DropdownButtonFormField's "exactly one item with value" assertion
+      // on both dropdowns at once. This is the regression pin: check 10 is
+      // still enforced (by validateSpellAgainstCatalog and by the bloc's own
+      // pruning on selection), just not by hiding the option pre-emptively.
+      final draftState = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: rangePersonal, duration: duration, target: targetRoom,
+        ),
+      );
+
+      await pumpScreen(
+        tester,
+        draftState,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [
+            voiceParam, rangePersonal, durationParam, targetRoom, targetIndividual,
+          ],
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+
+      final rangeDropdown = tester.widget<DropdownButtonFormField<Parameter>>(
+        find.byKey(const Key('range-dropdown')),
+      );
+      expect(rangeDropdown.initialValue, rangePersonal);
+
+      final targetDropdown = tester.widget<DropdownButtonFormField<Parameter>>(
+        find.byKey(const Key('target-dropdown')),
+      );
+      expect(targetDropdown.initialValue, targetRoom);
+
+      // The selected values render in the closed fields themselves, not
+      // just internally.
+      expect(find.text('Personal (+0)'), findsOneWidget);
+      expect(find.text('Room (+10)'), findsOneWidget);
     });
   });
 }

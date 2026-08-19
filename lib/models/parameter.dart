@@ -9,11 +9,16 @@ import 'package:eruditus/utils/map_serialization.dart';
 /// mirroring [ModifierScope.excludeTechniques] and added for the same shape of
 /// rule: HoH:MC's five Sensory Magic Targets, which the book forbids on any
 /// spell employing Intellego, "even as a requisite". **Both halves of that
-/// sentence now read this one list:** [appliesTo] keeps the parameter out of
-/// the picker for an excluded Technique, and check 12 in `spell.dart` rejects
-/// an excluded Technique appearing among the spell's requisites. If a future
-/// parameter ever needs to exclude a Technique while permitting it as a
-/// requisite, that is when this field splits in two — not before.
+/// sentence now read this one list, and both are enforced at the validation
+/// layer:** check 12 in `spell.dart` rejects an excluded Technique as the
+/// spell's own Technique, and rejects it appearing among the spell's
+/// requisites. [appliesTo] filtering the parameter out of the picker for an
+/// excluded Technique is a convenience layer on top of that -- it saves the
+/// user from picking a combination check 12 would reject -- not the
+/// guarantee itself; the importer and already-saved records never pass
+/// through a picker. If a future parameter ever needs to exclude a Technique
+/// while permitting it as a requisite, that is when this field splits in
+/// two — not before.
 ///
 /// One list is positive and the other negative because that is how each rule is
 /// written, not by accident: Fire is offered *for* Ignem and Imaginem, while a
