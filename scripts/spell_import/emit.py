@@ -7,8 +7,6 @@ from . import designline
 # the regeneration assertion.
 FIXED_TIMESTAMP = "2026-01-01T00:00:00.000"
 
-CORE_BOOK_ID = "arm5-core"
-
 # Ritual-flagged spells whose own design line already carries a condition-6
 # (storyguide-ruling, Core Rules line 12352 -- "too spectacular to be freely
 # available") justification, rather than being a Momentary Creo spell

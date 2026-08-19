@@ -1159,10 +1159,8 @@ def diagnose(title: str, parser: str) -> str:
     """
     root = sources.default_root()
     path = sources.resolve_book(title, root)
-    parsed, problems = blocks.PARSERS[parser](path.read_text(
-        encoding="utf-8", errors="strict").split("\n"))
+    parsed, problems = blocks.PARSERS[parser](sources.read_lines(path))
 
-    catalog = catalog_module.Catalog.load()
     with_design = [b for b in parsed if b.design_line]
     tokenized = 0
     failures: list[str] = []
