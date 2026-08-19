@@ -875,3 +875,67 @@ class TechniqueFormRegenerationTest(unittest.TestCase):
     # longer holds -- ANALOGY_BASE_EFFECTS (extract_spells.py) now routes 3
     # templates through it on purpose; see AnalogyBaseEffectsTest and
     # docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md.
+
+
+class NameKeyedTableCollisionTest(unittest.TestCase):
+    """The guard item 73.7 asked for, standing in for the per-book re-key.
+
+    HAND_DERIVED, HAND_DERIVED_ADJUSTMENT, DESIGN_LINE_TYPOS,
+    SPELL_NAME_TYPOS and exceptions.EXCEPTION_SPELLS are keyed by bare spell
+    name across every book, unlike SKIPPED_BLOCKS which is keyed per book id.
+    A third book printing a spell whose exact name already appears in one of
+    them would silently have that entry applied to it.
+
+    `_reject_duplicate_ids` cannot catch that, as the comment above
+    HAND_DERIVED explains: these tables are consulted while a book is still
+    being parsed, and a name-keyed misfire changes the name and therefore the
+    id, so no duplicate ever materialises for it to reject. This test can,
+    because it asks the question at the level the tables are keyed at.
+
+    Re-keying by (book_id, name) was deliberately deferred rather than done:
+    18 entries across 5 tables, all core-book today, and item 71 measured the
+    third book as distant (Covenants and Societates tokenize zero blocks).
+    This test is what makes deferring safe -- it turns a silent misapplication
+    into a red suite the moment a colliding book registers. When one does,
+    re-key the tables; `registered.id` is already in scope at all six lookup
+    sites in run().
+    """
+
+    def _names_by_book(self):
+        from scripts.spell_import import blocks
+
+        by_book = {}
+        for book in sources.BOOKS:
+            parsed, _ = blocks.PARSERS[book.parser](
+                sources.read_lines(sources.resolve_book(book.title)))
+            # Skipped blocks are excluded: run() checks SKIPPED_BLOCKS first
+            # and continues, so a skipped name never reaches these tables and
+            # cannot misfire. Counting it would be a false alarm.
+            skips = extract_spells.SKIPPED_BLOCKS.get(book.id, {})
+            by_book[book.id] = {
+                extract_spells.SPELL_NAME_TYPOS.get(b.name, b.name)
+                for b in parsed if b.name not in skips
+            }
+        return by_book
+
+    def test_every_name_keyed_entry_matches_exactly_one_book(self):
+        tables = {
+            "HAND_DERIVED": extract_spells.HAND_DERIVED,
+            "HAND_DERIVED_ADJUSTMENT": extract_spells.HAND_DERIVED_ADJUSTMENT,
+            "DESIGN_LINE_TYPOS": extract_spells.DESIGN_LINE_TYPOS,
+            "SPELL_NAME_TYPOS": extract_spells.SPELL_NAME_TYPOS,
+            "EXCEPTION_SPELLS": exceptions_module.EXCEPTION_SPELLS,
+        }
+        by_book = self._names_by_book()
+        for table_name, table in tables.items():
+            for key in table:
+                # SPELL_NAME_TYPOS is keyed by the misprint and corrected
+                # before the other four are consulted, so compare on the
+                # corrected name the same way run() does.
+                probe = extract_spells.SPELL_NAME_TYPOS.get(key, key)
+                with self.subTest(table=table_name, name=key):
+                    hits = sorted(book_id for book_id, names in by_book.items()
+                                  if probe in names)
+                    # Two hits: a collision -- re-key this table by
+                    # (book_id, name). Zero: the entry is stale.
+                    self.assertEqual(len(hits), 1, msg=f"matched {hits}")
