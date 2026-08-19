@@ -3,11 +3,11 @@
     "bookId": "arm5-core",
     "book": "Ars Magica - Definitive Edition (Core Rules)",
     "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
-    "sha256": "73e1a0b07daf7442ce29cd72fc5afb2f8ab437748651022c4188b1c7f5c5036f",
+    "sha256": "e783191f702b7e05eb91b3872962a3e5ebfa49a3ae6fdca35575d18b7d6f39ea",
     "rulebook": {
-      "commit": "9c6aee1",
-      "date": "2026-08-16",
-      "subject": "Update Ars Magica - Definitive Edition (Core Rules).md"
+      "commit": "ffc1c6b",
+      "date": "2026-08-18",
+      "subject": "tiny spelling fix in spell"
     },
     "spellsParsed": 360,
     "spellsImported": 325

@@ -479,6 +479,13 @@ DESIGN_LINE_TYPOS: dict[str, tuple[str, str]] = {
 # "Tread" throughout. "Tread the earth" (footsteps) also fits the spell's
 # own effect -- sensing what moves along the ground -- where "Thread" does
 # not.
+#
+# That one is **inert as of rulebook ffc1c6b** (2026-08-18, "tiny spelling fix
+# in spell"), which corrected the heading upstream to the same "Tread" this map
+# already produced -- which is why accepting that revision changed no asset.
+# The entry stays rather than being deleted: it costs nothing, and it keeps the
+# import correct if the checkout is ever rolled back to a revision before the
+# upstream fix.
 SPELL_NAME_TYPOS: dict[str, str] = {
     "Sense the Feet That Thread the Earth": "Sense the Feet That Tread the Earth",
 }
@@ -1104,28 +1111,34 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
             EXCEPTIONS_PATH.write_text(fresh_exceptions, encoding="utf-8")
 
         if accept_source:
-            if would_change:
-                old = json.loads(committed) if committed else []
-                # Merge across every recorded book that has a git history to
-                # read from -- with one book in BOOKS today there is at most
-                # one contribution, but the merge itself doesn't assume that.
-                previous: dict[str, str] = {}
-                for current in identities.values():
-                    recorded = lock.get(current.book_id)
-                    if recorded is not None and recorded.rulebook is not None:
-                        parser = blocks.PARSERS[sources.book_by_id(current.book_id).parser]
-                        previous.update(report_module.old_design_lines(
-                            root, recorded.rulebook.commit, recorded.path, parser
-                        ) or {})
-                REPORT_PATH.write_text(
-                    report_module.render(
-                        report_module.diff_assets(old, spells),
-                        locks=lock, currents=list(identities.values()),
-                        imported=len(spells), blocked=len(blocked), unresolved=len(unresolved),
-                        old_design_lines=previous or None, new_design_lines=design_lines,
-                    ),
-                    encoding="utf-8",
-                )
+            # Rendered whether or not the asset moved. `provenance.write` below
+            # records the new revision unconditionally, so gating the report on
+            # would_change left the two disagreeing in exactly the case a
+            # reader most wants recorded: adopting a revision that changed
+            # nothing. That is a real outcome ("we looked, it was a no-op"),
+            # not an absence of one. Found adopting rulebook ffc1c6b, whose
+            # only edit was a typo SPELL_NAME_TYPOS already corrected.
+            old = json.loads(committed) if committed else []
+            # Merge across every recorded book that has a git history to
+            # read from -- with one book in BOOKS today there is at most
+            # one contribution, but the merge itself doesn't assume that.
+            previous: dict[str, str] = {}
+            for current in identities.values():
+                recorded = lock.get(current.book_id)
+                if recorded is not None and recorded.rulebook is not None:
+                    parser = blocks.PARSERS[sources.book_by_id(current.book_id).parser]
+                    previous.update(report_module.old_design_lines(
+                        root, recorded.rulebook.commit, recorded.path, parser
+                    ) or {})
+            REPORT_PATH.write_text(
+                report_module.render(
+                    report_module.diff_assets(old, spells),
+                    locks=lock, currents=list(identities.values()),
+                    imported=len(spells), blocked=len(blocked), unresolved=len(unresolved),
+                    old_design_lines=previous or None, new_design_lines=design_lines,
+                ),
+                encoding="utf-8",
+            )
             provenance.write(identities)
         elif any(
             provenance.matches(lock, current) and lock[current.book_id].to_dict() != current.to_dict()

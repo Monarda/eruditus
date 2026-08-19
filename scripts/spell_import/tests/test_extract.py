@@ -535,6 +535,34 @@ class WriteGateTest(unittest.TestCase):
         for spell in report.spells:
             self.assertIn(spell["id"], report.design_lines, msg=spell["id"])
 
+    def test_the_committed_report_names_the_committed_lock_revision(self):
+        """The change report and source.lock must not disagree.
+
+        `--accept-source` writes the lock unconditionally but used to render
+        the report only when the *asset* moved, so adopting a revision that
+        changed nothing left the report still describing the previous
+        adoption. That is the one outcome most worth recording -- "we looked,
+        it was a no-op" -- and the committed pair silently contradicted each
+        other. Static check on committed artifacts, so it costs no run.
+        """
+        from scripts.spell_import import provenance
+        report = extract_spells.REPORT_PATH.read_text(encoding="utf-8")
+        lock = provenance.load()
+        for book_id, recorded in lock.items():
+            if recorded.rulebook is None:
+                continue
+            heading = f"(`{book_id}`)"
+            self.assertIn(heading, report, msg=f"{book_id} is locked but unreported")
+            after = report.split(heading, 1)[1]
+            source_line = next(
+                line for line in after.splitlines() if line.startswith(("Source:", "Initial import"))
+            )
+            self.assertIn(
+                recorded.rulebook.commit, source_line,
+                msg=(f"import_report.md does not name {book_id}'s locked revision "
+                     f"{recorded.rulebook.commit!r} -- re-run --write --accept-source"),
+            )
+
     def test_source_lock_exists(self):
         from scripts.spell_import import provenance
         # Existence gate only. The lock is diagnostic, not gating: drift is detected
