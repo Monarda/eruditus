@@ -78,22 +78,30 @@ def split(lines: list[str],
             f"{sorted(found ^ expected)} -- reconcile ALL_IDS and THEMES first")
 
     files: dict[str, list[str]] = {}
-    rows: list[tuple[str, str]] = []
+    rows: dict[str, str] = {}
 
     def emit(path: str, text: list[str]) -> None:
         files.setdefault(path, []).extend(text)
 
     for item in parse_items(lines):
-        if item.id in TOMBSTONES:
-            continue
         in_completed = section_of(lines, item.start).startswith("Completed")
+        # A tombstone is the redirect STUB in a band section -- NEVER the real
+        # closed item sharing its number under `## Completed`. Ids 59, 60 and 61
+        # each appear twice; filtering on bare id would delete 109 lines of real
+        # closed history along with the 10 lines of stub.
+        if item.id in TOMBSTONES and not in_completed:
+            continue
         closed = in_completed and item.id not in MISFILED
         home = "ARCHIVE.md" if closed else f"themes/{THEMES[item.id]}"
         body = item.body if closed else add_sub_ids(item.body, item.id)
         emit(home, [item.heading] + body + [""])
         shown = home.split("/")[-1]
-        rows.append((item.id, f"| {item.id} |  | {_status(item, closed)} "
-                              f"| {shown} | {item.title} |"))
+        # One row per id. An id with BOTH an open body and an archived
+        # predecessor (item 4) is indexed at its open home -- the archive is
+        # history, not a second home, so it must not claim a second row.
+        if item.id not in rows or not closed:
+            rows[item.id] = (f"| {item.id} |  | {_status(item, closed)} "
+                             f"| {shown} | {item.title} |")
 
     tail = _unclaimed_blocks(lines)
     if tail:
@@ -103,7 +111,9 @@ def split(lines: list[str],
         digits = re.match(r"(\d+)([a-z]?)", row[0])
         return int(digits.group(1)), digits.group(2)
 
-    index = INDEX_HEADER + "\n".join(r for _, r in sorted(rows, key=sort_key)) + "\n"
+    index = (INDEX_HEADER
+             + "\n".join(r for _, r in sorted(rows.items(), key=sort_key))
+             + "\n")
 
     out = {"todo.md": index}
     for path, text in files.items():

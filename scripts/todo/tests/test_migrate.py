@@ -5,14 +5,23 @@ SAMPLE = """# Eruditus Todo List
 
 ## C. Not on the Critical Path
 
+### 4. Conditional Wards
+- [ ] Add a ward type field
+
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells
 - [x] Already done
 
 ### 59. The Level Should Compute Live
-**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
+Redirect only — see `## Completed ✅`.
 
 ## Completed ✅
+
+### 4. Resolve Out-of-Scope Base Effects
+The archived predecessor of an id that is still open.
+
+### 59. The Spell Level Computes Live
+The real closed body, which must survive.
 
 ### 65. HoH:MC Spell Extraction
 Closed, with a binding constraint inside.
@@ -48,7 +57,7 @@ class AddSubIdsTest(unittest.TestCase):
         self.assertEqual(out, ["- **See also:** item 65"])
 
 
-SAMPLE_IDS = frozenset({"7", "59", "65", "73"})
+SAMPLE_IDS = frozenset({"4", "7", "59", "65", "73"})
 
 
 class SplitTest(unittest.TestCase):
@@ -72,9 +81,21 @@ class SplitTest(unittest.TestCase):
                       self.out["themes/importer.md"])
         self.assertNotIn("### 73.", self.out["ARCHIVE.md"])
 
-    def test_tombstones_are_dropped_entirely(self):
+    def test_a_tombstone_stub_is_dropped_but_its_real_item_survives(self):
+        # 59 appears twice: a redirect stub in a band section, and the real
+        # closed item under Completed. Filtering on bare id destroys both.
         joined = "".join(self.out.values())
-        self.assertNotIn("### 59.", joined)
+        self.assertNotIn("Redirect only", joined)
+        self.assertIn("The real closed body, which must survive.",
+                      self.out["ARCHIVE.md"])
+
+    def test_an_id_with_an_open_and_an_archived_body_gets_one_row(self):
+        # item 4's archived predecessor is history, not a second home, so it
+        # must not claim its own index row.
+        index = self.out["todo.md"]
+        self.assertEqual(index.count("| 4 |"), 1)
+        self.assertIn("| 4 |  | open", index)
+        self.assertIn("The archived predecessor", self.out["ARCHIVE.md"])
 
     def test_the_index_lists_every_surviving_item_once(self):
         index = self.out["todo.md"]
