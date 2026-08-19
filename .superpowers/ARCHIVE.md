@@ -1,5 +1,51 @@
 # Archive
 
+### 73. Deferred Minor Findings From Item 65's Reviews (`4a2030f`, `df15b84`)
+
+**Opened 2026-08-18.** Item 65 ran nine task reviews plus a whole-branch
+review. Their Critical and Important findings were fixed before merge; these
+are the minors, judged non-blocking at the time and recorded here because
+their only other home was a scratch ledger that has since been deleted. None
+is a correctness bug.
+
+- [x] **73.1** **`parse_inline`'s damaged-stat-line branch is unexercised.** HoH:MC has
+      zero damaged stat lines and no fixture covers it, so a polarity bug
+      (reporting when it should skip, or the reverse) would go undetected.
+- [x] **73.2** **13 of HoH:MC's 16 blocks rest on an aggregate count.** Only three have
+      their `prose` and `design_line` individually asserted; the rest are
+      covered by `len(blocks) == 16` and `problems == []`, which would not
+      catch a subtly wrong prose or design line on the other 13.
+- [x] **73.3** **`diagnose()` carries two lines of dead weight** — a
+      `catalog_module.Catalog.load()` whose result is never used (and which
+      reads the catalog off disk for nothing), and a reimplementation of
+      `sources.read_lines` rather than a call to it. Both inherited verbatim
+      from the plan text.
+- [x] **73.4** **`emit.CORE_BOOK_ID` is now referenced only by tests.** Production code
+      threads the book id through instead. The comment justifying its survival
+      names `catalog.CORE_BOOK_ID`, which is a different constant.
+- [x] **73.5** **A provenance test lost an assertion.** `test_names_the_absent_lock_...`
+      dropped its `assertNotIn` guard against moved-source wording when it was
+      adapted to the mapping API; its siblings still cover the wording.
+- [x] **73.6** **`provenance.load()` raises a bare `AttributeError` on a pre-mapping
+      `source.lock`** rather than a message naming the cause. Only reachable by
+      someone rebasing a branch that predates the format change.
+- [x] **73.7** **The per-book split stopped at `SKIPPED_BLOCKS`.** `SPELL_NAME_TYPOS`,
+      `DESIGN_LINE_TYPOS`, `HAND_DERIVED`, `HAND_DERIVED_ADJUSTMENT` and
+      `EXCEPTION_SPELLS` are still keyed by bare spell name across all books.
+      Verified zero collisions today. `_reject_duplicate_ids` cannot catch a
+      future one, because a name-keyed table misfires *before* ids are built —
+      it changes the name, and so the id, so no collision ever materialises. A
+      comment records this at the tables; a third book may force real keys.
+      **Resolved 2026-08-19 by guarding rather than re-keying** (`df15b84`):
+      `NameKeyedTableCollisionTest` asserts every key in the five tables
+      matches a parsed spell name in exactly one registered book, so a
+      collision is a red suite instead of a silent misapplication. The
+      re-key itself was deferred deliberately — 18 entries, all core-book,
+      and item 71 measured the third book as distant (Covenants and
+      Societates tokenize zero blocks). Do it when a collision actually
+      lands; `registered.id` is already in scope at all six lookup sites.
+- **See also:** item 65; item 71 (the third-book distance this weighed against).
+
 ### 72. Three Latent Defects the Second Book Exposed (`9b21925`, `757e9a8`)
 
 **Found and fixed during item 65, 2026-08-18.** None was introduced by that

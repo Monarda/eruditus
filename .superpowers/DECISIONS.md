@@ -174,6 +174,22 @@ also makes the regeneration assertion non-circular.  *(item 55)*
 `blocks.PARSERS`) so `parse_de` stays untouched and the core import is unchanged.
 `--diagnose` cannot write, by design.  *(item 65)*
 
+**Five importer tables are keyed by bare spell name across every book, and a
+test — not `_reject_duplicate_ids` — is what guards them.** `HAND_DERIVED`,
+`HAND_DERIVED_ADJUSTMENT`, `DESIGN_LINE_TYPOS`, `SPELL_NAME_TYPOS` and
+`exceptions.EXCEPTION_SPELLS` are name-keyed; only `SKIPPED_BLOCKS` is keyed
+per book id. `_reject_duplicate_ids` **structurally cannot** catch a cross-book
+name collision here: these tables are consulted while a book is still being
+parsed, and a misfire rewrites the name and therefore the id, so no duplicate
+ever materialises for it to reject. `NameKeyedTableCollisionTest`
+(`tests/test_extract.py`) covers the gap instead, asserting each key matches a
+parsed name in exactly one registered book — two hits is a collision, zero is a
+stale entry. **Do not delete it as redundant with the id guard.** Re-keying by
+`(book_id, name)` was weighed and deliberately deferred, not forgotten: 18
+entries, all core-book, against item 71's finding that the third book is
+distant. When a collision does land, re-key — `registered.id` is already in
+scope at all six lookup sites in `run()`.  *(items 73, 71)*
+
 **Combining two base effects is importer-only.** `COMBINED_BASE_EFFECTS` plus
 `emit.build_spell`'s `extra_adjustment` records a cosmetic tie as a magnitude-0
 `LevelAdjustment` — real, UI-visible data rather than a silent drop — but a user
