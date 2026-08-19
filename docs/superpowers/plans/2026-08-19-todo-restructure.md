@@ -110,6 +110,12 @@ class ParseItemsTest(unittest.TestCase):
         self.assertNotIn("Base Effect Extraction",
                          [i.title for i in parse_items(SAMPLE)])
 
+    def test_an_unnumbered_heading_still_ends_the_previous_body(self):
+        # otherwise item 65 swallows it, and the migrator emits it twice:
+        # once inside 65's body and once as an unclaimed block.
+        item = [i for i in parse_items(SAMPLE) if i.id == "65"][0]
+        self.assertNotIn("Unnumbered summary, no id at all.", item.body)
+
     def test_counts_open_and_done_bullets_separately(self):
         item = parse_items(SAMPLE)[0]
         self.assertEqual((item.open_bullets, item.done_bullets), (2, 1))
@@ -190,8 +196,12 @@ class Item:
 def parse_items(lines: list[str]) -> list[Item]:
     heads = [(n, m) for n, line in enumerate(lines, 1)
              if (m := ITEM_RE.match(line))]
-    stops = sorted([n for n, line in enumerate(lines, 1) if SECTION_RE.match(line)]
-                   + [n for n, _ in heads])
+    # EVERY `### ` line stops a body, not just the ones carrying an id. An
+    # unnumbered heading (`### Base Effect Extraction`) would otherwise be
+    # swallowed by the preceding item AND re-emitted by _unclaimed_blocks,
+    # duplicating it in the archive and blurring that item's boundary.
+    stops = sorted(n for n, line in enumerate(lines, 1)
+                   if line.startswith("### ") or SECTION_RE.match(line))
     items = []
     for line_no, match in heads:
         later = [s for s in stops if s > line_no]
@@ -224,7 +234,7 @@ def section_of(lines: list[str], line_no: int) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 10 tests
+Expected: PASS, 11 tests
 
 - [ ] **Step 5: Sanity-check against the real file**
 
@@ -940,7 +950,7 @@ Expected: PASS, 14 tests
 - [ ] **Step 5: Run the whole suite**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 37 tests
+Expected: PASS, 38 tests
 
 - [ ] **Step 6: Commit**
 
