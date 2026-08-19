@@ -8,7 +8,7 @@ class MappingTest(unittest.TestCase):
         # archive, which needs no entry here.
         self.assertTrue(THEMES.keys() <= ALL_IDS,
                         f"not real ids: {sorted(THEMES.keys() - ALL_IDS)}")
-        self.assertEqual(len(THEMES), 36)
+        self.assertEqual(len(THEMES), 38)
 
     def test_tombstones_have_no_theme(self):
         for item_id in TOMBSTONES:
@@ -19,8 +19,8 @@ class MappingTest(unittest.TestCase):
         for theme in THEMES.values():
             counts[theme] = counts.get(theme, 0) + 1
         self.assertEqual(counts, {
-            "rules-fidelity.md": 12,
-            "app.md": 10,
+            "rules-fidelity.md": 13,
+            "app.md": 11,
             "model.md": 7,
             "importer.md": 5,
             "multibook.md": 2,

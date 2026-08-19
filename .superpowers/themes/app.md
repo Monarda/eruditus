@@ -288,3 +288,16 @@ none blocking, all polish on the container-mode feature closed as item 14.
   1200×5000 view, and the three labels ("Not stated", "Static", "Dynamic")
   will be tight on a 320dp phone.
 - **See also:** item 14 (closed, `## Completed ✅`), item 57, item 59
+
+
+### 76. Creation-Screen UI for Picking a Cross-Form Base Effect
+**Opened 2026-08-19**, rescued from item 48's closed body where it was left open
+deliberately and then became unreachable when that item was archived.
+
+Item 48 landed the by-analogy model — a spell can borrow a base effect from
+another Technique/Form and record why — but a user cannot reach it interactively.
+
+- [ ] **76.1** Design and build the creation-screen affordance for choosing a
+      cross-Form base effect, including how the analogy rationale is captured.
+- **Spec:** `docs/superpowers/specs/2026-08-16-base-effect-analogy-design.md`
+- **See also:** items 48 (closed, `ARCHIVE.md`), 47.

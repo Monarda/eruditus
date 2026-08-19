@@ -16,10 +16,10 @@ THEMES: dict[str, str] = {
     # catalog vs. what the rulebook prints
     "4": RULES, "4b": RULES, "4c": RULES, "12": RULES, "20": RULES,
     "21": RULES, "22": RULES, "36": RULES, "41": RULES, "42": RULES,
-    "50": RULES, "63": RULES,
+    "50": RULES, "63": RULES, "75": RULES,
     # the Flutter app and project chores
     "7": APP, "9": APP, "10": APP, "11": APP, "16": APP, "18": APP,
-    "23": APP, "33": APP, "56": APP, "58": APP,
+    "23": APP, "33": APP, "56": APP, "58": APP, "76": APP,
     # what the spell model can't yet express
     "47": MODEL, "53": MODEL, "54": MODEL, "57": MODEL, "67": MODEL,
     "69": MODEL, "74": MODEL,
@@ -38,7 +38,7 @@ MISFILED: dict[str, str] = {"73": IMPORTER}
 
 # Every id `todo.md` currently holds, closed ones included.
 ALL_IDS: frozenset[str] = frozenset(
-    {str(n) for n in range(1, 75)} | {"4b", "4c"}
+    {str(n) for n in range(1, 77)} | {"4b", "4c"}
 )
 
 
