@@ -904,12 +904,12 @@ def split(lines: list[str],
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_migrate -v`
-Expected: PASS, 14 tests
+Expected: PASS, 13 tests
 
 - [ ] **Step 5: Run the whole suite**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 37 tests
+Expected: PASS, 36 tests
 
 - [ ] **Step 6: Commit**
 
