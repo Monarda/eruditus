@@ -240,12 +240,6 @@ This task is data with a test that pins it to reality, so a later drift in `todo
 # scripts/todo/tests/test_mapping.py
 import unittest
 from scripts.todo.mapping import THEMES, TOMBSTONES, MISFILED, ALL_IDS, theme_for
-from scripts.todo.parse import parse_items
-
-
-def real_items():
-    lines = open(".superpowers/todo.md", encoding="utf-8").read().split("\n")
-    return parse_items(lines)
 
 
 class MappingTest(unittest.TestCase):
@@ -268,11 +262,6 @@ class MappingTest(unittest.TestCase):
             "importer.md": 6,
             "multibook.md": 2,
         })
-
-    def test_mapping_covers_exactly_the_ids_the_file_actually_has(self):
-        found = {i.id for i in real_items()}
-        self.assertEqual(found, ALL_IDS,
-                         "todo.md changed: reconcile mapping.py before migrating")
 
     def test_item_73_is_recorded_as_misfiled_under_completed(self):
         self.assertEqual(MISFILED["73"], "importer.md")
@@ -346,9 +335,11 @@ def theme_for(item_id: str) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_mapping -v`
-Expected: PASS, 6 tests.
+Expected: PASS, 5 tests.
 
-If `test_mapping_covers_exactly_the_ids_the_file_actually_has` fails, `todo.md` has moved since 2026-08-19. Do not paper over it — reconcile `ALL_IDS` and `THEMES` against the file and re-run.
+`ALL_IDS` is enforced against the real file by `split`'s precondition in Task 4,
+not by a test here — a test reading `.superpowers/todo.md` would go red the
+moment Task 5 replaces that file with the index.
 
 - [ ] **Step 5: Commit**
 
@@ -367,7 +358,7 @@ git commit -m "feat: pin the id-to-theme mapping with a reality check"
 
 **Interfaces:**
 - Consumes: `parse_items`, `Item` from Task 1; `ALL_IDS` from Task 2.
-- Produces: `check(root: Path) -> list[str]` returning human-readable problems, empty when clean. `main() -> int` for CLI use, exit 1 on problems.
+- Produces: `check(root: Path) -> list[str]` returning human-readable problems, empty when clean. `main() -> int` for CLI use, exit 1 on problems. Scans only `TRACKED` plus `themes/*.md` — never the git-ignored scratch under `.superpowers/`.
 
 This is the artefact that outlives the migration. It encodes the spec's Verification section as something runnable.
 
@@ -443,6 +434,17 @@ class CheckTest(unittest.TestCase):
         problems = self.run_on(index=INDEX + "| 7 | do | open 2/3 | app.md | Dup |\n")
         self.assertTrue(any("7" in p and "twice" in p.lower() for p in problems))
 
+    def test_git_ignored_scratch_is_not_scanned(self):
+        # .superpowers/sdd/<plan>/ holds task briefs that quote item numbers
+        # out of the plan. They are not part of the todo tree.
+        with TemporaryDirectory() as d:
+            root = build(Path(d))
+            scratch = root / "sdd" / "a-plan"
+            scratch.mkdir(parents=True)
+            (scratch / "task-1-brief.md").write_text(
+                "Quotes item 999 from the plan.\n", encoding="utf-8")
+            self.assertEqual(check(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()
@@ -485,8 +487,25 @@ COUNT_RE = re.compile(r"open\s+(?P<open>\d+)/(?P<total>\d+)")
 XREF_RE = re.compile(r"\bitems?\s+(\d+[a-z]?)")
 
 
+TRACKED = ("todo.md", "DECISIONS.md", "STATUS.md", "ARCHIVE.md")
+
+
 def _read(path: Path) -> list[str]:
     return path.read_text(encoding="utf-8").split("\n")
+
+
+def _tracked_files(root: Path):
+    """Only the todo tree.
+
+    `.superpowers/` also holds git-ignored scratch -- the SDD workspace and
+    base_effects_extraction -- whose prose is not ours to police. Task briefs
+    in particular quote item numbers out of the plan, so an rglob here would
+    fail on this run's own working files.
+    """
+    for name in TRACKED:
+        if (root / name).exists():
+            yield root / name
+    yield from sorted(root.glob("themes/*.md"))
 
 
 def _index_rows(lines: list[str]) -> list[dict[str, str]]:
@@ -541,7 +560,7 @@ def check(root: Path) -> list[str]:
         if item_id not in by_id:
             problems.append(f"item {item_id}: orphan heading in {name}, no index row")
 
-    for path in sorted(root.rglob("*.md")):
+    for path in _tracked_files(root):
         for n, line in enumerate(_read(path), 1):
             if line.lstrip().startswith("|"):
                 continue        # index rows are not cross-references
@@ -568,7 +587,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_check -v`
-Expected: PASS, 6 tests
+Expected: PASS, 7 tests
 
 **Known limitation, accept it deliberately:** `XREF_RE` catches `item 25` and
 the *first* number of `items 65, 57, 27`. It under-detects rather than
@@ -592,8 +611,8 @@ git commit -m "feat: structural invariant checker for the split todo tree"
 - Create: `scripts/todo/tests/test_migrate.py`
 
 **Interfaces:**
-- Consumes: `parse_items`, `Item`, `section_of` from Task 1; `THEMES`, `TOMBSTONES`, `MISFILED` from Task 2.
-- Produces: `split(lines: list[str]) -> dict[str, str]` mapping output relative path to full text. `add_sub_ids(body: list[str], item_id: str) -> list[str]`.
+- Consumes: `parse_items`, `Item`, `section_of` from Task 1; `THEMES`, `TOMBSTONES`, `MISFILED`, `ALL_IDS` from Task 2.
+- Produces: `split(lines: list[str], expected_ids: frozenset[str] | None = None) -> dict[str, str]` mapping output relative path to full text; raises `ValueError` when the file's ids do not match `ALL_IDS`. `add_sub_ids(body: list[str], item_id: str) -> list[str]`.
 
 Pure function. Writing files is the caller's job (Task 5), so the split is unit-testable without touching disk.
 
@@ -648,9 +667,17 @@ class AddSubIdsTest(unittest.TestCase):
         self.assertEqual(out, ["- **See also:** item 65"])
 
 
+SAMPLE_IDS = frozenset({"7", "59", "65", "73"})
+
+
 class SplitTest(unittest.TestCase):
     def setUp(self):
-        self.out = split(SAMPLE)
+        self.out = split(SAMPLE, SAMPLE_IDS)
+
+    def test_a_file_the_mapping_does_not_match_is_refused(self):
+        with self.assertRaises(ValueError) as caught:
+            split(SAMPLE, SAMPLE_IDS | {"999"})
+        self.assertIn("999", str(caught.exception))
 
     def test_open_items_land_in_their_theme_file(self):
         self.assertIn("### 7. Spell Export/Backup Validation",
@@ -703,7 +730,7 @@ from __future__ import annotations
 
 import re
 
-from scripts.todo.mapping import MISFILED, THEMES, TOMBSTONES
+from scripts.todo.mapping import ALL_IDS, MISFILED, THEMES, TOMBSTONES
 from scripts.todo.parse import Item, parse_items, section_of
 
 CHECKBOX_RE = re.compile(r"^(?P<lead>\s*- \[(?: |x)\] )(?P<rest>.*)$")
@@ -741,7 +768,20 @@ def _status(item: Item, closed: bool) -> str:
     return "open"
 
 
-def split(lines: list[str]) -> dict[str, str]:
+def split(lines: list[str],
+          expected_ids: frozenset[str] | None = None) -> dict[str, str]:
+    """Split todo.md. Refuses to run against a file mapping.py does not match.
+
+    The guard lives here rather than in a test because a test reading the live
+    todo.md would go red the moment the migration replaces that file.
+    """
+    expected = ALL_IDS if expected_ids is None else expected_ids
+    found = {item.id for item in parse_items(lines)}
+    if found != expected:
+        raise ValueError(
+            f"todo.md has moved since mapping.py was written: "
+            f"{sorted(found ^ expected)} -- reconcile ALL_IDS and THEMES first")
+
     files: dict[str, list[str]] = {}
     rows: list[tuple[str, str]] = []
 
@@ -776,12 +816,12 @@ def split(lines: list[str]) -> dict[str, str]:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_migrate -v`
-Expected: PASS, 11 tests
+Expected: PASS, 12 tests
 
 - [ ] **Step 5: Run the whole suite**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 29 tests
+Expected: PASS, 30 tests
 
 - [ ] **Step 6: Commit**
 
@@ -872,8 +912,9 @@ from pathlib import Path
 before = subprocess.run(["git", "show", "HEAD:.superpowers/todo.md"],
                         capture_output=True, text=True,
                         encoding="utf-8").stdout.split("\n")
+from scripts.todo.check import _tracked_files
 after = "\n".join(p.read_text(encoding="utf-8")
-                  for p in Path(".superpowers").rglob("*.md"))
+                  for p in _tracked_files(Path(".superpowers")))
 allowed = ("## 0.", "## A.", "## B.", "## C.", "## D.",
            "## Where the import stands", "### 59.", "### 60.", "### 61.")
 missing = [l for l in before
