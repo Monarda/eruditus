@@ -19,7 +19,7 @@
 - **Hooks must declare `"shell": "bash"`** or they break on Windows (see `superpowers/6.2.0/docs/windows/polyglot-hooks.md`).
 - **Run Python as `uv run --no-project python ...`** locally; this repo has no `pyproject.toml`. CI uses bare `python` on its own runner.
 - **Temporary files go to the session scratchpad**, never `/tmp` (which resolves to `C:\tmp` on this machine).
-- The deliberate deletions, and nothing else, may be lost: the item 59/60/61 tombstone **stubs** (emphatically NOT the real closed items sharing those numbers, which run 52, 36 and 21 lines under `## Completed` and must reach the archive), the `## 0`/`A`/`B`/`C`/`D` band headers with their preambles, and the file's own title plus `## How to read this file`, superseded by the index header. `## Where the import stands` is not deleted — it moves verbatim to `STATUS.md`.
+- The deliberate deletions, and nothing else, may be lost: the item 59/60/61 tombstone **stubs** (emphatically NOT the real closed items sharing those numbers, which run 52, 36 and 21 lines under `## Completed` and must reach the archive), the `## 0`/`A`/`B`/`C`/`D` band headers with their preambles, the file's own title plus `## How to read this file`, and the two-line editorial preamble under `## Completed ✅` — all superseded by the index header and `ARCHIVE.md`'s own. `## Where the import stands` and `## Notes — standing constraints` are NOT deleted: they move to `STATUS.md` and `DECISIONS.md` in Task 5.
 
 ---
 
