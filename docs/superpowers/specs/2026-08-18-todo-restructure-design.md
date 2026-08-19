@@ -69,8 +69,8 @@ Three structural faults, distinct from mere size:
   themes/
     rules-fidelity.md  catalog vs. what the rulebook prints      (12 items)
     model.md           what the spell model can't yet express     (7 items)
-    importer.md        scripts/spell_import, ledger, provenance   (6 items)
-    app.md             the Flutter app and project chores         (9 items)
+    importer.md        scripts/spell_import, ledger, provenance   (5 items)
+    app.md             the Flutter app and project chores        (10 items)
     multibook.md       the second-book program, sub-project C     (2 items)
   ARCHIVE.md         41 closed items, verbatim. not loaded by default. ~950 lines
   .last-reviewed-merge  one sha. state for the rule-3 gate (see below)
@@ -299,9 +299,9 @@ removed, plus item 73, which is currently misfiled under Completed.
 | Theme | Items | n |
 |---|---|---|
 | `rules-fidelity.md` | 4, 4b, 4c, 12, 20, 21, 22, 36, 41, 42, 50, 63 | 12 |
-| `app.md` | 7, 9, 10, 11, 16, 18, 33, 56, 58 | 9 |
+| `app.md` | 7, 9, 10, 11, 16, 18, 23, 33, 56, 58 | 10 |
 | `model.md` | 47, 53, 54, 57, 67, 69, 74 | 7 |
-| `importer.md` | 23, 31, 32, 38, 70, 73 | 6 |
+| `importer.md` | 31, 32, 38, 70, 73 | 5 |
 | `multibook.md` | 66, 71 | 2 |
 
 Two assignments are judgement calls worth stating rather than burying:

@@ -291,9 +291,9 @@ class MappingTest(unittest.TestCase):
             counts[theme] = counts.get(theme, 0) + 1
         self.assertEqual(counts, {
             "rules-fidelity.md": 12,
-            "app.md": 9,
+            "app.md": 10,
             "model.md": 7,
-            "importer.md": 6,
+            "importer.md": 5,
             "multibook.md": 2,
         })
 
@@ -339,13 +339,13 @@ THEMES: dict[str, str] = {
     "50": RULES, "63": RULES,
     # the Flutter app and project chores
     "7": APP, "9": APP, "10": APP, "11": APP, "16": APP, "18": APP,
-    "33": APP, "56": APP, "58": APP,
+    "23": APP, "33": APP, "56": APP, "58": APP,
     # what the spell model can't yet express
     "47": MODEL, "53": MODEL, "54": MODEL, "57": MODEL, "67": MODEL,
     "69": MODEL, "74": MODEL,
     # scripts/spell_import, ledger, provenance
-    "23": IMPORTER, "31": IMPORTER, "32": IMPORTER, "38": IMPORTER,
-    "70": IMPORTER, "73": IMPORTER,
+    "31": IMPORTER, "32": IMPORTER, "38": IMPORTER, "70": IMPORTER,
+    "73": IMPORTER,
     # the second-book program
     "66": MULTIBOOK, "71": MULTIBOOK,
 }
