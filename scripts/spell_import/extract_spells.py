@@ -68,12 +68,12 @@ class SourceMoved(Exception):
 # gap, not a rules one -- the spell's own text matches both guidelines at
 # once ("all nonliving things are chilled thoroughly" / "all living things
 # ... lose one Fatigue level"), and `Spell.baseEffectId` can only record one.
-# ("peig-4a"'s "extinguish" is excluded too, but item 32.2's re-read found the
-# reason given here was wrong: "campfires and smaller fires go out" *is* a full
-# extinguish, and the Ignem base Individual is "a large campfire", so it does
-# match level 4 rather than level 3's "reduce the size of a fire". It is not
-# paid for because the fires go out as a consequence of the air freezing --
-# the spell buys the chill. See the ledger rationale.)
+# (Item 32.2 found this comment had "peig-4a" wrong twice over. Its
+# "extinguish" is not the *level 3* guideline: "campfires and smaller fires go
+# out" is a full extinguish, and the Ignem base Individual is "a large
+# campfire", so base 4 reaches exactly that size. Nor is it a free consequence
+# of the chill -- air at slightly below freezing does not put out a campfire.
+# The spell achieves all three level-4 guidelines and is recorded that way.)
 # Currently empty; the mechanism stays for the next
 # spell that turns out to be a genuine, no-forced-discriminator tie.
 KNOWN_UNRESOLVABLE: dict[str, str] = {}
@@ -90,13 +90,24 @@ KNOWN_UNRESOLVABLE: dict[str, str] = {}
 # highest-level effect" for the closest the rulebook comes to stating this
 # principle outright (written for an added Art, not a same-Technique/Form
 # guideline, but the same "does not raise the cost" logic applies).
-COMBINED_BASE_EFFECTS: dict[str, tuple[int, str]] = {
+COMBINED_BASE_EFFECTS: dict[str, tuple[tuple[int, str], ...]] = {
     "lib-peig-conjuration-indubitable-cold": (
-        0,
-        "Also chills a person, causing a lost Fatigue level (peig-4c), at "
-        "the same base level as the chosen guideline (peig-4b, chilling an "
-        "object) -- both are printed at level 4, so combining them adds "
-        "nothing to the spell's cost.",
+        (
+            0,
+            "Also chills a person, causing a lost Fatigue level (peig-4c), at "
+            "the same base level as the chosen guideline (peig-4b, chilling an "
+            "object) -- both are printed at level 4, so combining them adds "
+            "nothing to the spell's cost.",
+        ),
+        (
+            0,
+            "Also extinguishes fires up to the base Individual for Ignem, a "
+            "large campfire (peig-4a) -- 'campfires and smaller fires go "
+            "out'. Larger fires are only reduced ('house fires become as "
+            "small as campfires') because destroying a more intense fire "
+            "costs magnitudes this spell does not spend: one per five points "
+            "of damage above +5. Also level 4, so also free.",
+        ),
     ),
 }
 
@@ -1047,7 +1058,7 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                 spells.append(emit.build_spell(
                     block, base_effect_id, catalog, design,
                     realm_by_spell_id=REALM_BY_SPELL_ID,
-                    extra_adjustment=COMBINED_BASE_EFFECTS.get(spell_id),
+                    extra_adjustments=COMBINED_BASE_EFFECTS.get(spell_id),
                     analogy_rationale=None,
                     book_id=registered.id,
                 ))

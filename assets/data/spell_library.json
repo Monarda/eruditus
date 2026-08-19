@@ -5391,6 +5391,10 @@
       {
         "magnitude": 0,
         "note": "Also chills a person, causing a lost Fatigue level (peig-4c), at the same base level as the chosen guideline (peig-4b, chilling an object) -- both are printed at level 4, so combining them adds nothing to the spell's cost."
+      },
+      {
+        "magnitude": 0,
+        "note": "Also extinguishes fires up to the base Individual for Ignem, a large campfire (peig-4a) -- 'campfires and smaller fires go out'. Larger fires are only reduced ('house fires become as small as campfires') because destroying a more intense fire costs magnitudes this spell does not spend: one per five points of damage above +5. Also level 4, so also free."
       }
     ]
   },

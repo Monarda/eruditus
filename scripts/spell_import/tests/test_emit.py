@@ -81,7 +81,7 @@ class AdjustmentEmissionTest(unittest.TestCase):
         design = designline.parse_design("(Base 1, +1 Touch, +2 Sun)")
         spell = emit.build_spell(
             _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
-            extra_adjustment=(0, "Also achieves a second guideline for free."),
+            extra_adjustments=((0, "Also achieves a second guideline for free."),),
             book_id=catalog_module.CORE_BOOK_ID,
         )
         self.assertEqual(
@@ -93,7 +93,7 @@ class AdjustmentEmissionTest(unittest.TestCase):
         design = designline.parse_design("(Base 1, +1 Touch, +2 Sun, +1 for slightly unnatural control)")
         spell = emit.build_spell(
             _block("Test Spell", "Rego", "Aquam", 10), "reaq-3", self.catalog, design,
-            extra_adjustment=(0, "Combined effect note."),
+            extra_adjustments=((0, "Combined effect note."),),
             book_id=catalog_module.CORE_BOOK_ID,
         )
         self.assertEqual(

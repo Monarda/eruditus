@@ -51,15 +51,30 @@
         +3 then +1 and armour padding grants +3 Soak against it, which is
         heated metal, not a conjured fire's flat rating. Both rows are base
         level 4, so no computed level moved and no test could have caught it.
-      - `lib-peig-conjuration-indubitable-cold` **pick confirmed, reasoning
-        corrected** — which is what this item said re-reading it should do. The
-        old rationale dismissed `peig-4a` by claiming the spell only *shrinks*
-        fires; it does both, and "campfires and smaller fires go out" is a full
-        extinguish (the Ignem base Individual is "a large campfire"). The real
-        reason `peig-4a` is not paid for is that the fires go out as a
-        consequence of the air freezing — the spell buys the chill. The same
-        wrong reasoning was copied into `KNOWN_UNRESOLVABLE`'s comment in
-        `extract_spells.py` and is corrected there too.
+      - `lib-peig-conjuration-indubitable-cold` **pick confirmed, model
+        widened from two combined effects to three.** The spell achieves all
+        three Perdo Ignem level-4 guidelines and pays for one. The old
+        rationale dismissed `peig-4a` by claiming the spell only *shrinks*
+        fires; it does both, and "campfires and smaller fires go out" is a
+        full extinguish, since the Ignem base Individual is "a large campfire"
+        (line 14260) — exactly the size a base-4 extinguish reaches, with
+        larger fires only reduced because destroying a more intense one costs
+        a magnitude per five damage above +5 (line 14461). A first correction
+        argued `peig-4a` away as a free consequence of the chill; that was
+        also wrong, and the user caught it — **air at slightly below freezing
+        does not put out a campfire**, so the extinguishing is a separate
+        effect, not a byproduct. All three are level 4, so under the
+        Requisites section's "the base Arts and level for the spell are those
+        for the highest-level effect it has" (line 12372) the other two are
+        free. `COMBINED_BASE_EFFECTS` took a single `(magnitude, note)` pair
+        and now takes a sequence, since this is the first spell needing two.
+        The same wrong reasoning had been copied into `KNOWN_UNRESOLVABLE`'s
+        comment and is corrected there too.
+        **Caveat worth carrying:** line 12372 is written for a *requisite* —
+        an added Art — and extending it to two guidelines of the same
+        Technique and Form is this repo's inference, not a printed rule. It is
+        the closest the core rules come, and nothing contradicts it, but a
+        troupe could read it more narrowly.
       - **This is the second demonstrated failure of exactly the kind this item
         was opened for**, after `lib-reim-image-from-wizard-torn` (`cf0b40b`).
         Both were fluent, plausible rationales arguing from one salient detail

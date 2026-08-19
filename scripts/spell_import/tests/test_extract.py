@@ -319,11 +319,16 @@ class BountifulFeastTypoTest(unittest.TestCase):
 
 
 class CombinedBaseEffectsTest(unittest.TestCase):
-    """Conjuration of the Indubitable Cold: genuinely achieves two base-4
-    Perdo Ignem guidelines at once (chills an object, chills a person for a
-    lost Fatigue level). `Spell.baseEffectId` can only record one -- see
-    extract_spells.COMBINED_BASE_EFFECTS -- so the other is recorded as a
-    magnitude-0 LevelAdjustment instead of silently dropped.
+    """Conjuration of the Indubitable Cold: genuinely achieves all three
+    base-4 Perdo Ignem guidelines at once -- chills an object, chills a
+    person for a lost Fatigue level, and extinguishes a fire.
+    `Spell.baseEffectId` can only record one -- see
+    extract_spells.COMBINED_BASE_EFFECTS -- so the other two are recorded as
+    magnitude-0 LevelAdjustments instead of silently dropped. The rulebook
+    rule they rest on is the Requisites section's "the base Arts and level
+    for the spell are those for the highest-level effect it has": with every
+    effect at level 4, whichever is called primary sets the level and the
+    rest are free.
     """
 
     def test_imports_at_its_printed_level_with_the_chosen_base_effect(self):
@@ -334,15 +339,18 @@ class CombinedBaseEffectsTest(unittest.TestCase):
         self.assertEqual(spell["printedLevel"], 25)
         self.assertEqual(spell["baseEffectId"], "peig-4b")
 
-    def test_the_second_effect_is_recorded_as_a_zero_magnitude_adjustment(self):
+    def test_the_other_two_effects_are_recorded_as_zero_magnitude_adjustments(self):
         report = extract_spells.run(write=False)
         spell = next(
             s for s in report.spells if s["name"] == "Conjuration of the Indubitable Cold"
         )
         self.assertIn("adjustments", spell)
-        self.assertEqual(len(spell["adjustments"]), 1)
-        self.assertEqual(spell["adjustments"][0]["magnitude"], 0)
-        self.assertIn("peig-4c", spell["adjustments"][0]["note"])
+        self.assertEqual(len(spell["adjustments"]), 2)
+        for adjustment in spell["adjustments"]:
+            self.assertEqual(adjustment["magnitude"], 0)
+        notes = " ".join(a["note"] for a in spell["adjustments"])
+        self.assertIn("peig-4c", notes)
+        self.assertIn("peig-4a", notes)
 
     def test_no_longer_appears_in_known_unresolvable(self):
         self.assertNotIn(
