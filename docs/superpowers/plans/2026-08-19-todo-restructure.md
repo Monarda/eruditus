@@ -1283,16 +1283,23 @@ Create `.superpowers/hooks/check-merge-reviewed` (extensionless, per the Windows
 # Exit 2 feeds stderr back to Claude and blocks the turn from ending.
 set -u
 
-state=".superpowers/.last-reviewed-merge"
+# Anchor to the project, never to the caller's cwd. A relative path makes this
+# a silent no-op -- it fails OPEN -- if a Stop hook is ever invoked from
+# elsewhere, which is the worst failure mode for a guard: absent, not loud.
+root="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." 2>/dev/null && pwd)}"
+state="$root/.superpowers/.last-reviewed-merge"
 [ -f "$state" ] || exit 0
 
-newest=$(git rev-list --merges -1 HEAD 2>/dev/null) || exit 0
+# Strip ALL whitespace from both sides before comparing. Command substitution
+# eats trailing newlines but NOT a stray trailing space, and one space in this
+# file would otherwise block every turn until somebody worked out why.
+newest=$(git -C "$root" rev-list --merges -1 HEAD 2>/dev/null | tr -d '[:space:]')
 [ -n "$newest" ] || exit 0
 
-reviewed=$(cat "$state")
+reviewed=$(tr -d '[:space:]' < "$state")
 [ "$newest" = "$reviewed" ] && exit 0
 
-subject=$(git log -1 --format=%s "$newest")
+subject=$(git -C "$root" log -1 --format=%s "$newest")
 cat >&2 <<EOF
 Merge $newest has not been through item closure:
 
@@ -1313,13 +1320,24 @@ bash .superpowers/hooks/check-merge-reviewed; echo "exit=$?"
 ```
 Expected: the message on stderr, `exit=2`.
 
-- [ ] **Step 4: Test it stays quiet when current**
+- [ ] **Step 4: Test it stays quiet when current, and cannot be tripped**
 
 ```bash
 git rev-list --merges -1 HEAD > .superpowers/.last-reviewed-merge
 bash .superpowers/hooks/check-merge-reviewed; echo "exit=$?"
+
+# a stray trailing space must NOT block -- this is the false-positive that
+# would otherwise wedge every future turn in this repo
+printf '%s 
+' "$(git rev-list --merges -1 HEAD)" > .superpowers/.last-reviewed-merge
+bash .superpowers/hooks/check-merge-reviewed; echo "trailing-space exit=$?"
+
+# and it must survive being called from anywhere, not just the project root
+(cd / && bash "$OLDPWD/.superpowers/hooks/check-merge-reviewed"); echo "elsewhere exit=$?"
+
+git checkout -- .superpowers/.last-reviewed-merge
 ```
-Expected: no output, `exit=0`.
+Expected: `exit=0`, `trailing-space exit=0`, `elsewhere exit=0`, all silent.
 
 - [ ] **Step 5: Register the hook**
 
