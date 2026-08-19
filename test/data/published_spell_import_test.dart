@@ -228,6 +228,48 @@ void main() {
         reason: 'published assets break catalog invariants:\n${failures.join('\n')}');
   });
 
+  test('assertion 8: no base effect reference triple contradicts checks 10 and 11', () async {
+    final parameters = {for (final p in await loader.loadParameters()) p.id: p};
+    final failures = <String>[];
+
+    // Checked directly rather than routed through validateSpellAgainstCatalog:
+    // a reference triple is not a spell, and fabricating a plausible one per
+    // effect would bury the only two checks that read the pair. The two
+    // conditions below are checks 10 and 11 verbatim.
+    //
+    // This guards SpellCreationBloc._seedParameters (todo item 74). When the
+    // seed adopts a guideline it can write both slots at once, and its revert
+    // path assumes the pre-adoption pair was legal -- which holds for every
+    // pair the bloc itself produces, but says nothing about a reference triple
+    // authored into the catalog. A self-contradictory one is a data bug, and
+    // must fail here rather than be silently repaired in the bloc.
+    for (final effect in await loader.loadBaseEffects()) {
+      final range = parameters[effect.reference.rangeId];
+      final target = parameters[effect.reference.targetId];
+      if (range == null || target == null) {
+        failures.add('${effect.id}: reference names an unresolvable Range or Target');
+        continue;
+      }
+
+      final kind = target.targetType;
+      if (kind != null && range.forbidsTargetTypes.contains(kind)) {
+        failures.add(
+            '${effect.id}: ${range.name} Range with ${target.name}, a ${kind.name} Target');
+      }
+
+      final required = target.requiresRangeId;
+      if (required != null && range.id != required) {
+        failures.add(
+            '${effect.id}: ${target.name} requires "$required", '
+            'but the reference names ${range.id}');
+      }
+    }
+
+    expect(failures, isEmpty,
+        reason: 'base effect reference triples the seed could not safely adopt:\n'
+            '${failures.join('\n')}');
+  });
+
   test(
       "Circular Ward against Demons' chosenSlots survives the asset-load path "
       'and instantiates cleanly', () async {
