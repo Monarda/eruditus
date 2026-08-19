@@ -20,9 +20,9 @@ class MappingTest(unittest.TestCase):
             counts[theme] = counts.get(theme, 0) + 1
         self.assertEqual(counts, {
             "rules-fidelity.md": 12,
-            "app.md": 9,
+            "app.md": 10,
             "model.md": 7,
-            "importer.md": 6,
+            "importer.md": 5,
             "multibook.md": 2,
         })
 
