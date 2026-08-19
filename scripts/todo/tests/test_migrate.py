@@ -1,0 +1,96 @@
+import unittest
+from scripts.todo.migrate import split, add_sub_ids
+
+SAMPLE = """# Eruditus Todo List
+
+## C. Not on the Critical Path
+
+### 7. Spell Export/Backup Validation
+- [ ] Validate imported spells
+- [x] Already done
+
+### 59. The Level Should Compute Live
+**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
+
+## Completed ✅
+
+### 65. HoH:MC Spell Extraction
+Closed, with a binding constraint inside.
+
+### 73. Deferred Minor Findings
+- [ ] Something still open
+
+### Base Effect Extraction
+Unnumbered, but real closed-work summary.
+""".split("\n")
+
+
+class AddSubIdsTest(unittest.TestCase):
+    def test_numbers_bullets_in_source_order_from_one(self):
+        out = add_sub_ids(["- [ ] first", "- [x] second", "- [ ] third"], "38")
+        self.assertEqual(out, [
+            "- [ ] **38.1** first",
+            "- [x] **38.2** second",
+            "- [ ] **38.3** third",
+        ])
+
+    def test_a_ticked_bullet_still_consumes_its_number(self):
+        # so ticking one never renumbers a sibling
+        out = add_sub_ids(["- [x] done", "- [ ] open"], "9")
+        self.assertTrue(out[1].startswith("- [ ] **9.2**"))
+
+    def test_indented_continuation_lines_are_untouched(self):
+        out = add_sub_ids(["- [ ] first", "      continued here"], "7")
+        self.assertEqual(out[1], "      continued here")
+
+    def test_non_checkbox_bullets_are_untouched(self):
+        out = add_sub_ids(["- **See also:** item 65"], "72")
+        self.assertEqual(out, ["- **See also:** item 65"])
+
+
+SAMPLE_IDS = frozenset({"7", "59", "65", "73"})
+
+
+class SplitTest(unittest.TestCase):
+    def setUp(self):
+        self.out = split(SAMPLE, SAMPLE_IDS)
+
+    def test_a_file_the_mapping_does_not_match_is_refused(self):
+        with self.assertRaises(ValueError) as caught:
+            split(SAMPLE, SAMPLE_IDS | {"999"})
+        self.assertIn("999", str(caught.exception))
+
+    def test_open_items_land_in_their_theme_file(self):
+        self.assertIn("### 7. Spell Export/Backup Validation",
+                      self.out["themes/app.md"])
+
+    def test_closed_items_land_in_the_archive(self):
+        self.assertIn("### 65. HoH:MC Spell Extraction", self.out["ARCHIVE.md"])
+
+    def test_a_misfiled_item_goes_to_its_theme_not_the_archive(self):
+        self.assertIn("### 73. Deferred Minor Findings",
+                      self.out["themes/importer.md"])
+        self.assertNotIn("### 73.", self.out["ARCHIVE.md"])
+
+    def test_tombstones_are_dropped_entirely(self):
+        joined = "".join(self.out.values())
+        self.assertNotIn("### 59.", joined)
+
+    def test_the_index_lists_every_surviving_item_once(self):
+        index = self.out["todo.md"]
+        for item_id in ("7", "65", "73"):
+            self.assertEqual(index.count(f"| {item_id} "), 1)
+
+    def test_the_index_records_sub_bullet_counts(self):
+        self.assertIn("open 1/2", self.out["todo.md"])
+
+    def test_an_unnumbered_block_still_reaches_the_archive(self):
+        self.assertIn("### Base Effect Extraction", self.out["ARCHIVE.md"])
+
+    def test_bodies_are_carried_verbatim_apart_from_sub_ids(self):
+        self.assertIn("Closed, with a binding constraint inside.",
+                      self.out["ARCHIVE.md"])
+
+
+if __name__ == "__main__":
+    unittest.main()
