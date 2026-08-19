@@ -414,7 +414,9 @@ python -m unittest discover -s scripts/spell_import/tests -t .
 flutter test integration_test -d windows
 ```
 
-Expected: Dart **745 tests** green (742 before, plus shapes B and C and assertion 8 — shape A was rewritten, not added), Python **378** green, integration **8** green. Record the actual Dart figure; if it is not 745, reconcile the difference before continuing rather than editing STATUS.md to match.
+Expected: Dart **745 tests** green, Python **382** green, integration **8** green.
+
+The Dart arithmetic is 742 + 3: shapes B and C are new, assertion 8 is new, and shape A was *rewritten* rather than added. Item 73 landed between this plan being written and executed but was Python-only (`scripts/` alone), so the 742 baseline still holds — confirm with `git diff --stat <last-item-73-commit> -- test/` if the figure is off. Record the actual Dart figure; if it is not 745, reconcile the difference before continuing rather than editing STATUS.md to match a number you did not predict.
 
 - [ ] **Step 2: Amend the standing constraint in DECISIONS.md**
 
