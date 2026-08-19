@@ -589,6 +589,20 @@ None of them is the cause; do not reopen them.  *(item 51)*
 `unittest discover` cannot load that form, and one file using it silently kept
 itself out of the suite.  *(item 49)*
 
+**A book-corpus assertion is transcribed from the book, never pasted from
+parser output.** The 13 HoH:MC blocks in
+`test_the_remaining_blocks_prose_and_design_line_match_the_book` had their
+`prose` and `design_line` read out of `reviewed/`, because the cheap route —
+printing what `parse_inline` emits today and pasting it in — yields a test that
+passes, looks like coverage, and pins whatever the parser currently does
+*including its bugs*. That is the precise failure this test exists to prevent,
+so it is worth the transcription cost each time a book is added. The tell that
+it was done honestly is that the book's own inconsistencies survive in the
+expected values: `(Base Effect, ...)` for *Tie the Threads That Bind* beside
+`(Base effect, ...)` for *The Rooster's Crow*, and the stray space in
+`(Base 15, + 1 Touch, ...)` for *Embrace of Boethius*. Do not "tidy" these.
+*(item 73)*
+
 ## CI and workflows
 
 **Two workflows answer deliberately different questions.**

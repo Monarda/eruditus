@@ -94,7 +94,7 @@ not-yet-worth-doing.
 | 70 | do | open 2/3 | importer.md | Three Defects Found by the 52-Book Constraint Survey |
 | 71 | do | open 3/3 | multibook.md | The Anchored-but-Unparseable Rate, Measured Across Three More Inline Books |
 | 72 | — | closed | ARCHIVE.md | Three Latent Defects the Second Book Exposed (`9b21925`, `757e9a8`) |
-| 73 | do | open 7/7 | importer.md | Deferred Minor Findings From Item 65's Reviews |
+| 73 | do | open 1/7 | importer.md | Deferred Minor Findings From Item 65's Reviews |
 | 74 | decide | open 5/5 | model.md | Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects |
 | 75 | decide | open 1/1 | rules-fidelity.md | Should Group/Room/Structure/Boundary Cost Differently Under the Size Ladder? |
 | 76 | decide | open 1/1 | app.md | Creation-Screen UI for Picking a Cross-Form Base Effect |

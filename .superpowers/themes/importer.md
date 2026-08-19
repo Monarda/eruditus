@@ -204,25 +204,25 @@ are the minors, judged non-blocking at the time and recorded here because
 their only other home was a scratch ledger that has since been deleted. None
 is a correctness bug.
 
-- [ ] **73.1** **`parse_inline`'s damaged-stat-line branch is unexercised.** HoH:MC has
+- [x] **73.1** **`parse_inline`'s damaged-stat-line branch is unexercised.** HoH:MC has
       zero damaged stat lines and no fixture covers it, so a polarity bug
       (reporting when it should skip, or the reverse) would go undetected.
-- [ ] **73.2** **13 of HoH:MC's 16 blocks rest on an aggregate count.** Only three have
+- [x] **73.2** **13 of HoH:MC's 16 blocks rest on an aggregate count.** Only three have
       their `prose` and `design_line` individually asserted; the rest are
       covered by `len(blocks) == 16` and `problems == []`, which would not
       catch a subtly wrong prose or design line on the other 13.
-- [ ] **73.3** **`diagnose()` carries two lines of dead weight** — a
+- [x] **73.3** **`diagnose()` carries two lines of dead weight** — a
       `catalog_module.Catalog.load()` whose result is never used (and which
       reads the catalog off disk for nothing), and a reimplementation of
       `sources.read_lines` rather than a call to it. Both inherited verbatim
       from the plan text.
-- [ ] **73.4** **`emit.CORE_BOOK_ID` is now referenced only by tests.** Production code
+- [x] **73.4** **`emit.CORE_BOOK_ID` is now referenced only by tests.** Production code
       threads the book id through instead. The comment justifying its survival
       names `catalog.CORE_BOOK_ID`, which is a different constant.
-- [ ] **73.5** **A provenance test lost an assertion.** `test_names_the_absent_lock_...`
+- [x] **73.5** **A provenance test lost an assertion.** `test_names_the_absent_lock_...`
       dropped its `assertNotIn` guard against moved-source wording when it was
       adapted to the mapping API; its siblings still cover the wording.
-- [ ] **73.6** **`provenance.load()` raises a bare `AttributeError` on a pre-mapping
+- [x] **73.6** **`provenance.load()` raises a bare `AttributeError` on a pre-mapping
       `source.lock`** rather than a message naming the cause. Only reachable by
       someone rebasing a branch that predates the format change.
 - [ ] **73.7** **The per-book split stopped at `SKIPPED_BLOCKS`.** `SPELL_NAME_TYPOS`,

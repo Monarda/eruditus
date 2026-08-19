@@ -16,7 +16,7 @@ added tests, catalog rows and ledger entries:**
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **742 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **378 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **382 tests, green** |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **7 ledger entries carry an unreviewed candidate** (was 3). Item 55's
