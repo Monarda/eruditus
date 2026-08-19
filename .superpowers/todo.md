@@ -949,11 +949,15 @@ capability gap — see item 56.
       needs a validation check over `draft.requisites` — a different mechanism
       from a scope field, which is why it was not folded in.
       **✅ DONE 2026-08-19 via check 12.** Implemented reading the *same*
-      `scope.excludeTechniques` list rather than a parallel field — both
-      halves of HoH:MC 1009's sentence now read that one list:
-      `ParameterScope.appliesTo` already filtered the picker for the spell's
-      own Technique, and check 12 rejects an excluded Technique found among
-      `draft.requisites` too.
+      `scope.excludeTechniques` list rather than a parallel field — and check
+      12 enforces **both** halves of HoH:MC 1009's sentence at the validation
+      layer: the spell's own Technique, and each entry in `draft.requisites`.
+      `ParameterScope.appliesTo` filtering the excluded Technique out of the
+      picker sits on top of that as a convenience, not as the guarantee — the
+      importer and already-saved records never pass through a picker, which is
+      what the check is for. (The own-Technique arm was added by the branch's
+      whole-branch review, which caught that leaving that half to the picker
+      left those two readers unguarded.)
 - [x] **The Range must be Personal.** The reasoning this bullet was opened
       with — "No capability exists: no parameter constrains another
       parameter's value today," and that a mechanism "for five rows is
@@ -966,8 +970,14 @@ capability gap — see item 56.
       from 12086 with these five Sensory Targets as secondary beneficiaries,
       not the justification. `Parameter.requiresRangeId` now expresses
       HoH:MC 1006's rule; `SpellCreationBloc` prunes Range and Target against
-      each other in both directions, and the creation screen filters
-      peer-incompatible options and locks a Target-dictated Range. **One seam
+      each other in both directions, and the creation screen narrows the Range
+      list to the one a Target dictates and locks it, with a line saying why.
+      **The forbidding direction is deliberately NOT filtered in the UI** —
+      that was built, then removed by the whole-branch review: filtering it hid
+      all four container Targets in the default Personal-Range state (every
+      fresh draft seeds `range-personal`) and made the bloc's own
+      yield-to-the-peer resolution unreachable from the app. Do not re-add it;
+      the bloc resolves that conflict. **One further seam
       remains**: the guideline-adoption path (`_seedParameters`) does not
       participate in that pruning — recorded as item 74 rather than fixed
       here, since closing it is a design decision (which field yields on a
@@ -1029,17 +1039,25 @@ defects incidental to its purpose. **All three were verified by hand against
 unverified agent output. Survey writeup and classification:
 `scratchpad/survey-merged.md` (session-local; re-derive if lost).
 
-- [ ] **A core rule nothing enforces: Personal Range forbids a container
+- [x] **A core rule nothing enforces: Personal Range forbids a container
       Target.** Core Rules line 12086, read against the *current* `reviewed/`
       file: "Personal Range spells can never have a container Target (such as
-      Circle, Room, or Structure)." Nothing
-      in `lib/` checks this; `grep range-personal lib/` finds only the default
-      reference triple. The 325-spell library has **0 violations**, so it is
-      latent — but the creation screen permits the combination, and Boundary
-      and the two new Sensory containers are equally affected. This is the
-      *same shape* as item 67's "Range must be Personal", pointing the other
-      way, and it is the strongest single argument for building that
+      Circle, Room, or Structure)." When opened, nothing
+      in `lib/` checked this; the 325-spell library had **0 violations**, so it
+      was latent — but the creation screen permitted the combination, and
+      Boundary and the two new Sensory containers were equally affected. This
+      is the *same shape* as item 67's "Range must be Personal", pointing the
+      other way, and it was the strongest single argument for building that
       capability: it is core, universal, and gated behind no Virtue.
+      **✅ DONE 2026-08-19 via check 10**, on the cross-field constraints
+      branch this bullet argued for. `Parameter.forbidsTargetTypes` carries it,
+      keyed on `TargetType` rather than on target ids so that Boundary — and
+      any future container row — is covered with no data edit. Enforced
+      corpus-wide by `published_spell_import_test.dart`'s assertion 7 over 336
+      library spells and 31 templates; the guard was verified to fail (naming
+      16 spells) when the data was deliberately broken. **One seam remains,
+      recorded as item 74**: the guideline-adoption path can still assemble the
+      forbidden pair, which validation then reports.
 - [ ] **Vim has no size ladder.** Nine `size-<form>` modifiers exist
       (Animal, Aquam, Auram, Corpus, Herbam, Ignem, Imaginem, Terram, Mentem);
       Vim is absent entirely. Core Rules line 15670: "Spells and magical

@@ -284,9 +284,17 @@ List<String> validateSpellAgainstCatalog({
   //     that list already carries exactly the right Techniques for the only
   //     rule of this shape. ParameterScope's doc comment records that this is
   //     now the field's meaning.
+  //     Both messages are phrased to avoid an indefinite article before the
+  //     Art, borrowing the book's own construction ("employ the Technique of
+  //     Intellego"). "a $technique" reads "a Intellego" -- and the same trap
+  //     waits on Animal, Aquam, Auram, Ignem and Imaginem if either message is
+  //     ever reused for a Form.
   final excludedByTarget = target?.scope.excludeTechniques ?? const <String>[];
   if (excludedByTarget.contains(technique)) {
-    problems.add('${target!.name} cannot be used on a $technique spell');
+    problems.add(
+      '${target!.name} cannot be used on a spell employing the Technique '
+      'of $technique',
+    );
   }
   for (final art in requisites.keys) {
     if (excludedByTarget.contains(art)) {
