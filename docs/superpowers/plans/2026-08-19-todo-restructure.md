@@ -687,14 +687,23 @@ SAMPLE = """# Eruditus Todo List
 
 ## C. Not on the Critical Path
 
+### 4. Conditional Wards
+- [ ] Add a ward type field
+
 ### 7. Spell Export/Backup Validation
 - [ ] Validate imported spells
 - [x] Already done
 
 ### 59. The Level Should Compute Live
-**✅ COMPLETE 2026-08-17** — see `## Completed ✅`.
+Redirect only — see `## Completed ✅`.
 
 ## Completed ✅
+
+### 4. Resolve Out-of-Scope Base Effects
+The archived predecessor of an id that is still open.
+
+### 59. The Spell Level Computes Live
+The real closed body, which must survive.
 
 ### 65. HoH:MC Spell Extraction
 Closed, with a binding constraint inside.
@@ -730,7 +739,7 @@ class AddSubIdsTest(unittest.TestCase):
         self.assertEqual(out, ["- **See also:** item 65"])
 
 
-SAMPLE_IDS = frozenset({"7", "59", "65", "73"})
+SAMPLE_IDS = frozenset({"4", "7", "59", "65", "73"})
 
 
 class SplitTest(unittest.TestCase):
@@ -754,9 +763,21 @@ class SplitTest(unittest.TestCase):
                       self.out["themes/importer.md"])
         self.assertNotIn("### 73.", self.out["ARCHIVE.md"])
 
-    def test_tombstones_are_dropped_entirely(self):
+    def test_a_tombstone_stub_is_dropped_but_its_real_item_survives(self):
+        # 59 appears twice: a redirect stub in a band section, and the real
+        # closed item under Completed. Filtering on bare id destroys both.
         joined = "".join(self.out.values())
-        self.assertNotIn("### 59.", joined)
+        self.assertNotIn("Redirect only", joined)
+        self.assertIn("The real closed body, which must survive.",
+                      self.out["ARCHIVE.md"])
+
+    def test_an_id_with_an_open_and_an_archived_body_gets_one_row(self):
+        # item 4's archived predecessor is history, not a second home, so it
+        # must not claim its own index row.
+        index = self.out["todo.md"]
+        self.assertEqual(index.count("| 4 |"), 1)
+        self.assertIn("| 4 |  | open", index)
+        self.assertIn("The archived predecessor", self.out["ARCHIVE.md"])
 
     def test_the_index_lists_every_surviving_item_once(self):
         index = self.out["todo.md"]
@@ -867,22 +888,30 @@ def split(lines: list[str],
             f"{sorted(found ^ expected)} -- reconcile ALL_IDS and THEMES first")
 
     files: dict[str, list[str]] = {}
-    rows: list[tuple[str, str]] = []
+    rows: dict[str, str] = {}
 
     def emit(path: str, text: list[str]) -> None:
         files.setdefault(path, []).extend(text)
 
     for item in parse_items(lines):
-        if item.id in TOMBSTONES:
-            continue
         in_completed = section_of(lines, item.start).startswith("Completed")
+        # A tombstone is the redirect STUB in a band section -- NEVER the real
+        # closed item sharing its number under `## Completed`. Ids 59, 60 and 61
+        # each appear twice; filtering on bare id would delete 109 lines of real
+        # closed history along with the 10 lines of stub.
+        if item.id in TOMBSTONES and not in_completed:
+            continue
         closed = in_completed and item.id not in MISFILED
         home = "ARCHIVE.md" if closed else f"themes/{THEMES[item.id]}"
         body = item.body if closed else add_sub_ids(item.body, item.id)
         emit(home, [item.heading] + body + [""])
         shown = home.split("/")[-1]
-        rows.append((item.id, f"| {item.id} |  | {_status(item, closed)} "
-                              f"| {shown} | {item.title} |"))
+        # One row per id. An id with BOTH an open body and an archived
+        # predecessor (item 4) is indexed at its open home -- the archive is
+        # history, not a second home, so it must not claim a second row.
+        if item.id not in rows or not closed:
+            rows[item.id] = (f"| {item.id} |  | {_status(item, closed)} "
+                             f"| {shown} | {item.title} |")
 
     tail = _unclaimed_blocks(lines)
     if tail:
@@ -892,7 +921,9 @@ def split(lines: list[str],
         digits = re.match(r"(\d+)([a-z]?)", row[0])
         return int(digits.group(1)), digits.group(2)
 
-    index = INDEX_HEADER + "\n".join(r for _, r in sorted(rows, key=sort_key)) + "\n"
+    index = (INDEX_HEADER
+             + "\n".join(r for _, r in sorted(rows.items(), key=sort_key))
+             + "\n")
 
     out = {"todo.md": index}
     for path, text in files.items():
@@ -904,12 +935,12 @@ def split(lines: list[str],
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_migrate -v`
-Expected: PASS, 13 tests
+Expected: PASS, 14 tests
 
 - [ ] **Step 5: Run the whole suite**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 36 tests
+Expected: PASS, 37 tests
 
 - [ ] **Step 6: Commit**
 
