@@ -246,9 +246,9 @@ class ParseInlineAgainstMysteryCultsTest(unittest.TestCase):
         # only pin an aggregate count and an empty problem list; that would
         # not catch a subtly wrong prose or design line on any one block.
         # Three blocks have their design_line checked individually above
-        # (Revenge of the Bitten Toad, Form of the (Temperament) Heartbeast)
-        # or their stat checked (Embrace of Boethius) -- these are the other
-        # 13, each transcribed here from the book's own printed text
+        # (Revenge of the Bitten Toad, Form of the (Temperament) Heartbeast,
+        # The Voice of the Bjornaer Magus) -- these are the other 13, each
+        # transcribed here from the book's own printed text
         # (reviewed/Ars Magica 5e - Houses of Hermes - Mystery Cults.md),
         # not from what the parser currently emits.
         expectations = {
