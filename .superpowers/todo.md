@@ -2,10 +2,21 @@
 
 **Now:** 74 · 32 · 73
 
+**Standing goal:** every published spell in the Definitive Edition core rules
+is either (a) in the spell library with its computed level matching its
+printed level, (b) a template whose caster-supplied choices are left open
+(item 25/37), or (c) recorded as an exception spell with a citation-backed
+reason the guidelines don't apply to it (item 46).
+
 **How this works:** item numbers are stable global ids, never reused and never
 renumbered. Themes are files; the table below is the only thing that maps a
 number to its home. `open 3/7` means three of seven sub-ids remain open.
-Standing constraints live in `DECISIONS.md`; closed bodies in `ARCHIVE.md`.
+Standing constraints live in `DECISIONS.md`; closed bodies in `ARCHIVE.md`;
+live counts and suite results live in `STATUS.md`.
+
+**Kind legend:** `decide` = a question is open and nobody has answered it;
+`do` = the decision is made, the work is not; `maybe` = deliberately filed as
+not-yet-worth-doing.
 
 | #  | Kind | Status | Home | Title |
 |----|------|--------|------|-------|

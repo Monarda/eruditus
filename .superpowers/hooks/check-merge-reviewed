@@ -3,6 +3,13 @@
 # Exit 2 feeds stderr back to Claude and blocks the turn from ending.
 set -u
 
+# Claude Code passes a JSON payload on stdin. When a Stop hook has already
+# blocked once this turn, stop_hook_active is true -- fire again and the turn
+# can never end. Read it and bail out.
+payload=$(cat 2>/dev/null || true)
+case "$payload" in *'"stop_hook_active":true'*) exit 0 ;; esac
+case "$payload" in *'"stop_hook_active": true'*) exit 0 ;; esac
+
 # Anchor to the project, never to the caller's cwd. A relative path makes this
 # a silent no-op -- it fails OPEN -- if a Stop hook is ever invoked from
 # elsewhere, which is the worst failure mode for a guard: absent, not loud.
@@ -26,6 +33,6 @@ Merge $newest has not been through item closure:
   $subject
 
 Invoke the closing-an-item skill. If it closed no items, say so and record it:
-  git rev-list --merges -1 HEAD > $state
+  git rev-list --merges -1 HEAD > .superpowers/.last-reviewed-merge
 EOF
 exit 2

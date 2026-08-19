@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .superpowers/hooks/check-merge-reviewed",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.superpowers/hooks/check-merge-reviewed\"",
             "shell": "bash"
           }
         ]

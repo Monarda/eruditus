@@ -1,6 +1,10 @@
 # Standing Decisions and Constraints
 
-Organised by topic. Each entry cites the item it came from.
+This currently holds the old "standing constraints" section moved verbatim; the
+41 closed bodies now in `ARCHIVE.md` have **not yet** been distilled into it.
+That backfill is Phase 2 of `docs/superpowers/plans/2026-08-19-todo-restructure.md`.
+Once done, entries here will be organised by topic and each will cite the item
+it came from.
 
 ## Notes — standing constraints
 
