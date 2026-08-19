@@ -110,6 +110,30 @@ class LockFileTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(provenance.load(pathlib.Path(tmp) / "nope.lock"), {})
 
+    def test_a_pre_mapping_lock_raises_a_message_naming_the_cause(self):
+        """Rebasing a branch that predates the {book_id: entry} mapping leaves a
+        single-identity source.lock on disk. `from_dict` fed one of that
+        format's string field values, not a dict, used to fail with a bare
+        AttributeError; it must instead name the old format and what to do.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "source.lock"
+            old_format = {
+                "book": "Ars Magica - Definitive Edition (Core Rules)",
+                "path": "reviewed/Ars Magica - Definitive Edition (Core Rules).md",
+                "sha256": "a" * 64,
+                "rulebook": None,
+                "spellsParsed": 360,
+                "spellsImported": 250,
+            }
+            path.write_text(json.dumps(old_format), encoding="utf-8")
+            with self.assertRaises(ValueError) as raised:
+                provenance.load(path)
+            message = str(raised.exception)
+            self.assertIn("old", message)
+            self.assertIn("source.lock", message)
+            self.assertIn("--accept-source", message)
+
     def test_written_lock_is_readable_json_ending_in_a_newline(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = pathlib.Path(tmp) / "source.lock"

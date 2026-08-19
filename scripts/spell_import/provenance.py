@@ -129,7 +129,16 @@ def load(path: pathlib.Path = LOCK_PATH) -> dict[str, SourceIdentity]:
     if not path.is_file():
         return {}
     raw = json.loads(path.read_text(encoding="utf-8"))
-    return {book_id: SourceIdentity.from_dict(entry) for book_id, entry in raw.items()}
+    try:
+        return {book_id: SourceIdentity.from_dict(entry) for book_id, entry in raw.items()}
+    except AttributeError as error:
+        raise ValueError(
+            f"{path} looks like the old single-identity source.lock format "
+            "(from before the {book_id: entry} mapping) rather than a mapping "
+            "of book id to identity. Delete it and re-run "
+            "`python -m scripts.spell_import.extract_spells --write --accept-source` "
+            "to regenerate it in the current format."
+        ) from error
 
 
 def write(identities: dict[str, SourceIdentity], path: pathlib.Path = LOCK_PATH) -> None:
