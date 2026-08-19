@@ -1214,14 +1214,14 @@
     "rationale": "A flame conjured in the palm that 'can ignite very flammable items' matches crig-3c; the spell's total level (Base 3 + Touch + Conc, no extra magnitude) pays for only one base-3 effect, and the torch-like light is the unavoidable physical byproduct of a real flame, not a separately-paid crig-3a light effect — contrast Lamp without Flame, which explicitly buys light with 'no apparent source' (i.e. light without real fire, the case crig-3a actually covers). Nothing chills/heats the caster's own hand (ruling out crig-3b)."
   },
   "lib-crig-heat-searing-forge": {
-    "baseEffectId": "crig-4a",
+    "baseEffectId": "crig-4d",
     "candidates": [
       "crig-4a",
       "crig-4b",
       "crig-4c",
       "crig-4d"
     ],
-    "rationale": "Heated metal does exactly '+5 damage' on contact, the literal figure from crig-4a ('Create a fire doing +5 damage') reflavored as scalding metal rather than open flame, not a pure temperature-utility effect like boiling water (crig-4d, no damage stated)."
+    "rationale": "The Creo Ignem table runs four parallel ladders, and this spell is on the 'Heat an object' one: level 2 warm to the touch, 3 hot to the touch, 4 boil water, 5 glow red-hot. The spell's own first sentence is 'Heats a piece of metal so that it is too hot to touch' -- above level 3, below red-hot, which is exactly where crig-4d sits. It creates no fire at all, so crig-4a ('Create a fire doing +5 damage') is the wrong ladder: compare Blade of the Virulent Flame, which does 'form a fire along the length of a metal blade' and pays base 5 for the unnatural shape. The +5 damage here is a consequence of touching heated metal -- it decays to +3 then +1 over following rounds and armour padding grants a +3 Soak bonus against it -- not a conjured fire's flat rating. Corrected under item 32.2; the entry previously read crig-4a, argued from the numeric coincidence of '+5 damage' alone."
   },
   "lib-crig-lamp-without-flame": {
     "baseEffectId": "crig-4b",
@@ -1328,7 +1328,7 @@
       "peig-4b",
       "peig-4c"
     ],
-    "rationale": "The spell's own text matches peig-4b ('Chill an object', 'all nonliving things are chilled thoroughly') and peig-4c ('Chill a person so that they lose a Fatigue level', 'all living things ... lose one Fatigue level') simultaneously, not peig-4a ('Extinguish a fire') -- its 'campfires and smaller fires go out' only shrinks bigger fires, the level 3 guideline, not level 4's full extinguish. peig-4b is recorded as the primary baseEffectId; peig-4c is recorded separately as a magnitude-0 adjustment (extract_spells.COMBINED_BASE_EFFECTS) since both guidelines are level 4 and combining them is free -- the choice of which one is 'primary' is cosmetic, not load-bearing."
+    "rationale": "All three Perdo Ignem level-4 guidelines describe something this spell does, because they are all consequences of one act: chilling the air within ten paces to just below freezing. peig-4b ('Chill an object') is recorded as the primary baseEffectId and peig-4c ('Chill a person so that they lose a Fatigue level') as a magnitude-0 adjustment (extract_spells.COMBINED_BASE_EFFECTS), since both are level 4 and combining them is free; which of the two is called 'primary' is cosmetic, not load-bearing. peig-4a ('Extinguish a fire') is not recorded, but not for the reason this entry used to give: 'campfires and smaller fires go out' is a full extinguish, and the Ignem base Individual is 'a large campfire', so it does match peig-4a rather than level 3's 'reduce the size of a fire'. The reason it is not paid for is that the fires go out because the air around them froze -- the spell buys the chill, and the fires follow. Re-read under item 32.2: pick confirmed, reasoning corrected."
   },
   "lib-peig-winters-icy-touch": {
     "baseEffectId": "peig-4c",

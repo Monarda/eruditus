@@ -8,7 +8,9 @@
 
 > **336 imported · 31 templates · 8 exceptions · 0 blocked · 3 skipped · 0 unresolved**
 > — re-run 2026-08-19 after item 32.1: same counts, and the `unreviewed` line is
-> gone (it prints only when the count is non-zero).
+> gone (it prints only when the count is non-zero). Re-run again the same day
+> after item 32.2's first two entries: same counts (a corrected guideline at
+> the same base level moves no count).
 
 **Suite status: all three re-run 2026-08-19 at item 74's branch head — the
 Dart count moved 742→745 for item 74's own three tests (bloc shapes B and C,
@@ -17,7 +19,7 @@ plus assertion 8):**
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **745 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **391 tests, green** — re-run 2026-08-19 after item 32.1 and the book-scoping change |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **392 tests, green** — 2026-08-19; +1 for the report/lock consistency guard |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **0 ledger entries carry an unreviewed candidate** (was 7), and the count can no
@@ -53,6 +55,11 @@ HoH:MC. No spell is blocked. HoH:MC's own 16 parsed blocks account as 11
 library + 2 extracted templates + 3 deliberately skipped, with a 4th template
 hand-authored rather than parsed.
 
+**The rulebook checkout is pinned at `ffc1c6b`** (2026-08-18, "tiny spelling
+fix in spell"), adopted 2026-08-19. Its only edit corrects the "Sense the Feet
+That *Thread* the Earth" heading to "Tread" — the correction
+`SPELL_NAME_TYPOS` was already applying — so adopting it changed no asset.
+
 **Standing finding: base-effect resolution rests on human judgement, and most
 of it is unverifiable by test.** A design line names its guideline only by
 level (`Base level 15`), and e.g. Creo Animal has four entries at level 15.
@@ -69,6 +76,15 @@ commit that recorded it (`186419d`) gives 0 entries with differing candidate
 levels; the 20 were the all-General entries, which are *more* exposed, not
 less. Assertion 1 discriminates among candidates on no entry at all. See item
 32.3.
+
+**Item 32.2 has re-read 2 of those 217, and corrected 1.**
+`lib-crig-heat-searing-forge` moved `crig-4a` → `crig-4d` (*Heat of the Searing
+Forge* creates no fire; it is on the "Heat an object" ladder, and its own first
+sentence says "too hot to touch"), and
+`lib-peig-conjuration-indubitable-cold`'s pick was confirmed with its reasoning
+rewritten. That is the second wrong entry found by a second look, after
+`lib-reim-image-from-wizard-torn` (`cf0b40b`) — a two-for-two rate on a
+deliberately suspect sample of two, not an estimate for the remaining 215.
 
 **Two things confirmed as needing nothing further:**
 - **The parameter catalog is complete.** Every Range, Duration and Target used

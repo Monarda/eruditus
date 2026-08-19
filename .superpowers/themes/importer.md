@@ -36,7 +36,36 @@
       `test_a_core_spell_is_never_offered_a_supplement_row`. See DECISIONS.md,
       which records this as a revision of item 55.
 - [ ] **32.2** Re-read every entry against its spell's published text and its candidate
-      guidelines' wording
+      guidelines' wording. **2 of 217 done, 2026-08-19** — the two this item
+      already named as suspect, and one of them was wrong:
+      - `lib-crig-heat-searing-forge` **corrected, `crig-4a` → `crig-4d`.** The
+        Creo Ignem table runs four parallel ladders, and *Heat of the Searing
+        Forge* is on "Heat an object" (2 warm to the touch, 3 hot to the touch,
+        4 boil water, 5 glow red-hot): its own first sentence is "Heats a piece
+        of metal so that it is **too hot to touch**", above level 3 and below
+        red-hot. It creates no fire, so "Create a fire doing +5 damage" is the
+        wrong ladder — compare *Blade of the Virulent Flame*, which does form a
+        fire on metal and pays base 5 for the unnatural shape. The old
+        rationale argued from the numeric coincidence of "+5 damage" alone and
+        dismissed `crig-4d` as having "no damage stated"; the +5 here decays to
+        +3 then +1 and armour padding grants +3 Soak against it, which is
+        heated metal, not a conjured fire's flat rating. Both rows are base
+        level 4, so no computed level moved and no test could have caught it.
+      - `lib-peig-conjuration-indubitable-cold` **pick confirmed, reasoning
+        corrected** — which is what this item said re-reading it should do. The
+        old rationale dismissed `peig-4a` by claiming the spell only *shrinks*
+        fires; it does both, and "campfires and smaller fires go out" is a full
+        extinguish (the Ignem base Individual is "a large campfire"). The real
+        reason `peig-4a` is not paid for is that the fires go out as a
+        consequence of the air freezing — the spell buys the chill. The same
+        wrong reasoning was copied into `KNOWN_UNRESOLVABLE`'s comment in
+        `extract_spells.py` and is corrected there too.
+      - **This is the second demonstrated failure of exactly the kind this item
+        was opened for**, after `lib-reim-image-from-wizard-torn` (`cf0b40b`).
+        Both were fluent, plausible rationales arguing from one salient detail
+        while the spell's own opening sentence said otherwise. Two for two on
+        the entries anyone bothered to look at twice is not a reassuring base
+        rate for the 215 not yet re-read.
 - [x] **32.3** **Record which entries carry the risk — re-measured 2026-08-19, and
       the earlier figure was wrong.** The 2026-08-17 measurement said 186 of 206
       entries had candidates sharing one base level and 20 did not. Re-running it

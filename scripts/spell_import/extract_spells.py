@@ -67,10 +67,14 @@ class SourceMoved(Exception):
 # the identical printed level. What made it look unresolvable was a model
 # gap, not a rules one -- the spell's own text matches both guidelines at
 # once ("all nonliving things are chilled thoroughly" / "all living things
-# ... lose one Fatigue level"), and `Spell.baseEffectId` can only record one
-# ("peig-4a"'s "extinguish" is still excluded, contradicted by the spell's
-# own text for anything bigger than a campfire -- that's the *level 3*
-# guideline, not level 4). Currently empty; the mechanism stays for the next
+# ... lose one Fatigue level"), and `Spell.baseEffectId` can only record one.
+# ("peig-4a"'s "extinguish" is excluded too, but item 32.2's re-read found the
+# reason given here was wrong: "campfires and smaller fires go out" *is* a full
+# extinguish, and the Ignem base Individual is "a large campfire", so it does
+# match level 4 rather than level 3's "reduce the size of a fire". It is not
+# paid for because the fires go out as a consequence of the air freezing --
+# the spell buys the chill. See the ledger rationale.)
+# Currently empty; the mechanism stays for the next
 # spell that turns out to be a genuine, no-forced-discriminator tie.
 KNOWN_UNRESOLVABLE: dict[str, str] = {}
 
