@@ -121,12 +121,14 @@ taking the item count from 36 to roughly 116.
 | 7  | do     | open 3/4     | app.md            | Spell export/backup validation     |
 | 32 | do     | open         | importer.md       | Audit resolutions.json             |
 | 38 | do     | open 6/7     | importer.md       | Follow-ups from item 25's review   |
-| 59 | —      | closed 08-17 | ARCHIVE.md        | Spell level computes live          |
+| 59 | —      | closed       | ARCHIVE.md        | Spell level computes live          |
 | 73 | do     | open 7/7     | importer.md       | Deferred minors from item 65       |
 ```
 
 `open 6/7` means six of seven sub-ids remain open, so an item's weight is
-visible without opening its theme file. `Kind` is `—` for closed items.
+visible without opening its theme file. `Kind` is `—` for closed items, and a
+closed row's Status is the bare word `closed` — dates and commit shas live in
+the Title, where they already were.
 
 ### Priority
 
