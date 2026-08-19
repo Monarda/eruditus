@@ -391,7 +391,7 @@ git commit -m "feat: pin the id-to-theme mapping with a reality check"
 - Create: `scripts/todo/tests/test_check.py`
 
 **Interfaces:**
-- Consumes: `parse_items`, `Item` from Task 1; `ALL_IDS` from Task 2. An ARCHIVE body is legal for any indexed id (history); a theme body must match its index row.
+- Consumes: `parse_items`, `Item` from Task 1. An ARCHIVE body is legal for any indexed id (history); a theme body must match its index row.
 - Produces: `check(root: Path) -> list[str]` returning human-readable problems, empty when clean. `main() -> int` for CLI use, exit 1 on problems. Scans only `TRACKED` plus `themes/*.md` — never the git-ignored scratch under `.superpowers/`.
 
 This is the artefact that outlives the migration. It encodes the spec's Verification section as something runnable.
