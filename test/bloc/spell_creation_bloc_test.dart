@@ -887,6 +887,19 @@ void main() {
         source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
   );
 
+  // A second guideline carrying the same Touch/Ring/Circle reference. Shape B
+  // below needs the draft to already sit on a ward reference -- that is the
+  // only way a chosen Personal Range reads as deliberate, since Personal is
+  // also the standard reference value the comparison would call untouched.
+  final wardEffect2 = BaseEffect(
+    id: 'ward-2', technique: 'Rego', form: 'Aquam',
+    description: 'Ward against water', baseLevel: 5,
+    reference: const ParameterTriple(
+        rangeId: 'range-touch', durationId: 'duration-ring', targetId: 'target-circle'),
+    provenance: Provenance(
+        source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+  );
+
   SpellCreationBloc seedingBloc() => SpellCreationBloc(
         spellEngine: SpellEngine(allSpells: const [], allParameters: seedCatalog),
         spellRepository: spellRepository,
@@ -971,8 +984,11 @@ void main() {
   );
 
   blocTest<SpellCreationBloc, SpellCreationState>(
-    'the adopt is per-slot: an untouched Range and Duration follow the new '
-    'guideline while a chosen Target stays',
+    // Shape A of todo item 74. The Duration assertion is the point of the
+    // "per-slot" half: the Range seed is refused, but Duration has no
+    // cross-field constraint and must still follow the new guideline.
+    'the adopt is per-slot, and a Range seed that a chosen Target forbids is '
+    'not written',
     build: seedingBloc,
     act: (bloc) {
       bloc.add(BaseEffectSelected(wardEffect));  // -> touch / ring / circle
@@ -982,9 +998,56 @@ void main() {
     skip: 2,
     expect: () => [
       isA<SpellCreationState>()
-          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          // Personal + Room is what check 10 rejects, so the Range keeps its
+          // pre-adoption value instead of following the new guideline.
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-touch')
           .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-momentary')
           .having((s) => s.draft.target?.id, 'draft.target', 'target-room'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // Shape B of todo item 74, the forbidding direction reached from the other
+    // side: the seed wants to write the container Target, and a deliberate
+    // Personal Range is what forbids it. RangeSelected(personal) is only
+    // *deliberate* because the outgoing reference named Touch.
+    'a container Target seed that a chosen Personal Range forbids is not written',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(BaseEffectSelected(wardEffect)); // -> touch / ring / circle
+      bloc.add(RangeSelected(personal));        // clears Circle; off the seed
+      bloc.add(BaseEffectSelected(wardEffect2));// reference: touch / ring / circle
+    },
+    skip: 2,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.target, 'draft.target', isNull)
+          // Duration carries no cross-field constraint and still adopts.
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring')
+          .having((s) => s.draft.containerMode, 'draft.containerMode',
+              ContainerMode.unstated),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // Shape C of todo item 74 -- the regression no value comparison can see.
+    // TargetSelected(sound) sets range-personal itself, to satisfy check 11.
+    // range-personal is also the standard reference value, so the seed cannot
+    // tell that bloc-written Range apart from an untouched slot and would
+    // re-seed it to Touch, out from under the Target that required it.
+    'a Range seed is not written over the Range a Sensory Target requires',
+    build: seedingBloc,
+    act: (bloc) {
+      bloc.add(TargetSelected(sound));          // forces Range -> Personal
+      bloc.add(BaseEffectSelected(wardEffect)); // reference: touch / ring / circle
+    },
+    skip: 1,
+    expect: () => [
+      isA<SpellCreationState>()
+          .having((s) => s.draft.range?.id, 'draft.range', 'range-personal')
+          .having((s) => s.draft.target?.id, 'draft.target', 'target-sound')
+          .having((s) => s.draft.duration?.id, 'draft.duration', 'duration-ring'),
     ],
   );
 

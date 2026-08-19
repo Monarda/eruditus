@@ -696,6 +696,12 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// gives for `chosenBaseLevel` above: a keep-or-clear rule reasoned from
   /// what the value still means, rather than a blanket policy either way.
   ///
+  /// One exception to the per-slot evaluation, because Range and Target are not
+  /// independent: if the seeded pair would violate check 10 or check 11, both
+  /// slots keep their pre-adoption values rather than adopting. The seed is a
+  /// convenience for untouched slots; it does not get to build a state the
+  /// validator would refuse to save. See [_rangeTargetConflict] and todo item 74.
+  ///
   /// It matters because `_parameterContribution` charges each parameter as a
   /// *delta* from the reference. A ward guideline (Touch/Ring/Circle) left at
   /// the blank-draft default contributes -1, -2, 0, which can drive the level
@@ -741,11 +747,33 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       return candidate;
     }
 
-    final target = seed(draft.target, previousReference.targetId, next.targetId, 'Target');
+    var range = seed(draft.range, previousReference.rangeId, next.rangeId, 'Range');
+    var target = seed(draft.target, previousReference.targetId, next.targetId, 'Target');
+
+    // This helper is the third path that writes the Range/Target pair, after
+    // RangeSelected and TargetSelected, and it is the one that did not prune.
+    // Seeding one slot while a deliberate choice survives in the other can land
+    // on exactly the combination checks 10 and 11 reject -- so a seed that would
+    // contradict its peer is not written, and both slots keep their pre-adoption
+    // values. That narrows "an untouched slot follows the new guideline"; it
+    // carves no exception into "a deliberate choice survives a guideline switch".
+    //
+    // Reverting *both* slots is the same thing as reverting whichever slot the
+    // seed moved, because an unmoved slot already holds its pre-adoption value.
+    // That pair is always a legal landing place: the constructor seeds the
+    // standard triple (Personal forbids only container, Individual is an object
+    // Target naming no Range), and every other path that emits a pair prunes it.
+    // See todo item 74.
+    if (_rangeTargetConflict(range, target)) {
+      range = draft.range;
+      target = draft.target;
+    }
+
+    // Computed from the Target that actually lands, not the seed candidate.
     final keepsMode = _isContainer(target);
 
     return draft.copyWith(
-      range: seed(draft.range, previousReference.rangeId, next.rangeId, 'Range'),
+      range: range,
       duration: seed(draft.duration, previousReference.durationId, next.durationId, 'Duration'),
       target: target,
       containerMode: keepsMode ? null : ContainerMode.unstated,
@@ -756,6 +784,26 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   /// TargetSelected and [_seedParameters] need to decide whether a stated
   /// `containerMode` can survive landing on it.
   static bool _isContainer(Parameter? parameter) => parameter?.targetType == TargetType.container;
+
+  /// Whether [range] and [target] are the pair validateSpellAgainstCatalog
+  /// rejects -- check 10's forbidding direction (core 12086: a Personal Range
+  /// can never take a container Target) and check 11's forcing one (HoH:MC
+  /// 1006: each Sensory Target requires Personal Range).
+  ///
+  /// Mirrors both checks' null tolerance deliberately: an absent slot conflicts
+  /// with nothing, because a missing parameter is ResolvedSpell.isResolved's
+  /// problem rather than this rule's. RangeSelected and TargetSelected keep
+  /// their own inline logic -- they do not merely detect a conflict, they
+  /// resolve it asymmetrically (TargetSelected forces the required Range and
+  /// lets that win over the forbidding direction; RangeSelected clears the
+  /// Target), so only this detecting half is common to all three call sites.
+  static bool _rangeTargetConflict(Parameter? range, Parameter? target) {
+    if (range == null || target == null) return false;
+    final kind = target.targetType;
+    if (kind != null && range.forbidsTargetTypes.contains(kind)) return true;
+    final required = target.requiresRangeId;
+    return required != null && range.id != required;
+  }
 
   /// [_seedParameters] against the engine's live parameter catalog.
   SpellDraft _withSeededParameters(SpellDraft draft, ParameterTriple previousReference) =>

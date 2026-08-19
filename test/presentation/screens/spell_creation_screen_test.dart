@@ -1946,18 +1946,25 @@ void main() {
     });
 
     testWidgets(
-        'a draft the bloc can produce -- Personal Range with a container '
+        'a draft reached from stored data -- Personal Range with a container '
         'Target already selected -- renders both dropdowns without throwing',
         (tester) async {
-      // Core 12086 forbids this exact pair (a container Target under a
-      // Personal Range), and the old forbidding-direction filter tried to
-      // pre-empt it by dropping the conflicting choice from each dropdown's
-      // `items` -- while `initialValue` still held it, since neither
-      // dropdown's initialValue was ever filtered. That tripped
-      // DropdownButtonFormField's "exactly one item with value" assertion
-      // on both dropdowns at once. This is the regression pin: check 10 is
-      // still enforced (by validateSpellAgainstCatalog and by the bloc's own
-      // pruning on selection), just not by hiding the option pre-emptively.
+      // No bloc event path can produce this pair any more: RangeSelected
+      // clears the Target, TargetSelected clears the Range, and (as of todo
+      // item 74) _seedParameters refuses a seed that would land on it. But the
+      // screen does not only render bloc-written drafts -- a saved spell
+      // loaded back for editing, or a template instantiated with this pair
+      // already in its declaration, reaches the screen without going through
+      // either seeding or pruning. Core 12086 forbids this exact pair (a
+      // container Target under a Personal Range), and the old
+      // forbidding-direction filter tried to pre-empt it by dropping the
+      // conflicting choice from each dropdown's `items` -- while
+      // `initialValue` still held it, since neither dropdown's initialValue
+      // was ever filtered. That tripped DropdownButtonFormField's "exactly
+      // one item with value" assertion on both dropdowns at once. This is the
+      // regression pin: check 10 is still enforced (by
+      // validateSpellAgainstCatalog and by the bloc's own pruning on
+      // selection), just not by hiding the option pre-emptively.
       final draftState = SpellCreationState(
         status: SpellCreationStatus.editing,
         draft: SpellDraft(
