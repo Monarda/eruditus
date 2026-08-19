@@ -939,19 +939,43 @@ requisite, but two other bullets had gone unrecorded entirely). Item 64
 implemented one — Intellego on the spell's own Technique. An earlier draft of
 its spec dismissed the ones it considered with a single reason — "the app has
 no Virtue model" — which is true of three and false of two; this item records
-the accurate position so the tractable ones stay visible.
+the accurate position so the tractable ones stay visible. **Both of the
+tractable bullets below are now implemented** (2026-08-19, the cross-field
+constraints branch); the one bullet still open is storyguide judgment, not a
+capability gap — see item 56.
 
-- [ ] **No Intellego *as a requisite*.** Item 64's `excludeTechniques` covers
+- [x] **No Intellego *as a requisite*.** Item 64's `excludeTechniques` covers
       only the spell's own Technique. The book says "even as a requisite", which
       needs a validation check over `draft.requisites` — a different mechanism
       from a scope field, which is why it was not folded in.
-- [ ] **The Range must be Personal.** No capability exists: no parameter
-      constrains another parameter's value today. Building a general
-      cross-parameter mechanism for five rows is disproportionate, so this needs
-      a design decision before any code.
+      **✅ DONE 2026-08-19 via check 12.** Implemented reading the *same*
+      `scope.excludeTechniques` list rather than a parallel field — both
+      halves of HoH:MC 1009's sentence now read that one list:
+      `ParameterScope.appliesTo` already filtered the picker for the spell's
+      own Technique, and check 12 rejects an excluded Technique found among
+      `draft.requisites` too.
+- [x] **The Range must be Personal.** The reasoning this bullet was opened
+      with — "No capability exists: no parameter constrains another
+      parameter's value today," and that a mechanism "for five rows is
+      disproportionate" — is now obsolete, not merely resolved, and is
+      recorded here only so it is not mistaken for still standing. **✅ DONE
+      2026-08-19 via check 11.** Item 70's Core Rules 12086 finding (Personal
+      Range forbids a container Target, unconditionally, for every spell) was
+      the same capability read the other way, and it is universal rather than
+      five-rows-only — so the mechanism was proportionate after all, designed
+      from 12086 with these five Sensory Targets as secondary beneficiaries,
+      not the justification. `Parameter.requiresRangeId` now expresses
+      HoH:MC 1006's rule; `SpellCreationBloc` prunes Range and Target against
+      each other in both directions, and the creation screen filters
+      peer-incompatible options and locks a Target-dictated Range. **One seam
+      remains**: the guideline-adoption path (`_seedParameters`) does not
+      participate in that pruning — recorded as item 74 rather than fixed
+      here, since closing it is a design decision (which field yields on a
+      guideline-driven conflict), not an implementation detail.
 - [ ] **The Form must suit the sensory medium** ("An Ignem spell cannot be
       transmitted by sound"). Storyguide judgment by the book's own wording, so
-      display work — belongs with item 56's rules hints, not enforcement.
+      display work — belongs with item 56's rules hints, not enforcement. **The
+      only bullet left open in this item.**
 - **Won't do, recorded so they are not re-litigated:** not investable into
   magical items (the app models no enchantments — the same reason item 65
   excludes *Perceive the Change*); non-initiates cannot learn them, and the
@@ -964,7 +988,8 @@ the accurate position so the tractable ones stay visible.
   creature/character model to check a being's senses against).
 - **Files:** `lib/models/spell.dart` (the validation checks),
   `lib/models/parameter.dart`
-- **See also:** items 64, 56, 17
+- **See also:** items 64, 56, 17, 70 (the Core Rules 12086 finding that
+  justified the Range-must-be-Personal mechanism)
 
 ### 69. Constraint-Handling Pains Deferred From the Cross-Field Design Discussion
 
@@ -1097,6 +1122,57 @@ against each book; the table below is the durable record.
 - **See also:** item 65 (closed, `## Completed ✅` — the parser and the
   diagnostic mode this measures with), item 32 (ledger curation as its own
   cost centre)
+
+### 74. Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects
+
+**Opened 2026-08-19, from item 67's cross-field-constraints branch, and
+explicitly deferred by the human partner rather than fixed on the spot.**
+Item 67's "Range must be Personal" bullet closed via check 10 (Core Rules
+12086: a Personal Range can never take a container Target) and check 11
+(HoH:MC 1006: the five Sensory Targets require Personal Range), plus
+`SpellCreationBloc` pruning `RangeSelected` and `TargetSelected` against each
+other in both directions. That pruning has a third, unguarded path.
+
+- [ ] **`_seedParameters` (`lib/bloc/spell_creation/spell_creation_bloc.dart`,
+      currently around lines 726-753) writes Range and Target too, on
+      guideline adoption, and does not participate in the new two-way
+      pruning.** It can seed `range-personal` for an untouched Range slot
+      while a deliberately chosen container Target (e.g. `target-room`)
+      survives untouched in the same call — exactly the combination check 10
+      forbids.
+- [ ] **This is not theoretical — a passing test already produces it.**
+      `test/bloc/spell_creation_bloc_test.dart`, the case named `'the adopt is
+      per-slot: an untouched Range and Duration follow the new guideline
+      while a chosen Target stays'`, ends its assertion with
+      `draft.range?.id == 'range-personal'` and `draft.target?.id ==
+      'target-room'` — and passes today. `target-room` is a container
+      Target, so this recorded, tested behavior is precisely the state check
+      10 exists to reject.
+- [ ] **Why this was deferred rather than folded into check 10/11's fix:**
+      closing it means deciding *which field yields* when a guideline switch
+      creates a Range/Target conflict — Range following the guideline while
+      Target stays, or the reverse, or refusing the seed and leaving the slot
+      null. Any answer overturns, or carves an exception into, the
+      deliberate and documented rule that "a parameter chosen deliberately
+      survives a guideline switch" (`_seedParameters`'s doc comment, around
+      lines 690-697). That is a design decision about how adoption should
+      behave, not an implementation detail to patch quietly alongside a
+      corpus-guard task.
+- [ ] **Why it is safe today, and not urgent:** nothing silently saves an
+      illegal spell. `validateSpellAgainstCatalog` (checks 10-12) still runs
+      on the draft regardless of how it was assembled, so a caster who hits
+      this path sees a validation error before saving — the gap is that the
+      bloc does not *prevent* the state, not that the state escapes
+      unnoticed.
+- [ ] **The pattern to follow, when this is picked up:** the two-way pruning
+      `RangeSelected` and `TargetSelected` now do against each other — see
+      item 67's "Range must be Personal" resolution — is the shape a fix here
+      would generalize.
+- **Files:** `lib/bloc/spell_creation/spell_creation_bloc.dart`,
+  `test/bloc/spell_creation_bloc_test.dart`
+- **See also:** item 67 (the resolved sibling this gap was found while
+  closing), item 58 (the container-mode UX seam between bloc and screen —
+  the same kind of "pruning was added at some call sites but not all" shape)
 
 ---
 
