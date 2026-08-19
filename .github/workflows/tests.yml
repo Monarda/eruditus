@@ -41,12 +41,11 @@ jobs:
         id: lock
         run: |
           sha=$(python3 -c "
-          import json
-          lock = json.load(open('scripts/spell_import/source.lock'))
-          print((lock.get('rulebook') or {}).get('commit', ''))
+          from scripts.spell_import import provenance
+          print(provenance.pinned_revision(provenance.load()) or '')
           ")
           if [ -z "$sha" ]; then
-            echo "::error::source.lock records no rulebook revision, so this job cannot pin its input. The lock was probably written where the rulebook was not a git checkout; re-run --write --accept-source somewhere it is."
+            echo "::error::no book in source.lock records a rulebook revision, so this job cannot pin its input. The lock was probably written where the rulebook was not a git checkout; re-run --write --accept-source somewhere it is."
             exit 1
           fi
           echo "sha=$sha" >> "$GITHUB_OUTPUT"

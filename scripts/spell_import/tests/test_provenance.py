@@ -231,3 +231,52 @@ class MultiBookLockTest(unittest.TestCase):
         lock = {"arm5-hohmc": self._identity("arm5-hohmc", "bbb")}
         message = provenance.describe_change(lock, self._identity("arm5-hohmc", "ccc"))
         self.assertIn("arm5-hohmc", message)
+
+
+class PinnedRevisionTest(unittest.TestCase):
+    """The commit CI checks the rulebook out at.
+
+    The workflow used to read this straight out of the lock JSON, which is
+    how keying the lock by book id broke CI without a test noticing. The
+    rule lives here now so it is reachable from the suite.
+    """
+
+    @staticmethod
+    def _at(book_id, commit, date):
+        return identity(
+            book_id=book_id,
+            rev=provenance.RulebookRevision(commit=commit, date=date, subject="s"),
+        )
+
+    def test_picks_the_newest_recorded_revision(self):
+        lock = {
+            "arm5-hohmc": self._at("arm5-hohmc", "2539318", "2026-07-18"),
+            "arm5-core": self._at("arm5-core", "9c6aee1", "2026-08-16"),
+        }
+        self.assertEqual(provenance.pinned_revision(lock), "9c6aee1")
+
+    def test_insertion_order_does_not_decide_it(self):
+        lock = {
+            "arm5-core": self._at("arm5-core", "9c6aee1", "2026-08-16"),
+            "arm5-hohmc": self._at("arm5-hohmc", "2539318", "2026-07-18"),
+        }
+        self.assertEqual(provenance.pinned_revision(lock), "9c6aee1")
+
+    def test_a_book_with_no_revision_is_skipped_rather_than_fatal(self):
+        lock = {
+            "arm5-core": self._at("arm5-core", "9c6aee1", "2026-08-16"),
+            "arm5-hohmc": identity(book_id="arm5-hohmc", rev=None),
+        }
+        self.assertEqual(provenance.pinned_revision(lock), "9c6aee1")
+
+    def test_none_when_no_book_records_a_revision(self):
+        self.assertIsNone(provenance.pinned_revision({"arm5-core": identity(rev=None)}))
+
+    def test_none_for_an_empty_lock(self):
+        self.assertIsNone(provenance.pinned_revision({}))
+
+    def test_the_committed_lock_yields_a_revision(self):
+        """The regression this exists for: CI must get a sha from the real lock."""
+        pinned = provenance.pinned_revision(provenance.load())
+        self.assertIsNotNone(pinned, "the committed source.lock pins nothing -- CI cannot run")
+        self.assertRegex(pinned, r"^[0-9a-f]{7,40}$")

@@ -176,3 +176,28 @@ def describe_change(lock: dict[str, SourceIdentity], current: SourceIdentity) ->
         f"             {current.spells_parsed} parsed\n\n"
         "This is not a code failure. Regenerate and review:\n" + accept
     )
+
+
+def pinned_revision(lock: dict[str, SourceIdentity]) -> str | None:
+    """The rulebook commit CI should check out, or None if nothing is recorded.
+
+    Every registered book is a file in the *same* rulebook repository, so one
+    checkout has to serve them all, and the newest recorded revision is the
+    one that does. A book recorded at an older commit cannot have changed
+    between then and the newest -- if it had, its own record would name the
+    later commit, since `git_revision` records the last commit to touch that
+    file. So at the newest recorded revision every book still hashes to the
+    sha256 the lock holds for it.
+
+    This lives here rather than in the workflow because the workflow used to
+    reach into the lock's JSON itself, reading a top-level "rulebook" key.
+    Keying the lock by book id removed that key and broke CI with nothing in
+    the suite to catch it -- YAML is not reachable from the tests. Any future
+    change to the lock's shape now breaks a test first.
+    """
+    revisions = [
+        identity.rulebook for identity in lock.values() if identity.rulebook is not None
+    ]
+    if not revisions:
+        return None
+    return max(revisions, key=lambda revision: revision.date).commit

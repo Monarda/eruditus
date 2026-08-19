@@ -34,14 +34,19 @@ jobs:
           python - <<'PY'
           from scripts.spell_import import provenance, sources
           root = sources.default_root()
-          path = sources.resolve_book(sources.DE_TITLE, root)
-          current = provenance.describe(sources.DE_TITLE, path, root)
           lock = provenance.load()
-          if provenance.matches(lock, current):
-              print("Rulebook unchanged since the asset was generated.")
-          else:
-              print("NOTE: the rulebook has moved. Harmless unless the suite fails below.")
-              print(provenance.describe_change(lock, current))
+          # Every registered book, not just the core rules: since the lock was
+          # keyed by book id a supplement can move while the core rules sit
+          # still, and reporting only one of them hides the half that moved.
+          for book in sources.BOOKS:
+              path = sources.resolve_book(book.title, root)
+              current = provenance.describe(book.id, book.title, path, root)
+              if provenance.matches(lock, current):
+                  print(f"{book.id}: unchanged since the asset was generated.")
+              else:
+                  print(f"{book.id}: NOTE: the source has moved. "
+                        "Harmless unless the suite fails below.")
+                  print(provenance.describe_change(lock, current))
           PY
 
       - name: Run the import harness suite against upstream
