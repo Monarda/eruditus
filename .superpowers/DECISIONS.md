@@ -31,6 +31,10 @@ identity lives in a committed sidecar (`scripts/spell_import/source.lock`),
 **never in the asset itself**, and `provenance.py`/`report.py` are testable with
 zero rulebook dependency — keep them that way.  *(item 30)*
 
+**`RegenerationTest`'s failure message is drift-aware.** It checks `source.lock`
+to tell "the source moved" from "the asset was hand-edited" — do not flatten the
+two into one message while simplifying it.  *(item 30)*
+
 **`--write` is gated on `--accept-source`**: adopting a moved rulebook is always
 explicit. The one carve-out is that a `--write` under an *unchanged* source
 refreshes the lock's advisory counts, which are otherwise only ever written when
@@ -105,8 +109,9 @@ the loss of the chosen row, stays an ordinary `StaleEntry` and still demands a
 human.  *(item 55)*
 
 **The extractor must never write the ledger.** `run()` only reports what widened;
-`migrate_ledger.py` carries decisions forward, and it is a separate command
-rather than a flag for exactly that reason.  *(item 55)*
+`migrate_ledger.py` carries decisions forward — keeping `baseEffectId` and
+`rationale` **verbatim** — and it is a separate command rather than a flag for
+exactly that reason.  *(item 55)*
 
 **A migrated entry is not a reviewed entry.** Ids added by a migration land in
 `unreviewedCandidates` and the extractor prints the outstanding count on every
@@ -175,11 +180,11 @@ also makes the regeneration assertion non-circular.  *(item 55)*
 designing their own spell has no such mechanism (item 47). `KNOWN_UNRESOLVABLE`
 is empty; the mechanism stays for a future genuine tie.  *(item 39)*
 
-**Anchoring and parsing are different measurements.** The 52-book corpus survey
-classified how spell blocks are *anchored* and never checked that an anchored
-block *parses*, so a low tokenize rate from `--diagnose` is a first measurement,
-not a regression. Product line does not predict format either — HoH:*True
-Lineages* is 55/55 heading style.  *(item 65)*
+**Anchoring and parsing are different measurements.** The corpus survey behind
+this item classified how spell blocks are *anchored* and never checked that an
+anchored block *parses*, so a low tokenize rate from `--diagnose` is a first
+measurement, not a regression. Product line does not predict format either —
+HoH:*True Lineages* is 55/55 heading style.  *(item 65)*
 
 ## Naming
 
@@ -216,11 +221,15 @@ is that modifiers scale the level instead. *Mists of Change* is the one publishe
 spell that contradicts this and is recorded as an exception spell rather than
 weakening the model.  *(items 1, 46)*
 
+**`ParameterScope` carries a positive Forms list and a negative Techniques list**,
+because that is how each rule is written: Fire is offered *for* Ignem and
+Imaginem; a Sensory Target is offered for everything *except* Intellego.
+*(item 64)*
+
 **Duplicate requisite Arts are unrepresentable by construction** — `requisites`
 is a map keyed by art. That is the one invariant fixed by modelling rather than
-validation, and it is the shape to prefer. The `free`/`adding` split is
-sufficient: every requisite-driven magnitude in the 360 published spells is +0 or
-+1.  *(items 2, 40)*
+validation. The `free`/`adding` split is sufficient: every requisite-driven
+magnitude in the 360 published spells is +0 or +1.  *(items 2, 40)*
 
 **There is no bespoke `size` field on `Spell`.** Size is ordinary scoped
 Modifiers through `selectedModifiers`, so magnitude reaches the level by the
@@ -230,6 +239,11 @@ normal path with **no special case in the calculator**.  *(item 3)*
 `lib/models` has zero `extends` relationships, and the field most worth sharing
 (Range/Duration/Target) is exactly the one that cannot be identical between the
 typed and free-text shapes.  *(item 46)*
+
+**`chosenBaseLevel` enters `SpellLevelCalculator`'s additive/multiplicative split
+exactly as the guideline's own base would have.** That was the design-heavy
+question and this is the answer. Validation rejects both a missing chosen level
+and one below 1 — **neither computes a silent zero.**  *(item 25)*
 
 **Open guideline slots use one generic `chosenSlots: Map<String, String>` keyed
 by slot kind, not three bespoke `chosen*` fields.** Each bespoke nullable slot
@@ -265,16 +279,11 @@ for why it was a Ritual; a `_ritual_declaration(block)` helper plus the closed
 derives independently, so a wrong stored declaration only ever changed the in-app
 banner text, never a computed level.  *(item 49)*
 
-**`chosenBaseLevel` enters `SpellLevelCalculator`'s additive/multiplicative split
-exactly as the guideline's own base would have.** That was the design-heavy
-question and this is the answer. Validation rejects both a missing chosen level
-and one below 1 — **neither computes a silent zero.**  *(item 25)*
-
-**A General guideline whose payoff is a Might threshold carries no
-`effectFormula`.** A Might threshold ties to the total computed level, not
-`chosenBaseLevel`, and `crvi-hohmc-G1` has no reference triple to make the two
-coincide — so the field is deliberately absent, not missing. Its own `notes`
-field says so.  *(item 17)*
+**A General guideline whose payoff is a Might threshold, and which has no
+reference triple, carries no `effectFormula`.** A Might threshold ties to the
+total computed level, not `chosenBaseLevel`, and `crvi-hohmc-G1` has no
+reference triple to make the two coincide — so the field is deliberately absent,
+not missing. Its own `notes` field says so.  *(item 17)*
 
 ## Container and Sensory Targets
 
@@ -304,16 +313,16 @@ continuous acquisition for all five. A stated mode on one of these would now fai
 check 9.  *(items 68, 65)*
 
 **The book's equivalence sentences price the Sensory Targets; they do not
-classify them.** Magnitudes were untouched by the reclassification, and
-`targetType` follows the printed equivalences rather than the core `sense`
-ladder — which matches sense-for-sense and magnitude-for-magnitude but means the
-opposite thing. HoH:MC forbids Intellego precisely because granting senses is the
-other feature.  *(items 64, 68)*
+classify them.** Magnitudes were untouched by the reclassification, and no
+`targetType` is ever read off an equivalence. The core `sense` ladder in
+particular is **not** what `targetType` follows: it matches sense-for-sense and
+magnitude-for-magnitude but means the opposite thing. HoH:MC forbids Intellego
+precisely because granting senses is the other feature.  *(items 64, 68)*
 
-**`ParameterScope` carries a positive Forms list and a negative Techniques list**,
-because that is how each rule is written: Fire is offered *for* Ignem and
-Imaginem; a Sensory Target is offered for everything *except* Intellego.
-*(item 64)*
+**A magnitude given only by equivalence is reconciled against a printed design
+line before it is written down.** That is how the five Sensory Targets were
+costed, and it binds the next supplement too — an equivalence sentence on its
+own is not a magnitude.  *(item 64)*
 
 ## Modifiers, Size and adjustments
 
@@ -335,6 +344,14 @@ catalog rows or ad-hoc adjustments.** The CrVi Warping Point and PeIg chill-dama
 ladders became `selectionMode: single` modifiers scoped to their base effect;
 MuAu's single-property discount became a broadly-scoped one.  *(item 28)*
 
+**A storyguide judgement ladder is modelled as a *wildcard-scoped* modifier,
+resolved by the design line's own printed magnitude.** `Effect complexity` is
+scoped to no Technique/Form pair because core 12204 makes it general — "this
+normally adds magnitudes to the spell level to account for the complexity" — and
+the corpus prints it across many books and pairs; `elaborate-effect` is the
+precedent it follows. This is the scoping decision the next supplement's parser
+has to copy.  *(item 72)*
+
 **`ModifierScope.excludeTargets` is a carve-out mirroring `excludeTechniques`,
 not an allow-list.** `size-mentem` excludes `target-individual` because minds have
 no size — but can still be counted for Groups.  *(item 19)*
@@ -349,11 +366,6 @@ Animal rule prices treatment against creating an equivalent amount of *dead*
 animal — so live-animal rows are excluded from either scope. A test pins both
 exclusions.  *(item 29)*
 
-**Every handler that can move Technique, Form, base effect or Target must prune
-stale modifier selections.** `TargetSelected` was the one that did not, so
-switching Target to Individual left a `size-mentem` selection silently
-contributing magnitude.  *(item 19)*
-
 ## Validation and enforcement
 
 **`validateSpellAgainstCatalog` (`lib/models/spell.dart`) is the one enforcement
@@ -367,7 +379,8 @@ home must hold both the record and the catalog.  *(item 40)*
 **An invalid spell blocks; an *unresolved* one degrades.** Invalid is rejected at
 save/restore/import; unresolved renders a "Needs review" chip and an
 `(unverified)` level suffix in **both** places that build a card from a
-`ResolvedSpell`.  *(item 40)*
+`ResolvedSpell`. The blocking half was decided by the user and flagged
+**revisitable** — the two behaviours may want to converge.  *(item 40)*
 
 **Do not collapse `problems` into `isResolved`.** `isResolved` is a can-I-compute
 gate; `problems` means it computes but must not be trusted.  *(item 40)*
@@ -415,6 +428,12 @@ Computed from the draft in the funnel (`breakdown`, `levelUnavailableReason`,
 and `draft` sit outside all three, as the funnel's inputs. A new *handler* does
 nothing for any of them.  *(item 62)*
 
+**The test for the *computed* rule is `f(draft)`.**
+`SpellEngine.deriveGeneralEffect` reads `baseEffect.effectFormula` and
+`chosenBaseLevel` and consults **no catalog**, so no sync event can move it
+without the draft moving — which is what puts a field in the funnel's computed
+rule rather than under one of the other two.  *(item 62)*
+
 **Keep the two invalidation predicates distinct.** `validationErrors` clear when
 the **draft** moves, because they are statements about the draft's contents; the
 suggestion fields clear when the **level** moves, because a suggestion asserts
@@ -453,6 +472,11 @@ the same rule. Item 38's worry that the model cannot tell an authored
 Personal/Momentary/Individual from an unauthored one is real, and irrelevant here.
 *(item 60)*
 
+**Every handler that can move Technique, Form, base effect or Target must prune
+stale modifier selections.** `TargetSelected` was the one that did not, so
+switching Target to Individual left a `size-mentem` selection silently
+contributing magnitude.  *(item 19)*
+
 **`containerMode` is pruned inside `_seedParameters`, not at each call site**,
 computed from the *resulting* Target, because every handler that can re-seed a
 Target can strand a mode. Every caller of the pruning helper seeds after it, so a
@@ -479,6 +503,11 @@ Discard was once unreachable before the first Calculate, which left no way to
 abandon a draft at all — including one carrying the globally-scoped `no-words` /
 `no-gestures` modifiers, which are scoped to no Technique or Form and so appear on
 every draft.  *(items 59, 61)*
+
+**Suggestions stay behind a button, even though the level no longer does.**
+`findSimilarSpells` plus a `calculateBreakdown` per candidate is the half
+expensive enough to deserve one; making suggestions live because the level went
+live is the obvious accidental next step.  *(item 59)*
 
 **A `Column` gives its non-flex children an unbounded main axis**, so a banner
 pinned above a `ListView` cannot measure the body itself. `LevelBanner`'s 40% cap
@@ -523,6 +552,12 @@ worse, and `test/support/bloc_factories.dart`'s fakes carry no error hook. Do no
 its expected count from the raw JSON — an oracle independent of the loader. A
 hardcoded count is exactly what silently drifted by 566 entries.  *(items 5, 55)*
 
+**`allParameters` is left empty in the collapsed loader oracle, deliberately.**
+`asset_data_loader_test.dart`'s level-sum assertion matches assertion 1 that
+way, so that neither oracle applies the base-effect reference discount. Passing
+`allParameters` to "improve" the test silently changes what the oracle proves.
+*(item 29)*
+
 **A regeneration assertion needs a second, independent test beside it.**
 `spell_templates.json` had no regeneration test at all, so a committed-vs-fresh
 divergence went unnoticed; assertion 5 now covers all three assets, and a
@@ -545,6 +580,10 @@ serve CanvasKit's WASM/JS on Windows (`canvaskit/chromium/canvaskit.wasm` 404s
 though the file exists in the SDK cache), so every widget test waits forever on a
 renderer that never initializes. Upstream closed it by deprecating the flag rather
 than fixing the server.  *(item 51)*
+
+**Three other explanations for that hang were chased and falsified first** — a
+real Bloc, `sqfliteFfiInit()` on web, and Chrome's Local Network Access policy.
+None of them is the cause; do not reopen them.  *(item 51)*
 
 **Python test files import like their siblings, not via `from .. import`** —
 `unittest discover` cannot load that form, and one file using it silently kept
@@ -585,6 +624,11 @@ that trade becomes unacceptable.  *(item 29)*
 no page markers, only headings and prose cross-references, and an earlier promise
 to add them could not be kept. A citation may name a book and a section heading,
 never a page.  *(items 27, 56)*
+
+**Core-rules line citations carried over from archived bodies are known to run
+about 8 lines low**, so verify one against `reviewed/` before relying on it —
+item 70.3 measured a uniform +8 offset, though the 12086 cited above was newly
+read and is correct.  *(item 70)*
 
 **Aquam MVP limitation:** the Aquam Form has 5 distinct base-Individual sub-types
 (water/liquids/poisons/blood/wine), each with slightly different guideline
