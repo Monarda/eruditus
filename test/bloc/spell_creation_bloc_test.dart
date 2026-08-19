@@ -830,16 +830,20 @@ void main() {
   // degrades to null" path, and only the tests below see a catalog.
 
   Parameter seedParam(String id, String name, String category, int magnitude,
-          {TargetType? targetType, ParameterScope scope = const ParameterScope()}) =>
+          {TargetType? targetType, ParameterScope scope = const ParameterScope(),
+          List<TargetType> forbidsTargetTypes = const [], String? requiresRangeId}) =>
       Parameter(
         id: id, name: name, category: category, magnitude: magnitude,
         targetType: targetType, scope: scope,
+        forbidsTargetTypes: forbidsTargetTypes, requiresRangeId: requiresRangeId,
         provenance: Provenance(
             source: PublicationSource.published,
             citations: const [Citation(bookId: 'arm5-core')]),
       );
 
-  final personal = seedParam('range-personal', 'Personal', 'Range', 0);
+  // Core 12086: a Personal Range forbids a container Target.
+  final personal = seedParam('range-personal', 'Personal', 'Range', 0,
+      forbidsTargetTypes: const [TargetType.container]);
   final touch = seedParam('range-touch', 'Touch', 'Range', 1);
   final voice = seedParam('range-voice', 'Voice', 'Range', 2);
   final momentary = seedParam('duration-momentary', 'Momentary', 'Duration', 0);
@@ -852,9 +856,12 @@ void main() {
       targetType: TargetType.container);
   final room = seedParam('target-room', 'Room', 'Target', 2,
       targetType: TargetType.container);
+  // HoH:MC 1006: a Sensory Target requires Personal Range.
+  final sound = seedParam('target-sound', 'Sound', 'Target', 2,
+      targetType: TargetType.sensorium, requiresRangeId: 'range-personal');
 
   final seedCatalog = [personal, touch, voice, momentary, ring, fire,
-      individual, circle, room];
+      individual, circle, room, sound];
 
   // Reference Touch/Ring/Circle -- the shape all 12 ward guidelines carry.
   //
@@ -1036,6 +1043,65 @@ void main() {
               ContainerMode.dynamic),
     ],
   );
+
+  group('Range and Target prune each other', () {
+    // Peers, unlike the Technique/Form scope axes: neither is upstream of
+    // the other, so pruning has to run both ways -- the field just edited
+    // wins and the conflicting peer yields.
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting Personal Range clears a container Target and its mode',
+      build: seedingBloc,
+      act: (bloc) => bloc
+        ..add(TargetSelected(room))
+        ..add(const ContainerModeSelected(ContainerMode.static))
+        ..add(RangeSelected(personal)),
+      verify: (bloc) {
+        expect(bloc.state.draft.target, isNull);
+        expect(bloc.state.draft.containerMode, ContainerMode.unstated);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a container Target clears a Personal Range',
+      build: seedingBloc,
+      act: (bloc) => bloc
+        ..add(RangeSelected(personal))
+        ..add(TargetSelected(room)),
+      verify: (bloc) {
+        expect(bloc.state.draft.range, isNull);
+        expect(bloc.state.draft.target, room);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a Sensory Target sets the Range it requires',
+      build: seedingBloc,
+      act: (bloc) => bloc
+        ..add(RangeSelected(voice))
+        ..add(TargetSelected(sound)),
+      verify: (bloc) {
+        expect(bloc.state.draft.range?.id, 'range-personal');
+        expect(bloc.state.draft.target, sound);
+      },
+    );
+
+    blocTest<SpellCreationBloc, SpellCreationState>(
+      'selecting a Range that conflicts with a Target-forced Range clears the Target',
+      // sound forces Range to Personal (requiresRangeId). Picking Touch next
+      // -- a Range sound never named -- must not leave sound behind: that
+      // pairing is exactly what check 11 rejects.
+      build: seedingBloc,
+      act: (bloc) => bloc
+        ..add(TargetSelected(sound))
+        ..add(RangeSelected(touch)),
+      verify: (bloc) {
+        expect(bloc.state.draft.range, touch);
+        expect(bloc.state.draft.target, isNull);
+        expect(bloc.state.draft.containerMode, ContainerMode.unstated);
+      },
+    );
+  });
 
   blocTest<SpellCreationBloc, SpellCreationState>(
     'adopting Ring drops a lastingCreation declaration, which is only true at Momentary',

@@ -1860,4 +1860,140 @@ void main() {
           .called(1);
     });
   });
+
+  group('peer-aware dropdowns', () {
+    // range-personal: forbids a container Target (Core Rules 12086).
+    final rangePersonal = Parameter(
+      id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+      forbidsTargetTypes: const [TargetType.container],
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+    // target-sound: a HoH:MC Sensory Target, dictates Range Personal (HoH:MC 1006).
+    final targetSound = Parameter(
+      id: 'target-sound', name: 'Sound', category: 'Target', magnitude: 5,
+      targetType: TargetType.sensorium,
+      requiresRangeId: 'range-personal',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-hohmc')]));
+    final targetRoom = Parameter(
+      id: 'target-room', name: 'Room', category: 'Target', magnitude: 10,
+      targetType: TargetType.container,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+    final targetIndividual = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 8,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+    testWidgets('a Range dictated by the Target is not editable', (tester) async {
+      // Pump the creation screen and select Sound as the Target first,
+      // following the setup the neighbouring tests use.
+      final draftState = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: rangePersonal, duration: duration, target: targetSound,
+        ),
+      );
+      await pumpScreen(
+        tester,
+        draftState,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [voiceParam, rangePersonal, durationParam, targetSound],
+        ),
+      );
+
+      final dropdown = tester.widget<DropdownButtonFormField<Parameter>>(
+        find.byKey(const Key('range-dropdown')),
+      );
+      expect(dropdown.onChanged, isNull);
+    });
+
+    testWidgets(
+        'container Targets are still offered while Personal Range is chosen '
+        '(the forbidding direction of check 10 is deliberately not filtered '
+        'here -- see _compatibleWithPeers)', (tester) async {
+      // Pump the creation screen with Personal already selected as the
+      // Range -- this is also the app's own default draft state
+      // (ParameterTriple.standard()), so a filter hiding Room here would
+      // hide it for every fresh spell.
+      final draftState = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: rangePersonal, duration: duration,
+        ),
+      );
+      await pumpScreen(
+        tester,
+        draftState,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [
+            voiceParam, rangePersonal, durationParam, targetRoom, targetIndividual,
+          ],
+        ),
+      );
+
+      // DropdownButtonFormField doesn't expose its `items` as a public
+      // field in this Flutter version (only `onChanged` is), so the items
+      // are read the same way the "Form-scoped parameter" test above does:
+      // open the menu and check which item texts are present.
+      await tester.tap(find.byKey(const Key('target-dropdown')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Room (+10)'), findsOneWidget);
+      expect(find.text('Individual (+8)'), findsOneWidget);
+    });
+
+    testWidgets(
+        'a draft the bloc can produce -- Personal Range with a container '
+        'Target already selected -- renders both dropdowns without throwing',
+        (tester) async {
+      // Core 12086 forbids this exact pair (a container Target under a
+      // Personal Range), and the old forbidding-direction filter tried to
+      // pre-empt it by dropping the conflicting choice from each dropdown's
+      // `items` -- while `initialValue` still held it, since neither
+      // dropdown's initialValue was ever filtered. That tripped
+      // DropdownButtonFormField's "exactly one item with value" assertion
+      // on both dropdowns at once. This is the regression pin: check 10 is
+      // still enforced (by validateSpellAgainstCatalog and by the bloc's own
+      // pruning on selection), just not by hiding the option pre-emptively.
+      final draftState = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: rangePersonal, duration: duration, target: targetRoom,
+        ),
+      );
+
+      await pumpScreen(
+        tester,
+        draftState,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [
+            voiceParam, rangePersonal, durationParam, targetRoom, targetIndividual,
+          ],
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+
+      final rangeDropdown = tester.widget<DropdownButtonFormField<Parameter>>(
+        find.byKey(const Key('range-dropdown')),
+      );
+      expect(rangeDropdown.initialValue, rangePersonal);
+
+      final targetDropdown = tester.widget<DropdownButtonFormField<Parameter>>(
+        find.byKey(const Key('target-dropdown')),
+      );
+      expect(targetDropdown.initialValue, targetRoom);
+
+      // The selected values render in the closed fields themselves, not
+      // just internally.
+      expect(find.text('Personal (+0)'), findsOneWidget);
+      expect(find.text('Room (+10)'), findsOneWidget);
+    });
+  });
 }

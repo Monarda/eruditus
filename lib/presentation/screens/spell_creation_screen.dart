@@ -289,7 +289,17 @@ class SpellCreationScreen extends StatelessWidget {
                         onChanged: (param) {
                           if (param != null) bloc.add(RangeSelected(param));
                         },
+                        peerTarget: draft.target,
+                        locked: draft.target?.requiresRangeId != null,
                       ),
+                      if (draft.target?.requiresRangeId != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '${draft.target!.name} requires this Range '
+                          '(Houses of Hermes: Mystery Cults, Sensory Magic).',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       // Duration dropdown
                       _buildParameterDropdown(
@@ -686,17 +696,36 @@ class SpellCreationScreen extends StatelessWidget {
     required String? technique,
     required String? form,
     required Function(Parameter?) onChanged,
+    Parameter? peerTarget,
+    bool locked = false,
   }) {
     final categoryParameters = parameters
         .where((p) =>
-            p.category == category && p.scope.appliesTo(technique: technique, form: form))
+            p.category == category &&
+            p.scope.appliesTo(technique: technique, form: form) &&
+            _compatibleWithPeers(p, peerTarget: peerTarget))
         .toList();
+
+    // A filter above can exclude the currently-selected parameter -- e.g. a
+    // draft holding a Range/Target pair a future filter rejects, or a
+    // parameter that dropped out of the catalog. DropdownButtonFormField
+    // asserts that `initialValue` appears exactly once in `items`; without
+    // this guard that assertion fires at build time (and in a release
+    // build, where asserts compile out, the field silently renders a blank
+    // selection while the draft still holds the value). This is the same
+    // hazard `_withPrunedScopedParameters` documents in
+    // spell_creation_bloc.dart -- that helper keeps the bloc's state from
+    // ever reaching a value absent from `items`; this guard is the last line
+    // of defence here in case a value gets through anyway.
+    final items = selectedParameter != null && !categoryParameters.contains(selectedParameter)
+        ? [...categoryParameters, selectedParameter]
+        : categoryParameters;
 
     return DropdownButtonFormField<Parameter>(
       key: key,
       decoration: InputDecoration(labelText: label),
       initialValue: selectedParameter,
-      items: categoryParameters
+      items: items
           .map((p) => DropdownMenuItem(
                 value: p,
                 child: Text(p.requiresVirtue == null
@@ -704,9 +733,44 @@ class SpellCreationScreen extends StatelessWidget {
                     : '${p.name} (+${p.magnitude}, requires ${p.requiresVirtue})'),
               ))
           .toList(),
-      onChanged: onChanged,
+      onChanged: locked ? null : onChanged,
     );
   }
+}
+
+/// Whether [candidate] can be chosen given the peer Target already selected.
+/// Mirrors check 11's forcing direction only (HoH:MC 1006: a Target that
+/// requires a specific Range narrows that Range's dropdown to the one value
+/// it names). The bloc is what enforces this (`TargetSelected` prunes); this
+/// only stops the dropdown offering a choice that would immediately be
+/// undone.
+///
+/// Check 10's forbidding direction (core 12086: a Personal Range forbids a
+/// container Target) is deliberately **not** filtered here, in either
+/// direction -- this was tried and removed; do not re-add it. Filtering the
+/// Target list by the peer Range hid all four container Targets (Circle,
+/// Room, Structure, Boundary) in the app's own default state, because
+/// `ParameterTriple.standard()` starts every fresh draft on Personal Range --
+/// with no explanation shown to the user for why they had vanished.
+/// Filtering the Range list by the peer Target's forbidden kinds is just as
+/// bad from the other side: the bloc's documented policy for this exact
+/// conflict is "the field just edited wins; the conflicting peer yields" --
+/// choosing Personal Range with Room already selected clears Room, and
+/// choosing Room with Personal already selected clears Range (see
+/// `RangeSelected`/`TargetSelected` in spell_creation_bloc.dart). A dropdown
+/// that never offers the conflicting choice in the first place makes that
+/// resolution unreachable from the app. Check 10 is still fully enforced --
+/// by `validateSpellAgainstCatalog` and by the bloc's own pruning on
+/// selection -- it is just not pre-emptively hidden here.
+bool _compatibleWithPeers(
+  Parameter candidate, {
+  Parameter? peerTarget,
+}) {
+  if (candidate.category == 'Range') {
+    final required = peerTarget?.requiresRangeId;
+    if (required != null && candidate.id != required) return false;
+  }
+  return true;
 }
 
 /// The level field for a General guideline (`BaseEffect.isGeneral`).

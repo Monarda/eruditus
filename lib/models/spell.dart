@@ -98,6 +98,7 @@ List<String> validateSpellAgainstCatalog({
   required Map<String, RequisiteKind> requisites,
   required Map<String, List<String>> selectedModifiers,
   required Map<String, String> chosenSlots,
+  required Parameter? range,
   required Parameter? target,
   required ContainerMode containerMode,
   required List<Modifier> modifiers,
@@ -228,6 +229,71 @@ List<String> validateSpellAgainstCatalog({
       'A container mode applies only to a container Target, and '
       '${target.name} is not one',
     );
+  }
+
+  // 10. Core Rules 12086: "Personal Range spells can never have a container
+  //     Target (such as Circle, Room, or Structure)." The first constraint in
+  //     this catalog where one parameter forbids another's value, rather than
+  //     forcing Ritual status or removing an option from a picker.
+  //
+  //     A null Range or Target skips this, matching check 9's tolerance: an id
+  //     the catalog cannot resolve is ResolvedSpell.isResolved's problem, not
+  //     this function's. Not wrapped in `if (!isTemplate)` — a template's Range
+  //     and Target are as fully its own as a spell's, and nothing about
+  //     instantiation supplies a Range.
+  final targetKind = target?.targetType;
+  if (range != null &&
+      targetKind != null &&
+      range.forbidsTargetTypes.contains(targetKind)) {
+    problems.add(
+      '${range.name} Range cannot be combined with ${target!.name}, '
+      'which is a ${targetKind.name} Target',
+    );
+  }
+
+  // 11. The forcing direction: a Target that dictates its spell's Range.
+  //     HoH:MC 1006 requires every Sensory Magic spell's Range to be Personal.
+  //     The creation screen sets and locks the Range, so a live draft cannot
+  //     reach this — but the importer and already-saved records never pass
+  //     through a dropdown, which is what this check is for.
+  //
+  //     The message names the required *id* rather than a display name,
+  //     deliberately: this function has no parameter catalog to resolve
+  //     against (check 5 resolves modifiers only because it is handed the
+  //     list), and the only reader who sees this message is looking at record
+  //     data, for whom the id is the more useful string. Check 7 sets the same
+  //     precedent when it cannot describe a slot kind.
+  final requiredRangeId = target?.requiresRangeId;
+  if (requiredRangeId != null && range != null && range.id != requiredRangeId) {
+    problems.add(
+      '${target!.name} requires the Range "$requiredRangeId", '
+      'but this spell uses ${range.name}',
+    );
+  }
+
+  // 12. HoH:MC 1009: a Sensory Magic spell "cannot employ the Technique of
+  //     Intellego, even as a requisite." Both halves of that sentence are
+  //     enforced here now: the spell's own Technique below, and each
+  //     requisite in the loop that follows. `ParameterScope.appliesTo`
+  //     filtering the excluded Technique out of the picker is a convenience
+  //     layer on top of this, not the guarantee -- the importer and
+  //     already-saved records never pass through a picker, which is what this
+  //     check is for.
+  //
+  //     Reads `scope.excludeTechniques` rather than adding a field, because
+  //     that list already carries exactly the right Techniques for the only
+  //     rule of this shape. ParameterScope's doc comment records that this is
+  //     now the field's meaning.
+  final excludedByTarget = target?.scope.excludeTechniques ?? const <String>[];
+  if (excludedByTarget.contains(technique)) {
+    problems.add('${target!.name} cannot be used on a $technique spell');
+  }
+  for (final art in requisites.keys) {
+    if (excludedByTarget.contains(art)) {
+      problems.add(
+        '${target!.name} cannot be used on a spell with $art as a requisite',
+      );
+    }
   }
 
   return problems;

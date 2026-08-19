@@ -8,8 +8,17 @@ import 'package:eruditus/utils/map_serialization.dart';
 /// [excludeTechniques] carves out Techniques the parameter never applies to,
 /// mirroring [ModifierScope.excludeTechniques] and added for the same shape of
 /// rule: HoH:MC's five Sensory Magic Targets, which the book forbids on any
-/// spell employing Intellego, "even as a requisite" -- the requisite half needs
-/// a validation check rather than a scope field, and is todo item 67.
+/// spell employing Intellego, "even as a requisite". **Both halves of that
+/// sentence now read this one list, and both are enforced at the validation
+/// layer:** check 12 in `spell.dart` rejects an excluded Technique as the
+/// spell's own Technique, and rejects it appearing among the spell's
+/// requisites. [appliesTo] filtering the parameter out of the picker for an
+/// excluded Technique is a convenience layer on top of that -- it saves the
+/// user from picking a combination check 12 would reject -- not the
+/// guarantee itself; the importer and already-saved records never pass
+/// through a picker. If a future parameter ever needs to exclude a Technique
+/// while permitting it as a requisite, that is when this field splits in
+/// two — not before.
 ///
 /// One list is positive and the other negative because that is how each rule is
 /// written, not by accident: Fire is offered *for* Ignem and Imaginem, while a
@@ -84,6 +93,37 @@ class Parameter {
   /// screen, which offers the container-mode control only for a container.
   final TargetType? targetType;
 
+  /// Target kinds this parameter may never be combined with.
+  ///
+  /// Only `range-personal` sets it, from Core Rules 12086: "Personal Range
+  /// spells can never have a container Target (such as Circle, Room, or
+  /// Structure)."
+  ///
+  /// Keyed on [TargetType], not on target ids, because that is how the rule is
+  /// written — "such as" is illustrative, and Boundary is a container too
+  /// (12146). Keying on the kind covers Boundary and any future container row
+  /// with no data edit.
+  ///
+  /// The *forbidding* half of the cross-field pair; [requiresRangeId] is the
+  /// forcing half. They are separate fields because a "must not" has no value
+  /// to impose and can only remove options, while a "must" can be auto-set.
+  final List<TargetType> forbidsTargetTypes;
+
+  /// The Range this parameter's spell must use, or null when it dictates none.
+  ///
+  /// Only the five HoH:MC Sensory Magic Targets set it, to `range-personal`,
+  /// from HoH:MC 1006: "The Range must be Personal."
+  ///
+  /// The *forcing* half of the cross-field pair — see [forbidsTargetTypes] for
+  /// the forbidding half and why they are separate. Named for the `requires*`
+  /// family ([requiresRitual], [requiresVirtue]) with the `Id` suffix marking a
+  /// catalog reference, as `rangeId`/`durationId`/`targetId` do elsewhere.
+  ///
+  /// Unlike [requiresVirtue], which is informational because the app has no
+  /// character model, this one *is* enforced: check 11 rejects a mismatch and
+  /// `SpellCreationBloc` sets and locks the Range.
+  final String? requiresRangeId;
+
   final Provenance provenance;
 
   Parameter({
@@ -95,6 +135,8 @@ class Parameter {
     this.requiresVirtue,
     this.scope = const ParameterScope(),
     this.targetType,
+    this.forbidsTargetTypes = const [],
+    this.requiresRangeId,
     required this.provenance,
   });
 
@@ -106,6 +148,9 @@ class Parameter {
     'requiresRitual': requiresRitual,
     if (requiresVirtue != null) 'requiresVirtue': requiresVirtue,
     if (targetType != null) 'targetType': targetType!.name,
+    if (forbidsTargetTypes.isNotEmpty)
+      'forbidsTargetTypes': forbidsTargetTypes.map((t) => t.name).toList(),
+    if (requiresRangeId != null) 'requiresRangeId': requiresRangeId,
     'scope': scope.toMap(),
     ...provenance.toMap(),
   };
@@ -123,6 +168,11 @@ class Parameter {
     targetType: map['targetType'] == null
         ? null
         : targetTypeFromName(map['targetType'] as String, 'Parameter'),
+    forbidsTargetTypes: (map['forbidsTargetTypes'] as List?)
+            ?.map((n) => targetTypeFromName(n as String, 'Parameter'))
+            .toList() ??
+        const [],
+    requiresRangeId: map['requiresRangeId'] as String?,
     provenance: Provenance.fromMap(map),
   );
 
