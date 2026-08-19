@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Stop hook: has the newest merge had its item-closure extraction done?
+# Exit 2 feeds stderr back to Claude and blocks the turn from ending.
+set -u
+
+state=".superpowers/.last-reviewed-merge"
+[ -f "$state" ] || exit 0
+
+newest=$(git rev-list --merges -1 HEAD 2>/dev/null) || exit 0
+[ -n "$newest" ] || exit 0
+
+reviewed=$(cat "$state")
+[ "$newest" = "$reviewed" ] && exit 0
+
+subject=$(git log -1 --format=%s "$newest")
+cat >&2 <<EOF
+Merge $newest has not been through item closure:
+
+  $subject
+
+Invoke the closing-an-item skill. If it closed no items, say so and record it:
+  git rev-list --merges -1 HEAD > $state
+EOF
+exit 2
