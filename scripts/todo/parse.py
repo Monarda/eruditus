@@ -38,8 +38,12 @@ class Item:
 def parse_items(lines: list[str]) -> list[Item]:
     heads = [(n, m) for n, line in enumerate(lines, 1)
              if (m := ITEM_RE.match(line))]
-    stops = sorted([n for n, line in enumerate(lines, 1) if SECTION_RE.match(line)]
-                   + [n for n, _ in heads])
+    # EVERY `### ` line stops a body, not just the ones carrying an id. An
+    # unnumbered heading (`### Base Effect Extraction`) would otherwise be
+    # swallowed by the preceding item AND re-emitted by _unclaimed_blocks,
+    # duplicating it in the archive and blurring that item's boundary.
+    stops = sorted(n for n, line in enumerate(lines, 1)
+                   if line.startswith("### ") or SECTION_RE.match(line))
     items = []
     for line_no, match in heads:
         later = [s for s in stops if s > line_no]

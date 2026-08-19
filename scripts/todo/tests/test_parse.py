@@ -45,6 +45,12 @@ class ParseItemsTest(unittest.TestCase):
         self.assertNotIn("Base Effect Extraction",
                          [i.title for i in parse_items(SAMPLE)])
 
+    def test_an_unnumbered_heading_still_ends_the_previous_body(self):
+        # otherwise item 65 swallows it, and the migrator emits it twice:
+        # once inside 65's body and once as an unclaimed block.
+        item = [i for i in parse_items(SAMPLE) if i.id == "65"][0]
+        self.assertNotIn("Unnumbered summary, no id at all.", item.body)
+
     def test_counts_open_and_done_bullets_separately(self):
         item = parse_items(SAMPLE)[0]
         self.assertEqual((item.open_bullets, item.done_bullets), (2, 1))

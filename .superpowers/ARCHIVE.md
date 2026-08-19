@@ -997,13 +997,6 @@ have won is a ledger decision, not a filter. What binds:
   unchanged source (they had drifted to 294 against 325). `--accept-source`
   still gates *adopting a moved rulebook* — that discipline is unchanged.
 
-### Base Effect Extraction
-604 base effects extracted from the rulebook's guideline tables; out-of-scope patterns
-documented; Flutter desktop setup fixed (`sqflite_common_ffi` init). The catalog
-stands at 611 today after items 34, 28, 17 and 64.
-
----
-
 
 ### Base Effect Extraction
 604 base effects extracted from the rulebook's guideline tables; out-of-scope patterns

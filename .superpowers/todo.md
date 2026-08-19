@@ -52,7 +52,7 @@ Standing constraints live in `DECISIONS.md`; closed bodies in `ARCHIVE.md`.
 | 39 | — | closed | ARCHIVE.md | Ambiguous Ledger Resolutions Needing a Rules Decision — 4 of 4 |
 | 40 | — | closed | ARCHIVE.md | Model Invariants Have Only One Enforcement Path — COMPLETE 2026-08-16 |
 | 41 | maybe | open | rules-fidelity.md | Row-Duplication Ladders Across the Catalog (item 28's shape, elsewhere) |
-| 42 | do | open 1/1 | rules-fidelity.md | Derived Ease Factor Display for Poison/Disease Guidelines |
+| 42 | decide | open 1/1 | rules-fidelity.md | Derived Ease Factor Display for Poison/Disease Guidelines |
 | 43 | — | closed | ARCHIVE.md | Transport-Distance Modifier Wiring — DONE 2026-08-15 |
 | 44 | — | closed | ARCHIVE.md | Bare/Non-standard Requisite-Magnitude Phrasing — DONE 2026-08-15 |
 | 45 | — | closed | ARCHIVE.md | Design-Line Tokenizer Doesn't Recognize Transport-Distance Labels |
@@ -66,7 +66,7 @@ Standing constraints live in `DECISIONS.md`; closed bodies in `ARCHIVE.md`.
 | 53 | decide | open 1/1 | model.md | Bargain Duration's Nested Level Computation |
 | 54 | decide | open 1/1 | model.md | Open/Variable Requisites (Per-Casting, Not Per-Catalog-Entry) |
 | 55 | — | closed | ARCHIVE.md | The Catalog Stopped Being Core-Rules-Only — RESOLVED 2026-08-17 |
-| 56 | do | open 2/2 | app.md | Rules Hints — What a Choice Means, and Where It Comes From |
+| 56 | decide | open 2/2 | app.md | Rules Hints — What a Choice Means, and Where It Comes From |
 | 57 | decide | open 3/3 | model.md | The Remaining 16 Container Rows Still Owe a Static/Dynamic Ruling |
 | 58 | do | open 4/6 | app.md | Container Target Mode — UX Seam Between the Bloc/UI Work and the Derived Predicate |
 | 59 | — | closed | ARCHIVE.md | The Spell Level Computes Live (`99aa462..e6a61b4`) |
