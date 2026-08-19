@@ -1860,4 +1860,84 @@ void main() {
           .called(1);
     });
   });
+
+  group('peer-aware dropdowns', () {
+    // range-personal: forbids a container Target (Core Rules 12086).
+    final rangePersonal = Parameter(
+      id: 'range-personal', name: 'Personal', category: 'Range', magnitude: 0,
+      forbidsTargetTypes: const [TargetType.container],
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+    // target-sound: a HoH:MC Sensory Target, dictates Range Personal (HoH:MC 1006).
+    final targetSound = Parameter(
+      id: 'target-sound', name: 'Sound', category: 'Target', magnitude: 5,
+      targetType: TargetType.sensorium,
+      requiresRangeId: 'range-personal',
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-hohmc')]));
+    final targetRoom = Parameter(
+      id: 'target-room', name: 'Room', category: 'Target', magnitude: 10,
+      targetType: TargetType.container,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+    final targetIndividual = Parameter(
+      id: 'target-individual', name: 'Individual', category: 'Target', magnitude: 8,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]));
+
+    testWidgets('a Range dictated by the Target is not editable', (tester) async {
+      // Pump the creation screen and select Sound as the Target first,
+      // following the setup the neighbouring tests use.
+      final draftState = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: rangePersonal, duration: duration, target: targetSound,
+        ),
+      );
+      await pumpScreen(
+        tester,
+        draftState,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [voiceParam, rangePersonal, durationParam, targetSound],
+        ),
+      );
+
+      final dropdown = tester.widget<DropdownButtonFormField<Parameter>>(
+        find.byKey(const Key('range-dropdown')),
+      );
+      expect(dropdown.onChanged, isNull);
+    });
+
+    testWidgets('container Targets are hidden while Personal Range is chosen',
+        (tester) async {
+      // Pump the creation screen and select Personal as the Range first.
+      final draftState = SpellCreationState(
+        status: SpellCreationStatus.editing,
+        draft: SpellDraft(
+          technique: 'Creo', form: 'Ignem', baseEffect: creoIgnemEffect,
+          range: rangePersonal, duration: duration,
+        ),
+      );
+      await pumpScreen(
+        tester,
+        draftState,
+        configState: ConfigurationState(
+          status: ConfigurationStatus.loaded,
+          effects: [creoIgnemEffect],
+          parameters: [
+            voiceParam, rangePersonal, durationParam, targetRoom, targetIndividual,
+          ],
+        ),
+      );
+
+      // DropdownButtonFormField doesn't expose its `items` as a public
+      // field in this Flutter version (only `onChanged` is), so the items
+      // are read the same way the "Form-scoped parameter" test above does:
+      // open the menu and check which item texts are present.
+      await tester.tap(find.byKey(const Key('target-dropdown')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Room (+10)'), findsNothing);
+      expect(find.text('Individual (+8)'), findsOneWidget);
+    });
+  });
 }

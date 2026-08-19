@@ -289,7 +289,17 @@ class SpellCreationScreen extends StatelessWidget {
                         onChanged: (param) {
                           if (param != null) bloc.add(RangeSelected(param));
                         },
+                        peerTarget: draft.target,
+                        locked: draft.target?.requiresRangeId != null,
                       ),
+                      if (draft.target?.requiresRangeId != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          '${draft.target!.name} requires this Range '
+                          '(Houses of Hermes: Mystery Cults, Sensory Magic).',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                       const SizedBox(height: 12),
                       // Duration dropdown
                       _buildParameterDropdown(
@@ -317,6 +327,7 @@ class SpellCreationScreen extends StatelessWidget {
                         onChanged: (param) {
                           if (param != null) bloc.add(TargetSelected(param));
                         },
+                        peerRange: draft.range,
                       ),
                       if (draft.target?.targetType == TargetType.container) ...[
                         const SizedBox(height: 12),
@@ -686,10 +697,15 @@ class SpellCreationScreen extends StatelessWidget {
     required String? technique,
     required String? form,
     required Function(Parameter?) onChanged,
+    Parameter? peerRange,
+    Parameter? peerTarget,
+    bool locked = false,
   }) {
     final categoryParameters = parameters
         .where((p) =>
-            p.category == category && p.scope.appliesTo(technique: technique, form: form))
+            p.category == category &&
+            p.scope.appliesTo(technique: technique, form: form) &&
+            _compatibleWithPeers(p, peerRange: peerRange, peerTarget: peerTarget))
         .toList();
 
     return DropdownButtonFormField<Parameter>(
@@ -704,9 +720,35 @@ class SpellCreationScreen extends StatelessWidget {
                     : '${p.name} (+${p.magnitude}, requires ${p.requiresVirtue})'),
               ))
           .toList(),
-      onChanged: onChanged,
+      onChanged: locked ? null : onChanged,
     );
   }
+}
+
+/// Whether [candidate] can be chosen given the peer Range/Target already
+/// selected. Mirrors checks 10 and 11. The bloc is what enforces them
+/// (`RangeSelected`/`TargetSelected` prune); this only stops the dropdown
+/// offering a choice that would immediately be undone.
+bool _compatibleWithPeers(
+  Parameter candidate, {
+  Parameter? peerRange,
+  Parameter? peerTarget,
+}) {
+  if (candidate.category == 'Target') {
+    final kind = candidate.targetType;
+    if (peerRange != null &&
+        kind != null &&
+        peerRange.forbidsTargetTypes.contains(kind)) {
+      return false;
+    }
+  }
+  if (candidate.category == 'Range') {
+    final required = peerTarget?.requiresRangeId;
+    if (required != null && candidate.id != required) return false;
+    final kind = peerTarget?.targetType;
+    if (kind != null && candidate.forbidsTargetTypes.contains(kind)) return false;
+  }
+  return true;
 }
 
 /// The level field for a General guideline (`BaseEffect.isGeneral`).
