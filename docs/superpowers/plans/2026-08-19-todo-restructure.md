@@ -525,6 +525,10 @@ ROW_RE = re.compile(
     r"\s*(?P<home>[^|]*)\|"              # home
 )
 COUNT_RE = re.compile(r"open\s+(?P<open>\d+)/(?P<total>\d+)")
+# Deliberately under-detects: catches `item 25`, but only the FIRST number of
+# `items 65, 57, 27`. A green run therefore proves that no DETECTED reference
+# dangles -- not that every reference in the tree resolves. Widening this to
+# comma lists is a fine later change; never weaken it to silence a failure.
 XREF_RE = re.compile(r"\bitems?\s+(\d+[a-z]?)")
 
 
