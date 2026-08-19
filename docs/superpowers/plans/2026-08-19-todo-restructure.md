@@ -57,7 +57,7 @@ Scriptable and verifiable. Ends with a green checker and a byte-level reconcilia
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `Item` dataclass with fields `id: str`, `title: str`, `start: int`, `end: int`, `body: list[str]`, `open_bullets: int`, `done_bullets: int`, and property `total_bullets: int`. Function `parse_items(lines: list[str]) -> list[Item]`. Function `section_of(lines: list[str], line_no: int) -> str` returning the enclosing `## ` heading text.
+- Produces: `Item` dataclass with fields `id: str`, `title: str`, `heading: str` (the raw `### ` line), `start: int`, `end: int`, `body: list[str]`, `open_bullets: int`, `done_bullets: int`, and property `total_bullets: int`. Function `parse_items(lines: list[str]) -> list[Item]`. Function `section_of(lines: list[str], line_no: int) -> str` returning the enclosing `## ` heading text.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -80,14 +80,35 @@ Prose only, no bullets.
 
 ## Completed
 
+### 35 / 37. Open Guideline Slots — DONE
+Two ids in one heading; 35 owns this body.
+
 ### 65. HoH:MC Spell Extraction
 - **Not a checkbox bullet.**
+
+### Base Effect Extraction
+Unnumbered summary, no id at all.
 """.split("\n")
 
 
 class ParseItemsTest(unittest.TestCase):
     def test_finds_every_item_including_letter_suffixed_ids(self):
-        self.assertEqual([i.id for i in parse_items(SAMPLE)], ["7", "4b", "65"])
+        self.assertEqual([i.id for i in parse_items(SAMPLE)],
+                         ["7", "4b", "35", "65"])
+
+    def test_a_compound_heading_is_owned_by_its_first_id(self):
+        item = [i for i in parse_items(SAMPLE) if i.id == "35"][0]
+        self.assertEqual(item.title, "Open Guideline Slots — DONE")
+
+    def test_the_raw_heading_is_kept_verbatim(self):
+        # migration re-emits this line rather than rebuilding it, so the
+        # "/ 37" cross-link survives the move to the archive
+        item = [i for i in parse_items(SAMPLE) if i.id == "35"][0]
+        self.assertEqual(item.heading, "### 35 / 37. Open Guideline Slots — DONE")
+
+    def test_an_unnumbered_heading_is_not_an_item(self):
+        self.assertNotIn("Base Effect Extraction",
+                         [i.title for i in parse_items(SAMPLE)])
 
     def test_counts_open_and_done_bullets_separately(self):
         item = parse_items(SAMPLE)[0]
@@ -98,7 +119,7 @@ class ParseItemsTest(unittest.TestCase):
         self.assertEqual(parse_items(SAMPLE)[1].total_bullets, 0)
 
     def test_a_non_checkbox_bullet_is_not_counted(self):
-        self.assertEqual(parse_items(SAMPLE)[2].total_bullets, 0)
+        self.assertEqual(parse_items(SAMPLE)[3].total_bullets, 0)
 
     def test_body_stops_at_the_next_section_not_the_next_item(self):
         # 4b is the last item of section C; its body must not swallow
@@ -110,7 +131,7 @@ class ParseItemsTest(unittest.TestCase):
     def test_section_of_reports_the_enclosing_section(self):
         items = parse_items(SAMPLE)
         self.assertEqual(section_of(SAMPLE, items[0].start), "C. Not on the Critical Path")
-        self.assertEqual(section_of(SAMPLE, items[2].start), "Completed")
+        self.assertEqual(section_of(SAMPLE, items[3].start), "Completed")
 
     def test_titles_drop_the_id_prefix(self):
         self.assertEqual(parse_items(SAMPLE)[0].title, "Spell Export/Backup Validation")
@@ -141,7 +162,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-ITEM_RE = re.compile(r"^### (?P<id>\d+[a-z]?)\.\s*(?P<title>.*)$")
+# Two closed headings name two ids at once -- `### 35 / 37.`, `### 43 / 45.`.
+# The first id owns the body; the second has a heading of its own elsewhere.
+ITEM_RE = re.compile(
+    r"^### (?P<id>\d+[a-z]?)(?: */ *\d+[a-z]?)*\.\s*(?P<title>.*)$")
 SECTION_RE = re.compile(r"^## (?P<title>.*)$")
 OPEN_BULLET_RE = re.compile(r"^\s*- \[ \]")
 DONE_BULLET_RE = re.compile(r"^\s*- \[x\]")
@@ -151,6 +175,7 @@ DONE_BULLET_RE = re.compile(r"^\s*- \[x\]")
 class Item:
     id: str
     title: str
+    heading: str        # the raw `### ` line, carried verbatim on migration
     start: int          # 1-based line number of the ### heading
     end: int            # 1-based, inclusive, last line of the body
     body: list[str]
@@ -175,6 +200,7 @@ def parse_items(lines: list[str]) -> list[Item]:
         items.append(Item(
             id=match.group("id"),
             title=match.group("title").strip(),
+            heading=lines[line_no - 1],
             start=line_no,
             end=end,
             body=body,
@@ -198,7 +224,7 @@ def section_of(lines: list[str], line_no: int) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 6 tests
+Expected: PASS, 10 tests
 
 - [ ] **Step 5: Sanity-check against the real file**
 
@@ -211,7 +237,12 @@ items = parse_items(lines)
 print(len(items), 'items;', sum(i.open_bullets for i in items), 'open bullets')
 "
 ```
-Expected: `81 items; 80 open bullets`
+Expected: `80 items; 80 open bullets`
+
+80 items across 81 `### ` headings: two headings name two ids each (`35 / 37`,
+`43 / 45`) and one, `Base Effect Extraction`, has no id and is not an item.
+The 80 cover 76 distinct ids — 4, 59, 60 and 61 each appear twice, three as
+tombstones and one (item 4) as an open body plus an archived predecessor.
 
 - [ ] **Step 6: Commit**
 
@@ -357,7 +388,7 @@ git commit -m "feat: pin the id-to-theme mapping with a reality check"
 - Create: `scripts/todo/tests/test_check.py`
 
 **Interfaces:**
-- Consumes: `parse_items`, `Item` from Task 1; `ALL_IDS` from Task 2.
+- Consumes: `parse_items`, `Item` from Task 1; `ALL_IDS` from Task 2. An ARCHIVE body is legal for any indexed id (history); a theme body must match its index row.
 - Produces: `check(root: Path) -> list[str]` returning human-readable problems, empty when clean. `main() -> int` for CLI use, exit 1 on problems. Scans only `TRACKED` plus `themes/*.md` — never the git-ignored scratch under `.superpowers/`.
 
 This is the artefact that outlives the migration. It encodes the spec's Verification section as something runnable.
@@ -434,6 +465,13 @@ class CheckTest(unittest.TestCase):
         problems = self.run_on(index=INDEX + "| 7 | do | open 2/3 | app.md | Dup |\n")
         self.assertTrue(any("7" in p and "twice" in p.lower() for p in problems))
 
+    def test_an_archived_predecessor_under_an_open_id_is_legal(self):
+        # item 4 has an open body in a theme AND an archived predecessor
+        # under the same number. The archive is history, not a second home.
+        problems = self.run_on(
+            archive=ARCHIVE + "\n### 7. Backup checks, the original\nClosed part.\n")
+        self.assertEqual(problems, [])
+
     def test_git_ignored_scratch_is_not_scanned(self):
         # .superpowers/sdd/<plan>/ holds task briefs that quote item numbers
         # out of the plan. They are not part of the todo tree.
@@ -475,7 +513,7 @@ import re
 import sys
 from pathlib import Path
 
-from scripts.todo.parse import parse_items
+from scripts.todo.parse import Item, parse_items
 
 ROW_RE = re.compile(
     r"^\|\s*(?P<id>\d+[a-z]?)\s*\|"      # id
@@ -527,21 +565,33 @@ def check(root: Path) -> list[str]:
             problems.append(f"item {row['id']}: listed twice in the index")
         seen.add(row["id"])
 
-    # Every body heading, keyed by id, with the file it was found in.
-    bodies: dict[str, tuple[str, object]] = {}
-    for path in sorted(root.glob("themes/*.md")) + [root / "ARCHIVE.md"]:
-        if not path.exists():
-            continue
+    # A theme body is an item's home and must match its index row. An ARCHIVE
+    # body is history and is legal for any indexed id -- item 4 has an open
+    # body in a theme AND an archived predecessor under the same number.
+    theme_bodies: dict[str, tuple[str, Item]] = {}
+    for path in sorted(root.glob("themes/*.md")):
         for item in parse_items(_read(path)):
-            if item.id in bodies:
-                problems.append(f"item {item.id}: body appears in two files")
-            bodies[item.id] = (path.name, item)
+            if item.id in theme_bodies:
+                problems.append(
+                    f"item {item.id}: body appears in two theme files")
+            theme_bodies[item.id] = (path.name, item)
+
+    archive_bodies: dict[str, Item] = {}
+    archive = root / "ARCHIVE.md"
+    if archive.exists():
+        for item in parse_items(_read(archive)):
+            archive_bodies[item.id] = item
 
     by_id = {row["id"]: row for row in rows}
 
     for row in rows:
         home, item_id = row["home"], row["id"]
-        found = bodies.get(item_id)
+        if home == "ARCHIVE.md":
+            if item_id not in archive_bodies:
+                problems.append(
+                    f"item {item_id}: index says ARCHIVE.md, no body there")
+            continue
+        found = theme_bodies.get(item_id)
         if found is None or found[0] != home:
             where = "nowhere" if found is None else found[0]
             problems.append(
@@ -556,9 +606,12 @@ def check(root: Path) -> list[str]:
                     f"item {item_id}: index claims open {claimed[0]}/{claimed[1]}, "
                     f"body has {actual[0]}/{actual[1]}")
 
-    for item_id, (name, _) in sorted(bodies.items()):
+    for item_id, (name, _) in sorted(theme_bodies.items()):
         if item_id not in by_id:
             problems.append(f"item {item_id}: orphan heading in {name}, no index row")
+    for item_id in sorted(archive_bodies):
+        if item_id not in by_id:
+            problems.append(f"item {item_id}: orphan heading in ARCHIVE.md, no index row")
 
     for path in _tracked_files(root):
         for n, line in enumerate(_read(path), 1):
@@ -587,7 +640,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_check -v`
-Expected: PASS, 7 tests
+Expected: PASS, 8 tests
 
 **Known limitation, accept it deliberately:** `XREF_RE` catches `item 25` and
 the *first* number of `items 65, 57, 27`. It under-detects rather than
@@ -641,6 +694,9 @@ Closed, with a binding constraint inside.
 
 ### 73. Deferred Minor Findings
 - [ ] Something still open
+
+### Base Effect Extraction
+Unnumbered, but real closed-work summary.
 """.split("\n")
 
 
@@ -703,6 +759,9 @@ class SplitTest(unittest.TestCase):
     def test_the_index_records_sub_bullet_counts(self):
         self.assertIn("open 1/2", self.out["todo.md"])
 
+    def test_an_unnumbered_block_still_reaches_the_archive(self):
+        self.assertIn("### Base Effect Extraction", self.out["ARCHIVE.md"])
+
     def test_bodies_are_carried_verbatim_apart_from_sub_ids(self):
         self.assertIn("Closed, with a binding constraint inside.",
                       self.out["ARCHIVE.md"])
@@ -760,6 +819,24 @@ def add_sub_ids(body: list[str], item_id: str) -> list[str]:
     return out
 
 
+def _unclaimed_blocks(lines: list[str]) -> list[str]:
+    """`### ` blocks carrying no parseable id, e.g. `### Base Effect Extraction`.
+
+    They are real closed-work summary and must reach the archive. Only the band
+    headers and the status section are deliberate deletions -- an unnumbered
+    heading is not on that list, and dropping it would be a silent loss.
+    """
+    claimed = {item.start for item in parse_items(lines)}
+    out: list[str] = []
+    for n, line in enumerate(lines, 1):
+        if not line.startswith("### ") or n in claimed:
+            continue
+        end = next((m for m, later in enumerate(lines[n:], n + 1)
+                    if later.startswith(("### ", "## "))), len(lines) + 1)
+        out.extend(lines[n - 1:end - 1] + [""])
+    return out
+
+
 def _status(item: Item, closed: bool) -> str:
     if closed:
         return "closed"
@@ -795,7 +872,7 @@ def split(lines: list[str],
         closed = in_completed and item.id not in MISFILED
         home = "ARCHIVE.md" if closed else f"themes/{THEMES[item.id]}"
         body = item.body if closed else add_sub_ids(item.body, item.id)
-        emit(home, [f"### {item.id}. {item.title}"] + body + [""])
+        emit(home, [item.heading] + body + [""])
         shown = home.split("/")[-1]
         rows.append((item.id, f"| {item.id} |  | {_status(item, closed)} "
                               f"| {shown} | {item.title} |"))
@@ -816,12 +893,12 @@ def split(lines: list[str],
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `uv run --no-project python -m unittest scripts.todo.tests.test_migrate -v`
-Expected: PASS, 12 tests
+Expected: PASS, 14 tests
 
 - [ ] **Step 5: Run the whole suite**
 
 Run: `uv run --no-project python -m unittest discover -s scripts/todo/tests -t . -v`
-Expected: PASS, 30 tests
+Expected: PASS, 37 tests
 
 - [ ] **Step 6: Commit**
 
