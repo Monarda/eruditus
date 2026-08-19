@@ -11,6 +11,7 @@ writes it — a generated file that silently rewrites the human decisions it
 depends on is not a ledger.
 """
 import dataclasses
+import hashlib
 import json
 import pathlib
 
@@ -44,6 +45,39 @@ class UnnecessaryEntry(LedgerError):
     pass
 
 
+def audit_digest(base_effect_id: str, candidates) -> str:
+    """Fingerprint of the *decision* an audit checked, not of the whole entry.
+
+    Deliberately covers only the chosen id and the candidate set. A rationale
+    can be rewritten -- item 32.2 rewrote several -- without invalidating an
+    audit, because the audit tested which row the spell was built on, not the
+    prose explaining it. Change the pick or the field of candidates and the
+    digest moves, which is exactly when the entry owes a fresh look.
+    """
+    payload = f"{base_effect_id}|{','.join(sorted(candidates))}"
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
+
+
+@dataclasses.dataclass(frozen=True)
+class Audit:
+    """One independent re-derivation of an entry's choice.
+
+    `outcome` is "agreed" when the audit reached the recorded id unprompted,
+    "adjudicated" when it disagreed or flagged the entry and a human then
+    settled it. There is no "verified" -- an audit that agrees with the
+    artifact under audit has scored agreement, not correctness. See item 32.
+    """
+    swept_at: str
+    outcome: str
+    digest: str
+
+    OUTCOMES = ("agreed", "adjudicated")
+
+    def to_dict(self) -> dict:
+        return {"sweptAt": self.swept_at, "outcome": self.outcome,
+                "digest": self.digest}
+
+
 @dataclasses.dataclass(frozen=True)
 class Entry:
     base_effect_id: str
@@ -56,6 +90,10 @@ class Entry:
     # named here rather than folded into `candidates` and forgotten — see
     # todo item 32, whose whole subject is entries no test can check.
     unreviewed_candidates: tuple[str, ...] = ()
+    # The last independent re-derivation of this entry's choice, or None if
+    # the entry has never been audited. Stale (digest no longer matching the
+    # pick and candidates) counts as never -- see `Ledger.unaudited`.
+    audit: "Audit | None" = None
 
 
 @dataclasses.dataclass
@@ -78,11 +116,26 @@ class Ledger:
                     f"{spell_id}: unreviewedCandidates {unknown} are not among "
                     "this entry's candidates"
                 )
+            raw_audit = value.get("audit")
+            audit = None
+            if raw_audit is not None:
+                for field in ("sweptAt", "outcome", "digest"):
+                    if field not in raw_audit:
+                        raise ValueError(
+                            f"{spell_id}: audit block is missing {field!r}")
+                if raw_audit["outcome"] not in Audit.OUTCOMES:
+                    raise ValueError(
+                        f"{spell_id}: audit outcome {raw_audit['outcome']!r} is not "
+                        f"one of {Audit.OUTCOMES}")
+                audit = Audit(swept_at=raw_audit["sweptAt"],
+                              outcome=raw_audit["outcome"],
+                              digest=raw_audit["digest"])
             entries[spell_id] = Entry(
                 base_effect_id=value["baseEffectId"],
                 candidates=sorted(value["candidates"]),
                 rationale=value["rationale"],
                 unreviewed_candidates=unreviewed,
+                audit=audit,
             )
         return cls(entries=entries)
 
@@ -95,6 +148,26 @@ class Ledger:
         return {spell_id: entry.unreviewed_candidates
                 for spell_id, entry in sorted(self.entries.items())
                 if entry.unreviewed_candidates}
+
+    def unaudited(self) -> dict[str, str]:
+        """Every entry no audit currently covers, by spell id, with the reason.
+
+        "Currently" is the load-bearing word: an entry whose pick or candidate
+        set moved since it was swept is unaudited again, because the thing the
+        audit checked is not the thing the entry now says. This is what keeps
+        the cost of auditing a new book proportional to that book rather than
+        to the whole ledger.
+        """
+        stale: dict[str, str] = {}
+        for spell_id, entry in sorted(self.entries.items()):
+            if entry.audit is None:
+                stale[spell_id] = "never audited"
+            elif entry.audit.digest != audit_digest(
+                entry.base_effect_id, entry.candidates
+            ):
+                stale[spell_id] = (
+                    f"decision changed since {entry.audit.swept_at}")
+        return stale
 
     def resolve(self, spell_id: str, candidates: list[str]) -> str:
         candidates = sorted(candidates)

@@ -7,6 +7,84 @@ def build(entries: dict) -> ledger.Ledger:
     return ledger.Ledger.from_dict(entries)
 
 
+
+class AuditCoverageTest(unittest.TestCase):
+    """Every committed decision is covered by a current audit.
+
+    Item 32 closed on a redefined criterion: not "a human has verified every
+    entry", which is unreachable at 217 entries and absurd at the 1,000+ the
+    remaining books will bring, but "every entry has been through an
+    independent blind audit and every disagreement has been adjudicated".
+    That criterion is only meaningful if it stays true, so this test is what
+    holds it: change a pick or a candidate set without re-auditing and the
+    entry's digest stops matching, which fails here rather than quietly
+    leaving an unaudited decision in a ledger that claims to be audited.
+
+    The fix when this fails is to re-audit the named entries -- a batch of
+    one or two, not the whole ledger, which is the entire point of storing
+    the digest per entry.
+    """
+
+    def test_no_entry_is_unaudited_or_stale(self):
+        stale = ledger.Ledger.load().unaudited()
+        self.assertEqual(
+            stale, {},
+            msg=("these ledger decisions are not covered by a current audit; "
+                 "re-audit them and update their audit block"),
+        )
+
+    def test_an_edited_decision_goes_stale(self):
+        """The guard above must actually notice a changed pick."""
+        raw = {
+            "lib-test-spell": {
+                "baseEffectId": "test-1a",
+                "candidates": ["test-1a", "test-1b"],
+                "rationale": "because",
+                "audit": {
+                    "sweptAt": "2026-08-19",
+                    "outcome": "agreed",
+                    "digest": ledger.audit_digest("test-1a", ["test-1a", "test-1b"]),
+                },
+            }
+        }
+        self.assertEqual(ledger.Ledger.from_dict(raw).unaudited(), {})
+        raw["lib-test-spell"]["baseEffectId"] = "test-1b"
+        stale = ledger.Ledger.from_dict(raw).unaudited()
+        self.assertIn("lib-test-spell", stale)
+        self.assertIn("decision changed", stale["lib-test-spell"])
+
+    def test_a_rationale_rewrite_does_not_go_stale(self):
+        """Rewriting prose must not demand a re-audit -- 32.2 rewrote several."""
+        raw = {
+            "lib-test-spell": {
+                "baseEffectId": "test-1a",
+                "candidates": ["test-1a", "test-1b"],
+                "rationale": "the original wording",
+                "audit": {
+                    "sweptAt": "2026-08-19",
+                    "outcome": "agreed",
+                    "digest": ledger.audit_digest("test-1a", ["test-1a", "test-1b"]),
+                },
+            }
+        }
+        raw["lib-test-spell"]["rationale"] = "a completely different argument"
+        self.assertEqual(ledger.Ledger.from_dict(raw).unaudited(), {})
+
+    def test_an_unknown_outcome_is_rejected(self):
+        raw = {
+            "lib-test-spell": {
+                "baseEffectId": "test-1a",
+                "candidates": ["test-1a"],
+                "rationale": "because",
+                "audit": {"sweptAt": "2026-08-19", "outcome": "verified",
+                          "digest": "0" * 12},
+            }
+        }
+        with self.assertRaises(ValueError) as caught:
+            ledger.Ledger.from_dict(raw)
+        self.assertIn("verified", str(caught.exception))
+
+
 class ResolveTest(unittest.TestCase):
     def test_single_candidate_needs_no_entry(self):
         self.assertEqual(build({}).resolve("lib-cran-x", ["cran-5a"]), "cran-5a")

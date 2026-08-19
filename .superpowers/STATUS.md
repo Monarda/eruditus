@@ -19,7 +19,7 @@ plus assertion 8):**
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **745 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **393 tests, green** — 2026-08-19; +2 for the report/lock guard and the second combined-effect spell |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **397 tests, green** — 2026-08-19; +6 for the report/lock guard, the second combined-effect spell, and audit coverage |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **0 ledger entries carry an unreviewed candidate** (was 7), and the count can no
@@ -46,7 +46,7 @@ guards the rule. Extractor counts are unchanged and it no longer prints the
 | `spell_library.json` | 336 | 325 core + 11 HoH:MC (item 65) |
 | `spell_templates.json` | 31 | 27 core-extracted + 4 hand-authored/HoH:MC-extracted (item 17's 1 plus item 65's 3) |
 | `spell_exceptions.json` | 8 | item 46 |
-| `resolutions.json` | 217 | item 32; 0 carry an unreviewed candidate since 32.1 |
+| `resolutions.json` | 217 | item 32, closed; 0 unreviewed candidates, 0 unaudited |
 
 **All 360 published Chapter 9 spells are still accounted for**, and item 65
 adds *Houses of Hermes: Mystery Cults*' own 15 (11 library spells + 4
@@ -77,7 +77,7 @@ levels; the 20 were the all-General entries, which are *more* exposed, not
 less. Assertion 1 discriminates among candidates on no entry at all. See item
 32.3.
 
-**Item 32.2 has swept all 217 with a blind model pass and corrected 4.**
+**Item 32 is closed.** All 217 entries were swept by a blind model pass and 4 corrected.
 Eight Sonnet agents, candidates shuffled, answers withheld: **207 agreements,
 10 disagreements, 4 self-flagged**. `lib-inte-tracks-faerie-glow` and
 `lib-inte-sense-feet-that-tread-earth` moved to `inte-4b` (item 39 had
@@ -85,11 +85,17 @@ resolved three spells on one shared argument that holds for only one of them);
 `lib-peco-twist-tongue` moved to `peco-15b` (speech is not a sense);
 `lib-crig-heat-searing-forge` and `lib-peig-conjuration-indubitable-cold` both
 turned out to be combined-effect spells rather than single-guideline ones.
-**The sweep does not close 32.2**: agreement with the ledger scores agreement
-with the artifact under audit, so the 207 unflagged entries are unverified, not
-verified. Two model flags were the model being wrong where the ledger was
-right (*Wind of Mundane Silence*, *Trackless Step*) — read the flags, don't
-obey them.
+Two model flags were the model being wrong where the ledger was right (*Wind of
+Mundane Silence*, *Trackless Step*) — read the flags, don't obey them.
+
+The item closed on a **redefined criterion**: not "a human has verified every
+entry", which is unreachable at 217 and absurd at the 1,000+ the remaining
+books will bring, but "every entry has been through an independent blind audit
+and every disagreement has been adjudicated". Every entry now carries an
+`audit` block — **204 `agreed`, 13 `adjudicated`, 0 unaudited** — and
+`AuditCoverageTest` fails if a pick or candidate set moves without a fresh
+audit. The ledger is audited, **not** verified; see DECISIONS.md. A new book
+owes an audit of its own entries only.
 
 **Two things confirmed as needing nothing further:**
 - **The parameter catalog is complete.** Every Range, Duration and Target used

@@ -701,3 +701,26 @@ calculations are deferred.
 
 **The original "~200 flagged effects" figure was wrong and should not be
 quoted.**  *(items 4, 12)*
+
+### An audited ledger entry is not a verified one
+
+Every `resolutions.json` entry carries an `audit` block: when it was last
+independently re-derived, whether that pass `agreed` or the entry was
+`adjudicated` by a human, and a digest of the decision audited. There is
+deliberately no `verified` outcome. An audit that agrees with the ledger has
+scored agreement with the artifact under audit — the 2026-08-19 sweep
+produced two flags where the model was wrong and the ledger right, which is
+the same coin the other way up.
+
+What this buys is a closure criterion that survives scale. "A human has read
+every entry" cannot be met at 217 and is absurd at the 1,000+ the remaining
+books will bring; **audited, with every disagreement adjudicated** can be met
+for each book as it lands, because only disagreements reach a person — 217
+entries cost three rulings.
+
+The digest covers the chosen id and the candidate set, not the rationale: a
+rewritten argument does not invalidate an audit of the pick, but changing the
+pick or the field of candidates does. `AuditCoverageTest` fails on any entry
+no current audit covers, so an unaudited decision cannot sit quietly in a
+ledger that claims to be audited. **A new book owes an audit of its own
+entries, not of the whole ledger.**  *(items 32, 55)*

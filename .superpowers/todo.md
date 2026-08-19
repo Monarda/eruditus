@@ -1,6 +1,6 @@
 # Eruditus — Item Index
 
-**Now:** 32
+**Now:** — *(item 32 closed 2026-08-19; next focus not yet chosen)*
 
 **Standing goal:** every published spell in the Definitive Edition core rules
 is either (a) in the spell library with its computed level matching its
@@ -53,7 +53,7 @@ not-yet-worth-doing.
 | 29 | — | closed | ARCHIVE.md | Open Follow-ups from the Import-Harness Review — DONE 2026-08-17 |
 | 30 | — | closed | ARCHIVE.md | Rulebook Source Provenance (`77c8b01`) |
 | 31 | do | open 1/1 | importer.md | Real Per-Spell Summaries — Ledger-Authored |
-| 32 | do | open 1/3 | importer.md | Audit `resolutions.json` — no Test Can Check It |
+| 32 | — | closed | ARCHIVE.md | Audit `resolutions.json` — no Test Can Check It (`13849c4`, `386474c`) |
 | 33 | maybe | open 1/1 | app.md | Write-Only Columns on the `spells` Table — MAYBE, revisit when relevant |
 | 34 | — | closed | ARCHIVE.md | Guidelines Missing From the Catalog (`8a70889`, `87ac754`) |
 | 35 | — | closed | ARCHIVE.md | Open Guideline Slots — Realm, Form, "Specific Type" — DONE 2026-08-14/15 |

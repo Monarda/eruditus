@@ -1,5 +1,177 @@
 # Archive
 
+### 32. Audit `resolutions.json` — no Test Can Check It (`cf0b40b`, `21ab2fa`, `52d91e4`, `13849c4`, `386474c`)
+- [x] **32.1** **The entries that named their own gap — DONE 2026-08-19, 7 of 7.**
+      Item 55's migration carried three Creo Vim decisions past `crvi-hohmc-G1`
+      and item 65's `revi-hohmc-G1` widened four Rego Vim entries, each
+      recording the fact in `unreviewedCandidates`. Both supplement rows are
+      excluded on the rules: `crvi-hohmc-G1` binds a supernatural creature as a
+      temporary familiar and is gated behind the Faerie Magic Outer Mystery;
+      `revi-hohmc-G1` unites an automaton's instilled effects and is gated
+      behind Craft Automata. Both must be Rituals. All seven spells are
+      `arm5-core`, carry no virtue, and five are not Rituals.
+      **Then fixed at source instead.** The user's scoping rule — a core spell
+      uses core rows only — makes all seven questions structurally impossible,
+      so `Catalog.candidates()`/`general_candidates()` now narrow by the spell's
+      book (`catalog.visible_books`), the seven candidate lists dropped the
+      supplement row, and the rationales went back to their pre-32.1 text
+      because the row they weighed is no longer offered. The by-hand clearing
+      is what the fix was diagnosed from; the guard against a repeat is
+      `test_a_core_spell_is_never_offered_a_supplement_row`. See DECISIONS.md,
+      which records this as a revision of item 55.
+- [ ] **32.2** Re-read every entry against its spell's published text and its candidate
+      guidelines' wording. **All 217 swept by a blind model pass 2026-08-19,
+      4 entries corrected, and the sweep does not close this item** — an
+      unflagged entry is unverified, not verified. Started with the two this
+      item already named as suspect:
+      - `lib-crig-heat-searing-forge` **settled as two guidelines, not one.**
+        It is `crig-4a` (the +5 damage figure it prints) *plus* `crig-4d`
+        (the heat its first sentence describes) as a free magnitude-0
+        combination, both being level 4. The entry was argued to `crig-4d`
+        first, then the blind sweep argued it back to `crig-4a`; the user
+        broke the deadlock by pointing out that neither reading was complete.
+        Same shape as *Conjuration of the Indubitable Cold*, and the second
+        spell to need it — `COMBINED_BASE_EFFECTS` is now a sequence per
+        spell for this reason. Guarded by
+        `test_searing_forge_pays_for_its_damage_row_and_gets_the_heat_free`.
+        The reasoning each side rested on: the
+        Creo Ignem table runs four parallel ladders, and *Heat of the Searing
+        Forge* is on "Heat an object" (2 warm to the touch, 3 hot to the touch,
+        4 boil water, 5 glow red-hot): its own first sentence is "Heats a piece
+        of metal so that it is **too hot to touch**", above level 3 and below
+        red-hot. It creates no fire, so "Create a fire doing +5 damage" is the
+        wrong ladder — compare *Blade of the Virulent Flame*, which does form a
+        fire on metal and pays base 5 for the unnatural shape. The old
+        rationale argued from the numeric coincidence of "+5 damage" alone and
+        dismissed `crig-4d` as having "no damage stated"; the +5 here decays to
+        +3 then +1 and armour padding grants +3 Soak against it, which is
+        heated metal, not a conjured fire's flat rating. Both rows are base
+        level 4, so no computed level moved and no test could have caught it.
+      - `lib-peig-conjuration-indubitable-cold` **pick confirmed, model
+        widened from two combined effects to three.** The spell achieves all
+        three Perdo Ignem level-4 guidelines and pays for one. The old
+        rationale dismissed `peig-4a` by claiming the spell only *shrinks*
+        fires; it does both, and "campfires and smaller fires go out" is a
+        full extinguish, since the Ignem base Individual is "a large campfire"
+        (line 14260) — exactly the size a base-4 extinguish reaches, with
+        larger fires only reduced because destroying a more intense one costs
+        a magnitude per five damage above +5 (line 14461). A first correction
+        argued `peig-4a` away as a free consequence of the chill; that was
+        also wrong, and the user caught it — **air at slightly below freezing
+        does not put out a campfire**, so the extinguishing is a separate
+        effect, not a byproduct. All three are level 4, so under the
+        Requisites section's "the base Arts and level for the spell are those
+        for the highest-level effect it has" (line 12372) the other two are
+        free. `COMBINED_BASE_EFFECTS` took a single `(magnitude, note)` pair
+        and now takes a sequence, since this is the first spell needing two.
+        The same wrong reasoning had been copied into `KNOWN_UNRESOLVABLE`'s
+        comment and is corrected there too.
+        **Caveat worth carrying:** line 12372 is written for a *requisite* —
+        an added Art — and extending it to two guidelines of the same
+        Technique and Form is this repo's inference, not a printed rule. It is
+        the closest the core rules come, and nothing contradicts it, but a
+        troupe could read it more narrowly.
+      - **The blind sweep, 2026-08-19 — all 217 entries.** Eight Sonnet agents,
+        spell text plus candidates in randomised order, recorded answer
+        withheld, `resolutions.json` off-limits. **207 agreements, 10
+        disagreements, 4 self-flagged.** Three disagreements became ledger
+        corrections on the user's ruling (`lib-inte-tracks-faerie-glow` and
+        `lib-inte-sense-feet-that-tread-earth` to `inte-4b`,
+        `lib-peco-twist-tongue` to `peco-15b`); one became the combined-effect
+        settlement above; the rest were adjudicated in the ledger's favour.
+        **Two flags were the model being wrong where the ledger was right**,
+        which is the calibration worth keeping: *Wind of Mundane Silence* was
+        flagged low/ambiguous for arithmetic that in fact matches `pevi-G5`
+        exactly once the four magnitudes of Voice and Room are accounted for,
+        and *Trackless Step* was called undecidable from spell text alone —
+        true, but the ledger reads the printed Duration "Special (based on
+        Concentration)" as `rete-2b`'s "under your conscious control", which
+        the model was not shown. **The flags are worth reading, not obeying.**
+        The unflagged 207 are *not* thereby verified: agreement with the
+        ledger scores agreement with the artifact under audit.
+      - **Item 39's Intellego Terram pass had a systematic error**, and it took
+        the sweep to find it. Three spells were resolved to `inte-4a` on one
+        shared argument, "no seeing is involved". It holds for
+        `lib-inte-eyes-eons` (one property, no visibility) and fails for the
+        other two: *Tracks of the Faerie Glow* is entirely about tracks that
+        "stand out" to the eye, and *Sense the Feet* lists five facts against
+        a guideline reading "**one** mundane property" — five would be the
+        level-10 row. The user's ruling: both get one kind of information and
+        present it in a non-obvious way, which is `inte-4b`. **A shared
+        argument applied to N entries is a single point of failure worth
+        re-checking as a group.**
+      - **This is the second demonstrated failure of exactly the kind this item
+        was opened for**, after `lib-reim-image-from-wizard-torn` (`cf0b40b`).
+        Both were fluent, plausible rationales arguing from one salient detail
+        while the spell's own opening sentence said otherwise. Two for two on
+        the entries anyone bothered to look at twice is not a reassuring base
+        rate for the 215 not yet re-read.
+- [x] **32.3** **Record which entries carry the risk — re-measured 2026-08-19, and
+      the earlier figure was wrong.** The 2026-08-17 measurement said 186 of 206
+      entries had candidates sharing one base level and 20 did not. Re-running it
+      against that same commit (`186419d`) gives **0** entries with differing
+      candidate levels — the 20 were the all-General entries (`baseLevel: null`),
+      not level-discriminable ones. Today: **217 entries, 0 discriminable**, 195
+      numbered and 22 General-only. This is true *by construction* —
+      `Catalog.candidates()` selects rows by `baseLevel == base_level` and
+      `general_candidates()` by `baseLevel is None`, so a candidate set is always
+      level-uniform, and that function is unchanged since `7fdbb1c`. Assertion 1
+      therefore discriminates among candidates on **no** entry, not on 20 of
+      them. There is no per-entry split left to record: the risky subset is the
+      whole ledger.
+- **A demonstrated failure, not a theoretical one.**
+  `lib-reim-image-from-wizard-torn` shipped for months pointing at `reim-15b`,
+  *"Summon a disembodied spirit associated with Imaginem"*. The spell summons
+  nothing — it relocates the caster's own image — and its rationale argued "no
+  Arcane Connection involved" when the spell's own text says *"you must use an
+  Arcane Connection to yourself"*. Corrected in `cf0b40b`.
+- **Why nothing caught it:** both candidates are base level 15 — which is why the
+  extractor could not disambiguate them — so assertion 1 computed the printed 35
+  either way; assertion 3 saw an entry present; assertion 4 saw the id resolve.
+  Every automated check passed.
+- **The rule this establishes:** when an ambiguous spell's candidates share a base
+  level, the printed-vs-computed assertion confirms the base level and nothing
+  more. Those entries rest entirely on their written rationale — and per 32.3
+  that is every entry, not a subset.
+- **The same holds for every General entry, for a related reason.** A General base
+  effect has no fixed level to check against — `chosenBaseLevel` comes from the
+  caster — so assertion 1 cannot discriminate a wrong General guideline at all.
+  Assertion 6 (`test_general_catalog.py:163`) is the only automated check standing
+  between an entry and a wrong General pick.
+- **Item 39's *Conjuration of the Indubitable Cold* pick is the deliberate case of
+  this kind** — both candidates share base level 4 and the choice between them was
+  made arbitrarily on the grounds that it is cosmetic. Re-reading it should
+  confirm that reasoning, not the pick.
+- **32.2 cannot be handed to a cheap model — measured 2026-08-19.** A blind
+  20-entry eval (spell text + candidate guideline wording, answers withheld,
+  candidate order shuffled) scored Haiku 4.5 at 19/20 against the ledger. The one
+  miss was `lib-reim-image-from-wizard-torn`, planted as the known-defect case:
+  Haiku reproduced the original `reim-15b` error, at `medium` confidence, with the
+  Arcane Connection clause present in its input, and flagged nothing as ambiguous
+  in the whole run. Sonnet also scored 19/20 but caught that item and flagged 3 of
+  20 as genuinely ambiguous — including its own sole disagreement
+  (`lib-crig-heat-searing-forge`, `crig-4d` over the recorded `crig-4a`). The
+  usable shape is therefore *model as flagger, human as adjudicator*: a Sonnet
+  pass at a ~15% flag rate queues roughly 30 of 217 entries for a human read, and
+  the unflagged remainder stays unverified rather than becoming verified. Caveat:
+  n=20 with exactly one certified ground truth (`cf0b40b`), and "agreement with
+  the ledger" scores agreement with the artifact under audit. Eval harness is not
+  committed; regenerate from this description if it is worth repeating.
+- **Files:** `scripts/spell_import/resolutions.json`
+
+**Closed 2026-08-19 on a redefined criterion, at the user's ruling.** The
+original 32.2 — "re-read every entry against its spell's published text" —
+made a human the bottleneck for 217 entries now and 1,000+ once the
+remaining books are scanned. That is a row that can never be ticked rather
+than a task. The criterion that closes it is **every entry has been through
+an independent blind audit and every disagreement has been adjudicated**,
+which the 2026-08-19 sweep satisfies: 217 swept, 204 agreed, 13 adjudicated,
+4 corrected. What it explicitly does *not* claim is that the ledger is
+verified — see DECISIONS.md, "An audited ledger entry is not a verified
+one". The criterion is kept true by `AuditCoverageTest`, and the per-entry
+`audit` block means a new book costs an audit of its own entries rather than
+of the whole ledger.
+
 ### 74. Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects (`5bfd5e8`, `f75c2c9`)
 
 **Opened 2026-08-19, from item 67's cross-field-constraints branch, and
@@ -157,7 +329,6 @@ them is about parsing HoH:MC.
 
 - **See also:** items 65, 57, 27.
 
-
 ### 65. HoH:MC Spell Extraction — the Inline Block Parser (sub-project B) (`7ebd409..757e9a8`, merged `1a6783e`)
 Sub-project B of three. Item 64 landed the catalog rows; this proved the
 core-book importer generalises to a second book and a second block-anchoring
@@ -206,7 +377,6 @@ style.
 - **See also:** items 64, 57, 66, 68 (closed alongside this), 71 (opened
   alongside this).
 
-
 ### 68. Do the Sensory Targets' `targetType` Values Misrepresent Their Container Mode? (`c60a03d..eb28b18`, merged `1a6783e`)
 Opened from item 64's review as a deferred question, not a decision; item 65
 needed an answer before it could touch the four Sound/Spectacle spells, which
@@ -243,7 +413,6 @@ is what forced this closed rather than left open.
   touching the four spells), 14 and 57 (the container-mode feature and its
   ruling backlog, neither of which these five Targets participate in now).
 
-
 ### 64. HoH:MC Catalog Rows and the Intellego Exclusion (`2983b57..497ea1f`)
 Sub-project A of three. The five Sensory Magic Targets and two Glamour
 guidelines *Houses of Hermes: Mystery Cults* needs, plus the one rulebook
@@ -272,7 +441,6 @@ restriction on them the model can express.
   **Plan:** `docs/superpowers/plans/2026-08-18-hohmc-catalog-rows.md`.
 - **See also:** items 17 (the precedent), 55 (book-aware oracles), 58 (bullet
   closed), 65, 66, 67.
-
 
 ### 62. Every State Field Has an Owner (`940c8bc..e7774cd`)
 `SpellCreationBloc._emit` claimed, in its own doc comment, to be where a moved
@@ -308,7 +476,6 @@ inside, and the doc comment names the rule every field of the state follows.
 - **Spec:** `docs/superpowers/specs/2026-08-18-state-field-ownership-design.md`.
   **Plan:** `docs/superpowers/plans/2026-08-18-state-field-ownership.md`.
 - **See also:** item 59 (the funnel this completes), item 58.
-
 
 ### 59. The Spell Level Computes Live (`99aa462..e6a61b4`)
 The level existed only after pressing **Calculate & View Suggestions**, and
@@ -363,7 +530,6 @@ button gated three unrelated things; they are now separated.
   main axis, so the banner cannot measure that itself, and 40% of
   `MediaQuery.size` overflows a short or keyboard-inset viewport.
 
-
 ### 60. Drafts Seed From Their Guideline's Reference Triple (`657c491`)
 `SpellDraft` left Range/Duration/Target null, so every empty draft showed
 three blank dropdowns — and a ward guideline priced against Touch/Ring/Circle
@@ -401,7 +567,6 @@ initial state, `SpellDiscarded`, the post-save reset, `BaseEffectSelected`,
   same blank dropdown, reached by a different door. The one Form-scoped
   parameter in the catalog.
 
-
 ### 61. Clearable Single-Select Modifiers (`337adb4`)
 A single-select modifier's dropdown offered its own options and nothing else,
 and `onChanged` ignored null, so selection was one-way. Fixed by a null-valued
@@ -424,14 +589,12 @@ key when the last option went, so the bloc needed no change.
   the button that discarded it. **That second half is still true and is item
   59's**, which this fix does not touch.
 
-
 ### 1. Spell Constraint: One of Each Parameter (`2d897db`)
 Exactly one Range, one Duration, one Target. **Ars Magica rule: modifiers scale the
 level instead.** Three dedicated dropdowns; `SpellCreationBloc` enforces
 one-per-category; `validateSpellDraft` requires all three. *Mists of Change* is the
 one published spell that contradicts this — recorded as an exception spell rather
 than weakening the model (item 46).
-
 
 ### 2. Requisites UI & Integration
 One `Requisite(art, kind)` with `RequisiteKind` (`free` = 0 magnitude, `adding` = 1).
@@ -440,14 +603,12 @@ are unrepresentable by construction** since item 40 reshaped the field into a ma
 keyed by art. **The free/adding split is confirmed sufficient** — every
 requisite-driven magnitude in the 360 published spells is +0 or +1.
 
-
 ### 3. Size Feature (MVP)
 **There is no bespoke `size` field on `Spell`** — Size is modelled as ordinary scoped
 Modifiers through the existing `selectedModifiers` map, so magnitude feeds the level
 through the normal path with **no special case in the calculator**. Nine `size-<form>`
 ladders, each Form-scoped and excluding Intellego (item 50 is the one printed
 exception). The Aquam sub-type gap was closed as documented, not fixed — see *Notes*.
-
 
 ### 4. Resolve Out-of-Scope Base Effects — partially complete
 Four sub-items done, two were never gaps, the rest split out. What binds:
@@ -463,13 +624,11 @@ Four sub-items done, two were never gaps, the rest split out. What binds:
 - Conditional wards remain open as item 4 in section C.
 - **Spec:** `docs/superpowers/specs/2026-07-25-spell-modifiers-design.md`
 
-
 ### 5. Asset Data Loader Test Failures
 Fixed 19 built-in spells referencing base-effect ids not in the catalog (no level
 changes). **The lasting fix is that counts are derived, not hardcoded** — the loader
 test derives its expected count from the raw JSON, an oracle independent of the
 loader. A hardcoded count is exactly what silently drifted by 566 entries.
-
 
 ### 6. Widget-Test Coverage Hole — DONE 2026-08-17
 
@@ -554,11 +713,9 @@ only if it awaits real I/O, and mocking the *repository* removes that.
 - **Files:** test helpers, widget test templates, `integration_test/`,
   `.github/workflows/tests.yml`
 
-
 ### 8. UI: Disable Multi-Select for Range/Duration/Target — OBSOLETE
 Superseded by item 1: selecting multiple Ranges, Durations or Targets is no longer
 representable.
-
 
 ### 13. Summary/Description Entry for User-Created Spells — DONE 2026-08-17
 `validateSpellProse` lost its `source` parameter entirely: every spell, published
@@ -587,7 +744,6 @@ and `SpellTemplate` constructors. What binds:
 - **`TemplateInstantiated` needed no change** — it already seeded the draft
   summary from the template, and was already tested.
 - **Spec:** `docs/superpowers/specs/2026-08-17-user-created-spell-prose-design.md`
-
 
 ### 14. Container Targets: Static vs. Dynamic — DONE 2026-08-17
 The rulebook's "Container Targets" sidebar settles it: a container-target spell
@@ -618,7 +774,6 @@ binds, beyond what the code already records:
   the rule is the Target's, not a per-spell choice.
 - **Spec:** `docs/superpowers/specs/2026-08-17-container-target-mode-design.md`
 
-
 ### 15. Add All Core-Rulebook Parameters (`c835d0a`)
 The catalog held 17; the core rulebook defines **25**. Added Range Eye (+1), Duration
 Ring (+2) and Year (+4), Target Circle (+0) and the four missing magical senses
@@ -628,7 +783,6 @@ Ring (+2) and Year (+4), Target Circle (+0) and the four missing magical senses
 - **The Target `Touch` / Range `Touch` name collision is left as-is** — ids are
   category-scoped (`range-touch` vs `target-touch`) and the dropdowns filter by
   category, so the two never share a picker.
-
 
 ### 17. Virtue-Gated Parameters: Merinita Faerie Magic and Symbolic Magic — DONE 2026-08-16
 Nine parameters added, gated by an informational `requiresVirtue: String?` on both
@@ -652,7 +806,6 @@ character/Virtue model to enforce against; the field only names the requirement.
 - **Spec:** `docs/superpowers/specs/2026-08-16-virtue-gated-parameters-design.md`.
   Spawned items 53 and 54.
 
-
 ### 19. Size-Ladder Ceiling — COMPLETE 2026-08-16
 A `+5` (×100,000) rung exists on every `size-<form>` ladder; the four spells that
 needed it import. The architectural half: **`ModifierScope` gained `excludeTargets`**
@@ -667,7 +820,6 @@ prune stale modifier selections, so switching Target to Individual left a
 **Still deferred:** whether Group/Room/Structure/Boundary should cost differently
 from each other under the Size ladder — today they're priced identically.
 **Spec:** `docs/superpowers/specs/2026-08-16-modifier-target-scope-design.md`
-
 
 ### 24. Ad-hoc Level Adjustments
 A `LevelAdjustment` model — a list of `(magnitude, note)` — with one repeatable UI row
@@ -688,7 +840,6 @@ and one breakdown line per adjustment. What binds:
   catalog Modifiers instead: `no-words`, `no-gestures` (both global, buying off the
   still/silent casting requirement) and `invi-techniques-and-forms`.
 - **Spec:** `docs/superpowers/specs/2026-08-04-level-adjustments-design.md`
-
 
 ### 25. General-Level Spells — base level is chosen, not fixed
 33 published spells are General-level, including **every Vim spell and every ward**.
@@ -711,7 +862,6 @@ What binds:
   Vim spell with nowhere more general to point) as an exception spell.
 - **Spec:** `docs/superpowers/specs/2026-08-05-general-base-effects-design.md`
 
-
 ### 26. Non-standard Ranges, Durations and Targets
 **Covered by item 24's adjustments; no `Special` parameters were added, and
 `spell.dart` was untouched** — the section 0 "confirm no model change" check for this
@@ -725,7 +875,6 @@ became an exception spell instead, as did *Mists of Change* (`D: Sun & Year`, tw
 durations in one stat line). *The Bountiful Feast* was a genuine rulebook
 transcription defect (a missing closing paren), fixed via `DESIGN_LINE_TYPOS`, not a
 splitter change.
-
 
 ### 27. Published Spell Import Harness
 The harness is what makes every other mechanism *verifiable*. What binds:
@@ -748,7 +897,6 @@ The harness is what makes every other mechanism *verifiable*. What binds:
   spell.
 - **Spec:** `docs/superpowers/specs/2026-07-28-published-spell-import-design.md`
 
-
 ### 28. Guideline Levels Absent from the Rulebook's Own Table — 5 of 5
 All five turned out recoverable from documented prose rules. **Chose option 2 —
 model the prose rules in the modifier system** — not derived catalog rows or ad-hoc
@@ -763,7 +911,6 @@ now asserts the ledger and `NUMBERED_OVERRIDES` never silently disagree. **This 
 the same failure shape as item 55**, one layer down.
 **Not item 22:** that is rows genuinely absent from the Definitive Edition.
 **Spec:** `docs/superpowers/specs/2026-08-15-guideline-level-derivation-design.md`
-
 
 ### 29. Open Follow-ups from the Import-Harness Review — DONE 2026-08-17
 
@@ -848,7 +995,6 @@ items 43/45); what remains needed design judgement or more time.
   and the only non-first-party action in the repo. Pin it to a SHA if that trade is
   unacceptable.
 
-
 ### 30. Rulebook Source Provenance (`77c8b01`)
 Records which rulebook revision produced the assets, via deterministic sha256
 provenance in a committed sidecar (`scripts/spell_import/source.lock`), never in the
@@ -863,7 +1009,6 @@ asset itself. What binds:
   rule: a `--write` under an *unchanged* source refreshes the advisory counts,
   which had drifted to 294 against 325 because the lock was rewritten only when
   the source moved — the one case those counts are ever read.
-
 
 ### 34. Guidelines Missing From the Catalog (`8a70889`, `87ac754`)
 Compared every guideline table bullet by bullet, restored 4 missing General and 5
@@ -884,7 +1029,6 @@ missing ordinary guidelines, removed 2 invented rows. What binds:
   full catalog, and the bullet-count comparison is the test to run first.**
 - **Consequence:** Rego Animal and Rego Mentem now have *two* General candidates
   each, so spells in those arts need a recorded ledger pick.
-
 
 ### 35 / 37. Open Guideline Slots — Realm, Form, "Specific Type" — DONE 2026-08-14/15
 A guideline can leave a slot open that the caster fills, exactly as a General
@@ -908,11 +1052,9 @@ guideline leaves the level open. What binds:
   byte-identical regeneration rather than a git diff.
 - **Spec:** `docs/superpowers/specs/2026-08-10-open-guideline-slots-design.md`
 
-
 ### 37. A Template Has Open Slots Beyond Its Level
 Designed and shipped jointly with item 35 — **see the combined entry above.** Item
 35 is the realm instance; 37 generalised it to Form and "a specific type".
-
 
 ### 39. Ambiguous Ledger Resolutions Needing a Rules Decision — 4 of 4
 All four had a forced discriminator after all, found by re-reading each against its
@@ -928,7 +1070,6 @@ other multi-candidate spell, and `peig-4c` is recorded as a magnitude-0
 one-off and importer-only — a user designing their own spell cannot combine base
 effects this way; see item 47.** `KNOWN_UNRESOLVABLE` is empty but the mechanism
 stays for a future genuine tie.
-
 
 ### 40. Model Invariants Have Only One Enforcement Path — COMPLETE 2026-08-16
 What binds:
@@ -955,7 +1096,6 @@ What binds:
   one bad spell in a restore doesn't abort the rest.
 - **Plan:** `docs/superpowers/plans/2026-08-09-spell-invariant-enforcement.md`
 
-
 ### 43 / 45. Transport-Distance Modifier Wiring — DONE 2026-08-15
 `emit.py` mapped `rego-transport-distance` to option ids with the wrong prefix
 (`rego-transport-distance-5-paces` vs. the real `rego-distance-5-paces`), so
@@ -967,10 +1107,8 @@ keep failing at the tokenizer rather than one layer deeper with a near-identical
 message. *Hermes' Portal* now imports as `rete-4` (Base 4, +4 Arc, +4 Year, +5
 arcane connection, +2 size = level 75 exactly).
 
-
 ### 45. Design-Line Tokenizer Doesn't Recognize Transport-Distance Labels
 The tokenizer half of the fix above — **see the combined entry with item 43.**
-
 
 ### 44. Bare/Non-standard Requisite-Magnitude Phrasing — DONE 2026-08-15
 Three spells costed a requisite's magnitude in prose `_REQUISITE` didn't recognise —
@@ -983,7 +1121,6 @@ which **raises rather than guesses** if that list doesn't hold exactly one entry
 **Why this was not item 24's:** there the magnitude is unprinted and guessing would
 be wrong; here the magnitude *was* printed and only the label's wording was
 unrecognised.
-
 
 ### 46. Exception Spells — DONE 2026-08-16, 8 total
 Spells where the rulebook itself says guideline arithmetic doesn't apply. What binds:
@@ -1004,7 +1141,6 @@ Spells where the rulebook itself says guideline arithmetic doesn't apply. What b
   silently failing to cover these spells.
 - **Spec:** `docs/superpowers/specs/2026-08-15-exception-spells-design.md`
 
-
 ### 48. Base Effect Analogy — DONE 2026-08-16
 `Spell` and `SpellTemplate` gained their own stored `technique`/`form` (no longer
 derived from the base effect) plus an optional `analogyRationale`, **required
@@ -1016,7 +1152,6 @@ instantiating a by-analogy template works.
 **Still open, deliberately:** creation-screen UI for picking a cross-Form base effect
 interactively.
 **Spec:** `docs/superpowers/specs/2026-08-16-base-effect-analogy-design.md`
-
 
 ### 49. `emit.py` Mistagged Ritual Declarations — DONE 2026-08-16
 `build_spell` and `build_template` both unconditionally stamped
@@ -1032,7 +1167,6 @@ in-app banner text.
 `from .. import`, which `unittest discover` cannot load; switched to match its 13
 siblings so the whole suite runs under `discover`.
 
-
 ### 51. `flutter test --platform chrome` Hangs Forever on Windows — RESOLVED 2026-08-16
 **Use `flutter test -d chrome` instead.** `--platform chrome` is a deprecated
 `package:test` browser-platform path whose local dev server fails to serve CanvasKit's
@@ -1043,7 +1177,6 @@ closed by deprecating the flag rather than fixing the server. Three plausible
 hypotheses (the real-Bloc hang, `sqfliteFfiInit()` on web, Chrome's Local Network
 Access policy) were chased and falsified first. A note pointing here lives in
 `tool/setup_web.dart`.
-
 
 ### 52. Bottom Navigation Bar Was Effectively Invisible — FIXED 2026-08-16
 Library/Settings/Backup were unreachable in real use, on every platform, the whole
@@ -1059,7 +1192,6 @@ removing them from the tree — **a widget-tree presence check is neither a visi
 nor a reachability check.** No test taps through the real nav bar; every other screen
 is tested by pumping it directly as `MaterialApp.home`, bypassing the navigation
 shell.
-
 
 ### 55. The Catalog Stopped Being Core-Rules-Only — RESOLVED 2026-08-17
 `crvi-hohmc-G1` (item 17's *Houses of Hermes: Mystery Cults* guideline) was the
@@ -1106,7 +1238,6 @@ have won is a ledger decision, not a filter. What binds:
 - `source.lock`'s advisory counts are refreshed by any `--write` under an
   unchanged source (they had drifted to 294 against 325). `--accept-source`
   still gates *adopting a moved rulebook* — that discipline is unchanged.
-
 
 ### Base Effect Extraction
 604 base effects extracted from the rulebook's guideline tables; out-of-scope patterns
