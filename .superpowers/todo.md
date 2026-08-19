@@ -98,3 +98,4 @@ not-yet-worth-doing.
 | 74 | — | closed | ARCHIVE.md | Guideline Adoption Can Still Seed a Range/Target Pair Check 10 Rejects (`5bfd5e8`, `f75c2c9`) |
 | 75 | decide | open 1/1 | rules-fidelity.md | Should Group/Room/Structure/Boundary Cost Differently Under the Size Ladder? |
 | 76 | decide | open 1/1 | app.md | Creation-Screen UI for Picking a Cross-Form Base Effect |
+| 77 | decide | open 2/2 | importer.md | The Book-Scoping Rule Stops at Base Effects |

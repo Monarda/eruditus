@@ -229,3 +229,43 @@ unverified agent output. Survey writeup and classification:
   `assets/data/modifiers.json` (`size-vim`), and the 23 citation sites
 - **See also:** items 67 and 68 (the same cross-field capability), 69 (the
   deferred pains), 36 (catalog audit against the rulebook)
+
+---
+
+### 77. The Book-Scoping Rule Stops at Base Effects
+
+**Opened 2026-08-19**, as the loose thread from the `visible_books` change
+(commit `afe1f81`). That change scopes *base effect* candidates to the books a
+spell could cite. Parameters and modifiers reach the spell by different paths,
+neither of which is scoped, and one of them can be silently wrong.
+
+- [ ] **77.1** **`Catalog.parameter_id(category, name)` is first-match-wins
+      across the whole flat catalog.** It walks `parameters` and returns the
+      first row whose `category` and `name` match, with no book filter. Two
+      books printing a Range/Duration/Target of the same name at different
+      magnitudes would resolve to whichever row sits earlier in
+      `parameters.json` — file order, not a rule — and nothing would raise.
+      Counted today: **39 parameters, 31 `arm5-core` + 8 `arm5-hohmc`, and zero
+      duplicate `(category, name)` pairs**, so the defect is latent, not live.
+      Fix shape is the same as `visible_books`: pass the spell's book id and
+      narrow. Decide also whether a collision should *raise* rather than
+      silently pick, since a duplicate name across books is more likely an
+      import bug than a real rules distinction.
+- [ ] **77.2** **Modifiers are exposed differently and may need nothing.**
+      Selection does not search by name: `_selected_modifiers` resolves through
+      hand-maintained mappings keyed by `(Technique, Form, label)` to explicit
+      `modifiers.json` ids, so a new book's modifier cannot be picked by
+      accident — only by someone adding a mapping to it. All **35 modifiers are
+      `arm5-core`** today. The open question is whether an explicit mapping
+      should still be checked against the spell's visible books, i.e. whether
+      the scoping rule is about *what the catalog offers* or about *what a
+      spell may end up holding*. 77.1's answer probably settles this one.
+- **Why this is filed rather than done:** neither sub-item can bite until a book
+  adds a colliding parameter name or a spell-reachable modifier. Filing it means
+  the next book's import does not have to rediscover the reasoning.
+- **Files:** `scripts/spell_import/catalog.py` (`parameter_id`, `visible_books`),
+  `scripts/spell_import/emit.py` (the six `parameter_id` call sites)
+- **See also:** DECISIONS.md, "A spell may only use rows from books it could
+  have been printed against" — this item asks how far that rule reaches; items
+  55 and 32.1 for the base-effect half; item 66/71 for the books that will
+  trigger it
