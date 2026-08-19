@@ -235,7 +235,9 @@ void main() {
     // Checked directly rather than routed through validateSpellAgainstCatalog:
     // a reference triple is not a spell, and fabricating a plausible one per
     // effect would bury the only two checks that read the pair. The two
-    // conditions below are checks 10 and 11 verbatim.
+    // conditions below are checks 10 and 11 verbatim; the unresolvable-id
+    // guard above them is stricter than the checks, which skip a null slot --
+    // here an unresolvable reference id is itself the data bug.
     //
     // This guards SpellCreationBloc._seedParameters (todo item 74). When the
     // seed adopts a guideline it can write both slots at once, and its revert

@@ -9,9 +9,9 @@
 > **336 imported · 31 templates · 8 exceptions · 0 blocked · 3 skipped · 0 unresolved**
 > — plus `unreviewed: 7`, see below.
 
-**Suite status: all three re-run 2026-08-19 on the merged result of item 65 —
-the inline parser, the multi-book registry and the 14-spell HoH:MC import
-added tests, catalog rows and ledger entries:**
+**Suite status: all three re-run 2026-08-19 at item 74's branch head — the
+Dart count moved 742→745 for item 74's own three tests (bloc shapes B and C,
+plus assertion 8):**
 
 | Suite | Command | Result |
 |---|---|---|

@@ -48,9 +48,10 @@ other in both directions. That pruning has a third, unguarded path.
       **Resolved 2026-08-19** (`5bfd5e8`, `f75c2c9`): `_seedParameters` now
       refuses a seed that would land Range and Target on a combination check
       10 or check 11 rejects, reverting both slots to their pre-adoption
-      values rather than writing the half that moved. The two shapes above
-      (forbidding from each direction) and a third — a peer already
-      contradictory before the seed runs — are covered in
+      values rather than writing the half that moved. All three shapes —
+      check 10 reached from each side, and check 11's forcing direction,
+      where a bloc-written Personal Range is indistinguishable from an
+      untouched slot — are covered in
       `test/bloc/spell_creation_bloc_test.dart`; a fourth, corpus-level
       assertion (`test/data/published_spell_import_test.dart`, "assertion 8")
       confirms no published base effect's own reference triple is

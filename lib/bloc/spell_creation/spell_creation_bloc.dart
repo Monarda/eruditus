@@ -343,24 +343,17 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // upstream. The field just edited wins and the conflicting peer yields --
       // the same rule TargetSelected applies to containerMode below. Two
       // rulebook checks can conflict with a newly-picked Range, so both are
-      // checked here: core 12086 (a Personal Range forbids a container
-      // Target) and HoH:MC 1006 (a Sensory Target demands Personal Range,
-      // via requiresRangeId) -- a Target that names a different Range than
-      // the one just chosen is just as much a conflict as one this Range
-      // forbids outright, or the pair could reach check 11's violation with
-      // no TargetSelected in the trace at all.
+      // checked via _rangeTargetConflict: core 12086 (a Personal Range
+      // forbids a container Target) and HoH:MC 1006 (a Sensory Target demands
+      // Personal Range, via requiresRangeId) -- a Target that names a
+      // different Range than the one just chosen is just as much a conflict
+      // as one this Range forbids outright, or the pair could reach check
+      // 11's violation with no TargetSelected in the trace at all.
       //
       // The mode is cleared with the Target rather than left behind: a mode
       // outliving its Target reattaches to the next container chosen, which is
       // what check 9 then rejects with no visible cause (todo item 58).
-      final currentTarget = state.draft.target;
-      final targetKind = currentTarget?.targetType;
-      final forbidsCurrentTarget = targetKind != null &&
-          event.parameter.forbidsTargetTypes.contains(targetKind);
-      final requiredRangeId = currentTarget?.requiresRangeId;
-      final demandsDifferentRange =
-          requiredRangeId != null && requiredRangeId != event.parameter.id;
-      final clearsTarget = forbidsCurrentTarget || demandsDifferentRange;
+      final clearsTarget = _rangeTargetConflict(event.parameter, state.draft.target);
       _emit(emit, state.copyWith(
         status: SpellCreationStatus.editing,
         draft: state.draft.copyWith(
@@ -794,11 +787,10 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
   ///
   /// Mirrors both checks' null tolerance deliberately: an absent slot conflicts
   /// with nothing, because a missing parameter is ResolvedSpell.isResolved's
-  /// problem rather than this rule's. RangeSelected and TargetSelected keep
-  /// their own inline logic -- they do not merely detect a conflict, they
-  /// resolve it asymmetrically (TargetSelected forces the required Range and
-  /// lets that win over the forbidding direction; RangeSelected clears the
-  /// Target), so only this detecting half is common to all three call sites.
+  /// problem rather than this rule's. TargetSelected keeps its own inline
+  /// logic -- it does not merely detect a conflict, it resolves it
+  /// asymmetrically, forcing the required Range and letting that win over
+  /// the forbidding direction. RangeSelected now calls this helper directly.
   static bool _rangeTargetConflict(Parameter? range, Parameter? target) {
     if (range == null || target == null) return false;
     final kind = target.targetType;

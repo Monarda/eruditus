@@ -1,6 +1,6 @@
 # Eruditus — Item Index
 
-**Now:** 32 · 73
+**Now:** 32
 
 **Standing goal:** every published spell in the Definitive Edition core rules
 is either (a) in the spell library with its computed level matching its

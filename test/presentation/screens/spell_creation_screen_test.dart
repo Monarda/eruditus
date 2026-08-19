@@ -1946,25 +1946,28 @@ void main() {
     });
 
     testWidgets(
-        'a draft reached from stored data -- Personal Range with a container '
+        'a directly-constructed state -- Personal Range with a container '
         'Target already selected -- renders both dropdowns without throwing',
         (tester) async {
-      // No bloc event path can produce this pair any more: RangeSelected
-      // clears the Target, TargetSelected clears the Range, and (as of todo
-      // item 74) _seedParameters refuses a seed that would land on it. But the
-      // screen does not only render bloc-written drafts -- a saved spell
-      // loaded back for editing, or a template instantiated with this pair
-      // already in its declaration, reaches the screen without going through
-      // either seeding or pruning. Core 12086 forbids this exact pair (a
-      // container Target under a Personal Range), and the old
-      // forbidding-direction filter tried to pre-empt it by dropping the
-      // conflicting choice from each dropdown's `items` -- while
-      // `initialValue` still held it, since neither dropdown's initialValue
-      // was ever filtered. That tripped DropdownButtonFormField's "exactly
-      // one item with value" assertion on both dropdowns at once. This is the
-      // regression pin: check 10 is still enforced (by
-      // validateSpellAgainstCatalog and by the bloc's own pruning on
-      // selection), just not by hiding the option pre-emptively.
+      // No bloc path produces this pair, which is exactly why the state is
+      // constructed directly here rather than driven through the bloc. There
+      // is no load-a-saved-spell-for-editing path -- no such event exists in
+      // spell_creation_event.dart, and SpellCreationScreen's constructor
+      // takes only techniques/forms -- and templates come only from
+      // assetLoader.loadSpellTemplates(), which assertion 7 checks against
+      // checks 10/11 for every template (see the bloc's own comment on that
+      // seeding). RangeSelected clears the Target, TargetSelected clears the
+      // Range, and (as of todo item 74) _seedParameters refuses a seed that
+      // would land on it. This test is a widget-level regression pin against
+      // re-introducing the old pre-emptive dropdown filter: it tried to
+      // pre-empt core 12086 (a container Target under a Personal Range) by
+      // dropping the conflicting choice from each dropdown's `items` --
+      // while `initialValue` still held it, since neither dropdown's
+      // initialValue was ever filtered. That tripped DropdownButtonFormField's
+      // "exactly one item with value" assertion on both dropdowns at once.
+      // Check 10 is still enforced (by validateSpellAgainstCatalog and by the
+      // bloc's own pruning on selection), just not by hiding the option
+      // pre-emptively.
       final draftState = SpellCreationState(
         status: SpellCreationStatus.editing,
         draft: SpellDraft(
