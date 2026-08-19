@@ -893,7 +893,9 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
                         blocked.append((block.name, str(error)))
                     continue
 
-                general_candidates = catalog.general_candidates(block.technique, block.form)
+                general_candidates = catalog.general_candidates(
+                    block.technique, block.form, registered.id
+                )
                 if not general_candidates:
                     # Permanent, not a gap to fill: Perdo Imaginem's and Perdo
                     # Mentem's own guideline tables print no General row at all
@@ -974,7 +976,9 @@ def run(write: bool = False, accept_source: bool = False) -> Report:
 
             spell_id = catalog_module.slug_id(block.technique, block.form, block.name)
             design_lines[spell_id] = design_text
-            candidates = catalog.candidates(block.technique, block.form, design.base_level)
+            candidates = catalog.candidates(
+                block.technique, block.form, design.base_level, registered.id
+            )
 
             if not candidates and spell_id in NUMBERED_OVERRIDES:
                 override = NUMBERED_OVERRIDES[spell_id]

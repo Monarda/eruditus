@@ -47,15 +47,17 @@ class CandidatesTest(unittest.TestCase):
     def test_creo_animal_level_15_is_ambiguous(self):
         # Soothe Pains of the Beast says "Base level 15" and Creo Animal has
         # four entries at 15. This ambiguity is the reason the ledger exists.
-        found = self.catalog.candidates("Creo", "Animal", 15)
+        found = self.catalog.candidates("Creo", "Animal", 15, catalog.CORE_BOOK_ID)
         self.assertGreaterEqual(len(found), 2)
 
     def test_candidates_are_sorted_and_deduplicated(self):
-        found = self.catalog.candidates("Creo", "Animal", 15)
+        found = self.catalog.candidates("Creo", "Animal", 15, catalog.CORE_BOOK_ID)
         self.assertEqual(found, sorted(set(found)))
 
     def test_absent_level_yields_no_candidates(self):
-        self.assertEqual(self.catalog.candidates("Creo", "Animal", 9999), [])
+        self.assertEqual(
+            self.catalog.candidates("Creo", "Animal", 9999, catalog.CORE_BOOK_ID), []
+        )
 
     def test_parameter_lookup_by_category_and_name(self):
         self.assertEqual(self.catalog.parameter_id("Range", "Touch"), "range-touch")
@@ -64,10 +66,38 @@ class CandidatesTest(unittest.TestCase):
             self.catalog.parameter_id("Target", "Nowhere")
 
     def test_general_candidates_are_the_levelless_rows(self):
-        candidates = self.catalog.general_candidates("Perdo", "Vim")
+        candidates = self.catalog.general_candidates("Perdo", "Vim", catalog.CORE_BOOK_ID)
 
         self.assertEqual(len(candidates), 13)
         self.assertIn("pevi-G3", candidates)
+
+    def test_a_core_spell_is_never_offered_a_supplement_row(self):
+        # The scoping rule (catalog.visible_books): a core spell may only use
+        # core rows. Book-blind resolution offered HoH:MC's crvi-hohmc-G1 to
+        # three core Creo Vim spells and revi-hohmc-G1 to four core Rego Vim
+        # ones, and every one became a `unreviewedCandidates` backlog entry a
+        # human had to clear by hand -- for a row those spells could never
+        # legally use. Without this test, the next supplement does it again.
+        for technique, form, supplement_row in (
+            ("Creo", "Vim", "crvi-hohmc-G1"),
+            ("Rego", "Vim", "revi-hohmc-G1"),
+        ):
+            core = self.catalog.general_candidates(
+                technique, form, catalog.CORE_BOOK_ID
+            )
+            self.assertNotIn(supplement_row, core)
+            # ...and the supplement's own spells still see it.
+            own = self.catalog.general_candidates(technique, form, "arm5-hohmc")
+            self.assertIn(supplement_row, own)
+            self.assertEqual(set(core) - set(own), set())
+
+    def test_every_base_effect_is_visible_to_its_own_book(self):
+        # The filter narrows by *provenance*, so a row must never be filtered
+        # out of the candidate set for a spell from the very book that printed
+        # it -- that would be a row no spell could ever resolve to.
+        for effect in self.catalog.base_effects:
+            book = (effect.get("citations") or [{}])[0].get("bookId")
+            self.assertIn(book, catalog.visible_books(book), msg=effect["id"])
 
     def test_reference_cost_sums_the_triple(self):
         # Touch(1) + Ring(2) + Circle(0)

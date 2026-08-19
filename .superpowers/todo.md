@@ -53,7 +53,7 @@ not-yet-worth-doing.
 | 29 | — | closed | ARCHIVE.md | Open Follow-ups from the Import-Harness Review — DONE 2026-08-17 |
 | 30 | — | closed | ARCHIVE.md | Rulebook Source Provenance (`77c8b01`) |
 | 31 | do | open 1/1 | importer.md | Real Per-Spell Summaries — Ledger-Authored |
-| 32 | do | open 2/3 | importer.md | Audit `resolutions.json` — no Test Can Check It |
+| 32 | do | open 1/3 | importer.md | Audit `resolutions.json` — no Test Can Check It |
 | 33 | maybe | open 1/1 | app.md | Write-Only Columns on the `spells` Table — MAYBE, revisit when relevant |
 | 34 | — | closed | ARCHIVE.md | Guidelines Missing From the Catalog (`8a70889`, `87ac754`) |
 | 35 | — | closed | ARCHIVE.md | Open Guideline Slots — Realm, Form, "Specific Type" — DONE 2026-08-14/15 |

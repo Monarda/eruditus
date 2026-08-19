@@ -58,14 +58,32 @@ receive that spell.** Tried twice (`peme-G`, `inco-gen`) and reverted both times
 to the rulebook's own bullets, per art and in both directions, permanently. The
 reverse direction is the one that catches this.  *(items 25, 34)*
 
-**The catalog is flat, and stays flat** (decided by the user). Candidate
-resolution offers every row the catalog holds, from any book; a row that should
-not have won is a ledger decision, not a filter. What follows from that: the
-oracles must say which rows they mean — `catalog.cites(entry, book_id)` plus
-`CORE_BOOK_ID` — and the core-only tests keep their **exact** counts rather than
-relaxing to a bound, because an exact total is something every new supplement has
-to bump anyway. `test_loads_the_committed_catalogs`'s parameter count is
-deliberately a floor.  *(item 55)*
+**The catalog is flat, and stays flat** (decided by the user). It is one pool,
+never partitioned per book. What follows from that: the oracles must say which
+rows they mean — `catalog.cites(entry, book_id)` plus `CORE_BOOK_ID` — and the
+core-only tests keep their **exact** counts rather than relaxing to a bound,
+because an exact total is something every new supplement has to bump anyway.
+`test_loads_the_committed_catalogs`'s parameter count is deliberately a
+floor.  *(item 55)*
+
+**A spell may only use rows from books it could have been printed against**
+(decided by the user). Core spells use core base effects, modifiers and
+parameters only; a supplement spell uses core rows, its own book's, and
+*Mysteries Revised*'. `catalog.visible_books(book_id)` is the rule and both
+`candidates()` and `general_candidates()` apply it, so the narrowing is scoped
+at source. **This revises item 55's second half**, which made resolution
+book-blind and called an out-of-scope row "a ledger decision, not a filter".
+Book-blind resolution meant every new supplement widened the candidate sets of
+spells printed years earlier and handed a human the backlog: all seven entries
+item 32.1 cleared were HoH:MC rows offered to core spells that could never
+legally use them. **Adding a book must not reopen a decided question about an
+existing spell.**  *(items 55, 32)*
+
+**There is deliberately no exception mechanism for that scoping rule** (decided
+by the user). Real exceptions are expected to be rare; the first one fails
+loudly — `StaleEntry`, or "no base effect at that Technique/Form/level" — and
+the escape hatch gets designed against that concrete case rather than guessed
+at in advance.  *(item 32)*
 
 **A supplement row's id carries its book** (`crvi-hohmc-G1` cites `arm5-hohmc`),
 and the id-suffix test derives that segment from the row's own citation, so the
@@ -115,7 +133,10 @@ exactly that reason.  *(item 55)*
 
 **A migrated entry is not a reviewed entry.** Ids added by a migration land in
 `unreviewedCandidates` and the extractor prints the outstanding count on every
-run, so the backlog cannot go quiet. Clearing it is a re-read (item 32).  *(item 55)*
+run, so the backlog cannot go quiet. Clearing it is a re-read (item 32). Still
+live, but it should now fire rarely: since the scoping rule above, a *new book*
+no longer widens an existing spell's candidates, so the remaining triggers are
+in-scope catalog changes such as item 22's rebuild.  *(items 55, 32)*
 
 **Resolve an ambiguous pick against each candidate's *exact* wording, not the
 most general-sounding one.** All four of item 39's supposedly undecidable cases

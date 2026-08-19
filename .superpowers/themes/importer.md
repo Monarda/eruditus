@@ -17,21 +17,39 @@
 
 
 ### 32. Audit `resolutions.json` — no Test Can Check It
-- [ ] **32.1** **Start with the 3 entries that name their own gap.** Item 55's migration
-      carried `lib-crvi-restore-faded-threads`,
-      `lib-crvi-shell-false-determinations` and `lib-crvi-shell-opaque-mysteries`
-      past `crvi-hohmc-G1` without weighing it, and each records that in
-      `unreviewedCandidates`. Reading the familiar-binding guideline against
-      those three rationales and clearing the field is the smallest possible
-      instance of this item's whole job — and the only part of it the extractor
-      currently reports.
+- [x] **32.1** **The entries that named their own gap — DONE 2026-08-19, 7 of 7.**
+      Item 55's migration carried three Creo Vim decisions past `crvi-hohmc-G1`
+      and item 65's `revi-hohmc-G1` widened four Rego Vim entries, each
+      recording the fact in `unreviewedCandidates`. Both supplement rows are
+      excluded on the rules: `crvi-hohmc-G1` binds a supernatural creature as a
+      temporary familiar and is gated behind the Faerie Magic Outer Mystery;
+      `revi-hohmc-G1` unites an automaton's instilled effects and is gated
+      behind Craft Automata. Both must be Rituals. All seven spells are
+      `arm5-core`, carry no virtue, and five are not Rituals.
+      **Then fixed at source instead.** The user's scoping rule — a core spell
+      uses core rows only — makes all seven questions structurally impossible,
+      so `Catalog.candidates()`/`general_candidates()` now narrow by the spell's
+      book (`catalog.visible_books`), the seven candidate lists dropped the
+      supplement row, and the rationales went back to their pre-32.1 text
+      because the row they weighed is no longer offered. The by-hand clearing
+      is what the fix was diagnosed from; the guard against a repeat is
+      `test_a_core_spell_is_never_offered_a_supplement_row`. See DECISIONS.md,
+      which records this as a revision of item 55.
 - [ ] **32.2** Re-read every entry against its spell's published text and its candidate
       guidelines' wording
-- [x] **32.3** **Record which entries carry the risk — measured 2026-08-17 rather than
-      estimated.** Of 206 entries, **186 have candidates that all share one base
-      level** and 20 do not. The 186 are the ones no automated check can reach.
-      Recording the split *per entry* in the ledger file itself is still worth
-      doing, so the risky subset is visible while editing.
+- [x] **32.3** **Record which entries carry the risk — re-measured 2026-08-19, and
+      the earlier figure was wrong.** The 2026-08-17 measurement said 186 of 206
+      entries had candidates sharing one base level and 20 did not. Re-running it
+      against that same commit (`186419d`) gives **0** entries with differing
+      candidate levels — the 20 were the all-General entries (`baseLevel: null`),
+      not level-discriminable ones. Today: **217 entries, 0 discriminable**, 195
+      numbered and 22 General-only. This is true *by construction* —
+      `Catalog.candidates()` selects rows by `baseLevel == base_level` and
+      `general_candidates()` by `baseLevel is None`, so a candidate set is always
+      level-uniform, and that function is unchanged since `7fdbb1c`. Assertion 1
+      therefore discriminates among candidates on **no** entry, not on 20 of
+      them. There is no per-entry split left to record: the risky subset is the
+      whole ledger.
 - **A demonstrated failure, not a theoretical one.**
   `lib-reim-image-from-wizard-torn` shipped for months pointing at `reim-15b`,
   *"Summon a disembodied spirit associated with Imaginem"*. The spell summons
@@ -44,16 +62,32 @@
   Every automated check passed.
 - **The rule this establishes:** when an ambiguous spell's candidates share a base
   level, the printed-vs-computed assertion confirms the base level and nothing
-  more. Those entries rest entirely on their written rationale.
+  more. Those entries rest entirely on their written rationale — and per 32.3
+  that is every entry, not a subset.
 - **The same holds for every General entry, for a related reason.** A General base
   effect has no fixed level to check against — `chosenBaseLevel` comes from the
   caster — so assertion 1 cannot discriminate a wrong General guideline at all.
   Assertion 6 (`test_general_catalog.py:163`) is the only automated check standing
   between an entry and a wrong General pick.
-- **Item 39's *Conjuration of the Indubitable Cold* pick is a deliberate member of
-  the 186** — both candidates share base level 4 and the choice between them was
+- **Item 39's *Conjuration of the Indubitable Cold* pick is the deliberate case of
+  this kind** — both candidates share base level 4 and the choice between them was
   made arbitrarily on the grounds that it is cosmetic. Re-reading it should
   confirm that reasoning, not the pick.
+- **32.2 cannot be handed to a cheap model — measured 2026-08-19.** A blind
+  20-entry eval (spell text + candidate guideline wording, answers withheld,
+  candidate order shuffled) scored Haiku 4.5 at 19/20 against the ledger. The one
+  miss was `lib-reim-image-from-wizard-torn`, planted as the known-defect case:
+  Haiku reproduced the original `reim-15b` error, at `medium` confidence, with the
+  Arcane Connection clause present in its input, and flagged nothing as ambiguous
+  in the whole run. Sonnet also scored 19/20 but caught that item and flagged 3 of
+  20 as genuinely ambiguous — including its own sole disagreement
+  (`lib-crig-heat-searing-forge`, `crig-4d` over the recorded `crig-4a`). The
+  usable shape is therefore *model as flagger, human as adjudicator*: a Sonnet
+  pass at a ~15% flag rate queues roughly 30 of 217 entries for a human read, and
+  the unflagged remainder stays unverified rather than becoming verified. Caveat:
+  n=20 with exactly one certified ground truth (`cf0b40b`), and "agreement with
+  the ledger" scores agreement with the artifact under audit. Eval harness is not
+  committed; regenerate from this description if it is worth repeating.
 - **Files:** `scripts/spell_import/resolutions.json`
 
 ---
@@ -122,9 +156,10 @@ of `feature/general-base-effects`, each finding re-verified against source.
       candidate:** `crvi-G4`'s formula codes `offsetMagnitudes: -1` while its one
       template's verbatim prose (*Restore the Faded Threads*) reads "up to the
       magnitude of this spell –3". Low confidence either is wrong — they may describe
-      different quantities — but it is exactly what item 32 exists to check. **That
-      template is also one of the three entries carrying an unreviewed candidate
-      after item 55's migration, so it wants one re-read, not two.**
+      different quantities — but it is exactly what item 32 exists to check. **Item
+      32.1 has since cleared that entry's `unreviewedCandidates` field, but only
+      against `crvi-hohmc-G1` — the `offsetMagnitudes` question below is untouched
+      and still wants its own read.**
 - [ ] **38.7** **Two latent gaps in the Python import pipeline**, neither hit by the current
       corpus:
       - `extract_spells.py`'s General routing (`design.base_level is None or

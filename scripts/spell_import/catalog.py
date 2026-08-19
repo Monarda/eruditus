@@ -40,13 +40,35 @@ def cites(entry: dict, book_id: str) -> bool:
     have to say which rows they are talking about rather than assuming every
     row is core — a supplement row is not a surplus to be deleted.
 
-    Candidate resolution deliberately does **not** use this: a spell's
-    guideline is chosen from everything the catalog offers, and a row that
-    should not have been a candidate is a ledger decision, not a filter (see
-    todo item 55, and `migrate_ledger.py` for how such a row is carried past
-    existing decisions).
+    Candidate resolution *does* use this, via `visible_books` — see that
+    function for why item 55's book-blind rule was revised.
     """
     return any(c.get("bookId") == book_id for c in entry.get("citations") or [])
+
+
+def visible_books(book_id: str) -> frozenset[str]:
+    """The books a spell printed in `book_id` may draw catalog rows from.
+
+    A core spell is built from core rows only; a supplement spell may use core
+    rows and its own book's. (*Mysteries Revised* joins every set once it is a
+    registered book — it is not one yet, and inventing its id here would be a
+    guess.)
+
+    This **revises** item 55's rule that candidate resolution is book-blind and
+    that an out-of-scope row is "a ledger decision, not a filter". Book-blind
+    resolution meant every new supplement widened the candidate sets of spells
+    printed years earlier, and each widening became a `unreviewedCandidates`
+    backlog item for a human to clear -- item 32.1 cleared seven such entries,
+    and all seven were of exactly this kind: HoH:MC rows offered to core
+    spells that could never legally use them. Scoping the offer at source means
+    a new book adds rows without reopening a single existing decision.
+
+    There is deliberately **no exception mechanism**. A spell that genuinely
+    needs a row from a third book fails loudly -- `StaleEntry`, or "no base
+    effect at that Technique/Form/level" -- and the escape hatch gets designed
+    against that concrete case rather than guessed at now.
+    """
+    return frozenset({CORE_BOOK_ID, book_id})
 
 
 def slug_id(technique: str, form: str, name: str) -> str:
@@ -73,28 +95,41 @@ class Catalog:
             modifiers=read("modifiers.json"),
         )
 
-    def candidates(self, technique: str, form: str, base_level: int) -> list[str]:
+    def candidates(
+        self, technique: str, form: str, base_level: int, book_id: str
+    ) -> list[str]:
+        """Rows at this Technique/Form/level that a `book_id` spell may use.
+
+        `book_id` is the book the *spell* was printed in, not the row's — see
+        `visible_books` for the scoping rule and why it is not book-blind.
+        """
+        books = visible_books(book_id)
         return sorted({
             effect["id"]
             for effect in self.base_effects
             if effect["technique"] == technique
             and effect["form"] == form
             and effect["baseLevel"] == base_level
+            and any(cites(effect, book) for book in books)
         })
 
-    def general_candidates(self, technique: str, form: str) -> list[str]:
-        """Every General row for a Technique/Form.
+    def general_candidates(
+        self, technique: str, form: str, book_id: str
+    ) -> list[str]:
+        """Every General row for a Technique/Form a `book_id` spell may use.
 
         Unlike `candidates`, this cannot narrow by level: a General row has
         none. Perdo Vim therefore returns all 13, and the pick rests entirely
         on the ledger's recorded rationale plus assertion 6.
         """
+        books = visible_books(book_id)
         return sorted({
             effect["id"]
             for effect in self.base_effects
             if effect["technique"] == technique
             and effect["form"] == form
             and effect["baseLevel"] is None
+            and any(cites(effect, book) for book in books)
         })
 
     def reference_cost(self, effect_id: str) -> int:

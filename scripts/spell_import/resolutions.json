@@ -1564,13 +1564,9 @@
       "crvi-G1",
       "crvi-G2",
       "crvi-G3",
-      "crvi-G4",
-      "crvi-hohmc-G1"
+      "crvi-G4"
     ],
-    "rationale": "Its prose reads 'This spell temporarily restores spell traces to a fresh state (as if they had just expired). The spell will restore spell traces of negative magnitude up to the magnitude of this spell –3.' crvi-G4 is the only one of the four Creo Vim General bullets about traces — 'Refreshes all spell traces within the target that are less than the magnitude of the guideline –1, in negative magnitude (this restores them to their initial strength, generally half the magnitude of the spell)' — and its arithmetic lands exactly: the design line (Base, +1 Touch, +1 Dia) puts the guideline two magnitudes below the spell, so 'the magnitude of the guideline –1' is 'the magnitude of this spell –3'. crvi-G2 is the nearest rejected candidate, being the other bullet that turns on Intellego investigation of magic, but it 'prevents Intellego spells ... from learning any details about the magic on the target' — this spell exists to make the traces examinable, which is the opposite; crvi-G1 and crvi-G3 are likewise concealment shells, not restorations.",
-    "unreviewedCandidates": [
-      "crvi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'This spell temporarily restores spell traces to a fresh state (as if they had just expired). The spell will restore spell traces of negative magnitude up to the magnitude of this spell –3.' crvi-G4 is the only one of the four Creo Vim General bullets about traces — 'Refreshes all spell traces within the target that are less than the magnitude of the guideline –1, in negative magnitude (this restores them to their initial strength, generally half the magnitude of the spell)' — and its arithmetic lands exactly: the design line (Base, +1 Touch, +1 Dia) puts the guideline two magnitudes below the spell, so 'the magnitude of the guideline –1' is 'the magnitude of this spell –3'. crvi-G2 is the nearest rejected candidate, being the other bullet that turns on Intellego investigation of magic, but it 'prevents Intellego spells ... from learning any details about the magic on the target' — this spell exists to make the traces examinable, which is the opposite; crvi-G1 and crvi-G3 are likewise concealment shells, not restorations."
   },
   "lib-crvi-shell-false-determinations": {
     "baseEffectId": "crvi-G3",
@@ -1578,13 +1574,9 @@
       "crvi-G1",
       "crvi-G2",
       "crvi-G3",
-      "crvi-G4",
-      "crvi-hohmc-G1"
+      "crvi-G4"
     ],
-    "rationale": "Its prose reads 'All attempts to investigate the magic item give false information about its powers unless half of the level of the shell is exceeded by the magus's Investigation roll.' crvi-G3 is 'Create a magical shell which gives false information about the target to Intellego spells with level less than or equal to half its level plus one magnitude' — the only bullet that supplies false information, and the only one whose threshold is halved, matching the printed 'half of the level of the shell' (with (Base effect, +1 Touch), half the guideline plus one magnitude is half the shell's own level). crvi-G1 is the near miss and is excluded by its own parenthetical: 'this aura is generic magic only — no misleading information can be supplied'. crvi-G2's threshold is the full level, which is Shell of Opaque Mysteries, not this spell; crvi-G4 is about spell traces.",
-    "unreviewedCandidates": [
-      "crvi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'All attempts to investigate the magic item give false information about its powers unless half of the level of the shell is exceeded by the magus's Investigation roll.' crvi-G3 is 'Create a magical shell which gives false information about the target to Intellego spells with level less than or equal to half its level plus one magnitude' — the only bullet that supplies false information, and the only one whose threshold is halved, matching the printed 'half of the level of the shell' (with (Base effect, +1 Touch), half the guideline plus one magnitude is half the shell's own level). crvi-G1 is the near miss and is excluded by its own parenthetical: 'this aura is generic magic only — no misleading information can be supplied'. crvi-G2's threshold is the full level, which is Shell of Opaque Mysteries, not this spell; crvi-G4 is about spell traces."
   },
   "lib-crvi-shell-opaque-mysteries": {
     "baseEffectId": "crvi-G2",
@@ -1592,13 +1584,9 @@
       "crvi-G1",
       "crvi-G2",
       "crvi-G3",
-      "crvi-G4",
-      "crvi-hohmc-G1"
+      "crvi-G4"
     ],
-    "rationale": "Its prose reads 'it causes all attempts to investigate the magic item to utterly fail, unless the level of the ritual is exceeded by the magus's Investigation roll.' crvi-G2 is 'Create a magical shell which prevents Intellego spells with a level less than or equal to its level, plus one magnitude from learning any details about the magic on the target' — learning no details at all is 'utterly fail', and the threshold is the full level of the ritual, exactly as printed (with (Base effect, +1 Touch), the guideline plus one magnitude is the ritual's own level). crvi-G3 is the near miss — the entry itself says this spell is 'similar to Shell of False Determinations' — and is excluded twice over: it 'gives false information about the target', which this spell explicitly does not do, and its threshold is half the level rather than 'the level of the ritual'. crvi-G1 supplies a merely generic aura and crvi-G4 is about spell traces.",
-    "unreviewedCandidates": [
-      "crvi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'it causes all attempts to investigate the magic item to utterly fail, unless the level of the ritual is exceeded by the magus's Investigation roll.' crvi-G2 is 'Create a magical shell which prevents Intellego spells with a level less than or equal to its level, plus one magnitude from learning any details about the magic on the target' — learning no details at all is 'utterly fail', and the threshold is the full level of the ritual, exactly as printed (with (Base effect, +1 Touch), the guideline plus one magnitude is the ritual's own level). crvi-G3 is the near miss — the entry itself says this spell is 'similar to Shell of False Determinations' — and is excluded twice over: it 'gives false information about the target', which this spell explicitly does not do, and its threshold is half the level rather than 'the level of the ritual'. crvi-G1 supplies a merely generic aura and crvi-G4 is about spell traces."
   },
   "lib-muvi-mirror-opposition-form": {
     "baseEffectId": "muvi-G3",
@@ -1747,13 +1735,9 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5",
-      "revi-hohmc-G1"
+      "revi-G5"
     ],
-    "rationale": "Its prose reads 'All creatures with Infernal Might equal to or less than the level of the spell are unable to enter the circle or harm those within it.' revi-G1 is 'Ward against all supernatural beings from one realm (Divine, Faerie, Infernal, or Magic) with Might less than or equal to the level of the spell (Touch, Ring, Circle)' — the only one of the five Rego Vim General bullets whose subject is beings rather than spells, and whose printed reference parameters are this spell's own R: Touch, D: Ring, T: Circle, which is why the design line is a bare '(Base spell)' with nothing to charge. revi-G2 is the nearest rejected candidate and is excluded because it sustains or suppresses 'a spell you have cast'; this ward's target is a demon's Might, not a spell, and against revi-G2's Personal/Momentary/Individual reference the Touch/Ring/Circle stat line would owe magnitudes that the printed design line does not charge.",
-    "unreviewedCandidates": [
-      "revi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'All creatures with Infernal Might equal to or less than the level of the spell are unable to enter the circle or harm those within it.' revi-G1 is 'Ward against all supernatural beings from one realm (Divine, Faerie, Infernal, or Magic) with Might less than or equal to the level of the spell (Touch, Ring, Circle)' — the only one of the five Rego Vim General bullets whose subject is beings rather than spells, and whose printed reference parameters are this spell's own R: Touch, D: Ring, T: Circle, which is why the design line is a bare '(Base spell)' with nothing to charge. revi-G2 is the nearest rejected candidate and is excluded because it sustains or suppresses 'a spell you have cast'; this ward's target is a demon's Might, not a spell, and against revi-G2's Personal/Momentary/Individual reference the Touch/Ring/Circle stat line would owe magnitudes that the printed design line does not charge."
   },
   "lib-revi-maintaining-demanding-spell": {
     "baseEffectId": "revi-G2",
@@ -1762,13 +1746,9 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5",
-      "revi-hohmc-G1"
+      "revi-G5"
     ],
-    "rationale": "Its prose reads 'You cast this spell on a spell that you have already cast and are maintaining through concentration. The spell that requires concentration is then automatically maintained for the duration of this spell ... This spell only works on spells of equal or lower level.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (this cannot make a spell last longer than it could have naturally, so the sustaining version is only useful with Concentration Duration among standard Hermetic Durations)' — the parenthetical describes this spell's use case exactly, and with (Base effect, +1 Touch, +1 Diam) the guideline + 2 magnitudes is the spell's own level, matching 'equal or lower level'. revi-G4 is the near miss and is excluded because it is for 'a spell cast by another', where this one is cast on a spell you have already cast yourself; its cap would also be halved. revi-G5 adds 'of a specific type', which this spell does not specify.",
-    "unreviewedCandidates": [
-      "revi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'You cast this spell on a spell that you have already cast and are maintaining through concentration. The spell that requires concentration is then automatically maintained for the duration of this spell ... This spell only works on spells of equal or lower level.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (this cannot make a spell last longer than it could have naturally, so the sustaining version is only useful with Concentration Duration among standard Hermetic Durations)' — the parenthetical describes this spell's use case exactly, and with (Base effect, +1 Touch, +1 Diam) the guideline + 2 magnitudes is the spell's own level, matching 'equal or lower level'. revi-G4 is the near miss and is excluded because it is for 'a spell cast by another', where this one is cast on a spell you have already cast yourself; its cap would also be halved. revi-G5 adds 'of a specific type', which this spell does not specify."
   },
   "lib-revi-opening-intangible-tunnel": {
     "baseEffectId": "revi-G3",
@@ -1777,13 +1757,9 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5",
-      "revi-hohmc-G1"
+      "revi-G5"
     ],
-    "rationale": "Its prose reads 'You can open a magical channel from yourself to some target, allowing you to cast any spell with a range greater than Personal on that target ... Spells cast through the tunnel cannot be of higher level than that of this spell.' revi-G3 is 'Create a conduit or container for spells with level less than or equal to the level + 5 magnitudes of the Vim spell (a conduit puts you in mystical contact with the target at effective Touch range, while a container holds a spell for a specific length of time before releasing it)' — the conduit half of that clause is this spell's own description, and with (Base effect, +4 Arc, +1 Conc) the guideline + 5 magnitudes is the spell's own level, matching the printed cap. revi-G4 is the near miss because it carries the same '+5 magnitudes' term, but it 'sustains or suppresses a spell cast by another' and the tunnel neither sustains nor suppresses anything; its cap is halved besides, which the printed cap contradicts.",
-    "unreviewedCandidates": [
-      "revi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'You can open a magical channel from yourself to some target, allowing you to cast any spell with a range greater than Personal on that target ... Spells cast through the tunnel cannot be of higher level than that of this spell.' revi-G3 is 'Create a conduit or container for spells with level less than or equal to the level + 5 magnitudes of the Vim spell (a conduit puts you in mystical contact with the target at effective Touch range, while a container holds a spell for a specific length of time before releasing it)' — the conduit half of that clause is this spell's own description, and with (Base effect, +4 Arc, +1 Conc) the guideline + 5 magnitudes is the spell's own level, matching the printed cap. revi-G4 is the near miss because it carries the same '+5 magnitudes' term, but it 'sustains or suppresses a spell cast by another' and the tunnel neither sustains nor suppresses anything; its cap is halved besides, which the printed cap contradicts."
   },
   "lib-revi-suppressing-wizards-handiwork": {
     "baseEffectId": "revi-G2",
@@ -1792,13 +1768,9 @@
       "revi-G2",
       "revi-G3",
       "revi-G4",
-      "revi-G5",
-      "revi-hohmc-G1"
+      "revi-G5"
     ],
-    "rationale": "Its prose reads 'Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return ... The level of the spell to be suppressed must be less than or equal to the level of this spell.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (... a suppressed spell still ends when its original duration expires)'; with (Base, +1 Touch, +1 Conc) the guideline + 2 magnitudes is the spell's own level, matching the printed cap, and 'a spell you have cast' matches 'one spell that you have cast'. revi-G4 is the near miss and is excluded by 'cast by another' plus its halved cap; revi-G5 is excluded because it is also 'cast by another' and further requires spells 'of a specific type', where this spell suppresses any one of your own.",
-    "unreviewedCandidates": [
-      "revi-hohmc-G1"
-    ]
+    "rationale": "Its prose reads 'Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return ... The level of the spell to be suppressed must be less than or equal to the level of this spell.' revi-G2 is 'Sustain or suppress a spell you have cast whose level is less than or equal to the level + 2 magnitudes of the Vim spell (... a suppressed spell still ends when its original duration expires)'; with (Base, +1 Touch, +1 Conc) the guideline + 2 magnitudes is the spell's own level, matching the printed cap, and 'a spell you have cast' matches 'one spell that you have cast'. revi-G4 is the near miss and is excluded by 'cast by another' plus its halved cap; revi-G5 is excluded because it is also 'cast by another' and further requires spells 'of a specific type', where this spell suppresses any one of your own."
   },
   "lib-muau-infernal-smoke-death": {
     "baseEffectId": "muau-gen",

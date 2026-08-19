@@ -378,7 +378,10 @@ class KnownUnresolvableStalenessTest(unittest.TestCase):
                 stale.append((spell_id, "no longer a parsed spell at all"))
                 continue
             design = designline.parse_design(block.design_line)
-            candidates = cat.candidates(block.technique, block.form, design.base_level)
+            candidates = cat.candidates(
+                block.technique, block.form, design.base_level,
+                catalog_module.CORE_BOOK_ID,
+            )
             if len(candidates) < 2:
                 stale.append((spell_id, f"only {len(candidates)} candidate(s) now: {candidates}"))
 
