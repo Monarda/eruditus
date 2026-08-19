@@ -306,6 +306,32 @@ class ParseInlineFixtureTest(unittest.TestCase):
         self.assertEqual(len(found), 1)
         self.assertIsNone(found[0].design_line)
 
+    def test_a_damaged_stat_line_with_an_anchor_above_it_is_reported(self):
+        # HoH:MC has zero damaged stat lines, so nothing in the corpus test
+        # covers this branch. R and T are transposed below, same shape as
+        # statline.DetectTest.test_damaged_lines_are_detected_not_parsed.
+        lines = [
+            "##### A Made-Up Spell",
+            "MuAn 15",
+            "R: Per, T: Ring, D: Circle",
+        ]
+        found, problems = blocks.parse_inline(lines)
+        self.assertEqual(found, [])
+        self.assertEqual(len(problems), 1)
+        self.assertIn("damaged stat line", problems[0])
+
+    def test_a_damaged_stat_line_with_no_anchor_above_it_is_skipped(self):
+        # The same damaged line, but with no `TeFo Level` anchor above it --
+        # an enchanted-device effect or NPC power, not a spell. Silence here
+        # matches the silent skip an ordinary unanchored stat line gets.
+        lines = [
+            "Some prose about a creature.",
+            "R: Per, T: Ring, D: Circle",
+        ]
+        found, problems = blocks.parse_inline(lines)
+        self.assertEqual(found, [])
+        self.assertEqual(problems, [])
+
     def test_parsers_registry_exposes_both_styles(self):
         self.assertEqual(sorted(blocks.PARSERS), ["de", "inline"])
         self.assertIs(blocks.PARSERS["de"], blocks.parse_de)
