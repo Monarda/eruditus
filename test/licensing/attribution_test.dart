@@ -1,7 +1,10 @@
+import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/licensing/attribution.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('the Ars Magica attribution carries every CC BY-SA 4.0 §3(a) part', () {
     const a = arsMagicaAttribution;
 
@@ -41,6 +44,18 @@ void main() {
         'Ars Magica Fifth Edition',
         'Ars Magica 5e - Houses of Hermes: Mystery Cults',
       ]));
+    });
+
+    test('it names exactly the books in assets/data/books.json, so a third '
+        'book cannot be silently under-credited', () async {
+      final catalogTitles = (await AssetDataLoader().loadBooks())
+          .map((book) => book.title)
+          .toSet();
+
+      expect(a.books.toSet(), catalogTitles,
+          reason: 'assets/data/books.json and arsMagicaAttribution.books have '
+              'drifted apart — §3(a)(1)(A)(i) attribution is per-work, so '
+              'every book in the catalog needs an entry here');
     });
   });
 
