@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart'
-    show kIsWeb, LicenseEntryWithLineBreaks, LicenseRegistry;
+import 'package:flutter/foundation.dart' show kIsWeb, LicenseRegistry;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -37,21 +36,8 @@ Future<void> main() async {
   // Also surface the Ars Magica attribution through Flutter's own licence
   // machinery, so it is found by anyone reaching licences the standard way
   // (showLicensePage) and not only through the About screen. Two independent
-  // routes to the same §3(a) notice.
-  LicenseRegistry.addLicense(() async* {
-    yield LicenseEntryWithLineBreaks(
-      const <String>['Ars Magica (rulebook content in assets/data)'],
-      '${arsMagicaAttribution.creators}\n\n'
-      '${arsMagicaAttribution.copyrightNotice}\n\n'
-      'Licensed under ${arsMagicaAttribution.licenceName}\n'
-      '${arsMagicaAttribution.licenceUri}\n\n'
-      'Source: ${arsMagicaAttribution.sourceUri}\n\n'
-      '${arsMagicaAttribution.modificationNote}\n\n'
-      '$warrantyDisclaimerFullText\n\n'
-      '$trademarkNotice\n\n'
-      '$endorsementNotice',
-    );
-  });
+  // routes to the same §3(a) notice — see arsMagicaLicenseEntries.
+  LicenseRegistry.addLicense(arsMagicaLicenseEntries);
 
   // Initialize sqflite for web and desktop platforms
   if (kIsWeb) {

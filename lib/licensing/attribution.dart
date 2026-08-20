@@ -9,6 +9,8 @@
 /// go through `AppLocalizations`.
 library;
 
+import 'package:flutter/foundation.dart' show LicenseEntry, LicenseEntryWithLineBreaks;
+
 /// The rulebook checkout these assets were extracted from. Named rather than
 /// a branch, so §3(a)(1)(A)(v)'s URI identifies the material actually adapted
 /// — the same discipline as `source.lock` (todo item 30).
@@ -117,3 +119,26 @@ const String repoLicenceSummary =
     'scripts/spell_import/resolutions.json, '
     'scripts/spell_import/hand_authored_templates.json and '
     'scripts/spell_import/container_modes.json. See LICENSE and NOTICE.md.';
+
+/// The same §3(a) notice as the About screen, assembled as a `LicenseEntry`
+/// so `main()` can register it with Flutter's own licence machinery
+/// (`LicenseRegistry.addLicense`, surfaced via `showLicensePage`). Two
+/// independent routes to one notice, built from the same data, so they
+/// cannot state the attribution differently — including which books it
+/// names, which is why [SourceEditionAttribution.books] is folded in here
+/// too rather than left for the caller to remember.
+Stream<LicenseEntry> arsMagicaLicenseEntries() async* {
+  yield LicenseEntryWithLineBreaks(
+    const <String>['Ars Magica (rulebook content in assets/data)'],
+    'Books used: ${arsMagicaAttribution.books.join(', ')}\n\n'
+    '${arsMagicaAttribution.creators}\n\n'
+    '${arsMagicaAttribution.copyrightNotice}\n\n'
+    'Licensed under ${arsMagicaAttribution.licenceName}\n'
+    '${arsMagicaAttribution.licenceUri}\n\n'
+    'Source: ${arsMagicaAttribution.sourceUri}\n\n'
+    '${arsMagicaAttribution.modificationNote}\n\n'
+    '$warrantyDisclaimerFullText\n\n'
+    '$trademarkNotice\n\n'
+    '$endorsementNotice',
+  );
+}

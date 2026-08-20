@@ -89,4 +89,28 @@ void main() {
     expect(sourceEditions, contains(arsMagicaAttribution));
     expect(sourceEditions, isA<List<SourceEditionAttribution>>());
   });
+
+  test('the LicenseRegistry entry text carries every §3(a) field, '
+      'including the books, so it cannot disagree with the About screen',
+      () async {
+    final entries = await arsMagicaLicenseEntries().toList();
+    expect(entries, hasLength(1));
+
+    final text = entries.single.paragraphs.map((p) => p.text).join('\n\n');
+
+    expect(text, contains(arsMagicaAttribution.creators));
+    expect(text, contains(arsMagicaAttribution.copyrightNotice));
+    expect(text, contains(arsMagicaAttribution.licenceName));
+    expect(text, contains(arsMagicaAttribution.licenceUri));
+    expect(text, contains(arsMagicaAttribution.sourceUri));
+    expect(text, contains(arsMagicaAttribution.modificationNote));
+    expect(text, contains(warrantyDisclaimerFullText));
+    expect(text, contains(trademarkNotice));
+    expect(text, contains(endorsementNotice));
+    for (final title in arsMagicaAttribution.books) {
+      expect(text, contains(title),
+          reason: 'the LicenseRegistry route must name every book, the same '
+              'as the About screen');
+    }
+  });
 }
