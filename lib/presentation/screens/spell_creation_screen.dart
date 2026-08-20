@@ -7,6 +7,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/engine/ritual_status.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
@@ -14,6 +15,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/target_type.dart';
+import 'package:eruditus/presentation/format/contribution_formatter.dart';
 import 'package:eruditus/presentation/widgets/level_banner.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 import 'package:eruditus/presentation/widgets/ritual_section.dart';
@@ -62,6 +64,7 @@ class SpellCreationScreen extends StatelessWidget {
         },
         builder: (context, state) {
           final bloc = context.read<SpellCreationBloc>();
+          final l10n = AppLocalizations.of(context);
           final draft = state.draft;
           final configState = context.watch<ConfigurationBloc>().state;
 
@@ -376,7 +379,8 @@ class SpellCreationScreen extends StatelessWidget {
                       ),
                       if (state.validationErrors.isNotEmpty)
                         ...state.validationErrors.map(
-                          (e) => Text(e, style: const TextStyle(color: Colors.red)),
+                          (e) => Text(formatValidationError(l10n, e),
+                              style: const TextStyle(color: Colors.red)),
                         ),
                       const SizedBox(height: 16),
                       ElevatedButton(

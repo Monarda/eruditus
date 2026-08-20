@@ -7,6 +7,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/parameter_triple.dart';
@@ -38,7 +39,7 @@ void main() {
       );
 
       final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Technique must be selected'));
+      expect(errors, contains(const TechniqueMissing()));
     });
 
     test('fails if form not selected', () {
@@ -52,7 +53,7 @@ void main() {
       );
 
       final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Form must be selected'));
+      expect(errors, contains(const FormMissing()));
     });
 
     test('fails if base effect not selected', () {
@@ -62,7 +63,7 @@ void main() {
       );
 
       final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Base effect must be selected'));
+      expect(errors, contains(const BaseEffectMissing()));
     });
 
     test('passes for valid draft', () {
@@ -101,7 +102,7 @@ void main() {
       final errors = engine.validateSpellDraft(draft);
       expect(
         errors,
-        contains("Requisite art cannot be the spell's own technique or form"),
+        contains(const RequisiteIsOwnArt()),
       );
     });
 
@@ -157,7 +158,7 @@ void main() {
       );
 
       expect(testEngine.validateSpellDraft(draft),
-          contains('Only one option may be selected for Material difficulty'));
+          contains(const ModifierNotMultiSelect('Material difficulty')));
     });
 
     test('a multi-select modifier with several options chosen is valid', () {
@@ -212,7 +213,7 @@ void main() {
       );
 
       expect(engine.validateSpellDraft(draft),
-          contains('Magnitudes reduce this spell below level 1'));
+          contains(const MagnitudesBelowOne()));
     });
   });
 
@@ -1374,14 +1375,14 @@ void main() {
       final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: null);
 
       expect(engine.validateSpellDraft(draft),
-          contains('Choose a level for this General guideline'));
+          contains(const GeneralLevelNotChosen()));
     });
 
     test('a chosen level below 1 is an error', () {
       final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: 0);
 
       expect(engine.validateSpellDraft(draft),
-          contains('The chosen level must be at least 1'));
+          contains(const ChosenLevelBelowOne()));
     });
 
     test('a valid chosen level produces no errors', () {
@@ -1415,7 +1416,7 @@ void main() {
           range: personal, duration: momentary, target: individual);
 
       expect(engine.validateSpellDraft(draft),
-          contains('Magnitudes reduce this spell below level 1'));
+          contains(const MagnitudesBelowOne()));
     });
 
     test('a chosen level on a non-General effect is rejected', () {
@@ -1425,7 +1426,7 @@ void main() {
       );
       expect(
         engine.validateSpellDraft(draft),
-        contains('A chosen base level applies only to a General guideline'),
+        contains(const ChosenLevelNotGeneral()),
       );
     });
   });

@@ -7,6 +7,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
@@ -70,8 +71,11 @@ const String _momentaryDurationId = 'duration-momentary';
 /// shared by every path that can produce or hold one — the same contract
 /// [validateSpellProse] provides for prose.
 ///
-/// Returns a list of human-readable problems; empty means valid. Problems
-/// accumulate: a caller showing them to a user should see all of them at once.
+/// Returns a list of [SpellValidationError] rather than English -- this
+/// function runs in domain code with no locale reachable, and its results are
+/// rendered in three places (see `presentation/format/contribution_formatter.dart`
+/// for the wording). Empty means valid. Problems accumulate: a caller showing
+/// them to a user should see all of them at once.
 ///
 /// **Why this is a free function taking pieces rather than a method on [Spell].**
 /// [Spell] deliberately holds `baseEffectId` and not [BaseEffect], so it cannot
@@ -89,7 +93,7 @@ const String _momentaryDurationId = 'duration-momentary';
 /// NOT skipped for templates — a `SpellTemplate` genuinely carries
 /// `chosenSlots` now, so a stray key naming a kind the guideline never
 /// declared open is just as much a bug there as on a `Spell`.
-List<String> validateSpellAgainstCatalog({
+List<SpellValidationError> validateSpellAgainstCatalog({
   required BaseEffect effect,
   required String technique,
   required String form,
@@ -104,22 +108,22 @@ List<String> validateSpellAgainstCatalog({
   required List<Modifier> modifiers,
   bool isTemplate = false,
 }) {
-  final problems = <String>[];
+  final problems = <SpellValidationError>[];
 
   if (!isTemplate) {
     // 1. A General guideline's level comes from the caster, so it must be
     //    present and usable. Absent it, calculateBreakdown throws.
     if (effect.isGeneral) {
       if (chosenBaseLevel == null) {
-        problems.add('Choose a level for this General guideline');
+        problems.add(const GeneralLevelNotChosen());
       } else if (chosenBaseLevel < 1) {
-        problems.add('The chosen level must be at least 1');
+        problems.add(const ChosenLevelBelowOne());
       }
     } else if (chosenBaseLevel != null) {
       // 2. The converse. calculateBreakdown ignores a chosen level on a
       //    fixed-level guideline, so a stray one is silently meaningless
       //    stored data rather than a visible error.
-      problems.add('A chosen base level applies only to a General guideline');
+      problems.add(const ChosenLevelNotGeneral());
     }
   }
 
@@ -130,7 +134,7 @@ List<String> validateSpellAgainstCatalog({
   //    impossible rather than checked.
   for (final art in requisites.keys) {
     if (art == technique || art == form) {
-      problems.add("Requisite art cannot be the spell's own technique or form");
+      problems.add(const RequisiteIsOwnArt());
     }
   }
 
@@ -144,7 +148,7 @@ List<String> validateSpellAgainstCatalog({
     if (modifier == null) return;
     if (modifier.selectionMode == ModifierSelectionMode.single &&
         optionIds.length > 1) {
-      problems.add('Only one option may be selected for ${modifier.name}');
+      problems.add(ModifierNotMultiSelect(modifier.name));
     }
   });
 
@@ -165,7 +169,7 @@ List<String> validateSpellAgainstCatalog({
         final kindNames = effect.openSlots.length == 1
             ? _openSlotDescription(effect.openSlots.single)
             : effect.openSlots.map(_openSlotDescription).join(' or a ');
-        problems.add('Choose a $kindNames for this guideline');
+        problems.add(OpenSlotNotChosen(kindNames));
       }
     }
   }
@@ -181,7 +185,7 @@ List<String> validateSpellAgainstCatalog({
       final description = _openSlotKindByName(kind) != null
           ? _openSlotDescription(_openSlotKindByName(kind)!)
           : kind;
-      problems.add('A chosen $description applies only to a guideline with an open $description slot');
+      problems.add(ChosenSlotNotOpen(description));
     }
   }
 
@@ -196,15 +200,9 @@ List<String> validateSpellAgainstCatalog({
   //    correctly-recorded Technique/Form exactly as much as a spell does.
   final isAnalogy = technique != effect.technique || form != effect.form;
   if (isAnalogy && (analogyRationale == null || analogyRationale.trim().isEmpty)) {
-    problems.add(
-      "Technique/Form differs from the base effect's own -- "
-      'an analogyRationale is required to explain why',
-    );
+    problems.add(const AnalogyRationaleMissing());
   } else if (!isAnalogy && analogyRationale != null) {
-    problems.add(
-      'analogyRationale is set but Technique/Form already matches the base '
-      "effect's own -- remove it",
-    );
+    problems.add(const AnalogyRationaleUnwanted());
   }
 
   // 9. Only a container Target has the static/dynamic distinction at all —
@@ -225,10 +223,7 @@ List<String> validateSpellAgainstCatalog({
   if (containerMode != ContainerMode.unstated &&
       target != null &&
       target.targetType != TargetType.container) {
-    problems.add(
-      'A container mode applies only to a container Target, and '
-      '${target.name} is not one',
-    );
+    problems.add(ContainerModeOnNonContainer(target.name));
   }
 
   // 10. Core Rules 12086: "Personal Range spells can never have a container
@@ -245,10 +240,11 @@ List<String> validateSpellAgainstCatalog({
   if (range != null &&
       targetKind != null &&
       range.forbidsTargetTypes.contains(targetKind)) {
-    problems.add(
-      '${range.name} Range cannot be combined with ${target!.name}, '
-      'which is a ${targetKind.name} Target',
-    );
+    problems.add(RangeForbidsTarget(
+      rangeName: range.name,
+      targetName: target!.name,
+      targetKind: targetKind.name,
+    ));
   }
 
   // 11. The forcing direction: a Target that dictates its spell's Range.
@@ -265,10 +261,11 @@ List<String> validateSpellAgainstCatalog({
   //     precedent when it cannot describe a slot kind.
   final requiredRangeId = target?.requiresRangeId;
   if (requiredRangeId != null && range != null && range.id != requiredRangeId) {
-    problems.add(
-      '${target!.name} requires the Range "$requiredRangeId", '
-      'but this spell uses ${range.name}',
-    );
+    problems.add(RangeRequiredByTarget(
+      targetName: target!.name,
+      requiredRangeId: requiredRangeId,
+      rangeName: range.name,
+    ));
   }
 
   // 12. HoH:MC 1009: a Sensory Magic spell "cannot employ the Technique of
@@ -291,16 +288,17 @@ List<String> validateSpellAgainstCatalog({
   //     ever reused for a Form.
   final excludedByTarget = target?.scope.excludeTechniques ?? const <String>[];
   if (excludedByTarget.contains(technique)) {
-    problems.add(
-      '${target!.name} cannot be used on a spell employing the Technique '
-      'of $technique',
-    );
+    problems.add(TechniqueExcludedByTarget(
+      targetName: target!.name,
+      technique: technique,
+    ));
   }
   for (final art in requisites.keys) {
     if (excludedByTarget.contains(art)) {
-      problems.add(
-        '${target!.name} cannot be used on a spell with $art as a requisite',
-      );
+      problems.add(RequisiteArtExcludedByTarget(
+        targetName: target!.name,
+        art: art,
+      ));
     }
   }
 

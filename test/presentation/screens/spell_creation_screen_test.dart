@@ -24,6 +24,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
@@ -207,9 +208,9 @@ void main() {
       status: SpellCreationStatus.editing,
       draft: SpellDraft(),
       validationErrors: const [
-        'Technique must be selected',
-        'Form must be selected',
-        'Base effect must be selected',
+        TechniqueMissing(),
+        FormMissing(),
+        BaseEffectMissing(),
       ],
     );
     await pumpScreen(tester, state);

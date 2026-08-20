@@ -8,6 +8,7 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 /// A [Spell] record joined to the catalog entries its ids refer to.
 ///
@@ -68,7 +69,7 @@ class ResolvedSpell implements LibraryEntry {
   /// Whether these two notions should collapse into one is todo item 38's
   /// question, alongside the `ResolvedSpell`/`ResolvedTemplate` duplication.
   /// Do not merge them without preserving the compute gate.
-  List<String> get problems {
+  List<SpellValidationError> get problems {
     final effect = baseEffect;
     if (effect == null) return const [];
     return validateSpellAgainstCatalog(

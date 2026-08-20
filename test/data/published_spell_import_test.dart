@@ -7,6 +7,7 @@ import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 /// Assertions 1-4 of the published spell import harness.
 /// See docs/superpowers/specs/2026-07-28-published-spell-import-design.md
@@ -194,7 +195,8 @@ void main() {
         modifiers: modifiers,
       );
       if (problems.isNotEmpty) {
-        failures.add('${spell.name} (${spell.id}): ${problems.join('; ')}');
+        failures.add(
+            '${spell.name} (${spell.id}): ${problems.map((p) => p.runtimeType).join('; ')}');
       }
     }
 
@@ -220,7 +222,8 @@ void main() {
         isTemplate: true,
       );
       if (problems.isNotEmpty) {
-        failures.add('${template.name} (${template.id}): ${problems.join('; ')}');
+        failures.add(
+            '${template.name} (${template.id}): ${problems.map((p) => p.runtimeType).join('; ')}');
       }
     }
 
@@ -333,7 +336,7 @@ void main() {
       modifiers: modifiers,
     );
 
-    expect(problems, isEmpty, reason: problems.join('; '));
+    expect(problems, isEmpty, reason: problems.map((p) => p.runtimeType).join('; '));
   });
 
   test(
@@ -389,7 +392,7 @@ void main() {
       containerMode: unfilled.containerMode,
       modifiers: modifiers,
     );
-    expect(unfilledProblems, contains('Choose a Form for this guideline'));
+    expect(unfilledProblems, contains(const OpenSlotNotChosen('Form')));
 
     // Filling it in satisfies check 6, same real catalog entry.
     final filled = instantiate(chosenSlots: const {'form': 'Ignem'});
@@ -407,6 +410,7 @@ void main() {
       containerMode: filled.containerMode,
       modifiers: modifiers,
     );
-    expect(filledProblems, isEmpty, reason: filledProblems.join('; '));
+    expect(filledProblems, isEmpty,
+        reason: filledProblems.map((p) => p.runtimeType).join('; '));
   });
 }

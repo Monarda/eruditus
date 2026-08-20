@@ -64,5 +64,64 @@
   "levelUnavailableGeneralLevelNotTyped": "Type a level for this General guideline.",
   "levelUnavailableGeneralLevelBelowOne": "A General guideline needs a level of 1 or more.",
   "levelUnavailableParametersIncomplete": "Choose a Range, Duration and Target.",
-  "levelUnavailableMagnitudesBelowOne": "Magnitudes reduce this spell below level 1."
+  "levelUnavailableMagnitudesBelowOne": "Magnitudes reduce this spell below level 1.",
+  "validationTechniqueMissing": "Technique must be selected",
+  "validationFormMissing": "Form must be selected",
+  "validationBaseEffectMissing": "Base effect must be selected",
+  "validationRangeMissing": "Range must be selected",
+  "validationDurationMissing": "Duration must be selected",
+  "validationTargetMissing": "Target must be selected",
+  "validationMagnitudesBelowOne": "Magnitudes reduce this spell below level 1",
+  "validationGeneralLevelNotChosen": "Choose a level for this General guideline",
+  "validationChosenLevelBelowOne": "The chosen level must be at least 1",
+  "validationChosenLevelNotGeneral": "A chosen base level applies only to a General guideline",
+  "validationRequisiteIsOwnArt": "Requisite art cannot be the spell's own technique or form",
+  "validationAnalogyRationaleMissing": "Technique/Form differs from the base effect's own -- an analogyRationale is required to explain why",
+  "validationAnalogyRationaleUnwanted": "analogyRationale is set but Technique/Form already matches the base effect's own -- remove it",
+  "validationModifierNotMultiSelect": "Only one option may be selected for {modifier}",
+  "@validationModifierNotMultiSelect": {
+    "placeholders": { "modifier": { "type": "String" } }
+  },
+  "validationOpenSlotNotChosen": "Choose a {kind} for this guideline",
+  "@validationOpenSlotNotChosen": {
+    "placeholders": { "kind": { "type": "String" } }
+  },
+  "validationChosenSlotNotOpen": "A chosen {description} applies only to a guideline with an open {description} slot",
+  "@validationChosenSlotNotOpen": {
+    "placeholders": { "description": { "type": "String" } }
+  },
+  "validationContainerModeOnNonContainer": "A container mode applies only to a container Target, and {target} is not one",
+  "@validationContainerModeOnNonContainer": {
+    "placeholders": { "target": { "type": "String" } }
+  },
+  "validationRangeForbidsTarget": "{range} Range cannot be combined with {target}, which is a {kind} Target",
+  "@validationRangeForbidsTarget": {
+    "placeholders": {
+      "range": { "type": "String" },
+      "target": { "type": "String" },
+      "kind": { "type": "String" }
+    }
+  },
+  "validationRangeRequiredByTarget": "{target} requires the Range \"{requiredRange}\", but this spell uses {range}",
+  "@validationRangeRequiredByTarget": {
+    "placeholders": {
+      "target": { "type": "String" },
+      "requiredRange": { "type": "String" },
+      "range": { "type": "String" }
+    }
+  },
+  "validationTechniqueExcludedByTarget": "{target} cannot be used on a spell employing the Technique of {technique}",
+  "@validationTechniqueExcludedByTarget": {
+    "placeholders": {
+      "target": { "type": "String" },
+      "technique": { "type": "String" }
+    }
+  },
+  "validationRequisiteArtExcludedByTarget": "{target} cannot be used on a spell with {art} as a requisite",
+  "@validationRequisiteArtExcludedByTarget": {
+    "placeholders": {
+      "target": { "type": "String" },
+      "art": { "type": "String" }
+    }
+  }
 }

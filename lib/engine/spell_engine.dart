@@ -12,6 +12,7 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 class SpellEngine {
   final List<ResolvedSpell> allSpells;
@@ -50,31 +51,31 @@ class SpellEngine {
   Parameter? _parameterById(String id) =>
       allParameters.where((p) => p.id == id).firstOrNull;
 
-  List<String> validateSpellDraft(SpellDraft draft) {
-    final errors = <String>[];
+  List<SpellValidationError> validateSpellDraft(SpellDraft draft) {
+    final errors = <SpellValidationError>[];
 
     if (draft.technique == null || draft.technique!.isEmpty) {
-      errors.add('Technique must be selected');
+      errors.add(const TechniqueMissing());
     }
 
     if (draft.form == null || draft.form!.isEmpty) {
-      errors.add('Form must be selected');
+      errors.add(const FormMissing());
     }
 
     if (draft.baseEffect == null) {
-      errors.add('Base effect must be selected');
+      errors.add(const BaseEffectMissing());
     }
 
     if (draft.range == null) {
-      errors.add('Range must be selected');
+      errors.add(const RangeMissing());
     }
 
     if (draft.duration == null) {
-      errors.add('Duration must be selected');
+      errors.add(const DurationMissing());
     }
 
     if (draft.target == null) {
-      errors.add('Target must be selected');
+      errors.add(const TargetMissing());
     }
 
     // The catalog-dependent invariants live in one place, shared with
@@ -129,7 +130,7 @@ class SpellEngine {
           ritualDeclaration: draft.ritualDeclaration,
         );
       } on ArgumentError {
-        errors.add('Magnitudes reduce this spell below level 1');
+        errors.add(const MagnitudesBelowOne());
       }
     }
 

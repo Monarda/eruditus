@@ -1,3 +1,5 @@
+import 'package:eruditus/models/spell_validation_error.dart';
+
 /// Thrown when a write is refused because the spell breaks a catalog-dependent
 /// invariant — see `validateSpellAgainstCatalog`.
 ///
@@ -7,11 +9,18 @@
 /// to refuse in that case.
 class InvalidSpellException implements Exception {
   final String spellId;
-  final List<String> problems;
+  final List<SpellValidationError> problems;
 
   InvalidSpellException(this.spellId, this.problems);
 
-  String get message => 'Spell $spellId is invalid: ${problems.join('; ')}';
+  /// A diagnostic message, not user-facing prose: this class has no locale to
+  /// render [problems] with (the same reason they are structured rather than
+  /// English in the first place), so this names the variants rather than
+  /// wording them. No caller renders this to a user today -- see
+  /// `backup_screen.dart`, which surfaces only `spellId` from a batch of
+  /// these.
+  String get message =>
+      'Spell $spellId is invalid: ${problems.map((p) => p.runtimeType).join('; ')}';
 
   @override
   String toString() => 'InvalidSpellException: $message';

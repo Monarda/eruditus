@@ -12,6 +12,7 @@ import 'package:eruditus/models/invalid_spell_exception.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -121,7 +122,7 @@ void main() {
       () => repository.saveSpell(spell),
       throwsA(isA<InvalidSpellException>().having(
         (e) => e.problems, 'problems',
-        contains('Choose a level for this General guideline'),
+        contains(const GeneralLevelNotChosen()),
       )),
     );
   });
@@ -138,7 +139,7 @@ void main() {
       () => repository.saveSpell(spell),
       throwsA(isA<InvalidSpellException>().having(
         (e) => e.problems, 'problems',
-        contains('Only one option may be selected for Size'),
+        contains(const ModifierNotMultiSelect('Size')),
       )),
     );
   });

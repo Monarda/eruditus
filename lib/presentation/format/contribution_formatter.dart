@@ -1,6 +1,7 @@
 import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 /// Words a [ContributionSource] for display.
 ///
@@ -51,4 +52,46 @@ String formatUnavailableReason(
         l10n.levelUnavailableParametersIncomplete,
       LevelUnavailableReason.magnitudesBelowOne =>
         l10n.levelUnavailableMagnitudesBelowOne,
+    };
+
+/// Words a [SpellValidationError] for display.
+///
+/// Exhaustive for the same reason as [formatContribution]: a new variant will
+/// not compile until it has wording here.
+String formatValidationError(AppLocalizations l10n, SpellValidationError error) =>
+    switch (error) {
+      TechniqueMissing() => l10n.validationTechniqueMissing,
+      FormMissing() => l10n.validationFormMissing,
+      BaseEffectMissing() => l10n.validationBaseEffectMissing,
+      RangeMissing() => l10n.validationRangeMissing,
+      DurationMissing() => l10n.validationDurationMissing,
+      TargetMissing() => l10n.validationTargetMissing,
+      MagnitudesBelowOne() => l10n.validationMagnitudesBelowOne,
+      GeneralLevelNotChosen() => l10n.validationGeneralLevelNotChosen,
+      ChosenLevelBelowOne() => l10n.validationChosenLevelBelowOne,
+      ChosenLevelNotGeneral() => l10n.validationChosenLevelNotGeneral,
+      RequisiteIsOwnArt() => l10n.validationRequisiteIsOwnArt,
+      AnalogyRationaleMissing() => l10n.validationAnalogyRationaleMissing,
+      AnalogyRationaleUnwanted() => l10n.validationAnalogyRationaleUnwanted,
+      ModifierNotMultiSelect(:final modifierName) =>
+        l10n.validationModifierNotMultiSelect(modifierName),
+      OpenSlotNotChosen(:final kindNames) =>
+        l10n.validationOpenSlotNotChosen(kindNames),
+      ChosenSlotNotOpen(:final description) =>
+        l10n.validationChosenSlotNotOpen(description),
+      ContainerModeOnNonContainer(:final targetName) =>
+        l10n.validationContainerModeOnNonContainer(targetName),
+      RangeForbidsTarget(:final rangeName, :final targetName, :final targetKind) =>
+        l10n.validationRangeForbidsTarget(rangeName, targetName, targetKind),
+      RangeRequiredByTarget(
+        :final targetName,
+        :final requiredRangeId,
+        :final rangeName
+      ) =>
+        l10n.validationRangeRequiredByTarget(
+            targetName, requiredRangeId, rangeName),
+      TechniqueExcludedByTarget(:final targetName, :final technique) =>
+        l10n.validationTechniqueExcludedByTarget(targetName, technique),
+      RequisiteArtExcludedByTarget(:final targetName, :final art) =>
+        l10n.validationRequisiteArtExcludedByTarget(targetName, art),
     };

@@ -2,13 +2,14 @@ import 'package:equatable/equatable.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 enum SpellCreationStatus { initial, editing, calculated, saving, saved, error, discarded }
 
 class SpellCreationState extends Equatable {
   final SpellCreationStatus status;
   final SpellDraft draft;
-  final List<String> validationErrors;
+  final List<SpellValidationError> validationErrors;
   final LevelBreakdown? breakdown;
   /// Why there is no [breakdown], when there isn't one — "Choose a base effect
   /// to see a level.", and so on.
@@ -86,7 +87,7 @@ class SpellCreationState extends Equatable {
   SpellCreationState copyWith({
     SpellCreationStatus? status,
     SpellDraft? draft,
-    List<String>? validationErrors,
+    List<SpellValidationError>? validationErrors,
     Object? breakdown = _unset,
     Object? levelUnavailableReason = _unset,
     List<ResolvedSpell>? suggestions,

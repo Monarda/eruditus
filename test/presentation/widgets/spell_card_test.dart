@@ -9,6 +9,7 @@ import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_template.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
 import '../../support/pump_app.dart';
@@ -193,8 +194,8 @@ void main() {
       entry: spell,
       level: 20,
       problems: const [
-        'Choose a level for this General guideline',
-        'Only one option may be selected for Size',
+        GeneralLevelNotChosen(),
+        ModifierNotMultiSelect('Size'),
       ],
     ));
 
@@ -252,7 +253,7 @@ void main() {
 
     await pumpApp(tester, SpellCard(
       entry: unresolved,
-      problems: const ['Choose a level for this General guideline'],
+      problems: const [GeneralLevelNotChosen()],
     ));
 
     expect(find.byKey(const Key('spell-card-unresolved')), findsOneWidget);

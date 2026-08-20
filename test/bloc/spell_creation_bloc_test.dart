@@ -30,6 +30,7 @@ import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_template.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
@@ -1406,7 +1407,7 @@ void main() {
           .having(
             (s) => s.validationErrors,
             'validationErrors',
-            contains("Requisite art cannot be the spell's own technique or form"),
+            contains(const RequisiteIsOwnArt()),
           ),
     ],
   );
@@ -2445,7 +2446,7 @@ void main() {
         expect(bloc.state.draft.analogyRationale, isNull);
         final errors = spellEngine.validateSpellDraft(bloc.state.draft);
         expect(
-          errors.any((e) => e.contains('analogyRationale is set but')),
+          errors.any((e) => e is AnalogyRationaleUnwanted),
           isFalse,
         );
       },
@@ -2810,7 +2811,7 @@ void main() {
         isA<SpellCreationState>()
             .having((s) => s.status, 'status', SpellCreationStatus.editing)
             .having((s) => s.validationErrors, 'validationErrors',
-                contains('Target must be selected')),
+                contains(const TargetMissing())),
         isA<SpellCreationState>()
             .having((s) => s.draft.target, 'draft.target', targetParam)
             .having((s) => s.validationErrors, 'validationErrors (cleared by the edit)', isEmpty),
@@ -2833,7 +2834,7 @@ void main() {
         isA<SpellCreationState>()
             .having((s) => s.status, 'status', SpellCreationStatus.editing)
             .having((s) => s.validationErrors, 'validationErrors',
-                contains('Range must be selected')),
+                contains(const RangeMissing())),
       ],
     );
 

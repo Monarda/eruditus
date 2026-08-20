@@ -16,6 +16,7 @@ import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 
 class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
@@ -180,7 +181,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // drops all of them rather than showing a stale subset; the user gets the
       // remainder back, computed against the draft they actually have, on their
       // next press. `null` is copyWith's "leave it alone".
-      validationErrors: draftChanged ? const <String>[] : null,
+      validationErrors: draftChanged ? const <SpellValidationError>[] : null,
       // The same *kind* of rule as validationErrors above, on a deliberately
       // different predicate. A suggestion is not a statement about the draft;
       // it is a statement about a number. findSimilarSpells is asked for spells

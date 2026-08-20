@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
+import 'package:eruditus/presentation/format/contribution_formatter.dart';
 
 class SpellCard extends StatelessWidget {
   final LibraryEntry entry;
@@ -39,7 +42,7 @@ class SpellCard extends StatelessWidget {
   /// [rationale] already are. Rendered only when [LibraryEntry.isResolved]
   /// is true; ignored otherwise, leaving the unresolved branch below
   /// untouched.
-  final List<String> problems;
+  final List<SpellValidationError> problems;
 
   /// Rendered inside the card below the ListTile, e.g. the Library screen's
   /// *Learn at level…* button for a template. Empty by default so ordinary
@@ -61,6 +64,7 @@ class SpellCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isInvalid = !entry.isResolved;
     final hasProblems = entry.isResolved && problems.isNotEmpty;
     // An unresolved spell (see below) has a null technique/form too, since
@@ -166,7 +170,7 @@ class SpellCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      problems.join('; '),
+                      problems.map((p) => formatValidationError(l10n, p)).join('; '),
                       style: TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ),

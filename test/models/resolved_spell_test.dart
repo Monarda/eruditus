@@ -3,6 +3,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
@@ -139,7 +140,7 @@ void main() {
       baseEffect: generalEffect(),
       range: testRange, duration: testDuration, target: testTarget,
     );
-    expect(resolved.problems, contains('Choose a level for this General guideline'));
+    expect(resolved.problems, contains(const GeneralLevelNotChosen()));
   });
 
   test('problems is empty when the base effect does not resolve', () {
@@ -189,7 +190,7 @@ void main() {
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final resolved = ResolvedSpell(record: spell, baseEffect: effect);
-    expect(resolved.problems, contains('Choose a realm for this guideline'));
+    expect(resolved.problems, contains(const OpenSlotNotChosen('realm')));
   });
 
   test('problems does not report check 6 when chosenSlots is actually wired through', () {
@@ -212,7 +213,7 @@ void main() {
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final resolved = ResolvedSpell(record: spell, baseEffect: effect);
-    expect(resolved.problems, isNot(contains('Choose a realm for this guideline')));
+    expect(resolved.problems, isNot(contains(const OpenSlotNotChosen('realm'))));
   });
 
   test('technique/form come from the record even when the base effect disagrees', () {

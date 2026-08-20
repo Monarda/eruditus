@@ -10,6 +10,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 
 void main() {
@@ -721,7 +722,7 @@ void main() {
           provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
         );
 
-    List<String> validate({
+    List<SpellValidationError> validate({
       required BaseEffect effect,
       String? technique,
       String? form,
@@ -758,12 +759,12 @@ void main() {
 
     test('check 1: a General guideline with no chosen level is a problem', () {
       expect(validate(effect: generalEffect()),
-          contains('Choose a level for this General guideline'));
+          contains(const GeneralLevelNotChosen()));
     });
 
     test('check 1: a General guideline with a level below 1 is a problem', () {
       expect(validate(effect: generalEffect(), chosenBaseLevel: 0),
-          contains('The chosen level must be at least 1'));
+          contains(const ChosenLevelBelowOne()));
     });
 
     test('check 1: a General guideline with a valid level is fine', () {
@@ -772,20 +773,20 @@ void main() {
 
     test('check 2: a chosen level on a non-General guideline is a problem', () {
       expect(validate(effect: fixedEffect(), chosenBaseLevel: 20),
-          contains('A chosen base level applies only to a General guideline'));
+          contains(const ChosenLevelNotGeneral()));
     });
 
     test('check 3: a requisite equal to the spell own Technique is a problem', () {
       expect(
         validate(effect: fixedEffect(), requisites: {'Creo': RequisiteKind.free}),
-        contains("Requisite art cannot be the spell's own technique or form"),
+        contains(const RequisiteIsOwnArt()),
       );
     });
 
     test('check 3: a requisite equal to the spell own Form is a problem', () {
       expect(
         validate(effect: fixedEffect(), requisites: {'Ignem': RequisiteKind.free}),
-        contains("Requisite art cannot be the spell's own technique or form"),
+        contains(const RequisiteIsOwnArt()),
       );
     });
 
@@ -798,7 +799,7 @@ void main() {
             'Rego': RequisiteKind.adding, // unrelated
           },
         ),
-        contains("Requisite art cannot be the spell's own technique or form"),
+        contains(const RequisiteIsOwnArt()),
       );
     });
 
@@ -809,7 +810,7 @@ void main() {
           selectedModifiers: {'size-ignem': ['a', 'b']},
           modifiers: [singleChoice()],
         ),
-        contains('Only one option may be selected for Size (Ignem)'),
+        contains(const ModifierNotMultiSelect('Size (Ignem)')),
       );
     });
 
@@ -848,7 +849,7 @@ void main() {
           requisites: {'Creo': RequisiteKind.free},
           isTemplate: true,
         ),
-        contains("Requisite art cannot be the spell's own technique or form"),
+        contains(const RequisiteIsOwnArt()),
       );
     });
 
@@ -862,7 +863,7 @@ void main() {
 
     test('check 6: a declared open realm slot with no chosen value is a problem', () {
       expect(validate(effect: realmSlotEffect(), chosenBaseLevel: 20),
-          contains('Choose a realm for this guideline'));
+          contains(const OpenSlotNotChosen('realm')));
     });
 
     test('check 6: a filled realm slot is fine', () {
@@ -890,14 +891,14 @@ void main() {
     test('check 6: an either/or slot with neither kind filled is a problem', () {
       expect(
         validate(effect: eitherSlotEffect(), chosenBaseLevel: 20),
-        contains('Choose a Form or a specific type of enchantment for this guideline'),
+        contains(const OpenSlotNotChosen('Form or a specific type of enchantment')),
       );
     });
 
     test('check 7: a chosen realm on a guideline with no open realm slot is a problem', () {
       expect(
         validate(effect: fixedEffect(), chosenSlots: const {'realm': 'Infernal'}),
-        contains('A chosen realm applies only to a guideline with an open realm slot'),
+        contains(const ChosenSlotNotOpen('realm')),
       );
     });
 
@@ -920,7 +921,7 @@ void main() {
           chosenSlots: const {'realm': 'Infernal'},
           isTemplate: true,
         ),
-        contains('A chosen realm applies only to a guideline with an open realm slot'),
+        contains(const ChosenSlotNotOpen('realm')),
       );
     });
 
@@ -990,7 +991,7 @@ void main() {
         containerMode: ContainerMode.unstated,
         modifiers: const [],
       );
-      expect(problems, ['Technique/Form differs from the base effect\'s own -- an analogyRationale is required to explain why']);
+      expect(problems, const [AnalogyRationaleMissing()]);
     });
 
     test('check 8: matching technique/form with a stray rationale is invalid', () {
@@ -1013,7 +1014,7 @@ void main() {
         containerMode: ContainerMode.unstated,
         modifiers: const [],
       );
-      expect(problems, ["analogyRationale is set but Technique/Form already matches the base effect's own -- remove it"]);
+      expect(problems, const [AnalogyRationaleUnwanted()]);
     });
 
     group('check 9: container mode belongs only to a container Target', () {
@@ -1048,7 +1049,7 @@ void main() {
             target: targetOfType('target-group', TargetType.object),
             containerMode: ContainerMode.dynamic,
           ),
-          contains(contains('container mode applies only to a container Target')),
+          contains(const ContainerModeOnNonContainer('target-group')),
         );
       });
 
@@ -1059,7 +1060,7 @@ void main() {
             target: targetOfType('target-vision', TargetType.sense),
             containerMode: ContainerMode.static,
           ),
-          contains(contains('container mode applies only to a container Target')),
+          contains(const ContainerModeOnNonContainer('target-vision')),
         );
       });
 
@@ -1128,8 +1129,10 @@ void main() {
       );
 
       expect(problems, hasLength(1));
-      expect(problems.single, contains('Personal'));
-      expect(problems.single, contains('Room'));
+      expect(
+          problems.single,
+          const RangeForbidsTarget(
+              rangeName: 'Personal', targetName: 'Room', targetKind: 'container'));
     });
 
     test('check 10: Personal Range with a sensorium Target is valid', () {
@@ -1200,8 +1203,10 @@ void main() {
       );
 
       expect(problems, hasLength(1));
-      expect(problems.single, contains('Sound'));
-      expect(problems.single, contains('range-personal'));
+      expect(
+          problems.single,
+          const RangeRequiredByTarget(
+              targetName: 'Sound', requiredRangeId: 'range-personal', rangeName: 'Voice'));
     });
 
     test('check 11: a Sensory Target with the Range it requires is valid', () {
@@ -1269,8 +1274,8 @@ void main() {
       );
 
       expect(problems, hasLength(1));
-      expect(problems.single, contains('Intellego'));
-      expect(problems.single, contains('Sound'));
+      expect(problems.single,
+          const RequisiteArtExcludedByTarget(targetName: 'Sound', art: 'Intellego'));
     });
 
     test('check 12: a requisite the Target does not exclude is valid', () {
@@ -1334,8 +1339,8 @@ void main() {
       );
 
       expect(problems, hasLength(1));
-      expect(problems.single, contains('Intellego'));
-      expect(problems.single, contains('Sound'));
+      expect(problems.single,
+          const TechniqueExcludedByTarget(targetName: 'Sound', technique: 'Intellego'));
     });
   });
 
