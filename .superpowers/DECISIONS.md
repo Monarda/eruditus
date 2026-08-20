@@ -847,3 +847,77 @@ pick or the field of candidates does. `AuditCoverageTest` fails on any entry
 no current audit covers, so an unaudited decision cannot sit quietly in a
 ledger that claims to be audited. **A new book owes an audit of its own
 entries, not of the whole ledger.**  *(items 32, 55)*
+
+## Licensing and attribution
+
+**The repo is licensed by content, not by path: rulebook-derived content is
+CC BY-SA 4.0 wherever it appears; everything else is MIT.** The path tables in
+`LICENSE`, `NOTICE.md`, `README.md` and `repoLicenceSummary` are *illustrative
+of that rule*, never an exhaustive enumeration — a whole-branch review caught
+exactly that failure once, when the rule sentence was dropped and the table
+started reading as a closed list, leaving verbatim published-spell prose in
+`scripts/spell_import/hand_authored_templates.json` and quoted rulebook
+constructions in `container_modes.json` claimed by nothing. **When a new file
+starts carrying rulebook text, it is CC BY-SA the moment it exists**, whether
+or not anyone updates a table. Do not "tidy" the rule sentence away as
+redundant with the table it governs.  *(item 79.2)*
+
+**The split rests on §1(b)'s Collection/Adapted Material distinction, and that
+argument is what makes the MIT half defensible.** `assets/data/*.json` is
+Adapted Material — transcribed, restructured into a schema, given identifiers,
+in places corrected. `lib/**` is an independent contribution aggregated *with*
+licensed data, and the arithmetic it implements is a game system, not
+expression. **The edge that would collapse the argument is a `.dart` file
+embedding quoted rules text as a string literal.** Never do that; it is also
+what items 56 and 80.3 independently require.  *(item 79.2)*
+
+**§3(a) has seven parts, not five or six.** (A)(i) creator identification,
+(A)(ii) a copyright notice, (A)(iii) a notice referring to the licence,
+(A)(iv) a notice *referring to* the disclaimer of warranties — not the
+disclaimer reproduced — (A)(v) a URI to the licensed material, (B) an
+indication that we modified it, and **(C), the one that is easy to miss:
+include the licence text or a URI to it**, which is why
+`LICENSES/CC-BY-SA-4.0.txt` exists rather than only a link. §3(a)(2) then
+allows satisfying all of it "in any reasonable manner based on the medium",
+including by linking to one resource — which is why quoted text in the UI
+needs only a route to the About screen, not a notice of its own.  *(item 79.1)*
+
+**The notice is a *list* of source editions, and the list shape is
+load-bearing.** §3(a)(1)(A)(i) requires retaining creator identification *as
+supplied with the material*, so a separately published edition — an official
+translation, say — arrives with its own translators and its own copyright line
+and needs its own block, never an appendix to Atlas's. Adding one must be
+additive. `arsMagicaAttribution.books` is asserted set-equal to
+`assets/data/books.json`'s titles, so importing a book without crediting it
+fails the suite.  *(item 79.1)*
+
+**`NOTICE.md` and the About screen render from `lib/licensing/attribution.dart`,
+and tests assert `contains` against those consts character-for-character.** When
+an assertion fails, fix the Markdown to match the Dart — never loosen the
+matcher, and never edit the Dart to match prose. The en dash in `© 1993–2024`
+and the `®` after `Atlas Games` are part of that fidelity. Both notice routes —
+the About screen and `LicenseRegistry`/`showLicensePage` — must carry the same
+fields; they silently disagreed about the book list once, which is why
+`arsMagicaLicenseEntries()` is a named function with its own test rather than a
+closure inside `main()`.  *(item 79.1)*
+
+**Licence and attribution text is a deliberately-English population and never
+enters ARB** — the same status as the four realm values. A licensor's copyright
+line and creator credit are not ours to hand a translator. Only the About
+screen's *chrome* (title, headings, button label) is localised, and
+`pseudo_locale_coverage_test.dart` guards both directions: the chrome must not
+survive `en_XA`, and `Atlas Games` must. **Never add notice-body text to
+`_mustNotSurvive`** — it would fail the test on correct code.  *(items 79.1,
+80.3)*
+
+**Two things the licence does not grant, and the app must not imply.**
+Trademarks are excluded by §2(b)(2) — the grant covers the text, not "Ars
+Magica" as a mark, so this settles nothing about naming, branding or store
+listings. And §2(a)(6)/§5 mean nothing may imply Atlas Games endorses eruditus;
+both disclaimers ship in `NOTICE.md` and on the About screen.  *(item 79)*
+
+**The §3(a)(1)(A)(v) URI names the pinned rulebook commit (`ffc1c6b`), not a
+branch**, so it identifies the material actually adapted — the same discipline
+as `source.lock`. A URI must be *provided*, not clickable, which is why the
+About screen uses `SelectableText` and the app takes no `url_launcher`
+dependency.  *(items 79.1, 30)*
