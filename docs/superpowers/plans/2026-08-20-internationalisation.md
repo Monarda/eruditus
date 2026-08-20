@@ -1192,11 +1192,11 @@ git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
 
 **⚠️ This family has now been miscounted three times** (10, then 11, then 14), each time by grepping a truncated line range instead of the whole function. **Before writing code, run `grep -c "problems\.add" lib/models/spell.dart` and confirm it returns 14.** If it does not, stop and report rather than trusting this table. They surface in three places: the creation screen's validation list (`:377-378`), and `ResolvedSpell.problems` on spell cards in **both** the creation screen (`:408`) and the library screen (`:96`).
 
-**Why a sealed class and not an enum.** Task 5's `LevelUnavailableReason` is a plain enum because its five messages take no operands. Five of these eighteen do — `'Only one option may be selected for ${modifier.name}'` and friends — so this is Task 4's problem shape, and takes Task 4's solution. **Follow `lib/engine/contribution_source.dart` as the template**, not `LevelUnavailableReason`.
+**Why a sealed class and not an enum.** Task 5's `LevelUnavailableReason` is a plain enum because its five messages take no operands. Eight of these twenty-one do — `'Only one option may be selected for ${modifier.name}'` and friends — so this is Task 4's problem shape, and takes Task 4's solution. **Follow `lib/engine/contribution_source.dart` as the template**, not `LevelUnavailableReason`.
 
 **⚠️ `validateSpellDraft` concatenates `validateSpellAgainstCatalog`'s output** (`spell_engine.dart:84`). The two cannot be converted separately without an interim `List<enum-or-String>` union, which is exactly the type that hides the next defect. Convert both in this task.
 
-**The 18 variants.** Rendered text must be byte-identical to today's, including the `--` double hyphens and the absent full stops.
+**The 21 variants.** Rendered text must be byte-identical to today's, including the `--` double hyphens and the absent full stops.
 
 Operand-free (13), from `validateSpellDraft` (7) and `validateSpellAgainstCatalog` (6):
 
@@ -1235,7 +1235,7 @@ With operands (8):
 
 - [ ] **Step 1: Create the sealed hierarchy**
 
-`lib/models/spell_validation_error.dart`, modelled on `lib/engine/contribution_source.dart`: a `sealed class SpellValidationError extends Equatable`, then one `final class` per variant above. Operand-free variants take no constructor arguments and return `const []` from `props`; the five with operands carry their fields and list them all in `props`. Give the file a doc comment saying why it exists — validation runs in domain code with no `BuildContext`, and its results are rendered in three places.
+`lib/models/spell_validation_error.dart`, modelled on `lib/engine/contribution_source.dart`: a `sealed class SpellValidationError extends Equatable`, then one `final class` per variant above. Operand-free variants take no constructor arguments and return `const []` from `props`; the eight with operands carry their fields and list them all in `props`. Give the file a doc comment saying why it exists — validation runs in domain code with no `BuildContext`, and its results are rendered in three places.
 
 - [ ] **Step 2: Add the 21 ARB entries**
 
