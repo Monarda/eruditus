@@ -292,7 +292,7 @@ git commit -m "test: add pumpApp helper and route all widget tests through it"
 
 **Interfaces:**
 - Consumes: `lib/l10n/app_en.arb` (Task 1).
-- Produces: `String pseudoTransform(String value)` exported from `tool/gen_pseudo_arb.dart`, and the committed `app_en_XA.arb`. Task 10's coverage test relies on the transform being total and on placeholders surviving it.
+- Produces: `String pseudoTransform(String value)` exported from `tool/gen_pseudo_arb.dart`, and the committed `app_en_XA.arb`. Task 11's coverage test relies on the transform being total and on placeholders surviving it.
 
 A hand-written pseudo ARB drifts from `app_en.arb` the first time someone adds a string, and a drifted proof harness is worse than none. This mirrors the repo's existing regeneration-test idiom for `spell_library.json` (item 30).
 
@@ -1171,8 +1171,153 @@ git add lib/engine lib/bloc lib/presentation lib/l10n test
 git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
 ```
 ---
+### Task 6: `SpellValidationError` — the third family of engine-composed strings
 
-### Task 6: Migrate the small widgets
+**Files:**
+- Modify: `lib/engine/spell_engine.dart` (`validateSpellDraft`, 7 `errors.add` sites)
+- Modify: `lib/bloc/spell_creation/spell_creation_state.dart` (`validationErrors`)
+- Modify: `lib/bloc/spell_creation/spell_creation_bloc.dart:841,912`
+- Modify: `lib/presentation/format/contribution_formatter.dart` (add `formatValidationError`)
+- Modify: `lib/l10n/app_en.arb`, `lib/presentation/screens/spell_creation_screen.dart:377-378`
+- Test: `test/engine/spell_engine_test.dart`, `test/bloc/spell_creation_bloc_test.dart`, `test/presentation/format/contribution_formatter_test.dart`
+
+**Interfaces:**
+- Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2), `contribution_formatter.dart` (Tasks 4-5).
+- Produces: `enum SpellValidationError { techniqueMissing, formMissing, baseEffectMissing, rangeMissing, durationMissing, targetMissing, magnitudesBelowOne }`; `List<SpellValidationError> validateSpellDraft(...)`; `String formatValidationError(AppLocalizations l10n, SpellValidationError error)`.
+
+**⚠️ Neither the spec nor the original plan covered this.** The spec claimed twelve engine-composed user-facing strings — seven contribution labels (Task 4) and five unavailable reasons (Task 5). Found while reviewing Task 5: `validateSpellDraft` composes **seven more**, and they are rendered to the user at `spell_creation_screen.dart:377-378`. The real total is **nineteen**. Without this task, the app's validation messages stay hardcoded English while everything around them localises, the "engine never composes display prose" invariant is false, and **Task 11's pseudo-locale coverage test would fail at the very end of the plan** — the worst place to discover it.
+
+The seven strings, verbatim from `validateSpellDraft`:
+
+| Current string | Enum value |
+|---|---|
+| `Technique must be selected` | `techniqueMissing` |
+| `Form must be selected` | `formMissing` |
+| `Base effect must be selected` | `baseEffectMissing` |
+| `Range must be selected` | `rangeMissing` |
+| `Duration must be selected` | `durationMissing` |
+| `Target must be selected` | `targetMissing` |
+| `Magnitudes reduce this spell below level 1` | `magnitudesBelowOne` |
+
+**⚠️ Note the last one has no trailing full stop**, unlike `LevelUnavailableReason.magnitudesBelowOne`'s "Magnitudes reduce this spell below level 1." — the two are *different strings* reached by *different paths* (this one by the save button, that one by the live preview). **Keep both, keep them distinct, and do not "tidy" them into one.** Preserving rendered text byte-for-byte is the rule for this whole plan.
+
+- [ ] **Step 1: Add the ARB entries**
+
+```json
+  "validationTechniqueMissing": "Technique must be selected",
+  "validationFormMissing": "Form must be selected",
+  "validationBaseEffectMissing": "Base effect must be selected",
+  "validationRangeMissing": "Range must be selected",
+  "validationDurationMissing": "Duration must be selected",
+  "validationTargetMissing": "Target must be selected",
+  "validationMagnitudesBelowOne": "Magnitudes reduce this spell below level 1"
+```
+
+- [ ] **Step 2: Write the failing test**
+
+Add to `test/presentation/format/contribution_formatter_test.dart`, reusing that file's existing `loadL10n` helper:
+
+```dart
+  testWidgets('formats every validation error', (tester) async {
+    await loadL10n(tester);
+    expect(formatValidationError(l10n, SpellValidationError.techniqueMissing),
+        'Technique must be selected');
+    expect(formatValidationError(l10n, SpellValidationError.magnitudesBelowOne),
+        'Magnitudes reduce this spell below level 1');
+  });
+
+  testWidgets('a validation error is localised under en_XA', (tester) async {
+    await loadL10n(tester, locale: const Locale('en', 'XA'));
+
+    final result =
+        formatValidationError(l10n, SpellValidationError.techniqueMissing);
+
+    expect(result, isNot('Technique must be selected'));
+    expect(result.startsWith('['), isTrue);
+  });
+```
+
+- [ ] **Step 3: Run it and confirm it fails**
+
+Run: `flutter test test/presentation/format/contribution_formatter_test.dart`
+Expected: FAIL — `SpellValidationError` and `formatValidationError` are undefined.
+
+- [ ] **Step 4: Add the enum**
+
+In `lib/engine/spell_engine.dart` (or alongside it, matching where `LevelUnavailableReason` was placed in Task 5 — follow that precedent rather than inventing a new home):
+
+```dart
+/// Why a draft cannot be saved yet.
+///
+/// An enum rather than a message, for the same reason as
+/// [LevelUnavailableReason]: `validateSpellDraft` runs in domain code where no
+/// locale is reachable, and its results are rendered to the user at
+/// `spell_creation_screen.dart:377`. See
+/// `presentation/format/contribution_formatter.dart` for the wording.
+enum SpellValidationError {
+  techniqueMissing,
+  formMissing,
+  baseEffectMissing,
+  rangeMissing,
+  durationMissing,
+  targetMissing,
+  magnitudesBelowOne,
+}
+```
+
+- [ ] **Step 5: Change `validateSpellDraft`'s return type**
+
+`List<String>` becomes `List<SpellValidationError>`, and each `errors.add('...')` becomes the matching enum value per the table above. **Preserve every surrounding comment**, and keep the existing ordering of the checks — the order determines the order messages appear on screen.
+
+- [ ] **Step 6: Add the formatter function**
+
+Append to `lib/presentation/format/contribution_formatter.dart`:
+
+```dart
+String formatValidationError(
+        AppLocalizations l10n, SpellValidationError error) =>
+    switch (error) {
+      SpellValidationError.techniqueMissing => l10n.validationTechniqueMissing,
+      SpellValidationError.formMissing => l10n.validationFormMissing,
+      SpellValidationError.baseEffectMissing =>
+        l10n.validationBaseEffectMissing,
+      SpellValidationError.rangeMissing => l10n.validationRangeMissing,
+      SpellValidationError.durationMissing => l10n.validationDurationMissing,
+      SpellValidationError.targetMissing => l10n.validationTargetMissing,
+      SpellValidationError.magnitudesBelowOne =>
+        l10n.validationMagnitudesBelowOne,
+    };
+```
+
+No `default:` branch — exhaustiveness is the guarantee that a new validation reason cannot reach the screen unlocalised.
+
+- [ ] **Step 7: Thread the type through bloc and screen**
+
+`spell_creation_state.dart`: retype `validationErrors` to `List<SpellValidationError>`. `spell_creation_bloc.dart:841,912` need no change beyond the type flowing. `spell_creation_screen.dart:377-378`: map each error through `formatValidationError(l10n, error)`.
+
+**The rendered English is identical to before**, so any widget test asserting a validation message must pass unchanged. If one fails, an ARB value is wrong — never edit the test's expectation.
+
+- [ ] **Step 8: Rewrite the affected test assertions**
+
+Find them: `grep -rn "validateSpellDraft\|validationErrors" test/`. Assertions on the English strings become enum comparisons. **Rewrite, never delete** — each must still assert the same fact. Note that Task 5 deliberately left two `contains('Magnitudes reduce...')` assertions in `spell_engine_test.dart` alone because they exercise *this* path; they are in scope now and should be converted.
+
+- [ ] **Step 9: Regenerate and run everything**
+
+Run: `dart run tool/gen_pseudo_arb.dart`, then `flutter pub get`
+Run: `flutter test` → all green, **no skipped tests**, count must not fall
+Run: `flutter analyze` → exit 0
+Run: `git diff -w --stat` → no whitespace-only churn
+
+- [ ] **Step 10: Commit**
+
+```bash
+git add lib/engine lib/bloc lib/presentation lib/l10n test
+git commit -m "refactor(engine): make validateSpellDraft return an enum, not English"
+```
+
+---
+
+### Task 7: Migrate the small widgets
 
 **Files:**
 - Modify: `lib/presentation/widgets/modifiers_section.dart:63,68,105,136`
@@ -1271,7 +1416,7 @@ git commit -m "feat(l10n): migrate modifiers section and spell card strings"
 
 ---
 
-### Task 7: Migrate `ritual_section.dart`
+### Task 8: Migrate `ritual_section.dart`
 
 **Files:**
 - Modify: `lib/presentation/widgets/ritual_section.dart:50-57,71,87,95,99-102,110,113`
@@ -1352,7 +1497,7 @@ git commit -m "feat(l10n): migrate ritual section strings"
 
 ---
 
-### Task 8: Migrate the library, backup and configuration screens
+### Task 9: Migrate the library, backup and configuration screens
 
 **Files:**
 - Modify: `lib/presentation/screens/spell_library_screen.dart:36,53,63,85,109,157`
@@ -1451,7 +1596,7 @@ git commit -m "feat(l10n): migrate library, backup and configuration screens"
 
 ---
 
-### Task 9: Migrate `spell_creation_screen.dart`
+### Task 10: Migrate `spell_creation_screen.dart`
 
 **Files:**
 - Modify: `lib/presentation/screens/spell_creation_screen.dart` (51 literals)
@@ -1560,7 +1705,7 @@ git commit -m "feat(l10n): migrate spell creation screen strings"
 
 ---
 
-### Task 10: Pseudo-locale coverage test
+### Task 11: Pseudo-locale coverage test
 
 **Files:**
 - Create: `test/l10n/pseudo_locale_coverage_test.dart`
@@ -1616,7 +1761,7 @@ Pump each of the four screens in turn if pumping the whole tab view needs more b
 - [ ] **Step 2: Run it**
 
 Run: `flutter test test/l10n/pseudo_locale_coverage_test.dart`
-Expected: PASS if Tasks 6-9 were complete. **Any failure names a literal that was missed** — fix it by moving that string to ARB, not by removing it from the list.
+Expected: PASS if Tasks 7-10 were complete. **Any failure names a literal that was missed** — fix it by moving that string to ARB, not by removing it from the list.
 
 - [ ] **Step 3: Run everything**
 
@@ -1643,10 +1788,10 @@ git commit -m "test(l10n): add pseudo-locale coverage guard and close item 80"
 
 ## Self-review notes
 
-**Spec coverage.** All five spec design sections map to tasks: §1 → Task 1, §2 → Task 4, §3 → Task 4 (folded in, see below), §4 → Task 2, §5 → Tasks 3 and 10. The spec's testing table maps to Tasks 4, 5 and 10.
+**Spec coverage.** All five spec design sections map to tasks: §1 → Task 1, §2 → Task 4, §3 → Task 4 (folded in, see below), §4 → Task 2, §5 → Tasks 3 and 11. The spec's testing table maps to Tasks 4, 5 and 11.
 
 **One addition beyond the spec.** Task 5 (`LevelUnavailableReason`) covers five engine-composed strings the spec missed — found while reading `level_breakdown.dart` to write Task 4. The spec named seven `label:` sites; there are twelve engine-composed user-facing strings in total. **The spec should be amended** to say so, or Task 5 will look like scope creep to a reviewer who reads the spec first.
 
 **Item 82 folded in, narrowly.** The translation-provenance flag is applied to the one non-template locale this pass creates (`app_en_XA.arb`, Task 3) and deliberately *not* stamped across `app_en.arb`. Rationale in Global Constraints. This closes 82.2 and partly answers 82.1; **82.3 (what the flag drives) remains open** and is not blocked by this work.
 
-**Deliberate deferrals**, each noted where it arises rather than left silent: the locale-aware list join in Task 7, and the double-`Scaffold` nesting risk in Task 2 Step 3.
+**Deliberate deferrals**, each noted where it arises rather than left silent: the locale-aware list join in Task 8, and the double-`Scaffold` nesting risk in Task 2 Step 3.
