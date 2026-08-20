@@ -323,6 +323,32 @@ void main() {
     final result = pseudoTransform('Imported {count} spells');
 
     expect(result.contains('{count}'), isTrue);
+    expect(result.contains('Imported'), isFalse,
+        reason: 'text around a placeholder must still be accented');
+  });
+
+  test('pseudoTransform preserves two placeholders and the text between', () {
+    final result = pseudoTransform('{technique} {form} spell');
+
+    expect(result.contains('{technique}'), isTrue);
+    expect(result.contains('{form}'), isTrue);
+    expect(result.contains('spell'), isFalse);
+  });
+
+  test('pseudoTransform does not corrupt nested ICU plural syntax', () {
+    const plural =
+        '{count, plural, =0{none} one{1 spell} other{{count} spells}}';
+
+    final result = pseudoTransform(plural);
+
+    // The ICU keywords gen-l10n parses must survive byte-identical. A boolean
+    // in-placeholder flag clears on the first inner closing brace and accents
+    // `other`, breaking codegen for every locale.
+    expect(result.contains('plural,'), isTrue);
+    expect(result.contains('other{'), isTrue);
+    expect(result.contains('=0{'), isTrue);
+    expect(result.contains('one{'), isTrue);
+    expect(result.contains('{count}'), isTrue);
   });
 
   test('the generated locale is marked as machine-produced', () {
@@ -360,11 +386,18 @@ Create `tool/gen_pseudo_arb.dart`:
 import 'dart:convert';
 import 'dart:io';
 
+// Latin letters with diacritics only. Never a homoglyph: a Cyrillic small a is
+// indistinguishable from ASCII 'a' on screen, which defeats the half of this
+// harness that relies on a human seeing the difference.
 const _accents = {
-  'a': 'а', 'c': 'ć', 'e': 'ē', 'g': 'ģ', 'i': 'ĭ', 'l': 'ĺ', 'n': 'ň',
-  'o': 'ō', 'r': 'ŕ', 's': 'ś', 't': 'ţ', 'u': 'ű', 'z': 'ź',
-  'A': 'Å', 'C': 'Ĉ', 'E': 'Ē', 'G': 'Ĝ', 'I': 'Ĭ', 'L': 'Ĺ', 'N': 'Ň',
-  'O': 'Ō', 'R': 'Ŕ', 'S': 'Ś', 'T': 'Ţ', 'U': 'Ű', 'Z': 'Ź',
+  'a': 'ā', 'b': 'ƀ', 'c': 'ć', 'd': 'đ', 'e': 'ē', 'f': 'ƒ', 'g': 'ģ',
+  'h': 'ĥ', 'i': 'ĭ', 'j': 'ĵ', 'k': 'ķ', 'l': 'ĺ', 'm': 'ɱ', 'n': 'ň',
+  'o': 'ō', 'p': 'ƥ', 'q': 'ɋ', 'r': 'ŕ', 's': 'ś', 't': 'ţ', 'u': 'ű',
+  'v': 'ṽ', 'w': 'ŵ', 'x': 'ẋ', 'y': 'ý', 'z': 'ź',
+  'A': 'Å', 'B': 'Ɓ', 'C': 'Ĉ', 'D': 'Đ', 'E': 'Ē', 'F': 'Ƒ', 'G': 'Ĝ',
+  'H': 'Ĥ', 'I': 'Ĭ', 'J': 'Ĵ', 'K': 'Ķ', 'L': 'Ĺ', 'M': 'Ṁ', 'N': 'Ň',
+  'O': 'Ō', 'P': 'Ƥ', 'Q': 'Ɋ', 'R': 'Ŕ', 'S': 'Ś', 'T': 'Ţ', 'U': 'Ű',
+  'V': 'Ṽ', 'W': 'Ŵ', 'X': 'Ẋ', 'Y': 'Ý', 'Z': 'Ź',
 };
 
 /// Accents [value]'s letters and pads it ~30%, leaving `{placeholders}` alone.
@@ -372,19 +405,35 @@ const _accents = {
 /// A string that still renders as plain ASCII under locale `en_XA` never reached
 /// the ARB. The padding surfaces truncation, which is the evidence items 16
 /// and 58 have both been waiting on.
+///
+/// **Brace depth, not a boolean.** ICU plural and select messages nest. A
+/// boolean "am I in a placeholder" flag clears on the first inner closing brace
+/// and then accents the ICU keyword `other`, which gen-l10n needs verbatim -
+/// corrupting codegen for *every* locale, not just this one.
+///
+/// **Known limitation, accepted deliberately:** with a depth counter, literal
+/// text inside a plural's sub-messages is left un-accented, because telling ICU
+/// syntax from display text needs a real ICU parser. Such a value is still
+/// wrapped in brackets and padding, so the "was this migrated?" signal is
+/// intact; only the visual accenting is weaker for pluralised strings. Never
+/// corrupting ICU is worth more than accenting the few strings that use it.
 String pseudoTransform(String value) {
   final buffer = StringBuffer('[');
-  var inPlaceholder = false;
+  var depth = 0;
 
   for (final rune in value.runes) {
     final char = String.fromCharCode(rune);
-    if (char == '{') inPlaceholder = true;
-    if (char == '}') {
-      inPlaceholder = false;
+    if (char == '{') {
+      depth++;
       buffer.write(char);
       continue;
     }
-    buffer.write(inPlaceholder ? char : (_accents[char] ?? char));
+    if (char == '}') {
+      if (depth > 0) depth--;
+      buffer.write(char);
+      continue;
+    }
+    buffer.write(depth > 0 ? char : (_accents[char] ?? char));
   }
 
   final padding = '·' * (value.length * 0.3).ceil();
