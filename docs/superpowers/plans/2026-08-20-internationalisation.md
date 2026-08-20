@@ -1447,6 +1447,38 @@ git commit -m "feat(l10n): migrate modifiers section and spell card strings"
 
 This file is separated from Task 7 because `_describe` composes a *sentence* from a list of ritual reasons — the same class of problem as the engine's labels, but already in the presentation layer, so it needs ICU care rather than restructuring.
 
+- [ ] **Step 0: Discover the real string list — the table below is known to be incomplete**
+
+**⚠️ Do not trust this task's string table.** It was built by an extraction that
+filtered with `grep -vi`, and the `-i` made a lowercase-only exclusion pattern
+case-insensitive — silently swallowing every single-word capitalised chrome
+string. Task 7's table lost six strings that way (`Published`, `Modifiers`,
+`None`, and three chip labels). Assume this one lost some too.
+
+Run this first and reconcile against the table:
+
+```bash
+for f in lib/presentation/widgets/ritual_section.dart; do
+  echo "--- $f"
+  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+done
+```
+
+There is deliberately **no `-i`** in that exclusion. Anything it prints that is
+chrome and absent from the table gets an ARB key in the same naming style, and a
+line in your report saying you added it.
+
+**The boundary rule that decides what moves** (from the design spec):
+
+> *ARB holds the vocabulary that labels the interface; the catalog holds the
+> content the rulebook prints; user content passes through untouched.*
+
+So a field label like "Range" is chrome and moves. A parameter's name — "Voice",
+"Boundary" — is rulebook content and stays an **operand** interpolated into an
+ARB frame. Anything the user typed (a spell name, an adjustment note) renders
+**verbatim** and never enters ARB. Bare numbers and symbols (`'+2'`, `'•'`) are
+not prose and stay literals.
+
 - [ ] **Step 1: Add the ARB entries**
 
 ```json
@@ -1528,6 +1560,49 @@ git commit -m "feat(l10n): migrate ritual section strings"
 **Interfaces:**
 - Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2).
 - Produces: no new Dart API.
+
+- [ ] **Step 0: Discover the real string list — the table below is known to be incomplete**
+
+**⚠️ Do not trust this task's string table.** It was built by an extraction that
+filtered with `grep -vi`, and the `-i` made a lowercase-only exclusion pattern
+case-insensitive — silently swallowing every single-word capitalised chrome
+string. Task 7's table lost six strings that way (`Published`, `Modifiers`,
+`None`, and three chip labels). Assume this one lost some too.
+
+Run this first and reconcile against the table:
+
+```bash
+for f in lib/presentation/screens/spell_library_screen.dart lib/presentation/screens/backup_screen.dart lib/presentation/screens/configuration_screen.dart lib/main.dart; do
+  echo "--- $f"
+  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+done
+```
+
+There is deliberately **no `-i`** in that exclusion. Anything it prints that is
+chrome and absent from the table gets an ARB key in the same naming style, and a
+line in your report saying you added it.
+
+**The boundary rule that decides what moves** (from the design spec):
+
+> *ARB holds the vocabulary that labels the interface; the catalog holds the
+> content the rulebook prints; user content passes through untouched.*
+
+So a field label like "Range" is chrome and moves. A parameter's name — "Voice",
+"Boundary" — is rulebook content and stays an **operand** interpolated into an
+ARB frame. Anything the user typed (a spell name, an adjustment note) renders
+**verbatim** and never enters ARB. Bare numbers and symbols (`'+2'`, `'•'`) are
+not prose and stay literals.
+
+**⚠️ `'Published'` appears here too** (`configuration_screen.dart:94,219`,
+`spell_library_screen.dart:63`). Task 7 already added a `published` ARB key —
+**reuse it, do not add a second.** The filter list at
+`spell_library_screen.dart:63` is `['All', 'Published', 'My Spells']`, whose
+values are compared against `SpellLibraryState`'s filter logic
+(`spell_library_state.dart:48,65,82`). **Those comparisons key off the English
+string.** Localising the displayed label without decoupling it from the
+comparison key would silently break filtering under any non-English locale.
+Separate the display label from the filter key — do not simply wrap the list in
+`l10n`.
 
 - [ ] **Step 1: Add the ARB entries**
 
@@ -1626,6 +1701,49 @@ git commit -m "feat(l10n): migrate library, backup and configuration screens"
 - Produces: no new Dart API.
 
 The largest file (1170 lines, 51 literals) and the most test-covered, so it gets its own task.
+
+- [ ] **Step 0: Discover the real string list — the table below is known to be incomplete**
+
+**⚠️ Do not trust this task's string table.** It was built by an extraction that
+filtered with `grep -vi`, and the `-i` made a lowercase-only exclusion pattern
+case-insensitive — silently swallowing every single-word capitalised chrome
+string. Task 7's table lost six strings that way (`Published`, `Modifiers`,
+`None`, and three chip labels). Assume this one lost some too.
+
+Run this first and reconcile against the table:
+
+```bash
+for f in lib/presentation/screens/spell_creation_screen.dart; do
+  echo "--- $f"
+  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+done
+```
+
+There is deliberately **no `-i`** in that exclusion. Anything it prints that is
+chrome and absent from the table gets an ARB key in the same naming style, and a
+line in your report saying you added it.
+
+**The boundary rule that decides what moves** (from the design spec):
+
+> *ARB holds the vocabulary that labels the interface; the catalog holds the
+> content the rulebook prints; user content passes through untouched.*
+
+So a field label like "Range" is chrome and moves. A parameter's name — "Voice",
+"Boundary" — is rulebook content and stays an **operand** interpolated into an
+ARB frame. Anything the user typed (a spell name, an adjustment note) renders
+**verbatim** and never enters ARB. Bare numbers and symbols (`'+2'`, `'•'`) are
+not prose and stay literals.
+
+**⚠️ Decided 2026-08-20 for this file specifically — the realm control.** `'Realm'`
+(`:243`) **is chrome** and moves to ARB: it labels a control. The four values it
+offers — `'Divine'`, `'Faerie'`, `'Infernal'`, `'Magic'` (`:245`) — are **rulebook
+content** and **stay hardcoded for now**. They are catalog vocabulary that a
+published translation would supply, and putting them in ARB would invite a
+translator to rewrite the rules, which is the exact failure item 80.3 exists to
+prevent. Record them in your report as a known un-migrated set so the coverage
+test's author knows to expect them. The same reasoning applies to `'Technique'`,
+`'Form'`, `'Range'`, `'Duration'`, `'Target'` used as **field labels** — those are
+chrome and do move.
 
 - [ ] **Step 1: Add the ARB entries**
 
