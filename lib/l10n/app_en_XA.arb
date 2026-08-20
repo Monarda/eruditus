@@ -157,5 +157,18 @@
   "nameYourSpell": "[Ňāɱē Ýōűŕ Śƥēĺĺ·····]",
   "spellNameHint": "[ē.ģ., Ƥĭĺĺāŕ ōƒ Ƒĺāɱēś·······]",
   "spellSummaryHint": "[Ŵĥāţ đōēś ţĥĭś śƥēĺĺ đō?········]",
-  "saveButton": "[Śāṽē··]"
+  "saveButton": "[Śāṽē··]",
+  "aboutTitle": "[Åƀōűţ & Ĺĭćēňćēś·····]",
+  "aboutHowLicensedHeading": "[Ĥōŵ ēŕűđĭţűś ĭś ĺĭćēňśēđ········]",
+  "aboutAttributionHeading": "[Åţţŕĭƀűţĭōň····]",
+  "aboutBooksUsedHeading": "[Ɓōōķś űśēđ···]",
+  "aboutCreatorsHeading": "[Ĉŕēāţōŕś···]",
+  "aboutCopyrightHeading": "[Ĉōƥýŕĭģĥţ···]",
+  "aboutLicenceHeading": "[Ĺĭćēňćē···]",
+  "aboutSourceHeading": "[Śōűŕćē··]",
+  "aboutModificationsHeading": "[Ṁōđĭƒĭćāţĭōňś····]",
+  "aboutDisclaimerHeading": "[Đĭśćĺāĭɱēŕ ōƒ ŵāŕŕāňţĭēś········]",
+  "aboutTrademarksHeading": "[Ţŕāđēɱāŕķś···]",
+  "aboutEndorsementHeading": "[Ňō ēňđōŕśēɱēňţ·····]",
+  "aboutPackageLicencesButton": "[Ōƥēň-śōűŕćē ƥāćķāģē ĺĭćēňćēś·········]"
 }
