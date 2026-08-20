@@ -28,6 +28,7 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/target_type.dart';
+import 'package:eruditus/presentation/screens/about_screen.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
@@ -92,6 +93,13 @@ const _mustNotSurvive = <String>[
   'Range',
   'Duration',
   'Target',
+  // Item 79's About & Licences screen. Chrome only — see the assertion in
+  // that screen's own testWidgets below for the content half.
+  'About & Licences',
+  'How eruditus is licensed',
+  'Disclaimer of warranties',
+  'No endorsement',
+  'Open-source package licences',
 ];
 
 /// Strings that SHOULD still render in English under the pseudo-locale.
@@ -395,4 +403,28 @@ void main() {
       _expectNoneSurvive('backup');
     });
   });
+
+  testWidgets(
+    'about screen: no chrome string survives, and the licence notice still '
+    'renders in English',
+    (tester) async {
+      await pumpApp(
+        tester,
+        const AboutScreen(),
+        locale: _pseudoLocale,
+        wrapInScaffold: false,
+      );
+      await tester.pumpAndSettle();
+
+      _expectNoneSurvive('about');
+
+      // The §3(a) notice is a deliberately-English population, the same
+      // status as the four realm values in _mustSurvive: a licensor's
+      // copyright line and creator credit are not ours to translate, and
+      // routing them through ARB would hand a translator a legal notice to
+      // reword. See DECISIONS.md, "Internationalisation", and item 79.
+      expect(find.textContaining('Atlas Games'), findsWidgets,
+          reason: 'licence content is deliberately not routed through ARB');
+    },
+  );
 }

@@ -9,6 +9,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/presentation/screens/about_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
 class ConfigurationScreen extends StatefulWidget {
@@ -33,6 +34,19 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(l10n.configurationTitle),
+          // An AppBar action rather than a row in a settings list: this screen
+          // is a two-tab TabBarView with no shared foot, so a ListTile would
+          // have to sit inside either the Effects or the Parameters tab.
+          actions: [
+            IconButton(
+              key: const Key('open-about'),
+              icon: const Icon(Icons.info_outline),
+              tooltip: l10n.aboutTitle,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const AboutScreen()),
+              ),
+            ),
+          ],
           bottom: TabBar(tabs: [
             Tab(text: l10n.effectsTabLabel),
             Tab(text: l10n.parametersTabLabel),
