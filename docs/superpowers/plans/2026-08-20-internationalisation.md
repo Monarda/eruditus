@@ -1338,7 +1338,7 @@ git commit -m "refactor: make spell validation return structured errors, not Eng
 ```bash
 for f in lib/presentation/widgets/modifiers_section.dart lib/presentation/widgets/spell_card.dart; do
   echo "--- $f"
-  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+  grep -noE "'[^']{2,}'|\"[^\"]{2,}\"" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:|\"package:" | grep -E "[A-Za-z]{3,}"
 done
 ```
 
@@ -1460,13 +1460,20 @@ Run this first and reconcile against the table:
 ```bash
 for f in lib/presentation/widgets/ritual_section.dart; do
   echo "--- $f"
-  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+  grep -noE "'[^']{2,}'|\"[^\"]{2,}\"" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:|\"package:" | grep -E "[A-Za-z]{3,}"
 done
 ```
 
-There is deliberately **no `-i`** in that exclusion. Anything it prints that is
-chrome and absent from the table gets an ARB key in the same naming style, and a
-line in your report saying you added it.
+There is deliberately **no `-i`** in that exclusion — that flag is what lost six
+strings in Task 7. The pattern matches **both quote styles**: a Dart string
+containing an apostrophe is written with double quotes, and a single-quote-only
+pattern cannot see it. Task 8 hit exactly that — half of one help sentence was
+double-quoted and invisible to the earlier command.
+
+**Hits inside `//` comments are not UI strings** — this command cannot tell the
+difference, so read each hit in context before adding a key. Anything it prints
+that is genuinely chrome and absent from the table gets an ARB key in the same
+naming style, and a line in your report saying you added it.
 
 **The boundary rule that decides what moves** (from the design spec):
 
@@ -1574,13 +1581,20 @@ Run this first and reconcile against the table:
 ```bash
 for f in lib/presentation/screens/spell_library_screen.dart lib/presentation/screens/backup_screen.dart lib/presentation/screens/configuration_screen.dart lib/main.dart; do
   echo "--- $f"
-  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+  grep -noE "'[^']{2,}'|\"[^\"]{2,}\"" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:|\"package:" | grep -E "[A-Za-z]{3,}"
 done
 ```
 
-There is deliberately **no `-i`** in that exclusion. Anything it prints that is
-chrome and absent from the table gets an ARB key in the same naming style, and a
-line in your report saying you added it.
+There is deliberately **no `-i`** in that exclusion — that flag is what lost six
+strings in Task 7. The pattern matches **both quote styles**: a Dart string
+containing an apostrophe is written with double quotes, and a single-quote-only
+pattern cannot see it. Task 8 hit exactly that — half of one help sentence was
+double-quoted and invisible to the earlier command.
+
+**Hits inside `//` comments are not UI strings** — this command cannot tell the
+difference, so read each hit in context before adding a key. Anything it prints
+that is genuinely chrome and absent from the table gets an ARB key in the same
+naming style, and a line in your report saying you added it.
 
 **The boundary rule that decides what moves** (from the design spec):
 
@@ -1715,13 +1729,20 @@ Run this first and reconcile against the table:
 ```bash
 for f in lib/presentation/screens/spell_creation_screen.dart; do
   echo "--- $f"
-  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+  grep -noE "'[^']{2,}'|\"[^\"]{2,}\"" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:|\"package:" | grep -E "[A-Za-z]{3,}"
 done
 ```
 
-There is deliberately **no `-i`** in that exclusion. Anything it prints that is
-chrome and absent from the table gets an ARB key in the same naming style, and a
-line in your report saying you added it.
+There is deliberately **no `-i`** in that exclusion — that flag is what lost six
+strings in Task 7. The pattern matches **both quote styles**: a Dart string
+containing an apostrophe is written with double quotes, and a single-quote-only
+pattern cannot see it. Task 8 hit exactly that — half of one help sentence was
+double-quoted and invisible to the earlier command.
+
+**Hits inside `//` comments are not UI strings** — this command cannot tell the
+difference, so read each hit in context before adding a key. Anything it prints
+that is genuinely chrome and absent from the table gets an ARB key in the same
+naming style, and a line in your report saying you added it.
 
 **The boundary rule that decides what moves** (from the design spec):
 
