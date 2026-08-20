@@ -738,6 +738,35 @@ at the final whole-branch review.
   vocabulary, and routing them through ARB just adds a lookup with nothing to
   translate.  *(item 80, final review)*
 
+**The generated localisations are gitignored, so a fresh checkout does not
+build until `flutter pub get` runs.** `lib/l10n/app_localizations*.dart` are
+gen-l10n output and deliberately untracked (`.gitignore`); only the two `.arb`
+files are committed. `flutter pub get` regenerates them, and
+`.github/workflows/tests.yml` already runs it before `analyze` and `test` in
+both jobs — but **this was not true of the repo before item 80**, and it bites
+locally: merging item 80 to `main` produced 65 analyze errors and a failing
+suite purely because codegen had not run in that checkout. Run `flutter pub
+get` first when a tree suddenly cannot resolve `AppLocalizations`, before
+suspecting the merge.  *(item 80, final review)*
+
+**A domain exception that reaches the user gets caught specifically and routed
+to the structured channel — never left to a `catch (e)` that stringifies it.**
+`SpellCreationBloc._handleSpellSaveRequested` catches `InvalidSpellException`
+ahead of its catch-all and emits `e.problems` into `validationErrors`, which
+the screen renders through `formatValidationError`. The generic catch is for
+genuinely unexpected failures only. Left to the catch-all, `e.toString()` put
+a Dart *type name* in front of the user (`RequisiteIsOwnArt()`) where English
+prose used to be — a regression the pseudo-locale guard structurally cannot
+see, because those strings render only after a throw.
+
+⚠️ **That fix depends on the bloc's sequential event transformer**
+(`spell_creation_bloc.dart:41`, `events.asyncExpand(mapper)`): the draft merge
+was moved ahead of the `saving` emit so `state.draft` and the handler's local
+`draft` share identity, which is what stops `_emit`'s funnel clearing
+`validationErrors` on the way out. Under flutter_bloc's *default* concurrent
+transformer that identity is not guaranteed and the fix would be racy. Do not
+change that transformer without revisiting this.  *(item 80, final review)*
+
 ## CI and workflows
 
 **Two workflows answer deliberately different questions.**

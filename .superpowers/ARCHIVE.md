@@ -1,6 +1,6 @@
 # Archive
 
-### 80. Flutter Internationalisation for All User-Facing Text (`50c8a81..e22d4f2`)
+### 80. Flutter Internationalisation for All User-Facing Text (`50c8a81..0d5f0d7`, merged `23e2528`)
 
 **Opened 2026-08-20, asked for directly by the user.** No translation is wanted
 yet; the goal is that adding one later is not a rewrite. Nothing is wired today:
