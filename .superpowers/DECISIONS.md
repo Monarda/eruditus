@@ -683,10 +683,18 @@ that trade becomes unacceptable.  *(item 29)*
 
 ## Known limits — do not re-promise
 
-**`Citation.page` cannot carry page numbers.** The reviewed rulebook markdown has
-no page markers, only headings and prose cross-references, and an earlier promise
-to add them could not be kept. A citation may name a book and a section heading,
-never a page.  *(items 27, 56)*
+**~~`Citation.page` cannot carry page numbers.~~ RETRACTED 2026-08-20 (item 78).**
+The claim was that the markdown has no page markers. True of the book's *body*;
+false of the book as a whole. Four index tables — Spells (line 23778), Spell
+Guidelines (24143), Bestiary (24198) and Traditional (24265) — carry **1650
+unique `[page](#anchor)` pairs, 1606 of them (97.3%) resolving to real
+headings**, so a line maps to a printed page via its nearest preceding anchor.
+The PDF corroborates independently: **printed page = PDF index − 7, zero
+exceptions across 418 numbered pages**. `Citation.page` is still null everywhere
+*today* — the retraction is of the impossibility, not of the current state.
+**Page numbers are Definitive Edition only** (decided 2026-08-20: the open
+licence makes the earlier edition largely obsolete); note `books.json` still
+misdeclares `arm5-core` as 5e, which item 78.5 fixes.  *(items 27, 56, 78)*
 
 **Core-rules line citations carried over from archived bodies are known to run
 about 8 lines low**, so verify one against `reviewed/` before relying on it —

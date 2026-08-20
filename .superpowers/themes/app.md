@@ -198,12 +198,24 @@ text live?
 
 Decide this first when picking the item up; the estimate swings entirely on it.
 
-**⚠️ Citations cannot supply page numbers.** `Citation.page` is null for every
-built-in entry and structurally cannot be filled: the reviewed rulebook markdown
-carries no page markers, only prose cross-references, and `citation.dart:5-11`
-records that an earlier promise to add them "could not be kept." So a hint may
-name a **book and a section heading** — the markdown does have headings — never
-a page. Do not plan a "see p. 112" affordance.
+**⚠️ Two 2026-08-20 findings push this decision toward catalog data.** (a) The
+licence is CC BY-SA 4.0, so a hint may **quote the rulebook verbatim** rather
+than paraphrase it (item 79) — and quoted text with a page reference is
+extraction output, not hand-written UI copy. (b) Item 80.3 routes rules text
+through the catalog per source edition, never through ARB. Both point the same
+way, so the "hardcoded UI copy" option is weaker than it looked when this item
+was written. **Items 78, 79 and 80 are all upstream of this decision** — that is
+why they were opened.
+
+**~~⚠️ Citations cannot supply page numbers.~~ RETRACTED 2026-08-20 — see item
+78.** This item previously recorded that `Citation.page` "structurally cannot be
+filled" because the markdown carries no page markers. That was measured against
+the book's *body* and never tested against its *indexes*. The markdown holds
+**1650 `[page](#anchor)` pairs across four index tables, 97.3% of which resolve
+to real headings**, including a Spells Index and a Spell Guidelines Index — the
+two things this catalog actually cites. **A hint may name a page.** Plan the
+"see p. 112" affordance; item 78 supplies the data, and 78.6 settles which
+edition the number belongs to (Definitive Edition — decided 2026-08-20).
 
 - **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
   `lib/models/parameter.dart` and `assets/data/parameters.json` (only if the
@@ -301,3 +313,228 @@ another Technique/Form and record why — but a user cannot reach it interactive
       cross-Form base effect, including how the analogy rationale is captured.
 - **Spec:** `docs/superpowers/specs/2026-08-16-base-effect-analogy-design.md`
 - **See also:** items 48 (closed, `ARCHIVE.md`), 47.
+
+
+### 79. Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands
+
+**Opened 2026-08-20.** Item 56 assumed hint text would have to be *paraphrased*
+UI copy, because the licence position was never checked. It has been now:
+`Ars-Magica-Open-License/LICENSE.md` is **Creative Commons
+Attribution-ShareAlike 4.0 International**. §2(a)(1) grants the right to
+"reproduce and Share the Licensed Material, in whole or in part". **So we may
+quote rules text verbatim, and 56's hints can be the rulebook's own words rather
+than our gloss of them.**
+
+Two conditions ride along, and both are product decisions, not legal trivia:
+
+- [ ] **79.1** **Attribution (§3(a)) needs somewhere to live in the app.** The licence
+      requires retaining creator identification, a copyright notice, a notice
+      referring to the licence, a disclaimer notice, and a URI to the licensed
+      material — plus **an indication that we modified it** (§3(a)(1)(B)), which
+      we have: the `reviewed/` markdown is itself a corrected transcription.
+      §3(a)(2) allows satisfying this "in any reasonable manner based on the
+      medium", including by linking to one resource that carries it all. Decide
+      the affordance: an About/Licences screen, a footer on quoted text, or
+      both.
+- [ ] **79.2** **⚠️ ShareAlike (§3(b)) may reach eruditus itself.** If embedding quoted
+      rules text makes the app "Adapted Material", the adapter's licence must be
+      CC BY-SA 4.0 or a compatible one. **This is the decision with real
+      consequences and it should be made deliberately, before quoted text is
+      designed into a feature** — retrofitting a licence choice after the fact
+      is far worse than making it now. Note the catalog JSON is arguably already
+      a database derived from the Licensed Material (§4), so this question may
+      predate item 56 entirely.
+- [ ] **79.3** **Decide how much to quote, and mark it as a quote.** A hint that
+      reproduces a guideline verbatim must be visually distinguishable from our
+      own words, or the app silently attributes its own paraphrases to the
+      rulebook. This is the coupling to 56.1's affordance decision.
+
+- **Trademark is explicitly *not* licensed** (§2(b)(2)). The grant covers the
+  text, not "Ars Magica" as a mark — so this item does not settle naming,
+  branding or store-listing questions.
+- **No warranty, and no endorsement** (§5, §2(a)(6)): the app must not imply
+  Atlas Games endorses it.
+- **Files:** `assets/data/` (if quoted text becomes catalog data — see 56's
+  "UI copy vs. catalog data" decision), a new About/Licences screen
+- **See also:** items 56 (the consumer of this permission), 78 (a quote and its
+  page reference are the same affordance), 30 (provenance)
+
+
+### 80. Flutter Internationalisation for All User-Facing Text
+
+**Opened 2026-08-20, asked for directly by the user.** No translation is wanted
+yet; the goal is that adding one later is not a rewrite. Nothing is wired today:
+**no `intl`, no `flutter_localizations`, no `l10n.yaml`, no ARB files.**
+
+**Smaller than it looks.** `lib/presentation/` is **8 files** carrying roughly
+**115** candidate literals (of 55 Dart files in `lib/` total). This is a day of
+mechanical work, not a fortnight — the estimate should not be used as a reason
+to defer it.
+
+- [ ] **80.1** **Stand up the mechanism**: `flutter_localizations` + `intl`,
+      `l10n.yaml`, `generate: true`, one `app_en.arb`, and `MaterialApp`'s
+      `localizationsDelegates`/`supportedLocales`.
+- [ ] **80.2** **Migrate the existing literals**, and add a guard that stops new bare
+      literals reaching `lib/presentation/` — otherwise the migration decays
+      immediately. Flutter ships the `flutter_lints` rules for this; decide
+      whether to enable them repo-wide or scope them to `presentation/`.
+- [ ] **80.3** **⚠️ Decide how the text populations localise differently — the one
+      genuinely hard question here. ✅ Answered by the 2026-08-20 spec; kept open
+      until the code matches it.** There are **three**, not two — designing the
+      contribution restructure surfaced the third — and they do not travel the
+      same road:
+      - **App chrome** — our own labels, buttons, helper lines. Translated by us,
+        lives in ARB files, keyed by locale. Ordinary l10n.
+      - **Rules text** — quoted from the rulebook (item 79). **This is
+        translatable, but not by us and not through ARB.** Ars Magica has been
+        published in translation, and more may follow; the right source for
+        French rules text is the French edition, not our rendering of the
+        English one. So a locale selects a *source edition*, and the catalog
+        carries per-edition text — the ARB pipeline never sees it.
+      - **⚠️ User content** — an adjustment's `note`, and any prose the caster
+        typed. **Nobody translates it; it renders verbatim under every locale.**
+        Never in ARB, and explicitly **exempt from the pseudo-locale
+        transform**, or the proof harness raises false failures on the user's
+        own words. This is the one the item originally missed.
+      **The failure mode to design against is a translator being handed rules
+      strings in an ARB file**, where they would produce an unofficial
+      translation that the app then presents as the rulebook's own words.
+      Keeping rules text out of ARB is what prevents that, not a claim that it
+      cannot be translated at all.
+      **The boundary rule the spec settles on:** *ARB holds the vocabulary that
+      labels the interface; the catalog holds the content the rulebook prints;
+      user content passes through untouched.* So "Range" is chrome — it labels a
+      control — while "Voice" is content.
+
+- **Sequencing matters against item 56.** 56 introduces a large volume of new
+  user-facing strings. Doing 80.1 first means they land localised; doing it
+  after means a second pass over the same text. **Neither ordering is wrong, but
+  doing 80 *during* 56 is** — decide before 56 starts.
+- **Names in the catalog are not UI strings.** Spell, Technique, Form and
+  parameter names come from `assets/data/*.json`. Some are Latin and stay put
+  under any locale (*Creo*, *Ignem*); the rest are rulebook English that a
+  published translation would render differently. Either way they are data
+  reached through 80.3's edition route, never ARB.
+- **⚠️ The engine composes user-facing prose, and that is the real work.**
+  `spell_engine.dart` builds display strings at 7 sites and hands them to
+  `LevelBanner` pre-formatted, in domain code where no `BuildContext` and so no
+  locale can reach. **The level breakdown is untranslatable in principle until
+  `LevelContribution` carries structure instead of a `String label`** — adding
+  ARB files does not touch it. Decided 2026-08-20 to fix it in this item rather
+  than defer. De-risker: `LevelBreakdown` is **never persisted** (no
+  `toMap`/`toJson`; outside `lib/engine/` it appears only in
+  `SpellCreationState.breakdown` and `LevelBanner`), so there is no migration,
+  no backup-format change and no asset change.
+- **Spec:** `docs/superpowers/specs/2026-08-20-internationalisation-design.md`
+- **Files:** `pubspec.yaml`, new `l10n.yaml` + `lib/l10n/app_en.arb`,
+  new `lib/engine/contribution_source.dart`,
+  `lib/presentation/format/contribution_formatter.dart`,
+  `test/support/pump_app.dart`, `tool/gen_pseudo_arb.dart`,
+  `lib/engine/spell_engine.dart` + `level_breakdown.dart`,
+  `lib/presentation/**` (8 files), `lib/main.dart`, and the 10 test files
+  holding 47 inline `MaterialApp` constructions
+- **See also:** items 56 (the string-volume driver), 79 (why the boundary
+  exists), 16 (short forms — a translated label breaks any width assumption
+  that item makes)
+
+
+### 81. Latin as the First Real Locale
+
+**Opened 2026-08-20**, split out of item 80 so the proof harness and a shipped
+translation stay separate concerns. Latin is the obvious first language for this
+app — the game's whole vocabulary is Latin already — but it is **not** the right
+*test* language, and item 80 keeps the generated pseudo-locale for that.
+
+**Why it is not the test language.** The pseudo-locale's job is to make the
+three-population boundary visible: `[Ŕaňģe····] · Voice` shows accented chrome
+beside plain rulebook content, so a boundary mistake is obvious on sight. In
+Latin, chrome and content look alike — the app's content vocabulary is *already*
+Latin (*Creo*, *Ignem*, *Vim*) — so the very thing the harness exists to reveal
+is camouflaged. Latin is also inflected and often **shorter** than English, so it
+exercises layout in the opposite direction to the pseudo-locale's ~30% padding.
+
+- [ ] **81.1** **Translate the chrome, and have a human review it.** Machine-translated
+      Latin is weak — thin parallel corpora next to major languages — and this
+      game's audience is unusually Latin-literate. MT is an acceptable *first
+      draft* and an unacceptable *ship*.
+- [ ] **81.2** **⚠️ Decide the fallback for rules content, which Latin forces first.**
+      There is **no published Latin edition of Ars Magica**, so under item 80.3's
+      rule a Latin locale has no Latin source for rulebook content and must fall
+      back to English. **This is the first real exercise of the mixed-locale
+      path** — Latin chrome around English rules text — and whatever it settles
+      applies to every later locale whose edition does not exist. A locale
+      whose book *has* been published (French, Spanish) never hits this, so
+      Latin is the useful case to design against, not the awkward one.
+- [ ] **81.3** **Do not translate the Art and Form names.** `ArsArts`/`ArsForms` are
+      already Latin (`constants.dart`) and are correct as printed. A Latin
+      locale must leave them exactly as they are — the risk is an MT pass
+      "translating" already-correct Latin into different Latin.
+
+- **Blocked on item 80** — there is no ARB pipeline to translate into until it
+  lands.
+- **Files:** new `lib/l10n/app_la.arb`, `lib/main.dart` (`supportedLocales`)
+- **⚠️ Item 82 must be settled before this item runs.** 81.1 permits MT as a
+  first draft; item 82 is the flag that tracks which strings are still in that
+  state. Producing MT text without it means the burn-down starts unrecorded.
+- **See also:** items 80 (the mechanism and the pseudo-locale), 80.3 (the
+  boundary rule this item is the first real test of), 79 (whether a translated
+  quotation is still the licensed material), 82 (the MT flag)
+
+
+### 82. Machine-Translation Provenance for User-Facing Text
+
+**Opened 2026-08-20**, from the item 81 discussion. Nothing to build yet —
+English is the original, not a translation — but the convention should be fixed
+**before** item 81 produces the first machine-translated string, not retrofitted
+afterwards.
+
+**⚠️ This is partly a licence obligation, not only a quality signal.** CC BY-SA
+§3(a)(1)(B) requires indicating **if you modified the Licensed Material**. A
+machine translation of quoted rules text is a modification. So the moment MT
+touches rulebook content, a marker stops being optional. See item 79.
+
+- [ ] **82.1** **Decide the granularity — recommended: per string, not per locale.**
+      Translation review is incremental; a locale is rarely wholly machine or
+      wholly reviewed. Item 81.1 already draws the line at "MT is an acceptable
+      first draft and an unacceptable ship", and a per-string flag is what turns
+      that into a burn-down a release can be gated on. A file-level
+      `@@x-translation-status` is the cheaper alternative and cannot express a
+      half-reviewed locale — though 82.2 proved the two **compose**: set the
+      file-level default, override per string as review lands.
+      **⚠️ Do not stamp `original` onto every `app_en.arb` entry.** The template
+      file is the original *by definition* — `l10n.yaml` declares
+      `template-arb-file: app_en.arb` — so the value is derivable, and storing it
+      anyway would force a `@key` metadata block onto ~115 strings that need
+      none. That is item 33's write-only-duplication antipattern in a new place.
+      **The flag belongs on non-template locales only.**
+- [x] **82.2** **✅ VERIFIED 2026-08-20: `gen-l10n` tolerates custom ARB metadata.**
+      Probed against Flutter 3.44.8 with an isolated package. Accepted at both
+      levels, **exit 0 and no warnings**, with correct getters generated
+      including a typed `counted(int count)` placeholder method:
+      - **file level** — `@@x-generated`, `@@x-translation-status`
+      - **per string** — `x-translation-status` inside a `@key` block
+      - **on a non-template locale**, and a per-string value **overriding** a
+        file-level default (`@@x-translation-status: machine` with one entry
+        marked `reviewed`) — which is the exact shape 82.1 needs.
+      **So the flag lives inside the ARB files. No sidecar is required**, and the
+      shape-change risk this sub-item was guarding against does not exist.
+- [ ] **82.3** **Decide what the flag actually drives.** At least one of: a release
+      gate that refuses to ship an MT-flagged string in a shipped locale; an
+      in-app disclosure that a translation is machine-generated (which is also
+      the §3(a)(1)(B) indication); a reviewer filter listing what still needs
+      human eyes. **A flag nothing consumes is worse than no flag** — it implies
+      a guarantee nobody is enforcing.
+
+- **It spans two stores, not one.** Chrome translations live in ARB; rules
+  content lives in the catalog per source edition (item 80.3). Both can carry MT
+  text, so the convention has to work in both places or it will be applied to
+  whichever is convenient and forgotten in the other.
+- **The pseudo-locale is generated but is not a translation.** `app_xx.arb` is a
+  test artefact that never reaches a user as a language. Mark it
+  `@@x-generated`, not machine-translated, or the burn-down is permanently
+  polluted by ~115 entries that will never be reviewed.
+- **Precedent:** this repo already takes provenance seriously — item 30's
+  `source.lock` and `provenance.py` do exactly this for the import. Follow that
+  shape rather than inventing a second vocabulary.
+- **See also:** items 81 (produces the first MT text and is where this must be
+  in place), 79 (the licence obligation), 80.3 (the two stores)

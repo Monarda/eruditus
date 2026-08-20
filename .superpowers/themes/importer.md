@@ -192,3 +192,94 @@ neither of which is scoped, and one of them can be silently wrong.
   have been printed against" — this item asks how far that rule reaches; items
   55 and 32.1 for the base-effect half; item 66/71 for the books that will
   trigger it
+
+
+### 78. Page References for Users — the Markdown Indexes Can Supply Them
+
+**Opened 2026-08-20.** Reverses a standing "impossible" claim. `Citation.page` is
+null for every built-in entry because the body markdown carries no page markers,
+and `citation.dart:4-11`, `DECISIONS.md` ("Known limits — do not re-promise") and
+item 56 all record that pages therefore *cannot* be supplied. **That is now
+false.** The claim was made about the book's *body*; it was never tested against
+the book's *indexes*.
+
+**What the indexes actually hold** (measured 2026-08-20 against `reviewed/`):
+
+| Index | Line | Shape |
+|---|---|---|
+| Spells Index | 23778 | `\| Spell Name \| Arts \| Level \| Page \|` |
+| Spell Guidelines Index | 24143 | `\| Form \| Technique \| Page \|` |
+| Bestiary Index | 24198 | `\| Name \| Realm \| Form \| Might \| Page \|` |
+| Traditional Index | 24265 | `\| Entry \| Page \|` |
+
+Every row cites its page as `[313](#anchor)`. Across the file there are **1650
+unique `[page](#anchor)` pairs, of which 1606 (97.3%) resolve to a real heading**
+— about one anchor per 14 body lines. So a line maps to a page via its nearest
+preceding anchored heading. **The first two indexes alone cover exactly what the
+catalog cites**: spells by name, and guidelines by Technique/Form.
+
+- [ ] **78.1** **Build the anchor→page map and the line→page lookup.** Parse the four
+      index tables, slug each anchor against the document's headings, and expose
+      "which printed page is this line on". Note page *ranges* occur
+      (`[158-159](#ability-types)`) and must be modelled, not truncated.
+- [ ] **78.2** **Close the 44 unresolved anchors, or record why they stay unresolved.**
+      They are slug-normalisation misses, not missing headings — e.g.
+      `merinita--faerie-magic` and `bjornaer--the-heartbeast` double their hyphen
+      where the heading has an em-dash or colon. A stricter GitHub-compatible
+      slugger should recover most; whatever remains should be listed, not
+      silently dropped.
+- [ ] **78.3** **Resolve the 22 monotonicity violations.** Sorting the 1606 resolved
+      anchors by line should make page numbers non-decreasing; 22 pairs
+      decrease. At least some are appendix headings carrying a body page number
+      (`(line 23256, page 311)`), i.e. the Reference Guide reproducing content
+      from the body. **A violation is the signal that an anchor is being read
+      out of its section** — treat them as the correctness test for 78.1, not as
+      noise to smooth over.
+- [ ] **78.4** **Populate `Citation.page` through the importer** and retract the three
+      recorded "cannot" claims together — `citation.dart`, `DECISIONS.md`, and
+      item 56's own warning. Retract them in the same change that makes them
+      false, not before.
+- [ ] **78.5** **Fix `books.json`'s edition metadata.** It declares `arm5-core` as
+      `"Ars Magica Fifth Edition"` / `"ArM5"` / `"5e"`, but the import source and
+      the page numbers are **Definitive Edition**, which paginates differently
+      (the Reference Guide prints both: *"Fifth Edition p7, Definitive Edition
+      p8"*). Shipping a DE page under a 5e label sends the reader to the wrong
+      page. **Decided 2026-08-20: Definitive Edition only** — the open license
+      makes the earlier edition largely obsolete, so we never carry 5e numbers
+      and never show a paired "5e p7 / DE p8" form.
+- [ ] **78.6** **⚠️ A page number is only true of one edition — leave room for that.**
+      The 5e/DE divergence in 78.5 is the same problem a *translated* edition
+      poses: a French or German printing paginates differently again, and item
+      80.3 expects locale to select a source edition. So `page` belongs to an
+      edition, not to a book-in-the-abstract. **Do not design 78.4 as one scalar
+      `page` per citation and leave the shape to be fixed later** — decide now
+      whether the edition is implied by the `bookId` (making a translated
+      edition simply a different book id, probably the cheapest answer) or
+      carried alongside it. Deciding the *shape* costs nothing today; changing
+      it after 1061 citations carry a number costs a migration.
+
+**The PDF is the cross-check, not the source.** `F:\OneDrive\RPGs\Ars Magica\ArM
+Definitive\Ars Magica Definitive Digital.pdf` extracts cleanly with `pypdf`
+(~11s for all 582 pages). Two properties, both measured:
+- **printed page = PDF index − 7, with zero exceptions** across all 418 pages
+  that expose a numeric folio.
+- each page's own folio is the first line of its extracted text, **doubled**
+  (`293293` → 293), giving 418 independent confirmations.
+- 5 pages extract no text at all (full-page art: idx 0, 207, 500, 501, 581);
+  159 more lead with roman numerals (front matter) or an unextractable glyph.
+
+Prefer the markdown indexes as the source — they are in-repo, versioned, and
+already the provenance-locked artefact. Use the PDF to *verify* a sample, so the
+mapping has a witness outside the file that produced it.
+
+- **⚠️ Line citations in older item bodies run ~8 lines low** (DECISIONS.md, item
+  70.3). Re-read any line number quoted here before trusting it; the four index
+  line numbers above were read fresh on 2026-08-20.
+- **Only two books need this today:** 1034 `arm5-core` citations and 27
+  `arm5-hohmc` across the assets. Other books' PDFs are in
+  `F:\OneDrive\RPGs\Ars Magica\`, each with its own offset — do not assume 7.
+- **Files:** `scripts/spell_import/` (new index-parsing module),
+  `lib/models/citation.dart`, `assets/data/books.json`
+- **See also:** items 56 (the display half — this item stops at the data), 30
+  (provenance), 79 (what may be quoted alongside a page), 80.3 (locale selects a
+  source edition, which is what makes 78.6 necessary)
