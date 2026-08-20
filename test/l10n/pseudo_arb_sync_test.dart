@@ -23,6 +23,32 @@ void main() {
     final result = pseudoTransform('Imported {count} spells');
 
     expect(result.contains('{count}'), isTrue);
+    expect(result.contains('Imported'), isFalse,
+        reason: 'text around a placeholder must still be accented');
+  });
+
+  test('pseudoTransform preserves two placeholders and the text between', () {
+    final result = pseudoTransform('{technique} {form} spell');
+
+    expect(result.contains('{technique}'), isTrue);
+    expect(result.contains('{form}'), isTrue);
+    expect(result.contains('spell'), isFalse);
+  });
+
+  test('pseudoTransform does not corrupt nested ICU plural syntax', () {
+    const plural =
+        '{count, plural, =0{none} one{1 spell} other{{count} spells}}';
+
+    final result = pseudoTransform(plural);
+
+    // The ICU keywords gen-l10n parses must survive byte-identical. A boolean
+    // in-placeholder flag clears on the first inner closing brace and accents
+    // `other`, breaking codegen for every locale.
+    expect(result.contains('plural,'), isTrue);
+    expect(result.contains('other{'), isTrue);
+    expect(result.contains('=0{'), isTrue);
+    expect(result.contains('one{'), isTrue);
+    expect(result.contains('{count}'), isTrue);
   });
 
   test('the generated locale is marked as machine-produced', () {
