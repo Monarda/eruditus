@@ -1883,6 +1883,14 @@ import '../support/pump_app.dart';
 /// Chrome strings that must never survive a switch to the pseudo-locale.
 ///
 /// If one of these is findable under `en_XA`, it is still a hardcoded literal.
+///
+/// ⚠️ Deliberately NOT listed, because they are rulebook content that stays
+/// hardcoded by design (see Task 10 and item 80.3): the four realm values
+/// 'Divine', 'Faerie', 'Infernal', 'Magic'. Nor the filter/category comparison
+/// keys 'All', 'Published', 'My Spells', 'Range', 'Duration', 'Target' where
+/// they appear as *values* rather than display text — those are deliberately
+/// English (see Task 9). Adding any of them here would make this test fail on
+/// correct code.
 const _mustNotSurvive = <String>[
   'Create Spell',
   'Save to Library',
@@ -1897,6 +1905,31 @@ const _mustNotSurvive = <String>[
   'Not declared',
   'Guideline level',
   'Container behaviour',
+  // added as tasks 7-10 migrated far more than the plan originally tabulated
+  'Modifiers',
+  'Needs review',
+  'Configuration',
+  'Effects',
+  'Parameters',
+  'Add Custom Effect',
+  'Add Custom Parameter',
+  'Requisites',
+  'Adjustments',
+  'Summary',
+  'Save to Library',
+  'Find Similar Spells',
+];
+
+/// Strings that SHOULD still render in English under the pseudo-locale.
+///
+/// These are the deliberate exclusions. Asserting them positively stops a
+/// future change quietly migrating rulebook content into ARB — the failure
+/// item 80.3 exists to prevent — and documents the boundary in executable form.
+const _mustSurvive = <String>[
+  'Divine',
+  'Faerie',
+  'Infernal',
+  'Magic',
 ];
 
 void main() {
