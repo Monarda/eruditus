@@ -100,6 +100,18 @@ const _mustNotSurvive = <String>[
   'Disclaimer of warranties',
   'No endorsement',
   'Open-source package licences',
+  // Item 79 finding I4: these seven headings render inside the private
+  // _Edition widget (plus Trademarks, rendered in the top-level Column but
+  // missed by the same oversight) and were not covered above. All eight are
+  // ARB chrome headings, not notice-body content, so they belong here.
+  'Attribution',
+  'Books used',
+  'Creators',
+  'Copyright',
+  'Licence',
+  'Source',
+  'Modifications',
+  'Trademarks',
 ];
 
 /// Strings that SHOULD still render in English under the pseudo-locale.
