@@ -145,16 +145,21 @@ nothing new.
 
 ### 2. The §3(a) notice, and why it is a list
 
-All six required parts:
+All seven required parts. Note that (A) has five items, and that **(B) and (C)
+are separate obligations** — (C) is easy to overlook because (A)(iii) already
+mentions the licence, but (iii) requires only a *notice referring to* it while
+(C) additionally requires including the licence **text or a URI**. That is what
+`LICENSES/CC-BY-SA-4.0.txt` is for.
 
 | Clause | Content |
 |---|---|
 | (A)(i) creator | Trident, Inc. d/b/a Atlas Games®; markdown transcription by OriginalMadman |
 | (A)(ii) copyright | © 1993–2024 Trident, Inc. d/b/a Atlas Games |
-| (A)(iii) licence | CC BY-SA 4.0, with the deed URI |
-| (A)(iv) disclaimer | CC's §5 warranty disclaimer, verbatim |
-| (A)(v) URI | the CC deed URL, and the source repo **pinned at `ffc1c6b`** |
+| (A)(iii) licence notice | a notice referring to CC BY-SA 4.0 |
+| (A)(iv) disclaimer | a notice *referring to* the disclaimer of warranties. The clause does not require reproducing §5; we include its full text anyway, which is stronger than asked and costs nothing |
+| (A)(v) URI | a URI to the Licensed Material — the source repo **pinned at `ffc1c6b`** |
 | (B) modified | "transcribed, restructured into JSON, assigned identifiers, and in places corrected — see `scripts/spell_import/`" |
+| (C) licence text or URI | the CC BY-SA 4.0 deed URI, plus the full licence text at `LICENSES/CC-BY-SA-4.0.txt` |
 
 Plus two lines the licence requires us not to imply otherwise: trademarks are
 **not** licensed (§2(b)(2)), and nothing implies Atlas Games endorses eruditus
@@ -181,7 +186,7 @@ produce.
 reasonable manner based on the medium, means, and context", explicitly
 including "by providing a URI or hyperlink to a resource that includes the
 required information". Quoted text in the UI therefore does not need the full
-six-part notice attached to it. It needs a route to one place that carries it.
+seven-part notice attached to it. It needs a route to one place that carries it.
 
 - **New `lib/presentation/screens/about_screen.dart`**, reached from an
   "About & Licences" `ListTile` at the foot of
@@ -275,7 +280,7 @@ eruditus a calculator rather than a partial rulebook reader, and it keeps item
   whose source cannot be named is a licence defect, not a display bug.
 - **A `userCreated` entry can hold no `verbatim` text.** The mirror of the
   above, matching `Provenance`'s existing two-way check.
-- **Widget test: the About screen renders all six §3(a) parts**, plus the two
+- **Widget test: the About screen renders all seven §3(a) parts**, plus the two
   disclaimers. This is the guard against the notice silently rotting as the
   screen is restyled.
 - **`NOTICE.md` exists and carries the CC deed URI and the pinned commit.**
