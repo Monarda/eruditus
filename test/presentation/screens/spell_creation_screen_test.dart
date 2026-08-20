@@ -251,7 +251,7 @@ void main() {
     final state = SpellCreationState(
       status: SpellCreationStatus.initial,
       draft: SpellDraft(),
-      levelUnavailableReason: 'Choose a base effect to see a level.',
+      levelUnavailableReason: LevelUnavailableReason.noBaseEffect,
     );
     await pumpScreen(tester, state);
 

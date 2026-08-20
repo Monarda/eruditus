@@ -58,6 +58,19 @@ class LevelBreakdown extends Equatable {
   List<Object?> get props => [level, rawLevel, ritualStatus, contributions];
 }
 
+/// Why a draft cannot produce a level yet.
+///
+/// An enum rather than a message: these are chrome, and `previewLevel` runs in
+/// domain code where no locale is reachable. See
+/// `presentation/format/contribution_formatter.dart` for the wording.
+enum LevelUnavailableReason {
+  noBaseEffect,
+  generalLevelNotTyped,
+  generalLevelBelowOne,
+  parametersIncomplete,
+  magnitudesBelowOne,
+}
+
 /// The answer to "does this draft have a level yet, and if not, why not".
 ///
 /// Exactly one of [breakdown] and [unavailableReason] is non-null. This exists
@@ -70,11 +83,11 @@ class LevelBreakdown extends Equatable {
 /// fields, and those are what get compared.
 class LevelPreview {
   final LevelBreakdown? breakdown;
-  final String? unavailableReason;
+  final LevelUnavailableReason? unavailableReason;
 
   const LevelPreview.available(LevelBreakdown this.breakdown)
       : unavailableReason = null;
 
-  const LevelPreview.unavailable(String this.unavailableReason)
+  const LevelPreview.unavailable(LevelUnavailableReason this.unavailableReason)
       : breakdown = null;
 }

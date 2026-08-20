@@ -29,7 +29,7 @@ import 'package:eruditus/presentation/format/contribution_formatter.dart';
 /// arithmetic raises a question only the tier arithmetic answers.
 class LevelBanner extends StatefulWidget {
   final LevelBreakdown? breakdown;
-  final String? unavailableReason;
+  final LevelUnavailableReason? unavailableReason;
 
   const LevelBanner({super.key, this.breakdown, this.unavailableReason});
 
@@ -97,7 +97,7 @@ class _LevelBannerState extends State<LevelBanner> {
               ),
               if (reason != null)
                 Text(
-                  reason,
+                  formatUnavailableReason(l10n, reason),
                   key: const Key('level-unavailable-reason'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),

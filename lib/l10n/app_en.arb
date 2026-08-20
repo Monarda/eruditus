@@ -59,5 +59,10 @@
       "from": { "type": "int" },
       "to": { "type": "int" }
     }
-  }
+  },
+  "levelUnavailableNoBaseEffect": "Choose a base effect to see a level.",
+  "levelUnavailableGeneralLevelNotTyped": "Type a level for this General guideline.",
+  "levelUnavailableGeneralLevelBelowOne": "A General guideline needs a level of 1 or more.",
+  "levelUnavailableParametersIncomplete": "Choose a Range, Duration and Target.",
+  "levelUnavailableMagnitudesBelowOne": "Magnitudes reduce this spell below level 1."
 }

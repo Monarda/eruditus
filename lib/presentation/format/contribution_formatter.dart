@@ -1,4 +1,5 @@
 import 'package:eruditus/engine/contribution_source.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 
 /// Words a [ContributionSource] for display.
@@ -32,4 +33,22 @@ String _slotName(AppLocalizations l10n, ParameterSlot slot) => switch (slot) {
       ParameterSlot.range => l10n.slotRange,
       ParameterSlot.duration => l10n.slotDuration,
       ParameterSlot.target => l10n.slotTarget,
+    };
+
+/// Words a [LevelUnavailableReason] for display.
+///
+/// Exhaustive for the same reason as [formatContribution]: a new reason will
+/// not compile until it has wording here.
+String formatUnavailableReason(
+        AppLocalizations l10n, LevelUnavailableReason reason) =>
+    switch (reason) {
+      LevelUnavailableReason.noBaseEffect => l10n.levelUnavailableNoBaseEffect,
+      LevelUnavailableReason.generalLevelNotTyped =>
+        l10n.levelUnavailableGeneralLevelNotTyped,
+      LevelUnavailableReason.generalLevelBelowOne =>
+        l10n.levelUnavailableGeneralLevelBelowOne,
+      LevelUnavailableReason.parametersIncomplete =>
+        l10n.levelUnavailableParametersIncomplete,
+      LevelUnavailableReason.magnitudesBelowOne =>
+        l10n.levelUnavailableMagnitudesBelowOne,
     };

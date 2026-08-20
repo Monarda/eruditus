@@ -1214,7 +1214,7 @@ void main() {
       final preview = engine.previewLevel(SpellDraft(technique: 'Creo', form: 'Ignem'));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Choose a base effect to see a level.');
+      expect(preview.unavailableReason, LevelUnavailableReason.noBaseEffect);
     });
 
     test('General guideline with no chosen level: says so instead of throwing', () {
@@ -1232,7 +1232,7 @@ void main() {
       ));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Type a level for this General guideline.');
+      expect(preview.unavailableReason, LevelUnavailableReason.generalLevelNotTyped);
     });
 
     test('General guideline typed at 0: blames the level, not the magnitudes', () {
@@ -1257,7 +1257,7 @@ void main() {
       final preview = engine.previewLevel(draft);
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'A General guideline needs a level of 1 or more.');
+      expect(preview.unavailableReason, LevelUnavailableReason.generalLevelBelowOne);
     });
 
     test('a missing parameter: says so instead of computing', () {
@@ -1267,7 +1267,7 @@ void main() {
       ));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Choose a Range, Duration and Target.');
+      expect(preview.unavailableReason, LevelUnavailableReason.parametersIncomplete);
     });
 
     test('magnitudes below level 1: says so instead of throwing', () {
@@ -1285,7 +1285,7 @@ void main() {
       ));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Magnitudes reduce this spell below level 1.');
+      expect(preview.unavailableReason, LevelUnavailableReason.magnitudesBelowOne);
     });
 
     test('a complete draft: returns the same breakdown calculateBreakdown would', () {
@@ -1312,7 +1312,7 @@ void main() {
       // first move is the guideline, so that is the reason worth showing.
       final preview = engine.previewLevel(SpellDraft());
 
-      expect(preview.unavailableReason, 'Choose a base effect to see a level.');
+      expect(preview.unavailableReason, LevelUnavailableReason.noBaseEffect);
     });
   });
 

@@ -13,5 +13,10 @@
   "slotRange": "[Ŕāňģē··]",
   "slotDuration": "[Đűŕāţĭōň···]",
   "slotTarget": "[Ţāŕģēţ··]",
-  "ritualMinimumRaised": "[Ŕĭţűāĺ ɱĭňĭɱűɱ: ŕāĭśēđ ƒŕōɱ {from} ţō {to}·············]"
+  "ritualMinimumRaised": "[Ŕĭţűāĺ ɱĭňĭɱűɱ: ŕāĭśēđ ƒŕōɱ {from} ţō {to}·············]",
+  "levelUnavailableNoBaseEffect": "[Ĉĥōōśē ā ƀāśē ēƒƒēćţ ţō śēē ā ĺēṽēĺ.···········]",
+  "levelUnavailableGeneralLevelNotTyped": "[Ţýƥē ā ĺēṽēĺ ƒōŕ ţĥĭś Ĝēňēŕāĺ ģűĭđēĺĭňē.············]",
+  "levelUnavailableGeneralLevelBelowOne": "[Å Ĝēňēŕāĺ ģűĭđēĺĭňē ňēēđś ā ĺēṽēĺ ōƒ 1 ōŕ ɱōŕē.···············]",
+  "levelUnavailableParametersIncomplete": "[Ĉĥōōśē ā Ŕāňģē, Đűŕāţĭōň āňđ Ţāŕģēţ.···········]",
+  "levelUnavailableMagnitudesBelowOne": "[Ṁāģňĭţűđēś ŕēđűćē ţĥĭś śƥēĺĺ ƀēĺōŵ ĺēṽēĺ 1.·············]"
 }

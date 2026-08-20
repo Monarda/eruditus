@@ -1,4 +1,5 @@
 import 'package:eruditus/engine/contribution_source.dart';
+import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
 import 'package:flutter/material.dart';
@@ -81,5 +82,14 @@ void main() {
         reason: 'user content renders verbatim in every locale');
     expect(result.startsWith('['), isTrue,
         reason: 'but the frame around it is still localised');
+  });
+
+  testWidgets('formats every unavailable reason', (tester) async {
+    await loadL10n(tester);
+    expect(formatUnavailableReason(l10n, LevelUnavailableReason.noBaseEffect),
+        'Choose a base effect to see a level.');
+    expect(
+        formatUnavailableReason(l10n, LevelUnavailableReason.magnitudesBelowOne),
+        'Magnitudes reduce this spell below level 1.');
   });
 }

@@ -197,7 +197,7 @@ void main() {
 
   testWidgets('with no level, shows an em dash and the reason', (tester) async {
     await pump(tester, const LevelBanner(
-      unavailableReason: 'Choose a base effect to see a level.',
+      unavailableReason: LevelUnavailableReason.noBaseEffect,
     ));
 
     expect(find.byKey(const Key('level-banner')), findsOneWidget);
@@ -208,7 +208,7 @@ void main() {
 
   testWidgets('with no level, offers no expand affordance', (tester) async {
     await pump(tester, const LevelBanner(
-      unavailableReason: 'Choose a base effect to see a level.',
+      unavailableReason: LevelUnavailableReason.noBaseEffect,
     ));
 
     expect(find.byKey(const Key('level-banner-toggle')), findsNothing);

@@ -2702,11 +2702,11 @@ void main() {
       final withReason = SpellCreationState(
         status: SpellCreationStatus.editing,
         draft: SpellDraft(),
-        levelUnavailableReason: 'Choose a base effect to see a level.',
+        levelUnavailableReason: LevelUnavailableReason.noBaseEffect,
       );
 
       expect(withReason.copyWith(status: SpellCreationStatus.saving).levelUnavailableReason,
-          'Choose a base effect to see a level.');
+          LevelUnavailableReason.noBaseEffect);
       expect(withReason.copyWith(levelUnavailableReason: null).levelUnavailableReason, isNull);
     });
   });
@@ -2717,7 +2717,7 @@ void main() {
       addTearDown(bloc.close);
 
       expect(bloc.state.breakdown, isNull);
-      expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+      expect(bloc.state.levelUnavailableReason, LevelUnavailableReason.noBaseEffect);
     });
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -2754,7 +2754,7 @@ void main() {
         ..add(const TechniqueSelected('Perdo')),
       verify: (bloc) {
         expect(bloc.state.breakdown, isNull);
-        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+        expect(bloc.state.levelUnavailableReason, LevelUnavailableReason.noBaseEffect);
       },
     );
 
@@ -2768,7 +2768,7 @@ void main() {
         ..add(const SpellDiscarded()),
       verify: (bloc) {
         expect(bloc.state.breakdown, isNull);
-        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+        expect(bloc.state.levelUnavailableReason, LevelUnavailableReason.noBaseEffect);
       },
     );
 
