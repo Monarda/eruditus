@@ -22,6 +22,10 @@ SOFTWARE.
 
 ---
 
-NOTE: This MIT licence covers the software only. The rulebook-derived content
-in assets/data/ and scripts/spell_import/resolutions.json is Adapted Material
-under Creative Commons Attribution-ShareAlike 4.0 International. See NOTICE.md.
+NOTE: This MIT licence covers the software only. Rulebook-derived content is
+Adapted Material under Creative Commons Attribution-ShareAlike 4.0
+International wherever it appears in this repository — currently
+assets/data/, scripts/spell_import/resolutions.json,
+scripts/spell_import/hand_authored_templates.json and
+scripts/spell_import/container_modes.json — and everything else is MIT. See
+NOTICE.md for the full attribution.

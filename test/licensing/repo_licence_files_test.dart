@@ -34,6 +34,11 @@ void main() {
       expect(notice, contains('assets/data'));
     });
 
+    test('carries repoLicenceSummary verbatim, so the About screen and '
+        'NOTICE.md cannot state the licence split differently', () {
+      expect(notice, contains(repoLicenceSummary));
+    });
+
     test('carries every §3(a) part from the attribution data', () {
       expect(notice, contains(arsMagicaAttribution.copyrightNotice));
       expect(notice, contains(arsMagicaAttribution.licenceName));

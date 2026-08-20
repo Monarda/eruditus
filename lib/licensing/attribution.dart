@@ -104,9 +104,16 @@ const String endorsementNotice =
     'sponsored by Atlas Games or by any other rights holder.';
 
 /// How the repository itself is licensed — the §3(b) answer.
+///
+/// Content-first, not path-first: rulebook-derived content is CC BY-SA 4.0
+/// wherever it appears, and the software is MIT by default. Kept identical,
+/// character-for-character, to the opening paragraph of NOTICE.md's "How
+/// eruditus is licensed" section — test/licensing/repo_licence_files_test.dart
+/// asserts NOTICE.md contains this exact string.
 const String repoLicenceSummary =
-    'Eruditus is licensed in two halves. The software — lib/, test/, '
-    'integration_test/, tool/ and the Python extractor — is MIT licensed. The '
-    'rulebook-derived content in assets/data and in '
-    'scripts/spell_import/resolutions.json is Adapted Material under CC BY-SA '
-    '4.0 and carries that licence. See LICENSE and NOTICE.md.';
+    'Eruditus is licensed in two halves: rulebook-derived content is Adapted '
+    'Material under CC BY-SA 4.0 wherever it appears in this repository, and '
+    'everything else is MIT. That currently includes assets/data, '
+    'scripts/spell_import/resolutions.json, '
+    'scripts/spell_import/hand_authored_templates.json and '
+    'scripts/spell_import/container_modes.json. See LICENSE and NOTICE.md.';

@@ -22,13 +22,19 @@ spells against the same rules.
 
 ## Licence
 
-Eruditus is licensed in two halves.
+Eruditus is licensed in two halves: rulebook-derived content is CC BY-SA 4.0
+wherever it appears in this repository, and everything else is MIT. The table
+below names the paths that are wholly one or the other, so the boundary stays
+checkable — it is illustrative, not an exhaustive enumeration of every file
+that carries rulebook text.
 
 | Path | Licence |
 |---|---|
-| `lib/`, `test/`, `integration_test/`, `tool/`, `scripts/spell_import/*.py` | MIT — see `LICENSE` |
+| Everything else — e.g. `lib/`, `test/`, `integration_test/`, `tool/`, `scripts/` (Python) | MIT — see `LICENSE` |
 | `assets/data/*.json` | CC BY-SA 4.0 — see `LICENSES/CC-BY-SA-4.0.txt` |
 | `scripts/spell_import/resolutions.json` | CC BY-SA 4.0 — it quotes design lines |
+| `scripts/spell_import/hand_authored_templates.json` | CC BY-SA 4.0 — carries verbatim published spell text |
+| `scripts/spell_import/container_modes.json` | CC BY-SA 4.0 — rationales quote rulebook constructions |
 | `docs/` | follows the text it quotes |
 
 The catalogs are Adapted Material derived from the Ars Magica Open License
