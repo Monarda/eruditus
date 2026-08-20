@@ -1175,7 +1175,7 @@ git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
 
 **Files:**
 - Create: `lib/models/spell_validation_error.dart`
-- Modify: `lib/models/spell.dart:92-250` (`validateSpellAgainstCatalog`, 11 `problems.add` sites)
+- Modify: `lib/models/spell.dart:92-326` (`validateSpellAgainstCatalog`, **14** `problems.add` sites — the function runs to ~326, not 250)
 - Modify: `lib/engine/spell_engine.dart:53-137` (`validateSpellDraft`, 7 `errors.add` sites + the `addAll`)
 - Modify: `lib/models/resolved_spell.dart:74` (`problems`)
 - Modify: `lib/bloc/spell_creation/spell_creation_state.dart` (`validationErrors`)
@@ -1186,9 +1186,11 @@ git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
 
 **Interfaces:**
 - Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2), `contribution_formatter.dart` (Tasks 4-5).
-- Produces: `sealed class SpellValidationError` with 18 variants (listed below); `List<SpellValidationError> validateSpellDraft(...)`; `List<SpellValidationError> validateSpellAgainstCatalog(...)`; `List<SpellValidationError> ResolvedSpell.problems`; `String formatValidationError(AppLocalizations l10n, SpellValidationError error)`.
+- Produces: `sealed class SpellValidationError` with **21** variants (listed below); `List<SpellValidationError> validateSpellDraft(...)`; `List<SpellValidationError> validateSpellAgainstCatalog(...)`; `List<SpellValidationError> ResolvedSpell.problems`; `String formatValidationError(AppLocalizations l10n, SpellValidationError error)`.
 
-**⚠️ Neither the spec nor the original plan covered this family.** The spec claimed twelve engine-composed user-facing strings. Task 4 handled seven, Task 5 five — then Task 5's review found `validateSpellDraft`'s own seven, and sizing *that* found `validateSpellAgainstCatalog`'s eleven more. **The real total is 29 domain-composed user-facing strings.** They surface in three places: the creation screen's validation list (`:377-378`), and `ResolvedSpell.problems` on spell cards in **both** the creation screen (`:408`) and the library screen (`:96`).
+**⚠️ Neither the spec nor the original plan covered this family.** The spec claimed twelve engine-composed user-facing strings. Task 4 handled seven, Task 5 five — then Task 5's review found `validateSpellDraft`'s own seven, and sizing *that* found `validateSpellAgainstCatalog`'s **fourteen** more. **The real total is 33 domain-composed user-facing strings.**
+
+**⚠️ This family has now been miscounted three times** (10, then 11, then 14), each time by grepping a truncated line range instead of the whole function. **Before writing code, run `grep -c "problems\.add" lib/models/spell.dart` and confirm it returns 14.** If it does not, stop and report rather than trusting this table. They surface in three places: the creation screen's validation list (`:377-378`), and `ResolvedSpell.problems` on spell cards in **both** the creation screen (`:408`) and the library screen (`:96`).
 
 **Why a sealed class and not an enum.** Task 5's `LevelUnavailableReason` is a plain enum because its five messages take no operands. Five of these eighteen do — `'Only one option may be selected for ${modifier.name}'` and friends — so this is Task 4's problem shape, and takes Task 4's solution. **Follow `lib/engine/contribution_source.dart` as the template**, not `LevelUnavailableReason`.
 
@@ -1214,7 +1216,7 @@ Operand-free (13), from `validateSpellDraft` (7) and `validateSpellAgainstCatalo
 | `AnalogyRationaleMissing` | `Technique/Form differs from the base effect's own -- an analogyRationale is required to explain why` |
 | `AnalogyRationaleUnwanted` | `analogyRationale is set but Technique/Form already matches the base effect's own -- remove it` |
 
-With operands (5):
+With operands (8):
 
 | Variant | Fields | Rendered text |
 |---|---|---|
@@ -1223,6 +1225,11 @@ With operands (5):
 | `ChosenSlotNotOpen` | `description` | `A chosen {description} applies only to a guideline with an open {description} slot` |
 | `ContainerModeOnNonContainer` | `targetName` | `A container mode applies only to a container Target, and {target} is not one` |
 | `RangeForbidsTarget` | `rangeName`, `targetName`, `targetKind` | `{range} Range cannot be combined with {target}, which is a {kind} Target` |
+| `RangeRequiredByTarget` | `targetName`, `requiredRangeId`, `rangeName` | `{target} requires the Range "{requiredRange}", but this spell uses {range}` |
+| `TechniqueExcludedByTarget` | `targetName`, `technique` | `{target} cannot be used on a spell employing the Technique of {technique}` |
+| `RequisiteArtExcludedByTarget` | `targetName`, `art` | `{target} cannot be used on a spell with {art} as a requisite` |
+
+**⚠️ `RangeRequiredByTarget`'s message contains literal double-quote characters** around the range id. Keep them — they are part of the rendered text. In the ARB value they must be escaped as `\"`.
 
 **⚠️ `MagnitudesBelowOne` has no trailing full stop.** `LevelUnavailableReason.magnitudesBelowOne` (Task 5) renders the near-identical `'Magnitudes reduce this spell below level 1.'` **with** one. Different strings, different paths — the save button versus the live preview. **Keep both, keep them distinct, do not unify them, do not "fix" the missing stop.**
 
@@ -1230,9 +1237,9 @@ With operands (5):
 
 `lib/models/spell_validation_error.dart`, modelled on `lib/engine/contribution_source.dart`: a `sealed class SpellValidationError extends Equatable`, then one `final class` per variant above. Operand-free variants take no constructor arguments and return `const []` from `props`; the five with operands carry their fields and list them all in `props`. Give the file a doc comment saying why it exists — validation runs in domain code with no `BuildContext`, and its results are rendered in three places.
 
-- [ ] **Step 2: Add the 18 ARB entries**
+- [ ] **Step 2: Add the 21 ARB entries**
 
-Keys `validationTechniqueMissing` … `validationRangeForbidsTarget`, values exactly as tabulated above. The five with operands need `placeholders` blocks, all `"type": "String"`. Note `ChosenSlotNotOpen` uses `{description}` **twice** in one value — that is legal ICU and gen-l10n handles it.
+Keys `validationTechniqueMissing` … `validationRequisiteArtExcludedByTarget`, values exactly as tabulated above. The eight with operands need `placeholders` blocks, all `"type": "String"`. Note `ChosenSlotNotOpen` uses `{description}` **twice** in one value — that is legal ICU and gen-l10n handles it.
 
 - [ ] **Step 3: Write the failing test**
 
@@ -1278,7 +1285,7 @@ Expected: FAIL — the variants and `formatValidationError` are undefined.
 
 - [ ] **Step 5: Convert `validateSpellAgainstCatalog`**
 
-`lib/models/spell.dart:92` — return type becomes `List<SpellValidationError>`; each of the 11 `problems.add('...')` becomes the matching variant, moving interpolated values into constructor arguments. **Preserve every comment**: the numbered check comments encode rulebook citations (Core Rules line numbers) and hard-won reasoning about templates, null tolerance and Momentary. **Preserve the check ordering** — it determines the order messages appear.
+`lib/models/spell.dart:92` — return type becomes `List<SpellValidationError>`; each of the 14 `problems.add(...)` becomes the matching variant, moving interpolated values into constructor arguments. **Preserve every comment**: the numbered check comments encode rulebook citations (Core Rules line numbers) and hard-won reasoning about templates, null tolerance and Momentary. **Preserve the check ordering** — it determines the order messages appear.
 
 - [ ] **Step 6: Convert `validateSpellDraft`**
 
@@ -1286,7 +1293,7 @@ Expected: FAIL — the variants and `formatValidationError` are undefined.
 
 - [ ] **Step 7: Add the formatter**
 
-Append `formatValidationError` to `lib/presentation/format/contribution_formatter.dart`: an exhaustive `switch` over the sealed type, destructuring operands, **no `default:` branch**. A nineteenth variant must fail to compile until it has wording.
+Append `formatValidationError` to `lib/presentation/format/contribution_formatter.dart`: an exhaustive `switch` over the sealed type, destructuring operands, **no `default:` branch**. A twenty-second variant must fail to compile until it has wording.
 
 - [ ] **Step 8: Thread the type through**
 
