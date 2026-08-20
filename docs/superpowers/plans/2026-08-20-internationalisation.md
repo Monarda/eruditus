@@ -199,16 +199,6 @@ void main() {
 
     expect(find.text('Spell level'), findsOneWidget);
   });
-
-  testWidgets('pumpApp honours an explicit locale', (tester) async {
-    await pumpApp(
-      tester,
-      Builder(builder: (context) => Text(Localizations.localeOf(context).toString())),
-      locale: const Locale('en', 'XA'),
-    );
-
-    expect(find.text('en_XA'), findsOneWidget);
-  });
 }
 ```
 
@@ -216,6 +206,8 @@ void main() {
 
 Run: `flutter test test/support/pump_app_test.dart`
 Expected: FAIL — `pump_app.dart` does not exist.
+
+**⚠️ Do not add a locale-switching test to this task.** `WidgetsApp` resolves an explicit `locale` against `supportedLocales`, and at this point only `Locale('en')` is generated — so `Locale('en','XA')` collapses to `en` and any such test fails. The `locale` parameter is still built and still correct; it is *exercised* in Task 3, once `app_en_XA.arb` exists and `supportedLocales` actually contains `en_XA`.
 
 - [ ] **Step 3: Implement the helper**
 
@@ -278,7 +270,7 @@ Delete each file's now-unused private `pump` helper. Where a test supplies bloc 
 
 - [ ] **Step 6: Run the full suite**
 
-Run: `flutter test` → 748 passing (746 + 2)
+Run: `flutter test` → 747 passing (746 + 1)
 Run: `flutter analyze` → exit 0
 Run: `git diff -w --stat` to confirm no whitespace-only churn crept in.
 
@@ -457,7 +449,21 @@ Add to `test/l10n/pseudo_arb_sync_test.dart`:
     expect(l10n.spellLevel, isNot('Spell level'));
     expect(l10n.spellLevel.startsWith('['), isTrue);
   });
+
+  testWidgets('pumpApp honours an explicit locale', (tester) async {
+    await pumpApp(
+      tester,
+      Builder(builder: (context) => Text(Localizations.localeOf(context).toString())),
+      locale: const Locale('en', 'XA'),
+    );
+
+    expect(find.text('en_XA'), findsOneWidget);
+  });
 ```
+
+The second test is the one Task 2 could not carry: `WidgetsApp` resolves an
+explicit `locale` against `supportedLocales`, so it only survives resolution
+once `app_en_XA.arb` has been generated. It belongs here, not earlier.
 
 Add the imports it needs (`app_localizations.dart`, `../support/pump_app.dart`).
 
