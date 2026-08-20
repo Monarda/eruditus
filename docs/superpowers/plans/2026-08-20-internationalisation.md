@@ -4,7 +4,7 @@
 
 **Goal:** Stand up Flutter's l10n pipeline, migrate every user-facing string into ARB, and stop the engine composing display prose — so adding a language later is translation work, not a rewrite.
 
-**Architecture:** `gen-l10n` generates `AppLocalizations` from `lib/l10n/app_en.arb`. The engine stops returning `String` labels and returns a sealed `ContributionSource` hierarchy plus a `LevelUnavailableReason` enum; a presentation-layer formatter turns those into localised text. A generated pseudo-locale (`xx`) proves, mechanically, that no string was missed.
+**Architecture:** `gen-l10n` generates `AppLocalizations` from `lib/l10n/app_en.arb`. The engine stops returning `String` labels and returns a sealed `ContributionSource` hierarchy plus a `LevelUnavailableReason` enum; a presentation-layer formatter turns those into localised text. A generated pseudo-locale (`en_XA`) proves, mechanically, that no string was missed.
 
 **Tech Stack:** Flutter 3.44.8, Dart SDK `^3.12.2`, `flutter_localizations` (SDK), `intl`, `flutter_bloc` 9, `equatable`, `bloc_test`/`mocktail`.
 
@@ -18,7 +18,8 @@
 - **If working in a git worktree, set `ARS_RULEBOOK_ROOT`** or ~35 phantom rulebook-path test errors appear.
 - **Three text populations** (from the spec) govern every decision below: **app chrome** → ARB; **rulebook content** (parameter names, effect descriptions, modifier labels) → stays catalog data, never ARB; **user content** (adjustment notes, spell names the user typed) → verbatim, never ARB, never pseudo-transformed.
 - Latin is **not** part of this work. It is item 81.
-- **Translation provenance (item 82): mark non-template locales only.** `gen-l10n` accepts custom ARB metadata — verified against Flutter 3.44.8, exit 0 and no warnings, at file level (`@@x-translation-status`), per string (inside a `@key` block), and per string overriding a file-level default. The only non-template locale in this pass is the generated `app_xx.arb`, which Task 3 marks `generated`. **Do not add a `"x-translation-status": "original"` attribute to `app_en.arb` entries** — the template file is the original by definition (`l10n.yaml` declares `template-arb-file: app_en.arb`), so the value is derivable, and storing it anyway would force a `@key` block onto ~115 strings that need none.
+- **The pseudo-locale is `en_XA`, not `xx`** — `gen-l10n` rejects `xx` as a language code. Verified before dispatch; see Task 1 Step 1.
+- **Translation provenance (item 82): mark non-template locales only.** `gen-l10n` accepts custom ARB metadata — verified against Flutter 3.44.8, exit 0 and no warnings, at file level (`@@x-translation-status`), per string (inside a `@key` block), and per string overriding a file-level default. The only non-template locale in this pass is the generated `app_en_XA.arb`, which Task 3 marks `generated`. **Do not add a `"x-translation-status": "original"` attribute to `app_en.arb` entries** — the template file is the original by definition (`l10n.yaml` declares `template-arb-file: app_en.arb`), so the value is derivable, and storing it anyway would force a `@key` block onto ~115 strings that need none.
 
 ---
 
@@ -35,11 +36,16 @@
 - Consumes: nothing.
 - Produces: `AppLocalizations` (generated, importable as `package:eruditus/l10n/app_localizations.dart`), with getters `spellLevel`, `showBreakdown`, `hideBreakdown`. The `AppLocalizations.localizationsDelegates` and `AppLocalizations.supportedLocales` statics used by every later task.
 
-- [ ] **Step 1: Verify which pseudo-locale code the toolchain accepts**
+- [ ] **Step 1: Note the settled pseudo-locale code — no verification needed**
 
-The spec names `xx` with `en_XA` as fallback. Settle it now — the filename, `supportedLocales`, and every later locale-switching test depend on it.
+**Already verified against Flutter 3.44.8 before this plan was dispatched; do not re-litigate it.** The obvious choice `xx` is **rejected** by `gen-l10n` — *"xx is not a supported language code"* — so the pseudo-locale is **`en_XA`** throughout, the tag Android and Chrome already use.
 
-Create `lib/l10n/app_xx.arb` containing `{"@@locale": "xx", "spellLevel": "test"}`, run `flutter gen-l10n`, and check it is accepted without error. If it errors, delete it, use `app_en_XA.arb` with `"@@locale": "en_XA"` instead, and **substitute `en_XA` for `xx` everywhere in this plan**. Record which one won in the commit message.
+Consequences baked into every later task, listed here once:
+- the file is `lib/l10n/app_en_XA.arb`, with `"@@locale": "en_XA"`
+- tests switch locale with `const Locale('en', 'XA')`, never `Locale('en', 'XA')`
+- `supportedLocales` gains `Locale('en', 'XA')` automatically
+- gen-l10n emits `class AppLocalizationsEnXa extends AppLocalizationsEn` **inside `app_localizations_en.dart`** — there is no separate `app_localizations_en_XA.dart`, so do not look for one
+- because it *extends* the English class, a key missing from `app_en_XA.arb` silently renders English. The Task 3 generator emits every key, so this should never arise; if a coverage test ever reports an untransformed string, check the generator ran before assuming a hardcoded literal
 
 - [ ] **Step 2: Add dependencies and enable generation**
 
@@ -198,10 +204,10 @@ void main() {
     await pumpApp(
       tester,
       Builder(builder: (context) => Text(Localizations.localeOf(context).toString())),
-      locale: const Locale('xx'),
+      locale: const Locale('en', 'XA'),
     );
 
-    expect(find.text('xx'), findsOneWidget);
+    expect(find.text('en_XA'), findsOneWidget);
   });
 }
 ```
@@ -226,7 +232,7 @@ import 'package:provider/single_child_widget.dart';
 /// Every widget test goes through this rather than building its own
 /// MaterialApp: a widget that reads AppLocalizations needs a Localizations
 /// ancestor, and [locale] is the seam the pseudo-locale coverage test uses to
-/// re-run a screen under `xx`.
+/// re-run a screen under `en_XA`.
 Future<void> pumpApp(
   WidgetTester tester,
   Widget child, {
@@ -289,12 +295,12 @@ git commit -m "test: add pumpApp helper and route all widget tests through it"
 
 **Files:**
 - Create: `tool/gen_pseudo_arb.dart`
-- Create: `lib/l10n/app_xx.arb` (generated output, committed)
+- Create: `lib/l10n/app_en_XA.arb` (generated output, committed)
 - Test: `test/l10n/pseudo_arb_sync_test.dart`
 
 **Interfaces:**
 - Consumes: `lib/l10n/app_en.arb` (Task 1).
-- Produces: `String pseudoTransform(String value)` exported from `tool/gen_pseudo_arb.dart`, and the committed `app_xx.arb`. Task 10's coverage test relies on the transform being total and on placeholders surviving it.
+- Produces: `String pseudoTransform(String value)` exported from `tool/gen_pseudo_arb.dart`, and the committed `app_en_XA.arb`. Task 10's coverage test relies on the transform being total and on placeholders surviving it.
 
 A hand-written pseudo ARB drifts from `app_en.arb` the first time someone adds a string, and a drifted proof harness is worse than none. This mirrors the repo's existing regeneration-test idiom for `spell_library.json` (item 30).
 
@@ -338,13 +344,13 @@ void main() {
             'translation burn-down with entries nobody will ever review');
   });
 
-  test('app_xx.arb is exactly what the generator produces', () {
+  test('app_en_XA.arb is exactly what the generator produces', () {
     final en = jsonDecode(File('lib/l10n/app_en.arb').readAsStringSync())
         as Map<String, dynamic>;
-    final committed = File('lib/l10n/app_xx.arb').readAsStringSync();
+    final committed = File('lib/l10n/app_en_XA.arb').readAsStringSync();
 
     expect(committed, generatePseudoArb(en),
-        reason: 'app_xx.arb is stale — run: dart run tool/gen_pseudo_arb.dart');
+        reason: 'app_en_XA.arb is stale — run: dart run tool/gen_pseudo_arb.dart');
   });
 }
 ```
@@ -371,7 +377,7 @@ const _accents = {
 
 /// Accents [value]'s letters and pads it ~30%, leaving `{placeholders}` alone.
 ///
-/// A string that still renders as plain ASCII under locale `xx` never reached
+/// A string that still renders as plain ASCII under locale `en_XA` never reached
 /// the ARB. The padding surfaces truncation, which is the evidence items 16
 /// and 58 have both been waiting on.
 String pseudoTransform(String value) {
@@ -393,7 +399,7 @@ String pseudoTransform(String value) {
   return '$buffer$padding]';
 }
 
-/// Renders a complete `app_xx.arb` from a decoded `app_en.arb`.
+/// Renders a complete `app_en_XA.arb` from a decoded `app_en.arb`.
 ///
 /// Metadata keys (`@@locale`, and every `@key` description block) are dropped:
 /// gen-l10n takes placeholder metadata from the template file only.
@@ -405,7 +411,7 @@ String pseudoTransform(String value) {
 /// Flutter 3.44.8, exit 0, no warnings.
 String generatePseudoArb(Map<String, dynamic> en) {
   final out = <String, dynamic>{
-    '@@locale': 'xx',
+    '@@locale': 'en_XA',
     '@@x-translation-status': 'generated',
   };
 
@@ -420,8 +426,8 @@ String generatePseudoArb(Map<String, dynamic> en) {
 void main() {
   final en = jsonDecode(File('lib/l10n/app_en.arb').readAsStringSync())
       as Map<String, dynamic>;
-  File('lib/l10n/app_xx.arb').writeAsStringSync(generatePseudoArb(en));
-  stdout.writeln('wrote lib/l10n/app_xx.arb');
+  File('lib/l10n/app_en_XA.arb').writeAsStringSync(generatePseudoArb(en));
+  stdout.writeln('wrote lib/l10n/app_en_XA.arb');
 }
 ```
 
@@ -436,7 +442,7 @@ Run: `flutter pub get` to regenerate `AppLocalizations` with the new locale.
 Add to `test/l10n/pseudo_arb_sync_test.dart`:
 
 ```dart
-  testWidgets('the xx locale returns transformed strings', (tester) async {
+  testWidgets('the en_XA locale returns transformed strings', (tester) async {
     late AppLocalizations l10n;
 
     await pumpApp(
@@ -445,7 +451,7 @@ Add to `test/l10n/pseudo_arb_sync_test.dart`:
         l10n = AppLocalizations.of(context);
         return const SizedBox.shrink();
       }),
-      locale: const Locale('xx'),
+      locale: const Locale('en', 'XA'),
     );
 
     expect(l10n.spellLevel, isNot('Spell level'));
@@ -460,7 +466,7 @@ Run: `flutter test test/l10n/pseudo_arb_sync_test.dart` → PASS
 - [ ] **Step 6: Commit**
 
 ```bash
-git add tool/gen_pseudo_arb.dart lib/l10n/app_xx.arb test/l10n/pseudo_arb_sync_test.dart
+git add tool/gen_pseudo_arb.dart lib/l10n/app_en_XA.arb test/l10n/pseudo_arb_sync_test.dart
 git commit -m "test(l10n): add generated pseudo-locale and its regeneration guard"
 ```
 
@@ -843,8 +849,8 @@ void main() {
         'Adjustment · storyguide said so');
   });
 
-  testWidgets('a user note is NOT pseudo-transformed under xx', (tester) async {
-    await loadL10n(tester, locale: const Locale('xx'));
+  testWidgets('a user note is NOT pseudo-transformed under en_XA', (tester) async {
+    await loadL10n(tester, locale: const Locale('en', 'XA'));
 
     final result =
         formatContribution(l10n, const AdjustmentContribution('storyguide said so'));
@@ -956,7 +962,7 @@ The `'Range · Voice|2'` style assertions (which packed label and magnitude into
 
 - [ ] **Step 12: Regenerate the pseudo-locale and run everything**
 
-Run: `dart run tool/gen_pseudo_arb.dart` — the ARB grew, so `app_xx.arb` is stale.
+Run: `dart run tool/gen_pseudo_arb.dart` — the ARB grew, so `app_en_XA.arb` is stale.
 Run: `flutter test` → all green, **no skipped tests**, count ≥ 755
 Run: `flutter analyze` → exit 0
 Run: `git diff -w --stat` → no whitespace-only churn
@@ -1180,10 +1186,10 @@ Add to `test/presentation/widgets/spell_card_test.dart`:
   testWidgets('the card chrome is localised but the spell name is not',
       (tester) async {
     await pumpApp(tester, const SpellCard(/* existing fixture args */),
-        locale: const Locale('xx'));
+        locale: const Locale('en', 'XA'));
 
     expect(find.text('Needs review'), findsNothing,
-        reason: 'chrome should be pseudo-transformed under xx');
+        reason: 'chrome should be pseudo-transformed under en_XA');
   });
 ```
 
@@ -1192,7 +1198,7 @@ Use whichever fixture the neighbouring tests in that file already build; do not 
 - [ ] **Step 3: Run it and confirm it fails**
 
 Run: `flutter test test/presentation/widgets/spell_card_test.dart`
-Expected: FAIL — `'Needs review'` is still a hardcoded literal, so it renders untransformed under `xx`.
+Expected: FAIL — `'Needs review'` is still a hardcoded literal, so it renders untransformed under `en_XA`.
 
 - [ ] **Step 4: Replace the literals**
 
@@ -1264,7 +1270,7 @@ The two help strings were split across source lines by wrapping only; they are s
 ```dart
   testWidgets('ritual reasons are localised', (tester) async {
     await pumpApp(tester, const RitualSection(/* existing fixture args */),
-        locale: const Locale('xx'));
+        locale: const Locale('en', 'XA'));
 
     expect(find.textContaining('the guideline requires it'), findsNothing);
   });
@@ -1364,7 +1370,7 @@ Add to `test/presentation/screens/spell_library_screen_test.dart`:
 
 ```dart
   testWidgets('library chrome is localised', (tester) async {
-    await pumpApp(tester, /* existing fixture */, locale: const Locale('xx'));
+    await pumpApp(tester, /* existing fixture */, locale: const Locale('en', 'XA'));
 
     expect(find.text('Spell Library'), findsNothing);
   });
@@ -1471,7 +1477,7 @@ Lines 215, 781, 852 are **comment text**, not UI strings — leave them alone. L
 
 ```dart
   testWidgets('creation screen chrome is localised', (tester) async {
-    await pumpApp(tester, /* existing fixture */, locale: const Locale('xx'));
+    await pumpApp(tester, /* existing fixture */, locale: const Locale('en', 'XA'));
 
     expect(find.text('Create Spell'), findsNothing);
     expect(find.text('Save to Library'), findsNothing);
@@ -1519,7 +1525,7 @@ import '../support/pump_app.dart';
 
 /// Chrome strings that must never survive a switch to the pseudo-locale.
 ///
-/// If one of these is findable under `xx`, it is still a hardcoded literal.
+/// If one of these is findable under `en_XA`, it is still a hardcoded literal.
 const _mustNotSurvive = <String>[
   'Create Spell',
   'Save to Library',
@@ -1539,7 +1545,7 @@ const _mustNotSurvive = <String>[
 void main() {
   testWidgets('no chrome string survives the pseudo-locale', (tester) async {
     await pumpApp(tester, /* the app's root tab view */,
-        locale: const Locale('xx'));
+        locale: const Locale('en', 'XA'));
     await tester.pumpAndSettle();
 
     for (final literal in _mustNotSurvive) {
@@ -1586,6 +1592,6 @@ git commit -m "test(l10n): add pseudo-locale coverage guard and close item 80"
 
 **One addition beyond the spec.** Task 5 (`LevelUnavailableReason`) covers five engine-composed strings the spec missed — found while reading `level_breakdown.dart` to write Task 4. The spec named seven `label:` sites; there are twelve engine-composed user-facing strings in total. **The spec should be amended** to say so, or Task 5 will look like scope creep to a reviewer who reads the spec first.
 
-**Item 82 folded in, narrowly.** The translation-provenance flag is applied to the one non-template locale this pass creates (`app_xx.arb`, Task 3) and deliberately *not* stamped across `app_en.arb`. Rationale in Global Constraints. This closes 82.2 and partly answers 82.1; **82.3 (what the flag drives) remains open** and is not blocked by this work.
+**Item 82 folded in, narrowly.** The translation-provenance flag is applied to the one non-template locale this pass creates (`app_en_XA.arb`, Task 3) and deliberately *not* stamped across `app_en.arb`. Rationale in Global Constraints. This closes 82.2 and partly answers 82.1; **82.3 (what the flag drives) remains open** and is not blocked by this work.
 
 **Deliberate deferrals**, each noted where it arises rather than left silent: the locale-aware list join in Task 7, and the double-`Scaffold` nesting risk in Task 2 Step 3.
