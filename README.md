@@ -20,6 +20,23 @@ spells against the same rules.
 | `scripts/spell_import/` | The Python extractor that builds the spell library from the rulebook, and `resolutions.json`, its hand-written decision ledger |
 | `test/`, `integration_test/` | Dart unit/widget tests, and end-to-end tests |
 
+## Licence
+
+Eruditus is licensed in two halves.
+
+| Path | Licence |
+|---|---|
+| `lib/`, `test/`, `integration_test/`, `tool/`, `scripts/spell_import/*.py` | MIT — see `LICENSE` |
+| `assets/data/*.json` | CC BY-SA 4.0 — see `LICENSES/CC-BY-SA-4.0.txt` |
+| `scripts/spell_import/resolutions.json` | CC BY-SA 4.0 — it quotes design lines |
+| `docs/` | follows the text it quotes |
+
+The catalogs are Adapted Material derived from the Ars Magica Open License
+material, © 1993–2024 Trident, Inc. d/b/a Atlas Games®, and carry CC BY-SA 4.0
+accordingly. Full attribution, modification notice and disclaimers are in
+[NOTICE.md](NOTICE.md). Eruditus is an unofficial, fan-made tool and is not
+endorsed by Atlas Games.
+
 ## Running
 
 ```bash
