@@ -49,7 +49,7 @@ sealed hierarchy — `LevelUnavailableReason`, resolved by the same formatter.
 Without them the "choose a base effect" prompt stays hardcoded English while
 everything around it localises. Covered by the plan's Task 5.
 
-**⚠️ Amended again 2026-08-20, during execution: the real total is nineteen, not
+**⚠️ Amended again 2026-08-20, during execution: the real total is twenty-nine, not
 twelve.** A *third* family surfaced while reviewing Task 5. `validateSpellDraft`
 composes seven more — `'Technique must be selected'`, `'Form must be selected'`,
 and five siblings — which reach the user at `spell_creation_screen.dart:377-378`
@@ -60,7 +60,7 @@ errors.add('Technique must be selected');
 errors.add('Magnitudes reduce this spell below level 1');
 ```
 
-Also an enum (`SpellValidationError`), covered by the plan's Task 6. Note its
+And `validateSpellAgainstCatalog`, which `validateSpellDraft` concatenates, composes **eleven more** that also reach spell cards via `ResolvedSpell.problems`. Five of the eighteen carry operands, so this family takes Task 4's **sealed-class** shape rather than Task 5's plain enum. Covered by the plan's Task 6. Note its
 `magnitudesBelowOne` message has **no trailing full stop**, unlike
 `LevelUnavailableReason`'s near-identical one — two different strings on two
 different paths (save button vs. live preview). Both are kept, distinct.

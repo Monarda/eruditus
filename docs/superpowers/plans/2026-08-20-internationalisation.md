@@ -1171,148 +1171,143 @@ git add lib/engine lib/bloc lib/presentation lib/l10n test
 git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
 ```
 ---
-### Task 6: `SpellValidationError` — the third family of engine-composed strings
+### Task 6: `SpellValidationError` — the third family, across engine and model
 
 **Files:**
-- Modify: `lib/engine/spell_engine.dart` (`validateSpellDraft`, 7 `errors.add` sites)
+- Create: `lib/models/spell_validation_error.dart`
+- Modify: `lib/models/spell.dart:92-250` (`validateSpellAgainstCatalog`, 11 `problems.add` sites)
+- Modify: `lib/engine/spell_engine.dart:53-137` (`validateSpellDraft`, 7 `errors.add` sites + the `addAll`)
+- Modify: `lib/models/resolved_spell.dart:74` (`problems`)
 - Modify: `lib/bloc/spell_creation/spell_creation_state.dart` (`validationErrors`)
-- Modify: `lib/bloc/spell_creation/spell_creation_bloc.dart:841,912`
 - Modify: `lib/presentation/format/contribution_formatter.dart` (add `formatValidationError`)
-- Modify: `lib/l10n/app_en.arb`, `lib/presentation/screens/spell_creation_screen.dart:377-378`
-- Test: `test/engine/spell_engine_test.dart`, `test/bloc/spell_creation_bloc_test.dart`, `test/presentation/format/contribution_formatter_test.dart`
+- Modify: `lib/l10n/app_en.arb`
+- Modify: `lib/presentation/screens/spell_creation_screen.dart:377-378,408`, `lib/presentation/screens/spell_library_screen.dart:96`, `lib/presentation/widgets/spell_card.dart` (`problems`)
+- Test: `test/engine/spell_engine_test.dart`, `test/models/spell_test.dart`, `test/bloc/spell_creation_bloc_test.dart`, `test/presentation/format/contribution_formatter_test.dart`, and any widget test asserting a problem string
 
 **Interfaces:**
 - Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2), `contribution_formatter.dart` (Tasks 4-5).
-- Produces: `enum SpellValidationError { techniqueMissing, formMissing, baseEffectMissing, rangeMissing, durationMissing, targetMissing, magnitudesBelowOne }`; `List<SpellValidationError> validateSpellDraft(...)`; `String formatValidationError(AppLocalizations l10n, SpellValidationError error)`.
+- Produces: `sealed class SpellValidationError` with 18 variants (listed below); `List<SpellValidationError> validateSpellDraft(...)`; `List<SpellValidationError> validateSpellAgainstCatalog(...)`; `List<SpellValidationError> ResolvedSpell.problems`; `String formatValidationError(AppLocalizations l10n, SpellValidationError error)`.
 
-**⚠️ Neither the spec nor the original plan covered this.** The spec claimed twelve engine-composed user-facing strings — seven contribution labels (Task 4) and five unavailable reasons (Task 5). Found while reviewing Task 5: `validateSpellDraft` composes **seven more**, and they are rendered to the user at `spell_creation_screen.dart:377-378`. The real total is **nineteen**. Without this task, the app's validation messages stay hardcoded English while everything around them localises, the "engine never composes display prose" invariant is false, and **Task 11's pseudo-locale coverage test would fail at the very end of the plan** — the worst place to discover it.
+**⚠️ Neither the spec nor the original plan covered this family.** The spec claimed twelve engine-composed user-facing strings. Task 4 handled seven, Task 5 five — then Task 5's review found `validateSpellDraft`'s own seven, and sizing *that* found `validateSpellAgainstCatalog`'s eleven more. **The real total is 29 domain-composed user-facing strings.** They surface in three places: the creation screen's validation list (`:377-378`), and `ResolvedSpell.problems` on spell cards in **both** the creation screen (`:408`) and the library screen (`:96`).
 
-The seven strings, verbatim from `validateSpellDraft`:
+**Why a sealed class and not an enum.** Task 5's `LevelUnavailableReason` is a plain enum because its five messages take no operands. Five of these eighteen do — `'Only one option may be selected for ${modifier.name}'` and friends — so this is Task 4's problem shape, and takes Task 4's solution. **Follow `lib/engine/contribution_source.dart` as the template**, not `LevelUnavailableReason`.
 
-| Current string | Enum value |
+**⚠️ `validateSpellDraft` concatenates `validateSpellAgainstCatalog`'s output** (`spell_engine.dart:84`). The two cannot be converted separately without an interim `List<enum-or-String>` union, which is exactly the type that hides the next defect. Convert both in this task.
+
+**The 18 variants.** Rendered text must be byte-identical to today's, including the `--` double hyphens and the absent full stops.
+
+Operand-free (13), from `validateSpellDraft` (7) and `validateSpellAgainstCatalog` (6):
+
+| Variant | Rendered text |
 |---|---|
-| `Technique must be selected` | `techniqueMissing` |
-| `Form must be selected` | `formMissing` |
-| `Base effect must be selected` | `baseEffectMissing` |
-| `Range must be selected` | `rangeMissing` |
-| `Duration must be selected` | `durationMissing` |
-| `Target must be selected` | `targetMissing` |
-| `Magnitudes reduce this spell below level 1` | `magnitudesBelowOne` |
+| `TechniqueMissing` | `Technique must be selected` |
+| `FormMissing` | `Form must be selected` |
+| `BaseEffectMissing` | `Base effect must be selected` |
+| `RangeMissing` | `Range must be selected` |
+| `DurationMissing` | `Duration must be selected` |
+| `TargetMissing` | `Target must be selected` |
+| `MagnitudesBelowOne` | `Magnitudes reduce this spell below level 1` |
+| `GeneralLevelNotChosen` | `Choose a level for this General guideline` |
+| `ChosenLevelBelowOne` | `The chosen level must be at least 1` |
+| `ChosenLevelNotGeneral` | `A chosen base level applies only to a General guideline` |
+| `RequisiteIsOwnArt` | `Requisite art cannot be the spell's own technique or form` |
+| `AnalogyRationaleMissing` | `Technique/Form differs from the base effect's own -- an analogyRationale is required to explain why` |
+| `AnalogyRationaleUnwanted` | `analogyRationale is set but Technique/Form already matches the base effect's own -- remove it` |
 
-**⚠️ Note the last one has no trailing full stop**, unlike `LevelUnavailableReason.magnitudesBelowOne`'s "Magnitudes reduce this spell below level 1." — the two are *different strings* reached by *different paths* (this one by the save button, that one by the live preview). **Keep both, keep them distinct, and do not "tidy" them into one.** Preserving rendered text byte-for-byte is the rule for this whole plan.
+With operands (5):
 
-- [ ] **Step 1: Add the ARB entries**
+| Variant | Fields | Rendered text |
+|---|---|---|
+| `ModifierNotMultiSelect` | `modifierName` | `Only one option may be selected for {modifier}` |
+| `OpenSlotNotChosen` | `kindNames` | `Choose a {kind} for this guideline` |
+| `ChosenSlotNotOpen` | `description` | `A chosen {description} applies only to a guideline with an open {description} slot` |
+| `ContainerModeOnNonContainer` | `targetName` | `A container mode applies only to a container Target, and {target} is not one` |
+| `RangeForbidsTarget` | `rangeName`, `targetName`, `targetKind` | `{range} Range cannot be combined with {target}, which is a {kind} Target` |
 
-```json
-  "validationTechniqueMissing": "Technique must be selected",
-  "validationFormMissing": "Form must be selected",
-  "validationBaseEffectMissing": "Base effect must be selected",
-  "validationRangeMissing": "Range must be selected",
-  "validationDurationMissing": "Duration must be selected",
-  "validationTargetMissing": "Target must be selected",
-  "validationMagnitudesBelowOne": "Magnitudes reduce this spell below level 1"
-```
+**⚠️ `MagnitudesBelowOne` has no trailing full stop.** `LevelUnavailableReason.magnitudesBelowOne` (Task 5) renders the near-identical `'Magnitudes reduce this spell below level 1.'` **with** one. Different strings, different paths — the save button versus the live preview. **Keep both, keep them distinct, do not unify them, do not "fix" the missing stop.**
 
-- [ ] **Step 2: Write the failing test**
+- [ ] **Step 1: Create the sealed hierarchy**
 
-Add to `test/presentation/format/contribution_formatter_test.dart`, reusing that file's existing `loadL10n` helper:
+`lib/models/spell_validation_error.dart`, modelled on `lib/engine/contribution_source.dart`: a `sealed class SpellValidationError extends Equatable`, then one `final class` per variant above. Operand-free variants take no constructor arguments and return `const []` from `props`; the five with operands carry their fields and list them all in `props`. Give the file a doc comment saying why it exists — validation runs in domain code with no `BuildContext`, and its results are rendered in three places.
+
+- [ ] **Step 2: Add the 18 ARB entries**
+
+Keys `validationTechniqueMissing` … `validationRangeForbidsTarget`, values exactly as tabulated above. The five with operands need `placeholders` blocks, all `"type": "String"`. Note `ChosenSlotNotOpen` uses `{description}` **twice** in one value — that is legal ICU and gen-l10n handles it.
+
+- [ ] **Step 3: Write the failing test**
+
+Add to `test/presentation/format/contribution_formatter_test.dart`, reusing its `loadL10n` helper. Cover at minimum: one operand-free variant, the double-placeholder `ChosenSlotNotOpen`, the three-operand `RangeForbidsTarget`, and one `en_XA` case proving the frame is localised.
 
 ```dart
-  testWidgets('formats every validation error', (tester) async {
+  testWidgets('formats operand-free validation errors', (tester) async {
     await loadL10n(tester);
-    expect(formatValidationError(l10n, SpellValidationError.techniqueMissing),
+    expect(formatValidationError(l10n, const TechniqueMissing()),
         'Technique must be selected');
-    expect(formatValidationError(l10n, SpellValidationError.magnitudesBelowOne),
+    expect(formatValidationError(l10n, const MagnitudesBelowOne()),
         'Magnitudes reduce this spell below level 1');
+  });
+
+  testWidgets('formats a variant whose placeholder repeats', (tester) async {
+    await loadL10n(tester);
+    expect(formatValidationError(l10n, const ChosenSlotNotOpen('realm')),
+        'A chosen realm applies only to a guideline with an open realm slot');
+  });
+
+  testWidgets('formats a three-operand variant', (tester) async {
+    await loadL10n(tester);
+    expect(
+        formatValidationError(
+            l10n,
+            const RangeForbidsTarget(
+                rangeName: 'Personal', targetName: 'Room', targetKind: 'container')),
+        'Personal Range cannot be combined with Room, which is a container Target');
   });
 
   testWidgets('a validation error is localised under en_XA', (tester) async {
     await loadL10n(tester, locale: const Locale('en', 'XA'));
-
-    final result =
-        formatValidationError(l10n, SpellValidationError.techniqueMissing);
-
+    final result = formatValidationError(l10n, const TechniqueMissing());
     expect(result, isNot('Technique must be selected'));
     expect(result.startsWith('['), isTrue);
   });
 ```
 
-- [ ] **Step 3: Run it and confirm it fails**
+- [ ] **Step 4: Run it and confirm it fails**
 
 Run: `flutter test test/presentation/format/contribution_formatter_test.dart`
-Expected: FAIL — `SpellValidationError` and `formatValidationError` are undefined.
+Expected: FAIL — the variants and `formatValidationError` are undefined.
 
-- [ ] **Step 4: Add the enum**
+- [ ] **Step 5: Convert `validateSpellAgainstCatalog`**
 
-In `lib/engine/spell_engine.dart` (or alongside it, matching where `LevelUnavailableReason` was placed in Task 5 — follow that precedent rather than inventing a new home):
+`lib/models/spell.dart:92` — return type becomes `List<SpellValidationError>`; each of the 11 `problems.add('...')` becomes the matching variant, moving interpolated values into constructor arguments. **Preserve every comment**: the numbered check comments encode rulebook citations (Core Rules line numbers) and hard-won reasoning about templates, null tolerance and Momentary. **Preserve the check ordering** — it determines the order messages appear.
 
-```dart
-/// Why a draft cannot be saved yet.
-///
-/// An enum rather than a message, for the same reason as
-/// [LevelUnavailableReason]: `validateSpellDraft` runs in domain code where no
-/// locale is reachable, and its results are rendered to the user at
-/// `spell_creation_screen.dart:377`. See
-/// `presentation/format/contribution_formatter.dart` for the wording.
-enum SpellValidationError {
-  techniqueMissing,
-  formMissing,
-  baseEffectMissing,
-  rangeMissing,
-  durationMissing,
-  targetMissing,
-  magnitudesBelowOne,
-}
-```
+- [ ] **Step 6: Convert `validateSpellDraft`**
 
-- [ ] **Step 5: Change `validateSpellDraft`'s return type**
+`lib/engine/spell_engine.dart:53-137` — return type becomes `List<SpellValidationError>`, the 7 `errors.add` become variants, and the `addAll` at `:84` now type-checks unchanged. Preserve its comments and ordering too.
 
-`List<String>` becomes `List<SpellValidationError>`, and each `errors.add('...')` becomes the matching enum value per the table above. **Preserve every surrounding comment**, and keep the existing ordering of the checks — the order determines the order messages appear on screen.
+- [ ] **Step 7: Add the formatter**
 
-- [ ] **Step 6: Add the formatter function**
+Append `formatValidationError` to `lib/presentation/format/contribution_formatter.dart`: an exhaustive `switch` over the sealed type, destructuring operands, **no `default:` branch**. A nineteenth variant must fail to compile until it has wording.
 
-Append to `lib/presentation/format/contribution_formatter.dart`:
+- [ ] **Step 8: Thread the type through**
 
-```dart
-String formatValidationError(
-        AppLocalizations l10n, SpellValidationError error) =>
-    switch (error) {
-      SpellValidationError.techniqueMissing => l10n.validationTechniqueMissing,
-      SpellValidationError.formMissing => l10n.validationFormMissing,
-      SpellValidationError.baseEffectMissing =>
-        l10n.validationBaseEffectMissing,
-      SpellValidationError.rangeMissing => l10n.validationRangeMissing,
-      SpellValidationError.durationMissing => l10n.validationDurationMissing,
-      SpellValidationError.targetMissing => l10n.validationTargetMissing,
-      SpellValidationError.magnitudesBelowOne =>
-        l10n.validationMagnitudesBelowOne,
-    };
-```
+`resolved_spell.dart:74` (`problems`), `spell_creation_state.dart` (`validationErrors`), then the three render sites — `spell_creation_screen.dart:377-378` and `:408`, `spell_library_screen.dart:96`, and `spell_card.dart`'s `problems` parameter. Format at the render site, where `AppLocalizations` is reachable; do not format earlier and pass strings down.
 
-No `default:` branch — exhaustiveness is the guarantee that a new validation reason cannot reach the screen unlocalised.
+- [ ] **Step 9: Rewrite the affected test assertions**
 
-- [ ] **Step 7: Thread the type through bloc and screen**
+Find them: `grep -rn "validateSpellDraft\|validateSpellAgainstCatalog\|validationErrors\|problems" test/`. Assertions on the English become assertions on variants. **Rewrite, never delete** — each must still assert the same fact. Task 5 deliberately left two `contains('Magnitudes reduce...')` assertions in `spell_engine_test.dart` (~`:215`, `:1418`) alone because they exercise this path; they are in scope now. Widget tests asserting a *rendered* problem string must pass **unchanged** — if one fails, an ARB value is wrong; never edit the expectation.
 
-`spell_creation_state.dart`: retype `validationErrors` to `List<SpellValidationError>`. `spell_creation_bloc.dart:841,912` need no change beyond the type flowing. `spell_creation_screen.dart:377-378`: map each error through `formatValidationError(l10n, error)`.
-
-**The rendered English is identical to before**, so any widget test asserting a validation message must pass unchanged. If one fails, an ARB value is wrong — never edit the test's expectation.
-
-- [ ] **Step 8: Rewrite the affected test assertions**
-
-Find them: `grep -rn "validateSpellDraft\|validationErrors" test/`. Assertions on the English strings become enum comparisons. **Rewrite, never delete** — each must still assert the same fact. Note that Task 5 deliberately left two `contains('Magnitudes reduce...')` assertions in `spell_engine_test.dart` alone because they exercise *this* path; they are in scope now and should be converted.
-
-- [ ] **Step 9: Regenerate and run everything**
+- [ ] **Step 10: Regenerate and run everything**
 
 Run: `dart run tool/gen_pseudo_arb.dart`, then `flutter pub get`
 Run: `flutter test` → all green, **no skipped tests**, count must not fall
 Run: `flutter analyze` → exit 0
 Run: `git diff -w --stat` → no whitespace-only churn
 
-- [ ] **Step 10: Commit**
+- [ ] **Step 11: Commit**
 
 ```bash
-git add lib/engine lib/bloc lib/presentation lib/l10n test
-git commit -m "refactor(engine): make validateSpellDraft return an enum, not English"
+git add lib test
+git commit -m "refactor: make spell validation return structured errors, not English"
 ```
 
 ---
