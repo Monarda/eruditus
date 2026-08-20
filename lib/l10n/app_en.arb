@@ -179,5 +179,44 @@
   "noneOption": "None",
   "ritualChip": "Ritual",
   "generalChip": "Gen",
-  "exceptionChip": "Exception"
+  "exceptionChip": "Exception",
+  "ritualReasonRange": "{range} range",
+  "@ritualReasonRange": {
+    "description": "{range} is rulebook content (a Range's name) and is not translated",
+    "placeholders": { "range": { "type": "String" } }
+  },
+  "ritualReasonDuration": "{duration} duration",
+  "@ritualReasonDuration": {
+    "description": "{duration} is rulebook content (a Duration's name) and is not translated",
+    "placeholders": { "duration": { "type": "String" } }
+  },
+  "ritualReasonTarget": "{target} target",
+  "@ritualReasonTarget": {
+    "description": "{target} is rulebook content (a Target's name) and is not translated",
+    "placeholders": { "target": { "type": "String" } }
+  },
+  "ritualReasonLevelAbove": "level above {max}",
+  "@ritualReasonLevelAbove": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "ritualReasonGuidelineRequires": "the guideline requires it",
+  "ritualReasonLastingCreation": "it creates something lasting",
+  "ritualReasonStoryguideRuling": "storyguide ruling",
+  "ritualSummary": "Ritual: {reasons}.",
+  "@ritualSummary": {
+    "description": "{reasons} is a pre-joined list built by _describe; the '; ' separator stays a plain literal (a locale-aware list join is intl's job, out of scope here)",
+    "placeholders": { "reasons": { "type": "String" } }
+  },
+  "ritualNotDeclared": "Not declared",
+  "ritualCreatesLasting": "This creates something lasting",
+  "ritualCreatesLastingHelpSuggested": "Cast as anything other than a Momentary Ritual, this suspends the healing rather than completing it.",
+  "@ritualCreatesLastingHelpSuggested": {
+    "description": "Shown when guidelineIsSuggested is true (Core Rules line 13415)"
+  },
+  "ritualCreatesLastingHelpDefault": "A Momentary Creo spell that is not a Ritual creates something that vanishes as the magic ends.",
+  "@ritualCreatesLastingHelpDefault": {
+    "description": "Shown when guidelineIsSuggested is false (Core Rules line 13415)"
+  },
+  "ritualStoryguideRuling": "Storyguide ruling: too spectacular to be freely available",
+  "ritualStoryguideRulingHelp": "At the troupe's discretion — not something the guideline determines (Core Rules line 12352)."
 }

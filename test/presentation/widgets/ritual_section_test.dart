@@ -226,6 +226,21 @@ void main() {
     );
   });
 
+  testWidgets('ritual reasons are localised', (tester) async {
+    await pumpApp(tester, _host(RitualSection(
+      ritualStatus: const RitualStatus([RitualReason.guideline]),
+      declaration: RitualDeclaration.none,
+      showLastingCreationOption: false,
+      rangeName: 'Touch',
+      durationName: 'Momentary',
+      targetName: 'Individual',
+      guidelineIsSuggested: false,
+      onDeclarationChanged: (_) {},
+    )), locale: const Locale('en', 'XA'));
+
+    expect(find.textContaining('the guideline requires it'), findsNothing);
+  });
+
   testWidgets(
       'renders and selects the "creates something lasting" radio for an ineligible draft that already carries the declaration',
       (tester) async {

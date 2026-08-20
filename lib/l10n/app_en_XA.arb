@@ -55,5 +55,19 @@
   "noneOption": "[Ňōňē··]",
   "ritualChip": "[Ŕĭţűāĺ··]",
   "generalChip": "[Ĝēň·]",
-  "exceptionChip": "[Ēẋćēƥţĭōň···]"
+  "exceptionChip": "[Ēẋćēƥţĭōň···]",
+  "ritualReasonRange": "[{range} ŕāňģē····]",
+  "ritualReasonDuration": "[{duration} đűŕāţĭōň······]",
+  "ritualReasonTarget": "[{target} ţāŕģēţ·····]",
+  "ritualReasonLevelAbove": "[ĺēṽēĺ āƀōṽē {max}······]",
+  "ritualReasonGuidelineRequires": "[ţĥē ģűĭđēĺĭňē ŕēɋűĭŕēś ĭţ········]",
+  "ritualReasonLastingCreation": "[ĭţ ćŕēāţēś śōɱēţĥĭňģ ĺāśţĭňģ·········]",
+  "ritualReasonStoryguideRuling": "[śţōŕýģűĭđē ŕűĺĭňģ······]",
+  "ritualSummary": "[Ŕĭţűāĺ: {reasons}.······]",
+  "ritualNotDeclared": "[Ňōţ đēćĺāŕēđ····]",
+  "ritualCreatesLasting": "[Ţĥĭś ćŕēāţēś śōɱēţĥĭňģ ĺāśţĭňģ·········]",
+  "ritualCreatesLastingHelpSuggested": "[Ĉāśţ āś āňýţĥĭňģ ōţĥēŕ ţĥāň ā Ṁōɱēňţāŕý Ŕĭţűāĺ, ţĥĭś śűśƥēňđś ţĥē ĥēāĺĭňģ ŕāţĥēŕ ţĥāň ćōɱƥĺēţĭňģ ĭţ.······························]",
+  "ritualCreatesLastingHelpDefault": "[Å Ṁōɱēňţāŕý Ĉŕēō śƥēĺĺ ţĥāţ ĭś ňōţ ā Ŕĭţűāĺ ćŕēāţēś śōɱēţĥĭňģ ţĥāţ ṽāňĭśĥēś āś ţĥē ɱāģĭć ēňđś.·····························]",
+  "ritualStoryguideRuling": "[Śţōŕýģűĭđē ŕűĺĭňģ: ţōō śƥēćţāćűĺāŕ ţō ƀē ƒŕēēĺý āṽāĭĺāƀĺē··················]",
+  "ritualStoryguideRulingHelp": "[Åţ ţĥē ţŕōűƥē'ś đĭśćŕēţĭōň — ňōţ śōɱēţĥĭňģ ţĥē ģűĭđēĺĭňē đēţēŕɱĭňēś (Ĉōŕē Ŕűĺēś ĺĭňē 12352).····························]"
 }
