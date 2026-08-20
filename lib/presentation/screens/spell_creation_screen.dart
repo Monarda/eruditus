@@ -319,7 +319,11 @@ class SpellCreationScreen extends StatelessWidget {
                       if (draft.target?.requiresRangeId != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          l10n.targetRequiresThisRange(draft.target!.name),
+                          // Citation is a book title, not chrome -- passed as
+                          // an operand (see @targetRequiresThisRange) rather
+                          // than baked into the ARB literal.
+                          l10n.targetRequiresThisRange(draft.target!.name,
+                              'Houses of Hermes: Mystery Cults, Sensory Magic'),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],

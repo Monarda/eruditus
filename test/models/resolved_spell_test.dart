@@ -190,7 +190,7 @@ void main() {
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final resolved = ResolvedSpell(record: spell, baseEffect: effect);
-    expect(resolved.problems, contains(const OpenSlotNotChosen('realm')));
+    expect(resolved.problems, contains(const OpenSlotNotChosen([OpenSlotKind.realm])));
   });
 
   test('problems does not report check 6 when chosenSlots is actually wired through', () {
@@ -213,7 +213,7 @@ void main() {
       createdAt: DateTime(2026, 1, 1), updatedAt: DateTime(2026, 1, 1),
     );
     final resolved = ResolvedSpell(record: spell, baseEffect: effect);
-    expect(resolved.problems, isNot(contains(const OpenSlotNotChosen('realm'))));
+    expect(resolved.problems, isNot(contains(const OpenSlotNotChosen([OpenSlotKind.realm]))));
   });
 
   test('technique/form come from the record even when the base effect disagrees', () {

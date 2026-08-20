@@ -50,11 +50,17 @@ import '../support/pump_app.dart';
 ///
 /// ⚠️ Deliberately NOT listed, because they are rulebook content that stays
 /// hardcoded by design (see Task 10 and item 80.3): the four realm values
-/// 'Divine', 'Faerie', 'Infernal', 'Magic'. Nor the filter/category comparison
-/// keys 'All', 'Published', 'My Spells', 'Range', 'Duration', 'Target' where
-/// they appear as *values* rather than display text — those are deliberately
-/// English (see Task 9). Adding any of them here would make this test fail on
-/// correct code.
+/// 'Divine', 'Faerie', 'Infernal', 'Magic'. Adding any of these four here
+/// would make this test fail on correct code.
+///
+/// The filter/category comparison keys 'All', 'Published', 'My Spells',
+/// 'Range', 'Duration', 'Target' are a different case, and listing them here
+/// IS safe: they appear as *values* being compared (e.g. a category filter's
+/// internal key), never rendered as display `Text` under this pseudo-locale,
+/// so pseudo-transforming the chrome that labels them does not touch these
+/// literals at all. 'My Spells' already sat in this list, passing, which is
+/// the proof -- a previous version of this comment claimed the opposite for
+/// all six, which was simply false for at least that one.
 const _mustNotSurvive = <String>[
   'Create Spell',
   'Save to Library',
@@ -71,17 +77,21 @@ const _mustNotSurvive = <String>[
   'Container behaviour',
   // added as tasks 7-10 migrated far more than the plan originally tabulated
   'Modifiers',
-  'Needs review',
   'Configuration',
   'Effects',
   'Parameters',
-  'Add Custom Effect',
-  'Add Custom Parameter',
   'Requisites',
   'Adjustments',
   'Summary',
-  'Save to Library',
   'Find Similar Spells',
+  // Verified as real additions during the final-review fix pass (MINOR 3):
+  // each of these five is display text, and each disappears under the
+  // pseudo-locale on correct code.
+  'All',
+  'Published',
+  'Range',
+  'Duration',
+  'Target',
 ];
 
 /// Strings that SHOULD still render in English under the pseudo-locale.

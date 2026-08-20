@@ -13,15 +13,18 @@ class InvalidSpellException implements Exception {
 
   InvalidSpellException(this.spellId, this.problems);
 
-  /// A diagnostic message, not user-facing prose: no caller renders this to a
-  /// user today -- see `backup_screen.dart`, which surfaces only `spellId`
-  /// from a batch of these. The plain `join` below still reads well because
-  /// [SpellValidationError]'s variants are `Equatable`, whose default
-  /// `toString()` prints each variant's name and field values
-  /// (`EquatableConfig.stringify` is true under asserts, which covers
-  /// `flutter test` and every debug build) -- there is no need to hand-roll
-  /// wording here just because this class, like [SpellValidationError]
-  /// itself, has no locale to render one in.
+  /// A diagnostic message, not user-facing prose.
+  ///
+  /// `backup_screen.dart` surfaces only `spellId` from a batch of these, but
+  /// `SpellCreationBloc._handleSpellSaveRequested` catches
+  /// `InvalidSpellException` specifically on the single-save path and reads
+  /// [problems] directly into `SpellCreationState.validationErrors` -- the
+  /// same structured, already-localised channel `validateSpellDraft`
+  /// populates -- rather than calling [toString] or this getter. Do not
+  /// route this string to a user: [SpellValidationError]'s variants are
+  /// `Equatable`, whose default `toString()` prints each variant's bare name
+  /// and field values (e.g. `RequisiteIsOwnArt()`), and the plain `join`
+  /// below has no locale to render in -- neither is fit for display.
   String get message => 'Spell $spellId is invalid: ${problems.join('; ')}';
 
   @override

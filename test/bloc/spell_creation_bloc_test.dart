@@ -16,6 +16,7 @@ import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/invalid_spell_exception.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/general_effect_formula.dart';
@@ -710,6 +711,47 @@ void main() {
           // state.draft, or a retry finds the dialog empty again.
           .having((s) => s.draft.summary, 'draft.summary (dialog-supplied, preserved on error)',
               'A jet of flame.'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // Regression test for the final-review fix: a repository-refused save
+    // (InvalidSpellException) used to fall into the generic catch and land
+    // in errorMessage as e.toString() -- an unlocalised, stringified
+    // Equatable repr like "InvalidSpellException: Spell s1 is invalid:
+    // RequisiteIsOwnArt()". It must instead surface through the same
+    // structured, already-localised validationErrors channel
+    // validateSpellDraft uses, with errorMessage left untouched.
+    'SpellSaveRequested surfaces a repository InvalidSpellException as localised '
+    'validationErrors, not a stringified exception in errorMessage',
+    build: () {
+      final repo = MockSpellRepository();
+      when(() => repo.saveSpell(any())).thenThrow(
+        InvalidSpellException('doomed-id', const [RequisiteIsOwnArt()]),
+      );
+      return SpellCreationBloc(spellEngine: spellEngine, spellRepository: repo);
+    },
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellSaveRequested('Doomed Spell', summary: 'A jet of flame.'));
+    },
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having((s) => s.validationErrors, 'validationErrors',
+              contains(const RequisiteIsOwnArt()))
+          .having((s) => s.errorMessage, 'errorMessage (untouched -- not a stringified exception)',
+              isNull)
+          // The in-progress draft is preserved, matching the disk-full case
+          // above: a rejected save must not lose the user's work.
+          .having((s) => s.draft.technique, 'draft.technique (preserved)', 'Creo'),
     ],
   );
 

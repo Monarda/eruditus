@@ -108,7 +108,10 @@ class RitualSection extends StatelessWidget {
                 key: const Key('ritual-radio-storyguideRuling'),
                 value: RitualDeclaration.storyguideRuling,
                 title: Text(l10n.ritualStoryguideRuling),
-                subtitle: Text(l10n.ritualStoryguideRulingHelp),
+                // Citation is a rulebook line reference, passed as an operand
+                // (see @ritualStoryguideRulingHelp) rather than baked into
+                // the ARB literal.
+                subtitle: Text(l10n.ritualStoryguideRulingHelp('Core Rules line 12352')),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
             ],

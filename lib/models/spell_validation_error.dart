@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:eruditus/models/base_effect.dart';
+
 /// Why a spell draft or record fails validation, as structure rather than
 /// prose.
 ///
@@ -140,27 +142,36 @@ final class ModifierNotMultiSelect extends SpellValidationError {
 }
 
 /// `validateSpellAgainstCatalog` check 6: an open slot the guideline declares
-/// mandatory has not been filled. [kindNames] is rulebook content, already
-/// joined for the "or" case (e.g. pevi-G10's Form OR a specific type).
+/// mandatory has not been filled. [kinds] is the effect's own declared open
+/// slots (one, or two for pevi-G10's "Form OR a specific type" case) --
+/// structure, not rulebook prose. Wording each kind and joining them for the
+/// "or" case is `presentation/format/contribution_formatter.dart`'s job, not
+/// this one's: composing "Form or a specific type of enchantment" here would
+/// be exactly the English-conjunction-in-domain-code this type exists to
+/// avoid.
 final class OpenSlotNotChosen extends SpellValidationError {
-  final String kindNames;
+  final List<OpenSlotKind> kinds;
 
-  const OpenSlotNotChosen(this.kindNames);
+  const OpenSlotNotChosen(this.kinds);
 
   @override
-  List<Object?> get props => [kindNames];
+  List<Object?> get props => [kinds];
 }
 
 /// `validateSpellAgainstCatalog` check 7: stray chosen-slot data for a kind
-/// this guideline never declared open. [description] is rulebook content and
-/// appears twice in the rendered sentence.
+/// this guideline never declared open. [kind] is the resolved
+/// [OpenSlotKind], or `null` when the stray `chosenSlots` key does not parse
+/// as one at all (`_openSlotKindByName` tolerates that); [rawName] is always
+/// the original map key, used as the fallback when [kind] is `null`. The
+/// formatter picks which one to word and renders it twice in the sentence.
 final class ChosenSlotNotOpen extends SpellValidationError {
-  final String description;
+  final OpenSlotKind? kind;
+  final String rawName;
 
-  const ChosenSlotNotOpen(this.description);
+  const ChosenSlotNotOpen({required this.kind, required this.rawName});
 
   @override
-  List<Object?> get props => [description];
+  List<Object?> get props => [kind, rawName];
 }
 
 /// `validateSpellAgainstCatalog` check 9: a container mode stated on a

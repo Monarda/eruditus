@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/data/datasources/asset_data_loader.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
@@ -391,7 +392,7 @@ void main() {
       containerMode: unfilled.containerMode,
       modifiers: modifiers,
     );
-    expect(unfilledProblems, contains(const OpenSlotNotChosen('Form')));
+    expect(unfilledProblems, contains(const OpenSlotNotChosen([OpenSlotKind.form])));
 
     // Filling it in satisfies check 6, same real catalog entry.
     final filled = instantiate(chosenSlots: const {'form': 'Ignem'});

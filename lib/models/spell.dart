@@ -48,20 +48,6 @@ OpenSlotKind? _openSlotKindByName(String name) {
   return null;
 }
 
-/// Human-readable phrasing for an [OpenSlotKind] in a check-6 message.
-/// [OpenSlotKind.specificType] reads as "a specific type of enchantment" to
-/// match the rulebook's own phrasing rather than the bare enum name.
-String _openSlotDescription(OpenSlotKind kind) {
-  switch (kind) {
-    case OpenSlotKind.realm:
-      return 'realm';
-    case OpenSlotKind.form:
-      return 'Form';
-    case OpenSlotKind.specificType:
-      return 'specific type of enchantment';
-  }
-}
-
 /// Shared by [SpellDraft.isEligibleForLastingCreationDeclaration] and
 /// [spellOwesContainerMode] — both ask whether a Duration is Momentary, and
 /// two copies of the id would drift.
@@ -166,10 +152,7 @@ List<SpellValidationError> validateSpellAgainstCatalog({
       final filled = effect.openSlots
           .any((kind) => (chosenSlots[kind.name] ?? '').isNotEmpty);
       if (!filled) {
-        final kindNames = effect.openSlots.length == 1
-            ? _openSlotDescription(effect.openSlots.single)
-            : effect.openSlots.map(_openSlotDescription).join(' or a ');
-        problems.add(OpenSlotNotChosen(kindNames));
+        problems.add(OpenSlotNotChosen(effect.openSlots));
       }
     }
   }
@@ -180,12 +163,12 @@ List<SpellValidationError> validateSpellAgainstCatalog({
   //    6, this runs for a template too -- a SpellTemplate genuinely carries
   //    chosenSlots, so a stray key is just as much a bug there.
   final openKindNames = effect.openSlots.map((k) => k.name).toSet();
-  for (final kind in chosenSlots.keys) {
-    if (!openKindNames.contains(kind)) {
-      final description = _openSlotKindByName(kind) != null
-          ? _openSlotDescription(_openSlotKindByName(kind)!)
-          : kind;
-      problems.add(ChosenSlotNotOpen(description));
+  for (final rawName in chosenSlots.keys) {
+    if (!openKindNames.contains(rawName)) {
+      problems.add(ChosenSlotNotOpen(
+        kind: _openSlotKindByName(rawName),
+        rawName: rawName,
+      ));
     }
   }
 

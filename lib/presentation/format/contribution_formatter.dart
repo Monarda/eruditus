@@ -1,6 +1,7 @@
 import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 
 /// Words a [ContributionSource] for display.
@@ -35,6 +36,24 @@ String _slotName(AppLocalizations l10n, ParameterSlot slot) => switch (slot) {
       ParameterSlot.duration => l10n.slotDuration,
       ParameterSlot.target => l10n.slotTarget,
     };
+
+/// Rulebook-derived wording for an [OpenSlotKind], matching the rulebook's
+/// own phrasing rather than the bare enum name. Deliberately not localized
+/// via `l10n` -- see the `@description` on `validationOpenSlotNotChosen` /
+/// `validationChosenSlotNotOpen` in the ARB: this is rulebook content passed
+/// through as an operand, the same category as a Range or Target name.
+String _openSlotKindWord(OpenSlotKind kind) => switch (kind) {
+      OpenSlotKind.realm => 'realm',
+      OpenSlotKind.form => 'Form',
+      OpenSlotKind.specificType => 'specific type of enchantment',
+    };
+
+/// Joins declared open-slot kinds the way pevi-G10's two alternatives read:
+/// "Form or a specific type of enchantment". A single kind needs no join --
+/// every other catalog entry declares exactly one.
+String _openSlotKindNames(List<OpenSlotKind> kinds) => kinds.length == 1
+    ? _openSlotKindWord(kinds.single)
+    : kinds.map(_openSlotKindWord).join(' or a ');
 
 /// Words a [LevelUnavailableReason] for display.
 ///
@@ -75,10 +94,11 @@ String formatValidationError(AppLocalizations l10n, SpellValidationError error) 
       AnalogyRationaleUnwanted() => l10n.validationAnalogyRationaleUnwanted,
       ModifierNotMultiSelect(:final modifierName) =>
         l10n.validationModifierNotMultiSelect(modifierName),
-      OpenSlotNotChosen(:final kindNames) =>
-        l10n.validationOpenSlotNotChosen(kindNames),
-      ChosenSlotNotOpen(:final description) =>
-        l10n.validationChosenSlotNotOpen(description),
+      OpenSlotNotChosen(:final kinds) =>
+        l10n.validationOpenSlotNotChosen(_openSlotKindNames(kinds)),
+      ChosenSlotNotOpen(:final kind, :final rawName) =>
+        l10n.validationChosenSlotNotOpen(
+            kind != null ? _openSlotKindWord(kind) : rawName),
       ContainerModeOnNonContainer(:final targetName) =>
         l10n.validationContainerModeOnNonContainer(targetName),
       RangeForbidsTarget(:final rangeName, :final targetName, :final targetKind) =>

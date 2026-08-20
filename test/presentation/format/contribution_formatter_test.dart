@@ -1,6 +1,7 @@
 import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
 import 'package:flutter/material.dart';
@@ -107,7 +108,9 @@ void main() {
 
   testWidgets('formats a variant whose placeholder repeats', (tester) async {
     await loadL10n(tester);
-    expect(formatValidationError(l10n, const ChosenSlotNotOpen('realm')),
+    expect(
+        formatValidationError(l10n,
+            const ChosenSlotNotOpen(kind: OpenSlotKind.realm, rawName: 'realm')),
         'A chosen realm applies only to a guideline with an open realm slot');
   });
 

@@ -14,10 +14,12 @@
   },
   "contributionBaseEffect": "Base effect · {description}",
   "@contributionBaseEffect": {
+    "description": "{description} is rulebook content (a BaseEffect's description) and is not translated",
     "placeholders": { "description": { "type": "String" } }
   },
   "contributionSlot": "{slot} · {actual}",
   "@contributionSlot": {
+    "description": "{slot} is chrome, already localised by _slotName before it reaches here; {actual} is rulebook content (a Parameter's name) and is not translated",
     "placeholders": {
       "slot": { "type": "String" },
       "actual": { "type": "String" }
@@ -25,6 +27,7 @@
   },
   "contributionSlotAssumes": "{slot} · {actual} (guideline assumes {reference})",
   "@contributionSlotAssumes": {
+    "description": "{slot} is chrome, already localised by _slotName before it reaches here; {actual} and {reference} are rulebook content (Parameter names) and are not translated",
     "placeholders": {
       "slot": { "type": "String" },
       "actual": { "type": "String" },
@@ -33,6 +36,7 @@
   },
   "contributionRequisite": "Requisite · {art}, {parameter}",
   "@contributionRequisite": {
+    "description": "{art} is rulebook content (an Art's Latin name); {parameter} is rulebook content (a Parameter's name). Neither is translated",
     "placeholders": {
       "art": { "type": "String" },
       "parameter": { "type": "String" }
@@ -45,6 +49,7 @@
   },
   "contributionModifier": "{modifier} · {option}",
   "@contributionModifier": {
+    "description": "{modifier} and {option} are rulebook content (a modifier's name and option label) and are not translated",
     "placeholders": {
       "modifier": { "type": "String" },
       "option": { "type": "String" }
@@ -55,6 +60,7 @@
   "slotTarget": "Target",
   "ritualMinimumRaised": "Ritual minimum: raised from {from} to {to}",
   "@ritualMinimumRaised": {
+    "description": "{from} and {to} are numeric spell levels",
     "placeholders": {
       "from": { "type": "int" },
       "to": { "type": "int" }
@@ -134,10 +140,12 @@
   },
   "modifiersSelectedCount": "{count} selected",
   "@modifiersSelectedCount": {
+    "description": "{count} is a numeric selection count",
     "placeholders": { "count": { "type": "int" } }
   },
   "modifierOptionWithMagnitude": "{option} (+{magnitude})",
   "@modifierOptionWithMagnitude": {
+    "description": "{option} is rulebook content (a modifier option's label) and is not translated; {magnitude} is numeric",
     "placeholders": {
       "option": { "type": "String" },
       "magnitude": { "type": "int" }
@@ -146,6 +154,7 @@
   "untitledSpell": "Untitled spell",
   "untitledSpellOfArts": "Untitled {technique} {form}",
   "@untitledSpellOfArts": {
+    "description": "{technique} and {form} are rulebook content (Art names) and are not translated",
     "placeholders": {
       "technique": { "type": "String" },
       "form": { "type": "String" }
@@ -153,11 +162,13 @@
   },
   "spellCardUnavailable": "Unavailable — missing {references}",
   "@spellCardUnavailable": {
+    "description": "{references} is a joined list of raw catalog ids (system content, not translated)",
     "placeholders": { "references": { "type": "String" } }
   },
   "spellCardUnverifiedSuffix": " (unverified)",
   "spellCardArtsAndLevel": "{technique} {form} • Level {level}{suffix}",
   "@spellCardArtsAndLevel": {
+    "description": "{technique} and {form} are rulebook content (Art names) and are not translated; {level} is numeric; {suffix} is chrome, already localised (spellCardUnverifiedSuffix) before it reaches here",
     "placeholders": {
       "technique": { "type": "String" },
       "form": { "type": "String" },
@@ -167,6 +178,7 @@
   },
   "spellCardArtsOnly": "{technique} {form}",
   "@spellCardArtsOnly": {
+    "description": "{technique} and {form} are rulebook content (Art names) and are not translated",
     "placeholders": {
       "technique": { "type": "String" },
       "form": { "type": "String" }
@@ -197,6 +209,7 @@
   },
   "ritualReasonLevelAbove": "level above {max}",
   "@ritualReasonLevelAbove": {
+    "description": "{max} is a numeric spell level",
     "placeholders": { "max": { "type": "int" } }
   },
   "ritualReasonGuidelineRequires": "the guideline requires it",
@@ -218,7 +231,11 @@
     "description": "Shown when guidelineIsSuggested is false (Core Rules line 13415)"
   },
   "ritualStoryguideRuling": "Storyguide ruling: too spectacular to be freely available",
-  "ritualStoryguideRulingHelp": "At the troupe's discretion — not something the guideline determines (Core Rules line 12352).",
+  "ritualStoryguideRulingHelp": "At the troupe's discretion — not something the guideline determines ({citation}).",
+  "@ritualStoryguideRulingHelp": {
+    "description": "{citation} is a rulebook citation and is not translated",
+    "placeholders": { "citation": { "type": "String" } }
+  },
   "spellLibraryTitle": "Spell Library",
   "searchSpellsHint": "Search spells...",
   "filterAll": "All",
@@ -231,6 +248,7 @@
   "backupImportCancelled": "Import cancelled.",
   "backupImported": "Imported {spells} spells, {effects} effects, {parameters} parameters.",
   "@backupImported": {
+    "description": "{spells}, {effects} and {parameters} are numeric counts",
     "placeholders": {
       "spells": { "type": "int" },
       "effects": { "type": "int" },
@@ -247,6 +265,7 @@
   },
   "backupImportFailed": "Import failed: {error}",
   "@backupImportFailed": {
+    "description": "{error} is e.toString() -- opaque system content, not translated",
     "placeholders": { "error": { "type": "String" } }
   },
   "exportBackupToFile": "Export Backup to File",
@@ -302,6 +321,7 @@
   },
   "couldNotSaveSpell": "Could not save spell: {error}",
   "@couldNotSaveSpell": {
+    "description": "{error} is state.errorMessage, an opaque system/exception string, not translated",
     "placeholders": { "error": { "type": "String" } }
   },
   "createSpell": "Create Spell",
@@ -309,10 +329,13 @@
   "realmLabel": "Realm",
   "spellParameters": "Spell Parameters",
   "everySpellRequiresOneOfEach": "Every spell requires exactly one of each:",
-  "targetRequiresThisRange": "{target} requires this Range (Houses of Hermes: Mystery Cults, Sensory Magic).",
+  "targetRequiresThisRange": "{target} requires this Range ({citation}).",
   "@targetRequiresThisRange": {
-    "description": "{target} is rulebook content (a Parameter's name) and is not translated",
-    "placeholders": { "target": { "type": "String" } }
+    "description": "{target} is rulebook content (a Parameter's name); {citation} is a book citation. Neither is translated",
+    "placeholders": {
+      "target": { "type": "String" },
+      "citation": { "type": "String" }
+    }
   },
   "findSimilarSpells": "Find Similar Spells",
   "similarSpellsTitle": "Similar Spells",

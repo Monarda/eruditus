@@ -863,7 +863,7 @@ void main() {
 
     test('check 6: a declared open realm slot with no chosen value is a problem', () {
       expect(validate(effect: realmSlotEffect(), chosenBaseLevel: 20),
-          contains(const OpenSlotNotChosen('realm')));
+          contains(const OpenSlotNotChosen([OpenSlotKind.realm])));
     });
 
     test('check 6: a filled realm slot is fine', () {
@@ -891,14 +891,14 @@ void main() {
     test('check 6: an either/or slot with neither kind filled is a problem', () {
       expect(
         validate(effect: eitherSlotEffect(), chosenBaseLevel: 20),
-        contains(const OpenSlotNotChosen('Form or a specific type of enchantment')),
+        contains(const OpenSlotNotChosen([OpenSlotKind.form, OpenSlotKind.specificType])),
       );
     });
 
     test('check 7: a chosen realm on a guideline with no open realm slot is a problem', () {
       expect(
         validate(effect: fixedEffect(), chosenSlots: const {'realm': 'Infernal'}),
-        contains(const ChosenSlotNotOpen('realm')),
+        contains(const ChosenSlotNotOpen(kind: OpenSlotKind.realm, rawName: 'realm')),
       );
     });
 
@@ -921,7 +921,7 @@ void main() {
           chosenSlots: const {'realm': 'Infernal'},
           isTemplate: true,
         ),
-        contains(const ChosenSlotNotOpen('realm')),
+        contains(const ChosenSlotNotOpen(kind: OpenSlotKind.realm, rawName: 'realm')),
       );
     });
 
