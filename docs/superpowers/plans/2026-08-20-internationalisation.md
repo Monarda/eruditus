@@ -294,7 +294,7 @@ git commit -m "test: add pumpApp helper and route all widget tests through it"
 
 **Interfaces:**
 - Consumes: `lib/l10n/app_en.arb` (Task 1).
-- Produces: `String pseudoTransform(String value)` exported from `tool/gen_pseudo_arb.dart`, and the committed `app_xx.arb`. Task 11's coverage test relies on the transform being total and on placeholders surviving it.
+- Produces: `String pseudoTransform(String value)` exported from `tool/gen_pseudo_arb.dart`, and the committed `app_xx.arb`. Task 10's coverage test relies on the transform being total and on placeholders surviving it.
 
 A hand-written pseudo ARB drifts from `app_en.arb` the first time someone adds a string, and a drifted proof harness is worse than none. This mirrors the repo's existing regeneration-test idiom for `spell_library.json` (item 30).
 
@@ -465,20 +465,79 @@ git commit -m "test(l10n): add generated pseudo-locale and its regeneration guar
 ```
 
 ---
-
-### Task 4: `ContributionSource` — the engine stops composing prose
+### Task 4: `ContributionSource` — structured contributions, end to end
 
 **Files:**
 - Create: `lib/engine/contribution_source.dart`
+- Create: `lib/presentation/format/contribution_formatter.dart`
 - Modify: `lib/engine/level_breakdown.dart:6-20` (`LevelContribution`)
 - Modify: `lib/engine/spell_engine.dart:235-270` and `:311-328` (7 composition sites)
-- Test: `test/engine/spell_engine_test.dart`, `test/engine/level_breakdown_test.dart`
+- Modify: `lib/l10n/app_en.arb`
+- Modify: `lib/presentation/widgets/level_banner.dart:78,90,113,134`
+- Test: `test/engine/spell_engine_test.dart`, `test/engine/level_breakdown_test.dart`, `test/presentation/format/contribution_formatter_test.dart`
 
 **Interfaces:**
-- Consumes: nothing from earlier tasks — this is pure structure, no l10n involved.
-- Produces: `sealed class ContributionSource` with variants `BaseEffectContribution(String description)`, `SlotContribution({ParameterSlot slot, String actualName, String? referenceName})`, `RequisiteContribution({String art, String parameterName})`, `AdjustmentContribution(String note)`, `ModifierContribution({String modifierName, String optionLabel})`; `enum ParameterSlot { range, duration, target }`; and `LevelContribution({required ContributionSource source, required int magnitude, bool isBase})`. Task 6's formatter switches over exactly these.
+- Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2), `pseudoTransform` behaviour (Task 3).
+- Produces: `sealed class ContributionSource` with variants `BaseEffectContribution(String description)`, `SlotContribution({ParameterSlot slot, String actualName, String? referenceName})`, `RequisiteContribution({String art, String parameterName})`, `AdjustmentContribution(String note)`, `ModifierContribution({String modifierName, String optionLabel})`; `enum ParameterSlot { range, duration, target }`; `LevelContribution({required ContributionSource source, required int magnitude, bool isBase})`; and `String formatContribution(AppLocalizations l10n, ContributionSource source)`.
 
-- [ ] **Step 1: Write the failing test**
+**This task lands complete.** The engine change and the formatter that renders it are one deliverable — splitting them would leave `LevelBanner` rendering a placeholder at a review boundary. Do not commit a state where a contribution reaches the screen as `toString()`.
+
+- [ ] **Step 1: Add the ARB entries**
+
+Append to `lib/l10n/app_en.arb`. **The `·` separator lives here, not in Dart** — it is punctuation in a sentence and a translator may want a different one.
+
+```json
+  "contributionBaseEffect": "Base effect · {description}",
+  "@contributionBaseEffect": {
+    "placeholders": { "description": { "type": "String" } }
+  },
+  "contributionSlot": "{slot} · {actual}",
+  "@contributionSlot": {
+    "placeholders": {
+      "slot": { "type": "String" },
+      "actual": { "type": "String" }
+    }
+  },
+  "contributionSlotAssumes": "{slot} · {actual} (guideline assumes {reference})",
+  "@contributionSlotAssumes": {
+    "placeholders": {
+      "slot": { "type": "String" },
+      "actual": { "type": "String" },
+      "reference": { "type": "String" }
+    }
+  },
+  "contributionRequisite": "Requisite · {art}, {parameter}",
+  "@contributionRequisite": {
+    "placeholders": {
+      "art": { "type": "String" },
+      "parameter": { "type": "String" }
+    }
+  },
+  "contributionAdjustment": "Adjustment · {note}",
+  "@contributionAdjustment": {
+    "description": "{note} is USER CONTENT and renders verbatim in every locale",
+    "placeholders": { "note": { "type": "String" } }
+  },
+  "contributionModifier": "{modifier} · {option}",
+  "@contributionModifier": {
+    "placeholders": {
+      "modifier": { "type": "String" },
+      "option": { "type": "String" }
+    }
+  },
+  "slotRange": "Range",
+  "slotDuration": "Duration",
+  "slotTarget": "Target",
+  "ritualMinimumRaised": "Ritual minimum: raised from {from} to {to}",
+  "@ritualMinimumRaised": {
+    "placeholders": {
+      "from": { "type": "int" },
+      "to": { "type": "int" }
+    }
+  }
+```
+
+- [ ] **Step 2: Write the failing structural test**
 
 Add to `test/engine/level_breakdown_test.dart`:
 
@@ -513,12 +572,12 @@ Add to `test/engine/level_breakdown_test.dart`:
   });
 ```
 
-- [ ] **Step 2: Run it and confirm it fails**
+- [ ] **Step 3: Run it and confirm it fails**
 
 Run: `flutter test test/engine/level_breakdown_test.dart`
 Expected: FAIL — `SlotContribution` is undefined, `LevelContribution` has no `source` parameter.
 
-- [ ] **Step 3: Create the sealed hierarchy**
+- [ ] **Step 4: Create the sealed hierarchy**
 
 Create `lib/engine/contribution_source.dart`:
 
@@ -611,7 +670,7 @@ final class ModifierContribution extends ContributionSource {
 }
 ```
 
-- [ ] **Step 4: Swap `LevelContribution.label` for `source`**
+- [ ] **Step 5: Swap `LevelContribution.label` for `source`**
 
 In `lib/engine/level_breakdown.dart`, add the import and replace lines 6-20:
 
@@ -637,7 +696,7 @@ class LevelContribution extends Equatable {
 }
 ```
 
-- [ ] **Step 5: Rewrite the 7 engine composition sites**
+- [ ] **Step 6: Rewrite the 7 engine composition sites**
 
 In `lib/engine/spell_engine.dart`, at `:235-270`:
 
@@ -706,241 +765,12 @@ and `_parameterContribution` at `:311-328`, whose signature changes from `String
   }
 ```
 
-- [ ] **Step 6: Rewrite the engine test assertions**
+- [ ] **Step 7: Write the failing formatter test**
 
-There are roughly 35, concentrated in `test/engine/spell_engine_test.dart` (45 `label` references) and `test/engine/level_breakdown_test.dart` (16). Find them: `grep -rn "·" test/`
-
-Each becomes an assertion on structure. **Rewrite, never delete — each must still assert the same fact.**
-
-```dart
-// before
-expect(breakdown.contributions[1].label, 'Range · Voice');
-
-// after
-expect(breakdown.contributions[1].source,
-    const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'));
-```
-
-```dart
-// before
-expect(breakdown.contributions[1].label, 'Range · Personal (guideline assumes Touch)');
-
-// after
-expect(
-    breakdown.contributions[1].source,
-    const SlotContribution(
-        slot: ParameterSlot.range,
-        actualName: 'Personal',
-        referenceName: 'Touch'));
-```
-
-```dart
-// before
-expect(contribution.label, 'Base effect · Create flame');
-
-// after
-expect(contribution.source, const BaseEffectContribution('Create flame'));
-```
-
-The `'Range · Voice|2'` style assertions (which packed label and magnitude into one string) become two expectations — one on `source`, one on `magnitude`.
-
-- [ ] **Step 7: Run the suite**
-
-Run: `flutter test` → 750 passing (748 + 2), zero failures
-Run: `flutter analyze` → exit 0
-
-Expect `level_banner.dart` to fail analysis here — it still reads `contribution.label`. Fix it minimally in this task by rendering a placeholder that Task 6 replaces:
-
-```dart
-Expanded(child: Text(contribution.source.toString())),
-```
-
-and note in the commit that Task 6 replaces it. Any widget test asserting on breakdown line text will fail; mark those tests `skip: 'Task 6 restores this via the formatter'` rather than deleting them, and remove the skips in Task 6.
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add lib/engine test/engine lib/presentation/widgets/level_banner.dart
-git commit -m "refactor(engine): return structured ContributionSource instead of composed labels"
-```
-
----
-
-### Task 5: `LevelUnavailableReason` — the other engine-composed strings
-
-**Files:**
-- Modify: `lib/engine/level_breakdown.dart:70-78` (`LevelPreview`)
-- Modify: `lib/engine/spell_engine.dart:166-211` (5 `LevelPreview.unavailable` sites)
-- Modify: `lib/bloc/spell_creation/spell_creation_bloc.dart:60,140`
-- Modify: `lib/bloc/spell_creation/spell_creation_state.dart` (`levelUnavailableReason`)
-- Modify: `lib/presentation/screens/spell_creation_screen.dart:146`, `lib/presentation/widgets/level_banner.dart:30`
-- Test: `test/engine/spell_engine_test.dart:1200-1298`, `test/presentation/widgets/level_banner_test.dart:159,170`
-
-**Interfaces:**
-- Consumes: nothing from earlier tasks.
-- Produces: `enum LevelUnavailableReason { noBaseEffect, generalLevelNotTyped, generalLevelBelowOne, parametersIncomplete, magnitudesBelowOne }`, and `LevelPreview.unavailableReason` retyped from `String?` to `LevelUnavailableReason?`. Task 6's formatter renders it.
-
-**This was not in the spec.** `LevelPreview.unavailableReason` is a second family of engine-composed user-facing strings, found while reading `level_breakdown.dart` for this plan. Five strings, 19 test references. Without this task the "choose a base effect" prompt stays hardcoded English while everything around it localises.
-
-- [ ] **Step 1: Write the failing test**
-
-Replace the assertion at `test/engine/spell_engine_test.dart:1200`:
-
-```dart
-      expect(preview.unavailableReason, LevelUnavailableReason.noBaseEffect);
-```
-
-- [ ] **Step 2: Run it and confirm it fails**
-
-Run: `flutter test test/engine/spell_engine_test.dart`
-Expected: FAIL — `LevelUnavailableReason` is undefined.
-
-- [ ] **Step 3: Add the enum and retype `LevelPreview`**
-
-In `lib/engine/level_breakdown.dart`, above `LevelPreview`:
-
-```dart
-/// Why a draft cannot produce a level yet.
-///
-/// An enum rather than a message: these are chrome, and `previewLevel` runs in
-/// domain code where no locale is reachable. See
-/// `presentation/format/contribution_formatter.dart` for the wording.
-enum LevelUnavailableReason {
-  noBaseEffect,
-  generalLevelNotTyped,
-  generalLevelBelowOne,
-  parametersIncomplete,
-  magnitudesBelowOne,
-}
-```
-
-and change the field and constructor:
-
-```dart
-  final LevelUnavailableReason? unavailableReason;
-
-  const LevelPreview.available(LevelBreakdown this.breakdown)
-      : unavailableReason = null;
-
-  const LevelPreview.unavailable(LevelUnavailableReason this.unavailableReason)
-      : breakdown = null;
-```
-
-- [ ] **Step 4: Replace the 5 engine sites**
-
-In `lib/engine/spell_engine.dart`, keeping every surrounding comment intact — particularly the long doc comment at `:150-165` explaining why the General case is answered before the `try`, which stays accurate:
-
-| Line | Was | Becomes |
-|---|---|---|
-| 169 | `'Choose a base effect to see a level.'` | `LevelUnavailableReason.noBaseEffect` |
-| 174 | `'Type a level for this General guideline.'` | `LevelUnavailableReason.generalLevelNotTyped` |
-| 186 | `'A General guideline needs a level of 1 or more.'` | `LevelUnavailableReason.generalLevelBelowOne` |
-| 194 | `'Choose a Range, Duration and Target.'` | `LevelUnavailableReason.parametersIncomplete` |
-| 210 | `'Magnitudes reduce this spell below level 1.'` | `LevelUnavailableReason.magnitudesBelowOne` |
-
-The inline comment at `:176-184` names the old string ("told the caster *Magnitudes reduce this spell below level 1.*"). Keep it, but reword the quotation to name the enum value so it does not decay into a reference to a string that no longer exists.
-
-- [ ] **Step 5: Thread the type through bloc and UI**
-
-`spell_creation_state.dart`: retype `levelUnavailableReason` to `LevelUnavailableReason?`. `spell_creation_bloc.dart:60,140` need no change beyond the type flowing. `level_banner.dart:30`: retype `unavailableReason`. Render it as `reason.toString()` for now — Task 6 replaces that.
-
-- [ ] **Step 6: Update the remaining test references**
-
-The other 18 references (`grep -rn "unavailableReason" test/`) become enum comparisons. `level_banner_test.dart:159,170` pass `LevelUnavailableReason.noBaseEffect`.
-
-- [ ] **Step 7: Run the suite**
-
-Run: `flutter test` → 750 passing
-Run: `flutter analyze` → exit 0
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add lib/engine lib/bloc lib/presentation test
-git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
-```
-
----
-
-### Task 6: The contribution formatter
-
-**Files:**
-- Create: `lib/presentation/format/contribution_formatter.dart`
-- Modify: `lib/l10n/app_en.arb`
-- Modify: `lib/presentation/widgets/level_banner.dart:113,95-140`
-- Test: `test/presentation/format/contribution_formatter_test.dart`
-
-**Interfaces:**
-- Consumes: `ContributionSource` and `ParameterSlot` (Task 4), `LevelUnavailableReason` (Task 5), `AppLocalizations` (Task 1).
-- Produces: `String formatContribution(AppLocalizations l10n, ContributionSource source)` and `String formatUnavailableReason(AppLocalizations l10n, LevelUnavailableReason reason)`.
-
-- [ ] **Step 1: Add the ARB entries**
-
-Append to `lib/l10n/app_en.arb`. **The `·` separator lives here, not in Dart** — it is punctuation in a sentence and a translator may want a different one.
-
-```json
-  "contributionBaseEffect": "Base effect · {description}",
-  "@contributionBaseEffect": {
-    "placeholders": { "description": { "type": "String" } }
-  },
-  "contributionSlot": "{slot} · {actual}",
-  "@contributionSlot": {
-    "placeholders": {
-      "slot": { "type": "String" },
-      "actual": { "type": "String" }
-    }
-  },
-  "contributionSlotAssumes": "{slot} · {actual} (guideline assumes {reference})",
-  "@contributionSlotAssumes": {
-    "placeholders": {
-      "slot": { "type": "String" },
-      "actual": { "type": "String" },
-      "reference": { "type": "String" }
-    }
-  },
-  "contributionRequisite": "Requisite · {art}, {parameter}",
-  "@contributionRequisite": {
-    "placeholders": {
-      "art": { "type": "String" },
-      "parameter": { "type": "String" }
-    }
-  },
-  "contributionAdjustment": "Adjustment · {note}",
-  "@contributionAdjustment": {
-    "description": "{note} is USER CONTENT and renders verbatim in every locale",
-    "placeholders": { "note": { "type": "String" } }
-  },
-  "contributionModifier": "{modifier} · {option}",
-  "@contributionModifier": {
-    "placeholders": {
-      "modifier": { "type": "String" },
-      "option": { "type": "String" }
-    }
-  },
-  "slotRange": "Range",
-  "slotDuration": "Duration",
-  "slotTarget": "Target",
-  "levelUnavailableNoBaseEffect": "Choose a base effect to see a level.",
-  "levelUnavailableGeneralLevelNotTyped": "Type a level for this General guideline.",
-  "levelUnavailableGeneralLevelBelowOne": "A General guideline needs a level of 1 or more.",
-  "levelUnavailableParametersIncomplete": "Choose a Range, Duration and Target.",
-  "levelUnavailableMagnitudesBelowOne": "Magnitudes reduce this spell below level 1.",
-  "ritualMinimumRaised": "Ritual minimum: raised from {from} to {to}",
-  "@ritualMinimumRaised": {
-    "placeholders": {
-      "from": { "type": "int" },
-      "to": { "type": "int" }
-    }
-  }
-```
-
-- [ ] **Step 2: Write the failing test**
-
-Create `test/presentation/format/contribution_formatter_test.dart`:
+Run `flutter pub get` first so the new ARB keys generate. Create `test/presentation/format/contribution_formatter_test.dart`:
 
 ```dart
 import 'package:eruditus/engine/contribution_source.dart';
-import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
 import 'package:flutter/material.dart';
@@ -1024,32 +854,22 @@ void main() {
     expect(result.startsWith('['), isTrue,
         reason: 'but the frame around it is still localised');
   });
-
-  testWidgets('formats every unavailable reason', (tester) async {
-    await loadL10n(tester);
-    expect(formatUnavailableReason(l10n, LevelUnavailableReason.noBaseEffect),
-        'Choose a base effect to see a level.');
-    expect(
-        formatUnavailableReason(l10n, LevelUnavailableReason.magnitudesBelowOne),
-        'Magnitudes reduce this spell below level 1.');
-  });
 }
 ```
 
 The pseudo-locale test above is the explicit regression guard for the third text population.
 
-- [ ] **Step 3: Run it and confirm it fails**
+- [ ] **Step 8: Run it and confirm it fails**
 
 Run: `flutter test test/presentation/format/contribution_formatter_test.dart`
 Expected: FAIL — `contribution_formatter.dart` does not exist.
 
-- [ ] **Step 4: Implement the formatter**
+- [ ] **Step 9: Implement the formatter**
 
 Create `lib/presentation/format/contribution_formatter.dart`:
 
 ```dart
 import 'package:eruditus/engine/contribution_source.dart';
-import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 
 /// Words a [ContributionSource] for display.
@@ -1084,7 +904,174 @@ String _slotName(AppLocalizations l10n, ParameterSlot slot) => switch (slot) {
       ParameterSlot.duration => l10n.slotDuration,
       ParameterSlot.target => l10n.slotTarget,
     };
+```
 
+- [ ] **Step 10: Wire `LevelBanner` to the formatter**
+
+In `level_banner.dart`, take `final l10n = AppLocalizations.of(context);` at the top of `build`, then:
+
+- the contribution row becomes `Expanded(child: Text(formatContribution(l10n, contribution.source)))`
+- the hardcoded ritual-minimum line at `:134` becomes `Text(l10n.ritualMinimumRaised(breakdown.rawLevel, breakdown.level), style: Theme.of(context).textTheme.bodySmall)`
+- `'Spell level'` (`:78`) becomes `l10n.spellLevel`, and the `'Show the breakdown'`/`'Hide the breakdown'` pair (`:90`) becomes `l10n.showBreakdown`/`l10n.hideBreakdown` — Task 1 already put all three in the ARB
+
+**The rendered English text is identical to what the engine used to compose**, so existing widget tests asserting breakdown line text must pass unchanged. If one fails, the formatter or an ARB value is wrong — fix that, do not edit the test's expectation.
+
+- [ ] **Step 11: Rewrite the engine test assertions**
+
+Roughly 35, concentrated in `test/engine/spell_engine_test.dart` (45 `label` references) and `test/engine/level_breakdown_test.dart` (16). Find them: `grep -rn "·" test/`
+
+Each becomes an assertion on structure. **Rewrite, never delete — each must still assert the same fact.**
+
+```dart
+// before
+expect(breakdown.contributions[1].label, 'Range · Voice');
+
+// after
+expect(breakdown.contributions[1].source,
+    const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'));
+```
+
+```dart
+// before
+expect(breakdown.contributions[1].label, 'Range · Personal (guideline assumes Touch)');
+
+// after
+expect(
+    breakdown.contributions[1].source,
+    const SlotContribution(
+        slot: ParameterSlot.range,
+        actualName: 'Personal',
+        referenceName: 'Touch'));
+```
+
+```dart
+// before
+expect(contribution.label, 'Base effect · Create flame');
+
+// after
+expect(contribution.source, const BaseEffectContribution('Create flame'));
+```
+
+The `'Range · Voice|2'` style assertions (which packed label and magnitude into one string) become two expectations — one on `source`, one on `magnitude`.
+
+- [ ] **Step 12: Regenerate the pseudo-locale and run everything**
+
+Run: `dart run tool/gen_pseudo_arb.dart` — the ARB grew, so `app_xx.arb` is stale.
+Run: `flutter test` → all green, **no skipped tests**, count ≥ 755
+Run: `flutter analyze` → exit 0
+Run: `git diff -w --stat` → no whitespace-only churn
+
+- [ ] **Step 13: Commit**
+
+```bash
+git add lib/engine lib/presentation lib/l10n test/engine test/presentation
+git commit -m "refactor(engine): structured contributions rendered by a localised formatter"
+```
+
+---
+
+### Task 5: `LevelUnavailableReason` — the other engine-composed strings, end to end
+
+**Files:**
+- Modify: `lib/engine/level_breakdown.dart:70-78` (`LevelPreview`)
+- Modify: `lib/engine/spell_engine.dart:166-211` (5 `LevelPreview.unavailable` sites)
+- Modify: `lib/bloc/spell_creation/spell_creation_state.dart` (`levelUnavailableReason`)
+- Modify: `lib/presentation/format/contribution_formatter.dart` (add `formatUnavailableReason`)
+- Modify: `lib/l10n/app_en.arb`, `lib/presentation/widgets/level_banner.dart:30,44`
+- Test: `test/engine/spell_engine_test.dart:1200-1298`, `test/presentation/widgets/level_banner_test.dart:159,170`, `test/presentation/format/contribution_formatter_test.dart`
+
+**Interfaces:**
+- Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2), `contribution_formatter.dart` (Task 4).
+- Produces: `enum LevelUnavailableReason { noBaseEffect, generalLevelNotTyped, generalLevelBelowOne, parametersIncomplete, magnitudesBelowOne }`; `LevelPreview.unavailableReason` retyped from `String?`; `String formatUnavailableReason(AppLocalizations l10n, LevelUnavailableReason reason)`.
+
+**This was not in the original spec.** `LevelPreview.unavailableReason` is a second family of engine-composed user-facing strings — five strings, 19 test references — found while writing this plan. The spec was amended to say twelve engine-composed strings, not seven. Like Task 4, this task lands complete: **do not commit a state where a reason reaches the screen as `toString()`.**
+
+- [ ] **Step 1: Add the ARB entries**
+
+```json
+  "levelUnavailableNoBaseEffect": "Choose a base effect to see a level.",
+  "levelUnavailableGeneralLevelNotTyped": "Type a level for this General guideline.",
+  "levelUnavailableGeneralLevelBelowOne": "A General guideline needs a level of 1 or more.",
+  "levelUnavailableParametersIncomplete": "Choose a Range, Duration and Target.",
+  "levelUnavailableMagnitudesBelowOne": "Magnitudes reduce this spell below level 1."
+```
+
+- [ ] **Step 2: Write the failing test**
+
+Replace the assertion at `test/engine/spell_engine_test.dart:1200`:
+
+```dart
+      expect(preview.unavailableReason, LevelUnavailableReason.noBaseEffect);
+```
+
+and add to `test/presentation/format/contribution_formatter_test.dart`:
+
+```dart
+  testWidgets('formats every unavailable reason', (tester) async {
+    await loadL10n(tester);
+    expect(formatUnavailableReason(l10n, LevelUnavailableReason.noBaseEffect),
+        'Choose a base effect to see a level.');
+    expect(
+        formatUnavailableReason(l10n, LevelUnavailableReason.magnitudesBelowOne),
+        'Magnitudes reduce this spell below level 1.');
+  });
+```
+
+- [ ] **Step 3: Run it and confirm it fails**
+
+Run: `flutter test test/engine/spell_engine_test.dart`
+Expected: FAIL — `LevelUnavailableReason` is undefined.
+
+- [ ] **Step 4: Add the enum and retype `LevelPreview`**
+
+In `lib/engine/level_breakdown.dart`, above `LevelPreview`:
+
+```dart
+/// Why a draft cannot produce a level yet.
+///
+/// An enum rather than a message: these are chrome, and `previewLevel` runs in
+/// domain code where no locale is reachable. See
+/// `presentation/format/contribution_formatter.dart` for the wording.
+enum LevelUnavailableReason {
+  noBaseEffect,
+  generalLevelNotTyped,
+  generalLevelBelowOne,
+  parametersIncomplete,
+  magnitudesBelowOne,
+}
+```
+
+and change the field and constructor:
+
+```dart
+  final LevelUnavailableReason? unavailableReason;
+
+  const LevelPreview.available(LevelBreakdown this.breakdown)
+      : unavailableReason = null;
+
+  const LevelPreview.unavailable(LevelUnavailableReason this.unavailableReason)
+      : breakdown = null;
+```
+
+- [ ] **Step 5: Replace the 5 engine sites**
+
+In `lib/engine/spell_engine.dart`, keeping every surrounding comment intact — particularly the long doc comment at `:150-165` explaining why the General case is answered before the `try`, which stays accurate:
+
+| Line | Was | Becomes |
+|---|---|---|
+| 169 | `'Choose a base effect to see a level.'` | `LevelUnavailableReason.noBaseEffect` |
+| 174 | `'Type a level for this General guideline.'` | `LevelUnavailableReason.generalLevelNotTyped` |
+| 186 | `'A General guideline needs a level of 1 or more.'` | `LevelUnavailableReason.generalLevelBelowOne` |
+| 194 | `'Choose a Range, Duration and Target.'` | `LevelUnavailableReason.parametersIncomplete` |
+| 210 | `'Magnitudes reduce this spell below level 1.'` | `LevelUnavailableReason.magnitudesBelowOne` |
+
+The inline comment at `:176-184` quotes the old string ("told the caster *Magnitudes reduce this spell below level 1.*"). Keep the comment, but reword the quotation to name the enum value so it does not decay into a reference to a string that no longer exists.
+
+- [ ] **Step 6: Add the formatter function**
+
+Append to `lib/presentation/format/contribution_formatter.dart` (it needs a new import of `level_breakdown.dart`):
+
+```dart
 String formatUnavailableReason(
         AppLocalizations l10n, LevelUnavailableReason reason) =>
     switch (reason) {
@@ -1100,47 +1087,31 @@ String formatUnavailableReason(
     };
 ```
 
-- [ ] **Step 5: Wire `LevelBanner` to the formatter**
+- [ ] **Step 7: Thread the type through bloc and UI**
 
-Regenerate first: `flutter pub get`. Then in `level_banner.dart`, replace the Task 4 placeholder at the contribution row:
+`spell_creation_state.dart`: retype `levelUnavailableReason` to `LevelUnavailableReason?`. `spell_creation_bloc.dart:60,140` need no change beyond the type flowing. `level_banner.dart:30`: retype `unavailableReason`, and render it at `:44` via `formatUnavailableReason(l10n, reason)`.
 
-```dart
-Expanded(child: Text(formatContribution(l10n, contribution.source))),
-```
+**The rendered English is identical to before**, so widget tests asserting the reason text must pass unchanged.
 
-the unavailable-reason `Text(reason)` with `Text(formatUnavailableReason(l10n, reason))`, and the hardcoded ritual-minimum line at `:134`:
+- [ ] **Step 8: Update the remaining test references**
 
-```dart
-child: Text(
-  l10n.ritualMinimumRaised(breakdown.rawLevel, breakdown.level),
-  style: Theme.of(context).textTheme.bodySmall,
-),
-```
+The other 18 references (`grep -rn "unavailableReason" test/`) become enum comparisons. `level_banner_test.dart:159,170` pass `LevelUnavailableReason.noBaseEffect`.
 
-Also migrate `'Spell level'` (`:78`) and the `'Show the breakdown'`/`'Hide the breakdown'` pair (`:90`) to `l10n.spellLevel`, `l10n.showBreakdown`, `l10n.hideBreakdown` — Task 1 already put them in the ARB.
+- [ ] **Step 9: Regenerate and run everything**
 
-Obtain `l10n` once at the top of `build`: `final l10n = AppLocalizations.of(context);`.
-
-- [ ] **Step 6: Remove the Task 4 skips**
-
-Delete the `skip: 'Task 6 restores this via the formatter'` markers added in Task 4 Step 7. Those tests should now pass unchanged, because the rendered text is identical to what the engine used to compose.
-
-- [ ] **Step 7: Run the suite**
-
-Run: `flutter test` → 758 passing (750 + 8 formatter tests), zero skips
+Run: `dart run tool/gen_pseudo_arb.dart`
+Run: `flutter test` → all green, **no skipped tests**, count ≥ 756
 Run: `flutter analyze` → exit 0
-Run: `dart run tool/gen_pseudo_arb.dart` then `flutter test test/l10n/pseudo_arb_sync_test.dart` — the ARB grew, so `app_xx.arb` must be regenerated.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
-git add lib/presentation lib/l10n test/presentation
-git commit -m "feat(l10n): localise the level breakdown through a contribution formatter"
+git add lib/engine lib/bloc lib/presentation lib/l10n test
+git commit -m "refactor(engine): make LevelPreview.unavailableReason an enum"
 ```
-
 ---
 
-### Task 7: Migrate the small widgets
+### Task 6: Migrate the small widgets
 
 **Files:**
 - Modify: `lib/presentation/widgets/modifiers_section.dart:63,68,105,136`
@@ -1239,7 +1210,7 @@ git commit -m "feat(l10n): migrate modifiers section and spell card strings"
 
 ---
 
-### Task 8: Migrate `ritual_section.dart`
+### Task 7: Migrate `ritual_section.dart`
 
 **Files:**
 - Modify: `lib/presentation/widgets/ritual_section.dart:50-57,71,87,95,99-102,110,113`
@@ -1320,7 +1291,7 @@ git commit -m "feat(l10n): migrate ritual section strings"
 
 ---
 
-### Task 9: Migrate the library, backup and configuration screens
+### Task 8: Migrate the library, backup and configuration screens
 
 **Files:**
 - Modify: `lib/presentation/screens/spell_library_screen.dart:36,53,63,85,109,157`
@@ -1419,7 +1390,7 @@ git commit -m "feat(l10n): migrate library, backup and configuration screens"
 
 ---
 
-### Task 10: Migrate `spell_creation_screen.dart`
+### Task 9: Migrate `spell_creation_screen.dart`
 
 **Files:**
 - Modify: `lib/presentation/screens/spell_creation_screen.dart` (51 literals)
@@ -1528,7 +1499,7 @@ git commit -m "feat(l10n): migrate spell creation screen strings"
 
 ---
 
-### Task 11: Pseudo-locale coverage test
+### Task 10: Pseudo-locale coverage test
 
 **Files:**
 - Create: `test/l10n/pseudo_locale_coverage_test.dart`
@@ -1584,7 +1555,7 @@ Pump each of the four screens in turn if pumping the whole tab view needs more b
 - [ ] **Step 2: Run it**
 
 Run: `flutter test test/l10n/pseudo_locale_coverage_test.dart`
-Expected: PASS if Tasks 7-10 were complete. **Any failure names a literal that was missed** — fix it by moving that string to ARB, not by removing it from the list.
+Expected: PASS if Tasks 6-9 were complete. **Any failure names a literal that was missed** — fix it by moving that string to ARB, not by removing it from the list.
 
 - [ ] **Step 3: Run everything**
 
@@ -1611,10 +1582,10 @@ git commit -m "test(l10n): add pseudo-locale coverage guard and close item 80"
 
 ## Self-review notes
 
-**Spec coverage.** All five spec design sections map to tasks: §1 → Task 1, §2 → Task 4, §3 → Task 6, §4 → Task 2, §5 → Tasks 3 and 11. The spec's testing table maps to Tasks 4, 6 and 11.
+**Spec coverage.** All five spec design sections map to tasks: §1 → Task 1, §2 → Task 4, §3 → Task 4 (folded in, see below), §4 → Task 2, §5 → Tasks 3 and 10. The spec's testing table maps to Tasks 4, 5 and 10.
 
 **One addition beyond the spec.** Task 5 (`LevelUnavailableReason`) covers five engine-composed strings the spec missed — found while reading `level_breakdown.dart` to write Task 4. The spec named seven `label:` sites; there are twelve engine-composed user-facing strings in total. **The spec should be amended** to say so, or Task 5 will look like scope creep to a reviewer who reads the spec first.
 
 **Item 82 folded in, narrowly.** The translation-provenance flag is applied to the one non-template locale this pass creates (`app_xx.arb`, Task 3) and deliberately *not* stamped across `app_en.arb`. Rationale in Global Constraints. This closes 82.2 and partly answers 82.1; **82.3 (what the flag drives) remains open** and is not blocked by this work.
 
-**Deliberate deferrals**, each noted where it arises rather than left silent: the locale-aware list join in Task 8, and the double-`Scaffold` nesting risk in Task 2 Step 3.
+**Deliberate deferrals**, each noted where it arises rather than left silent: the locale-aware list join in Task 7, and the double-`Scaffold` nesting risk in Task 2 Step 3.
