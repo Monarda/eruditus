@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/presentation/widgets/level_banner.dart';
 
+import '../../support/pump_app.dart';
+
 void main() {
   const breakdown = LevelBreakdown(
     level: 10,
@@ -21,7 +23,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: banner)));
+    await pumpApp(tester, banner);
   }
 
   testWidgets('shows the level', (tester) async {

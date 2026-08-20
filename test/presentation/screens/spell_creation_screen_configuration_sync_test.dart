@@ -38,6 +38,7 @@ import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
 import '../../support/bloc_factories.dart';
+import '../../support/pump_app.dart';
 
 void main() {
   setUpAll(() {
@@ -99,15 +100,15 @@ void main() {
         states: configController.stream,
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       // The custom parameter doesn't exist yet.
       expect(find.textContaining('Custom Reach'), findsNothing);
@@ -179,15 +180,15 @@ void main() {
         states: configController.stream,
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       expect(find.textContaining('Custom Complexity'), findsNothing);
 
@@ -246,15 +247,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       // ModifiersSection renders nothing at all (not even the expand toggle)
       // when its filtered modifier list is empty.
@@ -284,15 +285,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       expect(find.byKey(const Key('modifiers-expand-toggle')), findsOneWidget);
       await tester.tap(find.byKey(const Key('modifiers-expand-toggle')));

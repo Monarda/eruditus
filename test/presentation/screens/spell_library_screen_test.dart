@@ -24,6 +24,7 @@ import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
 import '../../support/bloc_factories.dart';
+import '../../support/pump_app.dart';
 
 void main() {
   late MockSpellLibraryBloc bloc;
@@ -125,9 +126,12 @@ void main() {
 
   Future<void> pumpScreen(WidgetTester tester, SpellLibraryState state) async {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
-    await tester.pumpWidget(MaterialApp(
-      home: BlocProvider<SpellLibraryBloc>.value(value: bloc, child: const SpellLibraryScreen()),
-    ));
+    await pumpApp(
+      tester,
+      const SpellLibraryScreen(),
+      providers: [BlocProvider<SpellLibraryBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+    );
   }
 
   // The template section reaches for SpellCreationBloc only where its "Learn
@@ -143,15 +147,15 @@ void main() {
   }) async {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
     final resolvedCreationBloc = creationBloc ?? mockSpellCreationBloc();
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellLibraryBloc>.value(value: bloc),
-          BlocProvider<SpellCreationBloc>.value(value: resolvedCreationBloc),
-        ],
-        child: SpellLibraryScreen(onTemplateLearned: onTemplateLearned),
-      ),
-    ));
+    await pumpApp(
+      tester,
+      SpellLibraryScreen(onTemplateLearned: onTemplateLearned),
+      providers: [
+        BlocProvider<SpellLibraryBloc>.value(value: bloc),
+        BlocProvider<SpellCreationBloc>.value(value: resolvedCreationBloc),
+      ],
+      wrapInScaffold: false,
+    );
   }
 
   testWidgets('shows both built-in and user spells when loaded', (tester) async {

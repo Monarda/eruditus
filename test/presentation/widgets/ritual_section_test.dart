@@ -5,14 +5,15 @@ import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/presentation/widgets/ritual_section.dart';
 
-Widget _host(Widget child) =>
-    MaterialApp(home: Scaffold(body: SingleChildScrollView(child: child)));
+import '../../support/pump_app.dart';
+
+Widget _host(Widget child) => SingleChildScrollView(child: child);
 
 void main() {
   testWidgets(
       'shows the declaration control even for an ordinary spell, hides the banner',
       (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: false,
@@ -32,7 +33,7 @@ void main() {
   testWidgets(
       'shows the "creates something lasting" option only when the draft is Creo + Momentary',
       (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: true,
@@ -48,7 +49,7 @@ void main() {
 
   testWidgets('names every reason in the banner', (tester) async {
     // Aegis of the Hearth: Year duration and Boundary target.
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus([
         RitualReason.ritualOnlyDuration,
         RitualReason.ritualOnlyTarget,
@@ -71,7 +72,7 @@ void main() {
   });
 
   testWidgets('names the range reason in the banner', (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus([RitualReason.ritualOnlyRange]),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: false,
@@ -91,7 +92,7 @@ void main() {
 
   testWidgets('explains the healing case when the guideline is suggested',
       (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus([RitualReason.lastingCreation]),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: true,
@@ -109,7 +110,7 @@ void main() {
       (tester) async {
     final reported = <RitualDeclaration>[];
 
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: true,
@@ -128,7 +129,7 @@ void main() {
       (tester) async {
     final reported = <RitualDeclaration>[];
 
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: true,
@@ -146,7 +147,7 @@ void main() {
   testWidgets('selecting "not declared" reports none', (tester) async {
     final reported = <RitualDeclaration>[];
 
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.storyguideRuling,
       showLastingCreationOption: false,
@@ -163,7 +164,7 @@ void main() {
 
   testWidgets('the "not declared" radio is selected when declaration is none',
       (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.none,
       showLastingCreationOption: true,
@@ -184,7 +185,7 @@ void main() {
   testWidgets(
       'the "creates something lasting" radio is selected when declaration is lastingCreation',
       (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: true,
@@ -206,7 +207,7 @@ void main() {
   testWidgets(
       'the "storyguide ruling" radio is selected when declaration is storyguideRuling',
       (tester) async {
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.storyguideRuling,
       showLastingCreationOption: false,
@@ -234,7 +235,7 @@ void main() {
     // copies the catalog's declaration verbatim. The tile must still
     // render and show as selected, or the declaration becomes
     // unrecoverable the instant the user touches this control.
-    await tester.pumpWidget(_host(RitualSection(
+    await pumpApp(tester, _host(RitualSection(
       ritualStatus: const RitualStatus.notRitual(),
       declaration: RitualDeclaration.lastingCreation,
       showLastingCreationOption: false,

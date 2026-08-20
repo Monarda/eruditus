@@ -11,6 +11,8 @@ import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
 
+import '../../support/pump_app.dart';
+
 void main() {
   final rangeParam = Parameter(
       id: 'p1', name: 'Voice', category: 'Range', magnitude: 0,
@@ -66,13 +68,9 @@ void main() {
   }
 
   testWidgets('shows spell name, technique+form, level, and Published badge', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: buildSpell(name: 'Pillar of Fire', summary: 'Test summary.'),
-          level: 25,
-        ),
-      ),
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'Test summary.'),
+      level: 25,
     ));
 
     expect(find.text('Pillar of Fire'), findsOneWidget);
@@ -82,35 +80,25 @@ void main() {
   });
 
   testWidgets('shows "My Spell" badge for user-created spells', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-            entry: buildSpell(
-                name: 'My Fireball',
-                source: PublicationSource.userCreated,
-                summary: 'Test summary.')),
-      ),
-    ));
+    await pumpApp(tester, SpellCard(
+        entry: buildSpell(
+            name: 'My Fireball',
+            source: PublicationSource.userCreated,
+            summary: 'Test summary.')));
 
     expect(find.text('My Spell'), findsOneWidget);
   });
 
   testWidgets('falls back to "Untitled Technique Form" when name is null', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: buildSpell(name: null, summary: 'Test summary.'))),
-    ));
+    await pumpApp(tester, SpellCard(entry: buildSpell(name: null, summary: 'Test summary.')));
 
     expect(find.text('Untitled Creo Ignem'), findsOneWidget);
   });
 
   testWidgets('shows the spell description when present', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: buildSpell(name: 'Pillar of Fire', description: 'A wall of roaring flame.'),
-          level: 25,
-        ),
-      ),
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', description: 'A wall of roaring flame.'),
+      level: 25,
     ));
 
     expect(find.text('A wall of roaring flame.'), findsOneWidget);
@@ -122,14 +110,10 @@ void main() {
     // the Summary field (SummaryChanged('') -> draft.summary == ''), save.
     // `entry.summary ?? entry.description` does not fall through on '' since
     // `??` only checks for null, so this pins the blank-is-absent treatment.
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: buildSpell(
-              name: 'Pillar of Fire', summary: '', description: 'A wall of roaring flame.'),
-          level: 25,
-        ),
-      ),
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(
+          name: 'Pillar of Fire', summary: '', description: 'A wall of roaring flame.'),
+      level: 25,
     ));
 
     expect(find.text('A wall of roaring flame.'), findsOneWidget);
@@ -137,14 +121,10 @@ void main() {
 
   testWidgets('tapping the card invokes onTap', (tester) async {
     var tapped = false;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: buildSpell(
-              name: 'Test', source: PublicationSource.userCreated, summary: 'Test summary.'),
-          onTap: () => tapped = true,
-        ),
-      ),
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(
+          name: 'Test', source: PublicationSource.userCreated, summary: 'Test summary.'),
+      onTap: () => tapped = true,
     ));
 
     await tester.tap(find.byType(SpellCard));
@@ -177,9 +157,7 @@ void main() {
       target: individualParam,
     );
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: unresolved)),
-    ));
+    await pumpApp(tester, SpellCard(entry: unresolved));
 
     expect(find.byKey(const Key('spell-card-unresolved')), findsOneWidget);
     expect(find.text('Orphaned Spell'), findsOneWidget);
@@ -199,15 +177,11 @@ void main() {
       (tester) async {
     final spell = buildSpell(name: 'Touch of Midas', summary: 'Test summary.');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: spell, level: 20, isRitual: true)),
-    ));
+    await pumpApp(tester, SpellCard(entry: spell, level: 20, isRitual: true));
     expect(find.byKey(const Key('ritual-chip')), findsOneWidget);
     expect(find.text('Ritual'), findsOneWidget);
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: spell, level: 20)),
-    ));
+    await pumpApp(tester, SpellCard(entry: spell, level: 20));
     expect(find.byKey(const Key('ritual-chip')), findsNothing);
   });
 
@@ -215,17 +189,13 @@ void main() {
       (tester) async {
     final spell = buildSpell(name: 'Miscast Aegis', summary: 'Test summary.');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: spell,
-          level: 20,
-          problems: const [
-            'Choose a level for this General guideline',
-            'Only one option may be selected for Size',
-          ],
-        ),
-      ),
+    await pumpApp(tester, SpellCard(
+      entry: spell,
+      level: 20,
+      problems: const [
+        'Choose a level for this General guideline',
+        'Only one option may be selected for Size',
+      ],
     ));
 
     expect(find.byKey(const Key('needs-review-chip')), findsOneWidget);
@@ -242,9 +212,7 @@ void main() {
       (tester) async {
     final spell = buildSpell(name: 'Ordinary Bolt', summary: 'Test summary.');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: spell, level: 20)),
-    ));
+    await pumpApp(tester, SpellCard(entry: spell, level: 20));
 
     expect(find.byKey(const Key('needs-review-chip')), findsNothing);
     expect(find.textContaining('(unverified)'), findsNothing);
@@ -282,13 +250,9 @@ void main() {
       target: individualParam,
     );
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(
-          entry: unresolved,
-          problems: const ['Choose a level for this General guideline'],
-        ),
-      ),
+    await pumpApp(tester, SpellCard(
+      entry: unresolved,
+      problems: const ['Choose a level for this General guideline'],
     ));
 
     expect(find.byKey(const Key('spell-card-unresolved')), findsOneWidget);
@@ -318,9 +282,7 @@ void main() {
 
   testWidgets('a card built from a template renders its name, Technique/Form, blurb, and Published chip',
       (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: buildTemplate(summary: 'Wards against faeries of water.'))),
-    ));
+    await pumpApp(tester, SpellCard(entry: buildTemplate(summary: 'Wards against faeries of water.')));
 
     expect(find.text('Ward against Faeries of the Waters'), findsOneWidget);
     expect(find.textContaining('Creo Ignem'), findsOneWidget);
@@ -331,53 +293,37 @@ void main() {
   testWidgets('shows a Gen chip only when isGeneral is true', (tester) async {
     final template = buildTemplate(summary: 'Test summary.');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: template, isGeneral: true)),
-    ));
+    await pumpApp(tester, SpellCard(entry: template, isGeneral: true));
     expect(find.byKey(const Key('general-chip')), findsOneWidget);
     expect(find.text('Gen'), findsOneWidget);
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: template)),
-    ));
+    await pumpApp(tester, SpellCard(entry: template));
     expect(find.byKey(const Key('general-chip')), findsNothing);
   });
 
   testWidgets('shows an Exception chip only when isException is true', (tester) async {
     final template = buildTemplate(summary: 'Test summary.');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: template, isException: true)),
-    ));
+    await pumpApp(tester, SpellCard(entry: template, isException: true));
     expect(find.byKey(const Key('exception-chip')), findsOneWidget);
     expect(find.text('Exception'), findsOneWidget);
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: template)),
-    ));
+    await pumpApp(tester, SpellCard(entry: template));
     expect(find.byKey(const Key('exception-chip')), findsNothing);
   });
 
   testWidgets('shows the rationale text only when provided', (tester) async {
     final template = buildTemplate(summary: 'Test summary.');
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: SpellCard(entry: template, rationale: 'Rulebook says guideline arithmetic doesn\'t apply.'),
-      ),
-    ));
+    await pumpApp(tester, SpellCard(entry: template, rationale: 'Rulebook says guideline arithmetic doesn\'t apply.'));
     expect(find.text('Rulebook says guideline arithmetic doesn\'t apply.'), findsOneWidget);
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: template)),
-    ));
+    await pumpApp(tester, SpellCard(entry: template));
     expect(find.text('Rulebook says guideline arithmetic doesn\'t apply.'), findsNothing);
   });
 
   testWidgets('a null level renders the subtitle with no level suffix', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(body: SpellCard(entry: buildTemplate(summary: 'Test summary.'))),
-    ));
+    await pumpApp(tester, SpellCard(entry: buildTemplate(summary: 'Test summary.')));
     expect(find.textContaining('Creo Ignem'), findsOneWidget);
     expect(find.textContaining('Level'), findsNothing);
   });

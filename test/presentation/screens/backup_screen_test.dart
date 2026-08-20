@@ -16,6 +16,8 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 
+import '../../support/pump_app.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -81,13 +83,15 @@ void main() {
     // asset load actually complete before we assert on it.
     String? capturedJson;
 
-    await tester.pumpWidget(MaterialApp(
-      home: BackupScreen(
+    await pumpApp(
+      tester,
+      BackupScreen(
         backupService: backupService,
         exportJson: (json) async => capturedJson = json,
         importJson: () async => null,
       ),
-    ));
+      wrapInScaffold: false,
+    );
 
     final exportButton = tester.widget<ElevatedButton>(find.byKey(const Key('export-button')));
     await tester.runAsync(() => exportButton.onPressed!() as Future<void>);
@@ -99,13 +103,15 @@ void main() {
   });
 
   testWidgets('tapping import with a cancelled file picker shows "Import cancelled."', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: BackupScreen(
+    await pumpApp(
+      tester,
+      BackupScreen(
         backupService: backupService,
         exportJson: (json) async {},
         importJson: () async => null,
       ),
-    ));
+      wrapInScaffold: false,
+    );
 
     await tester.tap(find.byKey(const Key('import-button')));
     await tester.pumpAndSettle();
@@ -114,13 +120,15 @@ void main() {
   });
 
   testWidgets('tapping import with malformed content shows the failure message', (tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: BackupScreen(
+    await pumpApp(
+      tester,
+      BackupScreen(
         backupService: backupService,
         exportJson: (json) async {},
         importJson: () async => 'not valid json',
       ),
-    ));
+      wrapInScaffold: false,
+    );
 
     await tester.tap(find.byKey(const Key('import-button')));
     await tester.pumpAndSettle();
@@ -137,13 +145,15 @@ void main() {
       'customParameters': [],
     });
 
-    await tester.pumpWidget(MaterialApp(
-      home: BackupScreen(
+    await pumpApp(
+      tester,
+      BackupScreen(
         backupService: backupService,
         exportJson: (json) async {},
         importJson: () async => validJson,
       ),
-    ));
+      wrapInScaffold: false,
+    );
 
     final importButton = tester.widget<ElevatedButton>(find.byKey(const Key('import-button')));
     await tester.runAsync(() => importButton.onPressed!() as Future<void>);
@@ -171,13 +181,15 @@ void main() {
       'customParameters': [],
     });
 
-    await tester.pumpWidget(MaterialApp(
-      home: BackupScreen(
+    await pumpApp(
+      tester,
+      BackupScreen(
         backupService: backupService,
         exportJson: (json) async {},
         importJson: () async => validJson,
       ),
-    ));
+      wrapInScaffold: false,
+    );
 
     final importButton = tester.widget<ElevatedButton>(find.byKey(const Key('import-button')));
     await tester.runAsync(() => importButton.onPressed!() as Future<void>);

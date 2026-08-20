@@ -13,6 +13,7 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 
 import '../../support/bloc_factories.dart';
+import '../../support/pump_app.dart';
 
 void main() {
   late MockConfigurationBloc bloc;
@@ -21,9 +22,12 @@ void main() {
 
   Future<void> pumpScreen(WidgetTester tester, ConfigurationState state) async {
     bloc = mockConfigurationBloc(initialState: state);
-    await tester.pumpWidget(MaterialApp(
-      home: BlocProvider<ConfigurationBloc>.value(value: bloc, child: const ConfigurationScreen()),
-    ));
+    await pumpApp(
+      tester,
+      const ConfigurationScreen(),
+      providers: [BlocProvider<ConfigurationBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+    );
   }
 
   ConfigurationState loadedState({List<BaseEffect> effects = const []}) => ConfigurationState(

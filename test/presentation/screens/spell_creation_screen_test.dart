@@ -28,6 +28,7 @@ import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
 import 'package:eruditus/utils/constants.dart';
 
 import '../../support/bloc_factories.dart';
+import '../../support/pump_app.dart';
 
 /// The screen's own ListView.
 ///
@@ -139,18 +140,18 @@ void main() {
             parameters: [voiceParam],
           ),
     );
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellCreationBloc>.value(value: bloc),
-          BlocProvider<ConfigurationBloc>.value(value: configBloc),
-        ],
-        child: const SpellCreationScreen(
-          techniques: ArsArts.all,
-          forms: ArsForms.all,
-        ),
+    await pumpApp(
+      tester,
+      const SpellCreationScreen(
+        techniques: ArsArts.all,
+        forms: ArsForms.all,
       ),
-    ));
+      providers: [
+        BlocProvider<SpellCreationBloc>.value(value: bloc),
+        BlocProvider<ConfigurationBloc>.value(value: configBloc),
+      ],
+      wrapInScaffold: false,
+    );
   }
 
   testWidgets('selecting a technique dispatches TechniqueSelected', (tester) async {
@@ -723,15 +724,15 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellCreationBloc>.value(value: bloc),
-          BlocProvider<ConfigurationBloc>.value(value: configBloc),
-        ],
-        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-      ),
-    ));
+    await pumpApp(
+      tester,
+      const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      providers: [
+        BlocProvider<SpellCreationBloc>.value(value: bloc),
+        BlocProvider<ConfigurationBloc>.value(value: configBloc),
+      ],
+      wrapInScaffold: false,
+    );
     await tester.pump();
 
     expect(find.byType(SnackBar), findsOneWidget);
@@ -763,15 +764,15 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellCreationBloc>.value(value: bloc),
-          BlocProvider<ConfigurationBloc>.value(value: configBloc),
-        ],
-        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-      ),
-    ));
+    await pumpApp(
+      tester,
+      const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      providers: [
+        BlocProvider<SpellCreationBloc>.value(value: bloc),
+        BlocProvider<ConfigurationBloc>.value(value: configBloc),
+      ],
+      wrapInScaffold: false,
+    );
     await tester.pump();
 
     expect(find.byType(SnackBar), findsOneWidget);
@@ -902,15 +903,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '20');
       verify(() => bloc.add(const ChosenBaseLevelChanged(20))).called(1);
@@ -964,15 +965,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '20');
       await tester.pump();
@@ -1017,15 +1018,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       await tester.enterText(find.byKey(const Key('chosen-base-level-field')), '2');
       // The real bloc echoes the parsed value straight back onto the draft.
@@ -1265,15 +1266,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       expect(find.text('Hermetic Terram magic'), findsNothing);
 
@@ -1453,15 +1454,15 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
 
       await tester.tap(find.byKey(const Key('requisite-add-dropdown')));
       await tester.pumpAndSettle();
@@ -1563,18 +1564,18 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(
-            techniques: ArsArts.all,
-            forms: ArsForms.all,
-          ),
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(
+          techniques: ArsArts.all,
+          forms: ArsForms.all,
         ),
-      ));
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
       await tester.pump();
       expect(find.text('second'), findsOneWidget);
 
@@ -1734,15 +1735,15 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellCreationBloc>.value(value: bloc),
-          BlocProvider<ConfigurationBloc>.value(value: configBloc),
-        ],
-        child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-      ),
-    ));
+    await pumpApp(
+      tester,
+      const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+      providers: [
+        BlocProvider<SpellCreationBloc>.value(value: bloc),
+        BlocProvider<ConfigurationBloc>.value(value: configBloc),
+      ],
+      wrapInScaffold: false,
+    );
     await tester.scrollUntilVisible(find.byKey(const Key('summary-field')), 200, scrollable: screenScrollable);
 
     expect(find.text('Seeded from a template.'), findsOneWidget);
@@ -1788,15 +1789,15 @@ void main() {
           parameters: [voiceParam, durationParam, targetParam, roomTarget],
         ),
       );
-      await tester.pumpWidget(MaterialApp(
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider<SpellCreationBloc>.value(value: bloc),
-            BlocProvider<ConfigurationBloc>.value(value: configBloc),
-          ],
-          child: const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
-        ),
-      ));
+      await pumpApp(
+        tester,
+        const SpellCreationScreen(techniques: ArsArts.all, forms: ArsForms.all),
+        providers: [
+          BlocProvider<SpellCreationBloc>.value(value: bloc),
+          BlocProvider<ConfigurationBloc>.value(value: configBloc),
+        ],
+        wrapInScaffold: false,
+      );
     }
 
     // Drives the Target dropdown to [param], then pushes the state the real

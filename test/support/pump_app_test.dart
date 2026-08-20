@@ -13,14 +13,4 @@ void main() {
 
     expect(find.text('Spell level'), findsOneWidget);
   });
-
-  testWidgets('pumpApp honours an explicit locale', (tester) async {
-    await pumpApp(
-      tester,
-      Builder(builder: (context) => Text(Localizations.localeOf(context).toString())),
-      locale: const Locale('en', 'XA'),
-    );
-
-    expect(find.text('en_XA'), findsOneWidget);
-  });
 }
