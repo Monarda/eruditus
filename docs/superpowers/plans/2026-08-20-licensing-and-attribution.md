@@ -263,7 +263,7 @@ const String repoLicenceSummary =
 - [ ] **Step 4: Run the test to verify it passes**
 
 Run: `flutter test test/licensing/attribution_test.dart`
-Expected: PASS, 11 tests.
+Expected: PASS, 12 tests.
 
 - [ ] **Step 5: Check analyze is clean and commit**
 
@@ -1067,7 +1067,7 @@ flutter analyze
 flutter test
 ```
 
-Expected: analyze exits 0; all tests pass. The count should be 782 plus the tests added by Tasks 1-4 — 11 (attribution) + 10 (repo files) + 7 (About screen) + 2 (navigation) + 1 (the fifth pseudo-locale block) = 31, so **813**. Treat a different total as something to explain, not to paper over. If the run fails with a `sqlite3.dll` permissions error, kill stale `flutter_tester` processes and re-run.
+Expected: analyze exits 0; all tests pass. The count should be 782 plus the tests added by Tasks 1-4 — 12 (attribution) + 10 (repo files) + 7 (About screen) + 2 (navigation) + 1 (the fifth pseudo-locale block) = 32, so **814**. Treat a different total as something to explain, not to paper over. If the run fails with a `sqlite3.dll` permissions error, kill stale `flutter_tester` processes and re-run.
 
 - [ ] **Step 7: Verify by hand in the running app**
 
