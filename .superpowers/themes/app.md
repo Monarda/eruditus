@@ -451,12 +451,112 @@ touches rulebook content, a marker stops being optional. See item 79.
   content lives in the catalog per source edition (item 80.3). Both can carry MT
   text, so the convention has to work in both places or it will be applied to
   whichever is convenient and forgotten in the other.
-- **The pseudo-locale is generated but is not a translation.** `app_xx.arb` is a
-  test artefact that never reaches a user as a language. Mark it
-  `@@x-generated`, not machine-translated, or the burn-down is permanently
-  polluted by ~115 entries that will never be reviewed.
+- **The pseudo-locale is generated but is not a translation.** `app_en_XA.arb`
+  is a test artefact that never reaches a user as a language. Item 80 marks it
+  `@@x-translation-status: "generated"` rather than machine-translated, so the
+  burn-down is not permanently polluted by its 157 entries, which nobody will
+  ever review.
 - **Precedent:** this repo already takes provenance seriously — item 30's
   `source.lock` and `provenance.py` do exactly this for the import. Follow that
   shape rather than inventing a second vocabulary.
 - **See also:** items 81 (produces the first MT text and is where this must be
   in place), 79 (the licence obligation), 80.3 (the two stores)
+
+
+### 83. Raw Exception Strings Still Reach the User, Un-localised
+
+**Opened 2026-08-20** by item 80's final whole-branch review. Item 80 closed the
+`InvalidSpellException` case — that one was a genuine English *regression* and
+was fixed before merge. Four sites of the same shape remain, and they predate
+item 80, so they were correctly out of its scope.
+
+Each puts a raw `e.toString()` into text the user reads:
+
+| Site | Surface |
+|---|---|
+| `lib/presentation/screens/backup_screen.dart:53` | `backupImportFailed` |
+| `lib/bloc/spell_library/spell_library_bloc.dart:78` | library error state |
+| `lib/bloc/configuration/configuration_bloc.dart:40` | configuration error |
+| `lib/bloc/configuration/configuration_bloc.dart:76` | configuration error |
+
+- [ ] **83.1** **Decide what an unexpected error should say.** These are catch-alls for
+      genuinely unforeseen failures (disk, database, malformed backup file), so
+      unlike item 80's three families there is no fixed set of messages to
+      enumerate. Likely a single localised "something went wrong" frame with the
+      raw detail kept for diagnostics — but that is a product decision about how
+      much to show, not a mechanical migration.
+- [ ] **83.2** **⚠️ Note the pseudo-locale guard cannot see any of these.** Item 80's
+      coverage test pumps screens in their normal state; these strings render
+      only after a thrown exception. Whatever is decided needs its own test, or
+      it will decay silently the way this did.
+
+- **Not a regression** — unchanged from before item 80. Filed so the gap is
+  recorded rather than implied by item 80's closure.
+- **See also:** items 80 (closed), 84 (a guard that would have caught this class)
+
+
+### 84. The Pseudo-Locale Guard Is a Canary, Not a Guarantee
+
+**Opened 2026-08-20** by item 80's final whole-branch review.
+
+`test/l10n/pseudo_locale_coverage_test.dart` asserts that 26 named English
+strings do not survive a switch to `en_XA`. That is a real guard and it caught
+real gaps — but it proves the absence of **26 named strings**, not the absence
+of hardcoded strings. **A developer adding a new hardcoded literal is caught
+only if someone also adds it to the list**, which is precisely the maintenance
+burden a pseudo-locale is meant to remove.
+
+- [ ] **84.1** **Invert it.** Walk the widget tree for every `Text` and assert its string
+      either starts with `[` (pseudo-transformed, so it came from ARB) or appears
+      on an explicit exemption list. New hardcoded strings then fail **by
+      default** rather than by remembering. That is the difference between a
+      sample and a guarantee.
+- [ ] **84.2** **The exemption list is the design work**, not the tree walk. It must
+      cover: catalog names and descriptions from the fixture (rulebook content),
+      user content, the four realm values Divine/Faerie/Infernal/Magic that item
+      80 deliberately left hardcoded, and pure sign/numeral strings (`+2`, `—`).
+      Get this wrong in the permissive direction and the guard is theatre.
+- [ ] **84.3** **`main.dart`'s four tab labels sit outside the guard entirely.** The
+      test pumps the four screens; `_MainTabView` is private, so
+      `tabCreate`/`tabLibrary`/`tabSettings`/`tabBackup` are migrated but
+      unguarded.
+
+- **Precedent worth reusing:** the current guard's entries were all verified
+  non-vacuous during item 80's re-review by flipping the locale to `en` and
+  checking each one genuinely renders. Any replacement needs the same proof.
+- **See also:** items 80 (closed), 83
+
+
+### 85. ARB Key-Naming Is Inconsistent Across Item 80's Tasks
+
+**Opened 2026-08-20** by item 80's final whole-branch review. Cosmetic today and
+**much more expensive once a translation exists**, because renaming a key
+orphans its translations.
+
+Five implementers produced five conventions because none was written down. The
+conventions now exist in `DECISIONS.md` ("ARB conventions", added by item 80);
+the existing 157 keys were never reconciled to them.
+
+- [ ] **85.1** **Pick one and sweep.** The collisions are visible in adjacent tasks:
+      `effectsTabLabel`/`parametersTabLabel` (suffix) against
+      `tabCreate`/`tabLibrary`/`tabSettings`/`tabBackup` (prefix), for the same
+      UI role. Field labels split between a `Label` suffix
+      (`techniqueLabel`, `formLabel`, `nameLabel`) and none (`baseLevel`,
+      `guidelineLevel`, `specificType`). Buttons likewise
+      (`cancelButton`/`addButton` against `saveToLibrary`/`addRequisite`).
+- [ ] **85.2** **Decide the shared-key policy, which is currently self-contradictory.**
+      `published` is reused across three roles, while `Backup` was deliberately
+      **split** into `backupTitle`/`tabBackup` on the grounds that different
+      roles may want different lengths in translation. Both cannot be right.
+- [ ] **85.3** **⚠️ `mySpell` ("My Spell", card chip) and `mySpells` ("My Spells",
+      filter) differ by one character** and are one typo from a silent
+      wrong-label bug that no test would catch.
+- [ ] **85.4** **`spellCardArtsAndLevel` injects one translatable string into another** —
+      `spellCardUnverifiedSuffix` is passed in as `{suffix}`, so a translator
+      cannot reorder or reword the combination. Item 80's Task 10 rejected
+      exactly this shape for the effect-summary frames and used four full frames
+      instead; this one was missed. `DECISIONS.md` now records the rule.
+
+- **Do this before item 81**, which produces the first real translation — after
+  that, every rename costs a re-translation.
+- **See also:** items 80 (closed), 81 (the first translation)
