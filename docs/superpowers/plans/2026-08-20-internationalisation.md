@@ -244,7 +244,7 @@ Future<void> pumpApp(
 }
 ```
 
-`SingleChildWidget` is `provider`'s type, re-exported through `flutter_bloc`; import it from `package:flutter_bloc/flutter_bloc.dart` instead if the direct `provider` import is not already a dependency.
+`SingleChildWidget` is `provider`'s type. It is **not** reachable through `flutter_bloc/flutter_bloc.dart` -- proven false during Task 2: flutter_bloc 9.1.1 re-exports `provider` with a `show` clause that omits `SingleChildWidget`. Import it directly instead: `import 'package:provider/single_child_widget.dart';` (`provider` is already a transitive dependency via `flutter_bloc`, so no pubspec change is needed).
 
 Note `home: Scaffold(body: ...)` — most existing per-file helpers already wrap in a `Scaffold` (e.g. `level_banner_test.dart:24`). Tests that pump a full screen widget which supplies its *own* `Scaffold` will now nest two. That is harmless for layout but check the affected screen tests still pass; if one breaks, give `pumpApp` a `wrapInScaffold: true` default and pass `false` from that test.
 

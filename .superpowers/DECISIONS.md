@@ -710,6 +710,34 @@ delete the failing entry to make the test pass**, and never add the three
 deliberately-English populations above to its `_mustNotSurvive` list.
 *(item 80, 80.2)*
 
+**ARB conventions.** Written down here because five implementers on item 80
+independently produced five conventions, none of them recorded — caught only
+at the final whole-branch review.
+
+- **Key naming.** camelCase, prefixed by the screen or concept it belongs to
+  (`contribution*` for `ContributionSource` wording, `validation*` for
+  `SpellValidationError` wording, `ritual*`, `backup*`, `spellCard*`, …) —
+  match the sealed type or screen a key renders for, so a reader can find every
+  key belonging to one formatter by prefix alone.
+- **`@description` is mandatory on any key with a placeholder.** State which
+  text population each operand belongs to — chrome (already localised before
+  it reaches this key), rulebook content (not translated, routed through the
+  catalog per Task 6/9's boundary rule), user content (verbatim, exempt from
+  the pseudo-locale transform), or numeric — and, for rulebook content, name
+  *what* it is (a Parameter's name, an Art's Latin name, a modifier's label).
+  A key with no placeholder needs no `@description`.
+- **One full frame per rendered variant, never one translatable string
+  injected into another.** A book title or rulebook line citation is an
+  operand on the message that cites it (`targetRequiresThisRange`,
+  `ritualStoryguideRulingHelp`), not text baked into another ARB value's
+  literal — the same boundary rule applied one level deeper: composing prose
+  by string-gluing two ARB lookups together defeats a translator's ability to
+  reorder or reword either one independently.
+- **Pure sign/numeral strings stay in Dart, not ARB.** `'+2'`, `'—'`, and
+  similar — punctuation and arithmetic notation are not language-specific
+  vocabulary, and routing them through ARB just adds a lookup with nothing to
+  translate.  *(item 80, final review)*
+
 ## CI and workflows
 
 **Two workflows answer deliberately different questions.**
