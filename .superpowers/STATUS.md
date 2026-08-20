@@ -12,14 +12,15 @@
 > after item 32.2's first two entries: same counts (a corrected guideline at
 > the same base level moves no count).
 
-**Suite status: all three re-run 2026-08-19 at item 74's branch head — the
-Dart count moved 742→745 for item 74's own three tests (bloc shapes B and C,
-plus assertion 8):**
+**Suite status: all three re-run 2026-08-20 at item 80's (internationalisation)
+branch head — the Dart count moved 745→782 across items 74 through 80, the
+last 4 being task 11's pseudo-locale coverage guard
+(`test/l10n/pseudo_locale_coverage_test.dart`):**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **745 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **397 tests, green** — 2026-08-19; +6 for the report/lock guard, the second combined-effect spell, and audit coverage |
+| Dart | `flutter test` | **782 tests, green** |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **397 tests, green** — re-run 2026-08-20 at item 80's branch head, same count as 2026-08-19's run; +6 there for the report/lock guard, the second combined-effect spell, and audit coverage |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 
 **0 ledger entries carry an unreviewed candidate** (was 7), and the count can no

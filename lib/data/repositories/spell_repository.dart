@@ -4,6 +4,7 @@ import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/models/invalid_spell_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 class SpellRepository {
   final LocalSpellDatasource datasource;
@@ -83,7 +84,7 @@ class SpellRepository {
   /// `ResolvedSpell.isResolved` already reports, and refusing the write would
   /// mean a user who deleted a custom effect could no longer save edits to the
   /// spells built on it.
-  List<String> _problemsFor(Spell spell) => resolver.resolve(spell).problems;
+  List<SpellValidationError> _problemsFor(Spell spell) => resolver.resolve(spell).problems;
 
   /// Brings the shared resolver up to date before validating against it.
   ///

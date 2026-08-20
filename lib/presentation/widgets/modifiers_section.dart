@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/modifier.dart';
 
 /// The Modifiers section of the spell creation form. Collapsed by default: the
@@ -43,6 +44,7 @@ class _ModifiersSectionState extends State<ModifiersSection> {
   @override
   Widget build(BuildContext context) {
     if (widget.modifiers.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,8 +61,8 @@ class _ModifiersSectionState extends State<ModifiersSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Modifiers', style: Theme.of(context).textTheme.titleMedium),
-                      Text('$_selectedCount selected',
+                      Text(l10n.modifiersHeading, style: Theme.of(context).textTheme.titleMedium),
+                      Text(l10n.modifiersSelectedCount(_selectedCount),
                           style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
@@ -75,13 +77,13 @@ class _ModifiersSectionState extends State<ModifiersSection> {
         if (_expanded)
           ...widget.modifiers.map((modifier) =>
               modifier.selectionMode == ModifierSelectionMode.single
-                  ? _buildSingle(modifier)
-                  : _buildMulti(modifier)),
+                  ? _buildSingle(modifier, l10n)
+                  : _buildMulti(modifier, l10n)),
       ],
     );
   }
 
-  Widget _buildSingle(Modifier modifier) {
+  Widget _buildSingle(Modifier modifier, AppLocalizations l10n) {
     final selectedIds = widget.selected[modifier.id] ?? const <String>[];
     // Guard against a stored single-select selection carrying more than one
     // option: the dropdown asserts on a value matching no single item.
@@ -99,10 +101,10 @@ class _ModifiersSectionState extends State<ModifiersSection> {
         decoration: InputDecoration(labelText: modifier.name),
         initialValue: value,
         items: [
-          const DropdownMenuItem<ModifierOption?>(value: null, child: Text('None')),
+          DropdownMenuItem<ModifierOption?>(value: null, child: Text(l10n.noneOption)),
           ...modifier.options.map((option) => DropdownMenuItem<ModifierOption?>(
                 value: option,
-                child: Text('${option.label} (+${option.magnitude})'),
+                child: Text(l10n.modifierOptionWithMagnitude(option.label, option.magnitude)),
               )),
         ],
         onChanged: (option) {
@@ -124,7 +126,7 @@ class _ModifiersSectionState extends State<ModifiersSection> {
     );
   }
 
-  Widget _buildMulti(Modifier modifier) {
+  Widget _buildMulti(Modifier modifier, AppLocalizations l10n) {
     final selectedIds = widget.selected[modifier.id] ?? const <String>[];
 
     return Column(
@@ -133,7 +135,7 @@ class _ModifiersSectionState extends State<ModifiersSection> {
         Text(modifier.name, style: Theme.of(context).textTheme.bodyMedium),
         ...modifier.options.map((option) => CheckboxListTile(
               key: Key('modifier-checkbox-${option.id}'),
-              title: Text('${option.label} (+${option.magnitude})'),
+              title: Text(l10n.modifierOptionWithMagnitude(option.label, option.magnitude)),
               subtitle: option.description == null ? null : Text(option.description!),
               value: selectedIds.contains(option.id),
               onChanged: (isSelected) {

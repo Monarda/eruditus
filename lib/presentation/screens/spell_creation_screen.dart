@@ -7,6 +7,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/engine/ritual_status.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
@@ -14,6 +15,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/target_type.dart';
+import 'package:eruditus/presentation/format/contribution_formatter.dart';
 import 'package:eruditus/presentation/widgets/level_banner.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 import 'package:eruditus/presentation/widgets/ritual_section.dart';
@@ -50,18 +52,22 @@ class SpellCreationScreen extends StatelessWidget {
       },
       child: BlocConsumer<SpellCreationBloc, SpellCreationState>(
         listener: (context, state) {
+          final l10n = AppLocalizations.of(context);
           if (state.status == SpellCreationStatus.saved) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('"${state.savedSpell?.name}" saved to your library.')),
+              SnackBar(
+                  content: Text(l10n.spellSavedToLibrary('${state.savedSpell?.name}'))),
             );
           } else if (state.status == SpellCreationStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Could not save spell: ${state.errorMessage}')),
+              SnackBar(
+                  content: Text(l10n.couldNotSaveSpell('${state.errorMessage}'))),
             );
           }
         },
         builder: (context, state) {
           final bloc = context.read<SpellCreationBloc>();
+          final l10n = AppLocalizations.of(context);
           final draft = state.draft;
           final configState = context.watch<ConfigurationBloc>().state;
 
@@ -127,7 +133,7 @@ class SpellCreationScreen extends StatelessWidget {
                   state.suggestions.isNotEmpty);
 
           return Scaffold(
-            appBar: AppBar(title: const Text('Create Spell')),
+            appBar: AppBar(title: Text(l10n.createSpell)),
             // The LayoutBuilder exists for the banner alone. A Column lays its
             // non-flex children out with an *unbounded* main-axis constraint,
             // so a LayoutBuilder inside LevelBanner would be told its height
@@ -153,7 +159,7 @@ class SpellCreationScreen extends StatelessWidget {
                     children: [
                       DropdownButtonFormField<String>(
                         key: const Key('technique-dropdown'),
-                        decoration: const InputDecoration(labelText: 'Technique'),
+                        decoration: InputDecoration(labelText: l10n.techniqueLabel),
                         initialValue: draft.technique,
                         items: techniques
                             .map((t) => DropdownMenuItem(value: t, child: Text(t)))
@@ -165,7 +171,7 @@ class SpellCreationScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
                         key: const Key('form-dropdown'),
-                        decoration: const InputDecoration(labelText: 'Form'),
+                        decoration: InputDecoration(labelText: l10n.formLabel),
                         initialValue: draft.form,
                         items: forms
                             .map((f) => DropdownMenuItem(value: f, child: Text(f)))
@@ -178,7 +184,7 @@ class SpellCreationScreen extends StatelessWidget {
                       if (effectsForSelection.isNotEmpty)
                         DropdownButtonFormField<BaseEffect>(
                           key: const Key('base-effect-dropdown'),
-                          decoration: const InputDecoration(labelText: 'Base Effect'),
+                          decoration: InputDecoration(labelText: l10n.baseEffect),
                           initialValue: draft.baseEffect,
                           // Base effect descriptions can be long, and a Form switch
                           // swaps in a differently-sized list on the very next
@@ -196,8 +202,16 @@ class SpellCreationScreen extends StatelessWidget {
                                       // caster) -- printing the literal null would
                                       // read as "(Base null)". The numbered case is
                                       // untouched: existing tests pin its exact text.
-                                      '${e.description} (${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'}'
-                                      '${e.requiresVirtue == null ? '' : ', requires ${e.requiresVirtue}'})',
+                                      e.isGeneral
+                                          ? (e.requiresVirtue == null
+                                              ? l10n.effectWithGeneralMarker(e.description)
+                                              : l10n.effectWithGeneralMarkerAndVirtue(
+                                                  e.description, e.requiresVirtue!))
+                                          : (e.requiresVirtue == null
+                                              ? l10n.effectWithBaseLevelMarker(
+                                                  e.description, e.baseLevel!)
+                                              : l10n.effectWithBaseLevelMarkerAndVirtue(
+                                                  e.description, e.baseLevel!, e.requiresVirtue!)),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ))
@@ -237,8 +251,12 @@ class SpellCreationScreen extends StatelessWidget {
                         // isn't needed here -- keying by value is sufficient.
                         DropdownButtonFormField<String>(
                           key: ValueKey('chosen-realm-field-${draft.chosenSlots['realm']}'),
-                          decoration: const InputDecoration(labelText: 'Realm'),
+                          decoration: InputDecoration(labelText: l10n.realmLabel),
                           initialValue: draft.chosenSlots['realm'],
+                          // The four realm values stay these literal English words on
+                          // purpose -- they are catalog vocabulary the rulebook itself
+                          // prints (Divine/Faerie/Infernal/Magic), not interface chrome;
+                          // only the field's label above is localised.
                           items: const ['Divine', 'Faerie', 'Infernal', 'Magic']
                               .map((realm) => DropdownMenuItem(value: realm, child: Text(realm)))
                               .toList(),
@@ -254,7 +272,7 @@ class SpellCreationScreen extends StatelessWidget {
                         // (template instantiation) without needing a StatefulWidget.
                         DropdownButtonFormField<String>(
                           key: ValueKey('chosen-form-field-${draft.chosenSlots['form']}'),
-                          decoration: const InputDecoration(labelText: 'Form'),
+                          decoration: InputDecoration(labelText: l10n.formLabel),
                           initialValue: draft.chosenSlots['form'],
                           items: ArsForms.all
                               .map((form) => DropdownMenuItem(value: form, child: Text(form)))
@@ -273,14 +291,20 @@ class SpellCreationScreen extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: 16),
-                      Text('Spell Parameters', style: Theme.of(context).textTheme.titleMedium),
+                      Text(l10n.spellParameters, style: Theme.of(context).textTheme.titleMedium),
                       const SizedBox(height: 8),
-                      Text('Every spell requires exactly one of each:', style: Theme.of(context).textTheme.bodySmall),
+                      Text(l10n.everySpellRequiresOneOfEach, style: Theme.of(context).textTheme.bodySmall),
                       const SizedBox(height: 12),
-                      // Range dropdown
+                      // Range dropdown. `category` stays the literal English word 'Range'
+                      // on purpose -- it becomes Parameter.category, compared by value in
+                      // _buildParameterDropdown (p.category == category) and in
+                      // _compatibleWithPeers (candidate.category == 'Range'). Only `label`,
+                      // what the field displays, is localised (via the existing slotRange
+                      // key).
                       _buildParameterDropdown(
                         key: const Key('range-dropdown'),
-                        label: 'Range',
+                        l10n: l10n,
+                        label: l10n.slotRange,
                         category: 'Range',
                         parameters: configState.parameters,
                         selectedParameter: draft.range,
@@ -295,16 +319,21 @@ class SpellCreationScreen extends StatelessWidget {
                       if (draft.target?.requiresRangeId != null) ...[
                         const SizedBox(height: 4),
                         Text(
-                          '${draft.target!.name} requires this Range '
-                          '(Houses of Hermes: Mystery Cults, Sensory Magic).',
+                          // Citation is a book title, not chrome -- passed as
+                          // an operand (see @targetRequiresThisRange) rather
+                          // than baked into the ARB literal.
+                          l10n.targetRequiresThisRange(draft.target!.name,
+                              'Houses of Hermes: Mystery Cults, Sensory Magic'),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                       const SizedBox(height: 12),
-                      // Duration dropdown
+                      // Duration dropdown. `category` stays the literal 'Duration' for the
+                      // same reason as the Range dropdown above.
                       _buildParameterDropdown(
                         key: const Key('duration-dropdown'),
-                        label: 'Duration',
+                        l10n: l10n,
+                        label: l10n.slotDuration,
                         category: 'Duration',
                         parameters: configState.parameters,
                         selectedParameter: draft.duration,
@@ -315,10 +344,12 @@ class SpellCreationScreen extends StatelessWidget {
                         },
                       ),
                       const SizedBox(height: 12),
-                      // Target dropdown
+                      // Target dropdown. `category` stays the literal 'Target' for the
+                      // same reason as the Range dropdown above.
                       _buildParameterDropdown(
                         key: const Key('target-dropdown'),
-                        label: 'Target',
+                        l10n: l10n,
+                        label: l10n.slotTarget,
                         category: 'Target',
                         parameters: configState.parameters,
                         selectedParameter: draft.target,
@@ -376,19 +407,20 @@ class SpellCreationScreen extends StatelessWidget {
                       ),
                       if (state.validationErrors.isNotEmpty)
                         ...state.validationErrors.map(
-                          (e) => Text(e, style: const TextStyle(color: Colors.red)),
+                          (e) => Text(formatValidationError(l10n, e),
+                              style: const TextStyle(color: Colors.red)),
                         ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         key: const Key('calculate-button'),
                         onPressed: () => bloc.add(const SpellCalculated()),
-                        child: const Text('Find Similar Spells'),
+                        child: Text(l10n.findSimilarSpells),
                       ),
                       if (showSuggestions) ...[
                         const SizedBox(height: 16),
-                        Text('Similar Spells', style: Theme.of(context).textTheme.titleMedium),
+                        Text(l10n.similarSpellsTitle, style: Theme.of(context).textTheme.titleMedium),
                         if (state.suggestions.isEmpty)
-                          const Text('No similar spells found.')
+                          Text(l10n.noSimilarSpellsFound)
                         else
                           ...state.suggestions.map(
                             (s) => SpellCard(
@@ -421,7 +453,7 @@ class SpellCreationScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            state.errorMessage ?? 'Failed to save spell.',
+                            state.errorMessage ?? l10n.failedToSaveSpell,
                             style: const TextStyle(color: Colors.red),
                           ),
                         ),
@@ -438,7 +470,7 @@ class SpellCreationScreen extends StatelessWidget {
                             child: OutlinedButton(
                               key: const Key('discard-button'),
                               onPressed: isSaving ? null : () => bloc.add(const SpellDiscarded()),
-                              child: const Text('Discard'),
+                              child: Text(l10n.discardButton),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -475,7 +507,7 @@ class SpellCreationScreen extends StatelessWidget {
                                       width: 16,
                                       child: CircularProgressIndicator(strokeWidth: 2),
                                     )
-                                  : const Text('Save to Library'),
+                                  : Text(l10n.saveToLibrary),
                             ),
                           ),
                         ],
@@ -507,6 +539,7 @@ class SpellCreationScreen extends StatelessWidget {
     SpellCreationBloc bloc,
     SpellDraft draft,
   ) {
+    final l10n = AppLocalizations.of(context);
     final taken = draft.requisites.keys.toSet();
     final available =
         _selectableRequisiteArts(draft).where((art) => !taken.contains(art)).toList();
@@ -514,15 +547,15 @@ class SpellCreationScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Requisites', style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.requisitesHeading, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(
-          'Free requisites cost nothing; adding requisites cost +1 magnitude each.',
+          l10n.requisitesHelp,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
         if (draft.requisites.isEmpty)
-          const Text('No requisites.')
+          Text(l10n.noRequisites)
         else
           ...draft.requisites.entries.map(
             (entry) => Padding(
@@ -538,7 +571,9 @@ class SpellCreationScreen extends StatelessWidget {
                         .map((kind) => DropdownMenuItem(
                               value: kind,
                               child: Text(
-                                kind == RequisiteKind.adding ? 'Adding (+1)' : 'Free (+0)',
+                                kind == RequisiteKind.adding
+                                    ? l10n.requisiteAdding
+                                    : l10n.requisiteFree,
                               ),
                             ))
                         .toList(),
@@ -551,7 +586,7 @@ class SpellCreationScreen extends StatelessWidget {
                   IconButton(
                     key: Key('requisite-remove-${entry.key}'),
                     icon: const Icon(Icons.close),
-                    tooltip: 'Remove ${entry.key} requisite',
+                    tooltip: l10n.removeRequisite(entry.key),
                     onPressed: () => bloc.add(RequisiteRemoved(entry.key)),
                   ),
                 ],
@@ -569,7 +604,7 @@ class SpellCreationScreen extends StatelessWidget {
           DropdownButton<String>(
             key: const Key('requisite-add-dropdown'),
             value: null,
-            hint: const Text('Add requisite'),
+            hint: Text(l10n.addRequisite),
             isExpanded: true,
             items: available
                 .map((art) => DropdownMenuItem(value: art, child: Text(art)))
@@ -602,18 +637,19 @@ class SpellCreationScreen extends StatelessWidget {
     SpellCreationBloc bloc,
     SpellDraft draft,
   ) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Adjustments', style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.adjustmentsHeading, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(
-          'A one-off magnitude with the prose that justifies it, positive or negative.',
+          l10n.adjustmentsHelp,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
         if (draft.adjustments.isEmpty)
-          const Text('No adjustments.')
+          Text(l10n.noAdjustments)
         else
           for (var index = 0; index < draft.adjustments.length; index++)
             Padding(
@@ -625,7 +661,7 @@ class SpellCreationScreen extends StatelessWidget {
                   IconButton(
                     key: Key('adjustment-decrement-$index'),
                     icon: const Icon(Icons.remove),
-                    tooltip: 'Decrease magnitude',
+                    tooltip: l10n.decreaseMagnitude,
                     onPressed:
                         draft.adjustments[index].magnitude <= _minAdjustmentMagnitude
                             ? null
@@ -646,7 +682,7 @@ class SpellCreationScreen extends StatelessWidget {
                   IconButton(
                     key: Key('adjustment-increment-$index'),
                     icon: const Icon(Icons.add),
-                    tooltip: 'Increase magnitude',
+                    tooltip: l10n.increaseMagnitude,
                     onPressed:
                         draft.adjustments[index].magnitude >= _maxAdjustmentMagnitude
                             ? null
@@ -671,7 +707,7 @@ class SpellCreationScreen extends StatelessWidget {
                   IconButton(
                     key: Key('adjustment-remove-$index'),
                     icon: const Icon(Icons.close),
-                    tooltip: 'Remove adjustment',
+                    tooltip: l10n.removeAdjustment,
                     onPressed: () => bloc.add(AdjustmentRemoved(index)),
                   ),
                 ],
@@ -681,7 +717,7 @@ class SpellCreationScreen extends StatelessWidget {
           key: const Key('adjustment-add-button'),
           onPressed: () => bloc.add(const AdjustmentAdded()),
           icon: const Icon(Icons.add),
-          label: const Text('Add adjustment'),
+          label: Text(l10n.addAdjustment),
         ),
       ],
     );
@@ -689,6 +725,7 @@ class SpellCreationScreen extends StatelessWidget {
 
   Widget _buildParameterDropdown({
     required Key key,
+    required AppLocalizations l10n,
     required String label,
     required String category,
     required List<Parameter> parameters,
@@ -729,8 +766,9 @@ class SpellCreationScreen extends StatelessWidget {
           .map((p) => DropdownMenuItem(
                 value: p,
                 child: Text(p.requiresVirtue == null
-                    ? '${p.name} (+${p.magnitude})'
-                    : '${p.name} (+${p.magnitude}, requires ${p.requiresVirtue})'),
+                    ? l10n.parameterWithMagnitude(p.name, p.magnitude)
+                    : l10n.parameterWithMagnitudeAndVirtue(
+                        p.name, p.magnitude, p.requiresVirtue!)),
               ))
           .toList(),
       onChanged: locked ? null : onChanged,
@@ -827,13 +865,14 @@ class _GuidelineLevelFieldState extends State<_GuidelineLevelField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return TextFormField(
       key: const Key('chosen-base-level-field'),
       controller: _controller,
       keyboardType: TextInputType.number,
-      decoration: const InputDecoration(
-        labelText: 'Guideline level',
-        helperText: 'General guidelines have no fixed level — you choose it.',
+      decoration: InputDecoration(
+        labelText: l10n.guidelineLevel,
+        helperText: l10n.generalGuidelineLevelHelp,
       ),
       onChanged: (value) => widget.onChanged(int.tryParse(value)),
     );
@@ -880,9 +919,10 @@ class _SpecificTypeFieldState extends State<_SpecificTypeField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return TextFormField(
       controller: _controller,
-      decoration: const InputDecoration(labelText: 'Specific type'),
+      decoration: InputDecoration(labelText: l10n.specificType),
       onChanged: widget.onChanged,
     );
   }
@@ -926,12 +966,13 @@ class _SummaryFieldState extends State<_SummaryField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return TextFormField(
       controller: _controller,
       maxLines: 3,
-      decoration: const InputDecoration(
-        labelText: 'Summary',
-        helperText: 'Required. Shown on this spell\'s card in your library.',
+      decoration: InputDecoration(
+        labelText: l10n.summaryLabel,
+        helperText: l10n.nameRequiredHelp,
       ),
       onChanged: widget.onChanged,
     );
@@ -960,46 +1001,49 @@ class _ContainerModeField extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const Map<ContainerMode, String> _labels = {
-    ContainerMode.unstated: 'Not stated',
-    ContainerMode.static: 'Static',
-    ContainerMode.dynamic: 'Dynamic',
-  };
+  String _label(AppLocalizations l10n, ContainerMode mode) {
+    switch (mode) {
+      case ContainerMode.unstated:
+        return l10n.containerModeNotStated;
+      case ContainerMode.static:
+        return l10n.containerModeStatic;
+      case ContainerMode.dynamic:
+        return l10n.containerModeDynamic;
+    }
+  }
 
-  String get _helper {
+  String _helper(AppLocalizations l10n) {
     switch (value) {
       case ContainerMode.unstated:
-        return 'Not recorded. The rulebook fixes this when the spell is '
-            'designed, so it is worth deciding.';
+        return l10n.containerModeUnstatedHelp;
       case ContainerMode.static:
-        return 'Affects whatever is in the $targetName when cast, and keeps '
-            'affecting it even after it leaves.';
+        return l10n.containerModeStaticHelp(targetName);
       case ContainerMode.dynamic:
-        return 'Affects whatever is in the $targetName at the time. Leaving '
-            'ends the effect; entering starts it.';
+        return l10n.containerModeDynamicHelp(targetName);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Container behaviour',
+        Text(l10n.containerBehaviour,
             style: Theme.of(context).textTheme.bodyMedium),
         const SizedBox(height: 4),
         SegmentedButton<ContainerMode>(
           key: const Key('container-mode-field'),
           segments: ContainerMode.values
               .map((mode) =>
-                  ButtonSegment(value: mode, label: Text(_labels[mode]!)))
+                  ButtonSegment(value: mode, label: Text(_label(l10n, mode))))
               .toList(),
           selected: {value},
           showSelectedIcon: false,
           onSelectionChanged: (selection) => onChanged(selection.single),
         ),
         const SizedBox(height: 4),
-        Text(_helper, style: Theme.of(context).textTheme.bodySmall),
+        Text(_helper(l10n), style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -1078,10 +1122,11 @@ class _AdjustmentNoteFieldState extends State<_AdjustmentNoteField> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return TextFormField(
       controller: _controller,
       focusNode: _focusNode,
-      decoration: const InputDecoration(labelText: 'Note'),
+      decoration: InputDecoration(labelText: l10n.adjustmentNoteLabel),
       onFieldSubmitted: (_) => _commit(),
     );
   }
@@ -1117,8 +1162,9 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Name Your Spell'),
+      title: Text(l10n.nameYourSpell),
       // Two fields now, not one -- a short viewport with the keyboard up
       // could otherwise overflow the non-scrolling Column below.
       scrollable: true,
@@ -1128,7 +1174,7 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
           TextField(
             key: const Key('spell-name-field'),
             controller: _nameController,
-            decoration: const InputDecoration(hintText: 'e.g., Pillar of Flames'),
+            decoration: InputDecoration(hintText: l10n.spellNameHint),
             onChanged: (_) => setState(() {}),
           ),
           if (widget.requiresSummary) ...[
@@ -1137,9 +1183,9 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
               key: const Key('save-dialog-summary-field'),
               controller: _summaryController,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Summary',
-                hintText: 'What does this spell do?',
+              decoration: InputDecoration(
+                labelText: l10n.summaryLabel,
+                hintText: l10n.spellSummaryHint,
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -1149,7 +1195,7 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancelButton),
         ),
         ElevatedButton(
           key: const Key('confirm-save-button'),
@@ -1162,7 +1208,7 @@ class _SaveSpellDialogState extends State<_SaveSpellDialog> {
                   summary: widget.requiresSummary ? _summaryController.text.trim() : null,
                 ))
               : null,
-          child: const Text('Save'),
+          child: Text(l10n.saveButton),
         ),
       ],
     );

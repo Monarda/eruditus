@@ -6,6 +6,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/invalid_spell_exception.dart';
 import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/level_adjustment.dart';
 import 'package:eruditus/models/modifier.dart';
@@ -16,6 +17,7 @@ import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart' show SpellDraft;
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 
 class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
@@ -180,7 +182,7 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       // drops all of them rather than showing a stale subset; the user gets the
       // remainder back, computed against the draft they actually have, on their
       // next press. `null` is copyWith's "leave it alone".
-      validationErrors: draftChanged ? const <String>[] : null,
+      validationErrors: draftChanged ? const <SpellValidationError>[] : null,
       // The same *kind* of rule as validationErrors above, on a deliberately
       // different predicate. A suggestion is not a statement about the draft;
       // it is a statement about a number. findSimilarSpells is asked for spells
@@ -918,17 +920,25 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
       return;
     }
 
-    _emit(emit, state.copyWith(status: SpellCreationStatus.saving));
-
     // One event, one atomic save. Dispatching SummaryChanged and then
     // SpellSaveRequested would leave the draft half-updated if the second
-    // never arrived. Computed outside the try so the catch branch below can
-    // also emit it: the dialog-supplied summary lives only on this local
-    // `draft`, never on `state.draft`, so re-emitting `state` on failure
-    // would silently drop it and leave a retry finding the dialog empty.
+    // never arrived. Computed before the `saving` emit below (and folded into
+    // it) so both the success path and the InvalidSpellException catch below
+    // can reach it as `state.draft` by *identity*, not just by value: the
+    // dialog-supplied summary lives only on this local `draft`, never on the
+    // pre-save `state.draft`, so re-emitting the old `state` on failure would
+    // silently drop it and leave a retry finding the dialog empty -- and
+    // `_emit`'s funnel clears `validationErrors` whenever `next.draft` is a
+    // *different object* from the `state.draft` it is compared against
+    // (SpellDraft has no value equality), so the InvalidSpellException catch
+    // needs `state.draft` to already *be* this merged draft, not merely equal
+    // to it, or its own `validationErrors: e.problems` would be wiped by the
+    // same funnel pass that carries it.
     final draft = event.summary == null
         ? state.draft
         : state.draft.copyWith(summary: event.summary);
+
+    _emit(emit, state.copyWith(status: SpellCreationStatus.saving, draft: draft));
 
     try {
       final spell = draft.toSpell(name: event.name, source: PublicationSource.userCreated);
@@ -945,6 +955,24 @@ class SpellCreationBloc extends Bloc<SpellCreationEvent, SpellCreationState> {
         status: SpellCreationStatus.saved,
         savedSpell: spell,
         draft: _emptySeededDraft(),
+      ));
+    } on InvalidSpellException catch (e) {
+      // The engine pre-validates on Calculate, but it is synced with
+      // modifiers and parameters only (AvailableModifiersSynced /
+      // AvailableParametersSynced), not effects -- while the repository's
+      // write-time check refreshes all three. Deleting a custom base effect
+      // in the Configuration tab, between Calculate and Save, opens exactly
+      // that window: a draft the engine called valid that the repository
+      // then refuses. `e.problems` is the same structured, already-localised
+      // `SpellValidationError` list `validateSpellDraft` produces above, so
+      // it belongs in the same `validationErrors` channel -- not stringified
+      // into `errorMessage`, which would render `e.toString()`'s
+      // `Equatable.toString()` output (e.g. `RequisiteIsOwnArt()`) verbatim,
+      // in English, regardless of locale.
+      _emit(emit, state.copyWith(
+        draft: draft,
+        status: SpellCreationStatus.editing,
+        validationErrors: e.problems,
       ));
     } catch (e) {
       _emit(emit, state.copyWith(

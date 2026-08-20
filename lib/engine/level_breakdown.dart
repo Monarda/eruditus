@@ -1,22 +1,23 @@
 import 'package:equatable/equatable.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 
 /// One line of a spell's level calculation. [magnitude] holds the base level
 /// when [isBase] is true, and a magnitude contribution otherwise.
 class LevelContribution extends Equatable {
-  final String label;
+  final ContributionSource source;
   final int magnitude;
   final bool isBase;
 
   const LevelContribution({
-    required this.label,
+    required this.source,
     required this.magnitude,
     this.isBase = false,
   });
 
   // See RitualStatus.props for why these three types carry value equality.
   @override
-  List<Object?> get props => [label, magnitude, isBase];
+  List<Object?> get props => [source, magnitude, isBase];
 }
 
 /// A spell's calculated level together with the sources that produced it.
@@ -57,6 +58,19 @@ class LevelBreakdown extends Equatable {
   List<Object?> get props => [level, rawLevel, ritualStatus, contributions];
 }
 
+/// Why a draft cannot produce a level yet.
+///
+/// An enum rather than a message: these are chrome, and `previewLevel` runs in
+/// domain code where no locale is reachable. See
+/// `presentation/format/contribution_formatter.dart` for the wording.
+enum LevelUnavailableReason {
+  noBaseEffect,
+  generalLevelNotTyped,
+  generalLevelBelowOne,
+  parametersIncomplete,
+  magnitudesBelowOne,
+}
+
 /// The answer to "does this draft have a level yet, and if not, why not".
 ///
 /// Exactly one of [breakdown] and [unavailableReason] is non-null. This exists
@@ -69,11 +83,11 @@ class LevelBreakdown extends Equatable {
 /// fields, and those are what get compared.
 class LevelPreview {
   final LevelBreakdown? breakdown;
-  final String? unavailableReason;
+  final LevelUnavailableReason? unavailableReason;
 
   const LevelPreview.available(LevelBreakdown this.breakdown)
       : unavailableReason = null;
 
-  const LevelPreview.unavailable(String this.unavailableReason)
+  const LevelPreview.unavailable(LevelUnavailableReason this.unavailableReason)
       : breakdown = null;
 }

@@ -6,9 +6,30 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_bloc.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_event.dart';
 import 'package:eruditus/bloc/spell_library/spell_library_state.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/presentation/widgets/spell_card.dart';
+
+// The filter list's *values* ('All' | 'Published' | 'My Spells') are also the
+// comparison keys SpellLibraryState.filter checks against
+// (spell_library_state.dart:48,65,82) -- they stay these literal English
+// strings on purpose, never localised, so filtering keeps working under
+// every locale. Only the label each RadioListTile *displays* is localised,
+// via this mapping, so the two are decoupled: the key an event carries is
+// never the same value as the text a caster reads.
+const _filterKeys = ['All', 'Published', 'My Spells'];
+
+String _filterLabel(AppLocalizations l10n, String key) {
+  switch (key) {
+    case 'Published':
+      return l10n.published;
+    case 'My Spells':
+      return l10n.mySpells;
+    default:
+      return l10n.filterAll;
+  }
+}
 
 class SpellLibraryScreen extends StatefulWidget {
   // Lets a caller move focus to the Create tab once a template has been
@@ -32,8 +53,9 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Spell Library')),
+      appBar: AppBar(title: Text(l10n.spellLibraryTitle)),
       body: BlocBuilder<SpellLibraryBloc, SpellLibraryState>(
         builder: (context, state) {
           final bloc = context.read<SpellLibraryBloc>();
@@ -50,7 +72,7 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                 padding: const EdgeInsets.all(8),
                 child: TextField(
                   key: const Key('search-field'),
-                  decoration: const InputDecoration(labelText: 'Search spells...'),
+                  decoration: InputDecoration(labelText: l10n.searchSpellsHint),
                   onChanged: (value) => bloc.add(SearchQueryChanged(value)),
                 ),
               ),
@@ -60,10 +82,10 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                   if (value != null) bloc.add(FilterChanged(value));
                 },
                 child: Row(
-                  children: ['All', 'Published', 'My Spells'].map((filter) {
+                  children: _filterKeys.map((filter) {
                     return Expanded(
                       child: RadioListTile<String>(
-                        title: Text(filter),
+                        title: Text(_filterLabel(l10n, filter)),
                         value: filter,
                       ),
                     );
@@ -80,9 +102,9 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                     // spells. Omitted entirely when empty, rather than a
                     // heading over nothing.
                     if (templates.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text('General spells — learn at any level'),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text(l10n.generalSpellsHeader),
                       ),
                       ...templates.map((t) => _TemplateCard(
                             template: t,
@@ -103,10 +125,9 @@ class _SpellLibraryScreenState extends State<SpellLibraryScreen> {
                     // Omitted entirely when empty, matching the Templates
                     // section's own convention.
                     if (state.visibleExceptions.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text(
-                            'Exceptions — recorded from the rulebook directly, not derived from the guidelines'),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: Text(l10n.exceptionsHeader),
                       ),
                       ...state.visibleExceptions.map((e) => _ExceptionCard(entry: e)),
                     ],
@@ -136,6 +157,7 @@ class _TemplateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SpellCard(
       entry: template,
       isGeneral: true,
@@ -154,7 +176,7 @@ class _TemplateCard extends StatelessWidget {
                 context.read<SpellCreationBloc>().add(TemplateInstantiated(template));
                 onTemplateLearned?.call();
               },
-              child: const Text('Learn at level…'),
+              child: Text(l10n.learnAtLevel),
             ),
           ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eruditus/engine/ritual_status.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 
 /// The Ritual controls of the spell creation form: a non-interactive banner
@@ -46,19 +47,20 @@ class RitualSection extends StatelessWidget {
     required this.onDeclarationChanged,
   });
 
-  String _describe(RitualReason reason) => switch (reason) {
-        RitualReason.ritualOnlyRange => '$rangeName range',
-        RitualReason.ritualOnlyDuration => '$durationName duration',
-        RitualReason.ritualOnlyTarget => '$targetName target',
+  String _describe(RitualReason reason, AppLocalizations l10n) => switch (reason) {
+        RitualReason.ritualOnlyRange => l10n.ritualReasonRange(rangeName),
+        RitualReason.ritualOnlyDuration => l10n.ritualReasonDuration(durationName),
+        RitualReason.ritualOnlyTarget => l10n.ritualReasonTarget(targetName),
         RitualReason.exceedsMaxFormulaicLevel =>
-          'level above ${RitualStatus.maxFormulaicLevel}',
-        RitualReason.guideline => 'the guideline requires it',
-        RitualReason.lastingCreation => 'it creates something lasting',
-        RitualReason.storyguideRuling => 'storyguide ruling',
+          l10n.ritualReasonLevelAbove(RitualStatus.maxFormulaicLevel),
+        RitualReason.guideline => l10n.ritualReasonGuidelineRequires,
+        RitualReason.lastingCreation => l10n.ritualReasonLastingCreation,
+        RitualReason.storyguideRuling => l10n.ritualReasonStoryguideRuling,
       };
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -68,7 +70,8 @@ class RitualSection extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Text(
-                'Ritual: ${ritualStatus.reasons.map(_describe).join('; ')}.',
+                l10n.ritualSummary(
+                    ritualStatus.reasons.map((r) => _describe(r, l10n)).join('; ')),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -81,10 +84,10 @@ class RitualSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const RadioListTile<RitualDeclaration>(
-                key: Key('ritual-radio-none'),
+              RadioListTile<RitualDeclaration>(
+                key: const Key('ritual-radio-none'),
                 value: RitualDeclaration.none,
-                title: Text('Not declared'),
+                title: Text(l10n.ritualNotDeclared),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
               if (showLastingCreationOption ||
@@ -92,26 +95,23 @@ class RitualSection extends StatelessWidget {
                 RadioListTile<RitualDeclaration>(
                   key: const Key('ritual-radio-lastingCreation'),
                   value: RitualDeclaration.lastingCreation,
-                  title: const Text('This creates something lasting'),
+                  title: Text(l10n.ritualCreatesLasting),
                   subtitle: Text(
                     guidelineIsSuggested
                         // Core Rules line 13415.
-                        ? 'Cast as anything other than a Momentary Ritual, this '
-                            'suspends the healing rather than completing it.'
-                        : 'A Momentary Creo spell that is not a Ritual creates '
-                            'something that vanishes as the magic ends.',
+                        ? l10n.ritualCreatesLastingHelpSuggested
+                        : l10n.ritualCreatesLastingHelpDefault,
                   ),
                   controlAffinity: ListTileControlAffinity.leading,
                 ),
-              const RadioListTile<RitualDeclaration>(
-                key: Key('ritual-radio-storyguideRuling'),
+              RadioListTile<RitualDeclaration>(
+                key: const Key('ritual-radio-storyguideRuling'),
                 value: RitualDeclaration.storyguideRuling,
-                title:
-                    Text('Storyguide ruling: too spectacular to be freely available'),
-                subtitle: Text(
-                  "At the troupe's discretion — not something the guideline "
-                  'determines (Core Rules line 12352).',
-                ),
+                title: Text(l10n.ritualStoryguideRuling),
+                // Citation is a rulebook line reference, passed as an operand
+                // (see @ritualStoryguideRulingHelp) rather than baked into
+                // the ARB literal.
+                subtitle: Text(l10n.ritualStoryguideRulingHelp('Core Rules line 12352')),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
             ],

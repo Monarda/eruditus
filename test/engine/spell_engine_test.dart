@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/citation.dart';
@@ -6,6 +7,7 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/parameter_triple.dart';
@@ -37,7 +39,7 @@ void main() {
       );
 
       final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Technique must be selected'));
+      expect(errors, contains(const TechniqueMissing()));
     });
 
     test('fails if form not selected', () {
@@ -51,7 +53,7 @@ void main() {
       );
 
       final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Form must be selected'));
+      expect(errors, contains(const FormMissing()));
     });
 
     test('fails if base effect not selected', () {
@@ -61,7 +63,7 @@ void main() {
       );
 
       final errors = engine.validateSpellDraft(draft);
-      expect(errors, contains('Base effect must be selected'));
+      expect(errors, contains(const BaseEffectMissing()));
     });
 
     test('passes for valid draft', () {
@@ -100,7 +102,7 @@ void main() {
       final errors = engine.validateSpellDraft(draft);
       expect(
         errors,
-        contains("Requisite art cannot be the spell's own technique or form"),
+        contains(const RequisiteIsOwnArt()),
       );
     });
 
@@ -156,7 +158,7 @@ void main() {
       );
 
       expect(testEngine.validateSpellDraft(draft),
-          contains('Only one option may be selected for Material difficulty'));
+          contains(const ModifierNotMultiSelect('Material difficulty')));
     });
 
     test('a multi-select modifier with several options chosen is valid', () {
@@ -211,7 +213,7 @@ void main() {
       );
 
       expect(engine.validateSpellDraft(draft),
-          contains('Magnitudes reduce this spell below level 1'));
+          contains(const MagnitudesBelowOne()));
     });
   });
 
@@ -797,7 +799,10 @@ void main() {
       // takes 1 additively and 1 at x5: 4 + 1 + 5 = 10.
       expect(breakdown.level, 10);
       expect(
-        breakdown.contributions.any((c) => c.label.contains('Metal or gemstone') && c.magnitude == 2),
+        breakdown.contributions.any((c) =>
+            c.source is ModifierContribution &&
+            (c.source as ModifierContribution).optionLabel.contains('Metal or gemstone') &&
+            c.magnitude == 2),
         isTrue,
       );
     });
@@ -837,8 +842,12 @@ void main() {
 
       expect(breakdown.contributions.first.isBase, isTrue);
       expect(breakdown.contributions.first.magnitude, 3);
-      expect(breakdown.contributions.any((c) => c.label.startsWith('Range')), isTrue);
-      expect(breakdown.contributions.any((c) => c.label.startsWith('Requisite')), isTrue);
+      expect(
+          breakdown.contributions.any((c) =>
+              c.source is SlotContribution &&
+              (c.source as SlotContribution).slot == ParameterSlot.range),
+          isTrue);
+      expect(breakdown.contributions.any((c) => c.source is RequisiteContribution), isTrue);
     });
   });
 
@@ -1008,14 +1017,16 @@ void main() {
           adjustments: adjustments,
         );
 
-    test('each adjustment contributes one labelled breakdown line', () {
-      final labels = breakdownWith([
+    test('each adjustment contributes one structured breakdown line', () {
+      final sources = breakdownWith([
         LevelAdjustment(magnitude: 1, note: 'see through intervening material'),
         LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
-      ]).contributions.map((c) => c.label).toList();
+      ]).contributions.map((c) => c.source).toList();
 
-      expect(labels, contains('Adjustment · see through intervening material'));
-      expect(labels, contains('Adjustment · because the old limb is needed'));
+      expect(sources,
+          contains(const AdjustmentContribution('see through intervening material')));
+      expect(sources,
+          contains(const AdjustmentContribution('because the old limb is needed')));
     });
 
     test('a positive adjustment raises the level by 5 above the additive tier', () {
@@ -1034,8 +1045,8 @@ void main() {
       final breakdown =
           breakdownWith([LevelAdjustment(magnitude: 0, note: 'cosmetic, free')]);
       expect(breakdown.level, 10);
-      expect(breakdown.contributions.map((c) => c.label),
-          contains('Adjustment · cosmetic, free'));
+      expect(breakdown.contributions.map((c) => c.source),
+          contains(const AdjustmentContribution('cosmetic, free')));
     });
 
     test('calculateSpellLevel agrees with calculateBreakdown on adjustments', () {
@@ -1161,10 +1172,16 @@ void main() {
         range: personal, duration: sun, target: individual,
         selectedModifiers: const {}, requisites: const {});
 
-      final rangeLine = breakdown.contributions
-          .firstWhere((c) => c.label.startsWith('Range'));
+      final rangeLine = breakdown.contributions.firstWhere((c) =>
+          c.source is SlotContribution &&
+          (c.source as SlotContribution).slot == ParameterSlot.range);
 
-      expect(rangeLine.label, 'Range · Personal (guideline assumes Touch)');
+      expect(
+          rangeLine.source,
+          const SlotContribution(
+              slot: ParameterSlot.range,
+              actualName: 'Personal',
+              referenceName: 'Touch'));
       expect(rangeLine.magnitude, -1);
     });
 
@@ -1175,12 +1192,13 @@ void main() {
         baseEffect: creoIgnem10, range: voice, duration: sun, target: individual,
         selectedModifiers: const {}, requisites: const {});
 
-      expect(breakdown.contributions.map((c) => '${c.label}|${c.magnitude}'), [
-        'Base effect · Create flame|10',
-        'Range · Voice|2',
-        'Duration · Sun|2',
-        'Target · Individual|0',
+      expect(breakdown.contributions.map((c) => c.source), [
+        const BaseEffectContribution('Create flame'),
+        const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+        const SlotContribution(slot: ParameterSlot.duration, actualName: 'Sun'),
+        const SlotContribution(slot: ParameterSlot.target, actualName: 'Individual'),
       ]);
+      expect(breakdown.contributions.map((c) => c.magnitude), [10, 2, 2, 0]);
       expect(breakdown.level, 30);
     });
   });
@@ -1197,7 +1215,7 @@ void main() {
       final preview = engine.previewLevel(SpellDraft(technique: 'Creo', form: 'Ignem'));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Choose a base effect to see a level.');
+      expect(preview.unavailableReason, LevelUnavailableReason.noBaseEffect);
     });
 
     test('General guideline with no chosen level: says so instead of throwing', () {
@@ -1215,7 +1233,7 @@ void main() {
       ));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Type a level for this General guideline.');
+      expect(preview.unavailableReason, LevelUnavailableReason.generalLevelNotTyped);
     });
 
     test('General guideline typed at 0: blames the level, not the magnitudes', () {
@@ -1240,7 +1258,7 @@ void main() {
       final preview = engine.previewLevel(draft);
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'A General guideline needs a level of 1 or more.');
+      expect(preview.unavailableReason, LevelUnavailableReason.generalLevelBelowOne);
     });
 
     test('a missing parameter: says so instead of computing', () {
@@ -1250,7 +1268,7 @@ void main() {
       ));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Choose a Range, Duration and Target.');
+      expect(preview.unavailableReason, LevelUnavailableReason.parametersIncomplete);
     });
 
     test('magnitudes below level 1: says so instead of throwing', () {
@@ -1268,7 +1286,7 @@ void main() {
       ));
 
       expect(preview.breakdown, isNull);
-      expect(preview.unavailableReason, 'Magnitudes reduce this spell below level 1.');
+      expect(preview.unavailableReason, LevelUnavailableReason.magnitudesBelowOne);
     });
 
     test('a complete draft: returns the same breakdown calculateBreakdown would', () {
@@ -1295,7 +1313,7 @@ void main() {
       // first move is the guideline, so that is the reason worth showing.
       final preview = engine.previewLevel(SpellDraft());
 
-      expect(preview.unavailableReason, 'Choose a base effect to see a level.');
+      expect(preview.unavailableReason, LevelUnavailableReason.noBaseEffect);
     });
   });
 
@@ -1357,14 +1375,14 @@ void main() {
       final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: null);
 
       expect(engine.validateSpellDraft(draft),
-          contains('Choose a level for this General guideline'));
+          contains(const GeneralLevelNotChosen()));
     });
 
     test('a chosen level below 1 is an error', () {
       final draft = completeDraft(baseEffect: wardGuideline(), chosenBaseLevel: 0);
 
       expect(engine.validateSpellDraft(draft),
-          contains('The chosen level must be at least 1'));
+          contains(const ChosenLevelBelowOne()));
     });
 
     test('a valid chosen level produces no errors', () {
@@ -1398,7 +1416,7 @@ void main() {
           range: personal, duration: momentary, target: individual);
 
       expect(engine.validateSpellDraft(draft),
-          contains('Magnitudes reduce this spell below level 1'));
+          contains(const MagnitudesBelowOne()));
     });
 
     test('a chosen level on a non-General effect is rejected', () {
@@ -1408,7 +1426,7 @@ void main() {
       );
       expect(
         engine.validateSpellDraft(draft),
-        contains('A chosen base level applies only to a General guideline'),
+        contains(const ChosenLevelNotGeneral()),
       );
     });
   });

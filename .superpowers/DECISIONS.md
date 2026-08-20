@@ -652,6 +652,92 @@ expected values: `(Base Effect, ...)` for *Tie the Threads That Bind* beside
 `(Base 15, + 1 Touch, ...)` for *Embrace of Boethius*. Do not "tidy" these.
 *(item 73)*
 
+## Internationalisation
+
+**Three text populations, not two, and they do not travel the same road.**
+*App chrome* — our own labels, buttons, helper lines — is translated by us and
+lives in ARB, keyed by locale. *Rules text* quoted from the rulebook is
+translatable but never by us and never through ARB: a locale selects a source
+*edition* and the catalog carries per-edition text, because handing a
+translator rules strings in an ARB file would produce an unofficial
+translation the app then presents as the rulebook's own words. *User
+content* — an adjustment's `note`, any prose the caster typed — is never
+translated and renders verbatim under every locale, explicitly exempt from
+the pseudo-locale transform too, or the proof harness raises false failures on
+the user's own words. **The boundary rule: ARB holds the vocabulary that
+labels the interface; the catalog holds the content the rulebook prints; user
+content passes through untouched.** So "Range" is chrome — it labels a
+control — while "Voice" is content.  *(item 80, 80.3)*
+
+**Catalog names are data, not UI strings, and never enter ARB.** Spell,
+Technique, Form and parameter names come from `assets/data/*.json`; some stay
+Latin under any locale (*Creo*, *Ignem*), the rest are rulebook English a
+published translation would render differently. Either way they are reached
+through the per-edition catalog route above, never through `AppLocalizations`.
+The four realm values (`Divine`/`Faerie`/`Infernal`/`Magic`) and the
+filter/category comparison keys (`'All'`/`'Published'`/`'My Spells'`,
+`'Range'`/`'Duration'`/`'Target'` as *state values*, not as displayed labels)
+are the concrete instances of this: they stay hardcoded English literals in
+`lib/presentation/screens/*.dart` on purpose. Localising any of them would
+either hand a translator rulebook vocabulary to rewrite, or silently break a
+`filter == 'My Spells'`-style comparison under every non-English locale — the
+label *displayed* for each is localised via ARB, but the value dispatched and
+compared against is not, and the two are deliberately decoupled. Do not
+"finish" migrating these into ARB.  *(items 80.3, 9, 10)*
+
+**The engine never composes display prose.** `spell_engine.dart` and
+`level_breakdown.dart` hand `LevelBanner` a `LevelContribution` carrying
+structured data (a `ContributionSource` value, a magnitude), not a
+pre-formatted `String label` — formatting into locale-aware text happens only
+in `lib/presentation/format/contribution_formatter.dart`, which has a
+`BuildContext` and can reach `AppLocalizations`. Domain code (`lib/engine/`,
+`lib/bloc/`) has no `BuildContext` and so no locale; any future engine change
+that starts building a user-facing sentence there is unlocalisable by
+construction and has to be undone. The same discipline applies to
+`formatValidationError`/`formatUnavailableReason` and their sealed-class
+sources (`SpellValidationError`, `LevelUnavailableReason`): the domain layer
+produces a typed reason, the presentation layer's formatter turns it into
+words.  *(items 80, 4, 5, 6)*
+
+**The pseudo-locale (`en_XA`) is the standing guard against decay**, run in
+`test/l10n/pseudo_locale_coverage_test.dart`. It pumps each of the four
+top-level screens (there is no way to pump `main.dart`'s `_MainTabView`
+directly — it is private) under `Locale('en', 'XA')` and asserts a fixed list
+of chrome strings is unfindable, plus asserts the four realm values *are*
+findable, to keep the chrome/content boundary itself under test. **A failure
+of this test means a string was missed and must be moved to ARB — never
+delete the failing entry to make the test pass**, and never add the three
+deliberately-English populations above to its `_mustNotSurvive` list.
+*(item 80, 80.2)*
+
+**ARB conventions.** Written down here because five implementers on item 80
+independently produced five conventions, none of them recorded — caught only
+at the final whole-branch review.
+
+- **Key naming.** camelCase, prefixed by the screen or concept it belongs to
+  (`contribution*` for `ContributionSource` wording, `validation*` for
+  `SpellValidationError` wording, `ritual*`, `backup*`, `spellCard*`, …) —
+  match the sealed type or screen a key renders for, so a reader can find every
+  key belonging to one formatter by prefix alone.
+- **`@description` is mandatory on any key with a placeholder.** State which
+  text population each operand belongs to — chrome (already localised before
+  it reaches this key), rulebook content (not translated, routed through the
+  catalog per Task 6/9's boundary rule), user content (verbatim, exempt from
+  the pseudo-locale transform), or numeric — and, for rulebook content, name
+  *what* it is (a Parameter's name, an Art's Latin name, a modifier's label).
+  A key with no placeholder needs no `@description`.
+- **One full frame per rendered variant, never one translatable string
+  injected into another.** A book title or rulebook line citation is an
+  operand on the message that cites it (`targetRequiresThisRange`,
+  `ritualStoryguideRulingHelp`), not text baked into another ARB value's
+  literal — the same boundary rule applied one level deeper: composing prose
+  by string-gluing two ARB lookups together defeats a translator's ability to
+  reorder or reword either one independently.
+- **Pure sign/numeral strings stay in Dart, not ARB.** `'+2'`, `'—'`, and
+  similar — punctuation and arithmetic notation are not language-specific
+  vocabulary, and routing them through ARB just adds a lookup with nothing to
+  translate.  *(item 80, final review)*
+
 ## CI and workflows
 
 **Two workflows answer deliberately different questions.**

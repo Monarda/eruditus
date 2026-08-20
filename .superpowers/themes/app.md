@@ -360,84 +360,6 @@ Two conditions ride along, and both are product decisions, not legal trivia:
   page reference are the same affordance), 30 (provenance)
 
 
-### 80. Flutter Internationalisation for All User-Facing Text
-
-**Opened 2026-08-20, asked for directly by the user.** No translation is wanted
-yet; the goal is that adding one later is not a rewrite. Nothing is wired today:
-**no `intl`, no `flutter_localizations`, no `l10n.yaml`, no ARB files.**
-
-**Smaller than it looks.** `lib/presentation/` is **8 files** carrying roughly
-**115** candidate literals (of 55 Dart files in `lib/` total). This is a day of
-mechanical work, not a fortnight — the estimate should not be used as a reason
-to defer it.
-
-- [ ] **80.1** **Stand up the mechanism**: `flutter_localizations` + `intl`,
-      `l10n.yaml`, `generate: true`, one `app_en.arb`, and `MaterialApp`'s
-      `localizationsDelegates`/`supportedLocales`.
-- [ ] **80.2** **Migrate the existing literals**, and add a guard that stops new bare
-      literals reaching `lib/presentation/` — otherwise the migration decays
-      immediately. Flutter ships the `flutter_lints` rules for this; decide
-      whether to enable them repo-wide or scope them to `presentation/`.
-- [ ] **80.3** **⚠️ Decide how the text populations localise differently — the one
-      genuinely hard question here. ✅ Answered by the 2026-08-20 spec; kept open
-      until the code matches it.** There are **three**, not two — designing the
-      contribution restructure surfaced the third — and they do not travel the
-      same road:
-      - **App chrome** — our own labels, buttons, helper lines. Translated by us,
-        lives in ARB files, keyed by locale. Ordinary l10n.
-      - **Rules text** — quoted from the rulebook (item 79). **This is
-        translatable, but not by us and not through ARB.** Ars Magica has been
-        published in translation, and more may follow; the right source for
-        French rules text is the French edition, not our rendering of the
-        English one. So a locale selects a *source edition*, and the catalog
-        carries per-edition text — the ARB pipeline never sees it.
-      - **⚠️ User content** — an adjustment's `note`, and any prose the caster
-        typed. **Nobody translates it; it renders verbatim under every locale.**
-        Never in ARB, and explicitly **exempt from the pseudo-locale
-        transform**, or the proof harness raises false failures on the user's
-        own words. This is the one the item originally missed.
-      **The failure mode to design against is a translator being handed rules
-      strings in an ARB file**, where they would produce an unofficial
-      translation that the app then presents as the rulebook's own words.
-      Keeping rules text out of ARB is what prevents that, not a claim that it
-      cannot be translated at all.
-      **The boundary rule the spec settles on:** *ARB holds the vocabulary that
-      labels the interface; the catalog holds the content the rulebook prints;
-      user content passes through untouched.* So "Range" is chrome — it labels a
-      control — while "Voice" is content.
-
-- **Sequencing matters against item 56.** 56 introduces a large volume of new
-  user-facing strings. Doing 80.1 first means they land localised; doing it
-  after means a second pass over the same text. **Neither ordering is wrong, but
-  doing 80 *during* 56 is** — decide before 56 starts.
-- **Names in the catalog are not UI strings.** Spell, Technique, Form and
-  parameter names come from `assets/data/*.json`. Some are Latin and stay put
-  under any locale (*Creo*, *Ignem*); the rest are rulebook English that a
-  published translation would render differently. Either way they are data
-  reached through 80.3's edition route, never ARB.
-- **⚠️ The engine composes user-facing prose, and that is the real work.**
-  `spell_engine.dart` builds display strings at 7 sites and hands them to
-  `LevelBanner` pre-formatted, in domain code where no `BuildContext` and so no
-  locale can reach. **The level breakdown is untranslatable in principle until
-  `LevelContribution` carries structure instead of a `String label`** — adding
-  ARB files does not touch it. Decided 2026-08-20 to fix it in this item rather
-  than defer. De-risker: `LevelBreakdown` is **never persisted** (no
-  `toMap`/`toJson`; outside `lib/engine/` it appears only in
-  `SpellCreationState.breakdown` and `LevelBanner`), so there is no migration,
-  no backup-format change and no asset change.
-- **Spec:** `docs/superpowers/specs/2026-08-20-internationalisation-design.md`
-- **Files:** `pubspec.yaml`, new `l10n.yaml` + `lib/l10n/app_en.arb`,
-  new `lib/engine/contribution_source.dart`,
-  `lib/presentation/format/contribution_formatter.dart`,
-  `test/support/pump_app.dart`, `tool/gen_pseudo_arb.dart`,
-  `lib/engine/spell_engine.dart` + `level_breakdown.dart`,
-  `lib/presentation/**` (8 files), `lib/main.dart`, and the 10 test files
-  holding 47 inline `MaterialApp` constructions
-- **See also:** items 56 (the string-volume driver), 79 (why the boundary
-  exists), 16 (short forms — a translated label breaks any width assumption
-  that item makes)
-
-
 ### 81. Latin as the First Real Locale
 
 **Opened 2026-08-20**, split out of item 80 so the proof harness and a shipped
@@ -529,12 +451,112 @@ touches rulebook content, a marker stops being optional. See item 79.
   content lives in the catalog per source edition (item 80.3). Both can carry MT
   text, so the convention has to work in both places or it will be applied to
   whichever is convenient and forgotten in the other.
-- **The pseudo-locale is generated but is not a translation.** `app_xx.arb` is a
-  test artefact that never reaches a user as a language. Mark it
-  `@@x-generated`, not machine-translated, or the burn-down is permanently
-  polluted by ~115 entries that will never be reviewed.
+- **The pseudo-locale is generated but is not a translation.** `app_en_XA.arb`
+  is a test artefact that never reaches a user as a language. Item 80 marks it
+  `@@x-translation-status: "generated"` rather than machine-translated, so the
+  burn-down is not permanently polluted by its 157 entries, which nobody will
+  ever review.
 - **Precedent:** this repo already takes provenance seriously — item 30's
   `source.lock` and `provenance.py` do exactly this for the import. Follow that
   shape rather than inventing a second vocabulary.
 - **See also:** items 81 (produces the first MT text and is where this must be
   in place), 79 (the licence obligation), 80.3 (the two stores)
+
+
+### 83. Raw Exception Strings Still Reach the User, Un-localised
+
+**Opened 2026-08-20** by item 80's final whole-branch review. Item 80 closed the
+`InvalidSpellException` case — that one was a genuine English *regression* and
+was fixed before merge. Four sites of the same shape remain, and they predate
+item 80, so they were correctly out of its scope.
+
+Each puts a raw `e.toString()` into text the user reads:
+
+| Site | Surface |
+|---|---|
+| `lib/presentation/screens/backup_screen.dart:53` | `backupImportFailed` |
+| `lib/bloc/spell_library/spell_library_bloc.dart:78` | library error state |
+| `lib/bloc/configuration/configuration_bloc.dart:40` | configuration error |
+| `lib/bloc/configuration/configuration_bloc.dart:76` | configuration error |
+
+- [ ] **83.1** **Decide what an unexpected error should say.** These are catch-alls for
+      genuinely unforeseen failures (disk, database, malformed backup file), so
+      unlike item 80's three families there is no fixed set of messages to
+      enumerate. Likely a single localised "something went wrong" frame with the
+      raw detail kept for diagnostics — but that is a product decision about how
+      much to show, not a mechanical migration.
+- [ ] **83.2** **⚠️ Note the pseudo-locale guard cannot see any of these.** Item 80's
+      coverage test pumps screens in their normal state; these strings render
+      only after a thrown exception. Whatever is decided needs its own test, or
+      it will decay silently the way this did.
+
+- **Not a regression** — unchanged from before item 80. Filed so the gap is
+  recorded rather than implied by item 80's closure.
+- **See also:** items 80 (closed), 84 (a guard that would have caught this class)
+
+
+### 84. The Pseudo-Locale Guard Is a Canary, Not a Guarantee
+
+**Opened 2026-08-20** by item 80's final whole-branch review.
+
+`test/l10n/pseudo_locale_coverage_test.dart` asserts that 26 named English
+strings do not survive a switch to `en_XA`. That is a real guard and it caught
+real gaps — but it proves the absence of **26 named strings**, not the absence
+of hardcoded strings. **A developer adding a new hardcoded literal is caught
+only if someone also adds it to the list**, which is precisely the maintenance
+burden a pseudo-locale is meant to remove.
+
+- [ ] **84.1** **Invert it.** Walk the widget tree for every `Text` and assert its string
+      either starts with `[` (pseudo-transformed, so it came from ARB) or appears
+      on an explicit exemption list. New hardcoded strings then fail **by
+      default** rather than by remembering. That is the difference between a
+      sample and a guarantee.
+- [ ] **84.2** **The exemption list is the design work**, not the tree walk. It must
+      cover: catalog names and descriptions from the fixture (rulebook content),
+      user content, the four realm values Divine/Faerie/Infernal/Magic that item
+      80 deliberately left hardcoded, and pure sign/numeral strings (`+2`, `—`).
+      Get this wrong in the permissive direction and the guard is theatre.
+- [ ] **84.3** **`main.dart`'s four tab labels sit outside the guard entirely.** The
+      test pumps the four screens; `_MainTabView` is private, so
+      `tabCreate`/`tabLibrary`/`tabSettings`/`tabBackup` are migrated but
+      unguarded.
+
+- **Precedent worth reusing:** the current guard's entries were all verified
+  non-vacuous during item 80's re-review by flipping the locale to `en` and
+  checking each one genuinely renders. Any replacement needs the same proof.
+- **See also:** items 80 (closed), 83
+
+
+### 85. ARB Key-Naming Is Inconsistent Across Item 80's Tasks
+
+**Opened 2026-08-20** by item 80's final whole-branch review. Cosmetic today and
+**much more expensive once a translation exists**, because renaming a key
+orphans its translations.
+
+Five implementers produced five conventions because none was written down. The
+conventions now exist in `DECISIONS.md` ("ARB conventions", added by item 80);
+the existing 157 keys were never reconciled to them.
+
+- [ ] **85.1** **Pick one and sweep.** The collisions are visible in adjacent tasks:
+      `effectsTabLabel`/`parametersTabLabel` (suffix) against
+      `tabCreate`/`tabLibrary`/`tabSettings`/`tabBackup` (prefix), for the same
+      UI role. Field labels split between a `Label` suffix
+      (`techniqueLabel`, `formLabel`, `nameLabel`) and none (`baseLevel`,
+      `guidelineLevel`, `specificType`). Buttons likewise
+      (`cancelButton`/`addButton` against `saveToLibrary`/`addRequisite`).
+- [ ] **85.2** **Decide the shared-key policy, which is currently self-contradictory.**
+      `published` is reused across three roles, while `Backup` was deliberately
+      **split** into `backupTitle`/`tabBackup` on the grounds that different
+      roles may want different lengths in translation. Both cannot be right.
+- [ ] **85.3** **⚠️ `mySpell` ("My Spell", card chip) and `mySpells` ("My Spells",
+      filter) differ by one character** and are one typo from a silent
+      wrong-label bug that no test would catch.
+- [ ] **85.4** **`spellCardArtsAndLevel` injects one translatable string into another** —
+      `spellCardUnverifiedSuffix` is passed in as `{suffix}`, so a translator
+      cannot reorder or reword the combination. Item 80's Task 10 rejected
+      exactly this shape for the effect-summary frames and used four full frames
+      instead; this one was missed. `DECISIONS.md` now records the rule.
+
+- **Do this before item 81**, which produces the first real translation — after
+  that, every rename costs a re-translation.
+- **See also:** items 80 (closed), 81 (the first translation)

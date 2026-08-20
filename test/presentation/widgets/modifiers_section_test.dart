@@ -6,6 +6,8 @@ import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/widgets/modifiers_section.dart';
 
+import '../../support/pump_app.dart';
+
 void main() {
   final material = Modifier(
     id: 'terram-material',
@@ -45,16 +47,15 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-        body: ModifiersSection(
-          modifiers: modifiers,
-          selected: selected,
-          onSelect: onSelect ?? (_, _) {},
-          onDeselect: onDeselect ?? (_, _) {},
-        ),
+    await pumpApp(
+      tester,
+      ModifiersSection(
+        modifiers: modifiers,
+        selected: selected,
+        onSelect: onSelect ?? (_, _) {},
+        onDeselect: onDeselect ?? (_, _) {},
       ),
-    ));
+    );
   }
 
   testWidgets('renders nothing when no modifier applies', (tester) async {

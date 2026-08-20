@@ -13,7 +13,7 @@ untranslatable no matter how many ARB files it had.
 Two problems, and only the first is the obvious one.
 
 **1. There is no localisation mechanism.** `lib/presentation/` is 8 files and
-2345 lines carrying roughly 115 user-facing literals, plus the tab labels and
+2345 lines carrying roughly 157 user-facing literals, plus the tab labels and
 dialog titles in `lib/main.dart`. All hardcoded English.
 
 **2. ⚠️ The engine composes user-facing prose.** `spell_engine.dart` builds
@@ -48,6 +48,27 @@ These are pure chrome with no operands, so they need an enum rather than a
 sealed hierarchy — `LevelUnavailableReason`, resolved by the same formatter.
 Without them the "choose a base effect" prompt stays hardcoded English while
 everything around it localises. Covered by the plan's Task 5.
+
+**⚠️ Amended again 2026-08-20, during execution: the real total is thirty-three, not
+twelve.** A *third* family surfaced while reviewing Task 5. `validateSpellDraft`
+composes seven more — `'Technique must be selected'`, `'Form must be selected'`,
+and five siblings — which reach the user at `spell_creation_screen.dart:377-378`
+by way of `SpellCreationState.validationErrors`:
+
+```dart
+errors.add('Technique must be selected');
+errors.add('Magnitudes reduce this spell below level 1');
+```
+
+And `validateSpellAgainstCatalog`, which `validateSpellDraft` concatenates, composes **fourteen more** that also reach spell cards via `ResolvedSpell.problems`. 8 of the 21 carry operands, so this family takes Task 4's **sealed-class** shape rather than Task 5's plain enum. Covered by the plan's Task 6. Note its
+`magnitudesBelowOne` message has **no trailing full stop**, unlike
+`LevelUnavailableReason`'s near-identical one — two different strings on two
+different paths (save button vs. live preview). Both are kept, distinct.
+
+**The pattern worth recording:** each family was found only when the one before
+it was being changed. The lesson is not "count more carefully next time" but
+that `String` as a return type in domain code hides this class of defect — which
+is exactly what this whole item replaces with enums and sealed types.
 
 Fixing (1) without (2) produces an app that reports its own labels in French and
 its actual reasoning in English.
@@ -251,31 +272,31 @@ it the pseudo-locale switch in §5 has nowhere to be applied.
 With one language, a hardcoded literal and a correct ARB lookup are
 indistinguishable on screen. A pseudo-locale makes the difference visible.
 
-`app_xx.arb` transforms each English value by accenting its letters and padding
+`app_en_XA.arb` transforms each English value by accenting its letters and padding
 its length (`Calculate` → `[Ĉaĺćuĺaţe····]`), **leaving ICU placeholders
 untouched**. Two properties fall out:
 
-- a string that renders un-accented under locale `xx` is still hardcoded;
+- a string that renders un-accented under locale `en_XA` is still hardcoded;
 - the ~30% padding surfaces truncation and overflow, which is free evidence for
   **item 16** (short forms) and for **item 58's** untested-below-1200px
   segmented control.
 
 **It is generated, not hand-maintained.** A hand-written pseudo ARB drifts from
 `app_en.arb` the first time someone adds a string, and a drifted proof harness is
-worse than none. `tool/gen_pseudo_arb.dart` derives `app_xx.arb` from
+worse than none. `tool/gen_pseudo_arb.dart` derives `app_en_XA.arb` from
 `app_en.arb`, and a test asserts the committed file is what the generator
 produces — **the same regeneration-test idiom the repo already uses for
 `spell_library.json`** (item 30).
 
-`xx` is listed in `supportedLocales` and ships. No OS offers `xx`, so it is
-unreachable in normal use; the alternative — a test-only delegate wrapping ~115
-generated getters — is far more machinery for the same guarantee.
+`en_XA` — the pseudo-locale tag Android and Chrome already use — is listed in
+`supportedLocales` and ships. No OS offers it in practice, so it is unreachable
+in normal use; the alternative — a test-only delegate wrapping ~157 generated
+getters — is far more machinery for the same guarantee.
 
-**If `gen-l10n` rejects `xx`** as a locale identifier, fall back to `en_XA` — the
-pseudo-locale tag Android and Chrome already use — rather than inventing another.
-Verify which one the toolchain accepts as the first implementation step, since
-the filename, the `supportedLocales` entry and every test that switches locale
-all depend on the answer.
+**`gen-l10n` rejects a bare `xx` locale identifier**, which is why `en_XA` is
+the tag used throughout, not a fallback considered and set aside. The filename,
+the `supportedLocales` entry and every test that switches locale all depend on
+this.
 
 ## Testing
 
@@ -284,18 +305,27 @@ all depend on the answer.
 | Formatter | One test per `ContributionSource` variant; exhaustiveness is the compiler's job, not a test's. |
 | Engine | The ~35 assertions on composed labels (`'Range · Voice'` ×14, `'Range · Personal (guideline assumes Touch)'`, …) become assertions on structured sources. **Rewritten, not deleted** — each must still assert the same fact. |
 | Value equality | `LevelContribution` and `LevelBreakdown` still compare equal on recompute (guards item 58.1's contract). |
-| Pseudo-locale | Pump each of the 4 screens under `Locale('xx')`; assert no known English chrome string is findable. |
-| User content | An adjustment note renders **verbatim under `xx`** — the explicit regression guard for population three. |
-| ARB sync | `app_xx.arb` matches the generator's output. |
+| Pseudo-locale | Pump each of the 4 screens under `Locale('en', 'XA')`; assert no known English chrome string is findable. |
+| User content | An adjustment note renders **verbatim under `en_XA`** — the explicit regression guard for population three. |
+| ARB sync | `app_en_XA.arb` matches the generator's output. |
 | Suites | `flutter test`, the Python suite, and `flutter test integration_test -d windows` all green; `flutter analyze` at **exit 0**. |
 
 Two working constraints carry over: **do not run `dart format`** (it is not clean
 in this repo — hand-indent and check with `git diff -w`), and the Dart test count
 should rise, never fall, since no assertion is being dropped.
 
+**Rendered English is byte-identical to before this migration, with exactly one
+disclosed exception.** `backupRejectedSpells`'s `other` branch (count ≥ 2) reads
+"Skipped {count} invalid **spells**" where the pre-existing code produced
+"invalid spell(s)" for every count, grammatically odd at plural counts. The
+`=0` and `one` branches are byte-identical to the old code; only `other` was
+improved, and only because no test constrains that count's wording (see
+`app_en.arb`'s `@backupRejectedSpells` description). This is the single place
+the byte-identical claim above does not hold, and it is deliberate.
+
 ## Files
 
-**New:** `l10n.yaml`, `lib/l10n/app_en.arb`, `lib/l10n/app_xx.arb` (generated),
+**New:** `l10n.yaml`, `lib/l10n/app_en.arb`, `lib/l10n/app_en_XA.arb` (generated),
 `lib/engine/contribution_source.dart`,
 `lib/presentation/format/contribution_formatter.dart`,
 `test/support/pump_app.dart`, `tool/gen_pseudo_arb.dart`.

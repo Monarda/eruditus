@@ -24,6 +24,7 @@ import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/presentation/screens/spell_library_screen.dart';
 
 import '../../support/bloc_factories.dart';
+import '../../support/pump_app.dart';
 
 void main() {
   late MockSpellLibraryBloc bloc;
@@ -125,9 +126,12 @@ void main() {
 
   Future<void> pumpScreen(WidgetTester tester, SpellLibraryState state) async {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
-    await tester.pumpWidget(MaterialApp(
-      home: BlocProvider<SpellLibraryBloc>.value(value: bloc, child: const SpellLibraryScreen()),
-    ));
+    await pumpApp(
+      tester,
+      const SpellLibraryScreen(),
+      providers: [BlocProvider<SpellLibraryBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+    );
   }
 
   // The template section reaches for SpellCreationBloc only where its "Learn
@@ -143,15 +147,15 @@ void main() {
   }) async {
     whenListen(bloc, const Stream<SpellLibraryState>.empty(), initialState: state);
     final resolvedCreationBloc = creationBloc ?? mockSpellCreationBloc();
-    await tester.pumpWidget(MaterialApp(
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<SpellLibraryBloc>.value(value: bloc),
-          BlocProvider<SpellCreationBloc>.value(value: resolvedCreationBloc),
-        ],
-        child: SpellLibraryScreen(onTemplateLearned: onTemplateLearned),
-      ),
-    ));
+    await pumpApp(
+      tester,
+      SpellLibraryScreen(onTemplateLearned: onTemplateLearned),
+      providers: [
+        BlocProvider<SpellLibraryBloc>.value(value: bloc),
+        BlocProvider<SpellCreationBloc>.value(value: resolvedCreationBloc),
+      ],
+      wrapInScaffold: false,
+    );
   }
 
   testWidgets('shows both built-in and user spells when loaded', (tester) async {
@@ -229,6 +233,53 @@ void main() {
     );
 
     await tester.tap(find.widgetWithText(RadioListTile<String>, 'My Spells'));
+    await tester.pump();
+
+    verify(() => bloc.add(const FilterChanged('My Spells'))).called(1);
+  });
+
+  testWidgets('library chrome is localised', (tester) async {
+    whenListen(bloc, const Stream<SpellLibraryState>.empty(),
+        initialState: SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell, userSpell]));
+    await pumpApp(
+      tester,
+      const SpellLibraryScreen(),
+      providers: [BlocProvider<SpellLibraryBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+      locale: const Locale('en', 'XA'),
+    );
+
+    expect(find.text('Spell Library'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
+  });
+
+  // The filter trap: 'All' | 'Published' | 'My Spells' are simultaneously
+  // the radio tiles' displayed labels and SpellLibraryState's comparison
+  // keys (spell_library_state.dart:48,65,82). Localising the label without
+  // decoupling it from the key would make FilterChanged carry a translated
+  // string under any non-English locale, and every `filter == 'My Spells'`
+  // check in SpellLibraryState would silently stop matching. This proves
+  // the dispatched event still carries the untranslated English key even
+  // though the label on screen is pseudo-transformed and unreadable as
+  // 'My Spells'.
+  testWidgets('the filter dispatched stays the untranslated English key under a pseudo-locale',
+      (tester) async {
+    whenListen(bloc, const Stream<SpellLibraryState>.empty(),
+        initialState: SpellLibraryState(status: SpellLibraryStatus.loaded, allSpells: [builtInSpell, userSpell]));
+    await pumpApp(
+      tester,
+      const SpellLibraryScreen(),
+      providers: [BlocProvider<SpellLibraryBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+      locale: const Locale('en', 'XA'),
+    );
+
+    expect(find.widgetWithText(RadioListTile<String>, 'My Spells'), findsNothing,
+        reason: 'the displayed label should be pseudo-transformed, not the plain English word');
+
+    // The third tile is 'My Spells' -- 'All', 'Published', 'My Spells' in
+    // that order (see _filterKeys in spell_library_screen.dart).
+    await tester.tap(find.byType(RadioListTile<String>).at(2));
     await tester.pump();
 
     verify(() => bloc.add(const FilterChanged('My Spells'))).called(1);

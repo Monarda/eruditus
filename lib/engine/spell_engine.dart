@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
@@ -11,6 +12,7 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 class SpellEngine {
   final List<ResolvedSpell> allSpells;
@@ -49,31 +51,31 @@ class SpellEngine {
   Parameter? _parameterById(String id) =>
       allParameters.where((p) => p.id == id).firstOrNull;
 
-  List<String> validateSpellDraft(SpellDraft draft) {
-    final errors = <String>[];
+  List<SpellValidationError> validateSpellDraft(SpellDraft draft) {
+    final errors = <SpellValidationError>[];
 
     if (draft.technique == null || draft.technique!.isEmpty) {
-      errors.add('Technique must be selected');
+      errors.add(const TechniqueMissing());
     }
 
     if (draft.form == null || draft.form!.isEmpty) {
-      errors.add('Form must be selected');
+      errors.add(const FormMissing());
     }
 
     if (draft.baseEffect == null) {
-      errors.add('Base effect must be selected');
+      errors.add(const BaseEffectMissing());
     }
 
     if (draft.range == null) {
-      errors.add('Range must be selected');
+      errors.add(const RangeMissing());
     }
 
     if (draft.duration == null) {
-      errors.add('Duration must be selected');
+      errors.add(const DurationMissing());
     }
 
     if (draft.target == null) {
-      errors.add('Target must be selected');
+      errors.add(const TargetMissing());
     }
 
     // The catalog-dependent invariants live in one place, shared with
@@ -128,7 +130,7 @@ class SpellEngine {
           ritualDeclaration: draft.ritualDeclaration,
         );
       } on ArgumentError {
-        errors.add('Magnitudes reduce this spell below level 1');
+        errors.add(const MagnitudesBelowOne());
       }
     }
 
@@ -166,24 +168,24 @@ class SpellEngine {
   LevelPreview previewLevel(SpellDraft draft) {
     final baseEffect = draft.baseEffect;
     if (baseEffect == null) {
-      return const LevelPreview.unavailable('Choose a base effect to see a level.');
+      return const LevelPreview.unavailable(LevelUnavailableReason.noBaseEffect);
     }
     if (baseEffect.isGeneral) {
       final chosenBaseLevel = draft.chosenBaseLevel;
       if (chosenBaseLevel == null) {
-        return const LevelPreview.unavailable('Type a level for this General guideline.');
+        return const LevelPreview.unavailable(LevelUnavailableReason.generalLevelNotTyped);
       }
       // A typed `0` -- or a backspace down to it, which the field commits the
       // same way -- is not the null case above and not the magnitudes case
       // below. calculateBreakdown hands the chosen level straight to
       // SpellLevelCalculator, which rejects `baseLevel < 1` before a single
       // magnitude has been applied, so without this branch a bare `0` fell
-      // through to the catch at the end of this method and told the caster
-      // "Magnitudes reduce this spell below level 1." on a draft that has no
+      // through to the catch at the end of this method and reported
+      // LevelUnavailableReason.magnitudesBelowOne on a draft that has no
       // magnitudes to blame. Found by hand-testing the live banner during item
       // 59's review, on a General guideline with the level field emptied.
       if (chosenBaseLevel < 1) {
-        return const LevelPreview.unavailable('A General guideline needs a level of 1 or more.');
+        return const LevelPreview.unavailable(LevelUnavailableReason.generalLevelBelowOne);
       }
     }
 
@@ -191,7 +193,7 @@ class SpellEngine {
     final duration = draft.duration;
     final target = draft.target;
     if (range == null || duration == null || target == null) {
-      return const LevelPreview.unavailable('Choose a Range, Duration and Target.');
+      return const LevelPreview.unavailable(LevelUnavailableReason.parametersIncomplete);
     }
 
     try {
@@ -207,7 +209,7 @@ class SpellEngine {
         ritualDeclaration: draft.ritualDeclaration,
       ));
     } on ArgumentError {
-      return const LevelPreview.unavailable('Magnitudes reduce this spell below level 1.');
+      return const LevelPreview.unavailable(LevelUnavailableReason.magnitudesBelowOne);
     }
   }
 
@@ -233,17 +235,21 @@ class SpellEngine {
 
     final contributions = <LevelContribution>[
       LevelContribution(
-          label: 'Base effect · ${baseEffect.description}',
+          source: BaseEffectContribution(baseEffect.description),
           magnitude: baseLevel,
           isBase: true),
-      _parameterContribution('Range', range, baseEffect.reference.rangeId),
-      _parameterContribution('Duration', duration, baseEffect.reference.durationId),
-      _parameterContribution('Target', target, baseEffect.reference.targetId),
+      _parameterContribution(
+          ParameterSlot.range, range, baseEffect.reference.rangeId),
+      _parameterContribution(
+          ParameterSlot.duration, duration, baseEffect.reference.durationId),
+      _parameterContribution(
+          ParameterSlot.target, target, baseEffect.reference.targetId),
     ];
 
     for (final entry in requisites.entries) {
       contributions.add(LevelContribution(
-          label: 'Requisite · ${entry.key}, ${entry.value.name}',
+          source: RequisiteContribution(
+              art: entry.key, parameterName: entry.value.name),
           magnitude: entry.value.magnitude));
     }
 
@@ -251,7 +257,7 @@ class SpellEngine {
     // calculator call below and need no special case there.
     for (final adjustment in adjustments) {
       contributions.add(LevelContribution(
-          label: 'Adjustment · ${adjustment.note}',
+          source: AdjustmentContribution(adjustment.note),
           magnitude: adjustment.magnitude));
     }
 
@@ -265,7 +271,9 @@ class SpellEngine {
           final option = modifier.optionById(optionId);
           if (option == null) continue;
           contributions.add(LevelContribution(
-              label: '${modifier.name} · ${option.label}', magnitude: option.magnitude));
+              source: ModifierContribution(
+                  modifierName: modifier.name, optionLabel: option.label),
+              magnitude: option.magnitude));
         }
       }
     });
@@ -310,19 +318,23 @@ class SpellEngine {
   /// label is unchanged. That identity is why this is one code path and not a
   /// branch on `isGeneral`.
   LevelContribution _parameterContribution(
-      String slot, Parameter actual, String referenceId) {
+      ParameterSlot slot, Parameter actual, String referenceId) {
     if (actual.id == referenceId) {
-      return LevelContribution(label: '$slot · ${actual.name}', magnitude: 0);
+      return LevelContribution(
+          source: SlotContribution(slot: slot, actualName: actual.name),
+          magnitude: 0);
     }
 
     final reference = _parameterById(referenceId);
     if (reference == null || reference.magnitude == 0) {
       return LevelContribution(
-          label: '$slot · ${actual.name}', magnitude: actual.magnitude);
+          source: SlotContribution(slot: slot, actualName: actual.name),
+          magnitude: actual.magnitude);
     }
 
     return LevelContribution(
-      label: '$slot · ${actual.name} (guideline assumes ${reference.name})',
+      source: SlotContribution(
+          slot: slot, actualName: actual.name, referenceName: reference.name),
       magnitude: actual.magnitude - reference.magnitude,
     );
   }

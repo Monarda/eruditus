@@ -101,6 +101,9 @@ not-yet-worth-doing.
 | 77 | decide | open 2/2 | importer.md | The Book-Scoping Rule Stops at Base Effects |
 | 78 | do | open 6/6 | importer.md | Page References for Users — the Markdown Indexes Can Supply Them |
 | 79 | decide | open 3/3 | app.md | Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands |
-| 80 | do | open 3/3 | app.md | Flutter Internationalisation for All User-Facing Text |
+| 80 | — | closed | ARCHIVE.md | Flutter Internationalisation for All User-Facing Text |
 | 81 | do | open 3/3 | app.md | Latin as the First Real Locale |
-| 82 | decide | open 3/3 | app.md | Machine-Translation Provenance for User-Facing Text |
+| 82 | decide | open 2/3 | app.md | Machine-Translation Provenance for User-Facing Text |
+| 83 | decide | open 2/2 | app.md | Raw Exception Strings Still Reach the User, Un-localised |
+| 84 | do | open 3/3 | app.md | The Pseudo-Locale Guard Is a Canary, Not a Guarantee |
+| 85 | do | open 4/4 | app.md | ARB Key-Naming Is Inconsistent Across Item 80's Tasks |

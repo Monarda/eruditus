@@ -2,13 +2,14 @@ import 'package:equatable/equatable.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 
 enum SpellCreationStatus { initial, editing, calculated, saving, saved, error, discarded }
 
 class SpellCreationState extends Equatable {
   final SpellCreationStatus status;
   final SpellDraft draft;
-  final List<String> validationErrors;
+  final List<SpellValidationError> validationErrors;
   final LevelBreakdown? breakdown;
   /// Why there is no [breakdown], when there isn't one — "Choose a base effect
   /// to see a level.", and so on.
@@ -35,7 +36,7 @@ class SpellCreationState extends Equatable {
   ///
   /// Not a validation error: it renders inside the level banner as ordinary
   /// text saying what to do next, never as the red error text those use.
-  final String? levelUnavailableReason;
+  final LevelUnavailableReason? levelUnavailableReason;
   final List<ResolvedSpell> suggestions;
   // Precomputed per-suggestion spell levels, keyed by spell id, so the UI can
   // show "name, level, source, description" on each suggestion card without
@@ -86,7 +87,7 @@ class SpellCreationState extends Equatable {
   SpellCreationState copyWith({
     SpellCreationStatus? status,
     SpellDraft? draft,
-    List<String>? validationErrors,
+    List<SpellValidationError>? validationErrors,
     Object? breakdown = _unset,
     Object? levelUnavailableReason = _unset,
     List<ResolvedSpell>? suggestions,
@@ -111,7 +112,7 @@ class SpellCreationState extends Equatable {
           : breakdown as LevelBreakdown?,
       levelUnavailableReason: identical(levelUnavailableReason, _unset)
           ? this.levelUnavailableReason
-          : levelUnavailableReason as String?,
+          : levelUnavailableReason as LevelUnavailableReason?,
       suggestions: suggestions ?? this.suggestions,
       suggestionLevels: suggestionLevels ?? this.suggestionLevels,
       ritualSuggestionIds: ritualSuggestionIds ?? this.ritualSuggestionIds,

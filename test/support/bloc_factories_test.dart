@@ -7,6 +7,7 @@ import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
 
 import 'bloc_factories.dart';
+import 'pump_app.dart';
 
 void main() {
   testWidgets(
@@ -17,17 +18,16 @@ void main() {
       final bloc = realSpellCreationBloc();
       addTearDown(bloc.close);
 
-      await tester.pumpWidget(MaterialApp(
-        home: BlocProvider<SpellCreationBloc>.value(
-          value: bloc,
-          child: BlocBuilder<SpellCreationBloc, SpellCreationState>(
-            builder: (context, state) => Text(
-              state.draft.technique ?? 'no technique',
-              textDirection: TextDirection.ltr,
-            ),
+      await pumpApp(
+        tester,
+        BlocBuilder<SpellCreationBloc, SpellCreationState>(
+          builder: (context, state) => Text(
+            state.draft.technique ?? 'no technique',
+            textDirection: TextDirection.ltr,
           ),
         ),
-      ));
+        providers: [BlocProvider<SpellCreationBloc>.value(value: bloc)],
+      );
 
       expect(find.text('no technique'), findsOneWidget);
 

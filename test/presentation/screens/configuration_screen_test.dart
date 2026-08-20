@@ -13,6 +13,7 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 
 import '../../support/bloc_factories.dart';
+import '../../support/pump_app.dart';
 
 void main() {
   late MockConfigurationBloc bloc;
@@ -21,9 +22,12 @@ void main() {
 
   Future<void> pumpScreen(WidgetTester tester, ConfigurationState state) async {
     bloc = mockConfigurationBloc(initialState: state);
-    await tester.pumpWidget(MaterialApp(
-      home: BlocProvider<ConfigurationBloc>.value(value: bloc, child: const ConfigurationScreen()),
-    ));
+    await pumpApp(
+      tester,
+      const ConfigurationScreen(),
+      providers: [BlocProvider<ConfigurationBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+    );
   }
 
   ConfigurationState loadedState({List<BaseEffect> effects = const []}) => ConfigurationState(
@@ -37,6 +41,24 @@ void main() {
 
     expect(find.text('Effects'), findsOneWidget);
     expect(find.text('Parameters'), findsOneWidget);
+  });
+
+  testWidgets('configuration screen chrome is localised', (tester) async {
+    bloc = mockConfigurationBloc(initialState: loadedState());
+    await pumpApp(
+      tester,
+      const ConfigurationScreen(),
+      providers: [BlocProvider<ConfigurationBloc>.value(value: bloc)],
+      wrapInScaffold: false,
+      locale: const Locale('en', 'XA'),
+    );
+
+    expect(find.text('Configuration'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
+    expect(find.text('Effects'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
+    expect(find.text('Parameters'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
   });
 
   testWidgets('renders custom effects present in state', (tester) async {

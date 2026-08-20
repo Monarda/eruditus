@@ -12,9 +12,11 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
+import 'package:eruditus/models/invalid_spell_exception.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/container_mode.dart';
 import 'package:eruditus/models/general_effect_formula.dart';
@@ -29,6 +31,7 @@ import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_template.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
 
 class MockSpellRepository extends Mock implements SpellRepository {}
@@ -708,6 +711,47 @@ void main() {
           // state.draft, or a retry finds the dialog empty again.
           .having((s) => s.draft.summary, 'draft.summary (dialog-supplied, preserved on error)',
               'A jet of flame.'),
+    ],
+  );
+
+  blocTest<SpellCreationBloc, SpellCreationState>(
+    // Regression test for the final-review fix: a repository-refused save
+    // (InvalidSpellException) used to fall into the generic catch and land
+    // in errorMessage as e.toString() -- an unlocalised, stringified
+    // Equatable repr like "InvalidSpellException: Spell s1 is invalid:
+    // RequisiteIsOwnArt()". It must instead surface through the same
+    // structured, already-localised validationErrors channel
+    // validateSpellDraft uses, with errorMessage left untouched.
+    'SpellSaveRequested surfaces a repository InvalidSpellException as localised '
+    'validationErrors, not a stringified exception in errorMessage',
+    build: () {
+      final repo = MockSpellRepository();
+      when(() => repo.saveSpell(any())).thenThrow(
+        InvalidSpellException('doomed-id', const [RequisiteIsOwnArt()]),
+      );
+      return SpellCreationBloc(spellEngine: spellEngine, spellRepository: repo);
+    },
+    act: (bloc) {
+      bloc.add(const TechniqueSelected('Creo'));
+      bloc.add(const FormSelected('Ignem'));
+      bloc.add(BaseEffectSelected(creoIgnemEffect));
+      bloc.add(RangeSelected(rangeParam));
+      bloc.add(DurationSelected(durationParam));
+      bloc.add(TargetSelected(targetParam));
+      bloc.add(const SpellSaveRequested('Doomed Spell', summary: 'A jet of flame.'));
+    },
+    skip: 6,
+    expect: () => [
+      isA<SpellCreationState>().having((s) => s.status, 'status', SpellCreationStatus.saving),
+      isA<SpellCreationState>()
+          .having((s) => s.status, 'status', SpellCreationStatus.editing)
+          .having((s) => s.validationErrors, 'validationErrors',
+              contains(const RequisiteIsOwnArt()))
+          .having((s) => s.errorMessage, 'errorMessage (untouched -- not a stringified exception)',
+              isNull)
+          // The in-progress draft is preserved, matching the disk-full case
+          // above: a rejected save must not lose the user's work.
+          .having((s) => s.draft.technique, 'draft.technique (preserved)', 'Creo'),
     ],
   );
 
@@ -1405,7 +1449,7 @@ void main() {
           .having(
             (s) => s.validationErrors,
             'validationErrors',
-            contains("Requisite art cannot be the spell's own technique or form"),
+            contains(const RequisiteIsOwnArt()),
           ),
     ],
   );
@@ -1655,7 +1699,9 @@ void main() {
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           .having(
-            (s) => s.breakdown?.contributions.any((c) => c.label.contains('Metal')),
+            (s) => s.breakdown?.contributions.any((c) =>
+                c.source is ModifierContribution &&
+                (c.source as ModifierContribution).optionLabel.contains('Metal')),
             'breakdown mentions the modifier',
             isTrue,
           ),
@@ -2442,7 +2488,7 @@ void main() {
         expect(bloc.state.draft.analogyRationale, isNull);
         final errors = spellEngine.validateSpellDraft(bloc.state.draft);
         expect(
-          errors.any((e) => e.contains('analogyRationale is set but')),
+          errors.any((e) => e is AnalogyRationaleUnwanted),
           isFalse,
         );
       },
@@ -2699,11 +2745,11 @@ void main() {
       final withReason = SpellCreationState(
         status: SpellCreationStatus.editing,
         draft: SpellDraft(),
-        levelUnavailableReason: 'Choose a base effect to see a level.',
+        levelUnavailableReason: LevelUnavailableReason.noBaseEffect,
       );
 
       expect(withReason.copyWith(status: SpellCreationStatus.saving).levelUnavailableReason,
-          'Choose a base effect to see a level.');
+          LevelUnavailableReason.noBaseEffect);
       expect(withReason.copyWith(levelUnavailableReason: null).levelUnavailableReason, isNull);
     });
   });
@@ -2714,7 +2760,7 @@ void main() {
       addTearDown(bloc.close);
 
       expect(bloc.state.breakdown, isNull);
-      expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+      expect(bloc.state.levelUnavailableReason, LevelUnavailableReason.noBaseEffect);
     });
 
     blocTest<SpellCreationBloc, SpellCreationState>(
@@ -2751,7 +2797,7 @@ void main() {
         ..add(const TechniqueSelected('Perdo')),
       verify: (bloc) {
         expect(bloc.state.breakdown, isNull);
-        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+        expect(bloc.state.levelUnavailableReason, LevelUnavailableReason.noBaseEffect);
       },
     );
 
@@ -2765,7 +2811,7 @@ void main() {
         ..add(const SpellDiscarded()),
       verify: (bloc) {
         expect(bloc.state.breakdown, isNull);
-        expect(bloc.state.levelUnavailableReason, 'Choose a base effect to see a level.');
+        expect(bloc.state.levelUnavailableReason, LevelUnavailableReason.noBaseEffect);
       },
     );
 
@@ -2807,7 +2853,7 @@ void main() {
         isA<SpellCreationState>()
             .having((s) => s.status, 'status', SpellCreationStatus.editing)
             .having((s) => s.validationErrors, 'validationErrors',
-                contains('Target must be selected')),
+                contains(const TargetMissing())),
         isA<SpellCreationState>()
             .having((s) => s.draft.target, 'draft.target', targetParam)
             .having((s) => s.validationErrors, 'validationErrors (cleared by the edit)', isEmpty),
@@ -2830,7 +2876,7 @@ void main() {
         isA<SpellCreationState>()
             .having((s) => s.status, 'status', SpellCreationStatus.editing)
             .having((s) => s.validationErrors, 'validationErrors',
-                contains('Range must be selected')),
+                contains(const RangeMissing())),
       ],
     );
 

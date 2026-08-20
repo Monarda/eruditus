@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell_validation_error.dart';
+import 'package:eruditus/presentation/format/contribution_formatter.dart';
 
 class SpellCard extends StatelessWidget {
   final LibraryEntry entry;
@@ -39,7 +42,7 @@ class SpellCard extends StatelessWidget {
   /// [rationale] already are. Rendered only when [LibraryEntry.isResolved]
   /// is true; ignored otherwise, leaving the unresolved branch below
   /// untouched.
-  final List<String> problems;
+  final List<SpellValidationError> problems;
 
   /// Rendered inside the card below the ListTile, e.g. the Library screen's
   /// *Learn at level…* button for a template. Empty by default so ordinary
@@ -61,6 +64,7 @@ class SpellCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isInvalid = !entry.isResolved;
     final hasProblems = entry.isResolved && problems.isNotEmpty;
     // An unresolved spell (see below) has a null technique/form too, since
@@ -70,21 +74,23 @@ class SpellCard extends StatelessWidget {
     // nameless, unresolved spell would render the literal string
     // "Untitled null null".
     final title = entry.name ??
-        (isInvalid ? 'Untitled spell' : 'Untitled ${entry.technique} ${entry.form}');
+        (isInvalid
+            ? l10n.untitledSpell
+            : l10n.untitledSpellOfArts(entry.technique!, entry.form!));
     final String subtitle;
     if (isInvalid) {
       // The catalog entry this spell was built on no longer exists (a custom
       // effect or parameter the user deleted). Say so plainly rather than
       // showing a half-empty card or hiding the spell.
-      subtitle = 'Unavailable — missing ${entry.unresolvedReferences.join(', ')}';
+      subtitle = l10n.spellCardUnavailable(entry.unresolvedReferences.join(', '));
     } else {
       // hasProblems doesn't change *whether* a level renders, only whether
       // it's flagged: the breakdown genuinely computed, so unlike the
       // isInvalid branch above there is a real number to show.
-      final levelSuffix = hasProblems ? ' (unverified)' : '';
+      final levelSuffix = hasProblems ? l10n.spellCardUnverifiedSuffix : '';
       subtitle = level != null
-          ? '${entry.technique} ${entry.form} • Level $level$levelSuffix'
-          : '${entry.technique} ${entry.form}';
+          ? l10n.spellCardArtsAndLevel(entry.technique!, entry.form!, level!, levelSuffix)
+          : l10n.spellCardArtsOnly(entry.technique!, entry.form!);
     }
     // Prefer the paraphrase; fall back to the verbatim rulebook text.
     // validateSpellProse's rule is unconditional (todo item 13), so every
@@ -112,29 +118,29 @@ class SpellCard extends StatelessWidget {
               children: [
                 Flexible(child: Text(title)),
                 if (isRitual)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Chip(
-                      key: Key('ritual-chip'),
-                      label: Text('Ritual'),
+                      key: const Key('ritual-chip'),
+                      label: Text(l10n.ritualChip),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
                 if (isGeneral)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Chip(
-                      key: Key('general-chip'),
-                      label: Text('Gen'),
+                      key: const Key('general-chip'),
+                      label: Text(l10n.generalChip),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
                 if (isException)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Chip(
-                      key: Key('exception-chip'),
-                      label: Text('Exception'),
+                      key: const Key('exception-chip'),
+                      label: Text(l10n.exceptionChip),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
@@ -143,7 +149,7 @@ class SpellCard extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8),
                     child: Chip(
                       key: const Key('needs-review-chip'),
-                      label: const Text('Needs review'),
+                      label: Text(l10n.needsReview),
                       visualDensity: VisualDensity.compact,
                       backgroundColor: Theme.of(context).colorScheme.errorContainer,
                       labelStyle:
@@ -166,7 +172,7 @@ class SpellCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      problems.join('; '),
+                      problems.map((p) => formatValidationError(l10n, p)).join('; '),
                       style: TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ),
@@ -182,7 +188,7 @@ class SpellCard extends StatelessWidget {
             ),
             trailing: Chip(
                 label: Text(
-                    entry.source == PublicationSource.published ? 'Published' : 'My Spell')),
+                    entry.source == PublicationSource.published ? l10n.published : l10n.mySpell)),
           ),
           if (actions.isNotEmpty) ...actions,
         ],
