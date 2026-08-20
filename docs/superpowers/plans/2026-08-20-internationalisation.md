@@ -1331,6 +1331,19 @@ git commit -m "refactor: make spell validation return structured errors, not Eng
 - Consumes: `AppLocalizations` (Task 1), `pumpApp` (Task 2).
 - Produces: no new Dart API — ARB keys only.
 
+**⚠️ Three strings were missing from an earlier version of this table** — `'Published'` (`spell_card.dart:191`, the sibling branch of the `mySpell` ternary), `'Modifiers'` (`modifiers_section.dart:64`) and `'None'` (`modifiers_section.dart:104`). They were lost because the extraction that built these tables used `grep -vi`, and the `-i` made a lowercase-exclusion pattern swallow every single-word capitalised string. **Do not assume this table is complete — run the discovery command in Step 0 and reconcile.**
+
+- [ ] **Step 0: Discover the real string list before trusting the table**
+
+```bash
+for f in lib/presentation/widgets/modifiers_section.dart lib/presentation/widgets/spell_card.dart; do
+  echo "--- $f"
+  grep -noE "'[^']{2,}'" "$f" | grep -vE "':?[a-z][a-z0-9_-]*'$" | grep -vE "'package:" | grep -E "[A-Za-z]{3,}"
+done
+```
+
+Note the exclusion has **no `-i`** — that flag is precisely what hid the three strings above. Reconcile the output against the table; if you find chrome the table omits, add an ARB key for it following the same naming pattern and say so in your report.
+
 **Watch the population boundary here.** `option.label`, `entry.technique`, `entry.form` and `p.name` are rulebook content; the user's spell name is user content. Only the *frames* move to ARB.
 
 - [ ] **Step 1: Add the ARB entries**
@@ -1377,7 +1390,10 @@ git commit -m "refactor: make spell validation return structured errors, not Eng
     }
   },
   "needsReview": "Needs review",
-  "mySpell": "My Spell"
+  "mySpell": "My Spell",
+  "published": "Published",
+  "modifiersHeading": "Modifiers",
+  "noneOption": "None"
 ```
 
 - [ ] **Step 2: Write the failing test**
