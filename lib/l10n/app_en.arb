@@ -80,22 +80,27 @@
   "validationAnalogyRationaleUnwanted": "analogyRationale is set but Technique/Form already matches the base effect's own -- remove it",
   "validationModifierNotMultiSelect": "Only one option may be selected for {modifier}",
   "@validationModifierNotMultiSelect": {
+    "description": "{modifier} is rulebook content (a modifier's name) and is not translated",
     "placeholders": { "modifier": { "type": "String" } }
   },
   "validationOpenSlotNotChosen": "Choose a {kind} for this guideline",
   "@validationOpenSlotNotChosen": {
+    "description": "{kind} is rulebook-derived slot-kind wording (e.g. 'realm', 'Form') and is not translated",
     "placeholders": { "kind": { "type": "String" } }
   },
   "validationChosenSlotNotOpen": "A chosen {description} applies only to a guideline with an open {description} slot",
   "@validationChosenSlotNotOpen": {
+    "description": "{description} is rulebook-derived slot-kind wording and is not translated",
     "placeholders": { "description": { "type": "String" } }
   },
   "validationContainerModeOnNonContainer": "A container mode applies only to a container Target, and {target} is not one",
   "@validationContainerModeOnNonContainer": {
+    "description": "{target} is rulebook content (a Target's name) and is not translated",
     "placeholders": { "target": { "type": "String" } }
   },
   "validationRangeForbidsTarget": "{range} Range cannot be combined with {target}, which is a {kind} Target",
   "@validationRangeForbidsTarget": {
+    "description": "{range} and {target} are rulebook content (parameter names); {kind} is a TargetType enum name. None are translated",
     "placeholders": {
       "range": { "type": "String" },
       "target": { "type": "String" },
@@ -104,6 +109,7 @@
   },
   "validationRangeRequiredByTarget": "{target} requires the Range \"{requiredRange}\", but this spell uses {range}",
   "@validationRangeRequiredByTarget": {
+    "description": "{target} and {range} are rulebook content (parameter names); {requiredRange} is a raw catalog id, not prose. None are translated",
     "placeholders": {
       "target": { "type": "String" },
       "requiredRange": { "type": "String" },
@@ -112,6 +118,7 @@
   },
   "validationTechniqueExcludedByTarget": "{target} cannot be used on a spell employing the Technique of {technique}",
   "@validationTechniqueExcludedByTarget": {
+    "description": "{target} is rulebook content (a Target's name); {technique} is an Art's Latin name. Neither is translated",
     "placeholders": {
       "target": { "type": "String" },
       "technique": { "type": "String" }
@@ -119,6 +126,7 @@
   },
   "validationRequisiteArtExcludedByTarget": "{target} cannot be used on a spell with {art} as a requisite",
   "@validationRequisiteArtExcludedByTarget": {
+    "description": "{target} is rulebook content (a Target's name); {art} is an Art's Latin name. Neither is translated",
     "placeholders": {
       "target": { "type": "String" },
       "art": { "type": "String" }

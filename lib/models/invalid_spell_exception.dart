@@ -13,14 +13,16 @@ class InvalidSpellException implements Exception {
 
   InvalidSpellException(this.spellId, this.problems);
 
-  /// A diagnostic message, not user-facing prose: this class has no locale to
-  /// render [problems] with (the same reason they are structured rather than
-  /// English in the first place), so this names the variants rather than
-  /// wording them. No caller renders this to a user today -- see
-  /// `backup_screen.dart`, which surfaces only `spellId` from a batch of
-  /// these.
-  String get message =>
-      'Spell $spellId is invalid: ${problems.map((p) => p.runtimeType).join('; ')}';
+  /// A diagnostic message, not user-facing prose: no caller renders this to a
+  /// user today -- see `backup_screen.dart`, which surfaces only `spellId`
+  /// from a batch of these. The plain `join` below still reads well because
+  /// [SpellValidationError]'s variants are `Equatable`, whose default
+  /// `toString()` prints each variant's name and field values
+  /// (`EquatableConfig.stringify` is true under asserts, which covers
+  /// `flutter test` and every debug build) -- there is no need to hand-roll
+  /// wording here just because this class, like [SpellValidationError]
+  /// itself, has no locale to render one in.
+  String get message => 'Spell $spellId is invalid: ${problems.join('; ')}';
 
   @override
   String toString() => 'InvalidSpellException: $message';

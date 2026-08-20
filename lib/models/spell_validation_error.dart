@@ -11,9 +11,10 @@ import 'package:equatable/equatable.dart';
 /// places: the creation screen's validation list, and `ResolvedSpell.problems`
 /// on spell cards in both the creation screen and the library screen.
 ///
-/// Sealed on purpose, mirroring [ContributionSource]: a twenty-second variant
-/// will not compile until the formatter's switch handles it, so no problem can
-/// reach the screen unlocalised.
+/// Sealed on purpose, mirroring `ContributionSource`
+/// (`lib/engine/contribution_source.dart`): a twenty-second variant will not
+/// compile until the formatter's switch handles it, so no problem can reach
+/// the screen unlocalised.
 sealed class SpellValidationError extends Equatable {
   const SpellValidationError();
 }
@@ -63,9 +64,10 @@ final class TargetMissing extends SpellValidationError {
 }
 
 /// A draft whose negative magnitudes drive it below level 1. Distinct from
-/// [LevelUnavailableReason.magnitudesBelowOne] (`level_breakdown.dart`) —
-/// same fact, reached by a different path (the save button, not the live
-/// preview), with different rendered text (no trailing full stop here).
+/// `LevelUnavailableReason.magnitudesBelowOne`
+/// (`lib/engine/level_breakdown.dart`) — same fact, reached by a different
+/// path (the save button, not the live preview), with different rendered
+/// text (no trailing full stop here).
 final class MagnitudesBelowOne extends SpellValidationError {
   const MagnitudesBelowOne();
 

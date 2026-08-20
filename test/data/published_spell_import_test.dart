@@ -195,8 +195,7 @@ void main() {
         modifiers: modifiers,
       );
       if (problems.isNotEmpty) {
-        failures.add(
-            '${spell.name} (${spell.id}): ${problems.map((p) => p.runtimeType).join('; ')}');
+        failures.add('${spell.name} (${spell.id}): ${problems.join('; ')}');
       }
     }
 
@@ -223,7 +222,7 @@ void main() {
       );
       if (problems.isNotEmpty) {
         failures.add(
-            '${template.name} (${template.id}): ${problems.map((p) => p.runtimeType).join('; ')}');
+            '${template.name} (${template.id}): ${problems.join('; ')}');
       }
     }
 
@@ -336,7 +335,7 @@ void main() {
       modifiers: modifiers,
     );
 
-    expect(problems, isEmpty, reason: problems.map((p) => p.runtimeType).join('; '));
+    expect(problems, isEmpty, reason: problems.join('; '));
   });
 
   test(
@@ -410,7 +409,6 @@ void main() {
       containerMode: filled.containerMode,
       modifiers: modifiers,
     );
-    expect(filledProblems, isEmpty,
-        reason: filledProblems.map((p) => p.runtimeType).join('; '));
+    expect(filledProblems, isEmpty, reason: filledProblems.join('; '));
   });
 }
