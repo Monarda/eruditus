@@ -1,0 +1,15 @@
+{
+  "@@locale": "en",
+  "spellLevel": "Spell level",
+  "@spellLevel": {
+    "description": "Heading above the calculated level number"
+  },
+  "showBreakdown": "Show the breakdown",
+  "@showBreakdown": {
+    "description": "Tooltip on the control that expands the level breakdown"
+  },
+  "hideBreakdown": "Hide the breakdown",
+  "@hideBreakdown": {
+    "description": "Tooltip on the control that collapses the level breakdown"
+  }
+}

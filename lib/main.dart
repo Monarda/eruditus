@@ -22,6 +22,7 @@ import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/services/backup_service.dart';
 import 'package:eruditus/data/spell_resolver.dart';
 import 'package:eruditus/engine/spell_engine.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/presentation/screens/backup_screen.dart';
 import 'package:eruditus/presentation/screens/configuration_screen.dart';
 import 'package:eruditus/presentation/screens/spell_creation_screen.dart';
@@ -109,6 +110,8 @@ class EruditusApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Eruditus',
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: MultiBlocProvider(
         providers: [
           BlocProvider<SpellCreationBloc>.value(value: spellCreationBloc),
