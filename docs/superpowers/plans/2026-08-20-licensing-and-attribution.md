@@ -540,7 +540,7 @@ endorsed by Atlas Games.
 - [ ] **Step 8: Run the test to verify it passes**
 
 Run: `flutter test test/licensing/repo_licence_files_test.dart`
-Expected: PASS, 10 tests.
+Expected: PASS, 11 tests.
 
 If a `contains` assertion fails, the cause is almost always a typographic difference between `NOTICE.md` and `attribution.dart` — an ASCII hyphen against an en dash, or `(c)` against `©`. Fix `NOTICE.md` to match the Dart, not the other way round.
 
@@ -1067,7 +1067,7 @@ flutter analyze
 flutter test
 ```
 
-Expected: analyze exits 0; all tests pass. The count should be 782 plus the tests added by Tasks 1-4 — 12 (attribution) + 10 (repo files) + 7 (About screen) + 2 (navigation) + 1 (the fifth pseudo-locale block) = 32, so **814**. Treat a different total as something to explain, not to paper over. If the run fails with a `sqlite3.dll` permissions error, kill stale `flutter_tester` processes and re-run.
+Expected: analyze exits 0; all tests pass. The count should be 782 plus the tests added by Tasks 1-4 — 12 (attribution) + 11 (repo files) + 7 (About screen) + 2 (navigation) + 1 (the fifth pseudo-locale block) = 33, so **815**. Treat a different total as something to explain, not to paper over. If the run fails with a `sqlite3.dll` permissions error, kill stale `flutter_tester` processes and re-run.
 
 - [ ] **Step 7: Verify by hand in the running app**
 
