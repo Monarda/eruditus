@@ -74,21 +74,23 @@ class SpellCard extends StatelessWidget {
     // nameless, unresolved spell would render the literal string
     // "Untitled null null".
     final title = entry.name ??
-        (isInvalid ? 'Untitled spell' : 'Untitled ${entry.technique} ${entry.form}');
+        (isInvalid
+            ? l10n.untitledSpell
+            : l10n.untitledSpellOfArts(entry.technique!, entry.form!));
     final String subtitle;
     if (isInvalid) {
       // The catalog entry this spell was built on no longer exists (a custom
       // effect or parameter the user deleted). Say so plainly rather than
       // showing a half-empty card or hiding the spell.
-      subtitle = 'Unavailable — missing ${entry.unresolvedReferences.join(', ')}';
+      subtitle = l10n.spellCardUnavailable(entry.unresolvedReferences.join(', '));
     } else {
       // hasProblems doesn't change *whether* a level renders, only whether
       // it's flagged: the breakdown genuinely computed, so unlike the
       // isInvalid branch above there is a real number to show.
-      final levelSuffix = hasProblems ? ' (unverified)' : '';
+      final levelSuffix = hasProblems ? l10n.spellCardUnverifiedSuffix : '';
       subtitle = level != null
-          ? '${entry.technique} ${entry.form} • Level $level$levelSuffix'
-          : '${entry.technique} ${entry.form}';
+          ? l10n.spellCardArtsAndLevel(entry.technique!, entry.form!, level!, levelSuffix)
+          : l10n.spellCardArtsOnly(entry.technique!, entry.form!);
     }
     // Prefer the paraphrase; fall back to the verbatim rulebook text.
     // validateSpellProse's rule is unconditional (todo item 13), so every
@@ -147,7 +149,7 @@ class SpellCard extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 8),
                     child: Chip(
                       key: const Key('needs-review-chip'),
-                      label: const Text('Needs review'),
+                      label: Text(l10n.needsReview),
                       visualDensity: VisualDensity.compact,
                       backgroundColor: Theme.of(context).colorScheme.errorContainer,
                       labelStyle:
@@ -186,7 +188,7 @@ class SpellCard extends StatelessWidget {
             ),
             trailing: Chip(
                 label: Text(
-                    entry.source == PublicationSource.published ? 'Published' : 'My Spell')),
+                    entry.source == PublicationSource.published ? 'Published' : l10n.mySpell)),
           ),
           if (actions.isNotEmpty) ...actions,
         ],

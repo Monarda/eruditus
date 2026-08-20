@@ -328,4 +328,21 @@ void main() {
     expect(find.textContaining('Creo Ignem'), findsOneWidget);
     expect(find.textContaining('Level'), findsNothing);
   });
+
+  testWidgets('the card chrome is localised but the spell name is not',
+      (tester) async {
+    final spell = buildSpell(name: 'Miscast Aegis', summary: 'Test summary.');
+
+    await pumpApp(tester, SpellCard(
+      entry: spell,
+      level: 20,
+      problems: const [
+        GeneralLevelNotChosen(),
+        ModifierNotMultiSelect('Size'),
+      ],
+    ), locale: const Locale('en', 'XA'));
+
+    expect(find.text('Needs review'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
+  });
 }

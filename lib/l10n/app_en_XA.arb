@@ -39,5 +39,15 @@
   "validationRangeForbidsTarget": "[{range} Ŕāňģē ćāňňōţ ƀē ćōɱƀĭňēđ ŵĭţĥ {target}, ŵĥĭćĥ ĭś ā {kind} Ţāŕģēţ······················]",
   "validationRangeRequiredByTarget": "[{target} ŕēɋűĭŕēś ţĥē Ŕāňģē \"{requiredRange}\", ƀűţ ţĥĭś śƥēĺĺ űśēś {range}·······················]",
   "validationTechniqueExcludedByTarget": "[{target} ćāňňōţ ƀē űśēđ ōň ā śƥēĺĺ ēɱƥĺōýĭňģ ţĥē Ţēćĥňĭɋűē ōƒ {technique}······················]",
-  "validationRequisiteArtExcludedByTarget": "[{target} ćāňňōţ ƀē űśēđ ōň ā śƥēĺĺ ŵĭţĥ {art} āś ā ŕēɋűĭśĭţē··················]"
+  "validationRequisiteArtExcludedByTarget": "[{target} ćāňňōţ ƀē űśēđ ōň ā śƥēĺĺ ŵĭţĥ {art} āś ā ŕēɋűĭśĭţē··················]",
+  "modifiersSelectedCount": "[{count} śēĺēćţēđ·····]",
+  "modifierOptionWithMagnitude": "[{option} (+{magnitude})·······]",
+  "untitledSpell": "[Űňţĭţĺēđ śƥēĺĺ·····]",
+  "untitledSpellOfArts": "[Űňţĭţĺēđ {technique} {form}·········]",
+  "spellCardUnavailable": "[Űňāṽāĭĺāƀĺē — ɱĭśśĭňģ {references}···········]",
+  "spellCardUnverifiedSuffix": "[ (űňṽēŕĭƒĭēđ)····]",
+  "spellCardArtsAndLevel": "[{technique} {form} • Ĺēṽēĺ {level}{suffix}·············]",
+  "spellCardArtsOnly": "[{technique} {form}······]",
+  "needsReview": "[Ňēēđś ŕēṽĭēŵ····]",
+  "mySpell": "[Ṁý Śƥēĺĺ···]"
 }

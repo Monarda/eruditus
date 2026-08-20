@@ -131,5 +131,47 @@
       "target": { "type": "String" },
       "art": { "type": "String" }
     }
-  }
+  },
+  "modifiersSelectedCount": "{count} selected",
+  "@modifiersSelectedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "modifierOptionWithMagnitude": "{option} (+{magnitude})",
+  "@modifierOptionWithMagnitude": {
+    "placeholders": {
+      "option": { "type": "String" },
+      "magnitude": { "type": "int" }
+    }
+  },
+  "untitledSpell": "Untitled spell",
+  "untitledSpellOfArts": "Untitled {technique} {form}",
+  "@untitledSpellOfArts": {
+    "placeholders": {
+      "technique": { "type": "String" },
+      "form": { "type": "String" }
+    }
+  },
+  "spellCardUnavailable": "Unavailable — missing {references}",
+  "@spellCardUnavailable": {
+    "placeholders": { "references": { "type": "String" } }
+  },
+  "spellCardUnverifiedSuffix": " (unverified)",
+  "spellCardArtsAndLevel": "{technique} {form} • Level {level}{suffix}",
+  "@spellCardArtsAndLevel": {
+    "placeholders": {
+      "technique": { "type": "String" },
+      "form": { "type": "String" },
+      "level": { "type": "int" },
+      "suffix": { "type": "String" }
+    }
+  },
+  "spellCardArtsOnly": "{technique} {form}",
+  "@spellCardArtsOnly": {
+    "placeholders": {
+      "technique": { "type": "String" },
+      "form": { "type": "String" }
+    }
+  },
+  "needsReview": "Needs review",
+  "mySpell": "My Spell"
 }
