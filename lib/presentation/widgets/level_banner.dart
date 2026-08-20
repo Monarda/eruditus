@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:eruditus/engine/level_breakdown.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
+import 'package:eruditus/presentation/format/contribution_formatter.dart';
 
 /// The spell's level, pinned above the creation form and outside its scroll.
 ///
@@ -40,6 +42,7 @@ class _LevelBannerState extends State<LevelBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final breakdown = widget.breakdown;
     final reason = widget.unavailableReason;
 
@@ -75,7 +78,7 @@ class _LevelBannerState extends State<LevelBanner> {
                 key: const Key('breakdown-total'),
                 children: [
                   Expanded(
-                    child: Text('Spell level',
+                    child: Text(l10n.spellLevel,
                         style: Theme.of(context).textTheme.titleMedium),
                   ),
                   Text(breakdown == null ? '—' : '${breakdown.level}',
@@ -87,7 +90,7 @@ class _LevelBannerState extends State<LevelBanner> {
                     IconButton(
                       key: const Key('level-banner-toggle'),
                       icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-                      tooltip: _expanded ? 'Hide the breakdown' : 'Show the breakdown',
+                      tooltip: _expanded ? l10n.hideBreakdown : l10n.showBreakdown,
                       onPressed: () => setState(() => _expanded = !_expanded),
                     ),
                 ],
@@ -114,7 +117,9 @@ class _LevelBannerState extends State<LevelBanner> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Expanded(child: Text(contribution.label)),
+                                  Expanded(
+                                      child: Text(formatContribution(
+                                          l10n, contribution.source))),
                                   Text(contribution.isBase
                                       ? '${contribution.magnitude}'
                                       : '+${contribution.magnitude}'),
@@ -131,7 +136,8 @@ class _LevelBannerState extends State<LevelBanner> {
                             key: const Key('ritual-minimum-note'),
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
-                              'Ritual minimum: raised from ${breakdown.rawLevel} to ${breakdown.level}',
+                              l10n.ritualMinimumRaised(
+                                  breakdown.rawLevel, breakdown.level),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ),

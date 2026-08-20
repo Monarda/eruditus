@@ -11,5 +11,53 @@
   "hideBreakdown": "Hide the breakdown",
   "@hideBreakdown": {
     "description": "Tooltip on the control that collapses the level breakdown"
+  },
+  "contributionBaseEffect": "Base effect · {description}",
+  "@contributionBaseEffect": {
+    "placeholders": { "description": { "type": "String" } }
+  },
+  "contributionSlot": "{slot} · {actual}",
+  "@contributionSlot": {
+    "placeholders": {
+      "slot": { "type": "String" },
+      "actual": { "type": "String" }
+    }
+  },
+  "contributionSlotAssumes": "{slot} · {actual} (guideline assumes {reference})",
+  "@contributionSlotAssumes": {
+    "placeholders": {
+      "slot": { "type": "String" },
+      "actual": { "type": "String" },
+      "reference": { "type": "String" }
+    }
+  },
+  "contributionRequisite": "Requisite · {art}, {parameter}",
+  "@contributionRequisite": {
+    "placeholders": {
+      "art": { "type": "String" },
+      "parameter": { "type": "String" }
+    }
+  },
+  "contributionAdjustment": "Adjustment · {note}",
+  "@contributionAdjustment": {
+    "description": "{note} is USER CONTENT and renders verbatim in every locale",
+    "placeholders": { "note": { "type": "String" } }
+  },
+  "contributionModifier": "{modifier} · {option}",
+  "@contributionModifier": {
+    "placeholders": {
+      "modifier": { "type": "String" },
+      "option": { "type": "String" }
+    }
+  },
+  "slotRange": "Range",
+  "slotDuration": "Duration",
+  "slotTarget": "Target",
+  "ritualMinimumRaised": "Ritual minimum: raised from {from} to {to}",
+  "@ritualMinimumRaised": {
+    "placeholders": {
+      "from": { "type": "int" },
+      "to": { "type": "int" }
+    }
   }
 }

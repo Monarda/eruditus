@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/engine/spell_level_calculator.dart';
@@ -233,17 +234,21 @@ class SpellEngine {
 
     final contributions = <LevelContribution>[
       LevelContribution(
-          label: 'Base effect · ${baseEffect.description}',
+          source: BaseEffectContribution(baseEffect.description),
           magnitude: baseLevel,
           isBase: true),
-      _parameterContribution('Range', range, baseEffect.reference.rangeId),
-      _parameterContribution('Duration', duration, baseEffect.reference.durationId),
-      _parameterContribution('Target', target, baseEffect.reference.targetId),
+      _parameterContribution(
+          ParameterSlot.range, range, baseEffect.reference.rangeId),
+      _parameterContribution(
+          ParameterSlot.duration, duration, baseEffect.reference.durationId),
+      _parameterContribution(
+          ParameterSlot.target, target, baseEffect.reference.targetId),
     ];
 
     for (final entry in requisites.entries) {
       contributions.add(LevelContribution(
-          label: 'Requisite · ${entry.key}, ${entry.value.name}',
+          source: RequisiteContribution(
+              art: entry.key, parameterName: entry.value.name),
           magnitude: entry.value.magnitude));
     }
 
@@ -251,7 +256,7 @@ class SpellEngine {
     // calculator call below and need no special case there.
     for (final adjustment in adjustments) {
       contributions.add(LevelContribution(
-          label: 'Adjustment · ${adjustment.note}',
+          source: AdjustmentContribution(adjustment.note),
           magnitude: adjustment.magnitude));
     }
 
@@ -265,7 +270,9 @@ class SpellEngine {
           final option = modifier.optionById(optionId);
           if (option == null) continue;
           contributions.add(LevelContribution(
-              label: '${modifier.name} · ${option.label}', magnitude: option.magnitude));
+              source: ModifierContribution(
+                  modifierName: modifier.name, optionLabel: option.label),
+              magnitude: option.magnitude));
         }
       }
     });
@@ -310,19 +317,23 @@ class SpellEngine {
   /// label is unchanged. That identity is why this is one code path and not a
   /// branch on `isGeneral`.
   LevelContribution _parameterContribution(
-      String slot, Parameter actual, String referenceId) {
+      ParameterSlot slot, Parameter actual, String referenceId) {
     if (actual.id == referenceId) {
-      return LevelContribution(label: '$slot · ${actual.name}', magnitude: 0);
+      return LevelContribution(
+          source: SlotContribution(slot: slot, actualName: actual.name),
+          magnitude: 0);
     }
 
     final reference = _parameterById(referenceId);
     if (reference == null || reference.magnitude == 0) {
       return LevelContribution(
-          label: '$slot · ${actual.name}', magnitude: actual.magnitude);
+          source: SlotContribution(slot: slot, actualName: actual.name),
+          magnitude: actual.magnitude);
     }
 
     return LevelContribution(
-      label: '$slot · ${actual.name} (guideline assumes ${reference.name})',
+      source: SlotContribution(
+          slot: slot, actualName: actual.name, referenceName: reference.name),
       magnitude: actual.magnitude - reference.magnitude,
     );
   }

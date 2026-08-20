@@ -1,22 +1,23 @@
 import 'package:equatable/equatable.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 
 /// One line of a spell's level calculation. [magnitude] holds the base level
 /// when [isBase] is true, and a magnitude contribution otherwise.
 class LevelContribution extends Equatable {
-  final String label;
+  final ContributionSource source;
   final int magnitude;
   final bool isBase;
 
   const LevelContribution({
-    required this.label,
+    required this.source,
     required this.magnitude,
     this.isBase = false,
   });
 
   // See RitualStatus.props for why these three types carry value equality.
   @override
-  List<Object?> get props => [label, magnitude, isBase];
+  List<Object?> get props => [source, magnitude, isBase];
 }
 
 /// A spell's calculated level together with the sources that produced it.

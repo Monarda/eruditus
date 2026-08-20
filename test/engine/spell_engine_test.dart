@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/citation.dart';
@@ -797,7 +798,10 @@ void main() {
       // takes 1 additively and 1 at x5: 4 + 1 + 5 = 10.
       expect(breakdown.level, 10);
       expect(
-        breakdown.contributions.any((c) => c.label.contains('Metal or gemstone') && c.magnitude == 2),
+        breakdown.contributions.any((c) =>
+            c.source is ModifierContribution &&
+            (c.source as ModifierContribution).optionLabel.contains('Metal or gemstone') &&
+            c.magnitude == 2),
         isTrue,
       );
     });
@@ -837,8 +841,12 @@ void main() {
 
       expect(breakdown.contributions.first.isBase, isTrue);
       expect(breakdown.contributions.first.magnitude, 3);
-      expect(breakdown.contributions.any((c) => c.label.startsWith('Range')), isTrue);
-      expect(breakdown.contributions.any((c) => c.label.startsWith('Requisite')), isTrue);
+      expect(
+          breakdown.contributions.any((c) =>
+              c.source is SlotContribution &&
+              (c.source as SlotContribution).slot == ParameterSlot.range),
+          isTrue);
+      expect(breakdown.contributions.any((c) => c.source is RequisiteContribution), isTrue);
     });
   });
 
@@ -1008,14 +1016,16 @@ void main() {
           adjustments: adjustments,
         );
 
-    test('each adjustment contributes one labelled breakdown line', () {
-      final labels = breakdownWith([
+    test('each adjustment contributes one structured breakdown line', () {
+      final sources = breakdownWith([
         LevelAdjustment(magnitude: 1, note: 'see through intervening material'),
         LevelAdjustment(magnitude: -1, note: 'because the old limb is needed'),
-      ]).contributions.map((c) => c.label).toList();
+      ]).contributions.map((c) => c.source).toList();
 
-      expect(labels, contains('Adjustment · see through intervening material'));
-      expect(labels, contains('Adjustment · because the old limb is needed'));
+      expect(sources,
+          contains(const AdjustmentContribution('see through intervening material')));
+      expect(sources,
+          contains(const AdjustmentContribution('because the old limb is needed')));
     });
 
     test('a positive adjustment raises the level by 5 above the additive tier', () {
@@ -1034,8 +1044,8 @@ void main() {
       final breakdown =
           breakdownWith([LevelAdjustment(magnitude: 0, note: 'cosmetic, free')]);
       expect(breakdown.level, 10);
-      expect(breakdown.contributions.map((c) => c.label),
-          contains('Adjustment · cosmetic, free'));
+      expect(breakdown.contributions.map((c) => c.source),
+          contains(const AdjustmentContribution('cosmetic, free')));
     });
 
     test('calculateSpellLevel agrees with calculateBreakdown on adjustments', () {
@@ -1161,10 +1171,16 @@ void main() {
         range: personal, duration: sun, target: individual,
         selectedModifiers: const {}, requisites: const {});
 
-      final rangeLine = breakdown.contributions
-          .firstWhere((c) => c.label.startsWith('Range'));
+      final rangeLine = breakdown.contributions.firstWhere((c) =>
+          c.source is SlotContribution &&
+          (c.source as SlotContribution).slot == ParameterSlot.range);
 
-      expect(rangeLine.label, 'Range · Personal (guideline assumes Touch)');
+      expect(
+          rangeLine.source,
+          const SlotContribution(
+              slot: ParameterSlot.range,
+              actualName: 'Personal',
+              referenceName: 'Touch'));
       expect(rangeLine.magnitude, -1);
     });
 
@@ -1175,12 +1191,13 @@ void main() {
         baseEffect: creoIgnem10, range: voice, duration: sun, target: individual,
         selectedModifiers: const {}, requisites: const {});
 
-      expect(breakdown.contributions.map((c) => '${c.label}|${c.magnitude}'), [
-        'Base effect · Create flame|10',
-        'Range · Voice|2',
-        'Duration · Sun|2',
-        'Target · Individual|0',
+      expect(breakdown.contributions.map((c) => c.source), [
+        const BaseEffectContribution('Create flame'),
+        const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+        const SlotContribution(slot: ParameterSlot.duration, actualName: 'Sun'),
+        const SlotContribution(slot: ParameterSlot.target, actualName: 'Individual'),
       ]);
+      expect(breakdown.contributions.map((c) => c.magnitude), [10, 2, 2, 0]);
       expect(breakdown.level, 30);
     });
   });

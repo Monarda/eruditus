@@ -10,6 +10,7 @@ import 'package:eruditus/bloc/configuration/configuration_state.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_bloc.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_event.dart';
 import 'package:eruditus/bloc/spell_creation/spell_creation_state.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 import 'package:eruditus/models/base_effect.dart';
@@ -230,8 +231,8 @@ void main() {
         level: 20,
         rawLevel: 20,
         contributions: [
-          LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
-          LevelContribution(label: 'Range · Voice', magnitude: 2),
+          LevelContribution(source: BaseEffectContribution('Create flame'), magnitude: 10, isBase: true),
+          LevelContribution(source: SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'), magnitude: 2),
         ],
       ),
     );
@@ -352,7 +353,7 @@ void main() {
           rawLevel: 20,
           ritualStatus: RitualStatus([RitualReason.ritualOnlyDuration]),
           contributions: [
-            LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+            LevelContribution(source: BaseEffectContribution('Create flame'), magnitude: 10, isBase: true),
           ],
         ),
       ),
@@ -378,7 +379,7 @@ void main() {
           level: 12,
           rawLevel: 12,
           contributions: [
-            LevelContribution(label: 'Base effect · Create flame', magnitude: 10, isBase: true),
+            LevelContribution(source: BaseEffectContribution('Create flame'), magnitude: 10, isBase: true),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/presentation/widgets/level_banner.dart';
 
@@ -10,10 +11,20 @@ void main() {
     level: 10,
     rawLevel: 10,
     contributions: [
-      LevelContribution(label: 'Base effect · image, two senses', magnitude: 2, isBase: true),
-      LevelContribution(label: 'Range · Voice', magnitude: 2),
-      LevelContribution(label: 'Duration · Momentary', magnitude: 0),
-      LevelContribution(label: 'Material difficulty · Metal or gemstone', magnitude: 2),
+      LevelContribution(
+          source: BaseEffectContribution('image, two senses'),
+          magnitude: 2,
+          isBase: true),
+      LevelContribution(
+          source: SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+          magnitude: 2),
+      LevelContribution(
+          source: SlotContribution(slot: ParameterSlot.duration, actualName: 'Momentary'),
+          magnitude: 0),
+      LevelContribution(
+          source: ModifierContribution(
+              modifierName: 'Material difficulty', optionLabel: 'Metal or gemstone'),
+          magnitude: 2),
     ],
   );
 
@@ -94,8 +105,13 @@ void main() {
       level: 20,
       rawLevel: 2,
       contributions: [
-        LevelContribution(label: 'Base effect · Heal a Light Wound to a plant', magnitude: 1, isBase: true),
-        LevelContribution(label: 'Range · Touch', magnitude: 1),
+        LevelContribution(
+            source: BaseEffectContribution('Heal a Light Wound to a plant'),
+            magnitude: 1,
+            isBase: true),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.range, actualName: 'Touch'),
+            magnitude: 1),
       ],
     );
 
@@ -121,18 +137,41 @@ void main() {
       level: 30,
       rawLevel: 30,
       contributions: [
-        LevelContribution(label: 'Base effect · Create flame', magnitude: 4, isBase: true),
-        LevelContribution(label: 'Range · Voice', magnitude: 2),
-        LevelContribution(label: 'Duration · Sun', magnitude: 2),
-        LevelContribution(label: 'Target · Room', magnitude: 2),
-        LevelContribution(label: 'Requisite · Rego, adding', magnitude: 1),
-        LevelContribution(label: 'Requisite · Vim, adding', magnitude: 1),
-        LevelContribution(label: 'Adjustment · unusually precise', magnitude: 1),
-        LevelContribution(label: 'Adjustment · at a distance', magnitude: 1),
-        LevelContribution(label: 'Complexity · Intricate design', magnitude: 1),
-        LevelContribution(label: 'Material difficulty · Metal or gemstone', magnitude: 2),
-        LevelContribution(label: 'Size · +1', magnitude: 1),
-        LevelContribution(label: 'Penetration · +5', magnitude: 1),
+        LevelContribution(
+            source: BaseEffectContribution('Create flame'), magnitude: 4, isBase: true),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+            magnitude: 2),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.duration, actualName: 'Sun'),
+            magnitude: 2),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.target, actualName: 'Room'),
+            magnitude: 2),
+        LevelContribution(
+            source: RequisiteContribution(art: 'Rego', parameterName: 'adding'),
+            magnitude: 1),
+        LevelContribution(
+            source: RequisiteContribution(art: 'Vim', parameterName: 'adding'),
+            magnitude: 1),
+        LevelContribution(
+            source: AdjustmentContribution('unusually precise'), magnitude: 1),
+        LevelContribution(
+            source: AdjustmentContribution('at a distance'), magnitude: 1),
+        LevelContribution(
+            source: ModifierContribution(
+                modifierName: 'Complexity', optionLabel: 'Intricate design'),
+            magnitude: 1),
+        LevelContribution(
+            source: ModifierContribution(
+                modifierName: 'Material difficulty', optionLabel: 'Metal or gemstone'),
+            magnitude: 2),
+        LevelContribution(
+            source: ModifierContribution(modifierName: 'Size', optionLabel: '+1'),
+            magnitude: 1),
+        LevelContribution(
+            source: ModifierContribution(modifierName: 'Penetration', optionLabel: '+5'),
+            magnitude: 1),
       ],
     );
 

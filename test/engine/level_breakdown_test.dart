@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/ritual_status.dart';
 
@@ -8,9 +9,17 @@ void main() {
       level: 10,
       rawLevel: 10,
       contributions: [
-        LevelContribution(label: 'Base effect · image, two senses', magnitude: 2, isBase: true),
-        LevelContribution(label: 'Range · Voice', magnitude: 2),
-        LevelContribution(label: 'Complexity · Intricate Design', magnitude: 1),
+        LevelContribution(
+            source: BaseEffectContribution('image, two senses'),
+            magnitude: 2,
+            isBase: true),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+            magnitude: 2),
+        LevelContribution(
+            source: ModifierContribution(
+                modifierName: 'Complexity', optionLabel: 'Intricate Design'),
+            magnitude: 1),
       ],
     );
 
@@ -24,9 +33,14 @@ void main() {
       level: 10,
       rawLevel: 10,
       contributions: [
-        LevelContribution(label: 'Base', magnitude: 2, isBase: true),
-        LevelContribution(label: 'Range', magnitude: 2),
-        LevelContribution(label: 'Target', magnitude: 1),
+        LevelContribution(
+            source: BaseEffectContribution('Base'), magnitude: 2, isBase: true),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.range, actualName: 'Range'),
+            magnitude: 2),
+        LevelContribution(
+            source: SlotContribution(slot: ParameterSlot.target, actualName: 'Target'),
+            magnitude: 1),
       ],
     );
 
@@ -41,20 +55,29 @@ void main() {
       // the equality assertions below test Equatable rather than tautologically
       // comparing an object with itself. The `identical` check on the next line
       // is what pins that; it is the test's own proof, not a formality.
-      final a = LevelContribution(label: 'Range · Voice', magnitude: 1 + 1);
-      final b = LevelContribution(label: 'Range · Voice', magnitude: 2);
+      final a = LevelContribution(
+          source: const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+          magnitude: 1 + 1);
+      final b = LevelContribution(
+          source: const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+          magnitude: 2);
 
       expect(identical(a, b), isFalse);
       expect(a, b);
     });
 
     test('contributions differing in any field are not equal', () {
-      final a = LevelContribution(label: 'Range · Voice', magnitude: 1 + 1);
-      final b = LevelContribution(label: 'Range · Voice', magnitude: 1 + 2);
+      final a = LevelContribution(
+          source: const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+          magnitude: 1 + 1);
+      final b = LevelContribution(
+          source: const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+          magnitude: 1 + 2);
       expect(a, isNot(b));
 
-      final c = LevelContribution(label: 'Base', magnitude: 2, isBase: true);
-      final d = LevelContribution(label: 'Base', magnitude: 2);
+      final c = LevelContribution(
+          source: const BaseEffectContribution('Base'), magnitude: 2, isBase: true);
+      final d = LevelContribution(source: const BaseEffectContribution('Base'), magnitude: 2);
       expect(c, isNot(d));
     });
 
@@ -79,8 +102,14 @@ void main() {
             rawLevel: 20,
             ritualStatus: RitualStatus([RitualReason.lastingCreation]),
             contributions: [
-              LevelContribution(label: 'Base effect · Create flame', magnitude: 5 * 2, isBase: true),
-              LevelContribution(label: 'Range · Voice', magnitude: 1 + 1),
+              LevelContribution(
+                  source: const BaseEffectContribution('Create flame'),
+                  magnitude: 5 * 2,
+                  isBase: true),
+              LevelContribution(
+                  source: const SlotContribution(
+                      slot: ParameterSlot.range, actualName: 'Voice'),
+                  magnitude: 1 + 1),
             ],
           );
 
@@ -93,14 +122,51 @@ void main() {
     test('breakdowns differing only in a nested contribution are not equal', () {
       final a = LevelBreakdown(
         level: 20, rawLevel: 20,
-        contributions: [LevelContribution(label: 'Range · Voice', magnitude: 2)],
+        contributions: [
+          LevelContribution(
+              source: const SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+              magnitude: 2)
+        ],
       );
       final b = LevelBreakdown(
         level: 20, rawLevel: 20,
-        contributions: [LevelContribution(label: 'Range · Touch', magnitude: 1)],
+        contributions: [
+          LevelContribution(
+              source: const SlotContribution(slot: ParameterSlot.range, actualName: 'Touch'),
+              magnitude: 1)
+        ],
       );
 
       expect(a, isNot(b));
+    });
+
+    test('LevelContribution compares equal by its structured source', () {
+      const a = LevelContribution(
+        source: SlotContribution(
+            slot: ParameterSlot.range, actualName: 'Voice', referenceName: 'Touch'),
+        magnitude: 1,
+      );
+      const b = LevelContribution(
+        source: SlotContribution(
+            slot: ParameterSlot.range, actualName: 'Voice', referenceName: 'Touch'),
+        magnitude: 1,
+      );
+
+      expect(a, equals(b));
+    });
+
+    test('a differing reference makes contributions unequal', () {
+      const a = LevelContribution(
+        source: SlotContribution(slot: ParameterSlot.range, actualName: 'Voice'),
+        magnitude: 1,
+      );
+      const b = LevelContribution(
+        source: SlotContribution(
+            slot: ParameterSlot.range, actualName: 'Voice', referenceName: 'Touch'),
+        magnitude: 1,
+      );
+
+      expect(a, isNot(equals(b)));
     });
   });
 }

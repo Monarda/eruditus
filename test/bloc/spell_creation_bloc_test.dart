@@ -12,6 +12,7 @@ import 'package:eruditus/data/datasources/local_spell_datasource.dart';
 import 'package:eruditus/data/repositories/configuration_repository.dart';
 import 'package:eruditus/data/repositories/spell_repository.dart';
 import 'package:eruditus/data/spell_resolver.dart';
+import 'package:eruditus/engine/contribution_source.dart';
 import 'package:eruditus/engine/level_breakdown.dart';
 import 'package:eruditus/engine/spell_engine.dart';
 import 'package:eruditus/models/base_effect.dart';
@@ -1655,7 +1656,9 @@ void main() {
       isA<SpellCreationState>()
           .having((s) => s.status, 'status', SpellCreationStatus.calculated)
           .having(
-            (s) => s.breakdown?.contributions.any((c) => c.label.contains('Metal')),
+            (s) => s.breakdown?.contributions.any((c) =>
+                c.source is ModifierContribution &&
+                (c.source as ModifierContribution).optionLabel.contains('Metal')),
             'breakdown mentions the modifier',
             isTrue,
           ),

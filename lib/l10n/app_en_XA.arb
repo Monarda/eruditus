@@ -3,5 +3,15 @@
   "@@x-translation-status": "generated",
   "spellLevel": "[Śƥēĺĺ ĺēṽēĺ····]",
   "showBreakdown": "[Śĥōŵ ţĥē ƀŕēāķđōŵň······]",
-  "hideBreakdown": "[Ĥĭđē ţĥē ƀŕēāķđōŵň······]"
+  "hideBreakdown": "[Ĥĭđē ţĥē ƀŕēāķđōŵň······]",
+  "contributionBaseEffect": "[Ɓāśē ēƒƒēćţ · {description}·········]",
+  "contributionSlot": "[{slot} · {actual}······]",
+  "contributionSlotAssumes": "[{slot} · {actual} (ģűĭđēĺĭňē āśśűɱēś {reference})···············]",
+  "contributionRequisite": "[Ŕēɋűĭśĭţē · {art}, {parameter}·········]",
+  "contributionAdjustment": "[Åđĵűśţɱēňţ · {note}······]",
+  "contributionModifier": "[{modifier} · {option}·······]",
+  "slotRange": "[Ŕāňģē··]",
+  "slotDuration": "[Đűŕāţĭōň···]",
+  "slotTarget": "[Ţāŕģēţ··]",
+  "ritualMinimumRaised": "[Ŕĭţűāĺ ɱĭňĭɱűɱ: ŕāĭśēđ ƒŕōɱ {from} ţō {to}·············]"
 }
