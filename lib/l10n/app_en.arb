@@ -294,5 +294,120 @@
   "tabCreate": "Create",
   "tabLibrary": "Library",
   "tabSettings": "Settings",
-  "tabBackup": "Backup"
+  "tabBackup": "Backup",
+  "spellSavedToLibrary": "\"{name}\" saved to your library.",
+  "@spellSavedToLibrary": {
+    "description": "{name} is USER CONTENT and renders verbatim",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "couldNotSaveSpell": "Could not save spell: {error}",
+  "@couldNotSaveSpell": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "createSpell": "Create Spell",
+  "baseEffect": "Base Effect",
+  "realmLabel": "Realm",
+  "spellParameters": "Spell Parameters",
+  "everySpellRequiresOneOfEach": "Every spell requires exactly one of each:",
+  "targetRequiresThisRange": "{target} requires this Range (Houses of Hermes: Mystery Cults, Sensory Magic).",
+  "@targetRequiresThisRange": {
+    "description": "{target} is rulebook content (a Parameter's name) and is not translated",
+    "placeholders": { "target": { "type": "String" } }
+  },
+  "findSimilarSpells": "Find Similar Spells",
+  "similarSpellsTitle": "Similar Spells",
+  "noSimilarSpellsFound": "No similar spells found.",
+  "failedToSaveSpell": "Failed to save spell.",
+  "discardButton": "Discard",
+  "saveToLibrary": "Save to Library",
+  "requisitesHeading": "Requisites",
+  "requisitesHelp": "Free requisites cost nothing; adding requisites cost +1 magnitude each.",
+  "noRequisites": "No requisites.",
+  "requisiteAdding": "Adding (+1)",
+  "requisiteFree": "Free (+0)",
+  "removeRequisite": "Remove {art} requisite",
+  "@removeRequisite": {
+    "description": "{art} is rulebook content (an Art's name) and is not translated",
+    "placeholders": { "art": { "type": "String" } }
+  },
+  "addRequisite": "Add requisite",
+  "adjustmentsHeading": "Adjustments",
+  "adjustmentsHelp": "A one-off magnitude with the prose that justifies it, positive or negative.",
+  "noAdjustments": "No adjustments.",
+  "decreaseMagnitude": "Decrease magnitude",
+  "increaseMagnitude": "Increase magnitude",
+  "adjustmentNoteLabel": "Note",
+  "removeAdjustment": "Remove adjustment",
+  "addAdjustment": "Add adjustment",
+  "effectWithGeneralMarker": "{description} (General)",
+  "@effectWithGeneralMarker": {
+    "description": "{description} is rulebook content (a BaseEffect's description) and is not translated",
+    "placeholders": { "description": { "type": "String" } }
+  },
+  "effectWithGeneralMarkerAndVirtue": "{description} (General, requires {virtue})",
+  "@effectWithGeneralMarkerAndVirtue": {
+    "description": "{description} and {virtue} are rulebook content and are not translated",
+    "placeholders": {
+      "description": { "type": "String" },
+      "virtue": { "type": "String" }
+    }
+  },
+  "effectWithBaseLevelMarker": "{description} (Base {level})",
+  "@effectWithBaseLevelMarker": {
+    "description": "{description} is rulebook content (a BaseEffect's description) and is not translated",
+    "placeholders": {
+      "description": { "type": "String" },
+      "level": { "type": "int" }
+    }
+  },
+  "effectWithBaseLevelMarkerAndVirtue": "{description} (Base {level}, requires {virtue})",
+  "@effectWithBaseLevelMarkerAndVirtue": {
+    "description": "{description} and {virtue} are rulebook content and are not translated",
+    "placeholders": {
+      "description": { "type": "String" },
+      "level": { "type": "int" },
+      "virtue": { "type": "String" }
+    }
+  },
+  "parameterWithMagnitude": "{name} (+{magnitude})",
+  "@parameterWithMagnitude": {
+    "description": "{name} is rulebook content (a Parameter's name) and is not translated",
+    "placeholders": {
+      "name": { "type": "String" },
+      "magnitude": { "type": "int" }
+    }
+  },
+  "parameterWithMagnitudeAndVirtue": "{name} (+{magnitude}, requires {virtue})",
+  "@parameterWithMagnitudeAndVirtue": {
+    "description": "{name} and {virtue} are rulebook content and are not translated",
+    "placeholders": {
+      "name": { "type": "String" },
+      "magnitude": { "type": "int" },
+      "virtue": { "type": "String" }
+    }
+  },
+  "guidelineLevel": "Guideline level",
+  "generalGuidelineLevelHelp": "General guidelines have no fixed level — you choose it.",
+  "specificType": "Specific type",
+  "summaryLabel": "Summary",
+  "nameRequiredHelp": "Required. Shown on this spell's card in your library.",
+  "containerModeNotStated": "Not stated",
+  "containerModeStatic": "Static",
+  "containerModeDynamic": "Dynamic",
+  "containerModeUnstatedHelp": "Not recorded. The rulebook fixes this when the spell is designed, so it is worth deciding.",
+  "containerModeStaticHelp": "Affects whatever is in the {target} when cast, and keeps affecting it even after it leaves.",
+  "@containerModeStaticHelp": {
+    "description": "{target} is rulebook content (a Target's name) and is not translated",
+    "placeholders": { "target": { "type": "String" } }
+  },
+  "containerModeDynamicHelp": "Affects whatever is in the {target} at the time. Leaving ends the effect; entering starts it.",
+  "@containerModeDynamicHelp": {
+    "description": "{target} is rulebook content (a Target's name) and is not translated",
+    "placeholders": { "target": { "type": "String" } }
+  },
+  "containerBehaviour": "Container behaviour",
+  "nameYourSpell": "Name Your Spell",
+  "spellNameHint": "e.g., Pillar of Flames",
+  "spellSummaryHint": "What does this spell do?",
+  "saveButton": "Save"
 }

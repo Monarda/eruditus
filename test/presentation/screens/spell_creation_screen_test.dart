@@ -131,6 +131,7 @@ void main() {
     WidgetTester tester,
     SpellCreationState state, {
     ConfigurationState? configState,
+    Locale locale = const Locale('en'),
   }) async {
     useTallSurface(tester);
     bloc = mockSpellCreationBloc(initialState: state);
@@ -153,8 +154,16 @@ void main() {
         BlocProvider<ConfigurationBloc>.value(value: configBloc),
       ],
       wrapInScaffold: false,
+      locale: locale,
     );
   }
+
+  testWidgets('creation screen chrome is localised', (tester) async {
+    await pumpScreen(tester, SpellCreationState.initial(), locale: const Locale('en', 'XA'));
+
+    expect(find.text('Create Spell'), findsNothing);
+    expect(find.text('Save to Library'), findsNothing);
+  });
 
   testWidgets('selecting a technique dispatches TechniqueSelected', (tester) async {
     await pumpScreen(tester, SpellCreationState.initial());
