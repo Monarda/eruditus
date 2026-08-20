@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eruditus/data/services/backup_service.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 
 class BackupScreen extends StatefulWidget {
   final BackupService backupService;
@@ -22,35 +23,42 @@ class _BackupScreenState extends State<BackupScreen> {
   String? _statusMessage;
 
   Future<void> _handleExport() async {
+    final l10n = AppLocalizations.of(context);
     final jsonString = await widget.backupService.exportToJson();
     await widget.exportJson(jsonString);
-    setState(() => _statusMessage = 'Backup exported successfully.');
+    setState(() => _statusMessage = l10n.backupExported);
   }
 
   Future<void> _handleImport() async {
+    final l10n = AppLocalizations.of(context);
     final jsonString = await widget.importJson();
     if (jsonString == null) {
-      setState(() => _statusMessage = 'Import cancelled.');
+      setState(() => _statusMessage = l10n.backupImportCancelled);
       return;
     }
     try {
       final result = await widget.backupService.importFromJson(jsonString);
       setState(() {
-        _statusMessage = 'Imported ${result.spellsImported} spells, '
-            '${result.effectsImported} effects, '
-            '${result.parametersImported} parameters.'
-            '${result.spellsRejected == 0 ? '' : ' Skipped ${result.spellsRejected} '
-                'invalid spell(s): ${result.rejectedSpells.map((e) => e.spellId).join(', ')}'}';
+        _statusMessage = l10n.backupImported(
+              result.spellsImported,
+              result.effectsImported,
+              result.parametersImported,
+            ) +
+            l10n.backupRejectedSpells(
+              result.spellsRejected,
+              result.rejectedSpells.map((e) => e.spellId).join(', '),
+            );
       });
     } catch (e) {
-      setState(() => _statusMessage = 'Import failed: $e');
+      setState(() => _statusMessage = l10n.backupImportFailed(e.toString()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup')),
+      appBar: AppBar(title: Text(l10n.backupTitle)),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -59,13 +67,13 @@ class _BackupScreenState extends State<BackupScreen> {
             ElevatedButton(
               key: const Key('export-button'),
               onPressed: _handleExport,
-              child: const Text('Export Backup to File'),
+              child: Text(l10n.exportBackupToFile),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
               key: const Key('import-button'),
               onPressed: _handleImport,
-              child: const Text('Import Backup from File'),
+              child: Text(l10n.importBackupFromFile),
             ),
             if (_statusMessage != null) ...[
               const SizedBox(height: 16),

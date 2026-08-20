@@ -203,4 +203,22 @@ void main() {
       'Imported 1 spells, 0 effects, 0 parameters. Skipped 1 invalid spell(s): bad-1',
     );
   });
+
+  testWidgets('backup screen chrome is localised', (tester) async {
+    await pumpApp(
+      tester,
+      BackupScreen(
+        backupService: backupService,
+        exportJson: (json) async {},
+        importJson: () async => null,
+      ),
+      wrapInScaffold: false,
+      locale: const Locale('en', 'XA'),
+    );
+
+    expect(find.text('Backup'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
+    expect(find.text('Export Backup to File'), findsNothing,
+        reason: 'chrome should be pseudo-transformed under en_XA');
+  });
 }

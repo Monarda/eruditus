@@ -138,6 +138,7 @@ class _MainTabViewState extends State<_MainTabView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final screens = [
       const SpellCreationScreen(
         techniques: ArsArts.all,
@@ -153,7 +154,7 @@ class _MainTabViewState extends State<_MainTabView> {
         backupService: widget.backupService,
         exportJson: (jsonContent) async {
           await FilePicker.saveFile(
-            dialogTitle: 'Save Backup',
+            dialogTitle: l10n.saveBackupDialogTitle,
             fileName: 'eruditus_backup.json',
             bytes: utf8.encode(jsonContent),
           );
@@ -201,11 +202,11 @@ class _MainTabViewState extends State<_MainTabView> {
             context.read<SpellLibraryBloc>().add(const LibraryRequested());
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.auto_fix_high), label: 'Create'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'Library'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.cloud_upload), label: 'Backup'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.auto_fix_high), label: l10n.tabCreate),
+          BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: l10n.tabLibrary),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: l10n.tabSettings),
+          BottomNavigationBarItem(icon: const Icon(Icons.cloud_upload), label: l10n.tabBackup),
         ],
       ),
     );

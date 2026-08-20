@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eruditus/bloc/configuration/configuration_bloc.dart';
 import 'package:eruditus/bloc/configuration/configuration_event.dart';
 import 'package:eruditus/bloc/configuration/configuration_state.dart';
+import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
@@ -26,14 +27,15 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Configuration'),
-          bottom: const TabBar(tabs: [
-            Tab(text: 'Effects'),
-            Tab(text: 'Parameters'),
+          title: Text(l10n.configurationTitle),
+          bottom: TabBar(tabs: [
+            Tab(text: l10n.effectsTabLabel),
+            Tab(text: l10n.parametersTabLabel),
           ]),
         ),
         body: BlocBuilder<ConfigurationBloc, ConfigurationState>(
@@ -72,6 +74,7 @@ class _EffectsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: ListView(
         children: effects.map((e) {
@@ -83,7 +86,9 @@ class _EffectsTab extends StatelessWidget {
             // "Base null". Mirrors the same guard in the base-effect dropdown
             // on the creation screen.
             subtitle: Text(
-              '${e.technique} ${e.form} • ${e.isGeneral ? 'General' : 'Base ${e.baseLevel}'}',
+              e.isGeneral
+                  ? l10n.effectSummaryGeneral(e.technique, e.form)
+                  : l10n.effectSummaryLeveled(e.technique, e.form, e.baseLevel!),
             ),
             trailing: isCustom
                 ? IconButton(
@@ -91,7 +96,7 @@ class _EffectsTab extends StatelessWidget {
                     icon: const Icon(Icons.delete),
                     onPressed: () => onDelete(e.id),
                   )
-                : const Text('Published'),
+                : Text(l10n.published),
           );
         }).toList(),
       ),
@@ -125,40 +130,41 @@ class _AddEffectDialogState extends State<_AddEffectDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Add Custom Effect'),
+      title: Text(l10n.addCustomEffect),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
               key: const Key('new-effect-technique'),
-              decoration: const InputDecoration(labelText: 'Technique'),
+              decoration: InputDecoration(labelText: l10n.techniqueLabel),
               items: ArsArts.all.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
               onChanged: (v) => setState(() => _technique = v),
             ),
             DropdownButtonFormField<String>(
               key: const Key('new-effect-form'),
-              decoration: const InputDecoration(labelText: 'Form'),
+              decoration: InputDecoration(labelText: l10n.formLabel),
               items: ArsForms.all.map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
               onChanged: (v) => setState(() => _form = v),
             ),
             TextField(
               key: const Key('new-effect-description'),
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(labelText: l10n.descriptionLabel),
             ),
             TextField(
               key: const Key('new-effect-level'),
               controller: _levelController,
-              decoration: const InputDecoration(labelText: 'Base Level'),
+              decoration: InputDecoration(labelText: l10n.baseLevel),
               keyboardType: TextInputType.number,
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancelButton)),
         ElevatedButton(
           key: const Key('confirm-add-effect'),
           onPressed: () {
@@ -187,7 +193,7 @@ class _AddEffectDialogState extends State<_AddEffectDialog> {
               provenance: Provenance(source: PublicationSource.userCreated),
             ));
           },
-          child: const Text('Add'),
+          child: Text(l10n.addButton),
         ),
       ],
     );
@@ -203,20 +209,21 @@ class _ParametersTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: ListView(
         children: parameters.map((p) {
           final isCustom = p.provenance.source == PublicationSource.userCreated;
           return ListTile(
             title: Text(p.name),
-            subtitle: Text('${p.category} • Magnitude +${p.magnitude}'),
+            subtitle: Text(l10n.parameterCategoryAndMagnitude(p.category, p.magnitude)),
             trailing: isCustom
                 ? IconButton(
                     key: Key('delete-parameter-${p.id}'),
                     icon: const Icon(Icons.delete),
                     onPressed: () => onDelete(p.id),
                   )
-                : const Text('Published'),
+                : Text(l10n.published),
           );
         }).toList(),
       ),
@@ -249,34 +256,54 @@ class _AddParameterDialogState extends State<_AddParameterDialog> {
   final _nameController = TextEditingController();
   final _magnitudeController = TextEditingController();
 
+  // The dropdown's *values* stay these literal English strings on purpose --
+  // they become Parameter.category, which is compared by value elsewhere
+  // (e.g. spell_creation_screen.dart's `candidate.category == 'Range'`), the
+  // same catalog vocabulary a published Parameter's category already uses.
+  // Only the label each item *displays* is localised (via the existing
+  // slotRange/slotDuration/slotTarget keys), so the two stay decoupled.
+  String _categoryLabel(AppLocalizations l10n, String category) {
+    switch (category) {
+      case 'Range':
+        return l10n.slotRange;
+      case 'Duration':
+        return l10n.slotDuration;
+      default:
+        return l10n.slotTarget;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('Add Custom Parameter'),
+      title: Text(l10n.addCustomParameter),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             key: const Key('new-parameter-name'),
             controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration: InputDecoration(labelText: l10n.nameLabel),
           ),
           DropdownButtonFormField<String>(
             key: const Key('new-parameter-category'),
-            decoration: const InputDecoration(labelText: 'Category'),
-            items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+            decoration: InputDecoration(labelText: l10n.categoryLabel),
+            items: _categories
+                .map((c) => DropdownMenuItem(value: c, child: Text(_categoryLabel(l10n, c))))
+                .toList(),
             onChanged: (v) => setState(() => _category = v),
           ),
           TextField(
             key: const Key('new-parameter-magnitude'),
             controller: _magnitudeController,
-            decoration: const InputDecoration(labelText: 'Magnitude'),
+            decoration: InputDecoration(labelText: l10n.magnitudeLabel),
             keyboardType: TextInputType.number,
           ),
         ],
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancelButton)),
         ElevatedButton(
           key: const Key('confirm-add-parameter'),
           onPressed: () {
@@ -290,7 +317,7 @@ class _AddParameterDialogState extends State<_AddParameterDialog> {
               provenance: Provenance(source: PublicationSource.userCreated),
             ));
           },
-          child: const Text('Add'),
+          child: Text(l10n.addButton),
         ),
       ],
     );

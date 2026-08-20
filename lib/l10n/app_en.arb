@@ -218,5 +218,81 @@
     "description": "Shown when guidelineIsSuggested is false (Core Rules line 13415)"
   },
   "ritualStoryguideRuling": "Storyguide ruling: too spectacular to be freely available",
-  "ritualStoryguideRulingHelp": "At the troupe's discretion — not something the guideline determines (Core Rules line 12352)."
+  "ritualStoryguideRulingHelp": "At the troupe's discretion — not something the guideline determines (Core Rules line 12352).",
+  "spellLibraryTitle": "Spell Library",
+  "searchSpellsHint": "Search spells...",
+  "filterAll": "All",
+  "mySpells": "My Spells",
+  "generalSpellsHeader": "General spells — learn at any level",
+  "exceptionsHeader": "Exceptions — recorded from the rulebook directly, not derived from the guidelines",
+  "learnAtLevel": "Learn at level…",
+  "backupTitle": "Backup",
+  "backupExported": "Backup exported successfully.",
+  "backupImportCancelled": "Import cancelled.",
+  "backupImported": "Imported {spells} spells, {effects} effects, {parameters} parameters.",
+  "@backupImported": {
+    "placeholders": {
+      "spells": { "type": "int" },
+      "effects": { "type": "int" },
+      "parameters": { "type": "int" }
+    }
+  },
+  "backupRejectedSpells": "{count, plural, =0{} one{ Skipped 1 invalid spell(s): {ids}} other{ Skipped {count} invalid spells: {ids}}}",
+  "@backupRejectedSpells": {
+    "description": "'one' preserves the app's pre-existing literal 'invalid spell(s)' wording byte-for-byte (an existing test asserts count=1 exactly); 'other' uses grammatically plural wording since no test constrains it",
+    "placeholders": {
+      "count": { "type": "int" },
+      "ids": { "type": "String" }
+    }
+  },
+  "backupImportFailed": "Import failed: {error}",
+  "@backupImportFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "exportBackupToFile": "Export Backup to File",
+  "importBackupFromFile": "Import Backup from File",
+  "saveBackupDialogTitle": "Save Backup",
+  "configurationTitle": "Configuration",
+  "effectsTabLabel": "Effects",
+  "parametersTabLabel": "Parameters",
+  "effectSummaryGeneral": "{technique} {form} • General",
+  "@effectSummaryGeneral": {
+    "description": "{technique} and {form} are rulebook content (Art names) and are not translated",
+    "placeholders": {
+      "technique": { "type": "String" },
+      "form": { "type": "String" }
+    }
+  },
+  "effectSummaryLeveled": "{technique} {form} • Base {level}",
+  "@effectSummaryLeveled": {
+    "description": "{technique} and {form} are rulebook content (Art names) and are not translated",
+    "placeholders": {
+      "technique": { "type": "String" },
+      "form": { "type": "String" },
+      "level": { "type": "int" }
+    }
+  },
+  "addCustomEffect": "Add Custom Effect",
+  "techniqueLabel": "Technique",
+  "formLabel": "Form",
+  "descriptionLabel": "Description",
+  "baseLevel": "Base Level",
+  "cancelButton": "Cancel",
+  "addButton": "Add",
+  "parameterCategoryAndMagnitude": "{category} • Magnitude +{magnitude}",
+  "@parameterCategoryAndMagnitude": {
+    "description": "{category} is rulebook/catalog content (a Parameter's category) and is not translated",
+    "placeholders": {
+      "category": { "type": "String" },
+      "magnitude": { "type": "int" }
+    }
+  },
+  "addCustomParameter": "Add Custom Parameter",
+  "nameLabel": "Name",
+  "categoryLabel": "Category",
+  "magnitudeLabel": "Magnitude",
+  "tabCreate": "Create",
+  "tabLibrary": "Library",
+  "tabSettings": "Settings",
+  "tabBackup": "Backup"
 }
