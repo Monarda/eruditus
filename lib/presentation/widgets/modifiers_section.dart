@@ -61,7 +61,7 @@ class _ModifiersSectionState extends State<ModifiersSection> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Modifiers', style: Theme.of(context).textTheme.titleMedium),
+                      Text(l10n.modifiersHeading, style: Theme.of(context).textTheme.titleMedium),
                       Text(l10n.modifiersSelectedCount(_selectedCount),
                           style: Theme.of(context).textTheme.bodySmall),
                     ],
@@ -101,7 +101,7 @@ class _ModifiersSectionState extends State<ModifiersSection> {
         decoration: InputDecoration(labelText: modifier.name),
         initialValue: value,
         items: [
-          const DropdownMenuItem<ModifierOption?>(value: null, child: Text('None')),
+          DropdownMenuItem<ModifierOption?>(value: null, child: Text(l10n.noneOption)),
           ...modifier.options.map((option) => DropdownMenuItem<ModifierOption?>(
                 value: option,
                 child: Text(l10n.modifierOptionWithMagnitude(option.label, option.magnitude)),

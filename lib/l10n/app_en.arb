@@ -173,5 +173,11 @@
     }
   },
   "needsReview": "Needs review",
-  "mySpell": "My Spell"
+  "mySpell": "My Spell",
+  "published": "Published",
+  "modifiersHeading": "Modifiers",
+  "noneOption": "None",
+  "ritualChip": "Ritual",
+  "generalChip": "Gen",
+  "exceptionChip": "Exception"
 }

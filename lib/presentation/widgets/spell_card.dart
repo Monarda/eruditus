@@ -118,29 +118,29 @@ class SpellCard extends StatelessWidget {
               children: [
                 Flexible(child: Text(title)),
                 if (isRitual)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Chip(
-                      key: Key('ritual-chip'),
-                      label: Text('Ritual'),
+                      key: const Key('ritual-chip'),
+                      label: Text(l10n.ritualChip),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
                 if (isGeneral)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Chip(
-                      key: Key('general-chip'),
-                      label: Text('Gen'),
+                      key: const Key('general-chip'),
+                      label: Text(l10n.generalChip),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
                 if (isException)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Chip(
-                      key: Key('exception-chip'),
-                      label: Text('Exception'),
+                      key: const Key('exception-chip'),
+                      label: Text(l10n.exceptionChip),
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
@@ -188,7 +188,7 @@ class SpellCard extends StatelessWidget {
             ),
             trailing: Chip(
                 label: Text(
-                    entry.source == PublicationSource.published ? 'Published' : l10n.mySpell)),
+                    entry.source == PublicationSource.published ? l10n.published : l10n.mySpell)),
           ),
           if (actions.isNotEmpty) ...actions,
         ],

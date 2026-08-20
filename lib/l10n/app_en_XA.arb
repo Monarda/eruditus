@@ -49,5 +49,11 @@
   "spellCardArtsAndLevel": "[{technique} {form} • Ĺēṽēĺ {level}{suffix}·············]",
   "spellCardArtsOnly": "[{technique} {form}······]",
   "needsReview": "[Ňēēđś ŕēṽĭēŵ····]",
-  "mySpell": "[Ṁý Śƥēĺĺ···]"
+  "mySpell": "[Ṁý Śƥēĺĺ···]",
+  "published": "[Ƥűƀĺĭśĥēđ···]",
+  "modifiersHeading": "[Ṁōđĭƒĭēŕś···]",
+  "noneOption": "[Ňōňē··]",
+  "ritualChip": "[Ŕĭţűāĺ··]",
+  "generalChip": "[Ĝēň·]",
+  "exceptionChip": "[Ēẋćēƥţĭōň···]"
 }
