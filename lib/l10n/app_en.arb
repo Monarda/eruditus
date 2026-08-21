@@ -432,5 +432,18 @@
   "nameYourSpell": "Name Your Spell",
   "spellNameHint": "e.g., Pillar of Flames",
   "spellSummaryHint": "What does this spell do?",
-  "saveButton": "Save"
+  "saveButton": "Save",
+  "aboutTitle": "About & Licences",
+  "aboutHowLicensedHeading": "How eruditus is licensed",
+  "aboutAttributionHeading": "Attribution",
+  "aboutBooksUsedHeading": "Books used",
+  "aboutCreatorsHeading": "Creators",
+  "aboutCopyrightHeading": "Copyright",
+  "aboutLicenceHeading": "Licence",
+  "aboutSourceHeading": "Source",
+  "aboutModificationsHeading": "Modifications",
+  "aboutDisclaimerHeading": "Disclaimer of warranties",
+  "aboutTrademarksHeading": "Trademarks",
+  "aboutEndorsementHeading": "No endorsement",
+  "aboutPackageLicencesButton": "Open-source package licences"
 }

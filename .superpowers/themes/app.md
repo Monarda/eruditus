@@ -327,37 +327,54 @@ than our gloss of them.**
 
 Two conditions ride along, and both are product decisions, not legal trivia:
 
-- [ ] **79.1** **Attribution (§3(a)) needs somewhere to live in the app.** The licence
-      requires retaining creator identification, a copyright notice, a notice
-      referring to the licence, a disclaimer notice, and a URI to the licensed
-      material — plus **an indication that we modified it** (§3(a)(1)(B)), which
-      we have: the `reviewed/` markdown is itself a corrected transcription.
-      §3(a)(2) allows satisfying this "in any reasonable manner based on the
-      medium", including by linking to one resource that carries it all. Decide
-      the affordance: an About/Licences screen, a footer on quoted text, or
-      both.
-- [ ] **79.2** **⚠️ ShareAlike (§3(b)) may reach eruditus itself.** If embedding quoted
-      rules text makes the app "Adapted Material", the adapter's licence must be
-      CC BY-SA 4.0 or a compatible one. **This is the decision with real
-      consequences and it should be made deliberately, before quoted text is
-      designed into a feature** — retrofitting a licence choice after the fact
-      is far worse than making it now. Note the catalog JSON is arguably already
-      a database derived from the Licensed Material (§4), so this question may
-      predate item 56 entirely.
+**⚠️ The framing this item opened with understated the urgency, and that was
+corrected during its design.** 79.2 supposed the catalog JSON was "arguably
+already a database derived from the Licensed Material". It is more direct than
+that: the app has shipped the rulebook's own words since the import landed —
+612 guideline `description` strings and 336 published spell names with their
+prose — in a repo that carried **no LICENSE file at all**. This was never
+contingent on item 56.
+
+- [x] **79.1 ✅ DONE 2026-08-21.** Attribution lives in an **About & Licences
+      screen**, reached from an `AppBar` action on the Configuration screen, plus
+      a second route through `LicenseRegistry`/`showLicensePage`. Quoted text
+      elsewhere carries only a source marker routing there, which §3(a)(2)
+      permits. See DECISIONS.md, "Licensing and attribution".
+- [x] **79.2 ✅ DONE 2026-08-21.** The repo is **MIT for the software, CC BY-SA
+      4.0 for rulebook-derived content**, on §1(b)'s Collection/Adapted Material
+      distinction — stated by *content*, with the path tables illustrative
+      rather than exhaustive. See DECISIONS.md.
 - [ ] **79.3** **Decide how much to quote, and mark it as a quote.** A hint that
       reproduces a guideline verbatim must be visually distinguishable from our
       own words, or the app silently attributes its own paraphrases to the
       rulebook. This is the coupling to 56.1's affordance decision.
+      **Decided in the spec, not yet built — this is plan B.** The mechanism is
+      a per-string `TextProvenance {verbatim, authored, translated}` plus a
+      `SourcedText` value type, because `Provenance` answers "where did this
+      *entry* come from", not "whose words are *these*". The two coincide only
+      by accident today, and **item 31 breaks that deliberately** by putting
+      ledger-authored summaries on `published` spells. `verbatim` means "the
+      published words of a cited edition" — whichever edition, in whatever
+      language — so an official translation is `verbatim`, not `translated`;
+      `translated` means only "we produced this rendering". Quoting is bounded
+      by the control: the guideline line, a spell's own prose, and a
+      Range/Duration/Target/modifier's definition paragraph — not chapter-length
+      rules.
 
 - **Trademark is explicitly *not* licensed** (§2(b)(2)). The grant covers the
   text, not "Ars Magica" as a mark — so this item does not settle naming,
   branding or store-listing questions.
 - **No warranty, and no endorsement** (§5, §2(a)(6)): the app must not imply
   Atlas Games endorses it.
-- **Files:** `assets/data/` (if quoted text becomes catalog data — see 56's
-  "UI copy vs. catalog data" decision), a new About/Licences screen
+- **Spec:** `docs/superpowers/specs/2026-08-20-quoting-rules-text-design.md`
+- **Plan A (79.1, 79.2, done):** `docs/superpowers/plans/2026-08-20-licensing-and-attribution.md`
+- **Files:** `lib/licensing/attribution.dart`, `lib/presentation/screens/about_screen.dart`,
+  `LICENSE`, `NOTICE.md`, `LICENSES/CC-BY-SA-4.0.txt`; for 79.3,
+  `lib/models/text_provenance.dart` and the catalog assets
 - **See also:** items 56 (the consumer of this permission), 78 (a quote and its
-  page reference are the same affordance), 30 (provenance)
+  page reference are the same affordance), 30 (provenance), 31 (its authored
+  summaries are why 79.3 needs per-string provenance), 82 (same convention, ARB
+  side), 86 (the edition model 79.3's `verbatim` definition assumes)
 
 
 ### 81. Latin as the First Real Locale

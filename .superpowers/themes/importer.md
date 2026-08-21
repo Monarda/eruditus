@@ -283,3 +283,44 @@ mapping has a witness outside the file that produced it.
 - **See also:** items 56 (the display half — this item stops at the data), 30
   (provenance), 79 (what may be quoted alongside a page), 80.3 (locale selects a
   source edition, which is what makes 78.6 necessary)
+
+
+### 86. Source Editions — the Work/Edition Distinction
+
+**Opened 2026-08-21**, from item 79's design discussion. The user noted that an
+**official Spanish translation of the Definitive Edition is in progress and will
+carry the same CC BY-SA licence**. That is not a hypothetical: it is a second
+edition of the *same work*, and two things cannot express it today.
+
+- [ ] **86.1** **`Book` cannot describe an edition.** `lib/models/book.dart` holds
+      `id`/`title`/`abbreviation`/`edition`, where `edition` means "5e", not a
+      language edition. It needs `language` and `workId`, plus the per-book
+      §3(a) fields — `creators`, `copyrightNotice`, `licenceId`, `uri`,
+      `modificationNote` — that would let `NOTICE.md` and the About screen
+      generate their attribution list from `books.json` instead of carrying it
+      hand-maintained in `lib/licensing/attribution.dart`.
+- [ ] **86.2** **⚠️ Book-scoping would misfire, and this half is load-bearing.**
+      `scripts/spell_import/catalog.py`'s `visible_books()` enforces the rule
+      that *a spell may only use rows from books it could have been printed
+      against*. A translated edition of the same work is **not** a different
+      book under that rule — but as a fresh `books.json` row it reads as one, so
+      a core spell would either lose access to its own guidelines or wrongly
+      widen its candidate set. **Scoping must key on work id; language selection
+      keys on edition.** This must exist *before* a second edition's rows are
+      imported.
+- [ ] **86.3** **Guideline ids stay language-independent.** A translated edition
+      populates per-locale text against the **existing** ids — `cran-1` stays
+      `cran-1`. A parallel per-language catalog would fork the level
+      computation, which is the one thing this project cannot tolerate.
+
+- **Why it matters beyond tidiness:** item 79.3 defines `verbatim` as "the
+  published words of a **cited edition**", so quoting the Spanish edition is
+  `verbatim` and cited to *its* book and page — not `translated`. Collapsing the
+  two would under-credit its translators and claim a modification we did not
+  make. That definition assumes an edition model that does not exist yet.
+- **Same seam as item 77.** 77.1's latent parameter-collision defect goes live
+  on the same trigger — a second book with a colliding name — so the two are
+  best done together.
+- **See also:** items 79 (which defined `verbatim` this way), 77 (the same
+  seam), 55 and 32.1 (the book-scoping rule's history), 80.3/82 (locale selects
+  an edition, never a translation of English)
