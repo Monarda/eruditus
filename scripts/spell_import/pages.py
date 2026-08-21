@@ -1,108 +1,23 @@
-"""Printed page numbers, recovered from the rulebook's four index tables.
+"""Printed page numbers, recovered from the rulebook's own curated indexes.
 
-Every row in those tables cites a page as `[313](#anchor)`, and an anchor
-resolves to a heading whose line we know -- so a line's page is the page of
-the nearest anchored heading above it. `page_for_line`'s two guards return
-None rather than a guess: a wrong page sends a reader to the wrong place,
-which is worse than sending them nowhere. `build_index` applies the same
-rule one step earlier, at calibration time: an anchor whose own page is
-unreliable (it reproduces another section's content, disagrees with itself
-by more than a page break's worth, or is individually uncorroborated) is
-excluded from `line_pages` rather than calibrated from -- see
-REFERENCE_GUIDE_RANGE, the conflicting-citation check, and
-_ISOLATED_UNRELIABLE_LINES below.
+Three tables answer questions this importer needs, by direct lookup rather
+than by inference from a nearby heading:
+
+- Spells Index: spell name -> page.
+- Spell Guidelines Index: (technique, form) -> page.
+- Traditional Index: a qualified parameter name (e.g. "Voice (Range)") ->
+  page.
+
+A missing key means no page. Nothing here widens a key or guesses from a
+neighbour -- a wrong page sends a reader to the wrong place, which is worse
+than sending them nowhere.
 
 See docs/superpowers/specs/2026-08-21-page-references-design.md.
 """
 
-import bisect
 import re
 
 from scripts.spell_import import sources
-
-# How far above a line its nearest anchor may sit before inference becomes a
-# guess. Measured distance from a guideline to its nearest anchor is median
-# 13 / p90 22 lines, and a printed page spans roughly 44 markdown lines -- so
-# 60 accepts every real case while refusing the 789-line gap that exists
-# elsewhere in the document.
-MAX_ANCHOR_DISTANCE = 60
-
-# How far apart two citations of the same anchor may disagree before that
-# disagreement means the tables genuinely conflict, rather than one row
-# citing each half of a section that straddles a page break. Measured
-# 2026-08-21: of the 23 headings with more than one cited page, 13 have a
-# spread of exactly 1 (e.g. "#### Durations", line 12098, cited p304 seven
-# times and p305 once -- the worked spells either side are p303 and p305,
-# so p304 is correct and well-corroborated, not a disagreement). The other
-# 10 have spreads of 2-406 and are genuine conflicts -- see the check below.
-_MAX_CITED_SPREAD = 1
-
-# The Reference Guide (the rulebook's appendix of quick-reference tables)
-# reprints material from earlier chapters and cites the *body's* page for its
-# own headings -- e.g. "### Ease Factors" links back to "Definitive Edition
-# [p8](#ease-factor)", the page of Chapter 1's own Ease Factor heading, not
-# of this one. An anchor whose heading sits in this range legitimately points
-# backwards. Bounds: '# Reference Guide' (line 22629) to the line before
-# '## Spells Index' (23778), the first of the four citation tables that
-# follow it -- found by locating those two headings in the pinned rulebook,
-# 2026-08-21.
-REFERENCE_GUIDE_RANGE = (22629, 23777)
-
-# The Spell Guidelines Index -- a `### ` table nested inside the Spells
-# Index, one row per Technique/Form pair (e.g. "Rego Aquam") -- locates a
-# *section*, not a guideline: see
-# docs/superpowers/specs/2026-08-21-page-references-design.md, "Core
-# guidelines, parameters, modifiers". Its citation measures where the
-# guideline table begins, which is consistently a page ahead of the
-# section's own first worked example, cited precisely by the Spells Index.
-# Every row is excluded, not only the ones observed to violate monotonicity,
-# because the imprecision is structural to the table rather than particular
-# to a few of its 50 rows. Bounds: '### Spell Guidelines Index' (line 24143)
-# to the line before '## Bestiary Index' (24198).
-_SPELL_GUIDELINES_INDEX_RANGE = (24143, 24197)
-
-# Isolated citations that contradict the pages measured, by the same index,
-# immediately either side of them -- verified against the pinned rulebook,
-# 2026-08-21. None of these share a duplicate heading or a conflicting
-# citation (the two mechanical checks below already catch those); the only
-# evidence is that each one disagrees with pages read independently on both
-# sides of it:
-#
-#   933  Tribunals (a Code of Hermes clause) cites p22; its neighbours
-#        (lines 923, 927, 937, 941) all cite p21.
-#   2334 Hermetic Houses Summary cites p46; Virtues and Flaws immediately
-#        after it cites p45 and fits its own neighbours (44 before, 47
-#        after).
-#   2956 Social Statuses by Culture cites p65, bracketed by p64 on both
-#        sides (2952 before, 3026/3032 after).
-#   4113 Guild Dean cites p85 and 4117 Guild Master cites p84 -- reversed
-#        relative to their neighbours (84, 84 before; 85, 85 after). Nothing
-#        in the markdown says which of the pair is transposed, so -- as with
-#        6490/6494 below -- both are dropped rather than picking one.
-#   6490 Meddler and 6494 Mentor both cite p137, a two-line island inside a
-#        ten-line run of p136 (six lines before, four after); both are
-#        excluded, or the pair still reads as a decrease into Missing Ear.
-#   7793 Sense Passions (Ability) cites p107 -- identical to the *Virtue*
-#        row at line 4998, a different entry entirely -- while its own
-#        neighbours (7785, 7813) both cite p170.
-#   15912 Masking the Odor of Magic cites p369, the only such citation
-#        inside a run of seven p370 citations either side of it.
-#   16776 Damage Table cites p404, bracketed by p394 (16752 before, 16791
-#        after).
-#   17603 The Faerie Realm cites p417; Faerie Auras immediately after it
-#        cites p416 and fits its own neighbours (415 before, 418 after).
-#   21219 Gabriel, the Archangel of Prophecy cites p455, between citations
-#        of p489 and p490.
-#   22443 Mundane Interactions cites p518, between citations of p532 and
-#        p533.
-#
-# Excluding these is not a guess at which of two numbers is correct -- it is
-# refusing to calibrate from either, the same "return None rather than a
-# guess" rule the two guards above already apply.
-_ISOLATED_UNRELIABLE_LINES = frozenset({
-    933, 2334, 2956, 4113, 4117, 6490, 6494, 7793,
-    15912, 16776, 17603, 21219, 22443,
-})
 
 # `[313](#anchor)` and `[158-159](#anchor)`. The range's first page is what a
 # citation carries; the pattern must still recognise the form, or the row is
@@ -119,73 +34,32 @@ def slugify(heading):
 
 
 class PageIndex:
-    def __init__(self, anchor_pages, line_pages, spell_index_pages,
-                 heading_lines, heading_slugs):
-        self.anchor_pages = anchor_pages
-        self.line_pages = line_pages
+    def __init__(self, spell_index_pages, guideline_index_pages, topic_index_pages):
         self.spell_index_pages = spell_index_pages
-        self.heading_lines = heading_lines
-        self.heading_slugs = heading_slugs
-        self._lines = [line for line, _ in line_pages]
-
-    def page_for_line(self, line):
-        """The printed page of `line`, or None when the evidence is too thin."""
-        position = bisect.bisect_right(self._lines, line) - 1
-        if position < 0:
-            return None
-        anchor_line, page = self.line_pages[position]
-        if line - anchor_line > MAX_ANCHOR_DISTANCE:
-            return None
-        return page
-
-    def monotonicity_violations(self):
-        """Adjacent calibration points whose page decreases as the line grows.
-
-        A decrease means an anchor is being read out of its section, and
-        `page_for_line` walks backwards -- so one bad anchor gives a wrong
-        page to every line after it until the next one.
-        """
-        out = []
-        for i in range(len(self.line_pages) - 1):
-            line_a, page_a = self.line_pages[i]
-            line_b, page_b = self.line_pages[i + 1]
-            if page_b < page_a:
-                out.append((line_a, page_a, line_b, page_b))
-        return out
+        self.guideline_index_pages = guideline_index_pages
+        self.topic_index_pages = topic_index_pages
 
 
-def _headings(lines):
-    """Slug every heading, deduping repeats the way GitHub does."""
-    seen = {}
-    slugs = {}
-    heading_lines = []
-    for offset, text in enumerate(lines):
-        if not text.strip().startswith("#"):
-            continue
-        line = offset + 1
-        heading_lines.append(line)
-        base = slugify(text)
-        count = seen.get(base, 0)
-        seen[base] = count + 1
-        slugs[base if count == 0 else "%s-%d" % (base, count)] = line
-    return heading_lines, slugs
+def _find_heading(lines, text):
+    """The 1-based line of the first heading whose text equals `text`."""
+    for offset, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("#") and stripped.lstrip("#").strip().lower() == text:
+            return offset + 1
+    return None
 
 
-def _spell_index_pages(lines, slugs):
+def _spell_index_pages(lines):
     """The Spells Index's curated name -> page table.
 
     Authoritative, and nothing may second-guess it: the first occurrence of a
     spell name in the PDF matches this page only 57% of the time.
     """
     out = {}
-    heading = next(
-        (i for i, t in enumerate(lines)
-         if t.strip().startswith("#")
-         and t.strip().lstrip("#").strip().lower() == "spells index"),
-        None)
+    heading = _find_heading(lines, "spells index")
     if heading is None:
         return out
-    for text in lines[heading + 1:]:
+    for text in lines[heading:]:
         stripped = text.strip()
         if stripped.startswith("#"):
             break
@@ -203,44 +77,65 @@ def _spell_index_pages(lines, slugs):
     return out
 
 
-def _in_range(line, span):
-    start, end = span
-    return start <= line <= end
+def _guideline_index_pages(lines):
+    """The Spell Guidelines Index's (technique, form) -> page table.
+
+    Columns are `| Form | Technique | page |` -- Form first, which is not
+    the order the key uses.
+    """
+    out = {}
+    heading = _find_heading(lines, "spell guidelines index")
+    if heading is None:
+        return out
+    for text in lines[heading:]:
+        stripped = text.strip()
+        if stripped.startswith("#"):
+            break
+        if not stripped.startswith("|"):
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        match = _ANCHOR.search(cells[-1])
+        if not match:
+            continue
+        form, technique = cells[0], cells[1]
+        if form and technique:
+            out[(technique, form)] = int(match.group(1))
+    return out
+
+
+def _topic_index_pages(lines):
+    """The Traditional Index's qualified-name -> page table.
+
+    Runs from its own heading to end of file. Entry text has its `&nbsp;`
+    stripped and is lowercased before use as a key.
+    """
+    out = {}
+    heading = _find_heading(lines, "traditional index")
+    if heading is None:
+        return out
+    for text in lines[heading:]:
+        stripped = text.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if len(cells) < 2:
+            continue
+        match = _ANCHOR.search(cells[-1])
+        if not match:
+            continue
+        name = cells[0].replace("&nbsp;", "").strip().lower()
+        if name:
+            out[name] = int(match.group(1))
+    return out
 
 
 def build_index(lines):
-    heading_lines, slugs = _headings(lines)
-    anchor_pages = {}
-    citations = {}   # slug -> [(citing_line, page), ...], document order
-    for offset, text in enumerate(lines):
-        for match in _ANCHOR.finditer(text):
-            page, slug = int(match.group(1)), match.group(2)
-            if slug not in slugs:
-                continue   # an anchor with no heading is dropped, never guessed
-            anchor_pages.setdefault(slug, page)
-            citations.setdefault(slug, []).append((offset + 1, page))
-
-    line_pages = {}
-    for slug, cites in citations.items():
-        heading_line = slugs[slug]
-        if heading_line in _ISOLATED_UNRELIABLE_LINES:
-            continue
-        if _in_range(heading_line, REFERENCE_GUIDE_RANGE):
-            continue   # reproduces body content; cites the body's page
-        pages_cited = {page for _, page in cites}
-        if max(pages_cited) - min(pages_cited) > _MAX_CITED_SPREAD:
-            continue   # more than a page break apart -- see _MAX_CITED_SPREAD
-        if all(_in_range(citing_line, _SPELL_GUIDELINES_INDEX_RANGE)
-               for citing_line, _ in cites):
-            continue   # locates a section, not this heading
-        line_pages[heading_line] = cites[0][1]
-
     return PageIndex(
-        anchor_pages=anchor_pages,
-        line_pages=sorted(line_pages.items()),
-        spell_index_pages=_spell_index_pages(lines, slugs),
-        heading_lines=heading_lines,
-        heading_slugs=slugs,
+        spell_index_pages=_spell_index_pages(lines),
+        guideline_index_pages=_guideline_index_pages(lines),
+        topic_index_pages=_topic_index_pages(lines),
     )
 
 
