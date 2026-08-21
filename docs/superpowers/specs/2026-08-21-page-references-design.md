@@ -70,75 +70,89 @@ needed: citations live in assets, not in the `spells` table. User-created
 spells carry no citations at all (`Provenance`'s invariant), so nothing
 persisted changes shape.
 
-## The organising idea: the evidence differs, so the mechanism must
+## The organising idea: three curated tables, no searching
 
-One mechanism would be simpler and would be wrong. The three populations carry
-different evidence, and flattening them means either discarding a curated table
-or inventing numbers where none exist.
+**Revised 2026-08-21, after the human partner challenged the amount of search
+effort. They were right, and the measurements below say so.**
 
-| Population | Count | Source | Why this one |
-|---|---|---|---|
-| Core spells | 360 | Spells Index, name → page | A curated name→page table already exists. Nothing should second-guess it — PDF search disagrees with it 43% of the time |
-| Core guidelines, parameters, modifiers | ~674 | Nearest preceding resolved anchor | No per-row index exists. The Spell Guidelines Index has 50 rows — one per Technique/Form pair — so it locates a *section*, not a guideline |
-| HoH:MC, everything | 27 | Committed ledger, subagent-authored from the PDF | No index, and regex matching reaches only 12 of 15. At 27 records a reviewed ledger is cheaper and exact than a matcher in the repo |
+The original design inferred a guideline's page from the nearest anchored
+heading above its line, which required locating that line by matching its
+description text. That is a search, and it is what made an anchor map, a
+monotonicity gate and four exclusion mechanisms necessary. **None of it is
+needed.** The rulebook carries three curated tables that answer by lookup:
+
+| Population | Count | Table | Key | Coverage |
+|---|---|---|---|---|
+| Core spells | 360 | Spells Index | spell name | exact, curated |
+| Core guidelines | 608 | Spell Guidelines Index | `(technique, form)` | **608/608 — 100%** |
+| Core parameters | 31 | Traditional Index | `"{name} ({category})"` | **20/31 — 65%** |
+| Core modifiers | 35 | — | — | not indexed |
+| HoH:MC, everything | 27 | committed ledger | record id | exact, authored |
+
+Measured 2026-08-21: every core `base_effect` carries `technique` and `form`,
+and all 50 Technique/Form pairs appear in the Spell Guidelines Index, so the
+join is total. `parameters.json` carries `name` and `category`, and the
+Traditional Index indexes parameters in exactly that form — `Voice (Range)` →
+303, `Momentary (Duration)` → 304, `Individual (Target)` → 305.
+
+**Why lookup beats inference here, beyond simplicity.** The tables are the
+book's own statement of where its content is. Inference reached ~80% of
+guidelines where the table reaches 100%, and its correctness rested on 74
+hand-justified anchor exclusions — every one of which was a place the mapping
+could be wrong in a way no test would catch.
+
+**The residue takes no page.** The 11 parameters absent from the Traditional
+Index (`Sight`, `Arcane Connection`, `Boundary`, the sensory Targets) and the
+35 modifiers get `page` omitted. That is not a gap to close: a null page is
+valid and permanent (§2), and inventing a mechanism for 46 records is what
+this revision exists to stop. If those gaps prove to matter in item 56's
+hands, item 78.2 is where to reopen them.
 
 ## Design
 
-### 1. The anchor map (78.1)
+### 1. The three table parsers (78.1)
 
-A new module under `scripts/spell_import/` parses the four index tables and
-produces two lookups:
+`scripts/spell_import/pages.py` parses three tables into three dicts, and does
+nothing else:
 
-- `anchor_pages: dict[str, int]` — slug → printed page, from every
-  `[page](#anchor)` pair in the four tables.
-- `line_pages: list[tuple[int, int]]` — (heading line, printed page), sorted,
-  for every anchor whose slug resolves to a real heading.
+- `spell_index_pages: dict[str, int]` — spell name → page.
+- `guideline_index_pages: dict[tuple[str, str], int]` — `(technique, form)` → page.
+- `topic_index_pages: dict[str, int]` — Traditional Index entry → page, keyed
+  on the entry's text lowercased with `&nbsp;` stripped.
 
-Slugging follows GitHub's rules: lowercase, strip non-word characters, spaces
-to hyphens, and **dedupe repeats with a numeric suffix** (`-1`, `-2`) in
-document order — the repo's headings do repeat, and ignoring the suffix
-silently maps several headings onto one slug.
+A caller asks for a key; it gets a page or nothing. There is no line-to-page
+inference, no anchor map, and nothing walks backwards through the document.
 
 **Page ranges must be modelled, not truncated.** Rows like
-`[158-159](#ability-types)` occur; the range's *first* page is what a citation
+`[158-159](#ability-types)` occur; the range's first page is what a citation
 carries, but the parser must recognise the form rather than failing to match it.
-
-`page_for_line(line)` returns the page of the nearest preceding entry in
-`line_pages`, or `None` under the safety rule below.
 
 ### 2. The safety rule
 
-**A page is emitted only when the evidence supports it.** Two guards, both
-returning `None` rather than a guess:
+**A page is emitted only when a table names one.** With lookup rather than
+inference there is one rule and no thresholds: a key is present or it is not.
+A missing key yields no page.
 
-- **Distance guard.** If the nearest preceding anchor is more than **60 lines**
-  before the target line, emit no page. The threshold sits comfortably above
-  the p90 of 22 measured for guidelines and above one page's ~44 lines, while
-  refusing the 789-line gap that exists somewhere in the document.
-- **Locator failure.** If a record's text cannot be located in the markdown at
-  all, emit no page. Measured baseline: 32 of 40 sampled guidelines locate by
-  exact normalised description match. The locator should try exact match first,
-  then a normalised prefix of the description, and stop there — **do not add
-  fuzzy matching to raise the hit rate**, because a near-match on the wrong
-  guideline produces a confidently wrong page, which is worse than no page.
+A null page is not a temporary state to be eliminated. HoH:MC records outside
+the ledger, the 11 unindexed parameters and all 35 modifiers will have them,
+and `Citation`'s own doc comment already says *"A citation naming only its book
+is complete and valid."* That sentence stays true and stays in place.
 
-A null page is not a temporary state to be eliminated. HoH:MC will always have
-some, and `Citation`'s own doc comment already says *"A citation naming only
-its book is complete and valid."* That sentence stays true and stays in place.
+**Never widen a key to raise coverage.** Matching `Voice` where the table says
+`Voice (Range)`, or falling back to a neighbouring entry, reintroduces exactly
+the guessing this revision removed.
 
-### 3. The correctness test (78.3)
+### 3. What replaces the monotonicity gate (78.3)
 
-**The 22 monotonicity violations are the gate on §1, not a cleanup task.**
-Sorting the resolved anchors by line must make page numbers non-decreasing. A
-decrease means an anchor is being read out of its section — and because
-`page_for_line` walks backwards to the nearest anchor, one misplaced anchor
-poisons every line after it until the next one.
+78.3 existed to validate the anchor map. With no anchor map there is nothing
+for it to validate, and the sub-item is **closed as obsolete rather than done**
+— the defect it guarded against cannot occur, because no page is ever inferred
+from a neighbouring line.
 
-Each violation is resolved, not smoothed. Item 78 records that at least some
-are appendix headings carrying a body page number (the Reference Guide
-reproducing body content), which is a real structural fact about the book and
-must be handled rather than averaged away. A test asserts monotonicity holds
-over the final `line_pages`.
+What replaces it is a coverage assertion per table, pinning the measured
+figures so a source change is caught: the Spells Index yields 360 entries, the
+Spell Guidelines Index 50, and every core `base_effect`'s `(technique, form)`
+resolves.
 
 ### 4. The HoH:MC ledger
 
@@ -235,32 +249,25 @@ the book's *body* and never tested against its *indexes*.
 
 ## Testing
 
-- **Slug dedupe:** two identical headings produce `foo` and `foo-1`, and both
-  resolve.
 - **Page ranges:** `[158-159](#x)` parses to page 158, not to a failure and not
   to 158159.
-- **Monotonicity:** the final `line_pages` is non-decreasing in page as line
-  increases. This is §3's gate.
-- **Distance guard:** a line 61+ lines after its nearest anchor yields `None`;
-  one 59 lines after yields a page.
-- **Locator refuses near-misses:** a description that matches no line exactly
-  and no line by prefix yields `None` rather than the closest candidate.
-- **Spells Index authority:** for a sample of core spells, the emitted page
-  equals the Spells Index row, *not* the first PDF occurrence — this is the
-  regression guard for the 57% finding.
+- **Table coverage, pinned to measurement:** the Spells Index yields 360
+  entries; the Spell Guidelines Index yields 50; every core `base_effect`'s
+  `(technique, form)` resolves against it. A change in any of these means the
+  source moved — check `source.lock` before changing the number.
+- **Parameter lookup uses name *and* category:** `Voice (Range)` resolves;
+  bare `Voice` does not. This pins the key format against a future "helpful"
+  widening.
+- **A missing key yields no page**, and the emitted citation omits the `page`
+  field entirely rather than carrying null — `Citation.toMap` writes the key
+  only when it has a value.
 - **HoH:MC ledger coverage:** every `arm5-hohmc` citation in the assets has a
-  ledger entry.
+  ledger entry, every entry names a record that exists, every page is inside
+  the book, and every entry records the phrase it was matched on.
 - **Page coverage is a floor, not a ceiling.** A test asserts that at least the
   number of `arm5-core` citations carrying a page today still carry one — so a
   regression is caught while a hand-added guideline with no page is not a
-  failure. Do **not** write it as "every published citation has a page": the
-  locator reaches ~80% of guidelines by design (§2 refuses near-misses), and a
-  100% assertion would force fuzzy matching, which is the thing §2 forbids.
-- **PDF as witness, not source:** a sampled cross-check of core pages against
-  the DE PDF (printed = index − 7) is a one-off verification recorded in the
-  implementation report, run by a cheap-tier subagent like the HoH:MC ledger.
-  It does **not** become a test, because that would make the suite depend on an
-  F: drive that CI does not have.
+  failure.
 - The three suites stay green: `flutter test`, the Python extractor suite, and
   `flutter test integration_test -d windows`.
 
@@ -268,12 +275,11 @@ the book's *body* and never tested against its *indexes*.
 
 | File | Change |
 |---|---|
-| `scripts/spell_import/pages.py` | new — index parsing, slugging, `page_for_line`, the guards |
-| `scripts/spell_import/hohmc_pages.json` | new — the committed HoH:MC ledger |
+| `scripts/spell_import/pages.py` | three table parsers — and, in this revision, the removal of the anchor map, `page_for_line`, the monotonicity gate and all four exclusion mechanisms |
+| `scripts/spell_import/hohmc_pages.json` | the committed HoH:MC ledger |
 | `scripts/spell_import/emit.py` | populate `page` on the three emitted assets |
-| `scripts/enrich_catalog_pages.py` | new one-shot — pages into the three hand-maintained catalogs, then kept for reference |
-| `scripts/spell_import/tests/` | the tests above |
-| `assets/data/*.json` | regenerated, citations gaining `page` |
+| `scripts/enrich_catalog_pages.py` | one-shot — pages into the three hand-maintained catalogs by lookup, then kept for reference |
+| `assets/data/*.json` | regenerated / enriched, citations gaining `page` |
 | `assets/data/books.json` | `arm5-core` metadata → Definitive Edition |
 | `lib/models/citation.dart` | retract the "cannot" doc comment |
 | `.superpowers/DECISIONS.md` | retract the "Known limits" entry |
