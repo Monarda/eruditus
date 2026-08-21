@@ -8,6 +8,16 @@
   which duplicates the description rather than summarising it.
 - **Deferred by the human partner** until all core-rulebook spells import, so the
   work is done once against the full set.
+- **⚠️ Landing this changes text provenance, and one thing must NOT be deleted.**
+  `test/models/summary_provenance_tripwire_test.dart` fails the moment these
+  summaries stop being derived from descriptions, and names the three
+  `Resolved*.sourcedSummary` sites to switch to `SourcedText.authored`. But
+  `sourcedSpellText` then falls out of the *summary* path while remaining
+  load-bearing on the *description* path — instantiating a published template
+  copies the book's verbatim description into a spell saved as `userCreated`.
+  Deleting it as "now dead" reintroduces the mislabel item 79.3 fixed. This also
+  resolves item 87.1, which is one entry that reached this steady state early.
+  See DECISIONS.md, "Text provenance".
 - **Do the `" Level N."` suffix removal at the same time.** It is vestigial —
   nothing reads `RegExp(r'Level (\d+)\.$')` anymore; both former readers use the
   typed `printedLevel` field. Removing it from `emit._summary` rewrites every

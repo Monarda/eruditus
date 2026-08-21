@@ -983,3 +983,29 @@ covers all three asset populations (library, templates, exceptions), since
 `emit.py` builds all three the same way. Its two exclusions are the contents of
 `hand_authored_templates.json`, a category exclusion — **never add an id to
 that list to make the test pass.**  *(item 79.3)*
+
+**⚠️ `summary` and `description` have opposite futures, and `sourcedSpellText`
+must survive item 31.** The steady state the catalog is heading for is:
+*summary* is **authored or derived for every spell** — ours via item 31's
+ledger for published ones, the caster's for user-created ones — while
+*description* stays **verbatim for every imported spell**, because item 31
+touches summaries only. Two consequences a future session could violate by
+accident:
+
+- When item 31 lands and `sourcedSummary` collapses to
+  `SourcedText.authored(summary)`, `sourcedSpellText` falls out of the *summary*
+  path. **It must stay in the *description* path.** Instantiating a published
+  template still copies the book's verbatim description into a spell that saves
+  as `userCreated`, so deleting `sourcedSpellText` as "now dead" silently
+  reintroduces the mislabel it was written to fix — on descriptions, where the
+  prose is longest and most obviously the book's.
+- A template-seeded *summary* after item 31 is **our** prose, not the
+  rulebook's, so reporting it `verbatim` would be wrong in the other direction.
+  `authored` is correct there; the enum deliberately does not distinguish our
+  prose from the caster's, because both render the same way.
+
+**`tpl-revi-tie-threads-that-bind` is this transition arriving early, not a
+separate bug.** Its summary is already our paraphrase on a `published` record
+while its description is correctly verbatim — so it is the first entry to reach
+item 31's steady state, and item 31 is what fixes it. Do not "correct" it by
+rewriting the summary into a quote.  *(items 79.3, 31, 87.1)*

@@ -108,4 +108,4 @@ not-yet-worth-doing.
 | 84 | do | open 3/3 | app.md | The Pseudo-Locale Guard Is a Canary, Not a Guarantee |
 | 85 | do | open 4/4 | app.md | ARB Key-Naming Is Inconsistent Across Item 80's Tasks |
 | 86 | do | open 3/3 | importer.md | Source Editions — the Work/Edition Distinction |
-| 87 | do | open 5/5 | app.md | Provenance Render Sites and Hardening Deferred From Item 79.3 |
+| 87 | do | open 4/5 | app.md | Provenance Render Sites and Hardening Deferred From Item 79.3 |

@@ -20,14 +20,25 @@ import 'package:flutter_test/flutter_test.dart';
 /// today and all three need the same guard.
 ///
 /// When this test fails, the fix is NOT to change this file. It is to:
-///  1. Change `Spell.sourcedSummary` in `lib/models/spell.dart`,
-///     `ResolvedTemplate`'s/`ResolvedException`'s summary provenance (via
-///     `sourcedFrom` in `lib/presentation/widgets/spell_card.dart` or
-///     wherever it has moved to by then), to return
+///  1. Change the *summary* provenance to return
 ///     `SourcedText.authored(summary)` unconditionally for whichever
-///     asset(s) just failed below, and
+///     asset(s) just failed below. The three sites are
+///     `ResolvedSpell.sourcedSummary` (`lib/models/resolved_spell.dart`),
+///     `ResolvedTemplate.sourcedSummary` (`lib/models/resolved_template.dart`)
+///     and `ResolvedException.sourcedSummary`
+///     (`lib/models/resolved_exception.dart`), and
 ///  2. Delete this test once every asset it checks passes unconditionally --
 ///     its job is done.
+///
+/// **Do NOT delete `sourcedSpellText` when it falls out of the summary path.**
+/// `summary` and `description` have opposite futures: summary becomes authored
+/// for every spell, while description stays **verbatim for every imported
+/// spell**, because item 31 touches summaries only. Instantiating a published
+/// template still copies the book's verbatim description into a spell that
+/// saves as `userCreated`, so `ResolvedSpell.sourcedDescription` needs
+/// `sourcedSpellText`'s templateId comparison permanently. Removing it as
+/// "now dead" reintroduces the exact mislabel it was written to fix. See
+/// DECISIONS.md, "Text provenance".
 void main() {
   /// Prefix-of-description sniff test, shared by all three assets: `emit.py`
   /// truncates a description and (for spells only) appends " Level N.", so a
