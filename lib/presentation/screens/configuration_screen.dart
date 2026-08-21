@@ -10,6 +10,7 @@ import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/presentation/screens/about_screen.dart';
+import 'package:eruditus/presentation/widgets/sourced_text_view.dart';
 import 'package:eruditus/utils/constants.dart';
 
 class ConfigurationScreen extends StatefulWidget {
@@ -94,7 +95,7 @@ class _EffectsTab extends StatelessWidget {
         children: effects.map((e) {
           final isCustom = e.provenance.source == PublicationSource.userCreated;
           return ListTile(
-            title: Text(e.description),
+            title: SourcedTextView(e.sourcedDescription),
             // A General guideline has no baseLevel to print (the caster
             // chooses it) -- the literal null would otherwise read as
             // "Base null". Mirrors the same guard in the base-effect dropdown

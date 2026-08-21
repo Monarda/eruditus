@@ -1,6 +1,7 @@
 import 'package:eruditus/models/general_effect_formula.dart';
 import 'package:eruditus/models/parameter_triple.dart';
 import 'package:eruditus/models/provenance.dart';
+import 'package:eruditus/models/text_provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 /// Whether a guideline demands a Ritual spell.
@@ -109,6 +110,10 @@ class BaseEffect {
   /// [OpenSlotKind]. Empty for every guideline that commits to everything
   /// itself.
   final List<OpenSlotKind> openSlots;
+
+  /// [description] together with whose words it is — the rulebook's, for a
+  /// published guideline; the user's, for one they wrote. See `sourcedFrom`.
+  SourcedText get sourcedDescription => sourcedFrom(description, provenance);
 
   BaseEffect({
     required this.id,

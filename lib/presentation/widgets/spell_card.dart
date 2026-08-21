@@ -5,6 +5,7 @@ import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
+import 'package:eruditus/presentation/widgets/sourced_text_view.dart';
 
 class SpellCard extends StatelessWidget {
   final LibraryEntry entry;
@@ -92,7 +93,9 @@ class SpellCard extends StatelessWidget {
           ? l10n.spellCardArtsAndLevel(entry.technique!, entry.form!, level!, levelSuffix)
           : l10n.spellCardArtsOnly(entry.technique!, entry.form!);
     }
-    // Prefer the paraphrase; fall back to the verbatim rulebook text.
+    // Prefer the summary; fall back to the description. Both are the book's
+    // own words for a published spell today; item 31 is what makes the
+    // summary a real paraphrase. See sourcedFrom.
     // validateSpellProse's rule is unconditional (todo item 13), so every
     // entry is guaranteed a non-blank summary or description -- but that
     // guarantee is about the pair together, not about summary alone: a
@@ -100,9 +103,16 @@ class SpellCard extends StatelessWidget {
     // back to '' before save, leaving a real description behind it. `??`
     // only falls through on null, so an empty-string summary must be treated
     // as absent explicitly or that description would never render.
+    //
+    // entry.sourcedSummary/sourcedDescription -- not a local helper -- is
+    // the provenance rule: LibraryEntry declares both getters itself (todo
+    // item 79.3 finding F2), so every implementer, present and future, is
+    // compiler-forced to answer rather than falling through a presentation-
+    // layer default that could silently mislabel a fourth one's prose.
     final summary = entry.summary;
-    final blurb = (summary != null && summary.trim().isNotEmpty) ? summary : entry.description;
-    final hasBlurb = blurb != null && blurb.isNotEmpty;
+    final preferSummary = summary != null && summary.trim().isNotEmpty;
+    final blurb = preferSummary ? entry.sourcedSummary : entry.sourcedDescription;
+    final hasBlurb = blurb != null && blurb.text.isNotEmpty;
 
     return Card(
       key: isInvalid
@@ -167,7 +177,19 @@ class SpellCard extends StatelessWidget {
                         ? TextStyle(color: Theme.of(context).colorScheme.error)
                         : null),
                 if (hasBlurb)
-                  Text(blurb, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  SourcedTextView(
+                    blurb,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    // `onTap` is a supported constructor parameter and some
+                    // callers do pass it (or may start to) -- a marker here
+                    // would then be a second gesture target competing with
+                    // ListTile's own inside one list row. (No production
+                    // call site currently passes onTap, so this is a
+                    // standing readiness rule, not a response to a tap
+                    // target that exists today -- see finding F6.)
+                    showMarker: false,
+                  ),
                 if (hasProblems)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),

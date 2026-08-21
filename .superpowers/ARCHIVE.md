@@ -1332,3 +1332,65 @@ documented; Flutter desktop setup fixed (`sqflite_common_ffi` init). The catalog
 stands at 611 today after items 34, 28, 17 and 64.
 
 ---
+
+
+### 79. Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands — DONE 2026-08-21 (`dc31261..3b5e059`)
+
+**Opened 2026-08-20.** Item 56 assumed hint text would have to be *paraphrased*
+UI copy, because the licence position was never checked. It has been now:
+`Ars-Magica-Open-License/LICENSE.md` is **Creative Commons
+Attribution-ShareAlike 4.0 International**. §2(a)(1) grants the right to
+"reproduce and Share the Licensed Material, in whole or in part". **So we may
+quote rules text verbatim, and 56's hints can be the rulebook's own words rather
+than our gloss of them.**
+
+Two conditions ride along, and both are product decisions, not legal trivia:
+
+**⚠️ The framing this item opened with understated the urgency, and that was
+corrected during its design.** 79.2 supposed the catalog JSON was "arguably
+already a database derived from the Licensed Material". It is more direct than
+that: the app has shipped the rulebook's own words since the import landed —
+612 guideline `description` strings and 336 published spell names with their
+prose — in a repo that carried **no LICENSE file at all**. This was never
+contingent on item 56.
+
+- [x] **79.1 ✅ DONE 2026-08-21.** Attribution lives in an **About & Licences
+      screen**, reached from an `AppBar` action on the Configuration screen, plus
+      a second route through `LicenseRegistry`/`showLicensePage`. Quoted text
+      elsewhere carries only a source marker routing there, which §3(a)(2)
+      permits. See DECISIONS.md, "Licensing and attribution".
+- [x] **79.2 ✅ DONE 2026-08-21.** The repo is **MIT for the software, CC BY-SA
+      4.0 for rulebook-derived content**, on §1(b)'s Collection/Adapted Material
+      distinction — stated by *content*, with the path tables illustrative
+      rather than exhaustive. See DECISIONS.md.
+- [ ] **79.3** **Decide how much to quote, and mark it as a quote.** A hint that
+      reproduces a guideline verbatim must be visually distinguishable from our
+      own words, or the app silently attributes its own paraphrases to the
+      rulebook. This is the coupling to 56.1's affordance decision.
+      **Decided in the spec, not yet built — this is plan B.** The mechanism is
+      a per-string `TextProvenance {verbatim, authored, translated}` plus a
+      `SourcedText` value type, because `Provenance` answers "where did this
+      *entry* come from", not "whose words are *these*". The two coincide only
+      by accident today, and **item 31 breaks that deliberately** by putting
+      ledger-authored summaries on `published` spells. `verbatim` means "the
+      published words of a cited edition" — whichever edition, in whatever
+      language — so an official translation is `verbatim`, not `translated`;
+      `translated` means only "we produced this rendering". Quoting is bounded
+      by the control: the guideline line, a spell's own prose, and a
+      Range/Duration/Target/modifier's definition paragraph — not chapter-length
+      rules.
+
+- **Trademark is explicitly *not* licensed** (§2(b)(2)). The grant covers the
+  text, not "Ars Magica" as a mark — so this item does not settle naming,
+  branding or store-listing questions.
+- **No warranty, and no endorsement** (§5, §2(a)(6)): the app must not imply
+  Atlas Games endorses it.
+- **Spec:** `docs/superpowers/specs/2026-08-20-quoting-rules-text-design.md`
+- **Plan A (79.1, 79.2, done):** `docs/superpowers/plans/2026-08-20-licensing-and-attribution.md`
+- **Files:** `lib/licensing/attribution.dart`, `lib/presentation/screens/about_screen.dart`,
+  `LICENSE`, `NOTICE.md`, `LICENSES/CC-BY-SA-4.0.txt`; for 79.3,
+  `lib/models/text_provenance.dart` and the catalog assets
+- **See also:** items 56 (the consumer of this permission), 78 (a quote and its
+  page reference are the same affordance), 30 (provenance), 31 (its authored
+  summaries are why 79.3 needs per-string provenance), 82 (same convention, ARB
+  side), 86 (the edition model 79.3's `verbatim` definition assumes)

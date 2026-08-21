@@ -6,6 +6,7 @@ import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell_template.dart';
 
 class LibraryRepository {
   final AssetDataLoader assetLoader;
@@ -20,12 +21,24 @@ class LibraryRepository {
 
   List<ResolvedSpell>? _cachedBuiltInSpells;
 
+  // Templates are read-only catalog assets (see SpellTemplate's doc
+  // comment): unlike effects/parameters/modifiers, nothing in the Settings
+  // tab can add or delete one mid-session, so caching the raw records here
+  // is safe -- and avoids re-reading the asset file on every
+  // [_refreshResolver] call.
+  List<SpellTemplate>? _cachedTemplates;
+
   LibraryRepository({
     required this.assetLoader,
     required this.spellRepository,
     required this.resolver,
     this.configRepository,
   });
+
+  Future<List<SpellTemplate>> _loadTemplates() async {
+    _cachedTemplates ??= await assetLoader.loadSpellTemplates();
+    return _cachedTemplates!;
+  }
 
   // The resolver built at app startup holds a snapshot of the catalog at that
   // moment. Custom effects/parameters can be added or deleted afterward (from
@@ -38,6 +51,14 @@ class LibraryRepository {
   // widget tree to listen from, so it refreshes itself against the source of
   // truth (`ConfigurationRepository`) instead of reacting to a bloc stream.
   Future<void> _refreshResolver() async {
+    // Templates come from assetLoader, not configRepository, so this half
+    // always runs regardless of whether one was supplied -- needed so
+    // ResolvedSpell.sourcedSummary/sourcedDescription can tell a
+    // template-seeded spell's still-unedited prose from an authored one
+    // (see SpellResolver.resolve's `sourceTemplate` and todo item 79.3
+    // finding F1).
+    resolver.updateTemplates(await _loadTemplates());
+
     final configRepository = this.configRepository;
     if (configRepository == null) return;
     resolver.updateCatalogs(
@@ -60,7 +81,7 @@ class LibraryRepository {
   // against whatever catalog snapshot happened to exist on the first call.
   Future<List<ResolvedTemplate>> getTemplates() async {
     await _refreshResolver();
-    return resolver.resolveAllTemplates(await assetLoader.loadSpellTemplates());
+    return resolver.resolveAllTemplates(await _loadTemplates());
   }
 
   Future<List<ResolvedException>> getExceptions() async {

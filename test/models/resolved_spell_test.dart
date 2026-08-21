@@ -3,10 +3,12 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/text_provenance.dart';
 
 void main() {
   final effect = BaseEffect(
@@ -246,5 +248,109 @@ void main() {
     expect(resolved.technique, 'Rego');
     expect(resolved.form, 'Imaginem');
     expect(resolved.baseEffect?.form, 'Vim'); // the borrowed guideline, for contrast
+  });
+
+  group('sourcedSummary/sourcedDescription (finding F1: template-seeded prose)', () {
+    final template = SpellTemplate(
+      id: 'tpl-1',
+      name: 'Faerie Chains',
+      baseEffectId: 'crvi-1',
+      technique: 'Creo',
+      form: 'Vim',
+      rangeId: 'range-touch',
+      durationId: 'duration-momentary',
+      targetId: 'target-individual',
+      summary: 'The book\'s own summary.',
+      description: 'The book\'s own description.',
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-hohmc', page: 99)],
+      ),
+    );
+
+    Spell templateSeededSpell({String? summary, String? description, String? templateId = 'tpl-1'}) =>
+        Spell(
+          id: 'spell-from-template',
+          name: 'My Familiar Bond',
+          baseEffectId: 'crvi-1',
+          technique: 'Creo',
+          form: 'Vim',
+          rangeId: 'range-touch',
+          durationId: 'duration-momentary',
+          targetId: 'target-individual',
+          requisites: const {},
+          summary: summary,
+          description: description,
+          templateId: templateId,
+          provenance: Provenance(source: PublicationSource.userCreated),
+          createdAt: DateTime(2026, 1, 1),
+          updatedAt: DateTime(2026, 1, 1),
+        );
+
+    test('unedited template-seeded prose is verbatim, cited to the template', () {
+      final resolved = ResolvedSpell(
+        record: templateSeededSpell(
+          summary: 'The book\'s own summary.',
+          description: 'The book\'s own description.',
+        ),
+        sourceTemplate: template,
+      );
+
+      expect(resolved.sourcedSummary?.provenance, TextProvenance.verbatim);
+      expect(resolved.sourcedSummary?.citations, template.provenance.citations,
+          reason: 'a user-created spell has no citations of its own -- the '
+              'quote must be cited to the template it came from');
+      expect(resolved.sourcedDescription?.provenance, TextProvenance.verbatim);
+      expect(resolved.sourcedDescription?.citations, template.provenance.citations);
+    });
+
+    test('editing the summary flips it to authored, independent of the description', () {
+      final resolved = ResolvedSpell(
+        record: templateSeededSpell(
+          summary: 'My own rewording of the summary.',
+          description: 'The book\'s own description.',
+        ),
+        sourceTemplate: template,
+      );
+
+      expect(resolved.sourcedSummary?.provenance, TextProvenance.authored);
+      expect(resolved.sourcedSummary?.citations, isEmpty);
+      expect(resolved.sourcedDescription?.provenance, TextProvenance.verbatim,
+          reason: 'the description was not touched and still matches the template');
+    });
+
+    test('no templateId (an ordinary user-created spell) is authored, as before', () {
+      final resolved = ResolvedSpell(
+        record: templateSeededSpell(
+          summary: 'My own spell idea.',
+          description: 'My own longer description.',
+          templateId: null,
+        ),
+      );
+
+      expect(resolved.sourcedSummary?.provenance, TextProvenance.authored);
+      expect(resolved.sourcedDescription?.provenance, TextProvenance.authored);
+    });
+
+    test('a templateId that does not resolve (deleted/stale) degrades to authored, not a crash', () {
+      final resolved = ResolvedSpell(
+        record: templateSeededSpell(
+          summary: 'The book\'s own summary.',
+          description: 'The book\'s own description.',
+          templateId: 'tpl-does-not-exist',
+        ),
+        sourceTemplate: null,
+      );
+
+      expect(resolved.sourcedSummary?.provenance, TextProvenance.authored);
+      expect(resolved.sourcedDescription?.provenance, TextProvenance.authored);
+    });
+
+    test('a published spell (no template origin) is unaffected: verbatim with its own citations', () {
+      final resolved = ResolvedSpell(record: record());
+
+      expect(resolved.sourcedDescription?.provenance, TextProvenance.verbatim);
+      expect(resolved.sourcedDescription?.citations, record().provenance.citations);
+    });
   });
 }

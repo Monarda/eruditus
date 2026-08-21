@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/parameter.dart';
 import 'package:eruditus/models/citation.dart';
+import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell.dart';
@@ -263,7 +265,11 @@ void main() {
     expect(find.text('Choose a level for this General guideline'), findsNothing);
   });
 
-  ResolvedTemplate buildTemplate({String? summary, String? description}) {
+  ResolvedTemplate buildTemplate({
+    String? summary,
+    String? description,
+    PublicationSource source = PublicationSource.published,
+  }) {
     final record = SpellTemplate(
       id: 'tpl-1',
       name: 'Ward against Faeries of the Waters',
@@ -275,10 +281,35 @@ void main() {
       targetId: targetParam.id,
       summary: summary,
       description: description,
-      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+      provenance: Provenance(
+          source: source,
+          citations: source == PublicationSource.published ? const [Citation(bookId: 'arm5-core')] : const []),
     );
     return ResolvedTemplate(
         record: record, baseEffect: effect, range: rangeParam, duration: durationParam, target: targetParam);
+  }
+
+  ResolvedException buildException({
+    String? summary,
+    String? description,
+    PublicationSource source = PublicationSource.published,
+  }) {
+    final record = ExceptionSpell(
+      id: 'exc-1',
+      name: 'Wizard\'s Communion',
+      technique: 'Creo',
+      form: 'Vim',
+      range: 'Special',
+      duration: 'Special',
+      target: 'Special',
+      rationale: 'Does not follow the guideline system.',
+      summary: summary,
+      description: description,
+      provenance: Provenance(
+          source: source,
+          citations: source == PublicationSource.published ? const [Citation(bookId: 'arm5-core')] : const []),
+    );
+    return ResolvedException(record: record);
   }
 
   testWidgets('a card built from a template renders its name, Technique/Form, blurb, and Published chip',
@@ -344,5 +375,83 @@ void main() {
 
     expect(find.text('Needs review'), findsNothing,
         reason: 'chrome should be pseudo-transformed under en_XA');
+  });
+
+  testWidgets("a published spell's blurb renders as a quote", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'The rulebook says this.'),
+      level: 25,
+    ));
+
+    expect(find.byKey(const Key('sourced-text-quote')), findsOneWidget,
+        reason: "a published spell's prose is the book's own words");
+  });
+
+  testWidgets("a user-created spell's blurb renders as plain prose", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(
+          name: 'My Fireball',
+          source: PublicationSource.userCreated,
+          summary: 'My own spell idea.'),
+    ));
+
+    expect(find.text('My own spell idea.'), findsOneWidget);
+    expect(find.byKey(const Key('sourced-text-quote')), findsNothing,
+        reason: 'quote styling on the caster\'s own words would attribute '
+            'them to the rulebook');
+  });
+
+  testWidgets("the card's blurb carries no competing tap target", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'The rulebook says this.'),
+      level: 25,
+    ));
+
+    expect(find.byKey(const Key('sourced-text-marker')), findsNothing,
+        reason: 'showMarker is false so that a caller who does pass onTap '
+            'gets one gesture target, not two, inside the list row');
+  });
+
+  testWidgets('the blurb is still truncated to two lines', (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'The rulebook says this.'),
+      level: 25,
+    ));
+
+    final text = tester.widget<Text>(find.text('The rulebook says this.'));
+    expect(text.maxLines, 2);
+    expect(text.overflow, TextOverflow.ellipsis);
+  });
+
+  testWidgets("a published template's blurb renders as a quote", (tester) async {
+    await pumpApp(tester, SpellCard(entry: buildTemplate(summary: 'Wards against faeries of water.')));
+
+    expect(find.byKey(const Key('sourced-text-quote')), findsOneWidget,
+        reason: 'a General template is published rulebook prose, same as a spell');
+  });
+
+  testWidgets("a user-created template's blurb renders as plain prose", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildTemplate(summary: 'My homebrew ward.', source: PublicationSource.userCreated),
+    ));
+
+    expect(find.text('My homebrew ward.'), findsOneWidget);
+    expect(find.byKey(const Key('sourced-text-quote')), findsNothing);
+  });
+
+  testWidgets("a published exception's blurb renders as a quote", (tester) async {
+    await pumpApp(tester, SpellCard(entry: buildException(summary: 'A famous ritual among Bonisagi.')));
+
+    expect(find.byKey(const Key('sourced-text-quote')), findsOneWidget,
+        reason: 'an exception spell is published rulebook prose, same as an ordinary spell');
+  });
+
+  testWidgets("a user-created exception's blurb renders as plain prose", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildException(summary: 'My own oddity.', source: PublicationSource.userCreated),
+    ));
+
+    expect(find.text('My own oddity.'), findsOneWidget);
+    expect(find.byKey(const Key('sourced-text-quote')), findsNothing);
   });
 }

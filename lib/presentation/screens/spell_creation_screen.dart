@@ -196,6 +196,14 @@ class SpellCreationScreen extends StatelessWidget {
                           items: effectsForSelection
                               .map((e) => DropdownMenuItem(
                                     value: e,
+                                    // Deliberate deferral (item 79.3 finding F5): e.description
+                                    // is interpolated into an ARB chrome template
+                                    // (effectWithGeneralMarker et al.) rather than rendered
+                                    // through SourcedTextView, so this dropdown still shows
+                                    // 612 verbatim guideline descriptions undistinguished from
+                                    // ours. Fixing it needs a real layout change (the marker
+                                    // doesn't fit inside a DropdownMenuItem's single Text line)
+                                    // and is out of scope here; filed as a follow-up todo item.
                                     child: Text(
                                       // A General guideline has no baseLevel to print
                                       // (Core Rules leaves that row's level to the

@@ -9,6 +9,7 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/target_type.dart';
+import 'package:eruditus/models/text_provenance.dart';
 import 'package:eruditus/utils/map_serialization.dart';
 
 /// Every spell needs a summary or a description.
@@ -411,6 +412,30 @@ class Spell {
   /// member, carried by the model and the built-in library before any UI sets
   /// it, so that making it required later needs no migration. See todo item 14.
   final ContainerMode containerMode;
+
+  /// [summary] together with whose words it is, or null when there is none.
+  ///
+  /// **The [Provenance]-only rule** — correct for a plain [Spell] with no
+  /// template origin, but blind to [templateId]: it cannot tell a
+  /// template-seeded, not-yet-edited summary from an authored one, because
+  /// that comparison needs the source [SpellTemplate], which this class does
+  /// not carry. `ResolvedSpell.sourcedSummary` is the one that does — see its
+  /// doc comment and `sourcedSpellText`. Call this getter directly only where
+  /// no `ResolvedSpell` is available.
+  ///
+  /// **⚠️ Reports a published spell's summary as verbatim, which is true only
+  /// until item 31 lands** — see `sourcedFrom` and
+  /// `test/models/summary_provenance_tripwire_test.dart`.
+  SourcedText? get sourcedSummary =>
+      summary == null ? null : sourcedFrom(summary!, provenance);
+
+  /// [description] together with whose words it is, or null when there is
+  /// none. Unlike [sourcedSummary] this one is stable: a published spell's
+  /// description is the book's prose and item 31 does not touch it. See
+  /// [sourcedSummary]'s doc comment for why `ResolvedSpell.sourcedDescription`
+  /// is the getter to prefer when a `ResolvedSpell` is available.
+  SourcedText? get sourcedDescription =>
+      description == null ? null : sourcedFrom(description!, provenance);
 
   Spell({
     required this.id,

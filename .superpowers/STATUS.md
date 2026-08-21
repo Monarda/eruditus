@@ -12,15 +12,17 @@
 > after item 32.2's first two entries: same counts (a corrected guideline at
 > the same base level moves no count).
 
-**Suite status: Dart re-run 2026-08-21 at item 79's (licensing/attribution)
-branch head; Python and Integration last run 2026-08-20 at item 80's. The Dart
-count moved 745→782 across items 74 through 80, then 782→818 across item 79's
-plan A — 36 tests covering the §3(a) notice as data, the repo licence files,
-the About screen, and the pseudo-locale guard's fifth screen:**
+**Suite status: Dart re-run 2026-08-21 at item 79.3's branch head; Python and
+Integration last run 2026-08-20 at item 80's. The Dart count moved 745→782
+across items 74 through 80, then 782→818 across item 79's plan A (the §3(a)
+notice as data, the repo licence files, the About screen, the pseudo-locale
+guard's fifth screen), then 818→860 across plan B — text provenance, its
+rendering widget, the item-31 tripwire across all three asset populations, and
+the template-seeded-prose derivation:**
 
 | Suite | Command | Result |
 |---|---|---|
-| Dart | `flutter test` | **818 tests, green** |
+| Dart | `flutter test` | **860 tests, green** |
 | Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **397 tests, green** — re-run 2026-08-20 at item 80's branch head, same count as 2026-08-19's run; +6 there for the report/lock guard, the second combined-effect spell, and audit coverage |
 | Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
 

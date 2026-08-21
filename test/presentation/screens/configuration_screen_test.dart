@@ -72,6 +72,28 @@ void main() {
     expect(find.text('My custom effect'), findsOneWidget);
   });
 
+  testWidgets(
+      'a published effect\'s description renders as a quote, distinct from a '
+      'custom one (finding F5: BaseEffect.sourcedDescription wired up here)',
+      (tester) async {
+    final publishedEffect = BaseEffect(
+      id: 'cran-1', technique: 'Creo', form: 'Animal',
+      description: 'Give an animal a +1 bonus to Recovery rolls', baseLevel: 1,
+      provenance: Provenance(source: PublicationSource.published, citations: const [Citation(bookId: 'arm5-core')]),
+    );
+    final customEffect = BaseEffect(
+      id: 'custom-1', technique: 'Creo', form: 'Ignem',
+      description: 'My custom effect', baseLevel: 7,
+      provenance: Provenance(source: PublicationSource.userCreated),
+    );
+    await pumpScreen(tester, loadedState(effects: [publishedEffect, customEffect]));
+
+    expect(find.text('Give an animal a +1 bonus to Recovery rolls'), findsOneWidget);
+    expect(find.byKey(const Key('sourced-text-marker')), findsOneWidget,
+        reason: 'the published guideline\'s own words must be marked as a quote');
+    expect(find.text('My custom effect'), findsOneWidget);
+  });
+
   testWidgets('a General effect shows "General" rather than "Base null"', (tester) async {
     final generalEffect = BaseEffect(
       id: 'rean-gen', technique: 'Rego', form: 'Animal',
