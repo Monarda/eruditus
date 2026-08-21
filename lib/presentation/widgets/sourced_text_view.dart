@@ -30,6 +30,9 @@ class SourcedTextView extends StatelessWidget {
   /// instance — where a nested [InkWell] would compete for the same gesture.
   /// The quote styling still marks the text as a quote; §3(a)(2) is satisfied
   /// by the About screen being reachable, not by every quote linking to it.
+  /// This applies to every marker this widget can render, not just the
+  /// verbatim one — a translated blurb inside the same tappable row would
+  /// nest a tap target just as surely.
   final bool showMarker;
 
   const SourcedTextView(
@@ -41,6 +44,16 @@ class SourcedTextView extends StatelessWidget {
     this.showMarker = true,
   });
 
+  /// The rendered prose, with [style] applied on top of the shared body
+  /// style. Pulled out because the three provenance branches otherwise
+  /// repeat `maxLines`/`overflow` wiring with only the text style varying.
+  Widget _text(TextStyle? style) => Text(
+    sourced.text,
+    style: style,
+    maxLines: maxLines,
+    overflow: overflow,
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -49,12 +62,7 @@ class SourcedTextView extends StatelessWidget {
 
     switch (sourced.provenance) {
       case TextProvenance.authored:
-        return Text(
-          sourced.text,
-          style: body,
-          maxLines: maxLines,
-          overflow: overflow,
-        );
+        return _text(body);
 
       case TextProvenance.verbatim:
         return Container(
@@ -68,12 +76,7 @@ class SourcedTextView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                sourced.text,
-                style: body?.copyWith(fontStyle: FontStyle.italic),
-                maxLines: maxLines,
-                overflow: overflow,
-              ),
+              _text(body?.copyWith(fontStyle: FontStyle.italic)),
               if (showMarker) ...[
                 const SizedBox(height: 4),
                 _Marker(
@@ -89,17 +92,14 @@ class SourcedTextView extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              sourced.text,
-              style: body,
-              maxLines: maxLines,
-              overflow: overflow,
-            ),
-            const SizedBox(height: 4),
-            _Marker(
-              key: const Key('sourced-text-translated-marker'),
-              label: l10n.sourcedTextMachineTranslated,
-            ),
+            _text(body),
+            if (showMarker) ...[
+              const SizedBox(height: 4),
+              _Marker(
+                key: const Key('sourced-text-translated-marker'),
+                label: l10n.sourcedTextMachineTranslated,
+              ),
+            ],
           ],
         );
     }

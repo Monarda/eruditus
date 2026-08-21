@@ -63,4 +63,41 @@ void main() {
     expect(find.text('El libro dice esto.'), findsOneWidget);
     expect(find.byKey(const Key('sourced-text-translated-marker')), findsOneWidget);
   });
+
+  testWidgets('showMarker: false keeps the quote styling but drops the tap target',
+      (tester) async {
+    await pumpApp(tester, SourcedTextView(quoted, showMarker: false));
+
+    expect(find.byKey(const Key('sourced-text-quote')), findsOneWidget,
+        reason: 'the text is still a quote and must still look like one');
+    expect(find.byKey(const Key('sourced-text-marker')), findsNothing);
+  });
+
+  testWidgets('maxLines and overflow reach the rendered Text', (tester) async {
+    await pumpApp(
+      tester,
+      SourcedTextView(quoted, maxLines: 2, overflow: TextOverflow.ellipsis),
+    );
+
+    final text = tester.widget<Text>(find.text('The rulebook says this.'));
+    expect(text.maxLines, 2);
+    expect(text.overflow, TextOverflow.ellipsis);
+  });
+
+  testWidgets('showMarker: false also drops the translated marker, not just the verbatim one',
+      (tester) async {
+    await pumpApp(
+      tester,
+      SourcedTextView(
+        SourcedText.translated('El libro dice esto.', const [citation]),
+        showMarker: false,
+      ),
+    );
+
+    expect(find.text('El libro dice esto.'), findsOneWidget);
+    expect(find.byKey(const Key('sourced-text-translated-marker')), findsNothing,
+        reason: 'showMarker gates every marker this widget can render, not '
+            'only the verbatim one — a translated blurb in a tappable row '
+            'would otherwise still nest a competing tap target');
+  });
 }
