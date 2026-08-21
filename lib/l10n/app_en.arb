@@ -445,5 +445,7 @@
   "aboutDisclaimerHeading": "Disclaimer of warranties",
   "aboutTrademarksHeading": "Trademarks",
   "aboutEndorsementHeading": "No endorsement",
-  "aboutPackageLicencesButton": "Open-source package licences"
+  "aboutPackageLicencesButton": "Open-source package licences",
+  "sourcedTextRulebookMarker": "Rulebook",
+  "sourcedTextMachineTranslated": "Machine translation"
 }
