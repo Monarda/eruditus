@@ -532,29 +532,127 @@ checkable without reopening the PDF."
 
 ---
 
-### Task 4: Populate the three generated assets
+### Task 4: Strip the inference machinery, add the two lookups
+
+**⚠️ This task removes code Tasks 1-2 added.** That is deliberate and user-directed: measurement showed the rulebook's own tables answer by lookup what the anchor map was inferring. 608/608 core base effects resolve by `(technique, form)` against the Spell Guidelines Index, where the locator reached ~80%. Do not preserve the inference "just in case" — the 74 hand-justified anchor exclusions it depends on are the risk being removed.
 
 **Files:**
-- Modify: `scripts/spell_import/emit.py` (the three `citations` sites: lines 262, 394, 854)
+- Modify: `scripts/spell_import/pages.py`
+- Modify: `scripts/spell_import/tests/test_pages.py`
+
+**Interfaces:**
+- Consumes: nothing new.
+- Produces, and nothing else:
+  - `slugify(heading: str) -> str` (kept — the table parsers use it)
+  - `build_index(lines: list[str]) -> PageIndex`
+  - `load_index() -> PageIndex`
+  - `class PageIndex` with exactly three fields: `spell_index_pages: dict[str, int]`, `guideline_index_pages: dict[tuple[str, str], int]`, `topic_index_pages: dict[str, int]`
+
+**Removed entirely:** `page_for_line`, `monotonicity_violations`, `anchor_pages`, `line_pages`, `heading_lines`, `heading_slugs`, `MAX_ANCHOR_DISTANCE`, `REFERENCE_GUIDE_RANGE`, `_MAX_CITED_SPREAD`, `_ISOLATED_UNRELIABLE_LINES`, `_SPELL_GUIDELINES_INDEX_RANGE`, and every test that covers them.
+
+- [ ] **Step 1: Write the failing tests for the two new parsers**
+
+Replace the obsolete test classes in `scripts/spell_import/tests/test_pages.py` with:
+
+```python
+class GuidelineIndexTest(unittest.TestCase):
+    """The Spell Guidelines Index is `| Form | Technique | [page](#anchor) |`,
+    50 rows -- one per Technique/Form pair. Note the column order: Form first."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.index = pages.load_index()
+
+    def test_it_has_one_row_per_technique_form_pair(self):
+        self.assertEqual(len(self.index.guideline_index_pages), 50)
+
+    def test_creo_animal_resolves_to_its_printed_page(self):
+        self.assertEqual(self.index.guideline_index_pages[("Creo", "Animal")], 315)
+
+    def test_every_core_base_effect_resolves(self):
+        """Measured 2026-08-21: 608 of 608. If this drops, either the catalog
+        gained an art pair the book does not print, or the parser broke."""
+        import json
+        import pathlib
+        root = pathlib.Path(__file__).resolve().parents[3]
+        effects = json.loads(
+            (root / "assets/data/base_effects.json").read_text(encoding="utf-8"))
+        unresolved = [
+            e["id"] for e in effects
+            if any(c["bookId"] == "arm5-core" for c in e.get("citations", []))
+            and (e["technique"], e["form"]) not in self.index.guideline_index_pages
+        ]
+        self.assertEqual(unresolved, [])
+
+
+class TopicIndexTest(unittest.TestCase):
+    """The Traditional Index indexes a parameter by name AND category --
+    `Voice (Range)`, not `Voice`."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.index = pages.load_index()
+
+    def test_a_range_resolves_under_its_qualified_name(self):
+        self.assertEqual(self.index.topic_index_pages["voice (range)"], 303)
+
+    def test_a_duration_and_a_target_resolve_too(self):
+        self.assertEqual(self.index.topic_index_pages["momentary (duration)"], 304)
+        self.assertEqual(self.index.topic_index_pages["individual (target)"], 305)
+
+    def test_a_bare_name_does_not_resolve(self):
+        """Widening the key to bare `Voice` would reintroduce guessing: the
+        index has other entries a bare name could collide with."""
+        self.assertNotIn("voice", self.index.topic_index_pages)
+```
+
+- [ ] **Step 2: Run them to verify they fail**
+
+Run: `uv run --no-project python -m unittest scripts.spell_import.tests.test_pages -v`
+Expected: FAIL — `AttributeError: 'PageIndex' object has no attribute 'guideline_index_pages'`.
+
+- [ ] **Step 3: Rewrite `pages.py`**
+
+Keep `slugify` and the `_ANCHOR` / `_LINK` regexes. Replace everything else with three table parsers.
+
+The Spell Guidelines Index sits between `### Spell Guidelines Index` and the next heading; its columns are **Form, Technique, page** — in that order, which is not the order the key uses. The Traditional Index runs from `## Traditional Index` to end of file; strip `&nbsp;` from its entry text and lowercase it. The Spells Index parser already exists and keeps working — do not rewrite it.
+
+`PageIndex` becomes a plain container of the three dicts with no methods.
+
+- [ ] **Step 4: Run the tests**
+
+Run: `uv run --no-project python -m unittest scripts.spell_import.tests.test_pages -v`
+Expected: PASS. Report the test count, and the Python suite total against the current 458 — **it should go down**, because the removed machinery's tests go with it. Say by how much, and confirm zero failures.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add scripts/spell_import/pages.py scripts/spell_import/tests/test_pages.py
+git commit -m "refactor: replace page inference with three table lookups"
+```
+
+---
+
+### Task 5: Populate the three generated assets
+
+**Files:**
+- Modify: `scripts/spell_import/emit.py` (the three `citations` sites near lines 262, 394, 854)
 - Test: `scripts/spell_import/tests/test_emit.py`
 
 **Interfaces:**
-- Consumes: `pages.load_index()` and `PageIndex.spell_index_pages` from Tasks 1-2; `hohmc_pages.json` from Task 3.
-- Produces: `spell_library.json`, `spell_templates.json`, `spell_exceptions.json` whose citations carry `page` where known.
+- Consumes: `pages.load_index()` giving `spell_index_pages`; `scripts/spell_import/hohmc_pages.json`.
+- Produces: `spell_library.json`, `spell_templates.json`, `spell_exceptions.json` whose citations carry `page` where a table or the ledger names one.
 
 - [ ] **Step 1: Read the three sites and their tests**
 
-Read `emit.py` around lines 262, 394 and 854, and read `scripts/spell_import/tests/test_emit.py` to see how emitted records are asserted. Follow the existing test style rather than inventing one.
+Read `emit.py` around lines 262, 394 and 854, and `scripts/spell_import/tests/test_emit.py` to see how emitted records are asserted. Follow the existing style; do not add a parallel fixture system.
 
 - [ ] **Step 2: Write the failing test**
 
-Add to `test_emit.py`, matching its existing fixture style:
+Add to `test_emit.py`, matching its fixtures:
 
 ```python
     def test_a_core_spell_citation_carries_its_spells_index_page(self):
-        """The Spells Index is a curated name->page table. Nothing may
-        second-guess it: the first PDF occurrence of a spell name matches the
-        index page only 57% of the time."""
         record = self._emit_core_spell(name="Pilum of Fire")
         citation = record["citations"][0]
         self.assertEqual(citation["bookId"], "arm5-core")
@@ -571,40 +669,38 @@ Add to `test_emit.py`, matching its existing fixture style:
         self.assertNotIn("page", record["citations"][0])
 ```
 
-Build `_emit_core_spell` / `_emit_hohmc_spell` as thin helpers over whatever `test_emit.py` already uses to construct a record. **Read that file first** — do not add a parallel fixture system.
+Build `_emit_core_spell` / `_emit_hohmc_spell` as thin helpers over whatever `test_emit.py` already uses to construct a record. **Read that file first.**
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [ ] **Step 3: Run it to verify it fails**
 
 Run: `uv run --no-project python -m unittest scripts.spell_import.tests.test_emit -v`
-Expected: FAIL — `KeyError: 'page'` or `AssertionError: None is not an instance of int`.
+Expected: FAIL — `KeyError: 'page'`.
 
 - [ ] **Step 4: Implement**
 
-Add a single helper in `emit.py` used by all three sites, so the rule lives once:
+Add one helper in `emit.py` used by all three sites, so the rule lives once:
 
 ```python
 def _citation(book_id, *, spell_name=None, record_id=None):
-    """One citation, with a page when the evidence supports one.
+    """One citation, with a page when a table or the ledger names one.
 
-    Core spells take the Spells Index's curated page; HoH:MC records take the
+    Core spells take the Spells Index's page; HoH:MC records take the
     committed ledger's. A page is omitted, never null: `Citation.toMap` writes
     the key only when it has a value, and an absent key round-trips through
     `Citation.fromMap`'s `map['page'] as int?` unchanged.
     """
 ```
 
-Load the index and the ledger **once per run**, not per record — `load_index()` reads a 25k-line file.
+Load the index and the ledger **once per run**, not per record.
 
-- [ ] **Step 5: Regenerate and inspect the diff**
+- [ ] **Step 5: Regenerate and inspect**
 
 ```bash
 uv run --no-project python -m scripts.spell_import.extract_spells --write
 git diff --stat assets/data/
 ```
 
-Expected: the three emitted assets change; nothing else does. **Check the counts in the extractor's own output are unchanged** — 336 imported, 31 templates, 8 exceptions, 0 blocked, 3 skipped, 0 unresolved. A moved count means this task changed more than citations.
-
-Then spot-check three spells by hand against the Spells Index in the rulebook markdown, and put them in your report.
+Expected: the three emitted assets change; nothing else. **The extractor's own counts must be unchanged** — 336 imported, 31 templates, 8 exceptions, 0 blocked, 3 skipped, 0 unresolved. Spot-check three spells against the Spells Index by hand and put them in your report.
 
 - [ ] **Step 6: Run both suites and commit**
 
@@ -613,7 +709,7 @@ uv run --no-project python -m unittest discover -s scripts/spell_import/tests -t
 flutter test
 ```
 
-Expected: Python green (report the new total against 397); Dart still 860 — the assets gained a key the Dart model already reads.
+Report the Python total; Dart should be unchanged at 860.
 
 ```bash
 git add scripts/spell_import/emit.py scripts/spell_import/tests/test_emit.py assets/data/
@@ -622,79 +718,48 @@ git commit -m "feat: emit page numbers on spell, template and exception citation
 
 ---
 
-### Task 5: The one-shot catalog enrichment
+### Task 6: The one-shot catalog enrichment
+
+`base_effects.json`, `parameters.json` and `modifiers.json` are hand-maintained and have no generator, so their pages are applied once and committed — following `scripts/flag_ritual_effects.py`, which did the same for a different field.
 
 **Files:**
 - Create: `scripts/enrich_catalog_pages.py`
-- Modify: `assets/data/base_effects.json`, `assets/data/parameters.json`, `assets/data/modifiers.json`
-- Test: `scripts/spell_import/tests/test_pages.py` (add the coverage floor)
+- Modify: `assets/data/base_effects.json`, `assets/data/parameters.json`
+- Test: `scripts/spell_import/tests/test_pages.py`
 
 **Interfaces:**
-- Consumes: `pages.load_index()`, `PageIndex.page_for_line`.
-- Produces: nothing later tasks consume. The script is applied once and kept for reference.
+- Consumes: `pages.load_index()` giving `guideline_index_pages` and `topic_index_pages`.
+- Produces: nothing later tasks consume.
 
 - [ ] **Step 1: Read the precedent**
 
-Read `scripts/flag_ritual_effects.py` in full. Yours follows it: a header saying it is one-shot and already applied, and the same care with newlines. **Note its warning** — it rewrites every line, so it must preserve the file's existing convention or the diff is unreadable.
+Read `scripts/flag_ritual_effects.py` in full. Yours gets the same header — one-shot, already applied, do not re-run without checking. **Note its warning about newlines:** it rewrites every line, so preserve each file's existing convention or the diff becomes unreadable.
 
-- [ ] **Step 2: Write the locator and check its hit rate before applying anything**
+- [ ] **Step 2: Apply the two lookups**
 
-The locator finds a record's line in the rulebook: normalise whitespace and case, try an exact line match on the record's `description` (or `name`, for parameters and modifiers), then a normalised-prefix match. **Stop there.** Do not add fuzzy matching: a near-match on the wrong guideline gives a confidently wrong page, which is worse than no page.
+- `base_effects.json`: for each entry citing `arm5-core`, look up `(technique, form)` in `guideline_index_pages` and write `page` into that citation. Expect **608 of 608**.
+- `parameters.json`: for each entry citing `arm5-core`, look up `f"{name} ({category})".lower()` in `topic_index_pages`. Expect **20 of 31** — the 11 misses (`Sight`, `Arcane Connection`, `Boundary`, and the sensory Targets) get no page, deliberately.
+- `modifiers.json`: **not enriched.** Modifiers are not individually indexed — `Complexity` and `Material` return nothing — so all 35 keep no page. Do not invent a mechanism for them.
 
-Report the hit rate before writing any asset. The measured baseline is **32 of 40 sampled guidelines** locate by exact description match; a materially lower rate means the locator is wrong, and a materially higher one means fuzzy matching crept in.
+**Never widen a key to raise coverage.** Matching bare `Voice` where the table says `Voice (Range)` is the guessing this design removed.
 
-- [ ] **Step 3: Test that the locator refuses a near-miss**
-
-Before applying anything, add to `scripts/spell_import/tests/test_pages.py`:
-
-```python
-class LocatorTest(unittest.TestCase):
-    def test_a_description_matching_nothing_yields_no_line(self):
-        """A near-match on the wrong guideline gives a confidently wrong page,
-        which is worse than no page -- so the locator stops at exact and
-        prefix matching and never reaches for the closest candidate."""
-        from scripts import enrich_catalog_pages as enrich
-        lines = ["Give an animal a +1 bonus to Recovery rolls"]
-        self.assertIsNone(
-            enrich.locate("Give an animal a +7 bonus to Recovery rolls", lines))
-
-    def test_an_exact_description_finds_its_line(self):
-        from scripts import enrich_catalog_pages as enrich
-        lines = ["intro", "Give an animal a +1 bonus to Recovery rolls"]
-        self.assertEqual(
-            enrich.locate("Give an animal a +1 bonus to Recovery rolls", lines), 2)
-```
-
-This requires `enrich_catalog_pages.py` to expose `locate(text, lines) -> int | None` as an importable module-level function, not code buried in a `__main__` block. Structure the script that way.
-
-Run: `uv run --no-project python -m unittest scripts.spell_import.tests.test_pages -v`
-Expected: PASS once `locate` exists.
-
-- [ ] **Step 4: Apply, and inspect the diff closely**
-
-Run the script, then:
+- [ ] **Step 3: Inspect the diff closely**
 
 ```bash
 git diff --stat assets/data/
 git diff assets/data/parameters.json | head -40
 ```
 
-Every changed line must be a `page` addition inside a `citations` entry. If the diff shows reordered keys, changed indentation, or altered newlines, **revert and fix the script** — do not commit a reformatting.
+Every changed line must be a `page` addition inside a `citations` entry. Reordered keys, changed indentation or altered newlines mean the script is wrong — revert and fix it rather than committing a reformatting.
 
-- [ ] **Step 5: Add the coverage floor test**
+- [ ] **Step 4: Add the coverage floor test**
 
-Add to `scripts/spell_import/tests/test_pages.py`. Replace `<N>` with the count your run actually produced, and say in your report what it was:
+Add to `scripts/spell_import/tests/test_pages.py`. Replace `<N>` with the count your run actually produced, and report what it was:
 
 ```python
 class CatalogPageCoverageTest(unittest.TestCase):
-    """A floor, not a ceiling.
-
-    The locator reaches roughly 80% of guidelines by design -- it refuses
-    near-misses rather than guessing (see the spec, section 2) -- so
-    demanding 100% would force the fuzzy matching that rule forbids. This
-    catches a regression without failing when a hand-added guideline arrives
-    with no page.
-    """
+    """A floor, not a ceiling: 35 modifiers and 11 parameters carry no page by
+    design, so this catches a regression without demanding 100%."""
 
     def test_core_catalog_pages_do_not_regress(self):
         import json
@@ -711,42 +776,36 @@ class CatalogPageCoverageTest(unittest.TestCase):
         self.assertGreaterEqual(count, <N>)
 ```
 
-- [ ] **Step 6: Run both suites and commit**
+- [ ] **Step 5: Run both suites and commit**
 
 ```bash
 uv run --no-project python -m unittest discover -s scripts/spell_import/tests -t .
 flutter test
 ```
 
-Expected: both green. Report totals.
+Report both totals.
 
 ```bash
 git add scripts/enrich_catalog_pages.py assets/data/ scripts/spell_import/tests/test_pages.py
-git commit -m "feat: page numbers for the hand-maintained catalogs
-
-A one-shot, following scripts/flag_ritual_effects.py: base_effects,
-parameters and modifiers have no generator, so their pages are applied
-once and committed. The coverage test is a floor -- the locator refuses
-near-misses, so ~20% of guidelines legitimately carry no page."
+git commit -m "feat: page numbers for the hand-maintained catalogs"
 ```
 
 ---
 
-### Task 6: `books.json`, and the three retractions
+### Task 7: `books.json`, and the three retractions
 
 **Files:**
 - Modify: `assets/data/books.json`, `lib/models/citation.dart`, `.superpowers/DECISIONS.md`
 - Test: `test/data/datasources/asset_data_loader_test.dart`
 
 **Interfaces:**
-- Consumes: nothing.
-- Produces: nothing. This is the last task.
+- Consumes: nothing. Produces: nothing. This is the last task.
 
 - [ ] **Step 1: Write the failing Dart test**
 
 `books.json` declares `arm5-core` as `"Ars Magica Fifth Edition"` / `"ArM5"` / `"5e"`, but the pages now shipping are **Definitive Edition**, which paginates differently — the Reference Guide prints both (*"Fifth Edition p7, Definitive Edition p8"*), so a DE page under a 5e label sends the reader to the wrong page.
 
-Add to `test/data/datasources/asset_data_loader_test.dart`, following its existing style:
+Add to `test/data/datasources/asset_data_loader_test.dart`, following its style:
 
 ```dart
     test('arm5-core declares the Definitive Edition, which its pages belong to',
@@ -768,15 +827,15 @@ Expected: FAIL — title is "Ars Magica Fifth Edition".
 
 - [ ] **Step 3: Update `books.json`**
 
-Change `arm5-core`'s `title`, `abbreviation` and `edition` to name the Definitive Edition. **Do not change the `id`** — it appears in 1034 citations across every asset, and renaming it churns all of them for no benefit. Leave `arm5-hohmc` alone; it is a 5e supplement and correctly labelled.
+Change `arm5-core`'s `title`, `abbreviation` and `edition` to name the Definitive Edition. **Do not change the `id`** — it appears in 1034 citations across every asset. Leave `arm5-hohmc` alone; it is a 5e supplement and correctly labelled.
 
 - [ ] **Step 4: Retract the three "cannot" claims**
 
 Each retraction says what was actually wrong: *the claim was measured against the book's body and never tested against its indexes.*
 
-1. `lib/models/citation.dart` — the doc comment says pages "cannot be recovered from the import source" and that an earlier promise "could not be kept". Replace with what is now true: pages come from the indexes for core content and from a ledger for HoH:MC, and a citation naming only its book is **still** valid and permanent. Keep that last sentence — HoH:MC-only records and unlocatable guidelines both rely on it.
-2. `.superpowers/DECISIONS.md`, "Known limits — do not re-promise" — retract the page entry there, citing item 78.
-3. Item 56's warning in `.superpowers/themes/app.md` is already struck through and marked RETRACTED 2026-08-20. Update it to cite this landing.
+1. `lib/models/citation.dart` — the doc comment says pages "cannot be recovered from the import source" and an earlier promise "could not be kept". Replace with what is now true: pages come from the book's index tables for core content and from a ledger for HoH:MC, and a citation naming only its book is **still** valid and permanent. Keep that last sentence — 46 core records rely on it.
+2. `.superpowers/DECISIONS.md`, "Known limits — do not re-promise" — retract the page entry, citing item 78.
+3. Item 56's warning in `.superpowers/themes/app.md` is already struck through and marked RETRACTED 2026-08-20; update it to cite this landing.
 
 - [ ] **Step 5: Run everything**
 
@@ -794,12 +853,7 @@ Expected: analyze exits 0; Dart green (report the total against 860); Python gre
 
 ```bash
 git add assets/data/books.json lib/models/citation.dart .superpowers/
-git commit -m "feat: label arm5-core as the Definitive Edition, retract three cannot-claims
-
-The pages now shipping are Definitive Edition, which paginates
-differently from 5e, so the book metadata had to say so. The three
-recorded claims that pages could not be supplied were measured against
-the book's body and never against its indexes."
+git commit -m "feat: label arm5-core as the Definitive Edition, retract three cannot-claims"
 ```
 
 ---
@@ -808,8 +862,8 @@ the book's body and never against its indexes."
 
 Not part of any task:
 
-- **Verify a sample of core pages against the DE PDF** (printed page = PDF index − 7, zero exceptions across 418 folio-bearing pages). One-off, cheap-tier, recorded in the report — **not** a test, since it would make the suite depend on an F: drive CI does not have.
-- **Close item 78** with the `closing-an-item` skill: 78.1, 78.3, 78.4, 78.5, 78.6 done; **78.2 stays open** and needs re-scoping now that the safety rule makes sparse anchors harmless.
+- **No PDF cross-check of core pages.** Proposed and withdrawn: raw PDF text agrees with the Spells Index only 57% of the time, so it would validate the better source against the worse one.
+- **Close item 78** with the `closing-an-item` skill: 78.1, 78.4, 78.5, 78.6 done; **78.3 closes as obsolete** — it validated an anchor map that no longer exists; **78.2 stays open** and now means "the 46 core records no table indexes", which is a different question from the one it was filed for.
 - **Update `.superpowers/STATUS.md`** with both suite counts.
 - **Update item 87.3** — the source marker can now say book *and* page, which is the decision that item deferred.
 - **Tell item 56 it is unblocked**, and note that HoH:MC hints name a book without a page, permanently.
