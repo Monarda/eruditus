@@ -345,4 +345,50 @@ void main() {
     expect(find.text('Needs review'), findsNothing,
         reason: 'chrome should be pseudo-transformed under en_XA');
   });
+
+  testWidgets("a published spell's blurb renders as a quote", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'The rulebook says this.'),
+      level: 25,
+    ));
+
+    expect(find.byKey(const Key('sourced-text-quote')), findsOneWidget,
+        reason: "a published spell's prose is the book's own words");
+  });
+
+  testWidgets("a user-created spell's blurb renders as plain prose", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(
+          name: 'My Fireball',
+          source: PublicationSource.userCreated,
+          summary: 'My own spell idea.'),
+    ));
+
+    expect(find.text('My own spell idea.'), findsOneWidget);
+    expect(find.byKey(const Key('sourced-text-quote')), findsNothing,
+        reason: 'quote styling on the caster\'s own words would attribute '
+            'them to the rulebook');
+  });
+
+  testWidgets("the card's blurb carries no competing tap target", (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'The rulebook says this.'),
+      level: 25,
+    ));
+
+    expect(find.byKey(const Key('sourced-text-marker')), findsNothing,
+        reason: 'the card is itself tappable; a nested InkWell would give a '
+            'list row two competing gestures');
+  });
+
+  testWidgets('the blurb is still truncated to two lines', (tester) async {
+    await pumpApp(tester, SpellCard(
+      entry: buildSpell(name: 'Pillar of Fire', summary: 'The rulebook says this.'),
+      level: 25,
+    ));
+
+    final text = tester.widget<Text>(find.text('The rulebook says this.'));
+    expect(text.maxLines, 2);
+    expect(text.overflow, TextOverflow.ellipsis);
+  });
 }

@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/resolved_spell.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
+import 'package:eruditus/models/text_provenance.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
+import 'package:eruditus/presentation/widgets/sourced_text_view.dart';
 
 class SpellCard extends StatelessWidget {
   final LibraryEntry entry;
@@ -92,7 +95,9 @@ class SpellCard extends StatelessWidget {
           ? l10n.spellCardArtsAndLevel(entry.technique!, entry.form!, level!, levelSuffix)
           : l10n.spellCardArtsOnly(entry.technique!, entry.form!);
     }
-    // Prefer the paraphrase; fall back to the verbatim rulebook text.
+    // Prefer the summary; fall back to the description. Both are the book's
+    // own words for a published spell today; item 31 is what makes the
+    // summary a real paraphrase. See sourcedFrom.
     // validateSpellProse's rule is unconditional (todo item 13), so every
     // entry is guaranteed a non-blank summary or description -- but that
     // guarantee is about the pair together, not about summary alone: a
@@ -101,8 +106,24 @@ class SpellCard extends StatelessWidget {
     // only falls through on null, so an empty-string summary must be treated
     // as absent explicitly or that description would never render.
     final summary = entry.summary;
-    final blurb = (summary != null && summary.trim().isNotEmpty) ? summary : entry.description;
-    final hasBlurb = blurb != null && blurb.isNotEmpty;
+    final preferSummary = summary != null && summary.trim().isNotEmpty;
+    // entry.sourcedSummary/sourcedDescription only exist on ResolvedSpell
+    // (todo item 79.3 task 2) -- LibraryEntry itself, and the
+    // ResolvedTemplate/ResolvedException that also implement it, expose only
+    // the plain String getters. Those two render as SourcedText.authored,
+    // identical to the plain Text they rendered before this change, until a
+    // future item gives templates and exceptions the same provenance-aware
+    // getters ResolvedSpell has.
+    final blurbText = preferSummary ? summary : entry.description;
+    // A local so `is ResolvedSpell` can promote it -- `entry` itself is a
+    // field access, which Dart's flow analysis won't narrow.
+    final resolvedEntry = entry;
+    final blurb = blurbText == null
+        ? null
+        : resolvedEntry is ResolvedSpell
+            ? (preferSummary ? resolvedEntry.sourcedSummary : resolvedEntry.sourcedDescription)
+            : SourcedText.authored(blurbText);
+    final hasBlurb = blurb != null && blurb.text.isNotEmpty;
 
     return Card(
       key: isInvalid
@@ -167,7 +188,14 @@ class SpellCard extends StatelessWidget {
                         ? TextStyle(color: Theme.of(context).colorScheme.error)
                         : null),
                 if (hasBlurb)
-                  Text(blurb, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  SourcedTextView(
+                    blurb,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    // The card is already tappable; a marker here would be a
+                    // second gesture target inside one list row.
+                    showMarker: false,
+                  ),
                 if (hasProblems)
                   Padding(
                     padding: const EdgeInsets.only(top: 4),

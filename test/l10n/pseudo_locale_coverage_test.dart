@@ -112,6 +112,9 @@ const _mustNotSurvive = <String>[
   'Source',
   'Modifications',
   'Trademarks',
+  // Item 79.3's source markers. Chrome — the quoted text they mark is not.
+  'Rulebook',
+  'Machine translation',
 ];
 
 /// Strings that SHOULD still render in English under the pseudo-locale.
