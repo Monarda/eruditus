@@ -12,19 +12,41 @@
 > after item 32.2's first two entries: same counts (a corrected guideline at
 > the same base level moves no count).
 
-**Suite status: Dart re-run 2026-08-21 at item 79.3's branch head; Python and
-Integration last run 2026-08-20 at item 80's. The Dart count moved 745→782
-across items 74 through 80, then 782→818 across item 79's plan A (the §3(a)
-notice as data, the repo licence files, the About screen, the pseudo-locale
-guard's fifth screen), then 818→860 across plan B — text provenance, its
-rendering widget, the item-31 tripwire across all three asset populations, and
-the template-seeded-prose derivation:**
+**Suite status: all three re-run 2026-08-21 at item 78's branch head.** The Dart
+count moved 745→782 across items 74 through 80, then 782→818 across item 79's
+plan A (the §3(a) notice as data, the repo licence files, the About screen, the
+pseudo-locale guard's fifth screen), then 818→860 across plan B (text
+provenance, its rendering widget, the item-31 tripwire across all three asset
+populations, the template-seeded-prose derivation), then 860→861 for item 78's
+HoH:MC citation page. The Python count moved 397→417 across item 78.
 
 | Suite | Command | Result |
 |---|---|---|
 | Dart | `flutter test` | **861 tests, green** |
-| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **417 tests, green** — re-run 2026-08-20 at item 80's branch head, same count as 2026-08-19's run; +6 there for the report/lock guard, the second combined-effect spell, and audit coverage |
-| Integration | `flutter test integration_test -d windows` | **8 tests, green** — and now run by CI, see item 6 |
+| Python | `python -m unittest discover -s scripts/spell_import/tests -t .` | **417 tests, green** |
+| Integration | `flutter test integration_test -d windows` | **8 tests, green** — and run by CI, see item 6 |
+
+**Page references: 1015 of 1061 citations carry a printed page** (item 78, all
+Definitive Edition — 988 `arm5-core` and 27 `arm5-hohmc`). Counted from the
+assets today:
+
+| Asset | core with page | Source |
+|---|---|---|
+| `spell_library.json` | 325 / 325 | Spells Index, by name |
+| `spell_templates.json` | 26 / 27 | Spells Index, by name |
+| `spell_exceptions.json` | 8 / 8 | Spells Index, by name |
+| `base_effects.json` | 608 / 608 | Spell Guidelines Index, by `(technique, form)` |
+| `parameters.json` | 21 / 31 | Traditional Index, by `"{name} ({category})"` |
+| `modifiers.json` | 0 / 35 | not indexed |
+
+All 27 `arm5-hohmc` citations come from `scripts/spell_import/hohmc_pages.json`
+— a committed ledger read from that book's PDF, because its markdown carries no
+index tables at all. Every ledger phrase has been verified against its claimed
+page, which is also what confirms the `printed = index + 1` offset.
+
+**The remaining 46 are by design and are not a gap to close:** 35 modifiers and
+10 parameters that no index table lists, plus one template whose name is a
+`(Form)` placeholder. A null page is valid and permanent — see `citation.dart`.
 
 **0 ledger entries carry an unreviewed candidate** (was 7), and the count can no
 longer be raised by adding a book. Item 55's migration had carried three Creo
