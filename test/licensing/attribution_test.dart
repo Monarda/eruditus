@@ -41,7 +41,7 @@ void main() {
 
     test('it names the books actually shipped in assets/data', () {
       expect(a.books, containsAll(<String>[
-        'Ars Magica Fifth Edition',
+        'Ars Magica - Definitive Edition',
         'Ars Magica 5e - Houses of Hermes: Mystery Cults',
       ]));
     });

@@ -15,7 +15,8 @@
     "description": "This ritual binds a supernatural creature to the caster as her familiar, until a condition incorporated into the spell comes to pass. The level of the ritual must be no less than (the creature's Might + 15), though she may also need to penetrate its Magic Resistance if casting on an unwilling target. It has no effect if the target is already bound as a familiar to another. Casting requisites of a Technique and Form appropriate to the creature's nature and physical form may be included; this app has no way to model a per-casting, creature-dependent requisite, so none is recorded here (see todo item 54). It may be invented by anyone who has been Initiated into the Outer Mystery of Faerie Magic.",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 90
       }
     ]
   },
@@ -35,7 +36,8 @@
     "description": "Once a spell trace has been found or suspected, this spell is used to make it examinable. This spell temporarily restores spell traces to a fresh state (as if they had just expired). The spell will restore spell traces of negative magnitude up to the magnitude of this spell –3. The trace must still be existent to be affected (magnitude -9 or greater). Versions of this spell also exist for all standard Targets. Diameter duration is normally long enough to conduct Intellego Vim investigations of the spell traces.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 365
       }
     ]
   },
@@ -55,7 +57,8 @@
     "description": "Creates a \"shell\" of magic on an item, helping to shield it from investigation by other magi. All attempts to investigate the magic item give false information about its powers unless half of the level of the shell is exceeded by the magus's Investigation roll.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 365
       }
     ],
     "ritualDeclaration": "lastingCreation"
@@ -76,7 +79,8 @@
     "description": "This spell is similar to Shell of False Determinations (above), but it causes all attempts to investigate the magic item to utterly fail, unless the level of the ritual is exceeded by the magus's Investigation roll. Once a magus determines the presence of a particular shell (that is, by overcoming it), it has no more power against him or her.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 365
       }
     ],
     "ritualDeclaration": "lastingCreation"
@@ -97,7 +101,8 @@
     "description": "You can tell whether an image has been created or altered through a spell, seeing both the original and false images in the case of alterations. This spell must be at least 1 magnitude higher than an illusion in order to discern it. If you botch the spell, you mistake illusions for the real thing and reality for illusion. Your discernment is not limited to visual illusions, although you can only tell that a sound is illusory if you are looking at the apparent source.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 349
       }
     ]
   },
@@ -117,7 +122,8 @@
     "description": "This spell is cast at the same time as another formulaic spell (see ArM5, page 159) whose level must be less than twice the level of this spell. If successfully cast, the targeted spell may be cast with no penalty to the casting total due to reduced or absent gestures and/or voice. While this Muto Vim spell requires gestures and voice as normal, the casting total of the follow-up spell is not penalized, and thus difficult spells at the limit of a magus's ability have a greater chance of success when in restricted circumstances, without incurring fatigue loss. If the targeted spell has Range Voice, the volume used to cast this spell determines the actual range. There are ten versions of this spell, each affecting spells of one of the Hermetic Forms. This spell is particularly useful to Bjornaer magi who wish to maintain the appearance of mundane animals yet still cast spells.",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 36
       }
     ]
   },
@@ -137,7 +143,8 @@
     "description": "Cast on another spell while the other spell is being cast, this causes the targeted spell to have the exact opposite of its normal effects. This effect works on spells up to half the (level – 5) of the Mirror of Opposition spell. The effects of the inversion are up to the storyguide to determine, but the target of the inverted spell usually remains the same as that of the original spell. The inverted spell cannot overcome any limitations of Hermetic magic. For example, if a Momentary Perdo Corpus spell is cast, the inversion is probably a Creo Corpus spell of Sun duration. There are ten versions of this spell, each affecting spells of one of the Hermetic forms.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 368
       }
     ]
   },
@@ -157,7 +164,8 @@
     "description": "This spell allows a magus to suppress or alter the sigil in a spell that is currently being cast. The spell to be shrouded can be up to double the Shroud's level, and *Shroud Magic* has the same sigil (or lack of) as that given to the shrouded spell.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 368
       }
     ]
   },
@@ -177,7 +185,8 @@
     "description": "This spell splits another spell (whose level must be less than or equal to the level of this spell) into two or more identical spells of reduced power, which may be cast against two or more separate targets. Each resulting spell has the same Range and Target (target category, that is — the actual target may be different) as the original spell, but the power of the effect is divided by the number of resulting split spells. The precise effect is at storyguide discretion. One casting die is rolled, and the Penetration total is split between the spells. *The Sorcerer's Fork* must be equal to or greater than the level of the spell that is to be split. The split spell has a targeting penalty as for multiple casting (see page 225). If the casting magus is not cooperating, all the split spells will strike the original target.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 368
       }
     ]
   },
@@ -197,7 +206,8 @@
     "description": "You cast this spell as another spell of a level less than or equal to this one is cast. The effect of the other spell increases 5 levels in power, but not past the level of the Wizard's Boost. The effects of the extra 5 levels of power are for the storyguide to determine. A Wizard's Boost may never affect a single spell more than once. There are ten versions of this spell, one for each Hermetic Form.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 368
       }
     ]
   },
@@ -217,7 +227,8 @@
     "description": "The range of the targeted spell increases by one category. You may not affect a single spell more than once with this spell, and the targeted spell must be at least one magnitude lower in level than this spell. There are ten versions of *Wizard's Reach*, one for each Form.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 369
       }
     ]
   },
@@ -237,7 +248,8 @@
     "description": "Destroys the image from any one CrIm spell whose level you match or exceed on a stress die + the level of your spell.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 351
       }
     ],
     "chosenSlots": {
@@ -261,7 +273,8 @@
     "description": "If your spell Penetrates the resistance of a ghost or similar spirit, it loses a number of points from its Might equal to the level of this spell. If this reduces the spirit's Might to zero, it vanishes, apparently destroyed. Philosophers concur that the spirit goes to the afterlife, or is perhaps weakened to helplessness, but is not actually destroyed. Souls, after all, are immortal.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 355
       }
     ],
     "analogyRationale": "Perdo Mentem's own guideline table prints no General row. This spell's own text (\"it loses a number of points from its Might equal to the level of this spell\") is the Mentem-scoped echo of Perdo Vim's general \"reduce target's Might Score\" guideline (pevi-G3), narrowed to ghosts/spirits and without pevi-G3's own +2 magnitude bonus."
@@ -282,7 +295,8 @@
     "description": "Weakens and possibly destroys a creature with Infernal Might. If the spell penetrates the creature's Magic Resistance, the creature loses Might Score equal to the spell's level.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 370
       }
     ]
   },
@@ -302,7 +316,8 @@
     "description": "You make a Hermetic magic item lose all its powers permanently if the level of this spell + a stress die (no botch) equals or exceeds the highest level of the enchantments in the item. The enchantment is utterly destroyed, as is all of the vis that was used in the magic item. The object left is in all ways a mundane item, but could be invested with enchantments again at a later time.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 370
       }
     ],
     "ritualDeclaration": "lastingCreation"
@@ -323,7 +338,8 @@
     "description": "Prevents the detection of a magic spell, or of a magic power in an item or being, by InVi magic, unless the level of the InVi spell exceeds twice the level of this spell – 5 (for example, exceeds 20 for a level 15 version).",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 369
       }
     ]
   },
@@ -343,7 +359,8 @@
     "description": "Any demons who hear the caster's shout lose Might equal to the spell's (level – 5) if the spell penetrates their Magic Resistance.",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 29
       }
     ]
   },
@@ -383,7 +400,8 @@
     "description": "You raise a metaphorical \"breeze\" that blows the magic away from an area, canceling the effects of any spell there. You can cancel the effects of any spell if, with this spell, you can double the level of the spell on a stress die + the level of your spell. The spell must Penetrate to affect effects on a creature with Magic Resistance, including Parma Magica. If the spell penetrates, and its level + the stress die is double Parma Magica x 5, then this spell dispels the Parma Magica. Wind of Mundane Silence does not affect spells of Momentary duration. Magical things near the area of the Wind wave slightly from the \"breeze.\"",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 370
       }
     ]
   },
@@ -403,7 +421,8 @@
     "description": "No magical beast whose Magic Might is equal to or less than the level can affect anyone within the Circle or, if it is within the Circle, affect those outside. When a magus is making this and most other wards, a common gesture employed is the Fig Sign. The magus balls his or her right hand into a fist, placing the thumb between the index and middle fingers. A magus traveling to Italy should be warned that this sign is a deadly insult in that country.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 319
       }
     ],
     "chosenSlots": {
@@ -427,7 +446,8 @@
     "description": "No water faerie whose Faerie Might is equal to or less than the level of the spell can affect those targeted by the spell. Faeries cannot directly or indirectly break the magic circle, nor can they use ranged attacks or magic to affect those within it. Seen from certain angles at night, the ring appears as a light blue dome.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 323
       }
     ],
     "chosenSlots": {
@@ -451,7 +471,8 @@
     "description": "As Ward Against Faeries of the Water (ReAq Gen), but for faeries of the air. The faerie cannot directly or indirectly break the magic circle, nor can they use ranged attacks or magic to affect those within it. From some angles at night, the ring may be seen as a violethued dome.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 329
       }
     ],
     "chosenSlots": {
@@ -475,7 +496,8 @@
     "description": "Like Ward Against Faeries of the Waters (ReAq Gen), but for faeries of the wood. At some angles, at night, the ring appears to be a green-hued dome.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 342
       }
     ],
     "chosenSlots": {
@@ -499,7 +521,8 @@
     "description": "Cancels a ReIm spell that moves an image, putting the image back where it belongs, as long as you can match the spell's level on a stress die + the level of your spell. This spell targets the image.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 352
       }
     ],
     "analogyRationale": "Rego Imaginem's own General row (reim-G) is a ward -- this spell isn't one. This spell's own text (\"Cancels a ReIm spell ... as long as you can match the spell's level on a stress die + the level of your spell\") is the Imaginem-scoped echo of Rego Vim's general \"sustain or suppress a spell you cast\" guideline (revi-G2), narrowed to Rego Imaginem, trading revi-G2's +2 magnitude bonus for a stress-die factor revi-G2 doesn't have."
@@ -520,7 +543,8 @@
     "description": "Only ghosts and spirits with current Magic Might higher than the spell's level can enter the ring you create. At certain angles, the ring may be seen as an orange-hued dome. This spell does not affect ghosts or spirits associated with the other realms.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 357
       }
     ],
     "chosenSlots": {
@@ -544,7 +568,8 @@
     "description": "As Ward Against Faeries of the Waters (ReAq Gen), but for faeries of earth and stone. At some angles at night, the ring may be seen as a dark brown dome.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 362
       }
     ],
     "chosenSlots": {
@@ -568,7 +593,8 @@
     "description": "All creatures with Infernal Might equal to or less than the level of the spell are unable to enter the circle or harm those within it. If you cast the spell again, the stronger ring dispels the weaker, regardless of the order of casting. Some magi cast this spell before going to sleep at night. At night, from certain angles, the ring may be seen as a silver-hued dome.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 371
       }
     ],
     "chosenSlots": {
@@ -592,7 +618,8 @@
     "description": "You cast this spell on a spell that you have already cast and are maintaining through concentration. The spell that requires concentration is then automatically maintained for the duration of this spell, whether you concentrate or not. You cannot change the effects of the first spell without concentrating on it again. For instance, you can use The Unseen Arm (ReTe 5) to hold an object in the air without concentrating, but to move the object still requires concentration. A Stamina + Concentration stress roll against an Ease Factor of 6 must be made in order to cast this spell while keeping the first one going (a lower roll than normal because this is what the spell is designed for). This spell only works on spells of equal or lower level.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 372
       }
     ]
   },
@@ -612,7 +639,8 @@
     "description": "You can open a magical channel from yourself to some target, allowing you to cast any spell with a range greater than Personal on that target. The tunnel does not, of itself, grant any sense impressions of the target — you must cast appropriate spells through it if you wish to see. Spells cast through the tunnel cannot be of higher level than that of this spell. You must make standard Concentration rolls to maintain concentration on the Opening spell as you cast other spells. A magus who magically recognizes the tunnel (through *The Invisible Eye Revealed* or a similar spell) may cast spells through the tunnel back at you, and he need not concentrate on keeping the tunnel open. If this magus is the target of the tunneling spell, he is considered to be touching you. Otherwise, his effective range to you is his range to the target of the tunneling spell. If the target of the spell has Magic Resistance, you must Penetrate that resistance to open the tunnel. Spells cast through the tunnel must also Penetrate Magic Resistance normally.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 372
       }
     ]
   },
@@ -632,7 +660,8 @@
     "description": "Cancels one spell that you have cast, but only as long as you concentrate. When concentration is broken the effects of the spell return. The level of the spell to be suppressed must be less than or equal to the level of this spell. The effects of the spell being suppressed take about one round to fade out, and then another round to return after concentration is broken. The spell to be affected must be active to be suppressed — in particular, it may not be of Momentary duration. Common uses of this spell include providing access to some place normally blocked by magic (for example, having a MuTe blocking the door to your lab, and then suppressing it to enter), and avoiding traps (such as suppressing a *Watching Ward* [ReVi Gen] on your rear door). This spell is designed to be held while you do something else, so the magus gets a +3 bonus to all Concentration rolls.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 372
       }
     ]
   },
@@ -652,7 +681,8 @@
     "description": "This ritual is used only in the construction of automata. Once the magus has finished enchanting the automaton, he casts this spell onto the construction to unite all the magic into a cohesive unit. The base effect level must equal or exceed the construct's Magic Might to be successful, meaning the final spell level must equal or exceed the automaton's Magic Might + 15. Hand-authored rather than extracted: HoH:MC prints no Rego Vim guideline for it, only the spell's own level rule, so revi-hohmc-G1 carries no effectFormula and the extractor cannot compute the level. It may be invented by anyone who has been Initiated into the Automata Mystery of House Verditius, which grants the Craft Automata Virtue.",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 130
       }
     ]
   }

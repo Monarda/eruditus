@@ -60,7 +60,7 @@ const SourceEditionAttribution arsMagicaAttribution = SourceEditionAttribution(
       'places corrected. The source itself is a corrected transcription of the '
       'published books. See scripts/spell_import/ for what the extractor does.',
   books: <String>[
-    'Ars Magica Fifth Edition',
+    'Ars Magica - Definitive Edition',
     'Ars Magica 5e - Houses of Hermes: Mystery Cults',
   ],
 );

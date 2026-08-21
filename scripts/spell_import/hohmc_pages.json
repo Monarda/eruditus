@@ -1,0 +1,110 @@
+{
+  "crim-hohmc-10": {
+    "page": 101,
+    "matched": "Create a glamour"
+  },
+  "crvi-hohmc-G1": {
+    "page": 90,
+    "matched": "Temporary Familiars"
+  },
+  "duration-symbol": {
+    "page": 99,
+    "matched": "at Symbol Range might include a queen (character) charm"
+  },
+  "lib-crig-brilliance-eagles-plumage": {
+    "page": 29,
+    "matched": "Brilliance of tHe eagle's PluMage"
+  },
+  "lib-crme-scent-predator": {
+    "page": 29,
+    "matched": "scent of tHe Predator"
+  },
+  "lib-muan-form-temperament-heartbeast": {
+    "page": 36,
+    "matched": "infl  uencing the bodily humors"
+  },
+  "lib-muan-voice-bjornaer-magus": {
+    "page": 36,
+    "matched": "tHe voice of tHe Bjornaer Magus"
+  },
+  "lib-muim-ball-abysmal-music": {
+    "page": 101,
+    "matched": "This spell targets a formulaic Ignem spell while it is being cast"
+  },
+  "lib-mume-clarion-call-war-horse": {
+    "page": 29,
+    "matched": "c larion call of tHe War Horse MuMe 15"
+  },
+  "lib-pean-revenge-bitten-toad": {
+    "page": 29,
+    "matched": "revenge of tHe Bitten toad"
+  },
+  "lib-peme-closed-mouth-nightwalker": {
+    "page": 29,
+    "matched": "closed MoutH of tHe nigHtWalker"
+  },
+  "lib-peme-embrace-boethius": {
+    "page": 119,
+    "matched": "Embrace of Boethius"
+  },
+  "lib-reco-marking-territory": {
+    "page": 29,
+    "matched": "Marking tHe territory"
+  },
+  "lib-reme-hibernation-slumbering-turb": {
+    "page": 29,
+    "matched": "HiBernation of tHe sluMBering turB"
+  },
+  "muim-hohmc-10": {
+    "page": 101,
+    "matched": "Change a target into glamour"
+  },
+  "range-symbol": {
+    "page": 99,
+    "matched": "Symbol Range, Duration, and Target together in one spell would require"
+  },
+  "revi-hohmc-G1": {
+    "page": 108,
+    "matched": "automaton"
+  },
+  "target-flavor": {
+    "page": 28,
+    "matched": "The Flavor Target is equivalent to Individual"
+  },
+  "target-scent": {
+    "page": 28,
+    "matched": "The spell affects any being who smells the caster, effective over"
+  },
+  "target-sound": {
+    "page": 28,
+    "matched": "The spell affects any being who hears the sound the caster makes"
+  },
+  "target-spectacle": {
+    "page": 28,
+    "matched": "The Spectacle Target is the equivalent of Boundary"
+  },
+  "target-symbol": {
+    "page": 99,
+    "matched": "To use Symbol Range, Duration, and Target together"
+  },
+  "target-texture": {
+    "page": 28,
+    "matched": "The Texture Target is equivalent to Part"
+  },
+  "tpl-crvi-faerie-chains-familiar-slave": {
+    "page": 90,
+    "matched": "faerie cHains of tHe faMiliar slave"
+  },
+  "tpl-muvi-facilitate-stifled-form-spell": {
+    "page": 36,
+    "matched": "facilitate tHe stifled (forM) sPell"
+  },
+  "tpl-pevi-roosters-crow": {
+    "page": 29,
+    "matched": "tHe rooster's croW PeVi Gen"
+  },
+  "tpl-revi-tie-threads-that-bind": {
+    "page": 130,
+    "matched": "tie tHe tHreads tHat Bind"
+  }
+}

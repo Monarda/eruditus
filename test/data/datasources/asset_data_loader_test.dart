@@ -378,8 +378,11 @@ void main() {
     // effect strength without either misrepresenting the design line or
     // baking in a fragile magic-number assumption about today's template.
     expect(effect.effectFormula, isNull);
+    // The page comes from `scripts/spell_import/hohmc_pages.json`: HoH:MC's
+    // markdown carries no index tables, so its pages are a committed ledger
+    // read from the PDF rather than a lookup (item 78).
     expect(effect.provenance.citations, [
-      const Citation(bookId: 'arm5-hohmc'),
+      const Citation(bookId: 'arm5-hohmc', page: 90),
     ]);
   });
 
@@ -507,9 +510,20 @@ void main() {
 
     expect(books, isNotEmpty);
     final core = books.firstWhere((b) => b.id == 'arm5-core');
-    expect(core.title, 'Ars Magica Fifth Edition');
-    expect(core.abbreviation, 'ArM5');
-    expect(core.edition, '5e');
+    expect(core.title, 'Ars Magica - Definitive Edition');
+    expect(core.abbreviation, 'ArM:DE');
+    expect(core.edition, 'de');
+  });
+
+  test('arm5-core declares the Definitive Edition, which its pages belong to',
+      () async {
+    final books = await AssetDataLoader().loadBooks();
+    final core = books.firstWhere((b) => b.id == 'arm5-core');
+
+    expect(core.title, contains('Definitive Edition'));
+    expect(core.edition, isNot('5e'),
+        reason: 'a Definitive Edition page under a 5e label sends the '
+            'reader to the wrong page — see todo item 78.5');
   });
 
   test('every book id is unique', () async {
