@@ -27,7 +27,7 @@ CC BY-SA 4.0 accordingly.
 
 **Books used:**
 
-- Ars Magica Fifth Edition
+- Ars Magica - Definitive Edition
 - Ars Magica 5e - Houses of Hermes: Mystery Cults
 
 **Creators:** Trident, Inc. d/b/a Atlas Games®. Open License Markdown version by OriginalMadman.

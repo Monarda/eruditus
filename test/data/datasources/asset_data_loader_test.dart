@@ -507,9 +507,20 @@ void main() {
 
     expect(books, isNotEmpty);
     final core = books.firstWhere((b) => b.id == 'arm5-core');
-    expect(core.title, 'Ars Magica Fifth Edition');
-    expect(core.abbreviation, 'ArM5');
-    expect(core.edition, '5e');
+    expect(core.title, 'Ars Magica - Definitive Edition');
+    expect(core.abbreviation, 'ArM:DE');
+    expect(core.edition, 'de');
+  });
+
+  test('arm5-core declares the Definitive Edition, which its pages belong to',
+      () async {
+    final books = await AssetDataLoader().loadBooks();
+    final core = books.firstWhere((b) => b.id == 'arm5-core');
+
+    expect(core.title, contains('Definitive Edition'));
+    expect(core.edition, isNot('5e'),
+        reason: 'a Definitive Edition page under a 5e label sends the '
+            'reader to the wrong page — see todo item 78.5');
   });
 
   test('every book id is unique', () async {

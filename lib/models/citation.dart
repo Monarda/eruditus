@@ -2,13 +2,19 @@ import 'package:eruditus/utils/map_serialization.dart';
 
 /// One place a spell was published: a book, and optionally the page.
 ///
-/// [page] is nullable and is null for every built-in entry. The reviewed
-/// rulebook markdown carries no page markers — only prose cross-references of
-/// the form "see page 213" — so page numbers cannot be recovered from the
-/// import source. An earlier version of this comment promised they would
-/// "arrive with the spell-parsing work"; that work is done and the promise
-/// could not be kept. Supplying them needs the PDFs or a different edition.
-/// A citation naming only its book is complete and valid.
+/// [page] is nullable. Earlier versions of this comment claimed page numbers
+/// "cannot be recovered from the import source", measured against the
+/// reviewed rulebook markdown's *body* — which indeed carries no page
+/// markers, only prose cross-references like "see page 213" — but never
+/// tested against its *indexes*. Four index tables (Spells, Spell Guidelines,
+/// Bestiary, Traditional) carry `[page](#anchor)` pairs that resolve real
+/// headings to printed pages, so `page` is now populated from those tables
+/// for core content and from a committed ledger for HoH:MC (item 78). Pages
+/// are Definitive Edition only.
+///
+/// [page] is still null for the 46 core records no index table covers and
+/// for every comma-inverted spell name. A citation naming only its book is
+/// complete and valid.
 class Citation {
   final String bookId;
   final int? page;

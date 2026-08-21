@@ -214,8 +214,10 @@ the book's *body* and never tested against its *indexes*. The markdown holds
 **1650 `[page](#anchor)` pairs across four index tables, 97.3% of which resolve
 to real headings**, including a Spells Index and a Spell Guidelines Index — the
 two things this catalog actually cites. **A hint may name a page.** Plan the
-"see p. 112" affordance; item 78 supplies the data, and 78.6 settles which
-edition the number belongs to (Definitive Edition — decided 2026-08-20).
+"see p. 112" affordance; item 78 has landed the data — `Citation.page` is
+populated from the index tables for core content and from a committed ledger
+for HoH:MC, and `books.json` now declares `arm5-core` as the Definitive
+Edition (item 78.5), settling which edition the number belongs to.
 
 - **Files:** `lib/presentation/screens/spell_creation_screen.dart`,
   `lib/models/parameter.dart` and `assets/data/parameters.json` (only if the

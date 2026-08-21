@@ -808,8 +808,11 @@ The PDF corroborates independently: **printed page = PDF index − 7, zero
 exceptions across 418 numbered pages**. `Citation.page` is still null everywhere
 *today* — the retraction is of the impossibility, not of the current state.
 **Page numbers are Definitive Edition only** (decided 2026-08-20: the open
-licence makes the earlier edition largely obsolete); note `books.json` still
-misdeclares `arm5-core` as 5e, which item 78.5 fixes.  *(items 27, 56, 78)*
+licence makes the earlier edition largely obsolete). ~~`books.json` still
+misdeclares `arm5-core` as 5e, which item 78.5 fixes.~~ RETRACTED 2026-08-21
+(item 78.5): `books.json` now declares `arm5-core` as `"Ars Magica -
+Definitive Edition"` / `"ArM:DE"` / `"de"`, matching the pages it carries.
+*(items 27, 56, 78)*
 
 **Core-rules line citations carried over from archived bodies are known to run
 about 8 lines low**, so verify one against `reviewed/` before relying on it —
