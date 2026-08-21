@@ -762,7 +762,9 @@ class GeneralTemplateEmissionTest(unittest.TestCase):
                       "selectedModifiers"):
             self.assertIn(field, template, msg=field)
         self.assertEqual(template["source"], "published")
-        self.assertEqual(template["citations"], [{"bookId": "arm5-core"}])
+        # "Demon's Eternal Oblivion" is a real spell name -- it now resolves
+        # against the Spells Index like every other core citation does.
+        self.assertEqual(template["citations"], [{"bookId": "arm5-core", "page": 370}])
 
 
 class OpenSlotEmissionTest(unittest.TestCase):
@@ -1099,3 +1101,47 @@ class TechniqueFormEmissionTest(unittest.TestCase):
             book_id=catalog_module.CORE_BOOK_ID,
         )
         self.assertEqual(template["analogyRationale"], "By analogy to a Vim guideline.")
+
+
+class CitationPageEmissionTest(unittest.TestCase):
+    """Pins for emit._citation, which every one of build_spell/build_template/
+    build_exception_spell's citation sites route through.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.catalog = catalog_module.Catalog.load()
+
+    def _emit_core_spell(self, name: str) -> dict:
+        design = designline.parse_design("(Base 3, +1 Touch, +2 Sun)")
+        return emit.build_spell(
+            _block(name, "Creo", "Ignem", 10), "reaq-3", self.catalog, design,
+            book_id=catalog_module.CORE_BOOK_ID,
+        )
+
+    def _emit_hohmc_spell(self, *, record_id: str) -> dict:
+        # "lib-crme-scent-predator" -> Creo Mentem, "Scent of the Predator":
+        # slug_id built from exactly this technique/form/name.
+        design = designline.parse_design("(Base 3, +1 Touch, +2 Sun)")
+        block = _block("Scent of the Predator", "Creo", "Mentem", 10)
+        spell = emit.build_spell(
+            block, "crme-3", self.catalog, design, book_id="arm5-hohmc",
+        )
+        assert spell["id"] == record_id, spell["id"]
+        return spell
+
+    def test_a_core_spell_citation_carries_its_spells_index_page(self):
+        record = self._emit_core_spell(name="Pilum of Fire")
+        citation = record["citations"][0]
+        self.assertEqual(citation["bookId"], "arm5-core")
+        self.assertIsInstance(citation["page"], int)
+
+    def test_a_hohmc_citation_takes_its_page_from_the_ledger(self):
+        record = self._emit_hohmc_spell(record_id="lib-crme-scent-predator")
+        self.assertEqual(record["citations"][0]["page"], 29)
+
+    def test_a_citation_with_no_known_page_omits_the_key_entirely(self):
+        """Citation.toMap omits page when null, so an unknown page must be
+        absent rather than present-and-null."""
+        record = self._emit_core_spell(name="A Spell Not In The Index")
+        self.assertNotIn("page", record["citations"][0])

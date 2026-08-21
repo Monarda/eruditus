@@ -99,10 +99,19 @@ class RunTest(unittest.TestCase):
         ids = [s["id"] for s in self.report.spells]
         self.assertEqual(len(ids), len(set(ids)))
 
-    def test_no_page_numbers_are_invented(self):
+    def test_a_page_present_is_a_plausible_page_number(self):
+        # Pre-item-78 this asserted the opposite -- that no citation ever
+        # carried "page" at all, because nothing populated it yet. Item 78
+        # made a real page recoverable by direct lookup (Spells Index /
+        # HoH:MC ledger); emit._citation's own lookup logic is pinned in
+        # test_emit.CitationPageEmissionTest, so this integration-level
+        # check only guards shape: any page present is a real, positive
+        # page number, not a stray 0/negative/non-int.
         for spell in self.report.spells:
             for citation in spell["citations"]:
-                self.assertNotIn("page", citation)
+                if "page" in citation:
+                    self.assertIsInstance(citation["page"], int, msg=spell["id"])
+                    self.assertGreater(citation["page"], 0, msg=spell["id"])
 
     def test_every_parsed_block_lands_in_exactly_one_bucket(self):
         # A bucket-conservation invariant: every design-line block the parser
@@ -157,13 +166,13 @@ class RunTest(unittest.TestCase):
 
     def test_the_supplement_spells_are_imported(self):
         by_id = {s["id"]: s for s in self.report.spells}
-        for spell_id in ("lib-pean-revenge-bitten-toad",
-                         "lib-crme-scent-predator",
-                         "lib-muim-ball-abysmal-music",
-                         "lib-peme-embrace-boethius"):
+        for spell_id, page in (("lib-pean-revenge-bitten-toad", 29),
+                                ("lib-crme-scent-predator", 29),
+                                ("lib-muim-ball-abysmal-music", 101),
+                                ("lib-peme-embrace-boethius", 119)):
             self.assertIn(spell_id, by_id)
             self.assertEqual(by_id[spell_id]["citations"],
-                             [{"bookId": "arm5-hohmc"}], msg=spell_id)
+                             [{"bookId": "arm5-hohmc", "page": page}], msg=spell_id)
 
     def test_the_two_requisites_of_embrace_of_boethius_both_cost(self):
         # "+2 necessary requisites" against Req: Vim, Corpus -- +1 each.

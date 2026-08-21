@@ -1,11 +1,76 @@
 """Build one assets/data/spell_library.json entry from a parsed spell block."""
+import json
+import pathlib
+
 from . import catalog as catalog_module
 from . import designline
+from . import pages as pages_module
 
 # The existing 36 entries all carry this fixed timestamp. Generated entries
 # must too: a wall-clock value would make every run produce a diff, defeating
 # the regeneration assertion.
 FIXED_TIMESTAMP = "2026-01-01T00:00:00.000"
+
+HOHMC_PAGES_PATH = pathlib.Path(__file__).resolve().parent / "hohmc_pages.json"
+
+# Loaded at most once per run (load_index() parses a 25,000-line file), not
+# once per citation. Populated lazily rather than at import time, so tests
+# that never touch a citation never pay for it either.
+_page_index_cache: pages_module.PageIndex | None = None
+_spell_pages_ci_cache: dict | None = None
+_hohmc_pages_cache: dict | None = None
+
+
+def _page_index() -> pages_module.PageIndex:
+    global _page_index_cache
+    if _page_index_cache is None:
+        _page_index_cache = pages_module.load_index()
+    return _page_index_cache
+
+
+def _spell_pages_ci() -> dict:
+    """spell_index_pages, keyed lowercase.
+
+    The Spells Index's own printed capitalization disagrees with the spell's
+    own heading for most entries -- "Pilum Of Fire" in the table, "Pilum of
+    Fire" on the spell's own page -- a title-casing quirk of the table, not a
+    different name. Case-folding the *same* name is not the widening
+    `pages.py`'s docstring warns against (matching a shorter/different key,
+    e.g. `Voice` for `Voice (Range)`); measured 2026-08-21, folding case
+    introduces zero collisions across all 360 entries.
+    """
+    global _spell_pages_ci_cache
+    if _spell_pages_ci_cache is None:
+        _spell_pages_ci_cache = {
+            name.lower(): page for name, page in _page_index().spell_index_pages.items()
+        }
+    return _spell_pages_ci_cache
+
+
+def _hohmc_pages() -> dict:
+    global _hohmc_pages_cache
+    if _hohmc_pages_cache is None:
+        _hohmc_pages_cache = json.loads(HOHMC_PAGES_PATH.read_text(encoding="utf-8"))
+    return _hohmc_pages_cache
+
+
+def _citation(book_id, *, spell_name=None, record_id=None):
+    """One citation, with a page when a table or the ledger names one.
+
+    Core spells take the Spells Index's page; HoH:MC records take the
+    committed ledger's. A page is omitted, never null: `Citation.toMap` writes
+    the key only when it has a value, and an absent key round-trips through
+    `Citation.fromMap`'s `map['page'] as int?` unchanged.
+    """
+    citation = {"bookId": book_id}
+    if book_id == catalog_module.CORE_BOOK_ID:
+        page = _spell_pages_ci().get(spell_name.lower()) if spell_name else None
+    else:
+        entry = _hohmc_pages().get(record_id) if record_id else None
+        page = entry["page"] if entry else None
+    if page is not None:
+        citation["page"] = page
+    return citation
 
 # Ritual-flagged spells whose own design line already carries a condition-6
 # (storyguide-ruling, Core Rules line 12352 -- "too spectacular to be freely
@@ -259,7 +324,7 @@ def build_spell(
         raise ValueError(f"{block.name}: no printed level to emit")
     spell["printedLevel"] = block.printed_level
 
-    spell["citations"] = [{"bookId": book_id}]
+    spell["citations"] = [_citation(book_id, spell_name=block.name, record_id=slug)]
 
     # Build parameter magnitude lookup table for adjustment reduction
     parameter_magnitudes = {p["id"]: p["magnitude"] for p in catalog.parameters}
@@ -391,7 +456,7 @@ def build_template(
     if description:
         template["description"] = description
 
-    template["citations"] = [{"bookId": book_id}]
+    template["citations"] = [_citation(book_id, spell_name=block.name, record_id=template_id)]
 
     adjustments = [
         {"magnitude": token.magnitude, "note": token.note}
@@ -839,8 +904,9 @@ def build_exception_spell(block, rationale: str, *, book_id: str) -> dict:
     docs/superpowers/specs/2026-08-15-exception-spells-design.md.
     """
     slug = catalog_module.slug_id(block.technique, block.form, block.name)
+    exception_id = "exc-" + slug.removeprefix("lib-")
     exception = {
-        "id": "exc-" + slug.removeprefix("lib-"),
+        "id": exception_id,
         "name": block.name,
         "technique": block.technique,
         "form": block.form,
@@ -851,7 +917,7 @@ def build_exception_spell(block, rationale: str, *, book_id: str) -> dict:
         "source": "published",
         "summary": _template_summary(block),
         "rationale": rationale,
-        "citations": [{"bookId": book_id}],
+        "citations": [_citation(book_id, spell_name=block.name, record_id=exception_id)],
     }
     if block.printed_level is not None:
         exception["printedLevel"] = block.printed_level
