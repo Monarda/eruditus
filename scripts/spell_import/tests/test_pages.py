@@ -136,5 +136,50 @@ class RealRulebookTest(unittest.TestCase):
             self.assertNotIn(line, calibrated)
 
 
+class HohmcLedgerTest(unittest.TestCase):
+    """The ledger is hand-checked data, so the test guards its shape and its
+    coverage -- not the page numbers themselves, which only the PDF can
+    confirm."""
+
+    @classmethod
+    def setUpClass(cls):
+        import json
+        import pathlib
+        root = pathlib.Path(__file__).resolve().parents[3]
+        cls.ledger = json.loads(
+            (root / "scripts/spell_import/hohmc_pages.json").read_text(encoding="utf-8"))
+        cls.records = []
+        for name in ("spell_library", "spell_templates", "spell_exceptions",
+                     "base_effects", "parameters", "modifiers"):
+            data = json.loads(
+                (root / f"assets/data/{name}.json").read_text(encoding="utf-8"))
+            for record in data:
+                if any(c["bookId"] == "arm5-hohmc"
+                       for c in record.get("citations", [])):
+                    cls.records.append(record["id"])
+
+    def test_every_hohmc_record_has_a_ledger_entry(self):
+        missing = sorted(set(self.records) - set(self.ledger))
+        self.assertEqual(missing, [],
+                         "a HoH:MC record shipping page-less while its "
+                         "siblings carry pages is an authoring gap, not a "
+                         "valid null")
+
+    def test_the_ledger_has_no_entries_for_records_that_do_not_exist(self):
+        extra = sorted(set(self.ledger) - set(self.records))
+        self.assertEqual(extra, [])
+
+    def test_every_page_is_inside_the_book(self):
+        for record_id, entry in self.ledger.items():
+            page = entry["page"]
+            if page is None:
+                continue
+            self.assertTrue(1 <= page <= 138, f"{record_id}: page {page}")
+
+    def test_every_entry_records_the_evidence_for_its_page(self):
+        for record_id, entry in self.ledger.items():
+            self.assertTrue(entry.get("matched"), record_id)
+
+
 if __name__ == "__main__":
     unittest.main()

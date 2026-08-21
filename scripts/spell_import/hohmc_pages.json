@@ -1,0 +1,110 @@
+{
+  "crim-hohmc-10": {
+    "page": 101,
+    "matched": "Create a glamour"
+  },
+  "crvi-hohmc-G1": {
+    "page": 90,
+    "matched": "Temporary Familiars"
+  },
+  "duration-symbol": {
+    "page": 5,
+    "matched": "symbol"
+  },
+  "lib-crig-brilliance-eagles-plumage": {
+    "page": 29,
+    "matched": "Brilliance of tHe eagle's PluMage"
+  },
+  "lib-crme-scent-predator": {
+    "page": 29,
+    "matched": "scent of tHe Predator"
+  },
+  "lib-muan-form-temperament-heartbeast": {
+    "page": 36,
+    "matched": "infl  uencing the bodily humors"
+  },
+  "lib-muan-voice-bjornaer-magus": {
+    "page": 36,
+    "matched": "tHe voice of tHe Bjornaer Magus"
+  },
+  "lib-muim-ball-abysmal-music": {
+    "page": 101,
+    "matched": "B all of aBysMal Music MuIm 20"
+  },
+  "lib-mume-clarion-call-war-horse": {
+    "page": 29,
+    "matched": "c larion call of tHe War Horse MuMe 15"
+  },
+  "lib-pean-revenge-bitten-toad": {
+    "page": 29,
+    "matched": "revenge of tHe Bitten toad"
+  },
+  "lib-peme-closed-mouth-nightwalker": {
+    "page": 29,
+    "matched": "closed MoutH of tHe nigHtWalker"
+  },
+  "lib-peme-embrace-boethius": {
+    "page": 119,
+    "matched": "Embrace of Boethius"
+  },
+  "lib-reco-marking-territory": {
+    "page": 29,
+    "matched": "Marking tHe territory"
+  },
+  "lib-reme-hibernation-slumbering-turb": {
+    "page": 29,
+    "matched": "HiBernation of tHe sluMBering turB"
+  },
+  "muim-hohmc-10": {
+    "page": 101,
+    "matched": "Change a target into glamour"
+  },
+  "range-symbol": {
+    "page": 5,
+    "matched": "symbol"
+  },
+  "revi-hohmc-G1": {
+    "page": 108,
+    "matched": "automaton"
+  },
+  "target-flavor": {
+    "page": 28,
+    "matched": "Flavor"
+  },
+  "target-scent": {
+    "page": 8,
+    "matched": "scent"
+  },
+  "target-sound": {
+    "page": 18,
+    "matched": "sound"
+  },
+  "target-spectacle": {
+    "page": 27,
+    "matched": "Spectacle"
+  },
+  "target-symbol": {
+    "page": 5,
+    "matched": "symbol"
+  },
+  "target-texture": {
+    "page": 28,
+    "matched": "Texture"
+  },
+  "tpl-crvi-faerie-chains-familiar-slave": {
+    "page": 90,
+    "matched": "faerie cHains of tHe faMiliar slave"
+  },
+  "tpl-muvi-facilitate-stifled-form-spell": {
+    "page": 36,
+    "matched": "facilitate tHe stifled (forM) sPell"
+  },
+  "tpl-pevi-roosters-crow": {
+    "page": 29,
+    "matched": "tHe rooster's croW PeVi Gen"
+  },
+  "tpl-revi-tie-threads-that-bind": {
+    "page": 130,
+    "matched": "tie tHe tHreads tHat Bind"
+  }
+}
