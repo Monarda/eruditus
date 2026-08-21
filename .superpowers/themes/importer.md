@@ -242,38 +242,6 @@ catalog cites**: spells by name, and guidelines by Technique/Form.
       `Road`/`Bargain`/`Fire` — plus all 35 modifiers), which ship page-less by
       design. Reopen only if item 56 finds those gaps actually hurt a hint.
 
-- [ ] **78.7** **⚠️ Four defects found by the whole-branch review, being fixed by
-      hand.** Recorded here because they are otherwise only in a session ledger.
-      - **A wrong page ships.** `duration-concentration` in `parameters.json`
-        cites **215** — the concentration *roll* — where every sibling Duration
-        cites 304-305. The index row has two links
-        (`[215](#concentration-1), [304](#durations)`, rulebook line 24509) and
-        `pages.py`'s `_ANCHOR.search(cells[-1])` takes the first with no rule.
-        **121 of 1475 Traditional Index rows carry multiple links**, so this
-        recurs. Prefer the anchor matching the sibling group, or refuse to emit.
-      - **En-dash ranges are silently dropped.** `pages.py`'s `_ANCHOR` accepts
-        `-` but the book also writes `–`, dropping **108 of 1537** rows and
-        costing a real page: `Road (Range)` *is* indexed, as
-        `[236–237](#merinita--faerie-magic)`. Fix is the class `[-–—]`. Note this
-        makes the "11 parameters absent by design" figure 10 absent + 1 gap.
-      - **Half the HoH:MC ledger never reaches the assets — 13 of 27 land.**
-        `enrich_catalog_pages.py` matches only the literal `arm5-core` and never
-        consults the ledger (the revised Task 6 was rewritten around the core
-        tables and lost the ledger path), and `hand_authored_templates.json`
-        bypasses `emit.py` entirely. **The test meant to catch this asserts
-        ledger↔record-id membership, not that the page reached the asset.**
-      - **34 core spells are recoverable.** The Spells Index comma-inverts
-        leading articles (`Wizard's Mount, The`). Verified 34/34 recover by
-        inverting, no collisions — ~10% of core spells.
-- [ ] **78.8** **Three evidence-field corrections in `hohmc_pages.json`.** The
-      *pages* were independently verified against the PDF on 2026-08-21 — 26 of
-      27 phrases found on their claimed page, the 27th a mis-quoted phrase rather
-      than a wrong page, and the `printed = index + 1` offset confirmed by 26
-      independent hits. But `target-spectacle`'s phrase is from p27 while its page
-      is 28 (the sensory-targets section spans both; 28 is correct), and
-      `target-flavor`/`target-texture` still carry single-word evidence
-      (`"Flavor"`, `"Texture"`) that a fix round was supposed to replace. The
-      pages stand; the audit trail is weaker than the file implies.
 - [x] **78.3 ✅ CLOSED AS OBSOLETE 2026-08-21.** It validated the anchor map, and
       the anchor map no longer exists. Nothing infers a page from a neighbouring
       line, so the defect it guarded against cannot occur. The 22 violations were
@@ -294,6 +262,27 @@ catalog cites**: spells by name, and guidelines by Technique/Form.
       **implied by the `bookId`**, so a separately published edition is simply a
       different book id. This composes with item 86, which adds `workId` to group
       editions of one work — scoping keys on work, language selection on edition.
+
+- [x] **78.7 ✅ DONE 2026-08-21.** The four defects the whole-branch review found
+      are fixed. Three were parser rules, and the fixes are in `pages.py` so
+      they cannot recur: a multi-link index row now prefers the link whose
+      anchor matches the entry's own qualifier (`Concentration (Duration)` →
+      `#durations`, not the concentration *roll* on 215) and emits nothing when
+      none matches; the range pattern accepts an en dash; and the Spells Index's
+      36 comma-inverted rows are registered under the real name too. The fourth
+      was wiring — `enrich_catalog_pages.py` now consults the HoH:MC ledger for
+      non-core entries, and the two hand-authored templates that bypass
+      `emit.py` carry their pages directly.
+- [x] **78.8 ✅ DONE 2026-08-21.** All 27 ledger phrases now verify against their
+      claimed PDF page, checked by script rather than by the agent that wrote
+      them. `printed = index + 1` is confirmed by 27 independent hits — the one
+      check that catches a uniform offset error, which internal-consistency
+      checks pass happily.
+
+**Coverage: 1015 of 1061 citations carry a page.** The remaining 46 are by
+design — 35 modifiers and 10 parameters that no index table lists, plus one
+template whose name is a `(Form)` placeholder the index cannot match. A null
+page is valid and permanent; see `citation.dart`.
 
 **The PDF is the cross-check, not the source.** `F:\OneDrive\RPGs\Ars Magica\ArM
 Definitive\Ars Magica Definitive Digital.pdf` extracts cleanly with `pypdf`

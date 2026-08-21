@@ -99,7 +99,7 @@ not-yet-worth-doing.
 | 75 | decide | open 1/1 | rules-fidelity.md | Should Group/Room/Structure/Boundary Cost Differently Under the Size Ladder? |
 | 76 | decide | open 1/1 | app.md | Creation-Screen UI for Picking a Cross-Form Base Effect |
 | 77 | decide | open 2/2 | importer.md | The Book-Scoping Rule Stops at Base Effects |
-| 78 | do | open 3/8 | importer.md | Page References for Users — the Markdown Indexes Can Supply Them *(lookups landed; see the plan's cautionary banner)* |
+| 78 | do | open 1/8 | importer.md | Page References for Users — the Markdown Indexes Can Supply Them *(only 78.2 open; see the plan's cautionary banner)* |
 | 79 | — | closed | ARCHIVE.md | Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands — DONE 2026-08-21 (`dc31261..3b5e059`) |
 | 80 | — | closed | ARCHIVE.md | Flutter Internationalisation for All User-Facing Text |
 | 81 | do | open 3/3 | app.md | Latin as the First Real Locale |
