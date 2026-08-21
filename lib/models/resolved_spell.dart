@@ -9,6 +9,7 @@ import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
+import 'package:eruditus/models/text_provenance.dart';
 
 /// A [Spell] record joined to the catalog entries its ids refer to.
 ///
@@ -103,6 +104,8 @@ class ResolvedSpell implements LibraryEntry {
   String? get summary => record.summary;
   @override
   String? get description => record.description;
+  SourcedText? get sourcedSummary => record.sourcedSummary;
+  SourcedText? get sourcedDescription => record.sourcedDescription;
   @override
   PublicationSource get source => record.provenance.source;
   List<Citation> get citations => record.provenance.citations;

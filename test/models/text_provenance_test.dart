@@ -1,8 +1,33 @@
+import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/citation.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/spell.dart';
 import 'package:eruditus/models/text_provenance.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// A minimal published spell. Only the fields the provenance rule reads
+/// matter here; the rest are the smallest values that satisfy Spell's own
+/// invariants.
+Spell _spell({required String? summary, required String? description}) => Spell(
+      id: 'lib-test',
+      name: 'Test Spell',
+      baseEffectId: 'cran-1',
+      technique: 'Creo',
+      form: 'Animal',
+      rangeId: 'range-touch',
+      durationId: 'duration-moon',
+      targetId: 'target-group',
+      requisites: const {},
+      summary: summary,
+      description: description,
+      provenance: Provenance(
+        source: PublicationSource.published,
+        citations: const [Citation(bookId: 'arm5-core')],
+      ),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
 
 void main() {
   const citation = Citation(bookId: 'arm5-core');
@@ -82,6 +107,45 @@ void main() {
         SourcedText.verbatim('a', const [citation]),
         isNot(const SourcedText.authored('a')),
       );
+    });
+  });
+
+  group('model getters apply the rule', () {
+    test('a published guideline\'s description is verbatim, with its citation', () {
+      final effect = BaseEffect(
+        id: 'cran-1',
+        technique: 'Creo',
+        form: 'Animal',
+        description: 'Give an animal a +1 bonus to Recovery rolls',
+        baseLevel: 1,
+        provenance: Provenance(
+          source: PublicationSource.published,
+          citations: const [citation],
+        ),
+      );
+
+      expect(effect.sourcedDescription.provenance, TextProvenance.verbatim);
+      expect(effect.sourcedDescription.citations, const [citation]);
+    });
+
+    test('a custom guideline\'s description is authored', () {
+      final effect = BaseEffect(
+        id: 'custom-1',
+        technique: 'Creo',
+        form: 'Animal',
+        description: 'My homebrew guideline',
+        baseLevel: 5,
+        provenance: Provenance(source: PublicationSource.userCreated),
+      );
+
+      expect(effect.sourcedDescription.provenance, TextProvenance.authored);
+    });
+
+    test('a null summary yields a null SourcedText, not an empty one', () {
+      final spell = _spell(summary: null, description: 'text');
+
+      expect(spell.sourcedSummary, isNull);
+      expect(spell.sourcedDescription, isNotNull);
     });
   });
 }
