@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/resolved_exception.dart';
 import 'package:eruditus/models/resolved_spell.dart';
+import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/text_provenance.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
@@ -107,22 +109,9 @@ class SpellCard extends StatelessWidget {
     // as absent explicitly or that description would never render.
     final summary = entry.summary;
     final preferSummary = summary != null && summary.trim().isNotEmpty;
-    // entry.sourcedSummary/sourcedDescription only exist on ResolvedSpell
-    // (todo item 79.3 task 2) -- LibraryEntry itself, and the
-    // ResolvedTemplate/ResolvedException that also implement it, expose only
-    // the plain String getters. Those two render as SourcedText.authored,
-    // identical to the plain Text they rendered before this change, until a
-    // future item gives templates and exceptions the same provenance-aware
-    // getters ResolvedSpell has.
     final blurbText = preferSummary ? summary : entry.description;
-    // A local so `is ResolvedSpell` can promote it -- `entry` itself is a
-    // field access, which Dart's flow analysis won't narrow.
-    final resolvedEntry = entry;
-    final blurb = blurbText == null
-        ? null
-        : resolvedEntry is ResolvedSpell
-            ? (preferSummary ? resolvedEntry.sourcedSummary : resolvedEntry.sourcedDescription)
-            : SourcedText.authored(blurbText);
+    final blurb =
+        blurbText == null ? null : _sourcedBlurb(entry, blurbText, isSummary: preferSummary);
     final hasBlurb = blurb != null && blurb.text.isNotEmpty;
 
     return Card(
@@ -223,4 +212,30 @@ class SpellCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// [text] (already chosen as [entry]'s summary or description) together with
+/// whose words it is.
+///
+/// All three [LibraryEntry] implementations record a [Provenance] on their
+/// own record, and `sourcedFrom` derives the same rule from any of them --
+/// this only picks out which record's provenance to read, so a published
+/// template's or exception's blurb reads as a quote exactly like a published
+/// spell's does, rather than the two of them being silently hardcoded to
+/// [SourcedText.authored].
+///
+/// [ResolvedSpell] is the one case that does *not* call `sourcedFrom`
+/// directly: it goes through its own `sourcedSummary`/`sourcedDescription`
+/// getters (todo item 79.3 task 2), because item 31 will change
+/// `Spell.sourcedSummary` to report unconditionally-authored text once
+/// summaries stop being truncated descriptions -- reimplementing the
+/// derivation here would miss that change. See
+/// `test/models/summary_provenance_tripwire_test.dart`.
+SourcedText _sourcedBlurb(LibraryEntry entry, String text, {required bool isSummary}) {
+  if (entry is ResolvedSpell) {
+    return (isSummary ? entry.sourcedSummary : entry.sourcedDescription)!;
+  }
+  if (entry is ResolvedTemplate) return sourcedFrom(text, entry.record.provenance);
+  if (entry is ResolvedException) return sourcedFrom(text, entry.record.provenance);
+  return SourcedText.authored(text);
 }
