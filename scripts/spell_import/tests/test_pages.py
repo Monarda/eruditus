@@ -123,5 +123,24 @@ class HohmcLedgerTest(unittest.TestCase):
             self.assertTrue(entry.get("matched"), record_id)
 
 
+class CatalogPageCoverageTest(unittest.TestCase):
+    """A floor, not a ceiling: 35 modifiers and 11 parameters carry no page by
+    design, so this catches a regression without demanding 100%."""
+
+    def test_core_catalog_pages_do_not_regress(self):
+        import json
+        import pathlib
+        root = pathlib.Path(__file__).resolve().parents[3]
+        count = 0
+        for name in ("base_effects", "parameters", "modifiers"):
+            data = json.loads(
+                (root / f"assets/data/{name}.json").read_text(encoding="utf-8"))
+            for record in data:
+                for citation in record.get("citations", []):
+                    if citation["bookId"] == "arm5-core" and "page" in citation:
+                        count += 1
+        self.assertGreaterEqual(count, 628)
+
+
 if __name__ == "__main__":
     unittest.main()
