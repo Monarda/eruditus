@@ -36,6 +36,19 @@ class BuildIndexTest(unittest.TestCase):
         index = pages.build_index(lines)
         self.assertNotIn("not-a-heading", index.anchor_pages)
 
+    def test_a_heading_cited_with_two_different_pages_is_not_a_calibration_point(self):
+        """Two index rows disagreeing on an anchor's page is the same kind of
+        thin evidence the two guards already refuse to guess from."""
+        lines = ["# Widget", "| a | [10](#widget) |", "| b | [11](#widget) |"]
+        index = pages.build_index(lines)
+        self.assertNotIn(1, dict(index.line_pages))
+        self.assertIn("widget", index.anchor_pages, "still recorded, just not used to calibrate")
+
+    def test_a_heading_cited_consistently_is_still_a_calibration_point(self):
+        lines = ["# Widget", "| a | [10](#widget) |", "| b | [10](#widget) |"]
+        index = pages.build_index(lines)
+        self.assertEqual(dict(index.line_pages)[1], 10)
+
 
 class PageForLineTest(unittest.TestCase):
     def _index(self):
@@ -80,6 +93,32 @@ class RealRulebookTest(unittest.TestCase):
             violations, [],
             "an anchor read out of its section poisons every line after it "
             "until the next anchor -- see the spec, section 3")
+
+    def test_reference_guide_anchors_are_not_calibration_points(self):
+        """The Reference Guide reproduces body content and cites the body's
+        pages, so an anchor there points backwards. Using it as a calibration
+        point would give every following line a page from a different chapter."""
+        start, end = pages.REFERENCE_GUIDE_RANGE
+        inside = [ln for ln, _ in self.index.line_pages if start <= ln <= end]
+        self.assertEqual(inside, [])
+
+    def test_spell_guidelines_index_headings_are_not_calibration_points(self):
+        """The Spell Guidelines Index locates a section, not a guideline (see
+        the design spec) -- its citation is a page ahead of the section's own
+        first worked example, so none of its 50 rows are used to calibrate."""
+        start, end = pages._SPELL_GUIDELINES_INDEX_RANGE
+        calibrated = dict(self.index.line_pages)
+        self.assertNotIn(13006, calibrated, "Rego Aquam Guidelines")
+        self.assertNotIn(15105, calibrated, "Perdo Mentem Guidelines")
+        self.assertGreater(end, start, "sanity: the range is non-empty")
+
+    def test_isolated_uncorroborated_citations_are_not_calibration_points(self):
+        """A handful of citations disagree with pages read independently on
+        both sides of them, with no duplicate heading or conflicting anchor
+        to explain why -- see the constant's own comment for the evidence."""
+        calibrated = dict(self.index.line_pages)
+        for line in pages._ISOLATED_UNRELIABLE_LINES:
+            self.assertNotIn(line, calibrated)
 
 
 if __name__ == "__main__":
