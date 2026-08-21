@@ -192,11 +192,36 @@ paired form.
 every asset for no benefit; what changes is its title, abbreviation and edition,
 so the id unambiguously denotes the edition its pages belong to.
 
-### 6. Populating the field, and the three retractions (78.4)
+### 6. Populating the field (78.4) — two delivery mechanisms, not one
 
-The importer writes `page` into each citation it emits, from whichever of the
-three sources applies. Then **retract the three "cannot" claims in the same
-change that makes them false, not before**:
+**⚠️ The extractor writes only three of the six assets**, verified 2026-08-21:
+`extract_spells.py` emits `spell_library.json`, `spell_templates.json` and
+`spell_exceptions.json`. It *reads* `base_effects.json`, `parameters.json` and
+`modifiers.json` — those three are **hand-maintained catalogs with no
+generator**, as their git history shows. So "the importer populates the field"
+is only half true, and the halves are delivered differently:
+
+| Assets | Records | How `page` arrives |
+|---|---|---|
+| `spell_library`, `spell_templates`, `spell_exceptions` | 375 | `emit.py` writes it on every extractor run, from the Spells Index or the HoH:MC ledger |
+| `base_effects`, `parameters`, `modifiers` | 686 | A **one-shot enrichment script**, run once, its output reviewed and committed |
+
+The one-shot follows `scripts/flag_ritual_effects.py`, which is precedent in
+this repo for exactly this: a script that annotated `base_effects.json` once,
+was applied, and carries a header saying it is *"kept for reference only, not
+part of any build or test step — do not re-run without checking."* Ours gets the
+same header. **Note its warning about line endings**: it rewrites all lines, so
+the enrichment must preserve the file's existing newline convention or the diff
+becomes unreadable.
+
+**Consequence to accept rather than engineer around:** a guideline added by hand
+*after* the one-shot runs will have no page, and nothing will notice. That is
+correct behaviour under §2 — a null page is valid — and the coverage test below
+is written as a floor, not a ceiling, so it does not force a re-run of a script
+whose header says not to re-run it.
+
+Then **retract the three "cannot" claims in the same change that makes them
+false, not before**:
 
 1. `lib/models/citation.dart`'s doc comment, which says page numbers "cannot be
    recovered from the import source" and that an earlier promise "could not be
@@ -225,6 +250,12 @@ the book's *body* and never tested against its *indexes*.
   regression guard for the 57% finding.
 - **HoH:MC ledger coverage:** every `arm5-hohmc` citation in the assets has a
   ledger entry.
+- **Page coverage is a floor, not a ceiling.** A test asserts that at least the
+  number of `arm5-core` citations carrying a page today still carry one — so a
+  regression is caught while a hand-added guideline with no page is not a
+  failure. Do **not** write it as "every published citation has a page": the
+  locator reaches ~80% of guidelines by design (§2 refuses near-misses), and a
+  100% assertion would force fuzzy matching, which is the thing §2 forbids.
 - **PDF as witness, not source:** a sampled cross-check of core pages against
   the DE PDF (printed = index − 7) is a one-off verification recorded in the
   implementation report, run by a cheap-tier subagent like the HoH:MC ledger.
@@ -238,8 +269,9 @@ the book's *body* and never tested against its *indexes*.
 | File | Change |
 |---|---|
 | `scripts/spell_import/pages.py` | new — index parsing, slugging, `page_for_line`, the guards |
-| `scripts/spell_import/hohmc_pages.json` | new — the hand-authored ledger |
-| `scripts/spell_import/emit.py` | populate `page` on emitted citations |
+| `scripts/spell_import/hohmc_pages.json` | new — the committed HoH:MC ledger |
+| `scripts/spell_import/emit.py` | populate `page` on the three emitted assets |
+| `scripts/enrich_catalog_pages.py` | new one-shot — pages into the three hand-maintained catalogs, then kept for reference |
 | `scripts/spell_import/tests/` | the tests above |
 | `assets/data/*.json` | regenerated, citations gaining `page` |
 | `assets/data/books.json` | `arm5-core` metadata → Definitive Edition |
