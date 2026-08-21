@@ -8,8 +8,8 @@
     "matched": "Temporary Familiars"
   },
   "duration-symbol": {
-    "page": 5,
-    "matched": "symbol"
+    "page": 99,
+    "matched": "at Symbol Range might include a queen (character) charm"
   },
   "lib-crig-brilliance-eagles-plumage": {
     "page": 29,
@@ -29,7 +29,7 @@
   },
   "lib-muim-ball-abysmal-music": {
     "page": 101,
-    "matched": "B all of aBysMal Music MuIm 20"
+    "matched": "This spell targets a formulaic Ignem spell while it is being cast"
   },
   "lib-mume-clarion-call-war-horse": {
     "page": 29,
@@ -60,8 +60,8 @@
     "matched": "Change a target into glamour"
   },
   "range-symbol": {
-    "page": 5,
-    "matched": "symbol"
+    "page": 99,
+    "matched": "Symbol Range, Duration, and Target together in one spell would require"
   },
   "revi-hohmc-G1": {
     "page": 108,
@@ -72,20 +72,20 @@
     "matched": "Flavor"
   },
   "target-scent": {
-    "page": 8,
-    "matched": "scent"
+    "page": 28,
+    "matched": "The spell affects any being who smells the caster, effective over"
   },
   "target-sound": {
-    "page": 18,
-    "matched": "sound"
+    "page": 28,
+    "matched": "The spell affects any being who hears the sound the caster makes"
   },
   "target-spectacle": {
-    "page": 27,
-    "matched": "Spectacle"
+    "page": 28,
+    "matched": "taste, texture, scent, sound, or spectacle that transmits the spell"
   },
   "target-symbol": {
-    "page": 5,
-    "matched": "symbol"
+    "page": 99,
+    "matched": "To use Symbol Range, Duration, and Target together"
   },
   "target-texture": {
     "page": 28,
