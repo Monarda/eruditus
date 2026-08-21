@@ -69,7 +69,7 @@
   },
   "target-flavor": {
     "page": 28,
-    "matched": "Flavor"
+    "matched": "The Flavor Target is equivalent to Individual"
   },
   "target-scent": {
     "page": 28,
@@ -81,7 +81,7 @@
   },
   "target-spectacle": {
     "page": 28,
-    "matched": "taste, texture, scent, sound, or spectacle that transmits the spell"
+    "matched": "The Spectacle Target is the equivalent of Boundary"
   },
   "target-symbol": {
     "page": 99,
@@ -89,7 +89,7 @@
   },
   "target-texture": {
     "page": 28,
-    "matched": "Texture"
+    "matched": "The Texture Target is equivalent to Part"
   },
   "tpl-crvi-faerie-chains-familiar-slave": {
     "page": 90,

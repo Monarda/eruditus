@@ -22,8 +22,18 @@ from scripts.spell_import import sources
 # `[313](#anchor)` and `[158-159](#anchor)`. The range's first page is what a
 # citation carries; the pattern must still recognise the form, or the row is
 # silently skipped rather than parsed.
-_ANCHOR = re.compile(r"\[(\d+)(?:-\d+)?\]\(#([^)]+)\)")
+#
+# The separator is a character class because the book uses an en dash as well
+# as a hyphen. Accepting only `-` silently dropped 108 of the Traditional
+# Index's 1537 rows, and cost a real lookup: `Road (Range)` is indexed, as
+# `[236-237](#merinita--faerie-magic)` with an en dash.
+_ANCHOR = re.compile(r"\[(\d+)(?:[-–—]\d+)?\]\(#([^)]+)\)")
 _LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+
+# `Wizard's Mount, The` -- the Spells Index files a spell under its significant
+# word so the "The"s do not pile up under T. The catalog stores the spell's
+# real name, so each row is registered under both forms.
+_INVERTED = re.compile(r"^(.*),\s+(The|A|An)$", re.IGNORECASE)
 
 
 def slugify(heading):
@@ -72,8 +82,15 @@ def _spell_index_pages(lines):
         if not match:
             continue
         name = _LINK.sub(r"\1", cells[0]).strip()
-        if name:
-            out[name] = int(match.group(1))
+        if not name:
+            continue
+        page = int(match.group(1))
+        out[name] = page
+        # Also register the un-inverted form, so a lookup by the spell's real
+        # name finds it. 34 of the 360 rows are filed this way.
+        inverted = _INVERTED.match(name)
+        if inverted:
+            out.setdefault(f"{inverted.group(2)} {inverted.group(1)}", page)
     return out
 
 
@@ -122,13 +139,40 @@ def _topic_index_pages(lines):
         cells = [c.strip() for c in stripped.strip("|").split("|")]
         if len(cells) < 2:
             continue
-        match = _ANCHOR.search(cells[-1])
-        if not match:
+        links = _ANCHOR.findall(cells[-1])
+        if not links:
             continue
         name = cells[0].replace("&nbsp;", "").strip().lower()
-        if name:
-            out[name] = int(match.group(1))
+        if not name:
+            continue
+        page = _preferred_page(name, links)
+        if page is not None:
+            out[name] = page
     return out
+
+
+def _preferred_page(name, links):
+    """Choose among several pages cited for one index entry, or refuse.
+
+    121 of this table's rows cite more than one page, and taking the first is
+    how `Concentration (Duration)` ended up citing 215 -- the concentration
+    *roll* under Casting Spells -- instead of 304, where the Duration is
+    defined alongside Momentary, Sun and Moon.
+
+    The entry's own qualifier is the discriminator: `Concentration (Duration)`
+    prefers the link anchored at `durations`. When no anchor matches the
+    qualifier there is no principled choice, so nothing is emitted -- a
+    missing page is valid, a wrong one is not.
+    """
+    if len(links) == 1:
+        return int(links[0][0])
+    qualifier = re.search(r"\(([^)]+)\)\s*$", name)
+    if qualifier:
+        want = qualifier.group(1).strip().lower()
+        for page, anchor in links:
+            if want in anchor.lower():
+                return int(page)
+    return None
 
 
 def build_index(lines):

@@ -24,7 +24,34 @@ class RealRulebookTest(unittest.TestCase):
         cls.index = pages.load_index()
 
     def test_the_spells_index_covers_every_published_spell(self):
-        self.assertEqual(len(self.index.spell_index_pages), 360)
+        """Every core spell in the library resolves by its own name.
+
+        Asserting the property rather than the dict's size: the table has 360
+        rows, but 36 of them are filed comma-inverted (`Wizard's Mount, The`)
+        and are registered under both forms, so the dict is larger than the
+        table. What matters is that a lookup by the name the catalog stores
+        finds a page.
+        """
+        import json
+        import pathlib
+        root = pathlib.Path(__file__).resolve().parents[3]
+        spells = json.loads(
+            (root / "assets/data/spell_library.json").read_text(encoding="utf-8"))
+        folded = {k.lower(): v for k, v in self.index.spell_index_pages.items()}
+        unresolved = [
+            s["name"] for s in spells
+            if any(c["bookId"] == "arm5-core" for c in s.get("citations", []))
+            and s["name"].lower() not in folded
+        ]
+        self.assertEqual(unresolved, [])
+
+    def test_a_comma_inverted_row_is_registered_under_the_real_name(self):
+        """`Wizard's Mount, The` is how the index files it; `The Wizard's
+        Mount` is what the catalog calls it. Both must resolve, to the same
+        page."""
+        pages_by_name = self.index.spell_index_pages
+        self.assertEqual(pages_by_name["Wizard's Mount, The"], 316)
+        self.assertEqual(pages_by_name["The Wizard's Mount"], 316)
 
 
 class GuidelineIndexTest(unittest.TestCase):
@@ -106,6 +133,31 @@ class HohmcLedgerTest(unittest.TestCase):
                          "a HoH:MC record shipping page-less while its "
                          "siblings carry pages is an authoring gap, not a "
                          "valid null")
+
+    def test_every_hohmc_citation_carries_the_page_its_ledger_entry_names(self):
+        """The ledger existing is not the point -- the page reaching the asset
+        is. An earlier version of this class asserted only id membership, and
+        passed while 14 of the 27 entries were authored, verified, and then
+        wired to nothing.
+        """
+        import json
+        import pathlib
+        root = pathlib.Path(__file__).resolve().parents[3]
+        wrong = []
+        for name in ("spell_library", "spell_templates", "spell_exceptions",
+                     "base_effects", "parameters", "modifiers"):
+            data = json.loads(
+                (root / f"assets/data/{name}.json").read_text(encoding="utf-8"))
+            for record in data:
+                for citation in record.get("citations", []):
+                    if citation["bookId"] != "arm5-hohmc":
+                        continue
+                    expected = self.ledger[record["id"]]["page"]
+                    if citation.get("page") != expected:
+                        wrong.append(
+                            f"{record['id']}: asset {citation.get('page')!r}, "
+                            f"ledger {expected!r}")
+        self.assertEqual(wrong, [])
 
     def test_the_ledger_has_no_entries_for_records_that_do_not_exist(self):
         extra = sorted(set(self.ledger) - set(self.records))

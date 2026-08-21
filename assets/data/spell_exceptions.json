@@ -54,7 +54,8 @@
     "rationale": "Design line prints \"(Base effect)\", General-kind, no printed level. Intellego Vim's own guideline table prints exactly one General row, invi-G (\"detect the traces of magic of negative magnitude up to the magnitude of the guideline used - 2\") -- a residual-trace-decay formula, confirmed the wrong guideline by checking the arithmetic, not just the wording: at level 20 invi-G computes a magnitude of 2, while this spell's own text (\"detects the use of Intellego spells of up to double the level of this spell\") needs a level threshold of 40 -- different GeneralEffectKind families (spellTraceMagnitude vs. targetSpellLevel), not a close-enough match. No other Form's guideline can substitute by analogy either: this spell is already Intellego Vim, the top of the analogy chain (see docs/superpowers/specs/2026-08-16-analogy-unblock-blocked-spells-design.md). Same shape as Sight of the True Form: a matching InVi row was not attempted here for the identical reason -- test_general_entries_match_the_rulebook_bullet_for_bullet forbids it.",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 366
       }
     ],
     "description": "The caster can feel any magical means currently being used to spy on him. The representation varies in a way that depends on the spell, but it often feels like something touching the magus's back. For example, a magus being spied upon with Enchantment of the Scrying Pool might feel wet fingers, while a magus who is being tracked by The Inexorable Search might feel a finger running over his skin. This spell detects the use of Intellego spells of up to double the level of this spell. A special spell is required because most Intellego spells are designed to be subtle, and they are more subtle at higher levels."

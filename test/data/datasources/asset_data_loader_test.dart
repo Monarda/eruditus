@@ -378,8 +378,11 @@ void main() {
     // effect strength without either misrepresenting the design line or
     // baking in a fragile magic-number assumption about today's template.
     expect(effect.effectFormula, isNull);
+    // The page comes from `scripts/spell_import/hohmc_pages.json`: HoH:MC's
+    // markdown carries no index tables, so its pages are a committed ledger
+    // read from the PDF rather than a lookup (item 78).
     expect(effect.provenance.citations, [
-      const Citation(bookId: 'arm5-hohmc'),
+      const Citation(bookId: 'arm5-hohmc', page: 90),
     ]);
   });
 

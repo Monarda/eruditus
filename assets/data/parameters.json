@@ -111,7 +111,7 @@
     "citations": [
       {
         "bookId": "arm5-core",
-        "page": 215
+        "page": 304
       }
     ]
   },
@@ -340,7 +340,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-core"
+        "bookId": "arm5-core",
+        "page": 236
       }
     ]
   },
@@ -428,7 +429,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 99
       }
     ]
   },
@@ -442,7 +444,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 99
       }
     ]
   },
@@ -457,7 +460,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 99
       }
     ]
   },
@@ -478,7 +482,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 28
       }
     ]
   },
@@ -499,7 +504,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 28
       }
     ]
   },
@@ -520,7 +526,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 28
       }
     ]
   },
@@ -541,7 +548,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 28
       }
     ]
   },
@@ -562,7 +570,8 @@
     "source": "published",
     "citations": [
       {
-        "bookId": "arm5-hohmc"
+        "bookId": "arm5-hohmc",
+        "page": 28
       }
     ]
   }
