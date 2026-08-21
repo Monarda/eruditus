@@ -190,6 +190,87 @@ void main() {
     expect(resolved.modifiers.map((m) => m.id), ['size-terram']);
   });
 
+  test('resolve populates sourceTemplate from a spell\'s templateId', () {
+    final resolverWithTemplate = SpellResolver(
+      effects: [effect],
+      parameters: [voice, momentary, individual],
+      modifiers: const [],
+      templates: [template()],
+    );
+
+    final spellFromTemplate = Spell(
+      id: 'spell-from-tpl',
+      baseEffectId: effect.id,
+      technique: 'Creo',
+      form: 'Imaginem',
+      rangeId: voice.id,
+      durationId: momentary.id,
+      targetId: individual.id,
+      requisites: const {},
+      summary: 'Conjures an image affecting two senses.',
+      templateId: 'tpl-1',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+
+    final resolved = resolverWithTemplate.resolve(spellFromTemplate);
+    expect(resolved.sourceTemplate?.id, 'tpl-1');
+  });
+
+  test('resolve leaves sourceTemplate null when templateId is null', () {
+    final resolved = resolver.resolve(record());
+    expect(resolved.sourceTemplate, isNull);
+  });
+
+  test('resolve leaves sourceTemplate null for a templateId that does not resolve', () {
+    final spellFromTemplate = Spell(
+      id: 'spell-from-tpl',
+      baseEffectId: effect.id,
+      technique: 'Creo',
+      form: 'Imaginem',
+      rangeId: voice.id,
+      durationId: momentary.id,
+      targetId: individual.id,
+      requisites: const {},
+      summary: 'Conjures an image affecting two senses.',
+      templateId: 'tpl-gone',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+
+    final resolved = resolver.resolve(spellFromTemplate);
+    expect(resolved.sourceTemplate, isNull);
+  });
+
+  test('updateTemplates replaces the template catalog used for sourceTemplate lookups', () {
+    final mutableResolver = SpellResolver(
+      effects: [effect], parameters: [voice, momentary, individual], modifiers: const [],
+    );
+    final spellFromTemplate = Spell(
+      id: 'spell-from-tpl',
+      baseEffectId: effect.id,
+      technique: 'Creo',
+      form: 'Imaginem',
+      rangeId: voice.id,
+      durationId: momentary.id,
+      targetId: individual.id,
+      requisites: const {},
+      summary: 'Conjures an image affecting two senses.',
+      templateId: 'tpl-1',
+      provenance: Provenance(source: PublicationSource.userCreated),
+      createdAt: DateTime(2026, 1, 1),
+      updatedAt: DateTime(2026, 1, 1),
+    );
+
+    expect(mutableResolver.resolve(spellFromTemplate).sourceTemplate, isNull);
+
+    mutableResolver.updateTemplates([template()]);
+
+    expect(mutableResolver.resolve(spellFromTemplate).sourceTemplate?.id, 'tpl-1');
+  });
+
   test('an unknown modifier id is skipped, not surfaced as null', () {
     final resolver = SpellResolver(
       effects: [effect],

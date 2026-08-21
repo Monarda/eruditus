@@ -12,6 +12,7 @@ import 'package:eruditus/models/base_effect.dart';
 import 'package:eruditus/models/provenance.dart';
 import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/text_provenance.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -119,6 +120,66 @@ void main() {
     expect(userSpells.length, 1);
     expect(userSpells.first.id, 'user-1');
   });
+
+  // Finding F1 (todo item 79.3): a template-instantiated spell whose prose
+  // still matches its source template must render as the rulebook's own
+  // words, cited to the *template's* citations -- not authored, and not
+  // crashing on an empty citation list. End-to-end through the real
+  // LibraryRepository/SpellResolver/asset wiring, not just the model-level
+  // unit test in resolved_spell_test.dart.
+  test(
+    'getAllSpells resolves a template-instantiated spell\'s summary as verbatim, '
+    'cited to the template, until it is edited',
+    () async {
+      final template = (await AssetDataLoader().loadSpellTemplates())
+          .firstWhere((t) => t.id == 'tpl-crvi-faerie-chains-familiar-slave');
+
+      await spellRepository.saveSpell(Spell(
+        id: 'from-template-unedited',
+        name: 'My Familiar Bond',
+        baseEffectId: template.baseEffectId,
+        technique: template.technique,
+        form: template.form,
+        rangeId: template.rangeId,
+        durationId: template.durationId,
+        targetId: template.targetId,
+        requisites: const {},
+        summary: template.summary,
+        description: template.description,
+        templateId: template.id,
+        chosenBaseLevel: 25,
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ));
+      await spellRepository.saveSpell(Spell(
+        id: 'from-template-edited',
+        name: 'My Familiar Bond, Reworded',
+        baseEffectId: template.baseEffectId,
+        technique: template.technique,
+        form: template.form,
+        rangeId: template.rangeId,
+        durationId: template.durationId,
+        targetId: template.targetId,
+        requisites: const {},
+        summary: 'My own rewording of the summary.',
+        description: template.description,
+        templateId: template.id,
+        chosenBaseLevel: 25,
+        provenance: Provenance(source: PublicationSource.userCreated),
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: DateTime(2026, 1, 1),
+      ));
+
+      final all = await repository.getAllSpells();
+      final unedited = all.firstWhere((s) => s.id == 'from-template-unedited');
+      final edited = all.firstWhere((s) => s.id == 'from-template-edited');
+
+      expect(unedited.sourcedSummary?.provenance, TextProvenance.verbatim);
+      expect(unedited.sourcedSummary?.citations, template.provenance.citations);
+      expect(edited.sourcedSummary?.provenance, TextProvenance.authored);
+    },
+  );
 
   // Task 3's headline fix: LibraryRepository refreshes its resolver's catalog
   // snapshot from ConfigurationRepository on every getAllSpells() call (see

@@ -8,6 +8,7 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell_template.dart';
+import 'package:eruditus/models/text_provenance.dart';
 
 /// A [SpellTemplate] record joined to the catalog entries its ids refer to.
 ///
@@ -62,6 +63,15 @@ class ResolvedTemplate implements LibraryEntry {
   String? get summary => record.summary;
   @override
   String? get description => record.description;
+  // A template is read-only catalog data (see SpellTemplate's doc comment):
+  // there is no user-editing path that could ever diverge its text from its
+  // own provenance, unlike ResolvedSpell.sourcedSummary/sourcedDescription
+  // -- so the plain sourcedFrom rule applies unconditionally here.
+  @override
+  SourcedText? get sourcedSummary => summary == null ? null : sourcedFrom(summary!, record.provenance);
+  @override
+  SourcedText? get sourcedDescription =>
+      description == null ? null : sourcedFrom(description!, record.provenance);
   @override
   PublicationSource get source => record.provenance.source;
   List<Citation> get citations => record.provenance.citations;

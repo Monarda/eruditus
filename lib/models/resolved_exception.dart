@@ -1,6 +1,7 @@
 import 'package:eruditus/models/exception_spell.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
+import 'package:eruditus/models/text_provenance.dart';
 
 /// The [LibraryEntry] view of an [ExceptionSpell].
 ///
@@ -36,6 +37,14 @@ class ResolvedException implements LibraryEntry {
 
   @override
   String? get description => record.description;
+
+  // An ExceptionSpell is published catalog data the user cannot edit -- the
+  // same reasoning as ResolvedTemplate.sourcedSummary/sourcedDescription.
+  @override
+  SourcedText? get sourcedSummary => summary == null ? null : sourcedFrom(summary!, record.provenance);
+  @override
+  SourcedText? get sourcedDescription =>
+      description == null ? null : sourcedFrom(description!, record.provenance);
 
   @override
   PublicationSource get source => record.provenance.source;

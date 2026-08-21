@@ -415,6 +415,14 @@ class Spell {
 
   /// [summary] together with whose words it is, or null when there is none.
   ///
+  /// **The [Provenance]-only rule** — correct for a plain [Spell] with no
+  /// template origin, but blind to [templateId]: it cannot tell a
+  /// template-seeded, not-yet-edited summary from an authored one, because
+  /// that comparison needs the source [SpellTemplate], which this class does
+  /// not carry. `ResolvedSpell.sourcedSummary` is the one that does — see its
+  /// doc comment and `sourcedSpellText`. Call this getter directly only where
+  /// no `ResolvedSpell` is available.
+  ///
   /// **⚠️ Reports a published spell's summary as verbatim, which is true only
   /// until item 31 lands** — see `sourcedFrom` and
   /// `test/models/summary_provenance_tripwire_test.dart`.
@@ -423,7 +431,9 @@ class Spell {
 
   /// [description] together with whose words it is, or null when there is
   /// none. Unlike [sourcedSummary] this one is stable: a published spell's
-  /// description is the book's prose and item 31 does not touch it.
+  /// description is the book's prose and item 31 does not touch it. See
+  /// [sourcedSummary]'s doc comment for why `ResolvedSpell.sourcedDescription`
+  /// is the getter to prefer when a `ResolvedSpell` is available.
   SourcedText? get sourcedDescription =>
       description == null ? null : sourcedFrom(description!, provenance);
 

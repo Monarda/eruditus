@@ -408,8 +408,8 @@ void main() {
     ));
 
     expect(find.byKey(const Key('sourced-text-marker')), findsNothing,
-        reason: 'the card is itself tappable; a nested InkWell would give a '
-            'list row two competing gestures');
+        reason: 'showMarker is false so that a caller who does pass onTap '
+            'gets one gesture target, not two, inside the list row');
   });
 
   testWidgets('the blurb is still truncated to two lines', (tester) async {

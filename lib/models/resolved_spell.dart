@@ -8,6 +8,7 @@ import 'package:eruditus/models/publication_source.dart';
 import 'package:eruditus/models/requisite.dart';
 import 'package:eruditus/models/ritual_declaration.dart';
 import 'package:eruditus/models/spell.dart';
+import 'package:eruditus/models/spell_template.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
 import 'package:eruditus/models/text_provenance.dart';
 
@@ -33,6 +34,18 @@ class ResolvedSpell implements LibraryEntry {
   /// [SpellResolver.resolve], which always populates it.
   final List<Modifier> modifiers;
 
+  /// The [SpellTemplate] [record.templateId] names, when it resolves. Null
+  /// for a spell with no template origin, and for one whose template no
+  /// longer exists -- the same "degrade, don't half-build" policy as
+  /// [baseEffect]/[range]/[duration]/[target].
+  ///
+  /// Read only by [sourcedSummary]/[sourcedDescription] (see
+  /// `sourcedSpellText`): a template-instantiated spell's seeded prose is
+  /// still the rulebook's own words until the caster edits it, and this is
+  /// what lets that comparison happen without a model reaching into the
+  /// asset catalog itself.
+  final SpellTemplate? sourceTemplate;
+
   const ResolvedSpell({
     required this.record,
     this.baseEffect,
@@ -40,6 +53,7 @@ class ResolvedSpell implements LibraryEntry {
     this.duration,
     this.target,
     this.modifiers = const [],
+    this.sourceTemplate,
   });
 
   @override
@@ -104,8 +118,24 @@ class ResolvedSpell implements LibraryEntry {
   String? get summary => record.summary;
   @override
   String? get description => record.description;
-  SourcedText? get sourcedSummary => record.sourcedSummary;
-  SourcedText? get sourcedDescription => record.sourcedDescription;
+  // Not a pass-through to record.sourcedSummary/sourcedDescription: those
+  // getters know only Spell.provenance, and cannot see a template-seeded
+  // spell whose prose hasn't been edited yet -- see sourcedSpellText and
+  // sourceTemplate's doc comment (todo item 79.3 finding F1).
+  @override
+  SourcedText? get sourcedSummary => sourcedSpellText(
+        text: record.summary,
+        recordProvenance: record.provenance,
+        seedText: sourceTemplate?.summary,
+        seedCitations: sourceTemplate?.provenance.citations ?? const [],
+      );
+  @override
+  SourcedText? get sourcedDescription => sourcedSpellText(
+        text: record.description,
+        recordProvenance: record.provenance,
+        seedText: sourceTemplate?.description,
+        seedCitations: sourceTemplate?.provenance.citations ?? const [],
+      );
   @override
   PublicationSource get source => record.provenance.source;
   List<Citation> get citations => record.provenance.citations;

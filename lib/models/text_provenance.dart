@@ -122,3 +122,38 @@ SourcedText sourcedFrom(String text, Provenance provenance) =>
     provenance.source == PublicationSource.published
         ? SourcedText.verbatim(text, provenance.citations)
         : SourcedText.authored(text);
+
+/// [sourcedFrom]'s rule, widened for a spell that may still be carrying its
+/// source template's own prose verbatim.
+///
+/// **The one rule for this decision — do not reimplement it at a second call
+/// site.** [sourcedFrom] alone gets this wrong for a template-instantiated
+/// spell: [TemplateInstantiated] seeds a fresh, user-created draft's
+/// summary/description directly from the published [SpellTemplate]'s own
+/// text (`lib/bloc/spell_creation/spell_creation_bloc.dart`), so until the
+/// caster edits it, that text is still the rulebook's own words even though
+/// [Provenance.source] on the saved [Spell] reads `userCreated`. This
+/// function is the seam that corrects for that: seeded prose stays
+/// [TextProvenance.verbatim], cited to the *template's* citations (a
+/// user-created spell has none of its own), for exactly as long as [text]
+/// still matches [seedText] character-for-character; the moment it diverges
+/// — the user has edited it — [sourcedFrom] takes over unconditionally, and
+/// the field is [TextProvenance.authored].
+///
+/// [ResolvedSpell] is the only caller: it is the layer that has both the
+/// [Spell] record and (via `SpellResolver`, from [Spell.templateId]) its
+/// source [SpellTemplate], which a bare [Spell] does not.
+SourcedText? sourcedSpellText({
+  required String? text,
+  required Provenance recordProvenance,
+  required String? seedText,
+  required List<Citation> seedCitations,
+}) {
+  if (text == null) return null;
+  final stillMatchesSeed = recordProvenance.source != PublicationSource.published &&
+      seedText != null &&
+      text == seedText;
+  return stillMatchesSeed
+      ? SourcedText.verbatim(text, seedCitations)
+      : sourcedFrom(text, recordProvenance);
+}

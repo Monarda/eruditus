@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eruditus/l10n/app_localizations.dart';
 import 'package:eruditus/models/library_entry.dart';
 import 'package:eruditus/models/publication_source.dart';
-import 'package:eruditus/models/resolved_exception.dart';
-import 'package:eruditus/models/resolved_spell.dart';
-import 'package:eruditus/models/resolved_template.dart';
 import 'package:eruditus/models/spell_validation_error.dart';
-import 'package:eruditus/models/text_provenance.dart';
 import 'package:eruditus/presentation/format/contribution_formatter.dart';
 import 'package:eruditus/presentation/widgets/sourced_text_view.dart';
 
@@ -107,11 +103,15 @@ class SpellCard extends StatelessWidget {
     // back to '' before save, leaving a real description behind it. `??`
     // only falls through on null, so an empty-string summary must be treated
     // as absent explicitly or that description would never render.
+    //
+    // entry.sourcedSummary/sourcedDescription -- not a local helper -- is
+    // the provenance rule: LibraryEntry declares both getters itself (todo
+    // item 79.3 finding F2), so every implementer, present and future, is
+    // compiler-forced to answer rather than falling through a presentation-
+    // layer default that could silently mislabel a fourth one's prose.
     final summary = entry.summary;
     final preferSummary = summary != null && summary.trim().isNotEmpty;
-    final blurbText = preferSummary ? summary : entry.description;
-    final blurb =
-        blurbText == null ? null : _sourcedBlurb(entry, blurbText, isSummary: preferSummary);
+    final blurb = preferSummary ? entry.sourcedSummary : entry.sourcedDescription;
     final hasBlurb = blurb != null && blurb.text.isNotEmpty;
 
     return Card(
@@ -181,8 +181,13 @@ class SpellCard extends StatelessWidget {
                     blurb,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    // The card is already tappable; a marker here would be a
-                    // second gesture target inside one list row.
+                    // `onTap` is a supported constructor parameter and some
+                    // callers do pass it (or may start to) -- a marker here
+                    // would then be a second gesture target competing with
+                    // ListTile's own inside one list row. (No production
+                    // call site currently passes onTap, so this is a
+                    // standing readiness rule, not a response to a tap
+                    // target that exists today -- see finding F6.)
                     showMarker: false,
                   ),
                 if (hasProblems)
@@ -212,30 +217,4 @@ class SpellCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// [text] (already chosen as [entry]'s summary or description) together with
-/// whose words it is.
-///
-/// All three [LibraryEntry] implementations record a [Provenance] on their
-/// own record, and `sourcedFrom` derives the same rule from any of them --
-/// this only picks out which record's provenance to read, so a published
-/// template's or exception's blurb reads as a quote exactly like a published
-/// spell's does, rather than the two of them being silently hardcoded to
-/// [SourcedText.authored].
-///
-/// [ResolvedSpell] is the one case that does *not* call `sourcedFrom`
-/// directly: it goes through its own `sourcedSummary`/`sourcedDescription`
-/// getters (todo item 79.3 task 2), because item 31 will change
-/// `Spell.sourcedSummary` to report unconditionally-authored text once
-/// summaries stop being truncated descriptions -- reimplementing the
-/// derivation here would miss that change. See
-/// `test/models/summary_provenance_tripwire_test.dart`.
-SourcedText _sourcedBlurb(LibraryEntry entry, String text, {required bool isSummary}) {
-  if (entry is ResolvedSpell) {
-    return (isSummary ? entry.sourcedSummary : entry.sourcedDescription)!;
-  }
-  if (entry is ResolvedTemplate) return sourcedFrom(text, entry.record.provenance);
-  if (entry is ResolvedException) return sourcedFrom(text, entry.record.provenance);
-  return SourcedText.authored(text);
 }

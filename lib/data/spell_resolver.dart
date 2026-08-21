@@ -22,13 +22,30 @@ class SpellResolver {
   Map<String, Parameter> _parametersById;
   Map<String, Modifier> _modifiersById;
 
+  // Kept separately from the three catalogs above rather than folded into
+  // updateCatalogs: templates come from LibraryRepository's assetLoader, not
+  // ConfigurationRepository, and (being read-only catalog data -- see
+  // SpellTemplate's doc comment) never change mid-run the way a custom
+  // effect/parameter/modifier can. See [updateTemplates].
+  Map<String, SpellTemplate> _templatesById;
+
   SpellResolver({
     required List<BaseEffect> effects,
     required List<Parameter> parameters,
     required List<Modifier> modifiers,
+    List<SpellTemplate> templates = const [],
   })  : _effectsById = {for (final e in effects) e.id: e},
         _parametersById = {for (final p in parameters) p.id: p},
-        _modifiersById = {for (final m in modifiers) m.id: m};
+        _modifiersById = {for (final m in modifiers) m.id: m},
+        _templatesById = {for (final t in templates) t.id: t};
+
+  /// Replaces the known template catalog used for [Spell.templateId] lookups
+  /// (see [resolve]'s `sourceTemplate`). Separate from [updateCatalogs]
+  /// because it has a different source and refresh cadence -- see the field
+  /// doc comment on [_templatesById].
+  void updateTemplates(List<SpellTemplate> templates) {
+    _templatesById = {for (final t in templates) t.id: t};
+  }
 
   /// Replaces the known effect/parameter catalog used for id lookups.
   ///
@@ -56,6 +73,8 @@ class SpellResolver {
         duration: _parametersById[record.durationId],
         target: _parametersById[record.targetId],
         modifiers: _selectedModifiers(record.selectedModifiers),
+        sourceTemplate:
+            record.templateId == null ? null : _templatesById[record.templateId],
       );
 
   /// The catalog entries [selected]'s keys refer to, skipping ids that no
