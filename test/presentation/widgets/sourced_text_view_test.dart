@@ -84,6 +84,25 @@ void main() {
     expect(text.overflow, TextOverflow.ellipsis);
   });
 
+  testWidgets(
+      'imposes no colour when none is passed, so an ambient DefaultTextStyle '
+      '(e.g. a ListTile subtitle\'s onSurfaceVariant) is left to apply',
+      (tester) async {
+    await pumpApp(tester, const SourcedTextView(ours));
+    final authoredText = tester.widget<Text>(find.text('We say this.'));
+    expect(authoredText.style, isNull,
+        reason: 'a non-null style here, even one built from theme.textTheme.'
+            'bodyMedium, would override the ambient DefaultTextStyle a parent '
+            'like ListTile\'s subtitle sets, rather than merging onto it');
+
+    await pumpApp(tester, SourcedTextView(quoted));
+    final quotedText = tester.widget<Text>(find.text('The rulebook says this.'));
+    expect(quotedText.style?.color, isNull,
+        reason: 'the italic treatment must merge onto the ambient style, not '
+            'replace its colour with an explicit one');
+    expect(quotedText.style?.fontStyle, FontStyle.italic);
+  });
+
   testWidgets('showMarker: false also drops the translated marker, not just the verbatim one',
       (tester) async {
     await pumpApp(

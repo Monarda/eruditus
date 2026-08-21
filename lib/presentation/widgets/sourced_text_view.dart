@@ -58,13 +58,20 @@ class SourcedTextView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final body = style ?? theme.textTheme.bodyMedium;
 
     switch (sourced.provenance) {
       case TextProvenance.authored:
-        return _text(body);
+        return _text(style);
 
       case TextProvenance.verbatim:
+        // Merge italic onto whatever style applies -- the caller's [style]
+        // when given, the ambient DefaultTextStyle otherwise (a bare
+        // TextStyle has `inherit: true`, so `Text` merges this onto it
+        // rather than replacing it). Passing `theme.textTheme.bodyMedium`
+        // here instead would override that ambient style outright -- e.g. a
+        // ListTile subtitle's onSurfaceVariant colour -- with
+        // Typography.bodyMedium's own explicit black87.
+        final italic = (style ?? const TextStyle()).copyWith(fontStyle: FontStyle.italic);
         return Container(
           key: const Key('sourced-text-quote'),
           padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
@@ -76,7 +83,7 @@ class SourcedTextView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _text(body?.copyWith(fontStyle: FontStyle.italic)),
+              _text(italic),
               if (showMarker) ...[
                 const SizedBox(height: 4),
                 _Marker(
@@ -92,7 +99,7 @@ class SourcedTextView extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _text(body),
+            _text(style),
             if (showMarker) ...[
               const SizedBox(height: 4),
               _Marker(
