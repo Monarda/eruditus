@@ -1,5 +1,24 @@
 # Page References (item 78) Implementation Plan
 
+> ## ⚠️ KEEP AS A CAUTIONARY EXAMPLE — read this before copying anything here
+>
+> **This plan is retained as an example of what not to do.** Tasks 1-3 build an
+> elaborate inference engine — an anchor map, a line→page lookup, a monotonicity
+> gate, and four exclusion mechanisms resting on 74 hand-justified anchor
+> exclusions — to answer a question the rulebook's own index tables answer by
+> direct lookup. **Task 4 deletes all of it.** The lookup covers 608 of 608 core
+> base effects; the inference reached ~80%. Roughly 590k subagent tokens were
+> spent building and then removing it.
+>
+> **The rule that came out of it:** do not build an inference engine when a
+> combination of simple lookups, plus the cheapest agent available to check the
+> result against the source, would be sufficient. Recorded in `DECISIONS.md`,
+> "Choosing a mechanism — prefer the lookup that already exists".
+>
+> **Tasks 1-3 are left unedited on purpose**, as the record of the wrong turn.
+> Tasks 4-7 are the design that should have been written first. If you are
+> looking for the shape to copy, copy Task 4 onward.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Give every citation a printed page number where the evidence supports one, so item 56's hints can say "see p. 112".
@@ -38,6 +57,8 @@
 ---
 
 ### Task 1: The anchor map and its guards
+
+> **⚠️ Superseded by Task 4, which deletes this.** Retained as the record of the wrong turn — see the banner at the top of this file.
 
 Pure parsing over the rulebook markdown. No assets change, nothing consumes it yet.
 
@@ -332,6 +353,8 @@ the next task, and they are the correctness gate on this map."
 ---
 
 ### Task 2: Resolve the monotonicity violations
+
+> **⚠️ Superseded by Task 4.** This task exists only because Task 1 chose inference over lookup: with no anchor map there is nothing for a monotonicity gate to validate. It consumed ~508k tokens diagnosing 22 violations in a map that was about to be removed.
 
 **Files:**
 - Modify: `scripts/spell_import/pages.py`

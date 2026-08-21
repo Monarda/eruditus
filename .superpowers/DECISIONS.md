@@ -1012,3 +1012,39 @@ separate bug.** Its summary is already our paraphrase on a `published` record
 while its description is correctly verbatim — so it is the first entry to reach
 item 31's steady state, and item 31 is what fixes it. Do not "correct" it by
 rewriting the summary into a quote.  *(items 79.3, 31, 87.1)*
+
+## Choosing a mechanism — prefer the lookup that already exists
+
+**⚠️ Before designing a derivation, look for the table.** Item 78 built an
+anchor map, a line→page inference, a monotonicity gate and four exclusion
+mechanisms resting on **74 hand-justified anchor exclusions** — all to answer
+"what printed page is this guideline on". The rulebook indexes itself, and the
+Spell Guidelines Index answers that by `(technique, form)` lookup: **608 of
+608**, where the inference reached ~80%. The whole contraption was built and
+then deleted, at a cost of roughly 590k subagent tokens.
+
+The three tables, so nobody re-derives them:
+
+| Table | Key | Covers |
+|---|---|---|
+| Spells Index | spell name (Title Cased; fold case, and note leading articles are comma-inverted: `Wizard's Mount, The`) | 360 published spells |
+| Spell Guidelines Index | `(technique, form)` | all 608 core base effects |
+| Traditional Index | `"{name} ({category})"` — `Voice (Range)`, not `Voice` | 20 of 31 core parameters |
+
+**The usual cause is precision nobody asked for.** The inference existed to give
+line-level rather than section-level pages. A page reference only has to land
+the reader on the right page — "where this art's guidelines start" was always
+enough. When a design's complexity is buying accuracy beyond what the consumer
+needs, that is the signal to stop and look for the simpler source.
+
+**Match the agent to the job, and verify with a direct check rather than
+another review layer.** Searching a PDF and confirming a phrase appears on a
+page is cheap-tier work. `hohmc_pages.json`'s 27 entries were authored that way;
+its first pass had 8 wrong pages, and successive *reviews* corrected them only
+indirectly, by challenging the evidence field. What settled the question was a
+20-line script that checked every entry's recorded phrase against its claimed
+PDF page — 26 of 27 exact, the 27th a mis-quoted phrase rather than a wrong
+page, and the `printed = index + 1` offset confirmed by 26 independent hits.
+**A direct check against the source is worth more than another opinion about
+the code**, and it is the check that catches a uniform offset error, which
+internal-consistency checks pass happily.  *(item 78)*

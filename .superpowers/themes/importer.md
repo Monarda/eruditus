@@ -228,45 +228,72 @@ unique `[page](#anchor)` pairs, of which 1606 (97.3%) resolve to a real heading*
 preceding anchored heading. **The first two indexes alone cover exactly what the
 catalog cites**: spells by name, and guidelines by Technique/Form.
 
-- [ ] **78.1** **Build the anchor→page map and the line→page lookup.** Parse the four
-      index tables, slug each anchor against the document's headings, and expose
-      "which printed page is this line on". Note page *ranges* occur
-      (`[158-159](#ability-types)`) and must be modelled, not truncated.
-- [ ] **78.2** **Close the 44 unresolved anchors, or record why they stay unresolved.**
-      They are slug-normalisation misses, not missing headings — e.g.
-      `merinita--faerie-magic` and `bjornaer--the-heartbeast` double their hyphen
-      where the heading has an em-dash or colon. A stricter GitHub-compatible
-      slugger should recover most; whatever remains should be listed, not
-      silently dropped.
-- [ ] **78.3** **Resolve the 22 monotonicity violations.** Sorting the 1606 resolved
-      anchors by line should make page numbers non-decreasing; 22 pairs
-      decrease. At least some are appendix headings carrying a body page number
-      (`(line 23256, page 311)`), i.e. the Reference Guide reproducing content
-      from the body. **A violation is the signal that an anchor is being read
-      out of its section** — treat them as the correctness test for 78.1, not as
-      noise to smooth over.
-- [ ] **78.4** **Populate `Citation.page` through the importer** and retract the three
+- [x] **78.1 ✅ DONE 2026-08-21 — but not as written.** The anchor→page map was
+      built, then **deleted**: the rulebook's own tables answer by lookup what it
+      inferred. `scripts/spell_import/pages.py` now parses three tables — Spells
+      Index (name→page), Spell Guidelines Index (`(technique, form)`→page, 608 of
+      608), Traditional Index (`"{name} ({category})"`→page, 20 of 31 parameters).
+      **See `DECISIONS.md`, "Choosing a mechanism", and the cautionary banner on
+      `docs/superpowers/plans/2026-08-21-page-references.md`.**
+- [ ] **78.2** **RE-SCOPED 2026-08-21 — the unresolved *anchors* no longer matter,
+      because nothing resolves anchors any more.** What survives of this sub-item
+      is the coverage gap: **46 core records no table indexes** (11 parameters —
+      `Sight`, `Arcane Connection`, `Boundary`, the five sensory Targets, and
+      `Road`/`Bargain`/`Fire` — plus all 35 modifiers), which ship page-less by
+      design. Reopen only if item 56 finds those gaps actually hurt a hint.
+
+- [ ] **78.7** **⚠️ Four defects found by the whole-branch review, being fixed by
+      hand.** Recorded here because they are otherwise only in a session ledger.
+      - **A wrong page ships.** `duration-concentration` in `parameters.json`
+        cites **215** — the concentration *roll* — where every sibling Duration
+        cites 304-305. The index row has two links
+        (`[215](#concentration-1), [304](#durations)`, rulebook line 24509) and
+        `pages.py`'s `_ANCHOR.search(cells[-1])` takes the first with no rule.
+        **121 of 1475 Traditional Index rows carry multiple links**, so this
+        recurs. Prefer the anchor matching the sibling group, or refuse to emit.
+      - **En-dash ranges are silently dropped.** `pages.py`'s `_ANCHOR` accepts
+        `-` but the book also writes `–`, dropping **108 of 1537** rows and
+        costing a real page: `Road (Range)` *is* indexed, as
+        `[236–237](#merinita--faerie-magic)`. Fix is the class `[-–—]`. Note this
+        makes the "11 parameters absent by design" figure 10 absent + 1 gap.
+      - **Half the HoH:MC ledger never reaches the assets — 13 of 27 land.**
+        `enrich_catalog_pages.py` matches only the literal `arm5-core` and never
+        consults the ledger (the revised Task 6 was rewritten around the core
+        tables and lost the ledger path), and `hand_authored_templates.json`
+        bypasses `emit.py` entirely. **The test meant to catch this asserts
+        ledger↔record-id membership, not that the page reached the asset.**
+      - **34 core spells are recoverable.** The Spells Index comma-inverts
+        leading articles (`Wizard's Mount, The`). Verified 34/34 recover by
+        inverting, no collisions — ~10% of core spells.
+- [ ] **78.8** **Three evidence-field corrections in `hohmc_pages.json`.** The
+      *pages* were independently verified against the PDF on 2026-08-21 — 26 of
+      27 phrases found on their claimed page, the 27th a mis-quoted phrase rather
+      than a wrong page, and the `printed = index + 1` offset confirmed by 26
+      independent hits. But `target-spectacle`'s phrase is from p27 while its page
+      is 28 (the sensory-targets section spans both; 28 is correct), and
+      `target-flavor`/`target-texture` still carry single-word evidence
+      (`"Flavor"`, `"Texture"`) that a fix round was supposed to replace. The
+      pages stand; the audit trail is weaker than the file implies.
+- [x] **78.3 ✅ CLOSED AS OBSOLETE 2026-08-21.** It validated the anchor map, and
+      the anchor map no longer exists. Nothing infers a page from a neighbouring
+      line, so the defect it guarded against cannot occur. The 22 violations were
+      diagnosed and resolved at a cost of ~508k tokens before the map was
+      deleted — the single clearest illustration of the lesson in `DECISIONS.md`.
+- [x] **78.4 ✅ DONE 2026-08-21.** `Citation.page` is populated and the three
       recorded "cannot" claims together — `citation.dart`, `DECISIONS.md`, and
       item 56's own warning. Retract them in the same change that makes them
       false, not before.
-- [ ] **78.5** **Fix `books.json`'s edition metadata.** It declares `arm5-core` as
-      `"Ars Magica Fifth Edition"` / `"ArM5"` / `"5e"`, but the import source and
-      the page numbers are **Definitive Edition**, which paginates differently
-      (the Reference Guide prints both: *"Fifth Edition p7, Definitive Edition
-      p8"*). Shipping a DE page under a 5e label sends the reader to the wrong
-      page. **Decided 2026-08-20: Definitive Edition only** — the open license
-      makes the earlier edition largely obsolete, so we never carry 5e numbers
-      and never show a paired "5e p7 / DE p8" form.
-- [ ] **78.6** **⚠️ A page number is only true of one edition — leave room for that.**
-      The 5e/DE divergence in 78.5 is the same problem a *translated* edition
-      poses: a French or German printing paginates differently again, and item
-      80.3 expects locale to select a source edition. So `page` belongs to an
-      edition, not to a book-in-the-abstract. **Do not design 78.4 as one scalar
-      `page` per citation and leave the shape to be fixed later** — decide now
-      whether the edition is implied by the `bookId` (making a translated
-      edition simply a different book id, probably the cheapest answer) or
-      carried alongside it. Deciding the *shape* costs nothing today; changing
-      it after 1061 citations carry a number costs a migration.
+- [x] **78.5 ✅ DONE 2026-08-21.** `arm5-core` is now
+      `"Ars Magica - Definitive Edition"` / `"ArM:DE"` / `"de"`. Its **id is
+      unchanged** — it appears in 1034 citations. The title is load-bearing in
+      five places: `books.json`, `lib/licensing/attribution.dart`, `NOTICE.md`
+      and two tests, because item 79's attribution test asserts set equality
+      between `arsMagicaAttribution.books` and `books.json`'s titles. That guard
+      caught the drift, which is what it was added for.
+- [x] **78.6 ✅ DONE 2026-08-21.** `page` stays a scalar `int?`; the edition is
+      **implied by the `bookId`**, so a separately published edition is simply a
+      different book id. This composes with item 86, which adds `workId` to group
+      editions of one work — scoping keys on work, language selection on edition.
 
 **The PDF is the cross-check, not the source.** `F:\OneDrive\RPGs\Ars Magica\ArM
 Definitive\Ars Magica Definitive Digital.pdf` extracts cleanly with `pypdf`
