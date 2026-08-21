@@ -1,6 +1,6 @@
 import unittest
 
-from scripts.spell_import import pages
+from scripts.spell_import import pages, sources
 
 
 class SlugifyTest(unittest.TestCase):
@@ -36,16 +36,24 @@ class BuildIndexTest(unittest.TestCase):
         index = pages.build_index(lines)
         self.assertNotIn("not-a-heading", index.anchor_pages)
 
-    def test_a_heading_cited_with_two_different_pages_is_not_a_calibration_point(self):
-        """Two index rows disagreeing on an anchor's page is the same kind of
-        thin evidence the two guards already refuse to guess from."""
-        lines = ["# Widget", "| a | [10](#widget) |", "| b | [11](#widget) |"]
+    def test_a_heading_cited_with_a_wide_spread_is_not_a_calibration_point(self):
+        """Two index rows disagreeing by more than a page break's worth is
+        the same kind of thin evidence the two guards already refuse to
+        guess from."""
+        lines = ["# Widget", "| a | [10](#widget) |", "| b | [12](#widget) |"]
         index = pages.build_index(lines)
         self.assertNotIn(1, dict(index.line_pages))
         self.assertIn("widget", index.anchor_pages, "still recorded, just not used to calibrate")
 
     def test_a_heading_cited_consistently_is_still_a_calibration_point(self):
         lines = ["# Widget", "| a | [10](#widget) |", "| b | [10](#widget) |"]
+        index = pages.build_index(lines)
+        self.assertEqual(dict(index.line_pages)[1], 10)
+
+    def test_a_one_page_spread_is_a_page_break_not_a_conflict(self):
+        """A section straddling a page break gets cited on both halves --
+        that is corroboration, not disagreement, so it still calibrates."""
+        lines = ["# Widget", "| a | [10](#widget) |", "| b | [11](#widget) |"]
         index = pages.build_index(lines)
         self.assertEqual(dict(index.line_pages)[1], 10)
 
@@ -107,17 +115,24 @@ class RealRulebookTest(unittest.TestCase):
         the design spec) -- its citation is a page ahead of the section's own
         first worked example, so none of its 50 rows are used to calibrate."""
         start, end = pages._SPELL_GUIDELINES_INDEX_RANGE
+        table_lines = sources.read_lines(
+            sources.resolve_book(sources.DE_TITLE))[start - 1:end]
+        cited_slugs = {m.group(2) for text in table_lines
+                       for m in pages._ANCHOR.finditer(text)}
+        self.assertEqual(len(cited_slugs), 50, "the table has one row per Technique/Form pair")
+        headings = [self.index.heading_slugs[slug] for slug in cited_slugs]
         calibrated = dict(self.index.line_pages)
-        self.assertNotIn(13006, calibrated, "Rego Aquam Guidelines")
-        self.assertNotIn(15105, calibrated, "Perdo Mentem Guidelines")
-        self.assertGreater(end, start, "sanity: the range is non-empty")
+        self.assertFalse(any(line in calibrated for line in headings))
 
     def test_isolated_uncorroborated_citations_are_not_calibration_points(self):
         """A handful of citations disagree with pages read independently on
         both sides of them, with no duplicate heading or conflicting anchor
-        to explain why -- see the constant's own comment for the evidence."""
+        to explain why -- see the constant's own comment for the evidence.
+        Lines are hardcoded here, not read from the constant, so shrinking
+        the constant leaves this test still checking for every one of them."""
         calibrated = dict(self.index.line_pages)
-        for line in pages._ISOLATED_UNRELIABLE_LINES:
+        for line in (933, 2334, 2956, 4113, 4117, 6490, 6494, 7793,
+                     15912, 16776, 17603, 21219, 22443):
             self.assertNotIn(line, calibrated)
 
 

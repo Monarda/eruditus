@@ -2,9 +2,15 @@
 
 Every row in those tables cites a page as `[313](#anchor)`, and an anchor
 resolves to a heading whose line we know -- so a line's page is the page of
-the nearest anchored heading above it. Both guards below return None rather
-than a guess: a wrong page sends a reader to the wrong place, which is worse
-than sending them nowhere.
+the nearest anchored heading above it. `page_for_line`'s two guards return
+None rather than a guess: a wrong page sends a reader to the wrong place,
+which is worse than sending them nowhere. `build_index` applies the same
+rule one step earlier, at calibration time: an anchor whose own page is
+unreliable (it reproduces another section's content, disagrees with itself
+by more than a page break's worth, or is individually uncorroborated) is
+excluded from `line_pages` rather than calibrated from -- see
+REFERENCE_GUIDE_RANGE, the conflicting-citation check, and
+_ISOLATED_UNRELIABLE_LINES below.
 
 See docs/superpowers/specs/2026-08-21-page-references-design.md.
 """
@@ -20,6 +26,16 @@ from scripts.spell_import import sources
 # 60 accepts every real case while refusing the 789-line gap that exists
 # elsewhere in the document.
 MAX_ANCHOR_DISTANCE = 60
+
+# How far apart two citations of the same anchor may disagree before that
+# disagreement means the tables genuinely conflict, rather than one row
+# citing each half of a section that straddles a page break. Measured
+# 2026-08-21: of the 23 headings with more than one cited page, 13 have a
+# spread of exactly 1 (e.g. "#### Durations", line 12098, cited p304 seven
+# times and p305 once -- the worked spells either side are p303 and p305,
+# so p304 is correct and well-corroborated, not a disagreement). The other
+# 10 have spreads of 2-406 and are genuine conflicts -- see the check below.
+_MAX_CITED_SPREAD = 1
 
 # The Reference Guide (the rulebook's appendix of quick-reference tables)
 # reprints material from earlier chapters and cites the *body's* page for its
@@ -61,8 +77,8 @@ _SPELL_GUIDELINES_INDEX_RANGE = (24143, 24197)
 #        sides (2952 before, 3026/3032 after).
 #   4113 Guild Dean cites p85 and 4117 Guild Master cites p84 -- reversed
 #        relative to their neighbours (84, 84 before; 85, 85 after). Nothing
-#        in the markdown says which of the pair is transposed, so the
-#        earlier one is dropped.
+#        in the markdown says which of the pair is transposed, so -- as with
+#        6490/6494 below -- both are dropped rather than picking one.
 #   6490 Meddler and 6494 Mentor both cite p137, a two-line island inside a
 #        ten-line run of p136 (six lines before, four after); both are
 #        excluded, or the pair still reads as a decrease into Missing Ear.
@@ -84,7 +100,7 @@ _SPELL_GUIDELINES_INDEX_RANGE = (24143, 24197)
 # refusing to calibrate from either, the same "return None rather than a
 # guess" rule the two guards above already apply.
 _ISOLATED_UNRELIABLE_LINES = frozenset({
-    933, 2334, 2956, 4113, 6490, 6494, 7793,
+    933, 2334, 2956, 4113, 4117, 6490, 6494, 7793,
     15912, 16776, 17603, 21219, 22443,
 })
 
@@ -211,8 +227,9 @@ def build_index(lines):
             continue
         if _in_range(heading_line, REFERENCE_GUIDE_RANGE):
             continue   # reproduces body content; cites the body's page
-        if len({page for _, page in cites}) > 1:
-            continue   # the tables disagree on this anchor's page -- untrustworthy
+        pages_cited = {page for _, page in cites}
+        if max(pages_cited) - min(pages_cited) > _MAX_CITED_SPREAD:
+            continue   # more than a page break apart -- see _MAX_CITED_SPREAD
         if all(_in_range(citing_line, _SPELL_GUIDELINES_INDEX_RANGE)
                for citing_line, _ in cites):
             continue   # locates a section, not this heading
