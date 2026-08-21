@@ -100,7 +100,7 @@ not-yet-worth-doing.
 | 76 | decide | open 1/1 | app.md | Creation-Screen UI for Picking a Cross-Form Base Effect |
 | 77 | decide | open 2/2 | importer.md | The Book-Scoping Rule Stops at Base Effects |
 | 78 | do | open 6/6 | importer.md | Page References for Users — the Markdown Indexes Can Supply Them |
-| 79 | do | open 1/3 | app.md | Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands *(79.1/79.2 done; 79.3 is plan B)* |
+| 79 | — | closed | ARCHIVE.md | Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands — DONE 2026-08-21 (`dc31261..3b5e059`) |
 | 80 | — | closed | ARCHIVE.md | Flutter Internationalisation for All User-Facing Text |
 | 81 | do | open 3/3 | app.md | Latin as the First Real Locale |
 | 82 | decide | open 2/3 | app.md | Machine-Translation Provenance for User-Facing Text |
@@ -108,3 +108,4 @@ not-yet-worth-doing.
 | 84 | do | open 3/3 | app.md | The Pseudo-Locale Guard Is a Canary, Not a Guarantee |
 | 85 | do | open 4/4 | app.md | ARB Key-Naming Is Inconsistent Across Item 80's Tasks |
 | 86 | do | open 3/3 | importer.md | Source Editions — the Work/Edition Distinction |
+| 87 | do | open 5/5 | app.md | Provenance Render Sites and Hardening Deferred From Item 79.3 |

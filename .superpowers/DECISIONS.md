@@ -921,3 +921,65 @@ branch**, so it identifies the material actually adapted — the same discipline
 as `source.lock`. A URI must be *provided*, not clickable, which is why the
 About screen uses `SelectableText` and the app takes no `url_launcher`
 dependency.  *(items 79.1, 30)*
+
+## Text provenance — whose words a string is
+
+**`Provenance` and `TextProvenance` answer different questions, and conflating
+them is the defect.** `Provenance` records where an *entry* came from — a book,
+or the user. `TextProvenance {verbatim, authored, translated}` records whose
+words a particular *string on* that entry is. `verbatim` means **the published
+words of a cited edition** — whichever edition, in whatever language — so an
+officially published translation is Licensed Material in its own right and
+quoting it is `verbatim` cited to *its* book, never `translated`. `translated`
+means only "we produced this rendering", which is the modification
+§3(a)(1)(B) obliges us to indicate. Nothing in production yields `translated`
+yet; items 82 and 86 will.  *(item 79.3)*
+
+**Provenance is derived, not stored — and the reason matters more than the
+rule.** Every field it applies to has a provenance computable from the entry's
+own `Provenance`, so a stored copy would be item 33's write-only duplication.
+It also would **not** pre-pay for a second edition: `SourcedText` holds one
+string, where one guideline under two editions needs a per-edition collection.
+Item 86 owns that restructure, and **that** is the change which makes storage
+earn its place — not this one. Do not "finish the job" by persisting
+`TextProvenance` onto the assets.  *(item 79.3)*
+
+**⚠️ The one place entry-provenance and string-provenance genuinely diverge:
+template instantiation.** Learning a published template seeds the new draft
+with the template's own prose, and saving stamps that spell `userCreated` — so
+the naive rule would report the rulebook's words as the caster's. `Spell`
+carries `templateId`, and `sourcedSpellText` uses it: seeded prose stays
+`verbatim` **while it still matches the source template's text**, cited to the
+**template's** citations, and becomes `authored` the moment the user edits it.
+Cite the spell's own citations there and it throws — a `userCreated` spell has
+none, and `SourcedText.verbatim` rejects an empty list, so the failure is a
+crashed list row rather than a quiet mislabel. A `templateId` that no longer
+resolves degrades to `authored`, deliberately, rather than throwing.
+*(item 79.3, final review)*
+
+**`sourcedSummary`/`sourcedDescription` live on `LibraryEntry`, so the compiler
+is the enforcement.** An earlier shape type-switched on the three concrete
+`Resolved*` classes in `spell_card.dart` and fell through to
+`SourcedText.authored` — which silently mislabelled all 31 published templates
+and 8 exceptions as our own words, and would have done the same to any fourth
+implementer. Putting the getters on the interface makes a missing answer a
+build error. **Never reintroduce a default-to-authored fallback**: authored is
+a positive claim about authorship, not a safe default.  *(item 79.3)*
+
+**`SourcedTextView` is the only renderer of sourced prose, and it must not
+impose a colour.** The distinction is carried by a left border plus italics;
+`style` stays null by default so the ambient `DefaultTextStyle` wins, because
+`ListTile` sets its subtitle colour and an explicit `bodyMedium` silently
+overrode it. Merge only the italic — `TextStyle(fontStyle:)` has
+`inherit: true`. Scattering the treatment across call sites is how the
+distinction stops being true.  *(item 79.3, final review)*
+
+**`test/models/summary_provenance_tripwire_test.dart` is a dated guard, not a
+behaviour test.** Published summaries read as the rulebook's words only because
+`emit.py` builds each one by truncating the description. **Item 31 replaces them
+with ledger-authored prose**, at which point the summary getters must switch to
+`authored` and this test must be deleted — its failure message says so. It
+covers all three asset populations (library, templates, exceptions), since
+`emit.py` builds all three the same way. Its two exclusions are the contents of
+`hand_authored_templates.json`, a category exclusion — **never add an id to
+that list to make the test pass.**  *(item 79.3)*

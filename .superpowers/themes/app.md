@@ -315,68 +315,6 @@ another Technique/Form and record why — but a user cannot reach it interactive
 - **See also:** items 48 (closed, `ARCHIVE.md`), 47.
 
 
-### 79. Quoting Rules Text Directly — What CC BY-SA 4.0 Permits and Demands
-
-**Opened 2026-08-20.** Item 56 assumed hint text would have to be *paraphrased*
-UI copy, because the licence position was never checked. It has been now:
-`Ars-Magica-Open-License/LICENSE.md` is **Creative Commons
-Attribution-ShareAlike 4.0 International**. §2(a)(1) grants the right to
-"reproduce and Share the Licensed Material, in whole or in part". **So we may
-quote rules text verbatim, and 56's hints can be the rulebook's own words rather
-than our gloss of them.**
-
-Two conditions ride along, and both are product decisions, not legal trivia:
-
-**⚠️ The framing this item opened with understated the urgency, and that was
-corrected during its design.** 79.2 supposed the catalog JSON was "arguably
-already a database derived from the Licensed Material". It is more direct than
-that: the app has shipped the rulebook's own words since the import landed —
-612 guideline `description` strings and 336 published spell names with their
-prose — in a repo that carried **no LICENSE file at all**. This was never
-contingent on item 56.
-
-- [x] **79.1 ✅ DONE 2026-08-21.** Attribution lives in an **About & Licences
-      screen**, reached from an `AppBar` action on the Configuration screen, plus
-      a second route through `LicenseRegistry`/`showLicensePage`. Quoted text
-      elsewhere carries only a source marker routing there, which §3(a)(2)
-      permits. See DECISIONS.md, "Licensing and attribution".
-- [x] **79.2 ✅ DONE 2026-08-21.** The repo is **MIT for the software, CC BY-SA
-      4.0 for rulebook-derived content**, on §1(b)'s Collection/Adapted Material
-      distinction — stated by *content*, with the path tables illustrative
-      rather than exhaustive. See DECISIONS.md.
-- [ ] **79.3** **Decide how much to quote, and mark it as a quote.** A hint that
-      reproduces a guideline verbatim must be visually distinguishable from our
-      own words, or the app silently attributes its own paraphrases to the
-      rulebook. This is the coupling to 56.1's affordance decision.
-      **Decided in the spec, not yet built — this is plan B.** The mechanism is
-      a per-string `TextProvenance {verbatim, authored, translated}` plus a
-      `SourcedText` value type, because `Provenance` answers "where did this
-      *entry* come from", not "whose words are *these*". The two coincide only
-      by accident today, and **item 31 breaks that deliberately** by putting
-      ledger-authored summaries on `published` spells. `verbatim` means "the
-      published words of a cited edition" — whichever edition, in whatever
-      language — so an official translation is `verbatim`, not `translated`;
-      `translated` means only "we produced this rendering". Quoting is bounded
-      by the control: the guideline line, a spell's own prose, and a
-      Range/Duration/Target/modifier's definition paragraph — not chapter-length
-      rules.
-
-- **Trademark is explicitly *not* licensed** (§2(b)(2)). The grant covers the
-  text, not "Ars Magica" as a mark — so this item does not settle naming,
-  branding or store-listing questions.
-- **No warranty, and no endorsement** (§5, §2(a)(6)): the app must not imply
-  Atlas Games endorses it.
-- **Spec:** `docs/superpowers/specs/2026-08-20-quoting-rules-text-design.md`
-- **Plan A (79.1, 79.2, done):** `docs/superpowers/plans/2026-08-20-licensing-and-attribution.md`
-- **Files:** `lib/licensing/attribution.dart`, `lib/presentation/screens/about_screen.dart`,
-  `LICENSE`, `NOTICE.md`, `LICENSES/CC-BY-SA-4.0.txt`; for 79.3,
-  `lib/models/text_provenance.dart` and the catalog assets
-- **See also:** items 56 (the consumer of this permission), 78 (a quote and its
-  page reference are the same affordance), 30 (provenance), 31 (its authored
-  summaries are why 79.3 needs per-string provenance), 82 (same convention, ARB
-  side), 86 (the edition model 79.3's `verbatim` definition assumes)
-
-
 ### 81. Latin as the First Real Locale
 
 **Opened 2026-08-20**, split out of item 80 so the proof harness and a shipped
@@ -577,3 +515,49 @@ the existing 157 keys were never reconciled to them.
 - **Do this before item 81**, which produces the first real translation — after
   that, every rename costs a re-translation.
 - **See also:** items 80 (closed), 81 (the first translation)
+
+
+### 87. Provenance Render Sites and Hardening Deferred From Item 79.3
+
+**Opened 2026-08-21** by item 79.3's whole-branch review. The provenance
+mechanism landed and is applied to the spell card and the configuration
+screen's effects tab; these are the sites and edges it did not reach.
+
+- [ ] **87.1** **⚠️ `tpl-revi-tie-threads-that-bind` is a live mislabel, and it is
+      the defect item 79.3 exists to prevent.** Its summary is *our paraphrase*,
+      but the record is `published` with an `arm5-hohmc` citation — so
+      `ResolvedTemplate.sourcedSummary` reports it `verbatim` and attributes our
+      sentence to *Houses of Hermes: Mystery Cults*. Pre-existing, disclosed
+      rather than hidden, and currently sitting inside the tripwire's
+      hand-authored exclusion. Fix the data or the classification; do not fix it
+      by widening the exclusion.
+- [ ] **87.2** **The base-effect dropdown renders 612 guideline descriptions with no
+      provenance treatment** — the largest verbatim rulebook population in the
+      app. Deferred deliberately: `spell_creation_screen.dart` interpolates each
+      description into ARB *chrome* message templates
+      (`effectWithGeneralMarker` and friends), so a quote treatment cannot be
+      applied without reworking how those frames compose. A comment at the site
+      records the deferral. **This is item 56's affordance question in
+      practice** — do it there, not separately.
+- [ ] **87.3** **`SpellCard` passes `showMarker: false`, so the "Rulebook" marker, the
+      About-screen route and both `sourcedText*` ARB keys have zero production
+      render sites.** Published prose is still distinguished by border and
+      italics, so nothing is mis-attributed — but the branch's only *labelled*
+      attribution affordance is currently unreachable, and the two
+      `_mustNotSurvive` entries guarding those keys pass trivially. Decide
+      whether the marker should show on cards, or wait for item 56's hint sheets
+      to be its first real home.
+- [ ] **87.4** **Harden `sourcedSpellText` against a non-published seed.** It tests the
+      *spell's* provenance where it means the *seed's*, so a hypothetical
+      `userCreated` template would build `SourcedText.verbatim(text, [])` and
+      throw at render time. Unreachable today — templates come only from a
+      published, fully cited asset — but the guard is one condition
+      (`seedCitations.isNotEmpty`).
+- [ ] **87.5** **The tripwire's repair instructions name the wrong file.**
+      `summary_provenance_tripwire_test.dart` tells a future maintainer to change
+      `sourcedFrom` "in `lib/presentation/widgets/spell_card.dart`"; the getters
+      moved to `resolved_template.dart`/`resolved_exception.dart` in the same fix
+      wave. Hedged with "or wherever it has moved to by then", so it still lands
+      — but name the files.
+- **See also:** items 79 (closed, `ARCHIVE.md`), 56 (owns 87.2), 31 (its landing
+  deletes the tripwire), 36 (catalog description audit — 87.1's neighbourhood)
