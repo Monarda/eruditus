@@ -523,14 +523,17 @@ the existing 157 keys were never reconciled to them.
 mechanism landed and is applied to the spell card and the configuration
 screen's effects tab; these are the sites and edges it did not reach.
 
-- [ ] **87.1** **⚠️ `tpl-revi-tie-threads-that-bind` is a live mislabel, and it is
-      the defect item 79.3 exists to prevent.** Its summary is *our paraphrase*,
-      but the record is `published` with an `arm5-hohmc` citation — so
+- [ ] **87.1** **⚠️ `tpl-revi-tie-threads-that-bind` is a live mislabel — but it is
+      item 31 arriving early, not a separate bug.** Its summary is *our
+      paraphrase* on a `published` record with an `arm5-hohmc` citation, so
       `ResolvedTemplate.sourcedSummary` reports it `verbatim` and attributes our
-      sentence to *Houses of Hermes: Mystery Cults*. Pre-existing, disclosed
-      rather than hidden, and currently sitting inside the tripwire's
-      hand-authored exclusion. Fix the data or the classification; do not fix it
-      by widening the exclusion.
+      sentence to *Houses of Hermes: Mystery Cults*. **Its `description` is
+      correctly verbatim** — checked, and it is the book's own prose. So this is
+      one entry that has already reached the steady state the whole catalog is
+      heading for: *summary authored, description verbatim*. **Item 31 is what
+      fixes it**, for this entry and the other 375 at once. Until then it ships
+      mislabelled and disclosed. Do **not** "fix" it by rewriting the summary
+      into a quote, and do not widen the tripwire's hand-authored exclusion.
 - [ ] **87.2** **The base-effect dropdown renders 612 guideline descriptions with no
       provenance treatment** — the largest verbatim rulebook population in the
       app. Deferred deliberately: `spell_creation_screen.dart` interpolates each
@@ -553,11 +556,12 @@ screen's effects tab; these are the sites and edges it did not reach.
       throw at render time. Unreachable today — templates come only from a
       published, fully cited asset — but the guard is one condition
       (`seedCitations.isNotEmpty`).
-- [ ] **87.5** **The tripwire's repair instructions name the wrong file.**
-      `summary_provenance_tripwire_test.dart` tells a future maintainer to change
-      `sourcedFrom` "in `lib/presentation/widgets/spell_card.dart`"; the getters
-      moved to `resolved_template.dart`/`resolved_exception.dart` in the same fix
-      wave. Hedged with "or wherever it has moved to by then", so it still lands
-      — but name the files.
+- [x] **87.5 ✅ DONE 2026-08-21.** The tripwire's repair instructions named
+      `spell_card.dart`, where the getters no longer live. They now name the
+      three `Resolved*` files, and carry the warning that fell out of the
+      summary/description asymmetry: **`sourcedSpellText` must not be deleted
+      when it falls out of the summary path**, because template instantiation
+      still copies verbatim descriptions into user-created spells. See
+      DECISIONS.md, "Text provenance".
 - **See also:** items 79 (closed, `ARCHIVE.md`), 56 (owns 87.2), 31 (its landing
   deletes the tripwire), 36 (catalog description audit — 87.1's neighbourhood)
